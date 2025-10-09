@@ -10,6 +10,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.Address
@@ -278,6 +279,8 @@ class ConfirmationHandlerOptionKtxTest {
 
     @Test
     fun `On Google Pay selection with config with google pay config, should return expected option`() {
+        val expectedClientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA
+
         assertThat(
             PaymentSelection.GooglePay.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
@@ -294,7 +297,7 @@ class ConfirmationHandlerOptionKtxTest {
                     .asCommonConfiguration(),
                 linkConfiguration = null,
                 passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
-                clientAttributionMetadata = null,
+                clientAttributionMetadata = expectedClientAttributionMetadata,
             )
         ).isEqualTo(
             GooglePayConfirmationOption(
@@ -310,7 +313,8 @@ class ConfirmationHandlerOptionKtxTest {
                         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
                     )
                 ),
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                clientAttributionMetadata = expectedClientAttributionMetadata,
             )
         )
     }

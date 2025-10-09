@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntDef
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -19,6 +20,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -217,6 +219,23 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         transactionId: String? = null,
         label: String? = null,
     ) {
+        present(
+            currencyCode = currencyCode,
+            amount = amount,
+            transactionId = transactionId,
+            label = label,
+            clientAttributionMetadata = null,
+        )
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun present(
+        currencyCode: String,
+        amount: Long = 0L,
+        clientAttributionMetadata: ClientAttributionMetadata?,
+        transactionId: String? = null,
+        label: String? = null,
+    ) {
         check(skipReadyCheck || isReady) {
             "present() may only be called when Google Pay is available on this device."
         }
@@ -228,7 +247,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 amount = amount,
                 label = label,
                 transactionId = transactionId,
-                cardBrandFilter = cardBrandFilter
+                cardBrandFilter = cardBrandFilter,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         )
     }

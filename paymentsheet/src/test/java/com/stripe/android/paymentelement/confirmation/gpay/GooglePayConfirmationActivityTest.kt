@@ -16,6 +16,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
@@ -79,7 +80,8 @@ internal class GooglePayConfirmationActivityTest {
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
-                        passiveCaptchaParams = null
+                        passiveCaptchaParams = null,
+                        clientAttributionMetadata = GOOGLE_PAY_CONFIRMATION_OPTION.clientAttributionMetadata,
                     )
                 )
 
@@ -154,6 +156,7 @@ internal class GooglePayConfirmationActivityTest {
                         optionsParams = null,
                         originatedFromWallet = true,
                         passiveCaptchaParams = null,
+                        clientAttributionMetadata = GOOGLE_PAY_CONFIRMATION_OPTION.clientAttributionMetadata,
                     )
                 )
 
@@ -215,6 +218,7 @@ internal class GooglePayConfirmationActivityTest {
                         optionsParams = null,
                         originatedFromWallet = true,
                         passiveCaptchaParams = null,
+                        clientAttributionMetadata = GOOGLE_PAY_CONFIRMATION_OPTION.clientAttributionMetadata,
                     )
                 )
 
@@ -279,7 +283,8 @@ internal class GooglePayConfirmationActivityTest {
                     .BillingDetailsCollectionConfiguration(),
                 cardBrandFilter = DefaultCardBrandFilter,
             ),
-            passiveCaptchaParams = null
+            passiveCaptchaParams = null,
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(

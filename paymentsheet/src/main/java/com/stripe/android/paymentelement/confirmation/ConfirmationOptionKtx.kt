@@ -30,7 +30,11 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.New.USBankAccount -> toConfirmationOption(passiveCaptchaParams, clientAttributionMetadata)
         is PaymentSelection.New.LinkInline -> toConfirmationOption(linkConfiguration, passiveCaptchaParams)
         is PaymentSelection.New -> toConfirmationOption(passiveCaptchaParams, clientAttributionMetadata)
-        is PaymentSelection.GooglePay -> toConfirmationOption(configuration, passiveCaptchaParams)
+        is PaymentSelection.GooglePay -> toConfirmationOption(
+            configuration,
+            passiveCaptchaParams,
+            clientAttributionMetadata,
+        )
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration, passiveCaptchaParams)
         is PaymentSelection.ShopPay -> toConfirmationOption(configuration)
     }
@@ -128,7 +132,8 @@ private fun PaymentSelection.New.toConfirmationOption(
 
 private fun PaymentSelection.GooglePay.toConfirmationOption(
     configuration: CommonConfiguration,
-    passiveCaptchaParams: PassiveCaptchaParams?
+    passiveCaptchaParams: PassiveCaptchaParams?,
+    clientAttributionMetadata: ClientAttributionMetadata?,
 ): GooglePayConfirmationOption? {
     return configuration.googlePay?.let { googlePay ->
         GooglePayConfirmationOption(
@@ -142,7 +147,8 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             ),
-            passiveCaptchaParams = passiveCaptchaParams
+            passiveCaptchaParams = passiveCaptchaParams,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 }

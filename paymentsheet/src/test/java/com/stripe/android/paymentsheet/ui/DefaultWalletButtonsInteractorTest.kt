@@ -19,6 +19,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.link.verification.NoOpLinkInlineInteractor
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.DisplayablePaymentDetails
@@ -530,7 +531,8 @@ class DefaultWalletButtonsInteractorTest {
                         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                         cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance)
                     ),
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
+                    clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                 )
             )
         }
@@ -1017,6 +1019,7 @@ class DefaultWalletButtonsInteractorTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 availableWallets = availableWallets,
                 linkState = linkState,
+                clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             ),
             configuration = CommonConfigurationFactory.create(
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,

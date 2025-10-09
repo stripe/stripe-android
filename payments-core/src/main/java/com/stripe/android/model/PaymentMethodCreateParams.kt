@@ -124,13 +124,15 @@ constructor(
         card: Card,
         allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails?,
-        metadata: Map<String, String>?
+        metadata: Map<String, String>?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ) : this(
         type = PaymentMethod.Type.Card,
         card = card,
         allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
-        metadata = metadata
+        metadata = metadata,
+        clientAttributionMetadata = clientAttributionMetadata,
     )
 
     private constructor(
@@ -787,7 +789,13 @@ constructor(
             metadata: Map<String, String>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(card, allowRedisplay, billingDetails, metadata)
+            return PaymentMethodCreateParams(
+                card,
+                allowRedisplay,
+                billingDetails,
+                metadata,
+                clientAttributionMetadata = null,
+            )
         }
 
         /**
@@ -1085,22 +1093,38 @@ constructor(
          */
         @Throws(JSONException::class)
         @JvmStatic
-        fun createFromGooglePay(googlePayPaymentData: JSONObject): PaymentMethodCreateParams {
+        fun createFromGooglePay(
+            googlePayPaymentData: JSONObject
+        ): PaymentMethodCreateParams {
+            return createFromGooglePay(
+                googlePayPaymentData = googlePayPaymentData,
+                clientAttributionMetadata = null,
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun createFromGooglePay(
+            googlePayPaymentData: JSONObject,
+            clientAttributionMetadata: ClientAttributionMetadata?,
+        ): PaymentMethodCreateParams {
             val googlePayResult = GooglePayResult.fromJson(googlePayPaymentData)
             val token = googlePayResult.token
             val tokenId = token?.id.orEmpty()
 
-            return create(
-                Card(
+            return PaymentMethodCreateParams(
+                card = Card(
                     token = tokenId,
                     attribution = setOfNotNull(token?.card?.tokenizationMethod?.toString())
                 ),
-                PaymentMethod.BillingDetails(
+                billingDetails = PaymentMethod.BillingDetails(
                     address = googlePayResult.address,
                     name = googlePayResult.name,
                     email = googlePayResult.email,
                     phone = googlePayResult.phoneNumber
-                )
+                ),
+                allowRedisplay = null,
+                metadata = null,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 
