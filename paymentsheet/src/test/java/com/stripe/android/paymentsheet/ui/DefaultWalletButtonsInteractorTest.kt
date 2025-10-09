@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
+import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
@@ -853,13 +855,11 @@ class DefaultWalletButtonsInteractorTest {
     @Test
     fun `when click handler returns true, should not proceed with default action`() = runTest {
         val confirmationHandler = FakeConfirmationHandler()
-        var handlerCalled = false
-        var receivedWalletType: String? = null
+        val walletTypeTurbine = Turbine<String>()
 
         val walletButtonsViewClickHandler = WalletButtonsViewClickHandler { walletType ->
-            handlerCalled = true
-            receivedWalletType = walletType
-            true // Indicate that we've handled the action
+            walletTypeTurbine.add(walletType)
+            true
         }
 
         val interactor = createInteractor(
@@ -874,35 +874,40 @@ class DefaultWalletButtonsInteractorTest {
             confirmationHandler = confirmationHandler,
         )
 
-        interactor.state.test {
-            val state = awaitItem()
+        turbineScope {
+            val stateTurbine = interactor.state.testIn(this)
+
+            val state = stateTurbine.awaitItem()
             val googlePayButton = state.walletButtons.first()
 
             interactor.handleViewAction(
                 WalletButtonsInteractor.ViewAction.OnButtonPressed(googlePayButton, walletButtonsViewClickHandler)
             )
 
-            assertThat(handlerCalled).isTrue()
-            assertThat(receivedWalletType).isEqualTo("google_pay")
+            assertThat(walletTypeTurbine.awaitItem()).isEqualTo("google_pay")
 
             analyticsEventCallbackRule.assertMatchesExpectedEvent(
                 AnalyticEvent.TapsButtonInWalletsButtonsView(walletType = "google_pay")
             )
 
             confirmationHandler.startTurbine.expectNoEvents()
+
+            stateTurbine.ensureAllEventsConsumed()
+            walletTypeTurbine.ensureAllEventsConsumed()
+
+            stateTurbine.cancel()
+            walletTypeTurbine.cancel()
         }
     }
 
     @Test
     fun `when click handler returns false, should proceed with default action`() = runTest {
         val confirmationHandler = FakeConfirmationHandler()
-        var handlerCalled = false
-        var receivedWalletType: String? = null
+        val walletTypeTurbine = Turbine<String>()
 
         val walletButtonsViewClickHandler = WalletButtonsViewClickHandler { walletType ->
-            handlerCalled = true
-            receivedWalletType = walletType
-            false // Indicate that we have NOT handled the action, continue with default
+            walletTypeTurbine.add(walletType)
+            false
         }
 
         val interactor = createInteractor(
@@ -917,16 +922,17 @@ class DefaultWalletButtonsInteractorTest {
             confirmationHandler = confirmationHandler,
         )
 
-        interactor.state.test {
-            val state = awaitItem()
+        turbineScope {
+            val stateTurbine = interactor.state.testIn(this)
+
+            val state = stateTurbine.awaitItem()
             val googlePayButton = state.walletButtons.first()
 
             interactor.handleViewAction(
                 WalletButtonsInteractor.ViewAction.OnButtonPressed(googlePayButton, walletButtonsViewClickHandler)
             )
 
-            assertThat(handlerCalled).isTrue()
-            assertThat(receivedWalletType).isEqualTo("google_pay")
+            assertThat(walletTypeTurbine.awaitItem()).isEqualTo("google_pay")
 
             analyticsEventCallbackRule.assertMatchesExpectedEvent(
                 AnalyticEvent.TapsButtonInWalletsButtonsView(walletType = "google_pay")
@@ -934,6 +940,12 @@ class DefaultWalletButtonsInteractorTest {
 
             val arguments = confirmationHandler.startTurbine.awaitItem()
             assertThat(arguments.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
+
+            stateTurbine.ensureAllEventsConsumed()
+            walletTypeTurbine.ensureAllEventsConsumed()
+
+            stateTurbine.cancel()
+            walletTypeTurbine.cancel()
         }
     }
 

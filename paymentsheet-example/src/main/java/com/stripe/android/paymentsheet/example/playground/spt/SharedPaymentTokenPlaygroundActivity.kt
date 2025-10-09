@@ -53,7 +53,6 @@ import com.stripe.android.paymentelement.ExtendedLabelsInPaymentOptionPreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
-import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.rememberPaymentLauncher
@@ -293,11 +292,7 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                     if (parameters.paymentOption == null) {
                         if (parameters.showWalletButtons) {
                             Box(modifier = horizontalModifier) {
-                                flowController.WalletButtons(
-                                    remember {
-                                        WalletButtonsViewClickHandler { false }
-                                    }
-                                )
+                                flowController.WalletButtons()
                             }
                         }
 

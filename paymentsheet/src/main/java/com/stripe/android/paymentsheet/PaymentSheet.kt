@@ -3516,6 +3516,13 @@ class PaymentSheet internal constructor(
 
         /**
          * Displays a list of wallet buttons that can be used to checkout instantly
+         */
+        @WalletButtonsPreview
+        @Composable
+        fun WalletButtons()
+
+        /**
+         * Displays a list of wallet buttons that can be used to checkout instantly
          *
          * @param clickHandler intercepts wallet buttons view click before primary confirmation occurs. Return true
          *   if the click has been handled internally or false if the wallet confirmation process should continue. By

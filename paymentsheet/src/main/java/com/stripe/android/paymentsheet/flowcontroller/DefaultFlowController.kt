@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -176,6 +177,15 @@ internal class DefaultFlowController @Inject internal constructor(
                 }
             }
         }
+    }
+
+    @Composable
+    override fun WalletButtons() {
+        viewModel.flowControllerStateComponent.walletButtonsContent.Content(
+            remember {
+                WalletButtonsViewClickHandler { false }
+            }
+        )
     }
 
     @Composable

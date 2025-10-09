@@ -60,7 +60,6 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
-import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -518,9 +517,7 @@ internal class PaymentSheetPlaygroundActivity :
         }
 
         if (playgroundState.snapshot[WalletButtonsSettingsDefinition] != WalletButtonsPlaygroundType.Disabled) {
-            flowController.WalletButtons(
-                remember { WalletButtonsViewClickHandler { false } }
-            )
+            flowController.WalletButtons()
         }
 
         PaymentMethodSelector(

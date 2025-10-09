@@ -2232,6 +2232,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$CustomerConfigur
 
 public abstract interface class com/stripe/android/paymentsheet/PaymentSheet$FlowController {
 	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Companion;
+	public abstract fun WalletButtons (Landroidx/compose/runtime/Composer;I)V
 	public abstract fun WalletButtons (Lcom/stripe/android/paymentelement/WalletButtonsViewClickHandler;Landroidx/compose/runtime/Composer;I)V
 	public abstract fun configureWithIntentConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;)V
 	public abstract fun configureWithPaymentIntent (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;)V
