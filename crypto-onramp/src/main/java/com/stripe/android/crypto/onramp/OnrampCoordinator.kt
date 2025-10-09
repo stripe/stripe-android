@@ -11,7 +11,7 @@ import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
-import com.stripe.android.crypto.onramp.model.OnrampAuthenticationResult
+import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
@@ -53,7 +53,7 @@ class OnrampCoordinator @Inject internal constructor(
      *
      * @param linkAuthTokenClientSecret The auth token to authenticate a user with.
      */
-    suspend fun authenticateUserWithToken(linkAuthTokenClientSecret: String): OnrampAuthenticationResult {
+    suspend fun authenticateUserWithToken(linkAuthTokenClientSecret: String): OnrampTokenAuthenticationResult {
         return interactor.authenticateUserWithToken(linkAuthTokenClientSecret)
     }
 

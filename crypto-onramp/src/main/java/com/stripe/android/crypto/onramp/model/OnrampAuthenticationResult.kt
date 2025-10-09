@@ -6,12 +6,12 @@ import androidx.annotation.RestrictTo
  * Result of an OnRamp seamless sign in authentication operation.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed interface OnrampAuthenticationResult {
+sealed interface OnrampTokenAuthenticationResult {
     /**
      * Authentication completed successfully.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object Completed : OnrampAuthenticationResult
+    data object Completed : OnrampTokenAuthenticationResult
 
     /**
      * Authentication failed.
@@ -20,5 +20,5 @@ sealed interface OnrampAuthenticationResult {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Failed internal constructor(
         val error: Throwable
-    ) : OnrampAuthenticationResult
+    ) : OnrampTokenAuthenticationResult
 }

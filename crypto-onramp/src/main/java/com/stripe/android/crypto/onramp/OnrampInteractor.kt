@@ -15,7 +15,7 @@ import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
-import com.stripe.android.crypto.onramp.model.OnrampAuthenticationResult
+import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
@@ -91,15 +91,26 @@ internal class OnrampInteractor @Inject constructor(
         }
     }
 
-    suspend fun authenticateUserWithToken(linkAuthTokenClientSecret: String): OnrampAuthenticationResult {
+    suspend fun authenticateUserWithToken(linkAuthTokenClientSecret: String): OnrampTokenAuthenticationResult {
         return when (
             val result = linkController.lookupConsumerWithLinkAuthTokenClientSecret(linkAuthTokenClientSecret)
         ) {
             is LinkController.LookupConsumerResult.Success -> {
-                OnrampAuthenticationResult.Completed
+                analyticsService?.track(
+                    OnrampAnalyticsEvent.LinkUserAuthenticationWithTokenCompleted
+                )
+
+                OnrampTokenAuthenticationResult.Completed
             }
             is LinkController.LookupConsumerResult.Failed -> {
-                OnrampAuthenticationResult.Failed(result.error)
+                analyticsService?.track(
+                    OnrampAnalyticsEvent.ErrorOccurred(
+                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AuthenticateUserWithAuthToken,
+                        error = result.error,
+                    )
+                )
+
+                OnrampTokenAuthenticationResult.Failed(result.error)
             }
         }
     }
