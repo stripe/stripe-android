@@ -2133,7 +2133,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null,
+                    passiveCaptchaParams = null
                 )
             )
 
@@ -2172,7 +2172,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null,
+                    passiveCaptchaParams = null
                 )
             )
 
@@ -2306,7 +2306,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null,
+                    passiveCaptchaParams = null
                 )
             )
 
@@ -2341,7 +2341,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null,
+                    passiveCaptchaParams = null
                 )
             )
 
@@ -2376,7 +2376,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null,
+                    passiveCaptchaParams = null
                 )
             )
 
@@ -2482,16 +2482,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Launches Google Pay with correct client attribution metadata`() = confirmationTest {
         val expectedClientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA
-        val args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                        countryCode = "CA",
-                    )
-                )
-                .build()
-        )
+        val args = ARGS_CUSTOMER_WITH_GOOGLEPAY
 
         val viewModel = createViewModel(
             args = args,

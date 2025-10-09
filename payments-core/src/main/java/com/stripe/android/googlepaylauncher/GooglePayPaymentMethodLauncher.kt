@@ -219,19 +219,12 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         transactionId: String? = null,
         label: String? = null,
     ) {
-        check(skipReadyCheck || isReady) {
-            "present() may only be called when Google Pay is available on this device."
-        }
-
-        activityResultLauncher.launch(
-            GooglePayPaymentMethodLauncherContractV2.Args(
-                config = config,
-                currencyCode = currencyCode,
-                amount = amount,
-                label = label,
-                transactionId = transactionId,
-                cardBrandFilter = cardBrandFilter
-            )
+        present(
+            currencyCode = currencyCode,
+            amount = amount,
+            transactionId = transactionId,
+            label = label,
+            clientAttributionMetadata = null,
         )
     }
 
