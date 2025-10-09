@@ -81,7 +81,7 @@ private def set_gpg_location
 end
 
 private def reset_gradle_properties
-    execute_or_fail("git checkout origin/master gradle.properties")
+    execute_or_fail("git checkout origin/#{@deploy_branch} gradle.properties")
 end
 
 # Gets the contents of the PATH environment variable, but before it does
