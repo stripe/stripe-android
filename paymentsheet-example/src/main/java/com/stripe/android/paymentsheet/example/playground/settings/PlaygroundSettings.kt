@@ -490,6 +490,7 @@ internal class PlaygroundSettings private constructor(
             CustomerSessionRedisplaySettingsDefinition,
             CustomerSessionRedisplayFiltersSettingsDefinition,
             CustomerSessionOverrideRedisplaySettingsDefinition,
+            CustomerSessionOnBehalfOfSettingsDefinition,
             CustomerSettingsDefinition,
             CheckoutModeSettingsDefinition,
             UserCountryOverrideSettingsDefinition,

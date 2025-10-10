@@ -77,6 +77,11 @@ internal object CountrySettingsDefinition :
             playgroundSettings[CurrencySettingsDefinition] = currency
         }
 
+        if (value != Country.US) {
+            playgroundSettings[CustomerSessionOnBehalfOfSettingsDefinition] =
+                CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.NO_CONNECTED_ACCOUNT
+        }
+
         // When the changes via the UI, reset the customer.
         if (playgroundSettings[CustomerSettingsDefinition].value is CustomerType.Existing) {
             playgroundSettings[CustomerSettingsDefinition] = CustomerType.NEW
