@@ -74,15 +74,4 @@ internal object ConfirmationTokenFixtures {
         }
         """.trimIndent()
     )
-
-    val MINIMAL_CONFIRMATION_TOKEN_JSON = JSONObject(
-        """
-        {
-          "id": "ctoken_1234567890",
-          "object": "confirmation_token",
-          "created": 1694025025,
-          "livemode": false
-        }
-        """.trimIndent()
-    )
 }
