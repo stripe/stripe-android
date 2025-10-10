@@ -6,6 +6,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OffS
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_ATTRIBUTION_METADATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CONFIRMATION_TOKEN
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
@@ -31,6 +32,16 @@ constructor(
      * See [payment_method](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-payment_method).
      */
     val paymentMethodId: String? = null,
+
+    /**
+     * ID of the ConfirmationToken used to confirm this PaymentIntent.
+     *
+     * If the provided ConfirmationToken contains properties that are also being provided in this
+     * request, such as payment_method, then the values in this request will take precedence.
+     *
+     * See [confirmation_token](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-confirmation_token).
+     */
+    val confirmationTokenId: String? = null,
     val sourceParams: SourceParams? = null,
     val sourceId: String? = null,
 
@@ -206,6 +217,9 @@ constructor(
                 }
                 paymentMethodId != null -> {
                     mapOf(PARAM_PAYMENT_METHOD_ID to paymentMethodId)
+                }
+                confirmationTokenId != null -> {
+                    mapOf(PARAM_CONFIRMATION_TOKEN to confirmationTokenId)
                 }
                 sourceParams != null -> {
                     mapOf(PARAM_SOURCE_DATA to sourceParams.toParamMap())

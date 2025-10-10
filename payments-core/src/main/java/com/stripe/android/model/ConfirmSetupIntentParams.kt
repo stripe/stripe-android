@@ -3,6 +3,7 @@ package com.stripe.android.model
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_ATTRIBUTION_METADATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CONFIRMATION_TOKEN
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
@@ -27,6 +28,16 @@ constructor(
      * SetupIntent.
      */
     @get:JvmSynthetic internal val paymentMethodId: String? = null,
+
+    /**
+     * ID of the ConfirmationToken used to confirm this SetupIntent.
+     *
+     * If the provided ConfirmationToken contains properties that are also being provided in this
+     * request, such as payment_method, then the values in this request will take precedence.
+     *
+     * See [confirmation_token](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-confirmation_token).
+     */
+    @get:JvmSynthetic internal val confirmationTokenId: String? = null,
 
     @get:JvmSynthetic internal val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
 
@@ -122,6 +133,9 @@ constructor(
                 }
                 paymentMethodId != null -> {
                     mapOf(PARAM_PAYMENT_METHOD_ID to paymentMethodId)
+                }
+                confirmationTokenId != null -> {
+                    mapOf(PARAM_CONFIRMATION_TOKEN to confirmationTokenId)
                 }
                 else -> {
                     emptyMap()

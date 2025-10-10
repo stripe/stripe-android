@@ -9,7 +9,6 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
@@ -18,7 +17,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.paymentelement.confirmation.utils.ConfirmActionHelper
-import com.stripe.android.paymentelement.confirmation.utils.toConfirmParamsSetupFutureUsage
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -107,6 +105,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 } else {
                     handleDeferredIntentCreationSuccess(
                         clientSecret = result.clientSecret,
+                        confirmationTokenId = confirmationToken.id,
                         intentConfiguration = intentConfiguration,
                         paymentMethodType = paymentMethodType,
                         confirmationOption = confirmationOption,
@@ -130,6 +129,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
 
     private suspend fun handleDeferredIntentCreationSuccess(
         clientSecret: String,
+        confirmationTokenId: String,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         confirmationOption: PaymentMethodConfirmationOption,
         paymentMethodType: PaymentMethod.Type,
@@ -160,15 +160,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     isDeferred = true
                 ) {
                     create(
-                        paymentMethodId = "",
-                        paymentMethodType = paymentMethodType,
-                        optionsParams = confirmationOption.optionsParams,
-                        extraParams = (confirmationOption as? PaymentMethodConfirmationOption.New)
-                            ?.extraParams,
-                        intentConfigSetupFutureUsage = intentConfiguration
-                            .mode.setupFutureUse?.toConfirmParamsSetupFutureUsage(),
-                        radarOptions = hCaptchaToken?.let { RadarOptions(it) },
-                        clientAttributionMetadata = confirmationOption.clientAttributionMetadata,
+                        confirmationTokenId = confirmationTokenId
                     )
                 }
             }
