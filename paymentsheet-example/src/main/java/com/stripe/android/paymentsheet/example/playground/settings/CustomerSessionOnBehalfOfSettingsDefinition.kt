@@ -33,6 +33,9 @@ internal object CustomerSessionOnBehalfOfSettingsDefinition :
             OnBehalfOf.FR_CONNECTED_ACCOUNT -> {
                 // This setting is only available with CustomerSession
                 playgroundSettings[CustomerSessionSettingsDefinition] = true
+
+                // Only the US platform account is configured with connected accounts
+                playgroundSettings[CountrySettingsDefinition] = Country.US
             }
             else -> {
                 // Do nothing
