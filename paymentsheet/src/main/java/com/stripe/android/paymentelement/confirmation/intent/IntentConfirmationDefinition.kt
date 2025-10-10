@@ -34,12 +34,12 @@ internal class IntentConfirmationDefinition(
 
     override suspend fun action(
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<Args> {
         val interceptor: IntentConfirmationInterceptor
         try {
             interceptor = intentConfirmationInterceptorFactory.create(
-                initializationMode = confirmationParameters.initializationMode,
+                initializationMode = confirmationArgs.initializationMode,
             )
         } catch (e: DeferredIntentCallbackNotFoundException) {
             return ConfirmationDefinition.Action.Fail(
@@ -51,17 +51,17 @@ internal class IntentConfirmationDefinition(
         return when (confirmationOption) {
             is PaymentMethodConfirmationOption.New ->
                 interceptor.intercept(
-                    intent = confirmationParameters.intent,
+                    intent = confirmationArgs.intent,
                     confirmationOption = confirmationOption,
-                    shippingValues = confirmationParameters.shippingDetails?.toConfirmPaymentIntentShipping(),
+                    shippingValues = confirmationArgs.shippingDetails?.toConfirmPaymentIntentShipping(),
                 )
             is PaymentMethodConfirmationOption.Saved ->
                 interceptor.intercept(
-                    intent = confirmationParameters.intent,
+                    intent = confirmationArgs.intent,
                     confirmationOption = confirmationOption.copy(
-                        ephemeralKeySecret = confirmationParameters.ephemeralKeySecret,
+                        ephemeralKeySecret = confirmationArgs.ephemeralKeySecret,
                     ),
-                    shippingValues = confirmationParameters.shippingDetails?.toConfirmPaymentIntentShipping(),
+                    shippingValues = confirmationArgs.shippingDetails?.toConfirmPaymentIntentShipping(),
                 )
         }
     }
@@ -82,17 +82,17 @@ internal class IntentConfirmationDefinition(
         launcher: PaymentLauncher,
         arguments: Args,
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ) {
         when (arguments) {
             is Args.Confirm -> launchConfirm(launcher, arguments.confirmNextParams)
-            is Args.NextAction -> launchNextAction(launcher, arguments.clientSecret, confirmationParameters.intent)
+            is Args.NextAction -> launchNextAction(launcher, arguments.clientSecret, confirmationArgs.intent)
         }
     }
 
     override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: InternalPaymentResult
     ): ConfirmationDefinition.Result {

@@ -41,7 +41,7 @@ internal class LinkInlineSignupConfirmationDefinition(
 
     override suspend fun action(
         confirmationOption: LinkInlineSignupConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters
+        confirmationArgs: ConfirmationHandler.Args
     ): ConfirmationDefinition.Action<LauncherArguments> {
         val nextConfirmationOption = createPaymentMethodConfirmationOption(confirmationOption)
 
@@ -63,20 +63,20 @@ internal class LinkInlineSignupConfirmationDefinition(
         launcher: Launcher,
         arguments: LauncherArguments,
         confirmationOption: LinkInlineSignupConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ) {
         launcher.onResult(Result(arguments.nextConfirmationOption))
     }
 
     override fun toResult(
         confirmationOption: LinkInlineSignupConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: Result,
     ): ConfirmationDefinition.Result {
         return ConfirmationDefinition.Result.NextStep(
             confirmationOption = result.nextConfirmationOption,
-            parameters = confirmationParameters,
+            arguments = confirmationArgs,
         )
     }
 

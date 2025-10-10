@@ -124,10 +124,8 @@ internal class DefaultConfirmationHandler(
 
         _state.value = ConfirmationHandler.State.Confirming(arguments.confirmationOption)
 
-        val parameters = arguments.toParameters()
-
         val mediator = mediators.find { mediator ->
-            mediator.canConfirm(confirmationOption, parameters)
+            mediator.canConfirm(confirmationOption, arguments)
         } ?: run {
             errorReporter.report(
                 errorEvent = ErrorReporter
@@ -153,16 +151,16 @@ internal class DefaultConfirmationHandler(
             return
         }
 
-        handleMediatorAction(confirmationOption, parameters, mediator)
+        handleMediatorAction(confirmationOption, arguments, mediator)
     }
 
     private suspend fun handleMediatorAction(
         confirmationOption: ConfirmationHandler.Option,
-        parameters: ConfirmationDefinition.Parameters,
+        arguments: ConfirmationHandler.Args,
         mediator: ConfirmationMediator<*, *, *, *>,
     ) {
         val action = withContext(ioContext) {
-            mediator.action(confirmationOption, parameters)
+            mediator.action(confirmationOption, arguments)
         }
         when (action) {
             is ConfirmationMediator.Action.Launch -> {
@@ -201,7 +199,7 @@ internal class DefaultConfirmationHandler(
                 removeIsAwaitingForResult()
 
                 coroutineScope.launch {
-                    val parameters = result.parameters
+                    val parameters = result.arguments
 
                     confirm(
                         arguments = ConfirmationHandler.Args(
@@ -259,16 +257,6 @@ internal class DefaultConfirmationHandler(
 
     private fun retrieveIsAwaitingForResultData(): AwaitingConfirmationResultData? {
         return savedStateHandle.get<AwaitingConfirmationResultData>(AWAITING_CONFIRMATION_RESULT_KEY)
-    }
-
-    private fun ConfirmationHandler.Args.toParameters(): ConfirmationDefinition.Parameters {
-        return ConfirmationDefinition.Parameters(
-            appearance = appearance,
-            shippingDetails = shippingDetails,
-            initializationMode = initializationMode,
-            intent = intent,
-            ephemeralKeySecret = ephemeralKeySecret,
-        )
     }
 
     private suspend inline fun <reified T> Flow<*>.firstInstanceOf(): T {

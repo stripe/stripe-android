@@ -7,6 +7,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
@@ -18,14 +19,11 @@ import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -96,7 +94,7 @@ class BacsConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = createBacsConfirmationOption(),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = BacsMandateConfirmationResult.Confirmed,
         )
@@ -105,7 +103,7 @@ class BacsConfirmationDefinitionTest {
 
         val successResult = result.asNextStep()
 
-        assertThat(successResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(successResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
 
         val confirmationOption = successResult.confirmationOption
 
@@ -126,7 +124,7 @@ class BacsConfirmationDefinitionTest {
 
             val result = definition.toResult(
                 confirmationOption = createBacsConfirmationOption(),
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
                 deferredIntentConfirmationType = null,
                 result = BacsMandateConfirmationResult.Cancelled,
             )
@@ -145,7 +143,7 @@ class BacsConfirmationDefinitionTest {
 
             val result = definition.toResult(
                 confirmationOption = createBacsConfirmationOption(),
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
                 deferredIntentConfirmationType = null,
                 result = BacsMandateConfirmationResult.ModifyDetails,
             )
@@ -166,7 +164,7 @@ class BacsConfirmationDefinitionTest {
             confirmationOption = createBacsConfirmationOption(
                 name = null,
             ),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Fail<BacsMandateData>>()
@@ -189,7 +187,7 @@ class BacsConfirmationDefinitionTest {
             confirmationOption = createBacsConfirmationOption(
                 email = null,
             ),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Fail<BacsMandateData>>()
@@ -210,7 +208,7 @@ class BacsConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = createBacsConfirmationOption(),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<BacsMandateData>>()
@@ -251,7 +249,7 @@ class BacsConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = createBacsConfirmationOption(),
-            confirmationParameters = CONFIRMATION_PARAMETERS.copy(appearance = appearance),
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(appearance = appearance),
             arguments = bacsMandateData,
             launcher = launcher,
         )
@@ -293,18 +291,5 @@ class BacsConfirmationDefinitionTest {
 
     private fun ConfirmationHandler.Option.asNewPaymentMethodOption(): PaymentMethodConfirmationOption.New {
         return this as PaymentMethodConfirmationOption.New
-    }
-
-    private companion object {
-        private val PAYMENT_INTENT = PaymentIntentFactory.create()
-
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            intent = PAYMENT_INTENT,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            appearance = PaymentSheet.Appearance(),
-            shippingDetails = AddressDetails(),
-        )
     }
 }

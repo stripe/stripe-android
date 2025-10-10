@@ -38,6 +38,7 @@ import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePre
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -3519,6 +3520,17 @@ class PaymentSheet internal constructor(
         @WalletButtonsPreview
         @Composable
         fun WalletButtons()
+
+        /**
+         * Displays a list of wallet buttons that can be used to checkout instantly
+         *
+         * @param clickHandler intercepts wallet buttons view click before primary confirmation occurs. Return true
+         *   if the click has been handled internally or false if the wallet confirmation process should continue. By
+         *   default always returns false.
+         */
+        @WalletButtonsPreview
+        @Composable
+        fun WalletButtons(clickHandler: WalletButtonsViewClickHandler)
 
         /**
          * Configure the FlowController to process a [PaymentIntent].

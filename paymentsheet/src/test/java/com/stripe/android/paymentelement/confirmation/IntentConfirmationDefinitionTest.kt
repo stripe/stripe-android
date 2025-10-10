@@ -17,7 +17,6 @@ import com.stripe.android.paymentelement.confirmation.interceptor.FakeIntentConf
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
@@ -72,7 +71,7 @@ class IntentConfirmationDefinitionTest {
                     extraParams = null,
                     passiveCaptchaParams = null
                 ),
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
             )
 
             val result = intentConfirmationInterceptorFactory.interceptor
@@ -98,7 +97,7 @@ class IntentConfirmationDefinitionTest {
 
             definition.action(
                 confirmationOption = confirmationOption,
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
             )
 
             val result = intentConfirmationInterceptorFactory.interceptor
@@ -124,7 +123,7 @@ class IntentConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val completeAction = action.asComplete()
@@ -148,7 +147,7 @@ class IntentConfirmationDefinitionTest {
 
             val action = definition.action(
                 confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
             )
 
             val completeAction = action.asComplete()
@@ -175,7 +174,7 @@ class IntentConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val failAction = action.asFail()
@@ -196,7 +195,7 @@ class IntentConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val launchAction = action.asLaunch()
@@ -225,7 +224,7 @@ class IntentConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS_WITH_SI,
+            confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
         )
 
         val launchAction = action.asLaunch()
@@ -254,7 +253,7 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = launcher,
             arguments = IntentConfirmationDefinition.Args.Confirm(confirmParams),
-            confirmationParameters = CONFIRMATION_PARAMETERS_WITH_SI,
+            confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
         )
 
@@ -274,7 +273,7 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = launcher,
             arguments = IntentConfirmationDefinition.Args.NextAction(clientSecret = "si_123"),
-            confirmationParameters = CONFIRMATION_PARAMETERS_WITH_SI,
+            confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
         )
 
@@ -299,7 +298,7 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = launcher,
             arguments = IntentConfirmationDefinition.Args.Confirm(confirmParams),
-            confirmationParameters = CONFIRMATION_PARAMETERS_WITH_SI,
+            confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
         )
 
@@ -319,7 +318,7 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = launcher,
             arguments = IntentConfirmationDefinition.Args.NextAction(clientSecret = "pi_123"),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
         )
 
@@ -338,7 +337,7 @@ class IntentConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
             ),
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
@@ -364,7 +363,7 @@ class IntentConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = InternalPaymentResult.Failed(exception),
         )
@@ -386,7 +385,7 @@ class IntentConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = InternalPaymentResult.Canceled,
         )
@@ -452,14 +451,11 @@ class IntentConfirmationDefinitionTest {
             passiveCaptchaParams = null
         )
 
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123"
-            ),
-            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            appearance = PaymentSheet.Appearance(),
-            shippingDetails = AddressDetails(name = "John Doe"),
-        )
+        private val CONFIRMATION_PARAMETERS =
+            com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS.copy(
+                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                shippingDetails = AddressDetails(name = "John Doe")
+            )
 
         private val CONFIRMATION_PARAMETERS_WITH_SI = CONFIRMATION_PARAMETERS.copy(
             intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD

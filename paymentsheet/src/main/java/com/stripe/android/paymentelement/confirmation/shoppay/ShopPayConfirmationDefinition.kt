@@ -27,7 +27,7 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
 
     override fun toResult(
         confirmationOption: ShopPayConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: ShopPayActivityResult
     ): ConfirmationDefinition.Result {
@@ -39,7 +39,7 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
             }
             is ShopPayActivityResult.Completed -> {
                 ConfirmationDefinition.Result.Succeeded(
-                    intent = confirmationParameters.intent,
+                    intent = confirmationArgs.intent,
                     deferredIntentConfirmationType = deferredIntentConfirmationType,
                     // Shop Pay is handed off for `preparePaymentMethod` purposes
                     completedFullPaymentFlow = false,
@@ -69,13 +69,13 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
         launcher: ActivityResultLauncher<ShopPayActivityContract.Args>,
         arguments: Unit,
         confirmationOption: ShopPayConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters
+        confirmationArgs: ConfirmationHandler.Args
     ) {
         launcher.launch(
             ShopPayActivityContract.Args(
                 shopPayConfiguration = confirmationOption.shopPayConfiguration,
                 customerSessionClientSecret = confirmationOption.customerSessionClientSecret,
-                businessName = confirmationParameters.initializationMode.sellerBusinessName
+                businessName = confirmationArgs.initializationMode.sellerBusinessName
                     ?: confirmationOption.merchantDisplayName
             )
         )
@@ -83,7 +83,7 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: ShopPayConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters
+        confirmationArgs: ConfirmationHandler.Args
     ): ConfirmationDefinition.Action<Unit> {
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = Unit,
