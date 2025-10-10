@@ -51,19 +51,18 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             onSuccess = { confirmationToken ->
                 val paymentMethodType = confirmationToken.paymentMethodPreview?.type
                     ?: return ConfirmationDefinition.Action.Fail(
-                        cause = IllegalStateException("Failed to fetch PaymentMethod Type"),
-                        message = "Failed to fetch PaymentMethod Type".resolvableString,
+                        cause = IllegalStateException(ERROR_MISSING_PAYMENT_METHOD_TYPE),
+                        message = ERROR_MISSING_PAYMENT_METHOD_TYPE.resolvableString,
                         errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                     )
                 handleDeferredOnConfirmationTokenCreated(
                     intent = intent,
-                    callback = createIntentCallback,
                     confirmationToken = confirmationToken,
                     intentConfiguration = intentConfiguration,
+                    paymentMethodId = "",
                     paymentMethodType = paymentMethodType,
                     confirmationOption = updatedConfirmationOption,
                     shippingValues = shippingValues,
-                    hCaptchaToken = null,
                 )
             },
             onFailure = { error ->
@@ -79,22 +78,64 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     override suspend fun intercept(
         intent: StripeIntent,
         confirmationOption: PaymentMethodConfirmationOption.Saved,
-        shippingValues: ConfirmPaymentIntentParams.Shipping?
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        ephemeralKeySecret: String?
     ): ConfirmationDefinition.Action<Args> {
-        TODO("Not yet implemented")
+        val paymentMethod = confirmationOption.paymentMethod
+        return stripeRepository.createConfirmationToken(
+            confirmationTokenParams = ConfirmationTokenParams(
+                returnUrl = DefaultReturnUrl.create(context).value,
+                paymentMethodId = paymentMethod.id
+                    ?: return ConfirmationDefinition.Action.Fail(
+                        cause = IllegalStateException(ERROR_MISSING_PAYMENT_METHOD_ID),
+                        message = ERROR_MISSING_PAYMENT_METHOD_ID.resolvableString,
+                        errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    )
+            ),
+            options = requestOptions.copy(
+                apiKey = ephemeralKeySecret
+                    ?: return ConfirmationDefinition.Action.Fail(
+                        cause = IllegalStateException(ERROR_MISSING_EPHEMERAL_KEY_SECRET),
+                        message = ERROR_MISSING_EPHEMERAL_KEY_SECRET.resolvableString,
+                        errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    ),
+            ),
+        ).fold(
+            onSuccess = { confirmationToken ->
+                handleDeferredOnConfirmationTokenCreated(
+                    intent = intent,
+                    confirmationToken = confirmationToken,
+                    intentConfiguration = intentConfiguration,
+                    paymentMethodId = paymentMethod.id.orEmpty(),
+                    paymentMethodType = paymentMethod.type ?: return ConfirmationDefinition.Action.Fail(
+                        cause = IllegalStateException(ERROR_MISSING_PAYMENT_METHOD_TYPE),
+                        message = ERROR_MISSING_PAYMENT_METHOD_TYPE.resolvableString,
+                        errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    ),
+                    confirmationOption = confirmationOption,
+                    shippingValues = shippingValues,
+                )
+            },
+            onFailure = { error ->
+                ConfirmationDefinition.Action.Fail(
+                    cause = error,
+                    message = error.stripeErrorMessage(),
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                )
+            }
+        )
     }
 
     private suspend fun handleDeferredOnConfirmationTokenCreated(
         intent: StripeIntent,
-        callback: CreateIntentWithConfirmationTokenCallback,
         confirmationToken: ConfirmationToken,
         intentConfiguration: PaymentSheet.IntentConfiguration,
+        paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type,
         confirmationOption: PaymentMethodConfirmationOption,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        hCaptchaToken: String?
     ): ConfirmationDefinition.Action<Args> {
-        val result = callback.onCreateIntent(confirmationToken)
+        val result = createIntentCallback.onCreateIntent(confirmationToken)
 
         return when (result) {
             is CreateIntentResult.Success -> {
@@ -108,10 +149,10 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     handleDeferredIntentCreationSuccess(
                         clientSecret = result.clientSecret,
                         intentConfiguration = intentConfiguration,
+                        paymentMethodId = paymentMethodId,
                         paymentMethodType = paymentMethodType,
                         confirmationOption = confirmationOption,
                         shippingValues = shippingValues,
-                        hCaptchaToken = hCaptchaToken
                     )
                 }
             }
@@ -132,9 +173,9 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         clientSecret: String,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         confirmationOption: PaymentMethodConfirmationOption,
+        paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        hCaptchaToken: String?
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
@@ -160,14 +201,15 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     isDeferred = true
                 ) {
                     create(
-                        paymentMethodId = "",
+                        paymentMethodId = paymentMethodId,
                         paymentMethodType = paymentMethodType,
                         optionsParams = confirmationOption.optionsParams,
                         extraParams = (confirmationOption as? PaymentMethodConfirmationOption.New)
                             ?.extraParams,
                         intentConfigSetupFutureUsage = intentConfiguration
                             .mode.setupFutureUse?.toConfirmParamsSetupFutureUsage(),
-                        radarOptions = hCaptchaToken?.let { RadarOptions(it) },
+                        radarOptions = (confirmationOption as? PaymentMethodConfirmationOption.Saved)
+                            ?.hCaptchaToken?.let { RadarOptions(it) },
                         clientAttributionMetadata = confirmationOption.clientAttributionMetadata,
                     )
                 }
@@ -187,6 +229,13 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             intentConfiguration: PaymentSheet.IntentConfiguration,
             createIntentCallback: CreateIntentWithConfirmationTokenCallback,
         ): ConfirmationTokenConfirmationInterceptor
+    }
+
+    companion object {
+        private const val ERROR_MISSING_PAYMENT_METHOD_ID = "PaymentMethod must have an ID"
+        private const val ERROR_MISSING_PAYMENT_METHOD_TYPE = "Failed to fetch PaymentMethod Type"
+        private const val ERROR_MISSING_EPHEMERAL_KEY_SECRET =
+            "Ephemeral key secret is required to confirm with saved payment method"
     }
 }
 

@@ -60,6 +60,7 @@ internal class IntentConfirmationDefinition(
                     intent = confirmationArgs.intent,
                     confirmationOption = confirmationOption,
                     shippingValues = confirmationArgs.shippingDetails?.toConfirmPaymentIntentShipping(),
+                    ephemeralKeySecret = confirmationArgs.ephemeralKeySecret,
                 )
         }
     }

@@ -24,6 +24,7 @@ internal interface IntentConfirmationInterceptor {
         intent: StripeIntent,
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        ephemeralKeySecret: String? = null,
     ): ConfirmationDefinition.Action<Args>
 
     interface Factory {

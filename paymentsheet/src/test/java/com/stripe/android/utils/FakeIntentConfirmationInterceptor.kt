@@ -98,6 +98,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         intent: StripeIntent,
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        ephemeralKeySecret: String?,
     ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> {
         _calls.add(
             InterceptCall.WithExistingPaymentMethod(

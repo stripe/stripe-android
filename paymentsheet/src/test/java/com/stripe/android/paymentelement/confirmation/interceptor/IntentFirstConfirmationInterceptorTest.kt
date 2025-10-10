@@ -73,6 +73,7 @@ class IntentFirstConfirmationInterceptorTest {
             initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
         ) { interceptor ->
             val nextStep = interceptor.intercept(
+                intent = PaymentIntentFactory.create(),
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                     optionsParams = PaymentMethodOptionsParams.Card(
@@ -80,7 +81,6 @@ class IntentFirstConfirmationInterceptorTest {
                     ),
                     passiveCaptchaParams = null
                 ),
-                intent = PaymentIntentFactory.create(),
                 shippingValues = null,
             )
 
@@ -167,13 +167,13 @@ class IntentFirstConfirmationInterceptorTest {
         )
 
         val nextStep = interceptor.intercept(
+            intent = PaymentIntentFactory.create(),
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
                 hCaptchaToken = hCaptchaToken,
                 passiveCaptchaParams = null
             ),
-            intent = PaymentIntentFactory.create(),
             shippingValues = null,
         )
 
@@ -189,13 +189,13 @@ class IntentFirstConfirmationInterceptorTest {
         )
 
         val nextStep = interceptor.intercept(
+            intent = SetupIntentFactory.create(),
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
                 hCaptchaToken = hCaptchaToken,
                 passiveCaptchaParams = null
             ),
-            intent = SetupIntentFactory.create(),
             shippingValues = null,
         )
 
