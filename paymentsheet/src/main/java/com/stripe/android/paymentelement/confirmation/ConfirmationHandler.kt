@@ -76,7 +76,7 @@ internal interface ConfirmationHandler {
      * Defines the set of arguments requires for beginning the confirmation process
      */
     @Parcelize
-    data class Args constructor(
+    data class Args(
         /**
          * The [StripeIntent] that is being potentially confirmed by the handler
          */

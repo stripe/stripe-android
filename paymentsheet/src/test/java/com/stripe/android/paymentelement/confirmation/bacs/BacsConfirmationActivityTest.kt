@@ -194,6 +194,7 @@ internal class BacsConfirmationActivityTest {
         )
 
         val CONFIRMATION_ARGUMENTS = CONFIRMATION_PARAMETERS.copy(
+            intent = PAYMENT_INTENT,
             confirmationOption = CONFIRMATION_OPTION,
         )
 
