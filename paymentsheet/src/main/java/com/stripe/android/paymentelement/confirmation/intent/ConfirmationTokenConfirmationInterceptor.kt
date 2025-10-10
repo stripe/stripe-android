@@ -8,7 +8,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenParams
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
@@ -47,21 +46,11 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             options = requestOptions,
         ).fold(
             onSuccess = { confirmationToken ->
-                val paymentMethodType = confirmationToken.paymentMethodPreview?.type
-                    ?: return ConfirmationDefinition.Action.Fail(
-                        cause = IllegalStateException("Failed to fetch PaymentMethod Type"),
-                        message = "Failed to fetch PaymentMethod Type".resolvableString,
-                        errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                    )
                 handleDeferredOnConfirmationTokenCreated(
                     intent = intent,
                     callback = createIntentCallback,
                     confirmationToken = confirmationToken,
-                    intentConfiguration = intentConfiguration,
-                    paymentMethodType = paymentMethodType,
-                    confirmationOption = updatedConfirmationOption,
                     shippingValues = shippingValues,
-                    hCaptchaToken = null,
                 )
             },
             onFailure = { error ->
@@ -86,11 +75,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         intent: StripeIntent,
         callback: CreateIntentWithConfirmationTokenCallback,
         confirmationToken: ConfirmationToken,
-        intentConfiguration: PaymentSheet.IntentConfiguration,
-        paymentMethodType: PaymentMethod.Type,
-        confirmationOption: PaymentMethodConfirmationOption,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        hCaptchaToken: String?
     ): ConfirmationDefinition.Action<Args> {
         val result = callback.onCreateIntent(confirmationToken)
 
@@ -106,11 +91,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     handleDeferredIntentCreationSuccess(
                         clientSecret = result.clientSecret,
                         confirmationTokenId = confirmationToken.id,
-                        intentConfiguration = intentConfiguration,
-                        paymentMethodType = paymentMethodType,
-                        confirmationOption = confirmationOption,
                         shippingValues = shippingValues,
-                        hCaptchaToken = hCaptchaToken
                     )
                 }
             }
@@ -130,11 +111,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     private suspend fun handleDeferredIntentCreationSuccess(
         clientSecret: String,
         confirmationTokenId: String,
-        intentConfiguration: PaymentSheet.IntentConfiguration,
-        confirmationOption: PaymentMethodConfirmationOption,
-        paymentMethodType: PaymentMethod.Type,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        hCaptchaToken: String?
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
