@@ -224,4 +224,24 @@ class ConfirmationTokenParamsTest {
                 )
             )
     }
+
+    @Test
+    fun toParamMap_withClientContext_shouldCreateExpectedMap() {
+        val clientContext = ConfirmationTokenClientContextParams(
+            mode = "payment",
+            currency = "usd",
+            setupFutureUsage = "off_session",
+            captureMethod = "automatic"
+        )
+        val params = ConfirmationTokenParams(
+            clientContext = clientContext
+        )
+
+        assertThat(params.toParamMap())
+            .isEqualTo(
+                mapOf(
+                    "client_context" to clientContext.toParamMap()
+                )
+            )
+    }
 }
