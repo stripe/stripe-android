@@ -114,9 +114,7 @@ class LinkActivityContractTest {
         return LinkActivityContract(
             nativeLinkActivityContract = nativeLinkActivityContract,
             webLinkActivityContract = webLinkActivityContract,
-            linkGateFactory = {
-                linkGate
-            }
+            linkGateFactory = FakeLinkGate.Factory(linkGate)
         )
     }
 }

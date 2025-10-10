@@ -6,7 +6,9 @@ import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.LinkSignupDisabledReason
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
@@ -108,6 +110,8 @@ internal class FakeEventReporter : EventReporter {
         paymentSelection: PaymentSelection?,
         linkEnabled: Boolean,
         linkMode: LinkMode?,
+        linkDisabledReasons: List<LinkDisabledReason>?,
+        linkSignupDisabledReasons: List<LinkSignupDisabledReason>?,
         googlePaySupported: Boolean,
         linkDisplay: PaymentSheet.LinkConfiguration.Display,
         currency: String?,

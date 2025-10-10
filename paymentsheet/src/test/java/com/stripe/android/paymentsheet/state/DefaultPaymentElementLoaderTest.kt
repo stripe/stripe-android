@@ -29,6 +29,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
 import com.stripe.android.model.PaymentIntentCreationFlow
@@ -79,6 +80,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
@@ -163,6 +165,7 @@ internal class DefaultPaymentElementLoaderTest {
                     sharedDataSpecs = emptyList(),
                     isGooglePayReady = true,
                     linkMode = null,
+                    linkState = LinkDisabledState(listOf(LinkDisabledReason.NotSupportedInElementsSession)),
                     availableWallets = emptyList(),
                     cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
                     hasCustomerConfiguration = true,
@@ -1343,6 +1346,8 @@ internal class DefaultPaymentElementLoaderTest {
             ),
             linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
+            linkDisabledReasons = null,
+            linkSignupDisabledReasons = null,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
@@ -1408,6 +1413,8 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSelection = null,
             linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
+            linkDisabledReasons = null,
+            linkSignupDisabledReasons = null,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
@@ -2942,6 +2949,8 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSelection = null,
             linkEnabled = false,
             linkMode = null,
+            linkDisabledReasons = listOf(LinkDisabledReason.NotSupportedInElementsSession),
+            linkSignupDisabledReasons = null,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
@@ -2978,6 +2987,8 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSelection = null,
             linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
+            linkDisabledReasons = null,
+            linkSignupDisabledReasons = null,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
@@ -3014,6 +3025,8 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSelection = null,
             linkEnabled = true,
             linkMode = LinkMode.Passthrough,
+            linkDisabledReasons = null,
+            linkSignupDisabledReasons = null,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
@@ -3048,6 +3061,8 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSelection = null,
             linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
+            linkDisabledReasons = null,
+            linkSignupDisabledReasons = null,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
@@ -3092,6 +3107,8 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSelection = null,
             linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
+            linkDisabledReasons = null,
+            linkSignupDisabledReasons = null,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
@@ -3136,6 +3153,8 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSelection = null,
             linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
+            linkDisabledReasons = null,
+            linkSignupDisabledReasons = null,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
@@ -3296,6 +3315,8 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSelection = anyOrNull(),
             linkEnabled = eq(true),
             linkMode = anyOrNull(),
+            linkDisabledReasons = anyOrNull(),
+            linkSignupDisabledReasons = isNull(),
             googlePaySupported = any(),
             linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Automatic),
             currency = anyOrNull(),
@@ -3399,6 +3420,8 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSelection = anyOrNull(),
             linkEnabled = eq(false),
             linkMode = anyOrNull(),
+            linkDisabledReasons = eq(listOf(LinkDisabledReason.LinkConfiguration)),
+            linkSignupDisabledReasons = isNull(),
             googlePaySupported = any(),
             linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Never),
             currency = anyOrNull(),
@@ -3436,6 +3459,8 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSelection = anyOrNull(),
             linkEnabled = anyOrNull(),
             linkMode = anyOrNull(),
+            linkDisabledReasons = anyOrNull(),
+            linkSignupDisabledReasons = anyOrNull(),
             googlePaySupported = any(),
             linkDisplay = anyOrNull(),
             currency = anyOrNull(),
@@ -3560,6 +3585,8 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSelection = anyOrNull(),
             linkEnabled = anyOrNull(),
             linkMode = anyOrNull(),
+            linkDisabledReasons = anyOrNull(),
+            linkSignupDisabledReasons = anyOrNull(),
             googlePaySupported = any(),
             linkDisplay = anyOrNull(),
             currency = anyOrNull(),
@@ -3598,6 +3625,8 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSelection = anyOrNull(),
             linkEnabled = anyOrNull(),
             linkMode = anyOrNull(),
+            linkDisabledReasons = anyOrNull(),
+            linkSignupDisabledReasons = anyOrNull(),
             googlePaySupported = any(),
             linkDisplay = anyOrNull(),
             currency = anyOrNull(),
@@ -3799,6 +3828,8 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSelection = paymentSelection,
             linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
+            linkDisabledReasons = null,
+            linkSignupDisabledReasons = null,
             googlePaySupported = true,
             currency = "usd",
             initializationMode = initializationMode,
@@ -3955,6 +3986,14 @@ internal class DefaultPaymentElementLoaderTest {
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
     ): PaymentElementLoader {
+        val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(customerRepo)
+        val createLinkState = DefaultCreateLinkState(
+            accountStatusProvider = { linkAccountState },
+            retrieveCustomerEmail = retrieveCustomerEmailImpl,
+            linkStore = linkStore,
+            linkGateFactory = FakeLinkGate.Factory(linkGate)
+        )
+
         return DefaultPaymentElementLoader(
             prefsRepositoryFactory = { prefsRepository },
             googlePayRepositoryFactory = {
@@ -3967,11 +4006,8 @@ internal class DefaultPaymentElementLoaderTest {
             eventReporter = eventReporter,
             errorReporter = errorReporter,
             workContext = testDispatcher,
-            retrieveCustomerEmail = DefaultRetrieveCustomerEmail(customerRepo),
-            accountStatusProvider = { linkAccountState },
+            createLinkState = createLinkState,
             logLinkHoldbackExperiment = logLinkHoldbackExperiment,
-            linkStore = linkStore,
-            linkGateFactory = { linkGate },
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
             cvcRecollectionHandler = CvcRecollectionHandlerImpl(),

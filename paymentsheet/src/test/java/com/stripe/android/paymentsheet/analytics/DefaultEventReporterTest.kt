@@ -20,7 +20,9 @@ import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
+import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.LinkSignupDisabledReason
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
@@ -920,6 +922,62 @@ class DefaultEventReporterTest {
         }
 
     @Test
+    fun `Don't send link_disabled_reasons nor link_signup_disabled_reasons when none`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            linkDisabledReasons = listOf(),
+            linkSignupDisabledReasons = listOf(),
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_load_succeeded" &&
+                    req.params["link_disabled_reasons"] == null &&
+                    req.params["link_sign_up_disabled_reasons"] == null
+            }
+        )
+    }
+
+    @Test
+    fun `Send link_disabled_reasons when present`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            linkDisabledReasons = listOf(
+                LinkDisabledReason.NotSupportedInElementsSession,
+                LinkDisabledReason.BillingDetailsCollection,
+            ),
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_load_succeeded" &&
+                    req.params["link_disabled_reasons"] ==
+                    "not_supported_in_elements_session,billing_details_collection"
+            }
+        )
+    }
+
+    @Test
+    fun `Send link_signup_disabled_reasons when present`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            linkSignupDisabledReasons = listOf(
+                LinkSignupDisabledReason.LinkCardNotSupported
+            )
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_load_succeeded" &&
+                    req.params["link_signup_disabled_reasons"] == "link_card_not_supported"
+            }
+        )
+    }
+
+    @Test
     fun `Send correct link_context when pressing confirm button for Instant Debits`() = runTest(testDispatcher) {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateInit()
@@ -1505,6 +1563,8 @@ class DefaultEventReporterTest {
         paymentSelection: PaymentSelection = PaymentSelection.GooglePay,
         linkEnabled: Boolean = true,
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
+        linkDisabledReasons: List<LinkDisabledReason>? = null,
+        linkSignupDisabledReasons: List<LinkSignupDisabledReason>? = null,
         googlePayReady: Boolean = true,
         currency: String? = "usd",
         initializationMode: PaymentElementLoader.InitializationMode =
@@ -1527,6 +1587,8 @@ class DefaultEventReporterTest {
             googlePaySupported = googlePayReady,
             linkEnabled = linkEnabled,
             linkMode = linkMode,
+            linkDisabledReasons = linkDisabledReasons,
+            linkSignupDisabledReasons = linkSignupDisabledReasons,
             currency = currency,
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "klarna"),
