@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import com.stripe.android.CollectMissingLinkBillingDetailsPreview
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.strings.ResolvableString
@@ -3244,6 +3245,7 @@ class PaymentSheet internal constructor(
         internal val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
         internal val allowUserEmailEdits: Boolean,
         internal val allowLogOut: Boolean,
+        internal val disallowFundingSourceCreation: Set<String>,
     ) : Parcelable {
 
         @JvmOverloads
@@ -3254,6 +3256,7 @@ class PaymentSheet internal constructor(
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
             allowLogOut = true,
+            disallowFundingSourceCreation = emptySet(),
         )
 
         internal val shouldDisplay: Boolean
@@ -3265,6 +3268,7 @@ class PaymentSheet internal constructor(
         class Builder {
             private var display: Display = Display.Automatic
             private var collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true
+            private var disallowFundingSourceCreation: Set<String> = emptySet()
 
             fun display(display: Display) = apply {
                 this.display = display
@@ -3278,12 +3282,18 @@ class PaymentSheet internal constructor(
                     collectMissingBillingDetailsForExistingPaymentMethods
             }
 
+            @LinkDisallowFundingSourceCreationPreview
+            fun disallowFundingSourceCreation(disallowFundingSourceCreation: Set<String>) = apply {
+                this.disallowFundingSourceCreation = disallowFundingSourceCreation
+            }
+
             fun build() = LinkConfiguration(
                 display = display,
                 collectMissingBillingDetailsForExistingPaymentMethods =
                 collectMissingBillingDetailsForExistingPaymentMethods,
                 allowUserEmailEdits = true,
                 allowLogOut = true,
+                disallowFundingSourceCreation = disallowFundingSourceCreation,
             )
         }
 

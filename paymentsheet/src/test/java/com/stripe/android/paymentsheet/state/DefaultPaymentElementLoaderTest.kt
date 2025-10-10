@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.common.model.PaymentMethodRemovePermission
@@ -2659,6 +2660,42 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(repository.lastParams?.savedPaymentMethodSelectionId)
                 .isEqualTo("pm_1234321")
         }
+
+    @OptIn(LinkDisallowFundingSourceCreationPreview::class)
+    @Test
+    fun `Passes Link disallowed funding source creation along to ElementsSessionRepository`() = runTest {
+        val repository = FakeElementsSessionRepository(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            linkSettings = null,
+            error = null,
+        )
+
+        val loader = createPaymentElementLoader(
+            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+            elementsSessionRepository = repository,
+        )
+
+        val config = PaymentSheet.Configuration(
+            merchantDisplayName = MERCHANT_DISPLAY_NAME,
+            link = PaymentSheet.LinkConfiguration.Builder()
+                .display(PaymentSheet.LinkConfiguration.Display.Automatic)
+                .disallowFundingSourceCreation(setOf("somethingThatsNotAllowed"))
+                .build(),
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = config,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        assertThat(repository.lastParams?.linkDisallowedFundingSourceCreation)
+            .containsExactly("somethingThatsNotAllowed")
+    }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test

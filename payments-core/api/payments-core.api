@@ -329,6 +329,9 @@ public abstract interface class com/stripe/android/IssuingCardPinService$Listene
 	public abstract fun onError (Lcom/stripe/android/IssuingCardPinService$CardPinActionError;Ljava/lang/String;Ljava/lang/Throwable;)V
 }
 
+public abstract interface annotation class com/stripe/android/LinkDisallowFundingSourceCreationPreview : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/PayWithGoogleUtils {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/PayWithGoogleUtils;
@@ -2590,6 +2593,14 @@ public final class com/stripe/android/model/ElementsSessionParams$DeferredIntent
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ElementsSessionParams$DeferredIntentType;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/ElementsSessionParams$DeferredIntentType;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/ElementsSessionParams$Link$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ElementsSessionParams$Link;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/ElementsSessionParams$Link;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

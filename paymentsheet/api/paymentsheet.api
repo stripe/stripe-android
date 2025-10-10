@@ -2578,6 +2578,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$LinkConfiguratio
 	public fun <init> ()V
 	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration;
 	public final fun collectMissingBillingDetailsForExistingPaymentMethods (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Builder;
+	public final fun disallowFundingSourceCreation (Ljava/util/Set;)Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Builder;
 	public final fun display (Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Display;)Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Builder;
 }
 
