@@ -79,7 +79,7 @@ internal class ShopPayConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
@@ -99,7 +99,7 @@ internal class ShopPayConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             launcher = launcher,
             arguments = Unit,
         )
@@ -121,7 +121,7 @@ internal class ShopPayConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
                 initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
@@ -151,7 +151,7 @@ internal class ShopPayConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = ShopPayActivityResult.Completed,
         )
@@ -172,7 +172,7 @@ internal class ShopPayConfirmationDefinitionTest {
         val exception = IllegalStateException("ShopPay failed!")
         val result = definition.toResult(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = ShopPayActivityResult.Failed(exception),
         )
@@ -192,7 +192,7 @@ internal class ShopPayConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = ShopPayActivityResult.Canceled,
         )
@@ -211,7 +211,7 @@ internal class ShopPayConfirmationDefinitionTest {
         val exception = Exception("oops")
         val result = definition.toResult(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = ShopPayActivityResult.Failed(exception),
         )

@@ -30,11 +30,11 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
 
     override fun canConfirm(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
-        confirmationParameters: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationHandler.Args,
     ): Boolean {
         return !confirmationOption.optionsParams.hasAlreadyRecollectedCvc() && handler.requiresCVCRecollection(
-            stripeIntent = confirmationParameters.intent,
-            initializationMode = confirmationParameters.initializationMode,
+            stripeIntent = confirmationArgs.intent,
+            initializationMode = confirmationArgs.initializationMode,
             paymentMethod = confirmationOption.paymentMethod,
             optionsParams = confirmationOption.optionsParams,
         ) && !confirmationOption.originatedFromWallet
@@ -42,7 +42,7 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
-        confirmationParameters: ConfirmationHandler.Args
+        confirmationArgs: ConfirmationHandler.Args
     ): ConfirmationDefinition.Action<Unit> {
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = Unit,
@@ -67,20 +67,20 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
         launcher: CvcRecollectionLauncher,
         arguments: Unit,
         confirmationOption: PaymentMethodConfirmationOption.Saved,
-        confirmationParameters: ConfirmationHandler.Args
+        confirmationArgs: ConfirmationHandler.Args
     ) {
         handler.launch(confirmationOption.paymentMethod) { recollectionData ->
             launcher.launch(
                 data = recollectionData,
-                appearance = confirmationParameters.appearance,
-                isLiveMode = confirmationParameters.intent.isLiveMode,
+                appearance = confirmationArgs.appearance,
+                isLiveMode = confirmationArgs.intent.isLiveMode,
             )
         }
     }
 
     override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
-        confirmationParameters: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: CvcRecollectionResult
     ): ConfirmationDefinition.Result {
@@ -92,7 +92,7 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
                         else -> PaymentMethodOptionsParams.Card(cvc = result.cvc)
                     }
                 ),
-                parameters = confirmationParameters,
+                parameters = confirmationArgs,
             )
             is CvcRecollectionResult.Cancelled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,

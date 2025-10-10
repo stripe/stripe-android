@@ -66,7 +66,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         val result = definition.canConfirm(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-            confirmationParameters = CONFIRMATION_PARAMETERS
+            confirmationArgs = CONFIRMATION_PARAMETERS
         )
 
         assertThat(result).isTrue()
@@ -78,7 +78,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         val result = definition.canConfirm(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
-            confirmationParameters = CONFIRMATION_PARAMETERS
+            confirmationArgs = CONFIRMATION_PARAMETERS
         )
 
         assertThat(result).isTrue()
@@ -93,7 +93,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         val result = definition.canConfirm(
             confirmationOption = optionWithoutCaptcha,
-            confirmationParameters = CONFIRMATION_PARAMETERS
+            confirmationArgs = CONFIRMATION_PARAMETERS
         )
 
         assertThat(result).isFalse()
@@ -108,7 +108,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         val result = definition.canConfirm(
             confirmationOption = optionWithoutCaptcha,
-            confirmationParameters = CONFIRMATION_PARAMETERS
+            confirmationArgs = CONFIRMATION_PARAMETERS
         )
 
         assertThat(result).isFalse()
@@ -168,7 +168,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action)
@@ -190,7 +190,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = optionWithoutCaptcha,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action)
@@ -214,7 +214,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         definition.action(
             confirmationOption = optionWithoutCaptcha,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val reportedErrors = fakeErrorReporter.getLoggedErrors()
@@ -237,7 +237,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             launcher = launcher,
             arguments = launcherArgs,
         )
@@ -256,7 +256,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             launcher = launcher,
             arguments = launcherArgs,
         )
@@ -275,7 +275,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = PassiveChallengeActivityResult.Success(testToken),
         )
@@ -302,7 +302,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = PassiveChallengeActivityResult.Success(testToken),
         )
@@ -327,7 +327,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = PassiveChallengeActivityResult.Failed(exception),
         )
@@ -349,7 +349,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = PassiveChallengeActivityResult.Failed(exception),
         )
@@ -371,7 +371,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
             val action = definition.action(
                 confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
             )
 
             assertThat(action)
@@ -392,7 +392,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             launcher = launcher,
             arguments = launcherArgs,
         )

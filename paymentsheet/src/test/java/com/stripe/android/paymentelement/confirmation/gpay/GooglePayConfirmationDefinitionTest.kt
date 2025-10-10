@@ -106,7 +106,7 @@ class GooglePayConfirmationDefinitionTest {
         }
         val result = definition.toResult(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = GooglePayPaymentMethodLauncher.Result.Completed(
                 paymentMethod = paymentMethod,
@@ -135,7 +135,7 @@ class GooglePayConfirmationDefinitionTest {
         val exception = IllegalStateException("Failed!")
         val result = definition.toResult(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = GooglePayPaymentMethodLauncher.Result.Failed(
                 errorCode = 400,
@@ -159,7 +159,7 @@ class GooglePayConfirmationDefinitionTest {
         val exception = IllegalStateException("Failed!")
         val result = definition.toResult(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = GooglePayPaymentMethodLauncher.Result.Failed(
                 errorCode = GooglePayPaymentMethodLauncher.NETWORK_ERROR,
@@ -185,7 +185,7 @@ class GooglePayConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = GooglePayPaymentMethodLauncher.Result.Canceled,
         )
@@ -299,7 +299,7 @@ class GooglePayConfirmationDefinitionTest {
 
             definition.launch(
                 confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
                 arguments = Unit,
                 launcher = launcher,
             )
@@ -390,7 +390,7 @@ class GooglePayConfirmationDefinitionTest {
 
             definition.launch(
                 confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-                confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+                confirmationArgs = CONFIRMATION_PARAMETERS.copy(
                     initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                         intentConfiguration = PaymentSheet.IntentConfiguration(
                             sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
@@ -430,7 +430,7 @@ class GooglePayConfirmationDefinitionTest {
                         merchantCurrencyCode = "USD",
                     ),
                 ),
-                confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+                confirmationArgs = CONFIRMATION_PARAMETERS.copy(
                     intent = PAYMENT_INTENT.copy(currency = "CAD"),
                 ),
                 arguments = Unit,
@@ -463,7 +463,7 @@ class GooglePayConfirmationDefinitionTest {
                         customLabel = "Merchant Inc."
                     ),
                 ),
-                confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+                confirmationArgs = CONFIRMATION_PARAMETERS.copy(
                     intent = PAYMENT_INTENT.copy(currency = "CAD"),
                 ),
                 arguments = Unit,
@@ -497,7 +497,7 @@ class GooglePayConfirmationDefinitionTest {
                         customLabel = "Merchant Inc."
                     ),
                 ),
-                confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+                confirmationArgs = CONFIRMATION_PARAMETERS.copy(
                     intent = SetupIntentFactory.create(),
                 ),
                 arguments = Unit,
@@ -529,7 +529,7 @@ class GooglePayConfirmationDefinitionTest {
                     merchantCurrencyCode = merchantCurrencyCode,
                 ),
             ),
-            confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
                 initializationMode = initializationMode,
                 intent = SetupIntentFactory.create(),
             ),
@@ -560,7 +560,7 @@ class GooglePayConfirmationDefinitionTest {
 
             definition.launch(
                 confirmationOption = confirmationOption,
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
                 arguments = Unit,
                 launcher = launcher,
             )

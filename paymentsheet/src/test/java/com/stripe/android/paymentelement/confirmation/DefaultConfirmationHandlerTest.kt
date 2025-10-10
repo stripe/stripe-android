@@ -354,7 +354,7 @@ class DefaultConfirmationHandlerTest {
 
             val canConfirmCall = someDefinitionScenario.canConfirmCalls.awaitItem()
 
-            assertThat(canConfirmCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+            assertThat(canConfirmCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
 
             assertThat(someOtherDefinitionScenario.optionCalls.awaitItem().option)
                 .isEqualTo(SomeConfirmationDefinition.Option)
@@ -698,7 +698,7 @@ class DefaultConfirmationHandlerTest {
                 SOME_DEFINITION_PERSISTED_KEY
             )
 
-            assertThat(parameters?.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+            assertThat(parameters?.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
             assertThat(parameters?.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
         }
     }
@@ -855,7 +855,7 @@ class DefaultConfirmationHandlerTest {
             "SomeParameters",
             ConfirmationMediator.Parameters(
                 confirmationOption = SomeConfirmationDefinition.Option,
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
                 deferredIntentConfirmationType = null,
             )
         )
@@ -881,14 +881,14 @@ class DefaultConfirmationHandlerTest {
 
         val canConfirmCall = someDefinitionScenario.canConfirmCalls.awaitItem()
 
-        assertThat(canConfirmCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(canConfirmCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
 
         assertThat(someDefinitionScenario.optionCalls.awaitItem().option)
             .isEqualTo(SomeConfirmationDefinition.Option)
 
         val actionCall = someDefinitionScenario.actionCalls.awaitItem()
 
-        assertThat(actionCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(actionCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
     private suspend fun Scenario.assertSomeDefinitionLaunchCalled() {
@@ -896,14 +896,14 @@ class DefaultConfirmationHandlerTest {
 
         assertThat(launchCall.launcher).isEqualTo(SomeConfirmationDefinition.Launcher)
         assertThat(launchCall.arguments).isEqualTo(SomeConfirmationDefinition.LauncherArgs)
-        assertThat(launchCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(launchCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
     private suspend fun Scenario.assertSomeDefinitionToResultCalled() {
         val toResultCall = someDefinitionScenario.toResultCalls.awaitItem()
 
         assertThat(toResultCall.result).isEqualTo(SomeConfirmationDefinition.LauncherResult)
-        assertThat(toResultCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(toResultCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
     private fun Scenario.sendSomeOtherDefinitionLauncherResult() {
@@ -922,7 +922,7 @@ class DefaultConfirmationHandlerTest {
 
         val canConfirmCall = someOtherDefinitionScenario.canConfirmCalls.awaitItem()
 
-        assertThat(canConfirmCall.confirmationParameters).isEqualTo(
+        assertThat(canConfirmCall.confirmationArgs).isEqualTo(
             CONFIRMATION_PARAMETERS.copy(
                 confirmationOption = SomeOtherConfirmationDefinition.Option
             )
@@ -933,7 +933,7 @@ class DefaultConfirmationHandlerTest {
 
         val actionCall = someOtherDefinitionScenario.actionCalls.awaitItem()
 
-        assertThat(actionCall.confirmationParameters).isEqualTo(
+        assertThat(actionCall.confirmationArgs).isEqualTo(
             CONFIRMATION_PARAMETERS.copy(
                 confirmationOption = SomeOtherConfirmationDefinition.Option
             )
@@ -945,7 +945,7 @@ class DefaultConfirmationHandlerTest {
 
         assertThat(launchCall.launcher).isEqualTo(SomeOtherConfirmationDefinition.Launcher)
         assertThat(launchCall.arguments).isEqualTo(SomeOtherConfirmationDefinition.LauncherArgs)
-        assertThat(launchCall.confirmationParameters).isEqualTo(
+        assertThat(launchCall.confirmationArgs).isEqualTo(
             CONFIRMATION_PARAMETERS.copy(
                 confirmationOption = SomeOtherConfirmationDefinition.Option
             )
@@ -956,7 +956,7 @@ class DefaultConfirmationHandlerTest {
         val toResultCall = someOtherDefinitionScenario.toResultCalls.awaitItem()
 
         assertThat(toResultCall.result).isEqualTo(SomeOtherConfirmationDefinition.LauncherResult)
-        assertThat(toResultCall.confirmationParameters).isEqualTo(
+        assertThat(toResultCall.confirmationArgs).isEqualTo(
             CONFIRMATION_PARAMETERS.copy(
                 confirmationOption = SomeOtherConfirmationDefinition.Option
             )
@@ -1063,7 +1063,7 @@ class DefaultConfirmationHandlerTest {
 
         override fun canConfirm(
             confirmationOption: Option,
-            confirmationParameters: ConfirmationHandler.Args
+            confirmationArgs: ConfirmationHandler.Args
         ): Boolean {
             return isConfirmable
         }

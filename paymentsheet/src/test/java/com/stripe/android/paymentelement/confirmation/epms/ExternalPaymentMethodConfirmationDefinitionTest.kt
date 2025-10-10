@@ -92,7 +92,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = EPM_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = PaymentResult.Completed,
         )
@@ -113,7 +113,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
         val exception = IllegalStateException("Failed!")
         val result = definition.toResult(
             confirmationOption = EPM_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = PaymentResult.Failed(exception),
         )
@@ -133,7 +133,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = EPM_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = PaymentResult.Canceled,
         )
@@ -154,7 +154,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = EPM_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Fail<Unit>>()
@@ -190,7 +190,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = EPM_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
@@ -212,7 +212,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = EPM_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             arguments = Unit,
             launcher = launcher,
         )

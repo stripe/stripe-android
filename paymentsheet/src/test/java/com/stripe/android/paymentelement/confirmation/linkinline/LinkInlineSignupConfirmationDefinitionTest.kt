@@ -173,7 +173,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             confirmationOption = confirmationOption.copy(
                 userInput = UserInput.SignIn(email = "email@email.com"),
             ),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val getAccountStatusFlowCall = coordinatorScenario.getAccountStatusFlowCalls.awaitItem()
@@ -198,7 +198,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = confirmationOption,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val getAccountStatusFlowCall = coordinatorScenario.getAccountStatusFlowCalls.awaitItem()
@@ -238,7 +238,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = confirmationOption,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val firstGetAccountStatusFlowCall = coordinatorScenario.getAccountStatusFlowCalls.awaitItem()
@@ -304,7 +304,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = createLinkInlineSignupConfirmationOption(),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             launcher = launcher,
             arguments = LinkInlineSignupConfirmationDefinition.LauncherArguments(
                 nextConfirmationOption = nextOption,
@@ -330,7 +330,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = createLinkInlineSignupConfirmationOption(),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             result = LinkInlineSignupConfirmationDefinition.Result(
                 nextConfirmationOption = nextOption,
             ),
@@ -544,7 +544,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     ) {
         val action = definition.action(
             confirmationOption = confirmationOption,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val getAccountStatusFlowCall = coordinatorScenario.getAccountStatusFlowCalls.awaitItem()

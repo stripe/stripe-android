@@ -95,7 +95,7 @@ internal class LinkConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
@@ -113,7 +113,7 @@ internal class LinkConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             launcher = launcherScenario.launcher,
             arguments = Unit,
         )
@@ -135,7 +135,7 @@ internal class LinkConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             launcher = launcherScenario.launcher,
             arguments = Unit,
         )
@@ -153,7 +153,7 @@ internal class LinkConfirmationDefinitionTest {
             confirmationOption = LINK_CONFIRMATION_OPTION.copy(
                 linkExpressMode = LinkExpressMode.DISABLED
             ),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             launcher = launcherScenario.launcher,
             arguments = Unit,
         )
@@ -173,7 +173,7 @@ internal class LinkConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             result = LinkActivityResult.PaymentMethodObtained(paymentMethod),
             deferredIntentConfirmationType = null,
         )
@@ -200,7 +200,7 @@ internal class LinkConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             result = LinkActivityResult.Completed(
                 linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
             ),
@@ -229,7 +229,7 @@ internal class LinkConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             result = LinkActivityResult.Failed(
                 error = exception,
                 linkAccountUpdate = LinkAccountUpdate.Value(null)
@@ -261,7 +261,7 @@ internal class LinkConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             result = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.LoggedOut,
                 linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
@@ -290,7 +290,7 @@ internal class LinkConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             result = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.BackPressed,
                 linkAccountUpdate = LinkAccountUpdate.None

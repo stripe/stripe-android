@@ -35,10 +35,10 @@ internal class ConfirmationMediator<
 
     fun canConfirm(
         confirmationOption: ConfirmationHandler.Option,
-        confirmationParameters: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationHandler.Args,
     ): Boolean {
         return definition.option(confirmationOption)?.let {
-            definition.canConfirm(it, confirmationParameters)
+            definition.canConfirm(it, confirmationArgs)
         } ?: false
     }
 
@@ -53,7 +53,7 @@ internal class ConfirmationMediator<
                 persistedParameters = null
                 definition.toResult(
                     confirmationOption = params.confirmationOption,
-                    confirmationParameters = params.confirmationParameters,
+                    confirmationArgs = params.confirmationArgs,
                     result = result,
                     deferredIntentConfirmationType = params.deferredIntentConfirmationType
                 )
@@ -106,7 +106,7 @@ internal class ConfirmationMediator<
                         launch = {
                             persistedParameters = Parameters(
                                 confirmationOption = confirmationOption,
-                                confirmationParameters = parameters,
+                                confirmationArgs = parameters,
                                 deferredIntentConfirmationType = action.deferredIntentConfirmationType,
                             )
 
@@ -114,7 +114,7 @@ internal class ConfirmationMediator<
                                 launcher = it,
                                 arguments = action.launcherArguments,
                                 confirmationOption = confirmationOption,
-                                confirmationParameters = parameters,
+                                confirmationArgs = parameters,
                             )
                         },
                         receivesResultInProcess = action.receivesResultInProcess,
@@ -170,7 +170,7 @@ internal class ConfirmationMediator<
     @Parcelize
     internal data class Parameters<TConfirmationOption : ConfirmationHandler.Option>(
         val confirmationOption: TConfirmationOption,
-        val confirmationParameters: ConfirmationHandler.Args,
+        val confirmationArgs: ConfirmationHandler.Args,
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     ) : Parcelable
 

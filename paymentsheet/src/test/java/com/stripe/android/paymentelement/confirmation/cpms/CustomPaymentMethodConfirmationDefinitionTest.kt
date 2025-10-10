@@ -78,7 +78,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
     ) {
         val action = definition.action(
             confirmationOption = createCustomPaymentMethodConfirmationOption(),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Fail<CustomPaymentMethodInput>>()
@@ -111,7 +111,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
     ) {
         val action = definition.action(
             confirmationOption = createCustomPaymentMethodConfirmationOption(),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<CustomPaymentMethodInput>>()
@@ -132,7 +132,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
             launcher = launcher,
             arguments = Unit,
             confirmationOption = option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val input = launcher.calls.awaitItem().input
@@ -154,7 +154,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             result = InternalCustomPaymentMethodResult.Completed,
             deferredIntentConfirmationType = null,
         )
@@ -174,7 +174,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             result = InternalCustomPaymentMethodResult.Failed(exception),
             deferredIntentConfirmationType = null,
         )
@@ -194,7 +194,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             result = InternalCustomPaymentMethodResult.Canceled,
             deferredIntentConfirmationType = null,
         )

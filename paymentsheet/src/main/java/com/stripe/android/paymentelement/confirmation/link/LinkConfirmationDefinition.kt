@@ -39,7 +39,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: LinkConfirmationOption,
-        confirmationParameters: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<Unit> {
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = Unit,
@@ -52,7 +52,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
         launcher: LinkPaymentLauncher,
         arguments: Unit,
         confirmationOption: LinkConfirmationOption,
-        confirmationParameters: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationHandler.Args,
     ) {
         launcher.present(
             configuration = confirmationOption.configuration,
@@ -65,7 +65,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
 
     override fun toResult(
         confirmationOption: LinkConfirmationOption,
-        confirmationParameters: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: LinkActivityResult
     ): ConfirmationDefinition.Result {
@@ -86,7 +86,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
                         passiveCaptchaParams = confirmationOption.passiveCaptchaParams,
                         clientAttributionMetadata = null,
                     ),
-                    parameters = confirmationParameters,
+                    parameters = confirmationArgs,
                 )
             }
             is LinkActivityResult.Failed -> {
@@ -106,7 +106,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
             is LinkActivityResult.Completed -> {
                 result.linkAccountUpdate.updateLinkAccount()
                 ConfirmationDefinition.Result.Succeeded(
-                    intent = confirmationParameters.intent,
+                    intent = confirmationArgs.intent,
                     deferredIntentConfirmationType = deferredIntentConfirmationType
                 )
             }

@@ -47,14 +47,14 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
 
     override fun canConfirm(
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationHandler.Args
+        confirmationArgs: ConfirmationHandler.Args
     ): Boolean {
         return confirmationOption.passiveCaptchaParams != null
     }
 
     override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: PassiveChallengeActivityResult
     ): ConfirmationDefinition.Result {
@@ -62,13 +62,13 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
             is PassiveChallengeActivityResult.Failed -> {
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = confirmationOption.attachToken(null),
-                    parameters = confirmationParameters
+                    parameters = confirmationArgs
                 )
             }
             is PassiveChallengeActivityResult.Success -> {
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = confirmationOption.attachToken(result.token),
-                    parameters = confirmationParameters
+                    parameters = confirmationArgs
                 )
             }
         }
@@ -86,14 +86,14 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         launcher: ActivityResultLauncher<PassiveChallengeActivityContract.Args>,
         arguments: PassiveChallengeActivityContract.Args,
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationHandler.Args
+        confirmationArgs: ConfirmationHandler.Args
     ) {
         launcher.launch(arguments)
     }
 
     override suspend fun action(
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationHandler.Args
+        confirmationArgs: ConfirmationHandler.Args
     ): ConfirmationDefinition.Action<PassiveChallengeActivityContract.Args> {
         val passiveCaptchaParams = confirmationOption.passiveCaptchaParams
         if (passiveCaptchaParams != null) {

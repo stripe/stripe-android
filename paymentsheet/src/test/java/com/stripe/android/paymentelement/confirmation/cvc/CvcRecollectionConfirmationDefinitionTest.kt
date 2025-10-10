@@ -54,7 +54,7 @@ class CvcRecollectionConfirmationDefinitionTest {
         assertThat(
             definition.canConfirm(
                 confirmationOption = createSavedConfirmationOption(),
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
             )
         ).isTrue()
     }
@@ -70,7 +70,7 @@ class CvcRecollectionConfirmationDefinitionTest {
                 confirmationOption = createSavedConfirmationOption(
                     originatedFromWallet = true,
                 ),
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
             )
         ).isFalse()
     }
@@ -84,7 +84,7 @@ class CvcRecollectionConfirmationDefinitionTest {
         assertThat(
             definition.canConfirm(
                 confirmationOption = createSavedConfirmationOption(),
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
             )
         ).isFalse()
     }
@@ -100,7 +100,7 @@ class CvcRecollectionConfirmationDefinitionTest {
                 confirmationOption = createSavedConfirmationOption(
                     optionsParams = PaymentMethodOptionsParams.Card(cvc = "444")
                 ),
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
             )
         ).isFalse()
     }
@@ -137,7 +137,7 @@ class CvcRecollectionConfirmationDefinitionTest {
     fun `'action' should return launch action`() = test {
         val action = definition.action(
             confirmationOption = createSavedConfirmationOption(),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
@@ -157,7 +157,7 @@ class CvcRecollectionConfirmationDefinitionTest {
             launcher = launcherScenario.launcher,
             arguments = Unit,
             confirmationOption = option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val launchCall = launcherScenario.awaitLaunchCall()
@@ -174,7 +174,7 @@ class CvcRecollectionConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             result = CvcRecollectionResult.Confirmed(
                 cvc = "444",
             ),
@@ -208,7 +208,7 @@ class CvcRecollectionConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             result = CvcRecollectionResult.Confirmed(
                 cvc = "555",
             ),
@@ -239,7 +239,7 @@ class CvcRecollectionConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             result = CvcRecollectionResult.Cancelled,
             deferredIntentConfirmationType = null,
         )

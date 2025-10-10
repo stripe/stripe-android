@@ -35,7 +35,7 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: ExternalPaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<Unit> {
         val externalPaymentMethodType = confirmationOption.type
         val externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandlerProvider.get()
@@ -79,7 +79,7 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
         launcher: ActivityResultLauncher<ExternalPaymentMethodInput>,
         arguments: Unit,
         confirmationOption: ExternalPaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationHandler.Args,
     ) {
         errorReporter.report(
             ErrorReporter.SuccessEvent.EXTERNAL_PAYMENT_METHODS_LAUNCH_SUCCESS,
@@ -97,13 +97,13 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
 
     override fun toResult(
         confirmationOption: ExternalPaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: PaymentResult
     ): ConfirmationDefinition.Result {
         return when (result) {
             is PaymentResult.Completed -> ConfirmationDefinition.Result.Succeeded(
-                intent = confirmationParameters.intent,
+                intent = confirmationArgs.intent,
                 deferredIntentConfirmationType = null,
             )
             is PaymentResult.Failed -> ConfirmationDefinition.Result.Failed(

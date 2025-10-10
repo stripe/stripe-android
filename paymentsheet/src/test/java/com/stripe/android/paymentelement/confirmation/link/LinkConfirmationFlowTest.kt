@@ -64,7 +64,7 @@ class LinkConfirmationFlowTest {
         val parameters = savedStateHandle.get<Parameters<LinkConfirmationOption>>("LinkParameters")
 
         assertThat(parameters?.confirmationOption).isEqualTo(LINK_CONFIRMATION_OPTION)
-        assertThat(parameters?.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(parameters?.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
         assertThat(parameters?.deferredIntentConfirmationType).isNull()
     }
 
@@ -78,7 +78,7 @@ class LinkConfirmationFlowTest {
                 Parameters(
                     confirmationOption = LINK_CONFIRMATION_OPTION,
                     deferredIntentConfirmationType = null,
-                    confirmationParameters = CONFIRMATION_PARAMETERS,
+                    confirmationArgs = CONFIRMATION_PARAMETERS,
                 )
             )
         }

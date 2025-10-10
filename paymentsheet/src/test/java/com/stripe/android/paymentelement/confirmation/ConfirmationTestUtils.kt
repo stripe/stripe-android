@@ -51,7 +51,7 @@ internal fun <
             .get<Parameters<TConfirmationOption>>("${definition.key}Parameters")
 
         assertThat(savedParameters?.confirmationOption).isEqualTo(confirmationOption)
-        assertThat(savedParameters?.confirmationParameters).isEqualTo(parameters)
+        assertThat(savedParameters?.confirmationArgs).isEqualTo(parameters)
         assertThat(savedParameters?.deferredIntentConfirmationType).isNull()
 
         assertThat(awaitRegisterCall()).isNotNull()
@@ -78,7 +78,7 @@ internal fun <
             "${definition.key}Parameters",
             Parameters(
                 confirmationOption = confirmationOption,
-                confirmationParameters = parameters,
+                confirmationArgs = parameters,
                 deferredIntentConfirmationType = null,
             )
         )

@@ -41,11 +41,11 @@ internal interface ConfirmationDefinition<
      * with flow not possible (ie. a saved payment option is provided by CVC recollection is disabled).
      *
      * @param confirmationOption the expected [ConfirmationHandler.Option] type
-     * @param confirmationParameters a set of general confirmation parameters
+     * @param confirmationArgs a set of general confirmation parameters
      */
     fun canConfirm(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationHandler.Args,
     ): Boolean = true
 
     /**
@@ -55,11 +55,11 @@ internal interface ConfirmationDefinition<
      * [ConfirmationHandler.Option] and [ConfirmationHandler.Args] instances.
      *
      * @param confirmationOption the expected [ConfirmationHandler.Option] type
-     * @param confirmationParameters a set of general confirmation parameters
+     * @param confirmationArgs a set of general confirmation parameters
      */
     suspend fun action(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationHandler.Args,
     ): Action<TLauncherArgs>
 
     /**
@@ -69,13 +69,13 @@ internal interface ConfirmationDefinition<
      * @param launcher a launcher that launches the confirmation flow defined in the definition
      * @param arguments a set of launcher arguments that need to be passed to the launcher's launch function
      * @param confirmationOption the expected [ConfirmationHandler.Option] type
-     * @param confirmationParameters a set of general confirmation parameters
+     * @param confirmationArgs a set of general confirmation parameters
      */
     fun launch(
         launcher: TLauncher,
         arguments: TLauncherArgs,
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationHandler.Args,
     )
 
     /**
@@ -104,13 +104,13 @@ internal interface ConfirmationDefinition<
      * that can be understood by the [ConfirmationHandler] consumer.
      *
      * @param confirmationOption the expected [ConfirmationHandler.Option] type used during confirmation
-     * @param confirmationParameters a set of general confirmation parameters using during confirmation
+     * @param confirmationArgs a set of general confirmation parameters using during confirmation
      * @param deferredIntentConfirmationType DO NOT USE OUTSIDE OF INTENT CONFIRMATION
      * @param result the launcher result received after the confirmation flow was closed.
      */
     fun toResult(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: TLauncherResult,
     ): Result

@@ -63,7 +63,7 @@ class GooglePayConfirmationFlowTest {
                     .get<Parameters<GooglePayConfirmationOption>>("GooglePayParameters")
 
                 assertThat(parameters?.confirmationOption).isEqualTo(GOOGLE_PAY_CONFIRMATION_OPTION)
-                assertThat(parameters?.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+                assertThat(parameters?.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
                 assertThat(parameters?.deferredIntentConfirmationType).isNull()
 
                 verify(googlePayPaymentMethodLauncher, times(1)).present(

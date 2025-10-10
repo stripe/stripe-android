@@ -94,7 +94,7 @@ class BacsConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = createBacsConfirmationOption(),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = BacsMandateConfirmationResult.Confirmed,
         )
@@ -124,7 +124,7 @@ class BacsConfirmationDefinitionTest {
 
             val result = definition.toResult(
                 confirmationOption = createBacsConfirmationOption(),
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
                 deferredIntentConfirmationType = null,
                 result = BacsMandateConfirmationResult.Cancelled,
             )
@@ -143,7 +143,7 @@ class BacsConfirmationDefinitionTest {
 
             val result = definition.toResult(
                 confirmationOption = createBacsConfirmationOption(),
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
                 deferredIntentConfirmationType = null,
                 result = BacsMandateConfirmationResult.ModifyDetails,
             )
@@ -164,7 +164,7 @@ class BacsConfirmationDefinitionTest {
             confirmationOption = createBacsConfirmationOption(
                 name = null,
             ),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Fail<BacsMandateData>>()
@@ -187,7 +187,7 @@ class BacsConfirmationDefinitionTest {
             confirmationOption = createBacsConfirmationOption(
                 email = null,
             ),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Fail<BacsMandateData>>()
@@ -208,7 +208,7 @@ class BacsConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = createBacsConfirmationOption(),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<BacsMandateData>>()
@@ -249,7 +249,7 @@ class BacsConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = createBacsConfirmationOption(),
-            confirmationParameters = CONFIRMATION_PARAMETERS.copy(appearance = appearance),
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(appearance = appearance),
             arguments = bacsMandateData,
             launcher = launcher,
         )
