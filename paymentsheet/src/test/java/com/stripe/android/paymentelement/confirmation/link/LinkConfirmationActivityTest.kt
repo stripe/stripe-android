@@ -22,7 +22,7 @@ import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.NativeLinkArgs
 import com.stripe.android.link.TestFactory
 import com.stripe.android.networking.RequestSurface
-import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
@@ -33,9 +33,7 @@ import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.paymentelement.confirmation.paymentElementConfirmationTest
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.createTestActivityRule
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
@@ -230,15 +228,6 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
             configuration = TestFactory.LINK_CONFIGURATION,
             linkExpressMode = LinkExpressMode.ENABLED,
             passiveCaptchaParams = null
-        )
-
-        val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123"
-            ),
-            shippingDetails = null,
-            intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
         )
 
         const val LINK_COMPLETE_CODE = 49871

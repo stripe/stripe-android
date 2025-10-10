@@ -32,6 +32,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -41,7 +42,6 @@ import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -173,7 +173,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             confirmationOption = confirmationOption.copy(
                 userInput = UserInput.SignIn(email = "email@email.com"),
             ),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val getAccountStatusFlowCall = coordinatorScenario.getAccountStatusFlowCalls.awaitItem()
@@ -198,7 +198,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = confirmationOption,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val getAccountStatusFlowCall = coordinatorScenario.getAccountStatusFlowCalls.awaitItem()
@@ -238,7 +238,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = confirmationOption,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val firstGetAccountStatusFlowCall = coordinatorScenario.getAccountStatusFlowCalls.awaitItem()
@@ -304,7 +304,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = createLinkInlineSignupConfirmationOption(),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             launcher = launcher,
             arguments = LinkInlineSignupConfirmationDefinition.LauncherArguments(
                 nextConfirmationOption = nextOption,
@@ -330,7 +330,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = createLinkInlineSignupConfirmationOption(),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             result = LinkInlineSignupConfirmationDefinition.Result(
                 nextConfirmationOption = nextOption,
             ),
@@ -342,7 +342,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         val nextStepResult = result.asNextStep()
 
         assertThat(nextStepResult.confirmationOption).isEqualTo(nextOption)
-        assertThat(nextStepResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
     private fun testSkippedLinkSignupOnSignInError(
@@ -544,7 +544,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     ) {
         val action = definition.action(
             confirmationOption = confirmationOption,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val getAccountStatusFlowCall = coordinatorScenario.getAccountStatusFlowCalls.awaitItem()
@@ -897,18 +897,5 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 coordinator.attachNewCardToAccountCalls.ensureAllEventsConsumed()
             }
         }
-    }
-
-    private companion object {
-        private val PAYMENT_INTENT = PaymentIntentFactory.create()
-
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
-            shippingDetails = AddressDetails(),
-        )
     }
 }
