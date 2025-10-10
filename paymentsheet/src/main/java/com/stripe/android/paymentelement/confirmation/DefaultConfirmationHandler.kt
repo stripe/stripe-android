@@ -10,7 +10,9 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.CustomerStateHolder.Companion.SAVED_CUSTOMER
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.state.CustomerState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -42,6 +44,9 @@ internal class DefaultConfirmationHandler(
         } ?: ConfirmationHandler.State.Idle
     )
     override val state: StateFlow<ConfirmationHandler.State> = _state.asStateFlow()
+
+    override val customerState: StateFlow<CustomerState?> = savedStateHandle
+        .getStateFlow(SAVED_CUSTOMER, null)
 
     init {
         if (hasReloadedFromProcessDeath) {
@@ -208,6 +213,7 @@ internal class DefaultConfirmationHandler(
                             appearance = parameters.appearance,
                             initializationMode = parameters.initializationMode,
                             confirmationOption = result.confirmationOption,
+                            ephemeralKeySecret = ephemeralKeySecret,
                         )
                     )
                 }

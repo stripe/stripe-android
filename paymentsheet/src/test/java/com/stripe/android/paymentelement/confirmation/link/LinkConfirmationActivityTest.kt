@@ -23,7 +23,6 @@ import com.stripe.android.link.NativeLinkArgs
 import com.stripe.android.link.TestFactory
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
-import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -97,12 +96,8 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
             awaitItem().assertIdle()
 
             confirmationHandler.start(
-                ConfirmationHandler.Args(
+                CONFIRMATION_PARAMETERS.copy(
                     confirmationOption = LINK_CONFIRMATION_OPTION,
-                    appearance = CONFIRMATION_PARAMETERS.appearance,
-                    intent = CONFIRMATION_PARAMETERS.intent,
-                    shippingDetails = CONFIRMATION_PARAMETERS.shippingDetails,
-                    initializationMode = CONFIRMATION_PARAMETERS.initializationMode,
                 )
             )
 

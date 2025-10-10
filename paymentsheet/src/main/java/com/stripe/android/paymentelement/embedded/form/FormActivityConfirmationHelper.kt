@@ -88,7 +88,8 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
             confirmationOption = confirmationOption,
             appearance = configuration.appearance,
             initializationMode = initializationMode,
-            shippingDetails = paymentMethodMetadata.shippingDetails
+            shippingDetails = paymentMethodMetadata.shippingDetails,
+            ephemeralKeySecret = confirmationHandler.ephemeralKeySecret,
         )
     }
 }

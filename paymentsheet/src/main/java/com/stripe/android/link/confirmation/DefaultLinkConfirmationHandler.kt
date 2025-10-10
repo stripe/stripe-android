@@ -167,7 +167,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             confirmationOption = confirmationOption,
             appearance = PaymentSheet.Appearance(),
             initializationMode = configuration.initializationMode,
-            shippingDetails = configuration.shippingDetails
+            shippingDetails = configuration.shippingDetails,
+            ephemeralKeySecret = confirmationHandler.ephemeralKeySecret,
         )
     }
 
@@ -213,7 +214,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             ),
             appearance = PaymentSheet.Appearance(),
             initializationMode = configuration.initializationMode,
-            shippingDetails = configuration.shippingDetails
+            shippingDetails = configuration.shippingDetails,
+            ephemeralKeySecret = confirmationHandler.ephemeralKeySecret,
         )
     }
 

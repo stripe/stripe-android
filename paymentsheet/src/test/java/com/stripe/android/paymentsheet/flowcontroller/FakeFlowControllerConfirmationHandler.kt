@@ -12,7 +12,7 @@ internal class FakeFlowControllerConfirmationHandler(
     override val state: MutableStateFlow<ConfirmationHandler.State> =
         MutableStateFlow(ConfirmationHandler.State.Idle)
 ) : FlowControllerConfirmationHandler {
-    private val confirmationHandler = FakeConfirmationHandler(
+    override val confirmationHandler = FakeConfirmationHandler(
         hasReloadedFromProcessDeath = false,
         state = state,
     )

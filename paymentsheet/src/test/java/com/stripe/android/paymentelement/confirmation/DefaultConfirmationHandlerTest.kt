@@ -831,12 +831,8 @@ class DefaultConfirmationHandlerTest {
     }
 
     private fun createArguments(option: ConfirmationHandler.Option): ConfirmationHandler.Args {
-        return ConfirmationHandler.Args(
+        return CONFIRMATION_PARAMETERS.copy(
             confirmationOption = option,
-            intent = CONFIRMATION_PARAMETERS.intent,
-            appearance = CONFIRMATION_PARAMETERS.appearance,
-            initializationMode = CONFIRMATION_PARAMETERS.initializationMode,
-            shippingDetails = CONFIRMATION_PARAMETERS.shippingDetails,
         )
     }
 

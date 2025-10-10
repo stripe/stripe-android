@@ -19,9 +19,7 @@ import com.stripe.android.paymentelement.confirmation.asSucceeded
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultLauncher
 import kotlinx.coroutines.test.runTest
@@ -239,17 +237,12 @@ class CustomPaymentMethodConfirmationDefinitionTest {
     )
 
     companion object {
-        private val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
-            intent = PaymentIntentFactory.create(),
-            confirmationOption = FakeConfirmationOption(),
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            appearance = PaymentSheet.Appearance.Builder()
-                .colorsDark(PaymentSheet.Colors.defaultLight)
-                .build(),
-            shippingDetails = null,
-        )
+        private val CONFIRMATION_PARAMETERS =
+            com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS.copy(
+                appearance = PaymentSheet.Appearance.Builder()
+                    .colorsDark(PaymentSheet.Colors.defaultLight)
+                    .build(),
+            )
 
         private val CUSTOM_PAYMENT_METHOD_TYPE = PaymentSheet.CustomPaymentMethod(
             id = "cpmt_123",

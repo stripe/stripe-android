@@ -13,7 +13,7 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.ExtendedPaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -23,11 +23,8 @@ import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.paymentelement.confirmation.extendedPaymentElementConfirmationTest
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.view.ActivityStarter
@@ -173,14 +170,9 @@ internal class CvcRecollectionConfirmationActivityTest {
             passiveCaptchaParams = null
         )
 
-        val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
-            confirmationOption = CONFIRMATION_OPTION,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123"
-            ),
-            shippingDetails = AddressDetails(),
+        val CONFIRMATION_ARGUMENTS = CONFIRMATION_PARAMETERS.copy(
             intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
+            confirmationOption = CONFIRMATION_OPTION,
         )
 
         const val CVC_RECOLLECTION_ACTIVITY_NAME =

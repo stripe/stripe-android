@@ -13,7 +13,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class EmbeddedConfirmationStarter @Inject constructor(
-    private val confirmationHandler: ConfirmationHandler,
+    val confirmationHandler: ConfirmationHandler,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) {
     init {

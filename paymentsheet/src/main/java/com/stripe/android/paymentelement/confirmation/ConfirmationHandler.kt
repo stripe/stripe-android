@@ -9,6 +9,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +30,15 @@ internal interface ConfirmationHandler {
      * An observable indicating the current confirmation state of the handler.
      */
     val state: StateFlow<State>
+
+    /**
+     * An observable containing the current [CustomerState] of the customer associated with the
+     * [StripeIntent] being confirmed, or `null` if there is no customer.
+     */
+    val customerState: StateFlow<CustomerState?>
+
+    val ephemeralKeySecret: String?
+        get() = customerState.value?.ephemeralKeySecret
 
     /**
      * Registers all internal confirmation sub-handlers onto the given lifecycle owner.
@@ -66,7 +76,7 @@ internal interface ConfirmationHandler {
      * Defines the set of arguments requires for beginning the confirmation process
      */
     @Parcelize
-    data class Args(
+    data class Args constructor(
         /**
          * The [StripeIntent] that is being potentially confirmed by the handler
          */
@@ -90,7 +100,12 @@ internal interface ConfirmationHandler {
         /**
          * The shipping details of the customer that can be attached during the confirmation flow
          */
-        val shippingDetails: AddressDetails?
+        val shippingDetails: AddressDetails?,
+
+        /**
+         * An optional ephemeral key secret that can be used during the confirmation process
+         */
+        val ephemeralKeySecret: String?,
     ) : Parcelable
 
     /**
