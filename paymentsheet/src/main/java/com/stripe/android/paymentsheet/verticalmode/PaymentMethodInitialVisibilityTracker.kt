@@ -43,8 +43,8 @@ internal class PaymentMethodInitialVisibilityTracker(
      * and when the composition is finalized and stable.
      */
     fun updateVisibility(itemCode: String, coordinates: LayoutCoordinates) {
-        if (itemCode !in expectedItems) return
-        if (expectedItems.isEmpty()) return
+        if (itemCode !in expectedItems || expectedItems.isEmpty()) return
+        if (!coordinates.isAttached) return
         if (hasDispatched) return // Only dispatch once per tracker instance
 
         val newVisibility = calculateVisibility(coordinates)
