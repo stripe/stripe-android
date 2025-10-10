@@ -45,7 +45,8 @@ internal object CustomerSessionOnBehalfOfSettingsDefinition :
 
     override val displayName: String = "Customer Session OnBehalfOf Connected Account"
 
-    override fun createOptions(configurationData: PlaygroundConfigurationData): List<PlaygroundSettingDefinition.Displayable.Option<OnBehalfOf>> {
+    override fun createOptions(configurationData: PlaygroundConfigurationData):
+        List<PlaygroundSettingDefinition.Displayable.Option<OnBehalfOf>> {
         return listOf(
             PlaygroundSettingDefinition.Displayable.Option("None", OnBehalfOf.NO_CONNECTED_ACCOUNT),
             PlaygroundSettingDefinition.Displayable.Option("USA", OnBehalfOf.US_CONNECTED_ACCOUNT),
