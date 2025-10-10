@@ -38,7 +38,7 @@ internal fun <
 
         val action = mediator.action(
             option = confirmationOption,
-            parameters = parameters,
+            arguments = parameters,
         )
 
         assertThat(action).isInstanceOf<ConfirmationMediator.Action.Launch>()

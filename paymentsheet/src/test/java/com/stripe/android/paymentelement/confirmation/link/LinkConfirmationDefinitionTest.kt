@@ -183,7 +183,7 @@ internal class LinkConfirmationDefinitionTest {
         val nextStepResult = result.asNextStep()
 
         assertThat(nextStepResult.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
-        assertThat(nextStepResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
 
         val savedOption = nextStepResult.confirmationOption.asSaved()
 

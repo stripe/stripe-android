@@ -140,7 +140,7 @@ class ConfirmationMediatorTest {
 
         val action = mediator.action(
             option = InvalidTestConfirmationOption,
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(InvalidTestConfirmationOption)
@@ -171,7 +171,7 @@ class ConfirmationMediatorTest {
 
         val action = mediator.action(
             option = TestConfirmationDefinition.Option,
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
@@ -203,7 +203,7 @@ class ConfirmationMediatorTest {
 
         val action = mediator.action(
             option = TestConfirmationDefinition.Option,
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
@@ -235,7 +235,7 @@ class ConfirmationMediatorTest {
 
         val action = mediator.action(
             option = TestConfirmationDefinition.Option,
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
@@ -277,7 +277,7 @@ class ConfirmationMediatorTest {
 
         val action = mediator.action(
             option = TestConfirmationDefinition.Option,
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
@@ -333,7 +333,7 @@ class ConfirmationMediatorTest {
 
             val action = mediator.action(
                 option = TestConfirmationDefinition.Option,
-                parameters = CONFIRMATION_PARAMETERS,
+                arguments = CONFIRMATION_PARAMETERS,
             )
 
             assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
@@ -363,7 +363,7 @@ class ConfirmationMediatorTest {
 
         val action = mediator.action(
             option = TestConfirmationDefinition.Option,
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
@@ -407,7 +407,7 @@ class ConfirmationMediatorTest {
 
         val action = mediator.action(
             option = TestConfirmationDefinition.Option,
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
@@ -462,7 +462,7 @@ class ConfirmationMediatorTest {
         val createLauncherCall = createLauncherCalls.awaitItem()
 
         val action = mediator.action(
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
             option = TestConfirmationDefinition.Option,
         )
 

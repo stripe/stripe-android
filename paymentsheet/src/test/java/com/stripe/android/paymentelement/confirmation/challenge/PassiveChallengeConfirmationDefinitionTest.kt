@@ -292,7 +292,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         )
 
         assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
-        assertThat(nextStepResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
     @Test
@@ -317,7 +317,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         )
 
         assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
-        assertThat(nextStepResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
     @Test
@@ -339,7 +339,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         assertThat(nextStepResult.confirmationOption).isEqualTo(
             PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(passiveCaptchaParams = null)
         )
-        assertThat(nextStepResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
     @Test
@@ -361,7 +361,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         assertThat(nextStepResult.confirmationOption).isEqualTo(
             PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(passiveCaptchaParams = null, hCaptchaToken = null)
         )
-        assertThat(nextStepResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
     @Test

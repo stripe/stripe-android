@@ -75,7 +75,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
     ): ConfirmationDefinition.Result {
         return ConfirmationDefinition.Result.NextStep(
             confirmationOption = result.nextConfirmationOption,
-            parameters = confirmationArgs,
+            arguments = confirmationArgs,
         )
     }
 

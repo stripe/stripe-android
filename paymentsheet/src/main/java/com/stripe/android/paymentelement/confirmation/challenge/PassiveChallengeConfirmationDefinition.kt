@@ -62,13 +62,13 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
             is PassiveChallengeActivityResult.Failed -> {
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = confirmationOption.attachToken(null),
-                    parameters = confirmationArgs
+                    arguments = confirmationArgs
                 )
             }
             is PassiveChallengeActivityResult.Success -> {
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = confirmationOption.attachToken(result.token),
-                    parameters = confirmationArgs
+                    arguments = confirmationArgs
                 )
             }
         }

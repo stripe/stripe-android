@@ -48,7 +48,7 @@ class LinkConfirmationFlowTest {
 
         val action = mediator.action(
             option = LINK_CONFIRMATION_OPTION,
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationMediator.Action.Launch>()
@@ -122,7 +122,7 @@ class LinkConfirmationFlowTest {
                     originatedFromWallet = true,
                     passiveCaptchaParams = null
                 ),
-                parameters = CONFIRMATION_PARAMETERS,
+                arguments = CONFIRMATION_PARAMETERS,
             )
         )
     }

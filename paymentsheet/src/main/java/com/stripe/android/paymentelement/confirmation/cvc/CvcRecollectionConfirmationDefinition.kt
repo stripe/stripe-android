@@ -92,7 +92,7 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
                         else -> PaymentMethodOptionsParams.Card(cvc = result.cvc)
                     }
                 ),
-                parameters = confirmationArgs,
+                arguments = confirmationArgs,
             )
             is CvcRecollectionResult.Cancelled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,

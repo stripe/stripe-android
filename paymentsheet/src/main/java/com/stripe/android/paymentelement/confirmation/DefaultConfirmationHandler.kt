@@ -156,11 +156,11 @@ internal class DefaultConfirmationHandler(
 
     private suspend fun handleMediatorAction(
         confirmationOption: ConfirmationHandler.Option,
-        parameters: ConfirmationHandler.Args,
+        arguments: ConfirmationHandler.Args,
         mediator: ConfirmationMediator<*, *, *, *>,
     ) {
         val action = withContext(ioContext) {
-            mediator.action(confirmationOption, parameters)
+            mediator.action(confirmationOption, arguments)
         }
         when (action) {
             is ConfirmationMediator.Action.Launch -> {
@@ -199,7 +199,7 @@ internal class DefaultConfirmationHandler(
                 removeIsAwaitingForResult()
 
                 coroutineScope.launch {
-                    val parameters = result.parameters
+                    val parameters = result.arguments
 
                     confirm(
                         arguments = ConfirmationHandler.Args(

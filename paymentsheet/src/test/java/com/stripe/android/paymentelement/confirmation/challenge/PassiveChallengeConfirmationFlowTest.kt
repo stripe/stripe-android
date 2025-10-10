@@ -46,7 +46,7 @@ internal class PassiveChallengeConfirmationFlowTest {
                 extraParams = null,
                 passiveCaptchaParams = null
             ),
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         ),
     )
 
@@ -64,7 +64,7 @@ internal class PassiveChallengeConfirmationFlowTest {
                 passiveCaptchaParams = null,
                 hCaptchaToken = "test_token"
             ),
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         ),
     )
 
@@ -82,7 +82,7 @@ internal class PassiveChallengeConfirmationFlowTest {
                 extraParams = null,
                 passiveCaptchaParams = null
             ),
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         ),
     )
 
@@ -100,7 +100,7 @@ internal class PassiveChallengeConfirmationFlowTest {
                 passiveCaptchaParams = null,
                 hCaptchaToken = null
             ),
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         ),
     )
 

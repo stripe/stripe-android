@@ -86,7 +86,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
                         passiveCaptchaParams = confirmationOption.passiveCaptchaParams,
                         clientAttributionMetadata = null,
                     ),
-                    parameters = confirmationArgs,
+                    arguments = confirmationArgs,
                 )
             }
             is LinkActivityResult.Failed -> {

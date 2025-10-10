@@ -342,7 +342,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         val nextStepResult = result.asNextStep()
 
         assertThat(nextStepResult.confirmationOption).isEqualTo(nextOption)
-        assertThat(nextStepResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
     private fun testSkippedLinkSignupOnSignInError(

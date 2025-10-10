@@ -383,7 +383,7 @@ class DefaultConfirmationHandlerTest {
         ),
         someDefinitionResult = ConfirmationDefinition.Result.NextStep(
             confirmationOption = SomeOtherConfirmationDefinition.Option,
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         ),
         someOtherDefinitionAction = ConfirmationDefinition.Action.Launch(
             launcherArguments = SomeOtherConfirmationDefinition.LauncherArgs,
@@ -525,7 +525,7 @@ class DefaultConfirmationHandlerTest {
         test(
             savedStateHandle = createPrepopulatedSavedStateHandle(receivesResultInProcess = false),
             someDefinitionResult = ConfirmationDefinition.Result.NextStep(
-                parameters = CONFIRMATION_PARAMETERS,
+                arguments = CONFIRMATION_PARAMETERS,
                 confirmationOption = SomeOtherConfirmationDefinition.Option,
             ),
             someOtherDefinitionAction = ConfirmationDefinition.Action.Launch(

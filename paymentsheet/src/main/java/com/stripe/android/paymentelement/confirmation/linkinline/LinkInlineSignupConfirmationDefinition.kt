@@ -76,7 +76,7 @@ internal class LinkInlineSignupConfirmationDefinition(
     ): ConfirmationDefinition.Result {
         return ConfirmationDefinition.Result.NextStep(
             confirmationOption = result.nextConfirmationOption,
-            parameters = confirmationArgs,
+            arguments = confirmationArgs,
         )
     }
 

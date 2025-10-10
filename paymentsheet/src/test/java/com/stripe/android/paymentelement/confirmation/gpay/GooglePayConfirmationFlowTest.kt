@@ -48,7 +48,7 @@ class GooglePayConfirmationFlowTest {
 
                 val action = mediator.action(
                     option = GOOGLE_PAY_CONFIRMATION_OPTION,
-                    parameters = CONFIRMATION_PARAMETERS,
+                    arguments = CONFIRMATION_PARAMETERS,
                 )
 
                 assertThat(action).isInstanceOf<ConfirmationMediator.Action.Launch>()
@@ -92,7 +92,7 @@ class GooglePayConfirmationFlowTest {
                 originatedFromWallet = true,
                 passiveCaptchaParams = null
             ),
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         )
     )
 

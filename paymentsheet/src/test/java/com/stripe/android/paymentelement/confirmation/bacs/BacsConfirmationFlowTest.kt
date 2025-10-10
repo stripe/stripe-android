@@ -37,7 +37,7 @@ class BacsConfirmationFlowTest {
                 extraParams = null,
                 passiveCaptchaParams = null
             ),
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         ),
     )
 

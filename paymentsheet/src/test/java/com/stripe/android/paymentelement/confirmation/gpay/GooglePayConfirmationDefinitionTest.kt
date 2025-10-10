@@ -117,7 +117,7 @@ class GooglePayConfirmationDefinitionTest {
 
         val successResult = result.asNextStep()
 
-        assertThat(successResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(successResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
 
         assertThat(successResult.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
 

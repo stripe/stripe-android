@@ -165,7 +165,7 @@ internal interface ConfirmationDefinition<
              * A set of general confirmation parameters. Should normally be the same as what was provided by the
              * user
              */
-            val parameters: ConfirmationHandler.Args,
+            val arguments: ConfirmationHandler.Args,
         ) : Result
 
         /**

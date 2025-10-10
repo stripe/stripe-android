@@ -121,7 +121,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
 
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = nextConfirmationOption,
-                    parameters = confirmationArgs,
+                    arguments = confirmationArgs,
                 )
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> {

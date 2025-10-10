@@ -90,7 +90,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
 
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = nextConfirmationOption,
-                    parameters = confirmationArgs,
+                    arguments = confirmationArgs,
                 )
             }
             is BacsMandateConfirmationResult.ModifyDetails -> ConfirmationDefinition.Result.Canceled(
