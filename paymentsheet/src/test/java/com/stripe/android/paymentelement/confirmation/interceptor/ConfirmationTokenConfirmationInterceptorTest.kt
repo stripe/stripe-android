@@ -413,9 +413,9 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 optionsParams = null,
                 passiveCaptchaParams = null,
                 hCaptchaToken = null,
-                ephemeralKeySecret = "ek_test_123",
             ),
             shippingValues = null,
+            ephemeralKeySecret = "ek_test_123",
         )
 
         val failedStep = nextStep as ConfirmationDefinition.Action.Fail
@@ -442,9 +442,9 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 optionsParams = null,
                 passiveCaptchaParams = null,
                 hCaptchaToken = null,
-                ephemeralKeySecret = null,
             ),
             shippingValues = null,
+            ephemeralKeySecret = null,
         )
 
         val failedStep = nextStep as ConfirmationDefinition.Action.Fail

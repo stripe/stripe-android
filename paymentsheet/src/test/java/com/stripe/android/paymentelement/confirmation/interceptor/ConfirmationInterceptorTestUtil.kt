@@ -83,9 +83,9 @@ internal suspend fun IntentConfirmationInterceptor.interceptDefaultSavedPaymentM
         optionsParams = null,
         passiveCaptchaParams = null,
         hCaptchaToken = null,
-        ephemeralKeySecret = "ek_test_123",
     ),
     shippingValues = null,
+    ephemeralKeySecret = "ek_test_123",
 )
 
 @Suppress("UNCHECKED_CAST")

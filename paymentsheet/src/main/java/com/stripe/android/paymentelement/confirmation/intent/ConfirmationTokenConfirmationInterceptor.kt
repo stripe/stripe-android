@@ -78,7 +78,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     override suspend fun intercept(
         intent: StripeIntent,
         confirmationOption: PaymentMethodConfirmationOption.Saved,
-        shippingValues: ConfirmPaymentIntentParams.Shipping?
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        ephemeralKeySecret: String?
     ): ConfirmationDefinition.Action<Args> {
         val paymentMethod = confirmationOption.paymentMethod
         return stripeRepository.createConfirmationToken(
@@ -92,7 +93,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     )
             ),
             options = requestOptions.copy(
-                apiKey = confirmationOption.ephemeralKeySecret
+                apiKey = ephemeralKeySecret
                     ?: return ConfirmationDefinition.Action.Fail(
                         cause = IllegalStateException(ERROR_MISSING_EPHEMERAL_KEY_SECRET),
                         message = ERROR_MISSING_EPHEMERAL_KEY_SECRET.resolvableString,
