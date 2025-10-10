@@ -283,6 +283,17 @@ class ConfirmSetupIntentParamsTest {
         assertThat(radarOptionsMap?.get("hcaptcha_token")).isEqualTo("test_token")
     }
 
+    @Test
+    fun toParamMap_withConfirmationTokenId_shouldCreateExpectedMap() {
+        val params = ConfirmSetupIntentParams(
+            confirmationTokenId = "ctoken_123",
+            clientSecret = CLIENT_SECRET
+        ).toParamMap()
+
+        assertThat(params).containsKey("confirmation_token")
+        assertThat(params["confirmation_token"]).isEqualTo("ctoken_123")
+    }
+
     private companion object {
         private const val CLIENT_SECRET = "seti_1CkiBMLENEVhOs7YMtUehLau_secret_sw1VaYPGZA"
     }
