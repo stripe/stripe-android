@@ -1060,6 +1060,7 @@ internal class CustomerSheetViewModel(
                 ),
                 shippingDetails = null,
                 appearance = configuration.appearance,
+                ephemeralKeySecret = confirmationHandler.ephemeralKeySecret
             )
         )
 

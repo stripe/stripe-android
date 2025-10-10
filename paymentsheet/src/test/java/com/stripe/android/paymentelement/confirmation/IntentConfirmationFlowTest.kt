@@ -320,15 +320,13 @@ internal class IntentConfirmationFlowTest {
         initializationMode: PaymentElementLoader.InitializationMode,
         intent: StripeIntent,
     ): ConfirmationHandler.Args {
-        return ConfirmationHandler.Args(
+        return CONFIRMATION_PARAMETERS.copy(
             initializationMode = initializationMode,
             intent = intent,
-            confirmationOption = FakeConfirmationOption(),
             shippingDetails = AddressDetails(
                 name = "John Doe",
                 phoneNumber = "1234567890"
             ),
-            appearance = PaymentSheet.Appearance(),
         )
     }
 
@@ -379,6 +377,7 @@ internal class IntentConfirmationFlowTest {
                 phoneNumber = "1234567890"
             ),
             appearance = PaymentSheet.Appearance(),
+            ephemeralKeySecret = null,
         )
     }
 }

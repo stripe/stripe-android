@@ -65,6 +65,7 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
             initializationMode = confirmationState.initializationMode,
             appearance = confirmationState.configuration.appearance,
             shippingDetails = confirmationState.configuration.shippingDetails,
+            ephemeralKeySecret = confirmationStarter.confirmationHandler.ephemeralKeySecret,
         )
     }
 }

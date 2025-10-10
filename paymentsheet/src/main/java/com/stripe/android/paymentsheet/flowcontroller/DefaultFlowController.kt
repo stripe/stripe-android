@@ -556,6 +556,7 @@ internal class DefaultFlowController @Inject internal constructor(
                         initializationMode = initializationMode,
                         appearance = appearance,
                         shippingDetails = state.config.shippingDetails,
+                        ephemeralKeySecret = confirmationHandler.confirmationHandler.ephemeralKeySecret,
                     )
                 )
             } ?: run {

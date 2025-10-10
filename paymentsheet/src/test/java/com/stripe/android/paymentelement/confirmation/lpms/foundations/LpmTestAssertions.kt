@@ -49,6 +49,7 @@ internal suspend fun assertIntentConfirmed(
                 initializationMode = params.initializationMode,
                 appearance = PaymentSheet.Appearance.Builder().build(),
                 shippingDetails = params.shippingDetails,
+                ephemeralKeySecret = null,
             )
         )
 

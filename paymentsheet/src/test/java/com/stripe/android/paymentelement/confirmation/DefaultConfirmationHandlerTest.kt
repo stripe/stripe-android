@@ -13,6 +13,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.CustomerStateHolder.Companion.SAVED_CUSTOMER
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
@@ -638,6 +639,50 @@ class DefaultConfirmationHandlerTest {
         someDefinitionScenario.bootstrapCalls.ensureAllEventsConsumed()
     }
 
+    @Test
+    fun `customerState property exposes customer state from SavedStateHandle`() = test {
+        val customerState = com.stripe.android.paymentsheet.state.CustomerState(
+            id = "cus_123",
+            ephemeralKeySecret = "ek_test_123",
+            customerSessionClientSecret = null,
+            paymentMethods = emptyList(),
+            defaultPaymentMethodId = null,
+        )
+
+        savedStateHandle[SAVED_CUSTOMER] = customerState
+
+        confirmationHandler.customerState.test {
+            assertThat(awaitItem()).isEqualTo(customerState)
+        }
+    }
+
+    @Test
+    fun `customerState property returns null when no customer in SavedStateHandle`() = test {
+        confirmationHandler.customerState.test {
+            assertThat(awaitItem()).isNull()
+        }
+    }
+
+    @Test
+    fun `ephemeralKeySecret property returns secret from customerState`() = test {
+        val customerState = com.stripe.android.paymentsheet.state.CustomerState(
+            id = "cus_123",
+            ephemeralKeySecret = "ek_test_456",
+            customerSessionClientSecret = null,
+            paymentMethods = emptyList(),
+            defaultPaymentMethodId = null,
+        )
+
+        savedStateHandle[SAVED_CUSTOMER] = customerState
+
+        assertThat(confirmationHandler.ephemeralKeySecret).isEqualTo("ek_test_456")
+    }
+
+    @Test
+    fun `ephemeralKeySecret property returns null when customerState is null`() = test {
+        assertThat(confirmationHandler.ephemeralKeySecret).isNull()
+    }
+
     private fun launcherResultTest(
         result: ConfirmationDefinition.Result,
         test: (ConfirmationHandler.State.Complete) -> Unit,
@@ -831,12 +876,8 @@ class DefaultConfirmationHandlerTest {
     }
 
     private fun createArguments(option: ConfirmationHandler.Option): ConfirmationHandler.Args {
-        return ConfirmationHandler.Args(
+        return CONFIRMATION_PARAMETERS.copy(
             confirmationOption = option,
-            intent = CONFIRMATION_PARAMETERS.intent,
-            appearance = CONFIRMATION_PARAMETERS.appearance,
-            initializationMode = CONFIRMATION_PARAMETERS.initializationMode,
-            shippingDetails = CONFIRMATION_PARAMETERS.shippingDetails,
         )
     }
 

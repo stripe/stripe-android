@@ -201,5 +201,6 @@ internal val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
     confirmationOption = FakeConfirmationOption(),
     shippingDetails = AddressDetails(),
     intent = PAYMENT_INTENT,
-    appearance = PaymentSheet.Appearance()
+    appearance = PaymentSheet.Appearance(),
+    ephemeralKeySecret = null,
 )

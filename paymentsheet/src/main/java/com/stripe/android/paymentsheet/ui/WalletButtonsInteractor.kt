@@ -324,6 +324,7 @@ internal class DefaultWalletButtonsInteractor constructor(
             initializationMode = arguments.initializationMode,
             appearance = arguments.appearance,
             shippingDetails = arguments.configuration.shippingDetails,
+            ephemeralKeySecret = confirmationHandler.ephemeralKeySecret,
         )
     }
 
