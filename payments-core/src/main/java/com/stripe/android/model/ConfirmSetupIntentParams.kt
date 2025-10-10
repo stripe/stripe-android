@@ -29,16 +29,6 @@ constructor(
      */
     @get:JvmSynthetic internal val paymentMethodId: String? = null,
 
-    /**
-     * ID of the ConfirmationToken used to confirm this SetupIntent.
-     *
-     * If the provided ConfirmationToken contains properties that are also being provided in this
-     * request, such as payment_method, then the values in this request will take precedence.
-     *
-     * See [confirmation_token](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-confirmation_token).
-     */
-    @get:JvmSynthetic internal val confirmationTokenId: String? = null,
-
     @get:JvmSynthetic internal val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
 
     /**
@@ -82,6 +72,17 @@ constructor(
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null,
 
     private val clientAttributionMetadata: ClientAttributionMetadata? = null,
+
+    /**
+     * ID of the ConfirmationToken used to confirm this SetupIntent.
+     *
+     * If the provided ConfirmationToken contains properties that are also being provided in this
+     * request, such as payment_method, then the values in this request will take precedence.
+     *
+     * See
+     * [confirmation_token](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-confirmation_token).
+     */
+    private val confirmationTokenId: String? = null,
 ) : ConfirmStripeIntentParams {
 
     override fun shouldUseStripeSdk(): Boolean {

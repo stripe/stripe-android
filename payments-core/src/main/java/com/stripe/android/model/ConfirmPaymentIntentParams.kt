@@ -33,15 +33,6 @@ constructor(
      */
     val paymentMethodId: String? = null,
 
-    /**
-     * ID of the ConfirmationToken used to confirm this PaymentIntent.
-     *
-     * If the provided ConfirmationToken contains properties that are also being provided in this
-     * request, such as payment_method, then the values in this request will take precedence.
-     *
-     * See [confirmation_token](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-confirmation_token).
-     */
-    val confirmationTokenId: String? = null,
     val sourceParams: SourceParams? = null,
     val sourceId: String? = null,
 
@@ -144,6 +135,16 @@ constructor(
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null,
 
     private val clientAttributionMetadata: ClientAttributionMetadata? = null,
+
+    /**
+     * ID of the ConfirmationToken used to confirm this PaymentIntent.
+     *
+     * If the provided ConfirmationToken contains properties that are also being provided in this
+     * request, such as payment_method, then the values in this request will take precedence.
+     *
+     * See [confirmation_token](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-confirmation_token).
+     */
+    private val confirmationTokenId: String? = null,
 ) : ConfirmStripeIntentParams {
     fun shouldSavePaymentMethod(): Boolean {
         return savePaymentMethod == true
