@@ -25,12 +25,14 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -47,6 +49,10 @@ import java.util.Locale
 @Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 class LinkApiRepositoryTest {
+
+    @get:Rule
+    private val localeTestRule = LocaleTestRule()
+
     private val stripeRepository = mock<StripeRepository>()
     private val consumersApiService = mock<ConsumersApiService>()
     private val errorReporter = FakeErrorReporter()
@@ -318,6 +324,34 @@ class LinkApiRepositoryTest {
             requestSurface = eq("android_payment_element"),
             requestOptions = eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
         )
+    }
+
+    @Test
+    fun `createPaymentDetails for card adds billing country if no billing address provided`() = runTest {
+        val testLocale = Locale.CANADA
+        localeTestRule.setTemporarily(testLocale)
+
+        val secret = "secret"
+        val email = "email@stripe.com"
+
+        linkRepository.createCardPaymentDetails(
+            paymentMethodCreateParams = cardPaymentMethodCreateParamsWithoutBillingAddress,
+            userEmail = email,
+            stripeIntent = paymentIntent,
+            consumerSessionClientSecret = secret,
+        )
+
+        val argCaptor = argumentCaptor<ConsumerPaymentDetailsCreateParams>()
+        verify(consumersApiService).createPaymentDetails(
+            consumerSessionClientSecret = any(),
+            paymentDetailsCreateParams = argCaptor.capture(),
+            requestSurface = any(),
+            requestOptions = any(),
+        )
+
+        @Suppress("UNCHECKED_CAST")
+        val billingDetailsParam = argCaptor.firstValue.toParamMap()["billing_address"] as Map<String, Any>
+        assertThat(billingDetailsParam["country_code"]).isEqualTo("CA")
     }
 
     @Test
@@ -798,6 +832,19 @@ class LinkApiRepositoryTest {
             ),
             "card",
             false,
+            clientAttributionMetadata = null
+        )
+
+    private val cardPaymentMethodCreateParamsWithoutBillingAddress =
+        FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.CardNumber to FormFieldEntry("5555555555554444", true),
+                IdentifierSpec.CardCvc to FormFieldEntry("123", true),
+                IdentifierSpec.CardExpMonth to FormFieldEntry("12", true),
+                IdentifierSpec.CardExpYear to FormFieldEntry("2050", true),
+            ),
+            code = "card",
+            requiresMandate = false,
             clientAttributionMetadata = null
         )
 
