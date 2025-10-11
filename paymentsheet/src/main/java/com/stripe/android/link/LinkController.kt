@@ -27,6 +27,7 @@ import javax.inject.Singleton
  */
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Suppress("TooManyFunctions")
 class LinkController @Inject internal constructor(
     private val interactor: LinkControllerInteractor,
     private val presenterComponentFactory: LinkControllerPresenterComponent.Factory
@@ -79,6 +80,11 @@ class LinkController @Inject internal constructor(
      */
     suspend fun lookupConsumer(email: String): LookupConsumerResult {
         return interactor.lookupConsumer(email)
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun lookupConsumerWithLinkAuthTokenClientSecret(token: String): LookupConsumerResult {
+        return interactor.lookupConsumerWithLinkAuthTokenClientSecret(token)
     }
 
     /**

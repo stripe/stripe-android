@@ -92,7 +92,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        linkAuthTokenClientSecret: String?
     ): ConsumerSessionLookup {
         mobileLookupCalls.add(
             MobileLookupCall(

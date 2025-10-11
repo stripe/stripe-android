@@ -65,6 +65,10 @@ internal interface LinkAccountManager {
         customerId: String?
     ): Result<LinkAccount?>
 
+    suspend fun lookupByLinkAuthTokenClientSecret(
+        linkAuthTokenClientSecret: String
+    ): Result<LinkAccount?>
+
     /**
      * Refresh the mobile consumer session.
      */

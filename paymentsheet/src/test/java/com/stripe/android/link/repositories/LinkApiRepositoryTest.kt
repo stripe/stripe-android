@@ -128,7 +128,8 @@ class LinkApiRepositoryTest {
             sessionId = TestFactory.SESSION_ID,
             emailSource = TestFactory.EMAIL_SOURCE,
             customerId = null,
-            supportedVerificationTypes = null
+            supportedVerificationTypes = null,
+            linkAuthTokenClientSecret = null
         )
 
         assertThat(result).isEqualTo(Result.success(TestFactory.CONSUMER_SESSION_LOOKUP))
@@ -158,7 +159,8 @@ class LinkApiRepositoryTest {
                 supportedVerificationTypes: List<String>?,
                 requestOptions: ApiRequest.Options,
                 sessionId: String,
-                customerId: String?
+                customerId: String?,
+                linkAuthTokenClientSecret: String?
             ): ConsumerSessionLookup {
                 throw error
             }
@@ -173,7 +175,8 @@ class LinkApiRepositoryTest {
             sessionId = TestFactory.SESSION_ID,
             emailSource = TestFactory.EMAIL_SOURCE,
             customerId = null,
-            supportedVerificationTypes = null
+            supportedVerificationTypes = null,
+            linkAuthTokenClientSecret = null
         )
 
         assertThat(result).isEqualTo(Result.failure<ConsumerSessionLookup>(error))

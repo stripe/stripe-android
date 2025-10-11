@@ -19,6 +19,7 @@ import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import javax.inject.Inject
@@ -45,6 +46,15 @@ class OnrampCoordinator @Inject internal constructor(
         configuration: OnrampConfiguration,
     ): OnrampConfigurationResult {
         return interactor.configure(configuration)
+    }
+
+    /**
+     * Authenticates a user given the provided token.
+     *
+     * @param linkAuthTokenClientSecret The auth token to authenticate a user with.
+     */
+    suspend fun authenticateUserWithToken(linkAuthTokenClientSecret: String): OnrampTokenAuthenticationResult {
+        return interactor.authenticateUserWithToken(linkAuthTokenClientSecret)
     }
 
     /**
