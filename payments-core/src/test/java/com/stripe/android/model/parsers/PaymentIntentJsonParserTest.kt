@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.BOLETO_REQUIRES_ACTION
 import com.stripe.android.model.StripeIntent
+import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -195,5 +196,114 @@ class PaymentIntentJsonParserTest {
         val paymentIntent = PaymentIntentFixtures.PI_WITH_AUTOMATIC_PAYMENT_METHODS_ENABLED
 
         assertThat(paymentIntent.automaticPaymentMethodsEnabled).isTrue()
+    }
+
+
+    fun parse_withIntentConfirmationChallenge_hcaptcha_shouldCreateExpectedNextActionData() {
+        val json = JSONObject(
+            """
+            {
+                "id": "pi_test123",
+                "object": "payment_intent",
+                "status": "requires_action",
+                "next_action": {
+                    "type": "use_stripe_sdk",
+                    "use_stripe_sdk": {
+                        "type": "intent_confirmation_challenge",
+                        "site_key": "12345678-1234-1234-1234-123456789012",
+                        "verification_url": "https://api.stripe.com/v1/payment_intents/pi_test123/confirm",
+                        "rqdata": "optional_request_data",
+                        "captcha_vendor_name": "hcaptcha"
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        val paymentIntent = PaymentIntentJsonParser().parse(json)
+
+        val expectedNextActionData = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge(
+            verificationUrl = "https://api.stripe.com/v1/payment_intents/pi_test123/confirm",
+            vendorData = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.VendorData.HCaptchaVendorData(
+                siteKey = "12345678-1234-1234-1234-123456789012",
+                rqData = "optional_request_data"
+            )
+        )
+
+        assertThat(paymentIntent?.nextActionData).isEqualTo(expectedNextActionData)
+    }
+
+    @Test
+    fun parse_withIntentConfirmationChallenge_humanSecurity_shouldCreateExpectedNextActionData() {
+        val json = JSONObject(
+            """
+            {
+                "id": "pi_test123",
+                "object": "payment_intent",
+                "status": "requires_action",
+                "next_action": {
+                    "type": "use_stripe_sdk",
+                    "use_stripe_sdk": {
+                        "type": "intent_confirmation_challenge",
+                        "verification_url": "https://api.stripe.com/v1/payment_intents/pi_test123/confirm",
+                        "captcha_vendor_name": "human_security",
+                        "captcha_vendor_data": {
+                            "uuid": "test-uuid-123",
+                            "vid": "test-vid-456",
+                            "app_id": "test-app-789"
+                        }
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        val paymentIntent = PaymentIntentJsonParser().parse(json)
+
+        val expectedNextActionData = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge(
+            verificationUrl = "https://api.stripe.com/v1/payment_intents/pi_test123/confirm",
+            vendorData = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.VendorData.HumanSecurityVendorData(
+                uuid = "test-uuid-123",
+                vid = "test-vid-456",
+                appId = "test-app-789"
+            )
+        )
+
+        assertThat(paymentIntent?.nextActionData).isEqualTo(expectedNextActionData)
+    }
+
+    @Test
+    fun parse_withIntentConfirmationChallenge_arkose_shouldCreateExpectedNextActionData() {
+        val json = JSONObject(
+            """
+            {
+                "id": "pi_test123",
+                "object": "payment_intent",
+                "status": "requires_action",
+                "next_action": {
+                    "type": "use_stripe_sdk",
+                    "use_stripe_sdk": {
+                        "type": "intent_confirmation_challenge",
+                        "verification_url": "https://api.stripe.com/v1/payment_intents/pi_test123/confirm",
+                        "captcha_vendor_name": "arkose",
+                        "captcha_vendor_data": {
+                            "blob": "arkose-challenge-blob-data"
+                        }
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        val paymentIntent = PaymentIntentJsonParser().parse(json)
+
+        val expectedNextActionData = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge(
+            verificationUrl = "https://api.stripe.com/v1/payment_intents/pi_test123/confirm",
+            vendorData = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.VendorData.ArkoseVendorData(
+                blob = "arkose-challenge-blob-data"
+            )
+        )
+
+        assertThat(paymentIntent?.nextActionData).isEqualTo(expectedNextActionData)
     }
 }
