@@ -26,13 +26,6 @@ import javax.inject.Singleton
 @Module
 @SuppressWarnings("UnnecessaryAbstractClass")
 internal abstract class NextActionHandlerModule {
-    @IntentAuthenticatorMap
-    @Binds
-    @IntoMap
-    @IntentAuthenticatorKey(NextActionData.SdkData.Use3DS1::class)
-    abstract fun binds3DS1NextActionHandler(
-        webIntentNextActionHandler: WebIntentNextActionHandler
-    ): PaymentNextActionHandler<StripeIntent>
 
     @IntentAuthenticatorMap
     @Binds
