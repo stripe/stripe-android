@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.unit.IntSize
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
@@ -1461,6 +1463,144 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     .isEqualTo(R.string.stripe_link_simple_secure_payments.resolvableString)
             }
         }
+    }
+
+    @Test
+    fun visibilityTracker_isNull_beforeFirstAccess() = runScenario {
+        // Verify tracker is not created until first access
+        val interactorImpl = interactor as DefaultPaymentMethodVerticalLayoutInteractor
+        assertThat(interactorImpl.visibilityTrackerForTesting).isNull()
+    }
+
+    @Test
+    fun visibilityTracker_isCreated_onFirstVisibilityUpdate() = runScenario(
+        initialPaymentMethods = PaymentMethodFixtures.createCards(1),
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp")
+            )
+        )
+    ) {
+        val interactorImpl = interactor as DefaultPaymentMethodVerticalLayoutInteractor
+        val fakeLayoutCoordinates = FakeLayoutCoordinates(
+            size = IntSize(100, 50),
+            bounds = Rect(0f, 0f, 100f, 50f)
+        )
+
+        // Tracker should be null initially
+        assertThat(interactorImpl.visibilityTrackerForTesting).isNull()
+
+        // Trigger tracker creation
+        interactor.updatePaymentMethodVisibility("saved", fakeLayoutCoordinates)
+
+        // Tracker should now exist
+        assertThat(interactorImpl.visibilityTrackerForTesting).isNotNull()
+    }
+
+    @Test
+    fun visibilityTracker_reusesInstance_whenPaymentMethodsUnchanged() = runScenario(
+        initialPaymentMethods = PaymentMethodFixtures.createCards(1),
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp")
+            )
+        )
+    ) {
+        val interactorImpl = interactor as DefaultPaymentMethodVerticalLayoutInteractor
+        val fakeLayoutCoordinates = FakeLayoutCoordinates(
+            size = IntSize(100, 50),
+            bounds = Rect(0f, 0f, 100f, 50f)
+        )
+
+        // Create tracker
+        interactor.updatePaymentMethodVisibility("saved", fakeLayoutCoordinates)
+        val firstTrackerInstance = interactorImpl.visibilityTrackerForTesting
+
+        // Access tracker again without changing payment methods
+        interactor.updatePaymentMethodVisibility("card", fakeLayoutCoordinates)
+        val secondTrackerInstance = interactorImpl.visibilityTrackerForTesting
+
+        // Should be same instance
+        assertThat(secondTrackerInstance).isSameInstanceAs(firstTrackerInstance)
+    }
+
+    @Test
+    fun visibilityTracker_recreatesInstance_whenSavedPaymentMethodChanges() = runScenario(
+        initialPaymentMethods = PaymentMethodFixtures.createCards(1),
+        initialMostRecentlySelectedSavedPaymentMethod = PaymentMethodFixtures.createCards(1)[0],
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card")
+            )
+        )
+    ) {
+        val interactorImpl = interactor as DefaultPaymentMethodVerticalLayoutInteractor
+        val fakeLayoutCoordinates = FakeLayoutCoordinates(
+            size = IntSize(100, 50),
+            bounds = Rect(0f, 0f, 100f, 50f)
+        )
+
+        // Create initial tracker (with saved PM)
+        interactor.updatePaymentMethodVisibility("saved", fakeLayoutCoordinates)
+        val firstTrackerInstance = interactorImpl.visibilityTrackerForTesting
+
+        // Remove saved payment method
+        mostRecentlySelectedSavedPaymentMethodSource.value = null
+        paymentMethodsSource.value = emptyList()
+
+        // Access tracker again - should trigger recreation (no more saved PM)
+        interactor.updatePaymentMethodVisibility("card", fakeLayoutCoordinates)
+        val secondTrackerInstance = interactorImpl.visibilityTrackerForTesting
+
+        // Should be different instance
+        assertThat(secondTrackerInstance).isNotSameInstanceAs(firstTrackerInstance)
+    }
+
+    @Test
+    fun cancelPaymentMethodVisibilityTracking_disposesAndNullsTracker() = runScenario(
+        initialPaymentMethods = PaymentMethodFixtures.createCards(1)
+    ) {
+        val interactorImpl = interactor as DefaultPaymentMethodVerticalLayoutInteractor
+        val fakeLayoutCoordinates = FakeLayoutCoordinates(
+            size = IntSize(100, 50),
+            bounds = Rect(0f, 0f, 100f, 50f)
+        )
+
+        // Create tracker
+        interactor.updatePaymentMethodVisibility("saved", fakeLayoutCoordinates)
+        assertThat(interactorImpl.visibilityTrackerForTesting).isNotNull()
+
+        // Cancel tracking
+        interactor.cancelPaymentMethodVisibilityTracking()
+
+        // Tracker should be null
+        assertThat(interactorImpl.visibilityTrackerForTesting).isNull()
+    }
+
+    @Test
+    fun cancelPaymentMethodVisibilityTracking_allowsTrackerRecreation() = runScenario(
+        initialPaymentMethods = PaymentMethodFixtures.createCards(1)
+    ) {
+        val interactorImpl = interactor as DefaultPaymentMethodVerticalLayoutInteractor
+        val fakeLayoutCoordinates = FakeLayoutCoordinates(
+            size = IntSize(100, 50),
+            bounds = Rect(0f, 0f, 100f, 50f)
+        )
+
+        // Create initial tracker
+        interactor.updatePaymentMethodVisibility("saved", fakeLayoutCoordinates)
+        val firstTrackerInstance = interactorImpl.visibilityTrackerForTesting
+
+        // Cancel tracking
+        interactor.cancelPaymentMethodVisibilityTracking()
+
+        // Create new tracker
+        interactor.updatePaymentMethodVisibility("saved", fakeLayoutCoordinates)
+        val secondTrackerInstance = interactorImpl.visibilityTrackerForTesting
+
+        // Should be different instance
+        assertThat(secondTrackerInstance).isNotNull()
+        assertThat(secondTrackerInstance).isNotSameInstanceAs(firstTrackerInstance)
     }
 
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }

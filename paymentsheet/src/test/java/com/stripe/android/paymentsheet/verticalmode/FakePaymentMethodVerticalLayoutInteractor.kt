@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.compose.ui.layout.LayoutCoordinates
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -54,10 +55,11 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
         viewActionRecorder.record(viewAction)
     }
 
-    override fun reportInitialPaymentMethodVisibilitySnapshot(
-        visiblePaymentMethods: List<String>,
-        hiddenPaymentMethods: List<String>
-    ) {
+    override fun updatePaymentMethodVisibility(itemCode: String, layoutCoordinates: LayoutCoordinates) {
+        // Do nothing
+    }
+
+    override fun cancelPaymentMethodVisibilityTracking() {
         // Do nothing
     }
 }
