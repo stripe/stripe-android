@@ -1371,9 +1371,7 @@ internal class DefaultFlowControllerTest {
             )
         )
 
-        verify(paymentResultCallback).onPaymentSheetResult(
-            PaymentSheetResult.Canceled
-        )
+        verify(paymentResultCallback).onPaymentSheetResult(any<PaymentSheetResult.Canceled>())
     }
 
     @Test
@@ -1685,7 +1683,7 @@ internal class DefaultFlowControllerTest {
             )
         )
 
-        verify(paymentResultCallback).onPaymentSheetResult(PaymentSheetResult.Completed)
+        verify(paymentResultCallback).onPaymentSheetResult(PaymentSheetResult.Completed())
     }
 
     @Test
