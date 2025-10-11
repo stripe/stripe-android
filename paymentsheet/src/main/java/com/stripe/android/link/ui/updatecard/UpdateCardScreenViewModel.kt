@@ -28,7 +28,6 @@ import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Card.Networks
 import com.stripe.android.paymentsheet.CardUpdateParams
@@ -198,7 +197,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                 } ?: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
                 // Should always allow updating ZIP/postal code at minimum
                 address = if (
-                    paymentDetails.type == PaymentMethod.Type.Card.code &&
+                    paymentDetails.isCard &&
                     defaultConfiguration.address ==
                     PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 ) {
