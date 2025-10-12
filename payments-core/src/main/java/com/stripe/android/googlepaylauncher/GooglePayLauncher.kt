@@ -360,7 +360,8 @@ class GooglePayLauncher internal constructor(
 fun rememberGooglePayLauncher(
     config: GooglePayLauncher.Config,
     readyCallback: GooglePayLauncher.ReadyCallback,
-    resultCallback: GooglePayLauncher.ResultCallback
+    resultCallback: GooglePayLauncher.ResultCallback,
+    publishableKey: String? = null
 ): GooglePayLauncher {
     val currentReadyCallback by rememberUpdatedState(readyCallback)
 
@@ -394,7 +395,7 @@ fun rememberGooglePayLauncher(
             },
             PaymentAnalyticsRequestFactory(
                 context,
-                PaymentConfiguration.getInstance(context).publishableKey,
+                publishableKey ?: PaymentConfiguration.getInstance(context).publishableKey,
                 setOf(GooglePayLauncher.PRODUCT_USAGE)
             ),
             DefaultAnalyticsRequestExecutor()
