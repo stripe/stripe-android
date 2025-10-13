@@ -10,7 +10,7 @@ data class ConfirmationTokenClientContextParams(
     val mode: String,
 
     /** Three-letter ISO currency code */
-    val currency: String,
+    val currency: String?,
 
     /** Indicates how the payment method is intended to be used in the future */
     val setupFutureUsage: String? = null,
@@ -36,7 +36,7 @@ data class ConfirmationTokenClientContextParams(
     override fun toParamMap(): Map<String, Any> {
         return buildMap {
             put(PARAM_MODE, mode)
-            put(PARAM_CURRENCY, currency)
+            currency?.let { put(PARAM_CURRENCY, it) }
             setupFutureUsage?.let { put(PARAM_SETUP_FUTURE_USAGE, it) }
             captureMethod?.let { put(PARAM_CAPTURE_METHOD, it) }
             paymentMethodTypes?.let { put(PARAM_PAYMENT_METHOD_TYPES, it) }

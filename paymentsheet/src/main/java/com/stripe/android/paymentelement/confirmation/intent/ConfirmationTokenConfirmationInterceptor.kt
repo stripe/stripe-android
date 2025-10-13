@@ -7,7 +7,10 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmationToken
+import com.stripe.android.model.ConfirmationTokenClientContextParams
 import com.stripe.android.model.ConfirmationTokenParams
+import com.stripe.android.model.DeferredIntentParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
@@ -19,6 +22,7 @@ import com.stripe.android.paymentelement.confirmation.utils.ConfirmActionHelper
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.toDeferredIntentParams
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -37,12 +41,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         confirmationOption: PaymentMethodConfirmationOption.New,
         shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): ConfirmationDefinition.Action<Args> {
-        val updatedConfirmationOption = confirmationOption.updatedForDeferredIntent(intentConfiguration)
         return stripeRepository.createConfirmationToken(
-            confirmationTokenParams = ConfirmationTokenParams(
-                returnUrl = DefaultReturnUrl.create(context).value,
-                paymentMethodData = updatedConfirmationOption.createParams
-            ),
+            confirmationTokenParams = prepareConfirmationTokenParams(confirmationOption),
             options = requestOptions,
         ).fold(
             onSuccess = { confirmationToken ->
@@ -146,6 +146,35 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 cause = error,
                 message = error.stripeErrorMessage(),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        }
+    }
+
+    private fun prepareConfirmationTokenParams(confirmationOption: PaymentMethodConfirmationOption):
+        ConfirmationTokenParams {
+        val updatedConfirmationOption = confirmationOption.updatedForDeferredIntent(intentConfiguration)
+        return ConfirmationTokenParams(
+            returnUrl = DefaultReturnUrl.create(context).value,
+            paymentMethodData = (updatedConfirmationOption as? PaymentMethodConfirmationOption.New)?.createParams,
+            clientContext = prepareConfirmationTokenClientContextParams(
+                confirmationOption.optionsParams
+            )
+        )
+    }
+
+    private fun prepareConfirmationTokenClientContextParams(paymentMethodOptions: PaymentMethodOptionsParams?):
+        ConfirmationTokenClientContextParams {
+        return with (intentConfiguration.toDeferredIntentParams()) {
+            ConfirmationTokenClientContextParams(
+                mode = mode.code,
+                currency = mode.currency,
+                setupFutureUsage = mode.setupFutureUsage?.code,
+                captureMethod = (mode as? DeferredIntentParams.Mode.Payment)?.captureMethod?.code,
+                paymentMethodTypes = paymentMethodTypes,
+                onBehalfOf = onBehalfOf,
+                paymentMethodConfiguration = paymentMethodConfigurationId,
+                customer = TODO(),
+                paymentMethodOptions = paymentMethodOptions,
             )
         }
     }
