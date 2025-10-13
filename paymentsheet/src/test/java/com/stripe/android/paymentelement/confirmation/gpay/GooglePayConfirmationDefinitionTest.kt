@@ -12,6 +12,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.wallets.Wallet
@@ -126,6 +127,9 @@ class GooglePayConfirmationDefinitionTest {
         assertThat(savedOption.paymentMethod).isEqualTo(savedOption.paymentMethod)
         assertThat(savedOption.optionsParams).isNull()
         assertThat(savedOption.originatedFromWallet).isTrue()
+        assertThat(savedOption.clientAttributionMetadata).isEqualTo(
+            GOOGLE_PAY_CONFIRMATION_OPTION.clientAttributionMetadata
+        )
     }
 
     @Test
@@ -443,7 +447,8 @@ class GooglePayConfirmationDefinitionTest {
                 currencyCode = "CAD",
                 amount = 1000L,
                 transactionId = "pi_12345",
-                label = null
+                label = null,
+                clientAttributionMetadata = GOOGLE_PAY_CONFIRMATION_OPTION.clientAttributionMetadata,
             )
         }
     }
@@ -476,7 +481,8 @@ class GooglePayConfirmationDefinitionTest {
                 currencyCode = "CAD",
                 amount = 1000L,
                 transactionId = "pi_12345",
-                label = "Merchant Inc."
+                label = "Merchant Inc.",
+                clientAttributionMetadata = GOOGLE_PAY_CONFIRMATION_OPTION.clientAttributionMetadata,
             )
         }
     }
@@ -510,7 +516,8 @@ class GooglePayConfirmationDefinitionTest {
                 currencyCode = "USD",
                 amount = 2099L,
                 transactionId = "pi_12345",
-                label = "Merchant Inc."
+                label = "Merchant Inc.",
+                clientAttributionMetadata = GOOGLE_PAY_CONFIRMATION_OPTION.clientAttributionMetadata,
             )
         }
     }
@@ -659,7 +666,8 @@ class GooglePayConfirmationDefinitionTest {
                 ),
                 cardBrandFilter = DefaultCardBrandFilter,
             ),
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
         )
 
         private val APPEARANCE = PaymentSheet.Appearance.Builder()

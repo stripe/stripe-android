@@ -2,6 +2,7 @@ package com.stripe.android.utils
 
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -26,6 +27,7 @@ internal class FakePaymentElementLoader(
     private val validationError: PaymentSheetLoadingException? = null,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val passiveCaptchaParams: PassiveCaptchaParams? = null,
+    private val clientAttributionMetadata: ClientAttributionMetadata? = null,
 ) : PaymentElementLoader {
 
     fun updatePaymentMethods(paymentMethods: List<PaymentMethod>) {
@@ -64,6 +66,7 @@ internal class FakePaymentElementLoader(
                         cbcEligibility = cbcEligibility,
                         linkState = linkState,
                         passiveCaptchaParams = passiveCaptchaParams,
+                        clientAttributionMetadata = clientAttributionMetadata,
                     ),
                 )
             )

@@ -33,9 +33,11 @@ import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -351,7 +353,8 @@ internal class DefaultFlowControllerTest {
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                clientAttributionMetadata = null,
             )
         )
 
@@ -1344,9 +1347,34 @@ internal class DefaultFlowControllerTest {
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                clientAttributionMetadata = null,
             )
         )
+    }
+
+    @Test
+    fun `confirmPayment() with GooglePay sets client attribution metadata correctly`() = confirmationTest {
+        val expectedClientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA
+        val flowController = createFlowController(
+            clientAttributionMetadata = expectedClientAttributionMetadata,
+        )
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        )
+        flowController.onPaymentOptionResult(
+            PaymentOptionsActivityResult.Succeeded(
+                PaymentSelection.GooglePay,
+                linkAccountInfo = LinkAccountUpdate.Value(null)
+            )
+        )
+        flowController.confirm()
+
+        val arguments = startTurbine.awaitItem()
+
+        val googlePayConfirmationOption = arguments.confirmationOption as GooglePayConfirmationOption
+        assertThat(googlePayConfirmationOption.clientAttributionMetadata).isEqualTo(expectedClientAttributionMetadata)
     }
 
     @Test
@@ -1987,7 +2015,8 @@ internal class DefaultFlowControllerTest {
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                clientAttributionMetadata = null,
             )
         )
     }
@@ -2501,6 +2530,7 @@ internal class DefaultFlowControllerTest {
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this@DefaultFlowControllerTest.eventReporter,
         passiveCaptchaParams: PassiveCaptchaParams? = null,
+        clientAttributionMetadata: ClientAttributionMetadata? = null,
     ): DefaultFlowController {
         return createFlowController(
             FakePaymentElementLoader(
@@ -2509,6 +2539,7 @@ internal class DefaultFlowControllerTest {
                 paymentSelection = paymentSelection,
                 linkState = linkState,
                 passiveCaptchaParams = passiveCaptchaParams,
+                clientAttributionMetadata = clientAttributionMetadata,
             ),
             viewModel,
             errorReporter,
