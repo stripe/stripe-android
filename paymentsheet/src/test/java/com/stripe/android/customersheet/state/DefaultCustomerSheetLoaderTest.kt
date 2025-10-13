@@ -109,7 +109,7 @@ internal class DefaultCustomerSheetLoaderTest {
         assertThat(state.config).isEqualTo(config)
         assertThat(state.paymentMethodMetadata.stripeIntent).isEqualTo(STRIPE_INTENT)
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
-        assertThat(state.paymentMethodMetadata.customerMetadata?.hasCustomerConfiguration).isTrue()
+        assertThat(state.paymentMethodMetadata.customerMetadata).isNotNull()
         assertThat(state.paymentMethodMetadata.isGooglePayReady).isTrue()
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -658,6 +658,9 @@ internal class DefaultCustomerSheetLoaderTest {
                             canUpdateFullPaymentMethodDetails = true,
                         ),
                         defaultPaymentMethodId = defaultPaymentMethodId,
+                        customerId = "unused_for_customer_adapter_data_source",
+                        customerEphemeralKeySecret = "unused_for_customer_adapter_data_source",
+                        customerSessionClientSecret = null,
                     )
                 )
             }

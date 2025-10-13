@@ -103,9 +103,6 @@ class VerticalModeInitialScreenFactoryTest {
         if (hasSavedPaymentMethods) {
             customerStateHolder.setCustomerState(
                 CustomerState(
-                    id = "cus_foobar",
-                    ephemeralKeySecret = "ek_123",
-                    customerSessionClientSecret = null,
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
                     defaultPaymentMethodId = null,
                 )

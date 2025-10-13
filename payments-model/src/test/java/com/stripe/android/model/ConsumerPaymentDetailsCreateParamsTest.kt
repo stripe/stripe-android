@@ -5,6 +5,7 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import org.json.JSONObject
 import org.junit.Test
+import java.util.Locale
 
 class ConsumerPaymentDetailsCreateParamsTest {
 
@@ -179,7 +180,7 @@ class ConsumerPaymentDetailsCreateParamsTest {
     }
 
     @Test
-    fun `getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams_noAddress_returnsNull`() {
+    fun `getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams_noAddress_returnsDefault`() {
         val params = mapOf(
             "billing_details" to mapOf(
                 "name" to "John Doe"
@@ -187,12 +188,13 @@ class ConsumerPaymentDetailsCreateParamsTest {
         )
 
         val result = getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams(params)
+        val expected = "billing_address" to mapOf("country_code" to Locale.getDefault().country)
 
-        assertThat(result).isNull()
+        assertThat(result).isEqualTo(expected)
     }
 
     @Test
-    fun `getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams_noBillingDetails_returnsNull`() {
+    fun `getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams_noBillingDetails_returnsDefault`() {
         val params = mapOf(
             "card" to mapOf(
                 "number" to "4242424242424242",
@@ -202,8 +204,9 @@ class ConsumerPaymentDetailsCreateParamsTest {
         )
 
         val result = getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams(params)
+        val expected = "billing_address" to mapOf("country_code" to Locale.getDefault().country)
 
-        assertThat(result).isNull()
+        assertThat(result).isEqualTo(expected)
     }
 
     @Test
@@ -280,7 +283,7 @@ class ConsumerPaymentDetailsCreateParamsTest {
         assertThat(result).doesNotContainKey("is_default")
         assertThat(result).containsEntry("exp_month", 3)
         assertThat(result).containsEntry("exp_year", 2027)
-        assertThat(result).doesNotContainKey("billing_address")
+        assertThat(result).containsEntry("billing_address", mapOf("country_code" to Locale.getDefault().country))
         assertThat(result).doesNotContainKey("preferred_network")
     }
 
@@ -302,7 +305,7 @@ class ConsumerPaymentDetailsCreateParamsTest {
         assertThat(result).containsEntry("is_default", true)
         assertThat(result).containsEntry("exp_month", 3)
         assertThat(result).containsEntry("exp_year", 2027)
-        assertThat(result).doesNotContainKey("billing_address")
+        assertThat(result).containsEntry("billing_address", mapOf("country_code" to Locale.getDefault().country))
         assertThat(result).doesNotContainKey("preferred_network")
     }
 

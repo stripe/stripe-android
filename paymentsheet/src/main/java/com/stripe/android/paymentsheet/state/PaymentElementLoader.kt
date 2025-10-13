@@ -136,7 +136,7 @@ internal interface PaymentElementLoader {
 @Singleton
 @SuppressWarnings("LargeClass")
 internal class DefaultPaymentElementLoader @Inject constructor(
-    private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+    private val prefsRepositoryFactory: PrefsRepository.Factory,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
     private val elementsSessionRepository: ElementsSessionRepository,
     private val customerRepository: CustomerRepository,
@@ -362,9 +362,34 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
         customerInfo: CustomerInfo?,
-    ): CustomerMetadata {
+    ): CustomerMetadata? {
+        val customerId: String
+        val ephemeralKeySecret: String
+        val customerSessionClientSecret: String?
+
+        when (customerInfo) {
+            is CustomerInfo.CustomerSession -> {
+                val customer = elementsSession.customer
+                if (customer != null) {
+                    customerId = customer.session.customerId
+                    ephemeralKeySecret = customer.session.apiKey
+                    customerSessionClientSecret = customerInfo.customerSessionClientSecret
+                } else {
+                    return null
+                }
+            }
+            is CustomerInfo.Legacy -> {
+                customerId = customerInfo.id
+                ephemeralKeySecret = customerInfo.ephemeralKeySecret
+                customerSessionClientSecret = null
+            }
+            null -> return null
+        }
+
         return CustomerMetadata(
-            hasCustomerConfiguration = configuration.customer != null,
+            id = customerId,
+            ephemeralKeySecret = ephemeralKeySecret,
+            customerSessionClientSecret = customerSessionClientSecret,
             isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession),
             permissions = if (customerInfo is CustomerInfo.CustomerSession) {
                 createForPaymentSheetCustomerSession(
@@ -435,13 +460,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 CustomerState.createForCustomerSession(
                     customer = customerInfo.elementsSessionCustomer,
                     supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
-                    customerSessionClientSecret = customerInfo.customerSessionClientSecret,
                 )
             }
             is CustomerInfo.Legacy -> {
                 CustomerState.createForLegacyEphemeralKey(
-                    customerId = customerInfo.id,
-                    accessType = customerInfo.accessType,
                     paymentMethods = retrieveCustomerPaymentMethods(
                         metadata = metadata,
                         customerConfig = customerInfo.customerConfig,
@@ -624,7 +646,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         isLinkAvailable: Boolean,
     ): SavedSelection {
         val customerConfiguration = configuration.customer
-        val prefsRepository = prefsRepositoryFactory(customerConfiguration)
+        val prefsRepository = prefsRepositoryFactory.create(customerConfiguration?.id)
 
         return prefsRepository.getSavedSelection(
             isGooglePayAvailable = isGooglePayReady,

@@ -12,4 +12,8 @@ internal interface PrefsRepository {
     fun setSavedSelection(savedSelection: SavedSelection?): Boolean
 
     fun savePaymentSelection(paymentSelection: PaymentSelection?)
+
+    fun interface Factory {
+        fun create(customerId: String?): PrefsRepository
+    }
 }

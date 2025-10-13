@@ -55,6 +55,7 @@ internal class FakePaymentElementLoader(
                     paymentSelection = paymentSelection,
                     validationError = validationError,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        hasCustomerConfiguration = customer != null,
                         stripeIntent = stripeIntent,
                         billingDetailsCollectionConfiguration = configuration
                             .billingDetailsCollectionConfiguration,

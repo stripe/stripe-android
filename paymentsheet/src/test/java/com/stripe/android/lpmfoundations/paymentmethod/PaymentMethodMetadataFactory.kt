@@ -49,6 +49,7 @@ internal object PaymentMethodMetadataFactory {
         financialConnectionsAvailability: FinancialConnectionsAvailability? = FinancialConnectionsAvailability.Lite,
         customerMetadataPermissions: CustomerMetadata.Permissions =
             PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
+        customerSessionClientSecret: String? = null,
         shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = SHOP_PAY_CONFIGURATION,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
@@ -69,11 +70,15 @@ internal object PaymentMethodMetadataFactory {
             sellerBusinessName = null,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
-            customerMetadata = CustomerMetadata(
-                hasCustomerConfiguration = hasCustomerConfiguration,
-                isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                permissions = customerMetadataPermissions
-            ),
+            customerMetadata = if (hasCustomerConfiguration) {
+                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
+                    isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                    permissions = customerMetadataPermissions,
+                    customerSessionClientSecret = customerSessionClientSecret,
+                )
+            } else {
+                null
+            },
             sharedDataSpecs = sharedDataSpecs,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,

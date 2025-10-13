@@ -10,7 +10,9 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class CustomerMetadata(
-    val hasCustomerConfiguration: Boolean,
+    val id: String,
+    val ephemeralKeySecret: String,
+    val customerSessionClientSecret: String?,
     val isPaymentMethodSetAsDefaultEnabled: Boolean,
     val permissions: Permissions,
 ) : Parcelable {
@@ -96,16 +98,6 @@ internal data class CustomerMetadata(
                     canRemoveDuplicates = true,
                     canUpdateFullPaymentMethodDetails =
                     customerSheetSession.permissions.canUpdateFullPaymentMethodDetails,
-                )
-            }
-
-            // Native link uses PaymentMethodMetadata for DefaultFormHelper and doesn't use CustomerMetadata at all
-            internal fun createForNativeLink(): Permissions {
-                return Permissions(
-                    removePaymentMethod = PaymentMethodRemovePermission.None,
-                    canRemoveLastPaymentMethod = false,
-                    canRemoveDuplicates = false,
-                    canUpdateFullPaymentMethodDetails = false
                 )
             }
         }

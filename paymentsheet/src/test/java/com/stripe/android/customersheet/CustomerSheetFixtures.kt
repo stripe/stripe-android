@@ -78,7 +78,7 @@ internal object CustomerSheetFixtures {
                     id = "cuss_123",
                     customerId = "cus_123",
                     liveMode = false,
-                    apiKey = "123",
+                    apiKey = "ek_123",
                     apiKeyExpiry = 999999999,
                     components = ElementsSession.Customer.Components(
                         mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
@@ -126,6 +126,9 @@ internal object CustomerSheetFixtures {
                 canUpdateFullPaymentMethodDetails = true,
             ),
             defaultPaymentMethodId = null,
+            customerId = customer?.session?.customerId ?: "unused_for_customer_adapter_data_source",
+            customerEphemeralKeySecret = customer?.session?.apiKey ?: "unused_for_customer_adapter_data_source",
+            customerSessionClientSecret = customer?.session?.id,
         )
     }
 }

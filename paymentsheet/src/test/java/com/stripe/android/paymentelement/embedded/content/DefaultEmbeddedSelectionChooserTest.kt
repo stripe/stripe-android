@@ -39,7 +39,10 @@ internal class DefaultEmbeddedSelectionChooserTest {
     @Test
     fun `Uses new payment selection if there's no existing one`() = runScenario {
         val selection = chooser.choose(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(isGooglePayReady = true),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
+                isGooglePayReady = true
+            ),
             paymentMethods = null,
             previousSelection = null,
             newSelection = PaymentSelection.GooglePay,
@@ -57,6 +60,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
         val newSelection = PaymentSelection.Saved(paymentMethod)
         val selection = chooser.choose(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "cashapp")
                 )
@@ -76,7 +80,10 @@ internal class DefaultEmbeddedSelectionChooserTest {
         val previousSelection = PaymentSelection.Saved(paymentMethod)
 
         val selection = chooser.choose(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(isGooglePayReady = true),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
+                isGooglePayReady = true,
+            ),
             paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
             previousSelection = previousSelection,
             newSelection = PaymentSelection.GooglePay,
@@ -91,7 +98,9 @@ internal class DefaultEmbeddedSelectionChooserTest {
         val previousSelection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
 
         val selection = chooser.choose(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
+            ),
             paymentMethods = PaymentMethodFixtures.createCards(3) + PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
             previousSelection = previousSelection,
             newSelection = null,
@@ -107,6 +116,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
 
         val selection = chooser.choose(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "cashapp")
                 )
@@ -213,7 +223,9 @@ internal class DefaultEmbeddedSelectionChooserTest {
         val newSelection = PaymentSelection.Saved(paymentMethod)
 
         val selection = chooser.choose(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
+            ),
             paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
             previousSelection = PaymentSelection.ShopPay,
             newSelection = newSelection,
@@ -231,7 +243,10 @@ internal class DefaultEmbeddedSelectionChooserTest {
         val previousSelection = PaymentSelection.Saved(paymentMethod)
 
         val selection = chooser.choose(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(isGooglePayReady = true),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
+                isGooglePayReady = true,
+            ),
             paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
             previousSelection = previousSelection,
             newSelection = PaymentSelection.GooglePay,
@@ -249,7 +264,10 @@ internal class DefaultEmbeddedSelectionChooserTest {
 
         storePreviousChooseState(configuration = defaultConfiguration.copy(merchantDisplayName = "Hi"))
         val selection = chooser.choose(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(isGooglePayReady = true),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
+                isGooglePayReady = true
+            ),
             paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
             previousSelection = previousSelection,
             newSelection = newSelection,
@@ -271,7 +289,10 @@ internal class DefaultEmbeddedSelectionChooserTest {
             )
         )
         val selection = chooser.choose(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(isGooglePayReady = true),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
+                isGooglePayReady = true
+            ),
             paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
             previousSelection = previousSelection,
             newSelection = newSelection,
@@ -417,6 +438,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
 
         val selection = chooser.choose(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
                 isPaymentMethodSetAsDefaultEnabled = true
             ),
             paymentMethods = listOf(
@@ -441,6 +463,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
 
         val selection = chooser.choose(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
                 isPaymentMethodSetAsDefaultEnabled = false
             ),
             paymentMethods = listOf(
@@ -463,7 +486,10 @@ internal class DefaultEmbeddedSelectionChooserTest {
         val newSelection = PaymentSelection.Saved(paymentMethod)
 
         assertThat(savedStateHandle.get<CommonConfiguration>(PREVIOUS_CONFIGURATION_KEY)).isNull()
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(isGooglePayReady = true)
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            hasCustomerConfiguration = true,
+            isGooglePayReady = true
+        )
         val selection = chooser.choose(
             paymentMethodMetadata = paymentMethodMetadata,
             paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,

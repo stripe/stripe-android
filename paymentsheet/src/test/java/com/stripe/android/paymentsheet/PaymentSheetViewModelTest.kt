@@ -234,9 +234,6 @@ internal class PaymentSheetViewModelTest {
                     .build()
             ),
             customer = CustomerState(
-                id = "cus_2",
-                ephemeralKeySecret = "ek_123",
-                customerSessionClientSecret = null,
                 paymentMethods = paymentMethods,
                 defaultPaymentMethodId = null,
             ),
@@ -275,7 +272,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(customerInfoCaptor.firstValue).isEqualTo(
             CustomerRepository.CustomerInfo(
-                id = "cus_2",
+                id = "cus_123",
                 ephemeralKeySecret = "ek_123",
                 customerSessionClientSecret = null,
             )

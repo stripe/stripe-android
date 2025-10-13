@@ -120,7 +120,7 @@ import kotlin.test.Test
 internal class DefaultFlowControllerTest {
 
     @get:Rule
-    val paymentElemntCallbackTestRule = PaymentElementCallbackTestRule()
+    val paymentElementCallbackTestRule = PaymentElementCallbackTestRule()
 
     private val paymentOptionResultCallback = mock<PaymentOptionResultCallback>()
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
@@ -456,7 +456,10 @@ internal class DefaultFlowControllerTest {
                 config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test").asCommonConfiguration(),
                 paymentSelection = null,
                 validationError = null,
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(allowsDelayedPaymentMethods = false),
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    hasCustomerConfiguration = true,
+                    allowsDelayedPaymentMethods = false
+                ),
             ),
             configuration = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
             enableLogging = ENABLE_LOGGING,
@@ -647,7 +650,7 @@ internal class DefaultFlowControllerTest {
         verify(paymentOptionResultCallback).onPaymentOptionResult(
             argThat { result ->
                 result.paymentOption != null &&
-                    result.paymentOption?.paymentMethodType == "card" &&
+                    result.paymentOption.paymentMethodType == "card" &&
                     result.didCancel // should be true since canceled = true for logout
             }
         )
@@ -697,7 +700,7 @@ internal class DefaultFlowControllerTest {
             verify(paymentOptionResultCallback).onPaymentOptionResult(
                 argThat { result ->
                     result.paymentOption != null &&
-                        result.paymentOption?.paymentMethodType == "card" &&
+                        result.paymentOption.paymentMethodType == "card" &&
                         result.didCancel // should be true since canceled = true for logout
                 }
             )
@@ -722,7 +725,7 @@ internal class DefaultFlowControllerTest {
             verify(paymentOptionResultCallback).onPaymentOptionResult(
                 argThat {
                     paymentOption?.drawableResourceId == R.drawable.stripe_ic_paymentsheet_card_visa_ref &&
-                        paymentOption?.label == "···· 4242" &&
+                        paymentOption.label == "···· 4242" &&
                         !didCancel
                 }
             )
@@ -826,7 +829,7 @@ internal class DefaultFlowControllerTest {
         verify(paymentOptionResultCallback).onPaymentOptionResult(
             argThat {
                 paymentOption?.drawableResourceId == R.drawable.stripe_google_pay_mark &&
-                    paymentOption?.label == "Google Pay" &&
+                    paymentOption.label == "Google Pay" &&
                     didCancel
             }
         )

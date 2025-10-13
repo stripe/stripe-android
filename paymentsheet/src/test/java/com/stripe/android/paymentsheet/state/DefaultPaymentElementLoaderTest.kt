@@ -149,9 +149,6 @@ internal class DefaultPaymentElementLoaderTest {
             PaymentElementLoader.State(
                 config = config.asCommonConfiguration(),
                 customer = CustomerState(
-                    id = config.customer!!.id,
-                    ephemeralKeySecret = config.customer.ephemeralKeySecret,
-                    customerSessionClientSecret = null,
                     paymentMethods = PAYMENT_METHODS,
                     defaultPaymentMethodId = null,
                 ),
@@ -202,7 +199,7 @@ internal class DefaultPaymentElementLoaderTest {
                 initializedViaCompose = false,
             ),
         ).getOrThrow()
-        assertThat(result.paymentMethodMetadata.customerMetadata?.hasCustomerConfiguration).isFalse()
+        assertThat(result.paymentMethodMetadata.customerMetadata).isNull()
     }
 
     @Test

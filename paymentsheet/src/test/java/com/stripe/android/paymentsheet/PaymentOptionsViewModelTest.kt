@@ -28,6 +28,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -1291,7 +1292,8 @@ internal class PaymentOptionsViewModelTest {
             args = args.copy(
                 state = args.state.copy(
                     paymentMethodMetadata = args.state.paymentMethodMetadata.copy(
-                        linkStateResult = linkState
+                        linkStateResult = linkState,
+                        customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
                     )
                 )
             ),

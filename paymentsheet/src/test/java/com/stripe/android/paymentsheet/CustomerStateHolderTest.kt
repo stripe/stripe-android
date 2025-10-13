@@ -36,8 +36,6 @@ internal class CustomerStateHolderTest {
     fun `customer is restored from savedStateHandle`() {
         val savedStateHandle = SavedStateHandle()
         val customerState = CustomerState.createForLegacyEphemeralKey(
-            customerId = "cus_123",
-            accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
             paymentMethods = emptyList()
         )
         savedStateHandle[CustomerStateHolder.SAVED_CUSTOMER] = customerState
@@ -55,8 +53,6 @@ internal class CustomerStateHolderTest {
 
             customerStateHolder.setCustomerState(
                 CustomerState.createForLegacyEphemeralKey(
-                    customerId = "cus_123",
-                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
                 )
             )
@@ -69,8 +65,6 @@ internal class CustomerStateHolderTest {
     fun `MostRecentlySelectedSavedPaymentMethod is restored from savedStateHandle`() {
         val savedStateHandle = SavedStateHandle()
         val customerState = CustomerState.createForLegacyEphemeralKey(
-            customerId = "cus_123",
-            accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
         savedStateHandle[CustomerStateHolder.SAVED_CUSTOMER] = customerState
@@ -95,8 +89,6 @@ internal class CustomerStateHolderTest {
 
             customerStateHolder.setCustomerState(
                 CustomerState.createForLegacyEphemeralKey(
-                    customerId = "cus_123",
-                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
                 )
             )
@@ -105,8 +97,6 @@ internal class CustomerStateHolderTest {
 
             customerStateHolder.setCustomerState(
                 CustomerState.createForLegacyEphemeralKey(
-                    customerId = "cus_123",
-                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
                     paymentMethods = emptyList(),
                 )
             )
@@ -122,8 +112,6 @@ internal class CustomerStateHolderTest {
             val extraPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_333")
             customerStateHolder.setCustomerState(
                 CustomerState.createForLegacyEphemeralKey(
-                    customerId = "cus_123",
-                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD, extraPaymentMethod)
                 )
             )
@@ -132,8 +120,6 @@ internal class CustomerStateHolderTest {
 
             customerStateHolder.setCustomerState(
                 CustomerState.createForLegacyEphemeralKey(
-                    customerId = "cus_123",
-                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
                 )
             )
@@ -149,8 +135,6 @@ internal class CustomerStateHolderTest {
             val extraPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_333")
             customerStateHolder.setCustomerState(
                 CustomerState.createForLegacyEphemeralKey(
-                    customerId = "cus_123",
-                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD, extraPaymentMethod)
                 )
             )
@@ -159,8 +143,6 @@ internal class CustomerStateHolderTest {
 
             customerStateHolder.setCustomerState(
                 CustomerState.createForLegacyEphemeralKey(
-                    customerId = "cus_123",
-                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
                     paymentMethods = listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
                             card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
