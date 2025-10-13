@@ -48,6 +48,7 @@ import javax.inject.Provider
 @OptIn(SharedPaymentTokenSessionPreview::class)
 internal suspend fun createIntentConfirmationInterceptor(
     initializationMode: InitializationMode,
+    ephemeralKeySecret: String? = null,
     stripeRepository: StripeRepository = object : AbsFakeStripeRepository() {},
     publishableKeyProvider: () -> String = { "pk" },
     errorReporter: ErrorReporter = FakeErrorReporter(),
@@ -124,7 +125,7 @@ internal suspend fun createIntentConfirmationInterceptor(
         },
     ).create(
         initializationMode = initializationMode,
-        ephemeralKeySecret = null
+        ephemeralKeySecret = ephemeralKeySecret,
     )
 }
 
