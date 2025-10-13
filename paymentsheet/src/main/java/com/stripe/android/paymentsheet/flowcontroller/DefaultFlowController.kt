@@ -88,7 +88,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionResultCallback: PaymentOptionResultCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
-    private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+    private val prefsRepositoryFactory: PrefsRepository.Factory,
     activityResultCaller: ActivityResultCaller,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     // Properties provided through injection
@@ -694,7 +694,7 @@ internal class DefaultFlowController @Inject internal constructor(
         }
 
         selectionToSave?.let {
-            prefsRepositoryFactory(viewModel.state?.config?.customer).savePaymentSelection(it)
+            prefsRepositoryFactory.create(viewModel.state?.config?.customer?.id).savePaymentSelection(it)
         }
     }
 

@@ -136,7 +136,7 @@ internal interface PaymentElementLoader {
 @Singleton
 @SuppressWarnings("LargeClass")
 internal class DefaultPaymentElementLoader @Inject constructor(
-    private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+    private val prefsRepositoryFactory: PrefsRepository.Factory,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
     private val elementsSessionRepository: ElementsSessionRepository,
     private val customerRepository: CustomerRepository,
@@ -624,7 +624,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         isLinkAvailable: Boolean,
     ): SavedSelection {
         val customerConfiguration = configuration.customer
-        val prefsRepository = prefsRepositoryFactory(customerConfiguration)
+        val prefsRepository = prefsRepositoryFactory.create(customerConfiguration?.id)
 
         return prefsRepository.getSavedSelection(
             isGooglePayAvailable = isGooglePayReady,
