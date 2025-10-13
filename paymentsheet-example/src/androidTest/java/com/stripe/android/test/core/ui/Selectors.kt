@@ -360,6 +360,11 @@ internal class Selectors(
         hasTestTag(CVC_RECOLLECTION_SCREEN_CONFIRM)
     )
 
+    fun assertCardBrandDropdownExists(){
+        composeTestRule.onNode(hasTestTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG))
+            .assertExists()
+    }
+
     fun selectCardBrand(displayName: String) {
         composeTestRule.onNode(hasTestTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG))
             .performClick()

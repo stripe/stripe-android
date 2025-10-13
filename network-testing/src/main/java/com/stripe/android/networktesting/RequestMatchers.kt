@@ -73,7 +73,7 @@ object RequestMatchers {
         }
     }
 
-    fun query(name: String, value: String): RequestMatcher {
+    fun query(name: String, value: String?): RequestMatcher {
         return ToStringRequestMatcher("query($name, $value)") { request ->
             request.path.substringAfter("?")
                 .split("&")
