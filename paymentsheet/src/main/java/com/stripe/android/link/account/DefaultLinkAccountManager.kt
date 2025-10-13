@@ -248,6 +248,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 bankAccountId = bankAccountId,
                 userEmail = linkAccount.email,
                 consumerSessionClientSecret = linkAccount.clientSecret,
+                clientAttributionMetadata = config.clientAttributionMetadata,
             )
         } else {
             errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_BANK_ACCOUNT_WITH_NULL_ACCOUNT)

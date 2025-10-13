@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -162,6 +163,7 @@ internal open class FakeLinkRepository : LinkRepository {
         bankAccountId: String,
         userEmail: String,
         consumerSessionClientSecret: String,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ) = createBankAccountPaymentDetailsResult
 
     override suspend fun shareCardPaymentDetails(

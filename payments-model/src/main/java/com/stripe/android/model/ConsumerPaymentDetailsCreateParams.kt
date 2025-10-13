@@ -32,6 +32,10 @@ sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcela
                 params += it
             }
 
+            cardPaymentMethodCreateParamsMap["client_attribution_metadata"]?.let {
+                params += mapOf("client_attribution_metadata" to it)
+            }
+
             // only card number, exp_month and exp_year are included
             (cardPaymentMethodCreateParamsMap[BASE_PARAM_CARD] as? Map<*, *>)?.let { createParamsMap ->
                 params[LINK_PARAM_CARD] = createParamsMap.filterKeys { key ->
@@ -75,10 +79,11 @@ sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcela
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    data class BankAccount(
+    data class BankAccount constructor(
         private val bankAccountId: String,
         private val billingAddress: Map<String, @RawValue Any>?,
         private val billingEmailAddress: String?,
+        private val clientAttributionMetadata: Map<String, @RawValue Any>?,
     ) : ConsumerPaymentDetailsCreateParams {
 
         override fun toParamMap(): Map<String, Any> {
@@ -97,7 +102,11 @@ sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcela
                 ),
             )
 
-            return accountParams + billingParams
+            val clientAttributionMetadataParams = clientAttributionMetadata?.let {
+                mapOf("client_attribution_metadata" to it)
+            } ?: emptyMap()
+
+            return accountParams + billingParams + clientAttributionMetadataParams
         }
     }
 }

@@ -326,6 +326,7 @@ internal data class PaymentMethodMetadata(
             linkStateResult: LinkStateResult?,
             customerMetadata: CustomerMetadata?,
             initializationMode: PaymentElementLoader.InitializationMode,
+            clientAttributionMetadata: ClientAttributionMetadata?,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
@@ -369,11 +370,7 @@ internal data class PaymentMethodMetadata(
                     .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
                 passiveCaptchaParams = elementsSession.passiveCaptchaParams,
                 openCardScanAutomatically = configuration.opensCardScannerAutomatically,
-                clientAttributionMetadata = ClientAttributionMetadata.create(
-                    elementsSessionConfigId = elementsSession.elementsSessionId,
-                    initializationMode = initializationMode,
-                    automaticPaymentMethodsEnabled = elementsSession.stripeIntent.automaticPaymentMethodsEnabled,
-                ),
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 
@@ -485,7 +482,7 @@ internal data class PaymentMethodMetadata(
                 forceSetupFutureUseBehaviorAndNewMandate = configuration.forceSetupFutureUseBehaviorAndNewMandate,
                 passiveCaptchaParams = passiveCaptchaParams,
                 openCardScanAutomatically = false,
-                clientAttributionMetadata = null,
+                clientAttributionMetadata = configuration.clientAttributionMetadata,
             )
         }
     }

@@ -592,6 +592,7 @@ class ConsumersApiServiceImpl(
         internal val attachLinkConsumerToLinkAccountSession: String =
             getApiUrl("consumers/attach_link_consumer_to_link_account_session")
 
+        // TODO: send CAM here.
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details`
          */
@@ -602,6 +603,7 @@ class ConsumersApiServiceImpl(
          */
         private val createLinkAccountSession: String = getApiUrl("consumers/link_account_sessions")
 
+        // TODO: send CAM here.
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details/share`
          */

@@ -3,6 +3,7 @@ package com.stripe.android.link
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -12,7 +13,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class LinkConfiguration(
+internal data class LinkConfiguration constructor(
     val stripeIntent: StripeIntent,
     val merchantName: String,
     val sellerBusinessName: String?,
@@ -47,6 +48,7 @@ internal data class LinkConfiguration(
     val saveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
     val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
+    val clientAttributionMetadata: ClientAttributionMetadata?,
 ) : Parcelable {
 
     val customerIdForEceDefaultValues: String?

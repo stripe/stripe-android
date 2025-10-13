@@ -2046,13 +2046,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
             get() = getApiUrl("consumers/sessions/log_out")
 
         /**
-         * @return `https://api.stripe.com/v1/consumers/payment_details`
-         */
-        internal val consumerPaymentDetailsUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("consumers/payment_details")
-
-        /**
          * @return `https://api.stripe.com/v1/consumers/payment_details/list`
          */
         internal val listConsumerPaymentDetailsUrl: String
@@ -2066,6 +2059,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             @JvmSynthetic
             get() = getApiUrl("consumers/shipping_addresses/list")
 
+        // TODO: send CAM here.
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details/share`
          */

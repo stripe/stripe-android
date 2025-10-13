@@ -2,6 +2,7 @@ package com.stripe.android.link.repositories
 
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -115,6 +116,7 @@ internal interface LinkRepository {
         bankAccountId: String,
         userEmail: String,
         consumerSessionClientSecret: String,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): Result<ConsumerPaymentDetails.PaymentDetails>
 
     suspend fun shareCardPaymentDetails(

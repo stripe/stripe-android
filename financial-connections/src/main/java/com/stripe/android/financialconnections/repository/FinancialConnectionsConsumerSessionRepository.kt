@@ -264,6 +264,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
                 bankAccountId = bankAccountId,
                 billingAddress = billingDetails?.toConsumerBillingAddressParams(),
                 billingEmailAddress = billingDetails?.email,
+                clientAttributionMetadata = null, // TODO: set value.
             ),
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = true),

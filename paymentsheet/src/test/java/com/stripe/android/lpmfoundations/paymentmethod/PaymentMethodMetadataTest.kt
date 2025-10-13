@@ -1111,6 +1111,7 @@ internal class PaymentMethodMetadataTest {
             ),
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+            clientAttributionMetadata = null,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1331,6 +1332,7 @@ internal class PaymentMethodMetadataTest {
             linkStateResult = null,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+            clientAttributionMetadata = null,
         )
     }
 
@@ -2085,6 +2087,7 @@ internal class PaymentMethodMetadataTest {
             },
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+            clientAttributionMetadata = null,
         )
 
         assertThat(metadata.availableWallets)
@@ -2165,6 +2168,7 @@ internal class PaymentMethodMetadataTest {
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             forceSetupFutureUseBehaviorAndNewMandate = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+            clientAttributionMetadata = null,
         )
     }
 

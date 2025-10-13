@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
-internal class DefaultFormHelper(
+internal class DefaultFormHelper constructor(
     private val coroutineScope: CoroutineScope,
     private val linkInlineHandler: LinkInlineHandler,
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
