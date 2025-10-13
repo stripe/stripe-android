@@ -31,7 +31,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     private val context: Context,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
-    private val userFacingLogger: UserFacingLogger?,
+    private val userFacingLogger: UserFacingLogger,
 ) : IntentConfirmationInterceptor {
     private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptions.apiKeyIsLiveMode)
 
@@ -75,13 +75,13 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             confirmationTokenParams = ConfirmationTokenParams(
                 returnUrl = DefaultReturnUrl.create(context).value,
                 paymentMethodId = paymentMethod.id ?: "".also {
-                    userFacingLogger?.logWarningWithoutPii(ERROR_MISSING_PAYMENT_METHOD_ID)
+                    userFacingLogger.logWarningWithoutPii(ERROR_MISSING_PAYMENT_METHOD_ID)
                 }
             ),
             options = if (paymentMethod.customerId != null) {
                 requestOptions.copy(
                     apiKey = ephemeralKeySecret ?: "".also {
-                        userFacingLogger?.logWarningWithoutPii(ERROR_MISSING_EPHEMERAL_KEY_SECRET)
+                        userFacingLogger.logWarningWithoutPii(ERROR_MISSING_EPHEMERAL_KEY_SECRET)
                     }
                 )
             } else {

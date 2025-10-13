@@ -30,6 +30,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
+import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.view.ActivityStarter
@@ -83,6 +84,7 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
                     .stripeAccountIdProvider { null }
                     .allowsManualConfirmation(args.allowsManualConfirmation)
                     .savedStateHandle(extras.createSavedStateHandle())
+                    .userFacingLogger(FakeUserFacingLogger())
                     .build()
 
                 @Suppress("UNCHECKED_CAST")
@@ -160,6 +162,9 @@ internal interface LpmNetworkTestViewModelComponent {
             savedStateHandle: SavedStateHandle,
         ): Builder
 
+        @BindsInstance
+        fun userFacingLogger(userFacingLogger: UserFacingLogger): Builder
+
         fun build(): LpmNetworkTestViewModelComponent
     }
 }
@@ -178,10 +183,6 @@ internal object LpmNetworkTestModule {
 
     @Provides
     fun providesLogger(): Logger = FakeLogger()
-
-    @Provides
-    @Suppress("FunctionOnlyReturningConstant")
-    fun providesUserFacingLogger(): UserFacingLogger? = null
 
     @Provides
     fun providesPaymentConfiguration(

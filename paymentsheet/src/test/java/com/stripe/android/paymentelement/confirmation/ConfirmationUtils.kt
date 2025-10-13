@@ -106,7 +106,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     context = ApplicationProvider.getApplicationContext(),
                     stripeRepository = stripeRepository,
                     requestOptions = requestOptions,
-                    userFacingLogger = null,
+                    userFacingLogger = FakeUserFacingLogger(),
                 )
             }
         },
