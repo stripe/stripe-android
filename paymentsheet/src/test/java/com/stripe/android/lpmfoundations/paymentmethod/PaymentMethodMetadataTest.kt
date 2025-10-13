@@ -1104,7 +1104,7 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = false,
-            linkState = LinkState(
+            linkStateResult = LinkState(
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
                 configuration = createLinkConfiguration(),
                 loginState = LinkState.LoginState.LoggedOut,
@@ -1156,7 +1156,7 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = false,
             linkConfiguration = PaymentSheet.LinkConfiguration(),
             linkMode = null,
-            linkState = LinkState(
+            linkStateResult = LinkState(
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
                 configuration = createLinkConfiguration(),
                 loginState = LinkState.LoginState.LoggedOut,
@@ -1244,7 +1244,7 @@ internal class PaymentMethodMetadataTest {
             linkConfiguration = PaymentSheet.LinkConfiguration(),
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             linkMode = null,
-            linkState = null,
+            linkStateResult = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
             elementsSessionId = "session_1234",
@@ -1328,7 +1328,7 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = listOf(),
             externalPaymentMethodSpecs = listOf(),
             isGooglePayReady = false,
-            linkState = null,
+            linkStateResult = null,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
         )
@@ -2074,7 +2074,7 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = emptyList(),
             externalPaymentMethodSpecs = emptyList(),
             isGooglePayReady = isGooglePayReady,
-            linkState = if (hasLinkState) {
+            linkStateResult = if (hasLinkState) {
                 LinkState(
                     configuration = mock(),
                     loginState = LinkState.LoginState.LoggedOut,

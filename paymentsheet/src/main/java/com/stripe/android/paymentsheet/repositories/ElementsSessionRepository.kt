@@ -32,6 +32,7 @@ internal interface ElementsSessionRepository {
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
         countryOverride: String?,
+        linkDisallowedFundingSourceCreation: Set<String> = emptySet(),
     ): Result<ElementsSession>
 }
 
@@ -61,6 +62,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
         countryOverride: String?,
+        linkDisallowedFundingSourceCreation: Set<String>,
     ): Result<ElementsSession> {
         val params = initializationMode.toElementsSessionParams(
             customer = customer,
@@ -70,6 +72,7 @@ internal class RealElementsSessionRepository @Inject constructor(
             mobileSessionId = mobileSessionIdProvider.get(),
             appId = appId,
             countryOverride = countryOverride,
+            linkDisallowedFundingSourceCreation = linkDisallowedFundingSourceCreation,
         )
 
         val elementsSession = stripeRepository.retrieveElementsSession(
@@ -132,10 +135,15 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
     mobileSessionId: String,
     appId: String,
     countryOverride: String?,
+    linkDisallowedFundingSourceCreation: Set<String>,
 ): ElementsSessionParams {
     val customerSessionClientSecret = customer?.customerSessionClientSecret
     val legacyCustomerEphemeralKey = customer?.legacyCustomerEphemeralKey
     val customPaymentMethodIds = customPaymentMethods.toElementSessionParam()
+
+    val linkParams = ElementsSessionParams.Link(
+        disallowFundingSourceCreation = linkDisallowedFundingSourceCreation
+    )
 
     return when (this) {
         is PaymentElementLoader.InitializationMode.PaymentIntent -> {
@@ -149,6 +157,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 mobileSessionId = mobileSessionId,
                 appId = appId,
                 countryOverride = countryOverride,
+                link = linkParams,
             )
         }
 
@@ -163,6 +172,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 mobileSessionId = mobileSessionId,
                 appId = appId,
                 countryOverride = countryOverride,
+                link = linkParams,
             )
         }
 
@@ -178,6 +188,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 sellerDetails = intentConfiguration.toSellerDetails(),
                 appId = appId,
                 countryOverride = countryOverride,
+                link = linkParams,
             )
         }
     }

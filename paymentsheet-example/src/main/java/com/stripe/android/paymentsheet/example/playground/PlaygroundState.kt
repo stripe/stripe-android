@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CountrySettin
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionOnBehalfOfSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
@@ -147,6 +148,10 @@ internal sealed interface PlaygroundState : Parcelable {
                 .filterNot { value ->
                     value.isBlank()
                 }
+
+        val onBehalfOf: String
+            get() = snapshot[CustomerSessionOnBehalfOfSettingsDefinition]
+                .value
 
         fun customerSheetConfiguration(): CustomerSheet.Configuration {
             return snapshot.customerSheetConfiguration(this)

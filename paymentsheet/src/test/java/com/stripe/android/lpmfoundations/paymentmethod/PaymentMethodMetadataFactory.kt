@@ -14,7 +14,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
-import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.LinkStateResult
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
@@ -40,7 +40,7 @@ internal object PaymentMethodMetadataFactory {
         paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         linkConfiguration: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
-        linkState: LinkState? = null,
+        linkState: LinkStateResult? = null,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(),
         paymentMethodIncentive: PaymentMethodIncentive? = null,
@@ -49,6 +49,7 @@ internal object PaymentMethodMetadataFactory {
         financialConnectionsAvailability: FinancialConnectionsAvailability? = FinancialConnectionsAvailability.Lite,
         customerMetadataPermissions: CustomerMetadata.Permissions =
             PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
+        customerSessionClientSecret: String? = null,
         shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = SHOP_PAY_CONFIGURATION,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
@@ -69,11 +70,15 @@ internal object PaymentMethodMetadataFactory {
             sellerBusinessName = null,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
-            customerMetadata = CustomerMetadata(
-                hasCustomerConfiguration = hasCustomerConfiguration,
-                isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                permissions = customerMetadataPermissions
-            ),
+            customerMetadata = if (hasCustomerConfiguration) {
+                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
+                    isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                    permissions = customerMetadataPermissions,
+                    customerSessionClientSecret = customerSessionClientSecret,
+                )
+            } else {
+                null
+            },
             sharedDataSpecs = sharedDataSpecs,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
@@ -81,7 +86,7 @@ internal object PaymentMethodMetadataFactory {
             isGooglePayReady = isGooglePayReady,
             linkConfiguration = linkConfiguration,
             linkMode = linkMode,
-            linkState = linkState,
+            linkStateResult = linkState,
             cardBrandFilter = cardBrandFilter,
             paymentMethodIncentive = paymentMethodIncentive,
             elementsSessionId = elementsSessionId,

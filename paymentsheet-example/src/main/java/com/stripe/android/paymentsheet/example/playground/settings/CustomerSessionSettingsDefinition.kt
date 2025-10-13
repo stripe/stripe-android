@@ -21,6 +21,13 @@ internal object CustomerSessionSettingsDefinition : BooleanSettingsDefinition(
         }
     }
 
+    override fun valueUpdated(value: Boolean, playgroundSettings: PlaygroundSettings) {
+        if (!value) {
+            playgroundSettings[CustomerSessionOnBehalfOfSettingsDefinition] =
+                CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.NO_CONNECTED_ACCOUNT
+        }
+    }
+
     override fun configure(
         value: Boolean,
         customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder

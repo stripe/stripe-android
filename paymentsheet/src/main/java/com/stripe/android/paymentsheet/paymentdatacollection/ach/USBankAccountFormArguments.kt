@@ -85,7 +85,7 @@ internal class USBankAccountFormArguments(
                 code = selectedPaymentMethodCode,
                 intent = paymentMethodMetadata.stripeIntent,
                 paymentMethodSaveConsentBehavior = paymentMethodMetadata.paymentMethodSaveConsentBehavior,
-                hasCustomerConfiguration = paymentMethodMetadata.customerMetadata?.hasCustomerConfiguration ?: false,
+                hasCustomerConfiguration = paymentMethodMetadata.customerMetadata != null,
             )
             val instantDebits = selectedPaymentMethodCode == PaymentMethod.Type.Link.code
             val initializationMode = (viewModel as? PaymentSheetViewModel)
@@ -148,7 +148,7 @@ internal class USBankAccountFormArguments(
                 code = selectedPaymentMethodCode,
                 intent = paymentMethodMetadata.stripeIntent,
                 paymentMethodSaveConsentBehavior = paymentMethodMetadata.paymentMethodSaveConsentBehavior,
-                hasCustomerConfiguration = paymentMethodMetadata.customerMetadata?.hasCustomerConfiguration ?: false,
+                hasCustomerConfiguration = paymentMethodMetadata.customerMetadata != null,
             )
             val instantDebits = selectedPaymentMethodCode == PaymentMethod.Type.Link.code
             val bankFormInteractor = BankFormInteractor(

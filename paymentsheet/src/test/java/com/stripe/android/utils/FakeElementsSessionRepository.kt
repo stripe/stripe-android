@@ -26,6 +26,7 @@ internal class FakeElementsSessionRepository(
         val externalPaymentMethods: List<String>,
         val savedPaymentMethodSelectionId: String?,
         val userOverrideCountry: String?,
+        val linkDisallowedFundingSourceCreation: Set<String>,
     )
 
     var lastParams: Params? = null
@@ -37,6 +38,7 @@ internal class FakeElementsSessionRepository(
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
         userOverrideCountry: String?,
+        linkDisallowedFundingSourceCreation: Set<String>,
     ): Result<ElementsSession> {
         lastParams = Params(
             initializationMode = initializationMode,
@@ -45,6 +47,7 @@ internal class FakeElementsSessionRepository(
             customPaymentMethods = customPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
             userOverrideCountry = userOverrideCountry,
+            linkDisallowedFundingSourceCreation = linkDisallowedFundingSourceCreation,
         )
         return if (error != null) {
             Result.failure(error)

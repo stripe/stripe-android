@@ -64,6 +64,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.Link
 import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.LinkDisabledState
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
@@ -86,7 +88,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionResultCallback: PaymentOptionResultCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
-    private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+    private val prefsRepositoryFactory: PrefsRepository.Factory,
     activityResultCaller: ActivityResultCaller,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     // Properties provided through injection
@@ -425,10 +427,12 @@ internal class DefaultFlowController @Inject internal constructor(
                 val currentState = viewModel.state ?: return
                 val metadata = currentState.paymentSheetState.paymentMethodMetadata
                 val accountStatus = account?.accountStatus ?: AccountStatus.SignedOut
-                val linkState = metadata.linkState?.copy(loginState = accountStatus.toLoginState())
-                viewModel.state = currentState.copyPaymentSheetState(
-                    metadata = metadata.copy(linkState = linkState),
-                )
+                val linkStateResult = when (val result = metadata.linkStateResult) {
+                    is LinkState -> result.copy(loginState = accountStatus.toLoginState())
+                    is LinkDisabledState, null -> result
+                }
+                val updatedMetadata = metadata.copy(linkStateResult = linkStateResult)
+                viewModel.state = currentState.copyPaymentSheetState(metadata = updatedMetadata)
             }
             LinkAccountUpdate.None -> Unit
         }
@@ -690,7 +694,7 @@ internal class DefaultFlowController @Inject internal constructor(
         }
 
         selectionToSave?.let {
-            prefsRepositoryFactory(viewModel.state?.config?.customer).savePaymentSelection(it)
+            prefsRepositoryFactory.create(viewModel.state?.config?.customer?.id).savePaymentSelection(it)
         }
     }
 

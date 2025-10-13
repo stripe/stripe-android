@@ -2578,6 +2578,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$LinkConfiguratio
 	public fun <init> ()V
 	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration;
 	public final fun collectMissingBillingDetailsForExistingPaymentMethods (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Builder;
+	public final fun disallowFundingSourceCreation (Ljava/util/Set;)Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Builder;
 	public final fun display (Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Display;)Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Builder;
 }
 
@@ -4018,6 +4019,38 @@ public final class com/stripe/android/paymentsheet/state/CustomerState$DefaultPa
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/CustomerState$DefaultPaymentMethodState$Enabled;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/CustomerState$DefaultPaymentMethodState$Enabled;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/state/LinkDisabledState$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/LinkDisabledState;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/LinkDisabledState;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/state/LinkSignupModeResult$AlreadyRegistered$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/LinkSignupModeResult$AlreadyRegistered;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/LinkSignupModeResult$AlreadyRegistered;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/state/LinkSignupModeResult$Disabled$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/LinkSignupModeResult$Disabled;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/LinkSignupModeResult$Disabled;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/state/LinkSignupModeResult$Enabled$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/LinkSignupModeResult$Enabled;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/LinkSignupModeResult$Enabled;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
