@@ -270,7 +270,6 @@ def executeTests(appUrl, testUrl, isNightly):
             "Samsung Galaxy S22-12.0",
             "Google Pixel 5-11.0",
             "Samsung Galaxy A10-9.0",
-            "Samsung Galaxy Note 9-8.1",
         ]
     else:
         devices = [
