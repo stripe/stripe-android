@@ -24,7 +24,6 @@ import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -150,11 +149,6 @@ internal class DefaultPaymentElementLoaderTest {
             PaymentElementLoader.State(
                 config = config.asCommonConfiguration(),
                 customer = CustomerState(
-                    customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
-                        permissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS.copy(
-                            canRemoveDuplicates = false,
-                        )
-                    ),
                     paymentMethods = PAYMENT_METHODS,
                     defaultPaymentMethodId = null,
                 ),

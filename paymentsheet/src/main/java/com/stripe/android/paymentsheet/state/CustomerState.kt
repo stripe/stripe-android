@@ -1,14 +1,12 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
-import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class CustomerState(
-    val customerMetadata: CustomerMetadata,
     val paymentMethods: List<PaymentMethod>,
     val defaultPaymentMethodId: String?,
 ) : Parcelable {
@@ -33,10 +31,8 @@ internal data class CustomerState(
         internal fun createForCustomerSession(
             customer: ElementsSession.Customer,
             supportedSavedPaymentMethodTypes: List<PaymentMethod.Type>,
-            customerMetadata: CustomerMetadata,
         ): CustomerState {
             return CustomerState(
-                customerMetadata = customerMetadata,
                 paymentMethods = customer.paymentMethods.filter {
                     supportedSavedPaymentMethodTypes.contains(it.type)
                 },
@@ -52,11 +48,9 @@ internal data class CustomerState(
          * @return [CustomerState] instance with legacy ephemeral key secrets
          */
         internal fun createForLegacyEphemeralKey(
-            customerMetadata: CustomerMetadata,
             paymentMethods: List<PaymentMethod>,
         ): CustomerState {
             return CustomerState(
-                customerMetadata = customerMetadata,
                 paymentMethods = paymentMethods,
                 // This is a customer sessions only feature, so will always be null when using a legacy ephemeral key.
                 defaultPaymentMethodId = null

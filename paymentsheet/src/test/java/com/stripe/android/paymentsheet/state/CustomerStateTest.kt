@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -28,7 +27,6 @@ class CustomerStateTest {
         val customerState = CustomerState.createForCustomerSession(
             customer = customer,
             supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card),
-            customerMetadata = PaymentMethodMetadataFixtures.CUSTOMER_SESSIONS_CUSTOMER_METADATA,
         )
 
         return customerState
@@ -63,10 +61,7 @@ class CustomerStateTest {
         )
 
         assertThat(customerState.paymentMethods).isEqualTo(paymentMethods)
-        assertThat(customerState.customerMetadata.customerSessionClientSecret).isNull()
         assertThat(customerState.defaultPaymentMethodId).isNull()
-        assertThat(customerState.customerMetadata.id).isEqualTo("cus_123")
-        assertThat(customerState.customerMetadata.ephemeralKeySecret).isEqualTo("ek_123")
     }
 
     @Test
@@ -92,7 +87,6 @@ class CustomerStateTest {
             val customerState = CustomerState.createForCustomerSession(
                 customer = customer,
                 supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card),
-                customerMetadata = PaymentMethodMetadataFixtures.CUSTOMER_SESSIONS_CUSTOMER_METADATA,
             )
 
             assertThat(customerState.paymentMethods).containsExactlyElementsIn(cards)
@@ -120,7 +114,6 @@ class CustomerStateTest {
         paymentMethods: List<PaymentMethod> = emptyList()
     ): CustomerState {
         return CustomerState.createForLegacyEphemeralKey(
-            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
             paymentMethods = paymentMethods,
         )
     }

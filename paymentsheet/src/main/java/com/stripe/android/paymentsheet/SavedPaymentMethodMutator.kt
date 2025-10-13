@@ -142,7 +142,7 @@ internal class SavedPaymentMethodMutator(
 
     private suspend fun removePaymentMethodInternal(paymentMethodId: String): Result<PaymentMethod> {
         // TODO(samer-stripe): Send 'unexpected_error' here
-        val currentCustomer = customerStateHolder.customer.value ?: return Result.failure(
+        val customerMetadata = paymentMethodMetadataFlow.value?.customerMetadata ?: return Result.failure(
             IllegalStateException(
                 "Could not remove payment method because CustomerConfiguration was not found! Make sure it is " +
                     "provided as part of PaymentSheet.Configuration"
@@ -163,9 +163,9 @@ internal class SavedPaymentMethodMutator(
 
         return customerRepository.detachPaymentMethod(
             customerInfo = CustomerRepository.CustomerInfo(
-                id = currentCustomer.customerMetadata.id,
-                ephemeralKeySecret = currentCustomer.customerMetadata.ephemeralKeySecret,
-                customerSessionClientSecret = currentCustomer.customerMetadata.customerSessionClientSecret,
+                id = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
             ),
             paymentMethodId = paymentMethodId,
             canRemoveDuplicates = canRemoveDuplicates,
@@ -212,16 +212,16 @@ internal class SavedPaymentMethodMutator(
     }
 
     internal suspend fun setDefaultPaymentMethod(paymentMethod: PaymentMethod): Result<Unit> {
-        val customer = customerStateHolder.customer.value
+        val customer = paymentMethodMetadataFlow.value?.customerMetadata
             ?: return Result.failure(
                 IllegalStateException("Unable to set default payment method when customer is null.")
             )
 
         return customerRepository.setDefaultPaymentMethod(
             customerInfo = CustomerRepository.CustomerInfo(
-                id = customer.customerMetadata.id,
-                ephemeralKeySecret = customer.customerMetadata.ephemeralKeySecret,
-                customerSessionClientSecret = customer.customerMetadata.customerSessionClientSecret,
+                id = customer.id,
+                ephemeralKeySecret = customer.ephemeralKeySecret,
+                customerSessionClientSecret = customer.customerSessionClientSecret,
             ),
             paymentMethodId = paymentMethod.id,
         ).onFailure { error ->
@@ -261,7 +261,7 @@ internal class SavedPaymentMethodMutator(
         onSuccess: (PaymentMethod) -> Unit = {},
     ): Result<PaymentMethod> {
         // TODO(samer-stripe): Send 'unexpected_error' here
-        val currentCustomer = customerStateHolder.customer.value ?: return Result.failure(
+        val customerMetadata = paymentMethodMetadataFlow.value?.customerMetadata ?: return Result.failure(
             IllegalStateException(
                 "Could not update payment method because CustomerConfiguration was not found! Make sure it is " +
                     "provided as part of PaymentSheet.Configuration"
@@ -270,9 +270,9 @@ internal class SavedPaymentMethodMutator(
 
         return customerRepository.updatePaymentMethod(
             customerInfo = CustomerRepository.CustomerInfo(
-                id = currentCustomer.customerMetadata.id,
-                ephemeralKeySecret = currentCustomer.customerMetadata.ephemeralKeySecret,
-                customerSessionClientSecret = currentCustomer.customerMetadata.customerSessionClientSecret,
+                id = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
             ),
             paymentMethodId = paymentMethod.id!!,
             params = PaymentMethodUpdateParams.createCard(
@@ -291,8 +291,10 @@ internal class SavedPaymentMethodMutator(
         }.onSuccess { updatedMethod ->
             withContext(uiContext) {
                 customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(updatedMethod)
+
+                val currentCustomer = customerStateHolder.customer.value
                 customerStateHolder.setCustomerState(
-                    currentCustomer.copy(
+                    currentCustomer?.copy(
                         paymentMethods = currentCustomer.paymentMethods.map { savedMethod ->
                             val savedId = savedMethod.id
                             val updatedId = updatedMethod.id

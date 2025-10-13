@@ -6,7 +6,6 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -104,7 +103,6 @@ class VerticalModeInitialScreenFactoryTest {
         if (hasSavedPaymentMethods) {
             customerStateHolder.setCustomerState(
                 CustomerState(
-                    customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
                     defaultPaymentMethodId = null,
                 )

@@ -8,7 +8,6 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.BILLING_DETAILS
@@ -109,7 +108,6 @@ internal object PaymentSheetFixtures {
     )
 
     internal val EMPTY_CUSTOMER_STATE = CustomerState(
-        customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
         paymentMethods = listOf(),
         defaultPaymentMethodId = null,
     )
@@ -188,7 +186,6 @@ internal object PaymentSheetFixtures {
         return copy(
             state = state.copy(
                 customer = CustomerState(
-                    customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
                     paymentMethods = paymentMethods,
                     defaultPaymentMethodId = null,
                 ),

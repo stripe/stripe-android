@@ -181,7 +181,7 @@ class SavedPaymentMethodMutatorTest {
     }
 
     @Test
-    fun `removePaymentMethod with no CustomerConfiguration available, should not attempt detach`() = runScenario {
+    fun `removePaymentMethod with no CustomerConfiguration available, should not attempt detach`() {
         var calledDetach = false
         val customerRepository = FakeCustomerRepository(
             onDetachPaymentMethod = {
@@ -190,7 +190,10 @@ class SavedPaymentMethodMutatorTest {
             }
         )
 
-        runScenario(customerRepository = customerRepository) {
+        runScenario(
+            customerRepository = customerRepository,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        ) {
             savedPaymentMethodMutator.removePaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
             assertThat(calledDetach).isFalse()
@@ -860,14 +863,12 @@ class SavedPaymentMethodMutatorTest {
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = shouldRemoveDuplicates,
                     canUpdateFullPaymentMethodDetails = false,
-                )
+                ),
+                customerSessionClientSecret = customerSessionClientSecret,
             )
         ) {
             customerStateHolder.setCustomerState(
                 CustomerState(
-                    customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
-                        customerSessionClientSecret = customerSessionClientSecret,
-                    ),
                     paymentMethods = listOf(),
                     defaultPaymentMethodId = null,
                 )

@@ -4,7 +4,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadataFlow
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -159,7 +158,6 @@ class PaymentOptionsItemsMapperTest {
         paymentMethods: List<PaymentMethod> = emptyList(),
     ): CustomerState {
         return CustomerState(
-            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
             paymentMethods = paymentMethods,
             defaultPaymentMethodId = defaultPaymentMethodId,
         )

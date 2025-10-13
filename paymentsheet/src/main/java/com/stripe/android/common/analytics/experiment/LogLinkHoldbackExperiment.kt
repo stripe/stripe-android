@@ -169,11 +169,11 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     private suspend fun PaymentElementLoader.State.getEmail(): String? =
         paymentMethodMetadata.linkState?.configuration?.customerInfo?.email ?: retrieveCustomerEmail(
             configuration = config,
-            customer = customer?.let {
+            customer = paymentMethodMetadata.customerMetadata?.let { customerMetadata ->
                 CustomerRepository.CustomerInfo(
-                    id = it.customerMetadata.id,
-                    ephemeralKeySecret = it.customerMetadata.ephemeralKeySecret,
-                    customerSessionClientSecret = it.customerMetadata.customerSessionClientSecret
+                    id = customerMetadata.id,
+                    ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                    customerSessionClientSecret = customerMetadata.customerSessionClientSecret
                 )
             }
         )
