@@ -377,6 +377,7 @@ class CustomerSheet internal constructor(
     @ExperimentalCustomerSessionApi
     class IntentConfiguration internal constructor(
         internal val paymentMethodTypes: List<String>,
+        internal val onBehalfOf: String?,
     ) {
         /**
          * Builder for creating a [IntentConfiguration]
@@ -384,6 +385,7 @@ class CustomerSheet internal constructor(
         @ExperimentalCustomerSessionApi
         class Builder {
             private var paymentMethodTypes = listOf<String>()
+            private var onBehalfOf: String? = null
 
             /**
              * The payment methods types to display. If empty, we dynamically determine the
@@ -395,11 +397,20 @@ class CustomerSheet internal constructor(
             }
 
             /**
+             * The account (if any) for which the funds of the intent are intended. See
+             * [our docs](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-on_behalf_of) for more info.
+             */
+            fun onBehalfOf(connectedAccountId: String) = apply {
+                this.onBehalfOf = connectedAccountId
+            }
+
+            /**
              * Creates the [IntentConfiguration] instance.
              */
             fun build(): IntentConfiguration {
                 return IntentConfiguration(
                     paymentMethodTypes = paymentMethodTypes,
+                    onBehalfOf = onBehalfOf,
                 )
             }
         }
