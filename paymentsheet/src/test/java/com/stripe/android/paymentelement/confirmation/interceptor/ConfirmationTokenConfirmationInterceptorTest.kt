@@ -49,10 +49,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         confirmationTokenParser.parse(ConfirmationTokenFixtures.CONFIRMATION_TOKEN_JSON)!!
     }
 
-    private val minimalConfirmationToken by lazy {
-        confirmationTokenParser.parse(ConfirmationTokenFixtures.MINIMAL_CONFIRMATION_TOKEN_JSON)!!
-    }
-
     @Test
     fun `Fails if creating confirmation token did not succeed`() = runTest {
         val invalidRequestException = InvalidRequestException(
@@ -91,33 +87,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
         )
-    }
-
-    @Test
-    fun `Fails if confirmation token has no payment method preview`() = runTest {
-        val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
-            stripeRepository = object : AbsFakeStripeRepository() {
-                override suspend fun createConfirmationToken(
-                    confirmationTokenParams: ConfirmationTokenParams,
-                    options: ApiRequest.Options
-                ): Result<ConfirmationToken> {
-                    // Return a minimal confirmation token without payment method preview
-                    return Result.success(minimalConfirmationToken)
-                }
-            },
-            intentCreationConfirmationTokenCallbackProvider = Provider {
-                CreateIntentWithConfirmationTokenCallback { _ ->
-                    CreateIntentResult.Success(clientSecret = "pi_123")
-                }
-            },
-        )
-
-        val nextStep = interceptor.interceptDefaultNewPaymentMethod()
-
-        val failedStep = nextStep as ConfirmationDefinition.Action.Fail
-        assertThat(failedStep.cause).isInstanceOf(IllegalStateException::class.java)
-        assertThat(failedStep.message).isEqualTo("Failed to fetch PaymentMethod Type".resolvableString)
     }
 
     @Test

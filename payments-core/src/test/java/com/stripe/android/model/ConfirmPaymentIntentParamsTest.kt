@@ -600,6 +600,18 @@ class ConfirmPaymentIntentParamsTest {
         assertThat(params).containsKey("client_attribution_metadata")
         assertThat(params["client_attribution_metadata"]).isEqualTo(clientAttributionMetadata.toParamMap())
     }
+
+    @Test
+    fun toParamMap_withConfirmationTokenId_shouldCreateExpectedMap() {
+        val params = ConfirmPaymentIntentParams(
+            confirmationTokenId = "ctoken_123",
+            clientSecret = CLIENT_SECRET
+        ).toParamMap()
+
+        assertThat(params).containsKey("confirmation_token")
+        assertThat(params["confirmation_token"]).isEqualTo("ctoken_123")
+    }
+
     private companion object {
         private const val CLIENT_SECRET = "pi_1CkiBMLENEVhOs7YMtUehLau_secret_s4O8SDh7s6spSmHDw1VaYPGZA"
 
