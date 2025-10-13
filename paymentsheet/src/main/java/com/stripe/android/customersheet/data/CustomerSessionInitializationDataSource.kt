@@ -71,6 +71,10 @@ internal class CustomerSessionInitializationDataSource @Inject constructor(
                         canUpdateFullPaymentMethodDetails = true
                     ),
                     defaultPaymentMethodId = customer.defaultPaymentMethod,
+                    customerId = customer.session.customerId,
+                    customerEphemeralKeySecret = customer.session.apiKey,
+                    customerSessionClientSecret = customerSessionElementsSession.ephemeralKey
+                        .customerSessionClientSecret,
                 )
             }.toCustomerSheetDataResult()
         }

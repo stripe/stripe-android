@@ -94,10 +94,10 @@ internal object PaymentSheetFixtures {
         )
     )
 
-    const val DEFAULT_EPHEMERAL_KEY = "ek_6bpdbs8volf6ods1y6tf8oy9p9g64ehr"
+    const val DEFAULT_EPHEMERAL_KEY = "ek_123"
 
     private val defaultCustomerConfig = PaymentSheet.CustomerConfiguration(
-        id = "customer_id",
+        id = "cus_123",
         ephemeralKeySecret = DEFAULT_EPHEMERAL_KEY
     )
 
@@ -108,9 +108,6 @@ internal object PaymentSheetFixtures {
     )
 
     internal val EMPTY_CUSTOMER_STATE = CustomerState(
-        id = defaultCustomerConfig.id,
-        ephemeralKeySecret = defaultCustomerConfig.ephemeralKeySecret,
-        customerSessionClientSecret = null,
         paymentMethods = listOf(),
         defaultPaymentMethodId = null,
     )
@@ -189,9 +186,6 @@ internal object PaymentSheetFixtures {
         return copy(
             state = state.copy(
                 customer = CustomerState(
-                    id = config.customer?.id ?: "cus_1",
-                    ephemeralKeySecret = config.customer?.ephemeralKeySecret ?: "client_secret",
-                    customerSessionClientSecret = null,
                     paymentMethods = paymentMethods,
                     defaultPaymentMethodId = null,
                 ),

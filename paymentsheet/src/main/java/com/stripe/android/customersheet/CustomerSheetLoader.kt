@@ -147,7 +147,9 @@ internal class DefaultCustomerSheetLoader(
         ).isReady().first()
 
         val customerMetadata = CustomerMetadata(
-            hasCustomerConfiguration = true,
+            id = customerSheetSession.customerId,
+            ephemeralKeySecret = customerSheetSession.customerEphemeralKeySecret,
+            customerSessionClientSecret = customerSheetSession.customerSessionClientSecret,
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
             permissions = CustomerMetadata.Permissions.createForCustomerSheet(
                 configuration = configuration,

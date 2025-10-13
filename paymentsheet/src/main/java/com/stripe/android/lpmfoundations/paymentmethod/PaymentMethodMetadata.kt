@@ -324,7 +324,7 @@ internal data class PaymentMethodMetadata(
             externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
             isGooglePayReady: Boolean,
             linkStateResult: LinkStateResult?,
-            customerMetadata: CustomerMetadata,
+            customerMetadata: CustomerMetadata?,
             initializationMode: PaymentElementLoader.InitializationMode,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
@@ -463,11 +463,7 @@ internal data class PaymentMethodMetadata(
                     linkAccount = linkAccount
                 ),
                 shippingDetails = null,
-                customerMetadata = CustomerMetadata(
-                    hasCustomerConfiguration = true,
-                    isPaymentMethodSetAsDefaultEnabled = false,
-                    permissions = CustomerMetadata.Permissions.createForNativeLink(),
-                ),
+                customerMetadata = null,
                 sharedDataSpecs = emptyList(),
                 externalPaymentMethodSpecs = emptyList(),
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),

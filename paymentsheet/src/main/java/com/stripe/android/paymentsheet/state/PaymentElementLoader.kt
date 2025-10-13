@@ -362,9 +362,34 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
         customerInfo: CustomerInfo?,
-    ): CustomerMetadata {
+    ): CustomerMetadata? {
+        val customerId: String
+        val ephemeralKeySecret: String
+        val customerSessionClientSecret: String?
+
+        when (customerInfo) {
+            is CustomerInfo.CustomerSession -> {
+                val customer = elementsSession.customer
+                if (customer != null) {
+                    customerId = customer.session.customerId
+                    ephemeralKeySecret = customer.session.apiKey
+                    customerSessionClientSecret = customerInfo.customerSessionClientSecret
+                } else {
+                    return null
+                }
+            }
+            is CustomerInfo.Legacy -> {
+                customerId = customerInfo.id
+                ephemeralKeySecret = customerInfo.ephemeralKeySecret
+                customerSessionClientSecret = null
+            }
+            null -> return null
+        }
+
         return CustomerMetadata(
-            hasCustomerConfiguration = configuration.customer != null,
+            id = customerId,
+            ephemeralKeySecret = ephemeralKeySecret,
+            customerSessionClientSecret = customerSessionClientSecret,
             isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession),
             permissions = if (customerInfo is CustomerInfo.CustomerSession) {
                 createForPaymentSheetCustomerSession(
@@ -435,13 +460,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 CustomerState.createForCustomerSession(
                     customer = customerInfo.elementsSessionCustomer,
                     supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
-                    customerSessionClientSecret = customerInfo.customerSessionClientSecret,
                 )
             }
             is CustomerInfo.Legacy -> {
                 CustomerState.createForLegacyEphemeralKey(
-                    customerId = customerInfo.id,
-                    accessType = customerInfo.accessType,
                     paymentMethods = retrieveCustomerPaymentMethods(
                         metadata = metadata,
                         customerConfig = customerInfo.customerConfig,

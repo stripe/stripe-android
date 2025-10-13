@@ -263,7 +263,10 @@ internal class CustomerMetadataTest {
                 canRemoveLastPaymentMethod = true,
                 canUpdateFullPaymentMethodDetails = true
             ),
-            defaultPaymentMethodId = null
+            defaultPaymentMethodId = null,
+            customerId = "unused_for_customer_adapter_data_source",
+            customerEphemeralKeySecret = "unused_for_customer_adapter_data_source",
+            customerSessionClientSecret = null,
         )
     }
 
