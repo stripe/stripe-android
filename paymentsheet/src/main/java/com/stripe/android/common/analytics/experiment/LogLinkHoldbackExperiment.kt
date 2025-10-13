@@ -171,9 +171,9 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
             configuration = config,
             customer = customer?.let {
                 CustomerRepository.CustomerInfo(
-                    id = it.id,
-                    ephemeralKeySecret = it.ephemeralKeySecret,
-                    customerSessionClientSecret = it.customerSessionClientSecret
+                    id = it.customerMetadata.id,
+                    ephemeralKeySecret = it.customerMetadata.ephemeralKeySecret,
+                    customerSessionClientSecret = it.customerMetadata.customerSessionClientSecret
                 )
             }
         )

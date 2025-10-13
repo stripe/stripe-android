@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -28,7 +28,7 @@ class CustomerStateTest {
         val customerState = CustomerState.createForCustomerSession(
             customer = customer,
             supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card),
-            customerSessionClientSecret = "cuss_123",
+            customerMetadata = PaymentMethodMetadataFixtures.CUSTOMER_SESSIONS_CUSTOMER_METADATA,
         )
 
         return customerState
@@ -63,10 +63,10 @@ class CustomerStateTest {
         )
 
         assertThat(customerState.paymentMethods).isEqualTo(paymentMethods)
-        assertThat(customerState.customerSessionClientSecret).isNull()
+        assertThat(customerState.customerMetadata.customerSessionClientSecret).isNull()
         assertThat(customerState.defaultPaymentMethodId).isNull()
-        assertThat(customerState.id).isEqualTo("cus_1")
-        assertThat(customerState.ephemeralKeySecret).isEqualTo("ek_1")
+        assertThat(customerState.customerMetadata.id).isEqualTo("cus_123")
+        assertThat(customerState.customerMetadata.ephemeralKeySecret).isEqualTo("ek_123")
     }
 
     @Test
@@ -92,7 +92,7 @@ class CustomerStateTest {
             val customerState = CustomerState.createForCustomerSession(
                 customer = customer,
                 supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card),
-                customerSessionClientSecret = "cuss_123",
+                customerMetadata = PaymentMethodMetadataFixtures.CUSTOMER_SESSIONS_CUSTOMER_METADATA,
             )
 
             assertThat(customerState.paymentMethods).containsExactlyElementsIn(cards)
@@ -120,10 +120,7 @@ class CustomerStateTest {
         paymentMethods: List<PaymentMethod> = emptyList()
     ): CustomerState {
         return CustomerState.createForLegacyEphemeralKey(
-            customerId = "cus_1",
-            accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey(
-                ephemeralKeySecret = "ek_1",
-            ),
+            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
             paymentMethods = paymentMethods,
         )
     }

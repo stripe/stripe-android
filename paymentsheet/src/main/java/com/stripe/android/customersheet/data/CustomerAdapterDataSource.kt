@@ -71,6 +71,9 @@ internal class CustomerAdapterDataSource @Inject constructor(
                 ),
                 // Default payment methods are a customer sessions-only feature, so this value is unused.
                 defaultPaymentMethodId = null,
+                customerId = "unused_for_customer_adapter_data_source",
+                customerEphemeralKeySecret = "unused_for_customer_adapter_data_source",
+                customerSessionClientSecret = null,
             )
         }.toCustomerSheetDataResult()
     }

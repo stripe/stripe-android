@@ -31,6 +31,7 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.CardBrand
@@ -232,9 +233,7 @@ internal class PaymentSheetViewModelTest {
                     .build()
             ),
             customer = CustomerState(
-                id = "cus_2",
-                ephemeralKeySecret = "ek_123",
-                customerSessionClientSecret = null,
+                customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
                 paymentMethods = paymentMethods,
                 defaultPaymentMethodId = null,
             ),
@@ -273,7 +272,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(customerInfoCaptor.firstValue).isEqualTo(
             CustomerRepository.CustomerInfo(
-                id = "cus_2",
+                id = "cus_123",
                 ephemeralKeySecret = "ek_123",
                 customerSessionClientSecret = null,
             )

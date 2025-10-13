@@ -50,6 +50,7 @@ internal class FakeCustomerSheetLoader(
                 CustomerSheetState.Full(
                     config = configuration,
                     PaymentMethodMetadataFactory.create(
+                        hasCustomerConfiguration = true,
                         stripeIntent = stripeIntent,
                         cbcEligibility = cbcEligibility,
                         financialConnectionsAvailability = financialConnectionsAvailability,

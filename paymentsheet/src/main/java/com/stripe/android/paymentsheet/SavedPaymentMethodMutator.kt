@@ -163,9 +163,9 @@ internal class SavedPaymentMethodMutator(
 
         return customerRepository.detachPaymentMethod(
             customerInfo = CustomerRepository.CustomerInfo(
-                id = currentCustomer.id,
-                ephemeralKeySecret = currentCustomer.ephemeralKeySecret,
-                customerSessionClientSecret = currentCustomer.customerSessionClientSecret,
+                id = currentCustomer.customerMetadata.id,
+                ephemeralKeySecret = currentCustomer.customerMetadata.ephemeralKeySecret,
+                customerSessionClientSecret = currentCustomer.customerMetadata.customerSessionClientSecret,
             ),
             paymentMethodId = paymentMethodId,
             canRemoveDuplicates = canRemoveDuplicates,
@@ -219,9 +219,9 @@ internal class SavedPaymentMethodMutator(
 
         return customerRepository.setDefaultPaymentMethod(
             customerInfo = CustomerRepository.CustomerInfo(
-                id = customer.id,
-                ephemeralKeySecret = customer.ephemeralKeySecret,
-                customerSessionClientSecret = customer.customerSessionClientSecret,
+                id = customer.customerMetadata.id,
+                ephemeralKeySecret = customer.customerMetadata.ephemeralKeySecret,
+                customerSessionClientSecret = customer.customerMetadata.customerSessionClientSecret,
             ),
             paymentMethodId = paymentMethod.id,
         ).onFailure { error ->
@@ -270,9 +270,9 @@ internal class SavedPaymentMethodMutator(
 
         return customerRepository.updatePaymentMethod(
             customerInfo = CustomerRepository.CustomerInfo(
-                id = currentCustomer.id,
-                ephemeralKeySecret = currentCustomer.ephemeralKeySecret,
-                customerSessionClientSecret = currentCustomer.customerSessionClientSecret,
+                id = currentCustomer.customerMetadata.id,
+                ephemeralKeySecret = currentCustomer.customerMetadata.ephemeralKeySecret,
+                customerSessionClientSecret = currentCustomer.customerMetadata.customerSessionClientSecret,
             ),
             paymentMethodId = paymentMethod.id!!,
             params = PaymentMethodUpdateParams.createCard(

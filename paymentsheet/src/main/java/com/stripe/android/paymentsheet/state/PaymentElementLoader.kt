@@ -17,7 +17,6 @@ import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata.Permissions.Companion.createForPaymentSheetCustomerSession
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata.Permissions.Companion.createForPaymentSheetLegacyEphemeralKey
-import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.ElementsSession
@@ -362,9 +361,34 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
         customerInfo: CustomerInfo?,
-    ): CustomerMetadata {
+    ): CustomerMetadata? {
+        val customerId: String
+        val ephemeralKeySecret: String
+        val customerSessionClientSecret: String?
+
+        when (customerInfo) {
+            is CustomerInfo.CustomerSession -> {
+                val customer = elementsSession.customer
+                if (customer != null) {
+                    customerId = customer.session.customerId
+                    ephemeralKeySecret = customer.session.apiKey
+                    customerSessionClientSecret = customerInfo.customerSessionClientSecret
+                } else {
+                    return null
+                }
+            }
+            is CustomerInfo.Legacy -> {
+                customerId = customerInfo.id
+                ephemeralKeySecret = customerInfo.ephemeralKeySecret
+                customerSessionClientSecret = null
+            }
+            null -> return null
+        }
+
         return CustomerMetadata(
-            hasCustomerConfiguration = configuration.customer != null,
+            id = customerId,
+            ephemeralKeySecret = ephemeralKeySecret,
+            customerSessionClientSecret = customerSessionClientSecret,
             isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession),
             permissions = if (customerInfo is CustomerInfo.CustomerSession) {
                 createForPaymentSheetCustomerSession(
@@ -430,18 +454,18 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         savedSelection: Deferred<SavedSelection>,
         cardBrandFilter: PaymentSheetCardBrandFilter
     ): CustomerState? {
+        val customerMetadata = metadata.customerMetadata ?: return null
         val customerState = when (customerInfo) {
             is CustomerInfo.CustomerSession -> {
                 CustomerState.createForCustomerSession(
                     customer = customerInfo.elementsSessionCustomer,
                     supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
-                    customerSessionClientSecret = customerInfo.customerSessionClientSecret,
+                    customerMetadata = customerMetadata,
                 )
             }
             is CustomerInfo.Legacy -> {
                 CustomerState.createForLegacyEphemeralKey(
-                    customerId = customerInfo.id,
-                    accessType = customerInfo.accessType,
+                    customerMetadata = customerMetadata,
                     paymentMethods = retrieveCustomerPaymentMethods(
                         metadata = metadata,
                         customerConfig = customerInfo.customerConfig,
@@ -458,8 +482,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                         savedSelection = savedSelection,
                         defaultPaymentMethodId = state.defaultPaymentMethodId,
                         isPaymentMethodSetAsDefaultEnabled = metadata.customerMetadata
-                            ?.isPaymentMethodSetAsDefaultEnabled
-                            ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
+                            .isPaymentMethodSetAsDefaultEnabled
                     ).filter { paymentMethod ->
                         cardBrandFilter.isAccepted(paymentMethod) &&
                             paymentMethod.isSupportedWithBillingConfig(

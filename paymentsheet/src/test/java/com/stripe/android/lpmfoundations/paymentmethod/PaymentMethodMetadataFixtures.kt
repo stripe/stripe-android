@@ -14,28 +14,37 @@ internal object PaymentMethodMetadataFixtures {
     )
 
     internal val DEFAULT_CUSTOMER_METADATA = CustomerMetadata(
-        hasCustomerConfiguration = true,
+        id = "cus_123",
+        ephemeralKeySecret = "ek_123",
+        customerSessionClientSecret = null,
         isPaymentMethodSetAsDefaultEnabled = false,
         permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS
+    )
+
+    internal val CUSTOMER_SESSIONS_CUSTOMER_METADATA = DEFAULT_CUSTOMER_METADATA.copy(
+        customerSessionClientSecret = "cuss_123",
     )
 
     internal fun getDefaultCustomerMetadata(
         hasCustomerConfiguration: Boolean = true,
         isPaymentMethodSetAsDefaultEnabled: Boolean = false,
         permissions: CustomerMetadata.Permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
-    ): CustomerMetadata {
-        return CustomerMetadata(
-            hasCustomerConfiguration = hasCustomerConfiguration,
-            isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-            permissions = permissions,
-        )
+    ): CustomerMetadata? {
+        return if (hasCustomerConfiguration) {
+            DEFAULT_CUSTOMER_METADATA.copy(
+                isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                permissions = permissions,
+            )
+        } else {
+            null
+        }
     }
 
     internal fun getDefaultCustomerMetadataFlow(
         hasCustomerConfiguration: Boolean = true,
         isPaymentMethodSetAsDefaultEnabled: Boolean = false,
         permissions: CustomerMetadata.Permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
-    ): StateFlow<CustomerMetadata> {
+    ): StateFlow<CustomerMetadata?> {
         return stateFlowOf(
             getDefaultCustomerMetadata(
                 hasCustomerConfiguration = hasCustomerConfiguration,

@@ -69,11 +69,14 @@ internal object PaymentMethodMetadataFactory {
             sellerBusinessName = null,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
-            customerMetadata = CustomerMetadata(
-                hasCustomerConfiguration = hasCustomerConfiguration,
-                isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                permissions = customerMetadataPermissions
-            ),
+            customerMetadata = if (hasCustomerConfiguration) {
+                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
+                    isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                    permissions = customerMetadataPermissions
+                )
+            } else {
+                null
+            },
             sharedDataSpecs = sharedDataSpecs,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
