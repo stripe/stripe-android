@@ -397,11 +397,14 @@ class CustomerSheet internal constructor(
             }
 
             /**
-             * The account (if any) for which the funds of the intent are intended. See
-             * [our docs](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-on_behalf_of) for more info.
+             * The connected account whose payment method configurations will apply to the CustomerSheet session.
+             * Affects the allowed payment methods and whether card brand choice is enabled.
+             * When provided, the payment method will be saved to your platform account. See our
+             * [SetupIntent docs](https://docs.stripe.com/api/setup_intents/object#setup_intent_object-on_behalf_of)
+             * for more information.
              */
-            fun onBehalfOf(connectedAccountId: String) = apply {
-                this.onBehalfOf = connectedAccountId
+            fun onBehalfOf(onBehalfOf: String) = apply {
+                this.onBehalfOf = onBehalfOf
             }
 
             /**
