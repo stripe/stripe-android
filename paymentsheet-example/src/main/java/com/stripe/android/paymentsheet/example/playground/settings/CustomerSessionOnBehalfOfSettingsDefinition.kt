@@ -21,8 +21,8 @@ internal object CustomerSessionOnBehalfOfSettingsDefinition :
 
     override fun convertToValue(value: String): OnBehalfOf {
         return when (value) {
-            US_CONNECTED_ACCOUNT_ID -> OnBehalfOf.FR_CONNECTED_ACCOUNT
-            FR_CONNECTED_ACCOUNT_ID -> OnBehalfOf.US_CONNECTED_ACCOUNT
+            US_CONNECTED_ACCOUNT_ID -> OnBehalfOf.US_CONNECTED_ACCOUNT
+            FR_CONNECTED_ACCOUNT_ID -> OnBehalfOf.FR_CONNECTED_ACCOUNT
             else -> OnBehalfOf.NO_CONNECTED_ACCOUNT
         }
     }
