@@ -28,6 +28,8 @@ internal class IntentConfirmationDefinition(
     InternalPaymentResult
     > {
     override val key: String = "IntentConfirmation"
+
+    @Volatile
     private var ephemeralKeySecret: String? = null
 
     override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption? {
