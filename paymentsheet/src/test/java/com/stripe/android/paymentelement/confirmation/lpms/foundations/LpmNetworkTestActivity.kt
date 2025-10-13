@@ -18,6 +18,7 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -177,6 +178,10 @@ internal object LpmNetworkTestModule {
 
     @Provides
     fun providesLogger(): Logger = FakeLogger()
+
+    @Provides
+    @Suppress("FunctionOnlyReturningConstant")
+    fun providesUserFacingLogger(): UserFacingLogger? = null
 
     @Provides
     fun providesPaymentConfiguration(

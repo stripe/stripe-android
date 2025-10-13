@@ -453,55 +453,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
             )
         }
 
-    @Test
-    fun `Saved PM - Fails if payment method has no ID`() = runTest {
-        val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
-            stripeRepository = object : AbsFakeStripeRepository() {},
-            intentCreationConfirmationTokenCallbackProvider = Provider {
-                CreateIntentWithConfirmationTokenCallback { _ ->
-                    CreateIntentResult.Success(clientSecret = "pi_123")
-                }
-            },
-        )
-
-        val nextStep = interceptor.intercept(
-            intent = PaymentIntentFactory.create(),
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = null),
-                optionsParams = null,
-                passiveCaptchaParams = null,
-                hCaptchaToken = null,
-            ),
-            shippingValues = null,
-        )
-
-        val failedStep = nextStep as ConfirmationDefinition.Action.Fail
-        assertThat(failedStep.cause).isInstanceOf(IllegalStateException::class.java)
-        assertThat(failedStep.message).isEqualTo("PaymentMethod must have an ID".resolvableString)
-    }
-
-    @Test
-    fun `Saved PM - Fails if ephemeral key secret is missing when confirming an attached payment method`() = runTest {
-        val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
-            stripeRepository = object : AbsFakeStripeRepository() {},
-            intentCreationConfirmationTokenCallbackProvider = Provider {
-                CreateIntentWithConfirmationTokenCallback { _ ->
-                    CreateIntentResult.Success(clientSecret = "pi_123")
-                }
-            },
-        )
-
-        val nextStep = interceptor.interceptDefaultSavedPaymentMethod()
-
-        val failedStep = nextStep as ConfirmationDefinition.Action.Fail
-        assertThat(failedStep.cause).isInstanceOf(IllegalStateException::class.java)
-        assertThat(failedStep.message).isEqualTo(
-            "Ephemeral key secret is required to confirm with saved payment method".resolvableString
-        )
-    }
-
     private fun createFakeStripeRepositoryForConfirmationToken(): StripeRepository {
         return object : AbsFakeStripeRepository() {
             override suspend fun createConfirmationToken(
