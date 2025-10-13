@@ -79,14 +79,18 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                         errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                     )
             ),
-            options = requestOptions.copy(
-                apiKey = ephemeralKeySecret
-                    ?: return ConfirmationDefinition.Action.Fail(
-                        cause = IllegalStateException(ERROR_MISSING_EPHEMERAL_KEY_SECRET),
-                        message = ERROR_MISSING_EPHEMERAL_KEY_SECRET.resolvableString,
-                        errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                    ),
-            ),
+            options = if (paymentMethod.customerId != null) {
+                requestOptions.copy(
+                    apiKey = ephemeralKeySecret
+                        ?: return ConfirmationDefinition.Action.Fail(
+                            cause = IllegalStateException(ERROR_MISSING_EPHEMERAL_KEY_SECRET),
+                            message = ERROR_MISSING_EPHEMERAL_KEY_SECRET.resolvableString,
+                            errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                        ),
+                )
+            } else {
+                requestOptions
+            },
         ).fold(
             onSuccess = { confirmationToken ->
                 handleDeferredOnConfirmationTokenCreated(

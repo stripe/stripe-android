@@ -364,7 +364,56 @@ class ConfirmationTokenConfirmationInterceptorTest {
     }
 
     @Test
-    fun `Saved PM - succeed if a ephemeralKeySecret associated with the customer  is provided`() =
+    fun `Saved PM - succeed without ephemeralKeySecret if the payment method is not attached`() =
+        runInterceptorScenario(
+            initializationMode = DEFAULT_DEFERRED_INTENT,
+            scenario = InterceptorTestScenario(
+                stripeRepository = object : AbsFakeStripeRepository() {
+                    override suspend fun createConfirmationToken(
+                        confirmationTokenParams: ConfirmationTokenParams,
+                        options: ApiRequest.Options
+                    ): Result<ConfirmationToken> {
+                        return Result.success(confirmationToken)
+                    }
+
+                    override suspend fun retrieveStripeIntent(
+                        clientSecret: String,
+                        options: ApiRequest.Options,
+                        expandFields: List<String>
+                    ): Result<StripeIntent> {
+                        return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+                    }
+                },
+                intentCreationConfirmationTokenCallbackProvider = Provider {
+                    CreateIntentWithConfirmationTokenCallback { _ ->
+                        CreateIntentResult.Success(clientSecret = "pi_123_secret_456")
+                    }
+                },
+            )
+        ) { interceptor ->
+
+            val nextStep = interceptor.intercept(
+                intent = PaymentIntentFactory.create(),
+                confirmationOption = PaymentMethodConfirmationOption.Saved(
+                    paymentMethod = PaymentMethodFixtures.AU_BECS_DEBIT,
+                    optionsParams = null,
+                    passiveCaptchaParams = null,
+                    hCaptchaToken = null,
+                ),
+                shippingValues = null,
+            )
+
+            assertThat(nextStep).isEqualTo(
+                ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
+                    intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    completedFullPaymentFlow = true,
+                )
+            )
+        }
+
+    @Test
+    fun `Saved PM - succeed if a ephemeralKeySecret associated with the customer is provided`() =
         runInterceptorScenario(
             initializationMode = DEFAULT_DEFERRED_INTENT,
             scenario = InterceptorTestScenario(
@@ -433,7 +482,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
     }
 
     @Test
-    fun `Saved PM - Fails if ephemeral key secret is missing`() = runTest {
+    fun `Saved PM - Fails if ephemeral key secret is missing when confirming an attached payment method`() = runTest {
         val interceptor = createIntentConfirmationInterceptor(
             initializationMode = DEFAULT_DEFERRED_INTENT,
             stripeRepository = object : AbsFakeStripeRepository() {},
@@ -444,16 +493,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
             },
         )
 
-        val nextStep = interceptor.intercept(
-            intent = PaymentIntentFactory.create(),
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                optionsParams = null,
-                passiveCaptchaParams = null,
-                hCaptchaToken = null,
-            ),
-            shippingValues = null,
-        )
+        val nextStep = interceptor.interceptDefaultSavedPaymentMethod()
 
         val failedStep = nextStep as ConfirmationDefinition.Action.Fail
         assertThat(failedStep.cause).isInstanceOf(IllegalStateException::class.java)
