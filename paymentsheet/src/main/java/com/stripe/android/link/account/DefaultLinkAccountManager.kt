@@ -277,6 +277,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 cvc = cvc,
                 allowRedisplay = allowRedisplay,
                 apiKey = apiKey,
+                clientAttributionMetadata = config.clientAttributionMetadata,
             ).getOrThrow()
         }
     }

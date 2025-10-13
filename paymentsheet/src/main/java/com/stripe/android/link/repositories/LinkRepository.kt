@@ -132,7 +132,8 @@ internal interface LinkRepository {
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String?,
-        apiKey: String?
+        apiKey: String?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): Result<SharePaymentDetails>
 
     suspend fun createPaymentMethod(
