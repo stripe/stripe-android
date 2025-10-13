@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import com.stripe.android.CollectMissingLinkBillingDetailsPreview
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.strings.ResolvableString
@@ -38,6 +39,7 @@ import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePre
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -3243,6 +3245,7 @@ class PaymentSheet internal constructor(
         internal val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
         internal val allowUserEmailEdits: Boolean,
         internal val allowLogOut: Boolean,
+        internal val disallowFundingSourceCreation: Set<String>,
     ) : Parcelable {
 
         @JvmOverloads
@@ -3253,6 +3256,7 @@ class PaymentSheet internal constructor(
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
             allowLogOut = true,
+            disallowFundingSourceCreation = emptySet(),
         )
 
         internal val shouldDisplay: Boolean
@@ -3264,6 +3268,7 @@ class PaymentSheet internal constructor(
         class Builder {
             private var display: Display = Display.Automatic
             private var collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true
+            private var disallowFundingSourceCreation: Set<String> = emptySet()
 
             fun display(display: Display) = apply {
                 this.display = display
@@ -3277,12 +3282,18 @@ class PaymentSheet internal constructor(
                     collectMissingBillingDetailsForExistingPaymentMethods
             }
 
+            @LinkDisallowFundingSourceCreationPreview
+            fun disallowFundingSourceCreation(disallowFundingSourceCreation: Set<String>) = apply {
+                this.disallowFundingSourceCreation = disallowFundingSourceCreation
+            }
+
             fun build() = LinkConfiguration(
                 display = display,
                 collectMissingBillingDetailsForExistingPaymentMethods =
                 collectMissingBillingDetailsForExistingPaymentMethods,
                 allowUserEmailEdits = true,
                 allowLogOut = true,
+                disallowFundingSourceCreation = disallowFundingSourceCreation,
             )
         }
 
@@ -3519,6 +3530,17 @@ class PaymentSheet internal constructor(
         @WalletButtonsPreview
         @Composable
         fun WalletButtons()
+
+        /**
+         * Displays a list of wallet buttons that can be used to checkout instantly
+         *
+         * @param clickHandler intercepts wallet buttons view click before primary confirmation occurs. Return true
+         *   if the click has been handled internally or false if the wallet confirmation process should continue. By
+         *   default always returns false.
+         */
+        @WalletButtonsPreview
+        @Composable
+        fun WalletButtons(clickHandler: WalletButtonsViewClickHandler)
 
         /**
          * Configure the FlowController to process a [PaymentIntent].

@@ -263,11 +263,14 @@ def executeTests(appUrl, testUrl, isNightly):
     devices = []
     if isNightly:
         devices = [
+            "Google Pixel 10 Pro XL-16.0",
+            "Google Pixel 9 Pro-15.0",
             "Google Pixel 8-14.0",
             "Google Pixel 7-13.0",
             "Samsung Galaxy S22-12.0",
             "Google Pixel 5-11.0",
-            "Samsung Galaxy S9-8.0",
+            "Samsung Galaxy A10-9.0",
+            "Samsung Galaxy Note 9-8.1",
         ]
     else:
         devices = [

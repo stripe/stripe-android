@@ -23,6 +23,7 @@ import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
@@ -50,6 +51,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import javax.inject.Provider
 
+@OptIn(WalletButtonsPreview::class)
 internal interface WalletButtonsInteractor {
     val state: StateFlow<State>
 
@@ -123,7 +125,10 @@ internal interface WalletButtonsInteractor {
     }
 
     sealed interface ViewAction {
-        data class OnButtonPressed(val button: WalletButton) : ViewAction
+        data class OnButtonPressed constructor(
+            val button: WalletButton,
+            val clickHandler: WalletButtonsViewClickHandler,
+        ) : ViewAction
         data object OnShown : ViewAction
         data object OnHidden : ViewAction
         data object OnResendCode : ViewAction
@@ -131,7 +136,7 @@ internal interface WalletButtonsInteractor {
     }
 }
 
-@OptIn(ExperimentalAnalyticEventCallbackApi::class)
+@OptIn(ExperimentalAnalyticEventCallbackApi::class, WalletButtonsPreview::class)
 internal class DefaultWalletButtonsInteractor constructor(
     private val arguments: StateFlow<Arguments?>,
     private val confirmationHandler: ConfirmationHandler,
@@ -227,6 +232,14 @@ internal class DefaultWalletButtonsInteractor constructor(
                 analyticsCallbackProvider.get()?.onEvent(
                     AnalyticEvent.TapsButtonInWalletsButtonsView(action.button.walletType.code)
                 )
+
+                val isHandled = action.clickHandler.onWalletButtonClick(
+                    wallet = action.button.walletType.code
+                )
+
+                if (isHandled) {
+                    return
+                }
 
                 arguments.value?.let { arguments ->
                     when (action.button) {

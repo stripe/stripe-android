@@ -528,7 +528,7 @@ internal class PaymentSheetPlaygroundViewModel(
             cause = IllegalStateException("No payment playground state"),
             displayMessage = "No payment playground state"
         )
-        return createAndConfirmIntentInternal(
+        return createAndConfirmIntent(
             confirmationParams = ConfirmationParams.ConfirmationToken(
                 id = confirmationToken.id,
             ),

@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -35,6 +36,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -62,6 +64,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.Link
 import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.LinkDisabledState
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
@@ -179,7 +183,16 @@ internal class DefaultFlowController @Inject internal constructor(
 
     @Composable
     override fun WalletButtons() {
-        viewModel.flowControllerStateComponent.walletButtonsContent.Content()
+        viewModel.flowControllerStateComponent.walletButtonsContent.Content(
+            remember {
+                WalletButtonsViewClickHandler { false }
+            }
+        )
+    }
+
+    @Composable
+    override fun WalletButtons(clickHandler: WalletButtonsViewClickHandler) {
+        viewModel.flowControllerStateComponent.walletButtonsContent.Content(clickHandler)
     }
 
     override fun configureWithPaymentIntent(
@@ -414,10 +427,12 @@ internal class DefaultFlowController @Inject internal constructor(
                 val currentState = viewModel.state ?: return
                 val metadata = currentState.paymentSheetState.paymentMethodMetadata
                 val accountStatus = account?.accountStatus ?: AccountStatus.SignedOut
-                val linkState = metadata.linkState?.copy(loginState = accountStatus.toLoginState())
-                viewModel.state = currentState.copyPaymentSheetState(
-                    metadata = metadata.copy(linkState = linkState),
-                )
+                val linkStateResult = when (val result = metadata.linkStateResult) {
+                    is LinkState -> result.copy(loginState = accountStatus.toLoginState())
+                    is LinkDisabledState, null -> result
+                }
+                val updatedMetadata = metadata.copy(linkStateResult = linkStateResult)
+                viewModel.state = currentState.copyPaymentSheetState(metadata = updatedMetadata)
             }
             LinkAccountUpdate.None -> Unit
         }

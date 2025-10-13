@@ -11,7 +11,9 @@ import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.LinkSignupDisabledReason
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -108,6 +110,8 @@ internal class DefaultEventReporter @Inject internal constructor(
         paymentSelection: PaymentSelection?,
         linkEnabled: Boolean,
         linkMode: LinkMode?,
+        linkDisabledReasons: List<LinkDisabledReason>?,
+        linkSignupDisabledReasons: List<LinkSignupDisabledReason>?,
         googlePaySupported: Boolean,
         linkDisplay: PaymentSheet.LinkConfiguration.Display,
         currency: String?,
@@ -142,6 +146,8 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 linkMode = linkMode,
+                linkDisabledReasons = linkDisabledReasons,
+                linkSignupDisabledReasons = linkSignupDisabledReasons,
                 googlePaySupported = googlePaySupported,
                 linkDisplay = linkDisplay,
                 initializationMode = initializationMode,

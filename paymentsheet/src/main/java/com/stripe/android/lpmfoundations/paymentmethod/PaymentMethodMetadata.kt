@@ -32,13 +32,17 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.toPaymentMethodIncentive
+import com.stripe.android.paymentsheet.state.LinkDisabledState
+import com.stripe.android.paymentsheet.state.LinkSignupModeResult
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.LinkStateResult
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.FormElement
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 internal const val IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE = false
@@ -69,7 +73,7 @@ internal data class PaymentMethodMetadata(
     val linkConfiguration: PaymentSheet.LinkConfiguration,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val linkMode: LinkMode?,
-    val linkState: LinkState?,
+    val linkStateResult: LinkStateResult?,
     val paymentMethodIncentive: PaymentMethodIncentive?,
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val cardBrandFilter: CardBrandFilter,
@@ -81,6 +85,13 @@ internal data class PaymentMethodMetadata(
     val openCardScanAutomatically: Boolean,
     val clientAttributionMetadata: ClientAttributionMetadata?,
 ) : Parcelable {
+
+    @IgnoredOnParcel
+    val linkState: LinkState? =
+        when (val result = linkStateResult) {
+            is LinkState -> result
+            is LinkDisabledState, null -> null
+        }
 
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
@@ -312,7 +323,7 @@ internal data class PaymentMethodMetadata(
             sharedDataSpecs: List<SharedDataSpec>,
             externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
             isGooglePayReady: Boolean,
-            linkState: LinkState?,
+            linkStateResult: LinkStateResult?,
             customerMetadata: CustomerMetadata,
             initializationMode: PaymentElementLoader.InitializationMode,
         ): PaymentMethodMetadata {
@@ -327,7 +338,7 @@ internal data class PaymentMethodMetadata(
                 availableWallets = WalletType.listFrom(
                     elementsSession = elementsSession,
                     isGooglePayReady = isGooglePayReady,
-                    linkState = linkState,
+                    linkState = linkStateResult as? LinkState,
                     isShopPayAvailable = configuration.shopPayConfiguration != null
                 ),
                 paymentMethodOrder = configuration.paymentMethodOrder,
@@ -345,7 +356,7 @@ internal data class PaymentMethodMetadata(
                 paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
                 linkConfiguration = configuration.link,
                 linkMode = linkSettings?.linkMode,
-                linkState = linkState,
+                linkStateResult = linkStateResult,
                 paymentMethodIncentive = linkSettings?.linkConsumerIncentive?.toPaymentMethodIncentive(),
                 isGooglePayReady = isGooglePayReady,
                 displayableCustomPaymentMethods = elementsSession.toDisplayableCustomPaymentMethods(configuration),
@@ -401,7 +412,7 @@ internal data class PaymentMethodMetadata(
                 paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
                 linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = elementsSession.linkSettings?.linkMode,
-                linkState = null,
+                linkStateResult = null,
                 paymentMethodIncentive = null,
                 externalPaymentMethodSpecs = emptyList(),
                 displayableCustomPaymentMethods = emptyList(),
@@ -462,9 +473,9 @@ internal data class PaymentMethodMetadata(
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
                 linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = null,
-                linkState = LinkState(
+                linkStateResult = LinkState(
                     configuration = configuration,
-                    signupMode = null,
+                    signupModeResult = LinkSignupModeResult.AlreadyRegistered,
                     loginState = LinkState.LoginState.LoggedIn
                 ),
                 paymentMethodIncentive = null,

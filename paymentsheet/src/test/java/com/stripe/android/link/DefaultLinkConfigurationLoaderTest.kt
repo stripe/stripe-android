@@ -5,7 +5,6 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.link.gate.FakeLinkGate
-import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -21,7 +20,7 @@ import org.mockito.kotlin.verify
 internal class DefaultLinkConfigurationLoaderTest {
     private val logger = FakeLogger()
     private val linkGate = FakeLinkGate()
-    private val linkGateFactory = LinkGate.Factory { linkGate }
+    private val linkGateFactory = FakeLinkGate.Factory(linkGate)
     private val configuration =
         LinkController.Configuration.Builder(
             merchantDisplayName = "Test Merchant",

@@ -42,6 +42,10 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
         clientAttributionMetadata: ClientAttributionMetadata?
     ): T
 
+    abstract fun create(
+        confirmationTokenId: String
+    ): T
+
     fun create(
         paymentMethod: PaymentMethod,
         optionsParams: PaymentMethodOptionsParams?,
@@ -126,6 +130,15 @@ internal class ConfirmPaymentIntentParamsFactory(
             clientAttributionMetadata = clientAttributionMetadata,
         )
     }
+
+    override fun create(
+        confirmationTokenId: String
+    ): ConfirmPaymentIntentParams {
+        return ConfirmPaymentIntentParams(
+            confirmationTokenId = confirmationTokenId,
+            clientSecret = clientSecret,
+        )
+    }
 }
 
 internal class ConfirmSetupIntentParamsFactory(
@@ -166,6 +179,15 @@ internal class ConfirmSetupIntentParamsFactory(
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
             radarOptions = radarOptions,
             clientAttributionMetadata = clientAttributionMetadata,
+        )
+    }
+
+    override fun create(
+        confirmationTokenId: String
+    ): ConfirmSetupIntentParams {
+        return ConfirmSetupIntentParams(
+            confirmationTokenId = confirmationTokenId,
+            clientSecret = clientSecret,
         )
     }
 }

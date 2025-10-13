@@ -164,7 +164,7 @@ internal class PaymentSheetPlaygroundActivity :
 
             val playgroundState by viewModel.state.collectAsState()
 
-            val paymentSheet = remember {
+            val paymentSheet = remember(playgroundState) {
                 PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                     .externalPaymentMethodConfirmHandler(this)
                     .confirmCustomPaymentMethodCallback(this)
@@ -178,22 +178,35 @@ internal class PaymentSheetPlaygroundActivity :
                     }
             }
                 .build()
-            val flowController = remember {
+            val flowController = remember(playgroundState) {
                 PaymentSheet.FlowController.Builder(
                     viewModel::onPaymentSheetResult,
                     viewModel::onPaymentOptionSelected
                 )
                     .externalPaymentMethodConfirmHandler(this)
                     .confirmCustomPaymentMethodCallback(this)
-                    .createIntentCallback(viewModel::createIntentCallback)
                     .analyticEventCallback(viewModel::analyticCallback)
+                    .also {
+                        if (playgroundState?.snapshot[ConfirmationTokenSettingsDefinition] == true) {
+                            it.createIntentCallback(viewModel::createIntentWithConfirmationTokenCallback)
+                        } else {
+                            it.createIntentCallback(viewModel::createIntentCallback)
+                        }
+                    }
             }
                 .build()
-            val embeddedPaymentElementBuilder = remember {
-                EmbeddedPaymentElement.Builder(
-                    viewModel::createIntentCallback,
-                    viewModel::onEmbeddedResult,
-                )
+            val embeddedPaymentElementBuilder = remember(playgroundState) {
+                if (playgroundState?.snapshot[ConfirmationTokenSettingsDefinition] == true) {
+                    EmbeddedPaymentElement.Builder(
+                        viewModel::createIntentWithConfirmationTokenCallback,
+                        viewModel::onEmbeddedResult,
+                    )
+                } else {
+                    EmbeddedPaymentElement.Builder(
+                        viewModel::createIntentCallback,
+                        viewModel::onEmbeddedResult,
+                    )
+                }
             }
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedPaymentElementBuilder)
 
