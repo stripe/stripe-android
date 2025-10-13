@@ -91,11 +91,6 @@ internal interface ConfirmationHandler {
          * The shipping details of the customer that can be attached during the confirmation flow
          */
         val shippingDetails: AddressDetails?,
-
-        /**
-         * An optional ephemeral key secret that can be used during the confirmation process
-         */
-        val ephemeralKeySecret: String? = null,
     ) : Parcelable
 
     /**

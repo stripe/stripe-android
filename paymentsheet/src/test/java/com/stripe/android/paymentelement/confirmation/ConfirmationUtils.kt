@@ -95,11 +95,13 @@ internal suspend fun createIntentConfirmationInterceptor(
         confirmationTokenConfirmationInterceptorFactory = object : ConfirmationTokenConfirmationInterceptor.Factory {
             override fun create(
                 intentConfiguration: PaymentSheet.IntentConfiguration,
-                createIntentCallback: CreateIntentWithConfirmationTokenCallback
+                createIntentCallback: CreateIntentWithConfirmationTokenCallback,
+                ephemeralKeySecret: String?,
             ): ConfirmationTokenConfirmationInterceptor {
                 return ConfirmationTokenConfirmationInterceptor(
                     intentConfiguration = intentConfiguration,
                     createIntentCallback = createIntentCallback,
+                    ephemeralKeySecret = ephemeralKeySecret,
                     context = ApplicationProvider.getApplicationContext(),
                     stripeRepository = stripeRepository,
                     requestOptions = requestOptions,
@@ -120,7 +122,10 @@ internal suspend fun createIntentConfirmationInterceptor(
                 )
             }
         },
-    ).create(initializationMode)
+    ).create(
+        initializationMode = initializationMode,
+        ephemeralKeySecret = null
+    )
 }
 
 internal fun createTestConfirmationHandlerFactory(

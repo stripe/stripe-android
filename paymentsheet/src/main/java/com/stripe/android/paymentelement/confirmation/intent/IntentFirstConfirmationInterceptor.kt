@@ -41,8 +41,7 @@ internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
     override suspend fun intercept(
         intent: StripeIntent,
         confirmationOption: PaymentMethodConfirmationOption.Saved,
-        shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        ephemeralKeySecret: String?
+        shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): ConfirmationDefinition.Action<Args> {
         return confirmActionHelper.createConfirmAction(
             clientSecret = clientSecret,

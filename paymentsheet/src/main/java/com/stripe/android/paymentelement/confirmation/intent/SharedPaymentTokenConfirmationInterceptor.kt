@@ -62,7 +62,6 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
         intent: StripeIntent,
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        ephemeralKeySecret: String?,
     ): ConfirmationDefinition.Action<Args> {
         return intercept(
             intent = intent,

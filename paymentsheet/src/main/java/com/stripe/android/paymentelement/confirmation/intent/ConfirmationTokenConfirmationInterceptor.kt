@@ -26,6 +26,7 @@ import dagger.assisted.AssistedInject
 internal class ConfirmationTokenConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
     @Assisted private val createIntentCallback: CreateIntentWithConfirmationTokenCallback,
+    @Assisted private val ephemeralKeySecret: String?,
     private val context: Context,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
@@ -65,8 +66,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     override suspend fun intercept(
         intent: StripeIntent,
         confirmationOption: PaymentMethodConfirmationOption.Saved,
-        shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        ephemeralKeySecret: String?
+        shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): ConfirmationDefinition.Action<Args> {
         val paymentMethod = confirmationOption.paymentMethod
         return stripeRepository.createConfirmationToken(
@@ -188,6 +188,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         fun create(
             intentConfiguration: PaymentSheet.IntentConfiguration,
             createIntentCallback: CreateIntentWithConfirmationTokenCallback,
+            ephemeralKeySecret: String?,
         ): ConfirmationTokenConfirmationInterceptor
     }
 

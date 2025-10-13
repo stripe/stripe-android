@@ -56,7 +56,6 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         intent: StripeIntent,
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        ephemeralKeySecret: String?,
     ): ConfirmationDefinition.Action<Args> {
         return handleSavedPaymentMethod(
             intentConfiguration = intentConfiguration,

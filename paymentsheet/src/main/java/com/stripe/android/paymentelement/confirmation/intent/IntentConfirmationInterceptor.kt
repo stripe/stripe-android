@@ -24,11 +24,13 @@ internal interface IntentConfirmationInterceptor {
         intent: StripeIntent,
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        ephemeralKeySecret: String? = null,
     ): ConfirmationDefinition.Action<Args>
 
     interface Factory {
-        suspend fun create(initializationMode: PaymentElementLoader.InitializationMode): IntentConfirmationInterceptor
+        suspend fun create(
+            initializationMode: PaymentElementLoader.InitializationMode,
+            ephemeralKeySecret: String?
+        ): IntentConfirmationInterceptor
     }
 
     companion object {
@@ -45,7 +47,8 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
     private val sharedPaymentTokenConfirmationInterceptorFactory: SharedPaymentTokenConfirmationInterceptor.Factory,
 ) : IntentConfirmationInterceptor.Factory {
     override suspend fun create(
-        initializationMode: PaymentElementLoader.InitializationMode
+        initializationMode: PaymentElementLoader.InitializationMode,
+        ephemeralKeySecret: String?
     ): IntentConfirmationInterceptor {
         return when (initializationMode) {
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
@@ -56,8 +59,9 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                 ) {
                     is DeferredIntentCallback.ConfirmationToken -> {
                         confirmationTokenConfirmationInterceptorFactory.create(
-                            initializationMode.intentConfiguration,
-                            deferredIntentCallback.callback,
+                            intentConfiguration = initializationMode.intentConfiguration,
+                            createIntentCallback = deferredIntentCallback.callback,
+                            ephemeralKeySecret = ephemeralKeySecret,
                         )
                     }
                     is DeferredIntentCallback.PaymentMethod -> {

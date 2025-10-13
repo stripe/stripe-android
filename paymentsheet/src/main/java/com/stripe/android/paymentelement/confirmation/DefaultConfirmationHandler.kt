@@ -208,7 +208,6 @@ internal class DefaultConfirmationHandler(
                             appearance = parameters.appearance,
                             initializationMode = parameters.initializationMode,
                             confirmationOption = result.confirmationOption,
-                            ephemeralKeySecret = parameters.ephemeralKeySecret,
                         )
                     )
                 }
