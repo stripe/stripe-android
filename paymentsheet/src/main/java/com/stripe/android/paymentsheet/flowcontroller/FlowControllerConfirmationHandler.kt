@@ -21,7 +21,10 @@ internal interface FlowControllerConfirmationHandler {
      */
     val state: Flow<State>
 
-    val confirmationHandler: ConfirmationHandler
+    /**
+     * An optional ephemeral key secret that can be used during the confirmation process.
+     */
+    val ephemeralKeySecret: String?
 
     /**
      * Performs internal confirmation prerequisites that help speed up overall confirmation time
@@ -46,10 +49,13 @@ internal interface FlowControllerConfirmationHandler {
 
 internal class DefaultFlowControllerConfirmationHandler @Inject constructor(
     val coroutineScope: CoroutineScope,
-    override val confirmationHandler: ConfirmationHandler
+    private val confirmationHandler: ConfirmationHandler
 ) : FlowControllerConfirmationHandler {
     private val _state = Channel<State>()
     override val state = _state.receiveAsFlow()
+
+    override val ephemeralKeySecret: String?
+        get() = confirmationHandler.ephemeralKeySecret
 
     init {
         coroutineScope.launch {

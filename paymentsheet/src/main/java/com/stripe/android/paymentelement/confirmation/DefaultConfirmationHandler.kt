@@ -45,8 +45,11 @@ internal class DefaultConfirmationHandler(
     )
     override val state: StateFlow<ConfirmationHandler.State> = _state.asStateFlow()
 
-    override val customerState: StateFlow<CustomerState?> = savedStateHandle
+    private val customerState: StateFlow<CustomerState?> = savedStateHandle
         .getStateFlow(SAVED_CUSTOMER, null)
+
+    override val ephemeralKeySecret: String?
+        get() = customerState.value?.ephemeralKeySecret
 
     init {
         if (hasReloadedFromProcessDeath) {

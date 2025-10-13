@@ -10,11 +10,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 internal class FakeFlowControllerConfirmationHandler(
     override val state: MutableStateFlow<ConfirmationHandler.State> =
-        MutableStateFlow(ConfirmationHandler.State.Idle)
+        MutableStateFlow(ConfirmationHandler.State.Idle),
+    override val ephemeralKeySecret: String? = null,
 ) : FlowControllerConfirmationHandler {
-    override val confirmationHandler = FakeConfirmationHandler(
+    private val confirmationHandler = FakeConfirmationHandler(
         hasReloadedFromProcessDeath = false,
         state = state,
+        ephemeralKeySecret = ephemeralKeySecret
     )
 
     override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {

@@ -4,13 +4,12 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.Turbine
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.paymentsheet.state.CustomerState
 import kotlinx.coroutines.flow.MutableStateFlow
 
 internal class FakeConfirmationHandler(
     override val hasReloadedFromProcessDeath: Boolean = false,
     override val state: MutableStateFlow<ConfirmationHandler.State> = MutableStateFlow(ConfirmationHandler.State.Idle),
-    override val customerState: MutableStateFlow<CustomerState?> = MutableStateFlow(null)
+    override val ephemeralKeySecret: String? = null,
 ) : ConfirmationHandler {
     val registerTurbine: Turbine<RegisterCall> = Turbine()
     val startTurbine: Turbine<ConfirmationHandler.Args> = Turbine()

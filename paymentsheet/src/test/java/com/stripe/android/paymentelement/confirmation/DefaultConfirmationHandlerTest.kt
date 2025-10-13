@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CustomerStateHolder.Companion.SAVED_CUSTOMER
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
@@ -640,32 +641,8 @@ class DefaultConfirmationHandlerTest {
     }
 
     @Test
-    fun `customerState property exposes customer state from SavedStateHandle`() = test {
-        val customerState = com.stripe.android.paymentsheet.state.CustomerState(
-            id = "cus_123",
-            ephemeralKeySecret = "ek_test_123",
-            customerSessionClientSecret = null,
-            paymentMethods = emptyList(),
-            defaultPaymentMethodId = null,
-        )
-
-        savedStateHandle[SAVED_CUSTOMER] = customerState
-
-        confirmationHandler.customerState.test {
-            assertThat(awaitItem()).isEqualTo(customerState)
-        }
-    }
-
-    @Test
-    fun `customerState property returns null when no customer in SavedStateHandle`() = test {
-        confirmationHandler.customerState.test {
-            assertThat(awaitItem()).isNull()
-        }
-    }
-
-    @Test
     fun `ephemeralKeySecret property returns secret from customerState`() = test {
-        val customerState = com.stripe.android.paymentsheet.state.CustomerState(
+        val customerState = CustomerState(
             id = "cus_123",
             ephemeralKeySecret = "ek_test_456",
             customerSessionClientSecret = null,
