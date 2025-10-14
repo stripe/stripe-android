@@ -11,6 +11,7 @@ import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenClientContextParams
 import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.DeferredIntentParams
+import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
@@ -46,7 +47,10 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.createConfirmationToken(
-            confirmationTokenParams = prepareConfirmationTokenParams(confirmationOption),
+            confirmationTokenParams = prepareConfirmationTokenParams(
+                confirmationOption,
+                shippingValues,
+            ),
             options = requestOptions,
         ).fold(
             onSuccess = { confirmationToken ->
@@ -73,7 +77,10 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     ): ConfirmationDefinition.Action<Args> {
         val paymentMethod = confirmationOption.paymentMethod
         return stripeRepository.createConfirmationToken(
-            confirmationTokenParams = prepareConfirmationTokenParams(confirmationOption),
+            confirmationTokenParams = prepareConfirmationTokenParams(
+                confirmationOption,
+                shippingValues,
+            ),
             options = if (paymentMethod.customerId != null) {
                 requestOptions.copy(
                     apiKey = ephemeralKeySecret ?: "".also {
@@ -179,13 +186,26 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         }
     }
 
-    private fun prepareConfirmationTokenParams(confirmationOption: PaymentMethodConfirmationOption):
-        ConfirmationTokenParams {
+    private fun prepareConfirmationTokenParams(
+        confirmationOption: PaymentMethodConfirmationOption,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+    ): ConfirmationTokenParams {
         val updatedConfirmationOption = confirmationOption.updatedForDeferredIntent(intentConfiguration)
         return ConfirmationTokenParams(
             returnUrl = DefaultReturnUrl.create(context).value,
             paymentMethodId = (confirmationOption as? PaymentMethodConfirmationOption.Saved)?.paymentMethod?.id,
             paymentMethodData = (updatedConfirmationOption as? PaymentMethodConfirmationOption.New)?.createParams,
+            shipping = shippingValues,
+            mandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT).takeIf {
+                when (confirmationOption) {
+                    is PaymentMethodConfirmationOption.New -> {
+                        confirmationOption.createParams.requiresMandate
+                    }
+                    is PaymentMethodConfirmationOption.Saved -> {
+                        confirmationOption.paymentMethod.type?.requiresMandate == true
+                    }
+                }
+            },
             clientContext =
             if (requestOptions.apiKeyIsLiveMode) {
                 null
