@@ -120,6 +120,7 @@ internal class LinkApiRepository @Inject constructor(
         sessionId: String,
         customerId: String?,
         supportedVerificationTypes: List<String>?,
+        linkAuthTokenClientSecret: String?,
     ): Result<ConsumerSessionLookup> = withContext(workContext) {
         runCatching {
             consumersApiService.mobileLookupConsumerSession(
@@ -132,7 +133,8 @@ internal class LinkApiRepository @Inject constructor(
                 requestOptions = apiRequestOptions,
                 sessionId = sessionId,
                 customerId = customerId,
-                supportedVerificationTypes = supportedVerificationTypes
+                supportedVerificationTypes = supportedVerificationTypes,
+                linkAuthTokenClientSecret = linkAuthTokenClientSecret,
             )
         }
     }

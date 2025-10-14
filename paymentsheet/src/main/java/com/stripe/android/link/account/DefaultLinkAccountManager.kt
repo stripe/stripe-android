@@ -531,6 +531,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             customerId = customerId,
             linkAuthIntentId = null,
             supportedVerificationTypes = supportedVerificationTypes.takeIf { startSession },
+            linkAuthTokenClientSecret = null,
         ).onFailure { error ->
             linkEventsReporter.onAccountLookupFailure(error)
         }.map { consumerSessionLookup ->
@@ -553,6 +554,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             email = null,
             emailSource = null,
             supportedVerificationTypes = supportedVerificationTypes,
+            linkAuthTokenClientSecret = null,
         ).onFailure { error ->
             linkEventsReporter.onAccountLookupFailure(error)
         }.map { consumerSessionLookup ->
@@ -560,6 +562,26 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 lookup = consumerSessionLookup,
                 startSession = true,
                 linkAuthIntentId = linkAuthIntentId,
+            )
+        }
+    }
+
+    override suspend fun lookupByLinkAuthTokenClientSecret(linkAuthTokenClientSecret: String): Result<LinkAccount?> {
+        return linkAuth.lookup(
+            linkAuthTokenClientSecret = linkAuthTokenClientSecret,
+            sessionId = config.elementsSessionId,
+            email = null,
+            emailSource = null,
+            supportedVerificationTypes = supportedVerificationTypes,
+            linkAuthIntentId = null,
+            customerId = null
+        ).onFailure { error ->
+            linkEventsReporter.onAccountLookupFailure(error)
+        }.map { consumerSessionLookup ->
+            setLinkAccountFromLookupResult(
+                lookup = consumerSessionLookup,
+                startSession = true,
+                linkAuthIntentId = null,
             )
         }
     }

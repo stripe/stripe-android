@@ -44,6 +44,10 @@ internal sealed class OnrampAnalyticsEvent(
         name = "link_user_authentication_completed"
     )
 
+    data object LinkUserAuthenticationWithTokenCompleted : OnrampAnalyticsEvent(
+        name = "link_user_authentication_with_token_completed"
+    )
+
     data object LinkAuthorizationStarted : OnrampAnalyticsEvent(
         name = "link_authorization_started"
     )
@@ -149,6 +153,7 @@ internal sealed class OnrampAnalyticsEvent(
             RegisterLinkUser("register_link_user"),
             UpdatePhoneNumber("update_phone_number"),
             AuthenticateUser("authenticate_user"),
+            AuthenticateUserWithAuthToken("authenticate_user_with_auth_token"),
             Authorize("authorize"),
             CollectPaymentMethod("collect_payment_method"),
             AttachKycInfo("attach_kyc_info"),

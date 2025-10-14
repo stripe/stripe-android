@@ -27,6 +27,7 @@ import javax.inject.Singleton
  */
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Suppress("TooManyFunctions")
 class LinkController @Inject internal constructor(
     private val interactor: LinkControllerInteractor,
     private val presenterComponentFactory: LinkControllerPresenterComponent.Factory
@@ -79,6 +80,11 @@ class LinkController @Inject internal constructor(
      */
     suspend fun lookupConsumer(email: String): LookupConsumerResult {
         return interactor.lookupConsumer(email)
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun authenticateWithToken(token: String): AuthenticateWithTokenResult {
+        return interactor.authenticateWithToken(token)
     }
 
     /**
@@ -661,6 +667,28 @@ class LinkController @Inject internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Poko
         class Failed internal constructor(val error: Throwable) : UpdatePhoneNumberResult
+    }
+
+    /**
+     * Result of authenticating with a token.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface AuthenticateWithTokenResult {
+
+        /**
+         * The authentication was successful.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Success : AuthenticateWithTokenResult
+
+        /**
+         * An error occurred while authenticating.
+         *
+         * @param error The error that occurred.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
+        class Failed internal constructor(val error: Throwable) : AuthenticateWithTokenResult
     }
 
     /**

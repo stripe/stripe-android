@@ -45,7 +45,8 @@ internal class FakeLinkAuth : LinkAuth {
         linkAuthIntentId: String?,
         customerId: String?,
         sessionId: String,
-        supportedVerificationTypes: List<String>?
+        supportedVerificationTypes: List<String>?,
+        linkAuthTokenClientSecret: String?
     ): Result<ConsumerSessionLookup> {
         lookupCalls.add(
             LookupCall(

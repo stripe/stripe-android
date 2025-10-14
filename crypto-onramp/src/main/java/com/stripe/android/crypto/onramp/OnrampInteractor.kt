@@ -26,6 +26,7 @@ import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
@@ -86,6 +87,30 @@ internal class OnrampInteractor @Inject constructor(
                     )
                 )
                 OnrampConfigurationResult.Failed(linkResult.error)
+            }
+        }
+    }
+
+    suspend fun authenticateUserWithToken(linkAuthTokenClientSecret: String): OnrampTokenAuthenticationResult {
+        return when (
+            val result = linkController.authenticateWithToken(linkAuthTokenClientSecret)
+        ) {
+            is LinkController.AuthenticateWithTokenResult.Success -> {
+                analyticsService?.track(
+                    OnrampAnalyticsEvent.LinkUserAuthenticationWithTokenCompleted
+                )
+
+                OnrampTokenAuthenticationResult.Completed
+            }
+            is LinkController.AuthenticateWithTokenResult.Failed -> {
+                analyticsService?.track(
+                    OnrampAnalyticsEvent.ErrorOccurred(
+                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AuthenticateUserWithAuthToken,
+                        error = result.error,
+                    )
+                )
+
+                OnrampTokenAuthenticationResult.Failed(result.error)
             }
         }
     }

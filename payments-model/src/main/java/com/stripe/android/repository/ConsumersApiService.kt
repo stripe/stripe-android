@@ -69,7 +69,8 @@ interface ConsumersApiService {
         supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        linkAuthTokenClientSecret: String?
     ): ConsumerSessionLookup
 
     suspend fun refreshConsumerSession(
@@ -254,7 +255,8 @@ class ConsumersApiServiceImpl(
         supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        linkAuthTokenClientSecret: String?
     ): ConsumerSessionLookup {
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -271,7 +273,8 @@ class ConsumersApiServiceImpl(
                     "email_source" to emailSource?.backendValue,
                     "app_id" to appId,
                     "customer_id" to customerId,
-                    "supported_verification_types" to supportedVerificationTypes
+                    "supported_verification_types" to supportedVerificationTypes,
+                    "link_auth_token_client_secret" to linkAuthTokenClientSecret
                 ).filterValues { it != null }
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
