@@ -364,6 +364,76 @@ class ConfirmationTokenConfirmationInterceptorTest {
     }
 
     @Test
+    fun `Includes clientContext in test mode`() = runTest {
+        val observedParams = mutableListOf<ConfirmationTokenParams>()
+
+        val interceptor = createIntentConfirmationInterceptor(
+            initializationMode = DEFAULT_DEFERRED_INTENT,
+            publishableKeyProvider = { "pk_test_123" },
+            stripeRepository = object : AbsFakeStripeRepository() {
+                override suspend fun createConfirmationToken(
+                    confirmationTokenParams: ConfirmationTokenParams,
+                    options: ApiRequest.Options
+                ): Result<ConfirmationToken> {
+                    observedParams += confirmationTokenParams
+                    return Result.success(confirmationToken)
+                }
+
+                override suspend fun retrieveStripeIntent(
+                    clientSecret: String,
+                    options: ApiRequest.Options,
+                    expandFields: List<String>
+                ): Result<StripeIntent> {
+                    return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+                }
+            },
+            intentCreationConfirmationTokenCallbackProvider = Provider {
+                succeedingCreateIntentWithConfirmationTokenCallback(confirmationToken)
+            },
+        )
+
+        interceptor.interceptDefaultNewPaymentMethod()
+
+        assertThat(observedParams).hasSize(1)
+        assertThat(observedParams[0].clientContext).isNotNull()
+    }
+
+    @Test
+    fun `Does not include clientContext in live mode`() = runTest {
+        val observedParams = mutableListOf<ConfirmationTokenParams>()
+
+        val interceptor = createIntentConfirmationInterceptor(
+            initializationMode = DEFAULT_DEFERRED_INTENT,
+            publishableKeyProvider = { "pk_live_123" },
+            stripeRepository = object : AbsFakeStripeRepository() {
+                override suspend fun createConfirmationToken(
+                    confirmationTokenParams: ConfirmationTokenParams,
+                    options: ApiRequest.Options
+                ): Result<ConfirmationToken> {
+                    observedParams += confirmationTokenParams
+                    return Result.success(confirmationToken)
+                }
+
+                override suspend fun retrieveStripeIntent(
+                    clientSecret: String,
+                    options: ApiRequest.Options,
+                    expandFields: List<String>
+                ): Result<StripeIntent> {
+                    return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+                }
+            },
+            intentCreationConfirmationTokenCallbackProvider = Provider {
+                succeedingCreateIntentWithConfirmationTokenCallback(confirmationToken)
+            },
+        )
+
+        interceptor.interceptDefaultNewPaymentMethod()
+
+        assertThat(observedParams).hasSize(1)
+        assertThat(observedParams[0].clientContext).isNull()
+    }
+
+    @Test
     fun `Saved PM - succeed without ephemeralKeySecret if the payment method is not attached`() =
         runInterceptorScenario(
             initializationMode = DEFAULT_DEFERRED_INTENT,
