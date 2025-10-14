@@ -79,7 +79,9 @@ internal class PassiveChallengeConfirmationActivityTest {
                         optionsParams = CONFIRMATION_OPTION.optionsParams,
                         shouldSave = false,
                         extraParams = null,
-                        passiveCaptchaParams = null
+                        passiveCaptchaParams = null,
+                        attestationRequired = false,
+                        clientAttributionMetadata = null
                     )
                 )
 
@@ -121,7 +123,9 @@ internal class PassiveChallengeConfirmationActivityTest {
                         optionsParams = CONFIRMATION_OPTION.optionsParams,
                         shouldSave = false,
                         extraParams = null,
-                        passiveCaptchaParams = null
+                        passiveCaptchaParams = null,
+                        attestationRequired = false,
+                        clientAttributionMetadata = null
                     )
                 )
 
@@ -168,7 +172,8 @@ internal class PassiveChallengeConfirmationActivityTest {
                             optionsParams = SAVED_CONFIRMATION_OPTION.optionsParams,
                             originatedFromWallet = false,
                             passiveCaptchaParams = null,
-                            hCaptchaToken = "test_token"
+                            hCaptchaToken = "test_token",
+                            attestationRequired = false
                         )
                     )
 
@@ -225,7 +230,9 @@ internal class PassiveChallengeConfirmationActivityTest {
             optionsParams = null,
             extraParams = null,
             shouldSave = false,
-            passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS
+            passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
+            attestationRequired = false,
+            clientAttributionMetadata = null
         )
 
         val SAVED_CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
@@ -233,7 +240,8 @@ internal class PassiveChallengeConfirmationActivityTest {
             optionsParams = null,
             originatedFromWallet = false,
             passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
-            hCaptchaToken = null
+            hCaptchaToken = null,
+            attestationRequired = false
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(

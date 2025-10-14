@@ -61,6 +61,7 @@ class SharedPaymentTokenConfirmationInterceptorTest {
                     optionsParams = null,
                     passiveCaptchaParams = null,
                     hCaptchaToken = null,
+                    attestationRequired = false,
                 ),
                 shippingValues = providedShippingAddress,
             )

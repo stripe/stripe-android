@@ -34,6 +34,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+@SuppressWarnings("LargeClass")
 internal class DefaultLinkConfirmationHandlerTest {
     private val dispatcher = UnconfinedTestDispatcher()
 
@@ -337,6 +338,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             val option = args.confirmationOption as LinkPassthroughConfirmationOption
             assertThat(option.paymentDetailsId).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id)
             assertThat(option.expectedPaymentMethodType).isEqualTo(ConsumerPaymentDetails.Card.TYPE)
+            assertThat(option.attestationRequired).isEqualTo(false)
         }
 
     @Test
@@ -375,6 +377,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         val option = args.confirmationOption as LinkPassthroughConfirmationOption
         assertThat(option.paymentDetailsId).isEqualTo(bankAccount.id)
         assertThat(option.expectedPaymentMethodType).isEqualTo(ConsumerPaymentDetails.Card.TYPE)
+        assertThat(option.attestationRequired).isEqualTo(false)
     }
 
     @Test
@@ -417,6 +420,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             val option = args.confirmationOption as LinkPassthroughConfirmationOption
             assertThat(option.paymentDetailsId).isEqualTo(bankAccount.id)
             assertThat(option.expectedPaymentMethodType).isEqualTo(ConsumerPaymentDetails.BankAccount.TYPE)
+            assertThat(option.attestationRequired).isEqualTo(false)
         }
 
     @Test
@@ -453,6 +457,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             val option = args.confirmationOption as LinkPassthroughConfirmationOption
             assertThat(option.paymentDetailsId).isEqualTo(passthroughDetails.id)
             assertThat(option.expectedPaymentMethodType).isEqualTo(ConsumerPaymentDetails.Card.TYPE)
+            assertThat(option.attestationRequired).isEqualTo(false)
         }
 
     @Test
@@ -513,6 +518,83 @@ internal class DefaultLinkConfirmationHandlerTest {
                     phone = "+15555555555",
                 )
             )
+        }
+
+    @Test
+    fun `handler with attestationRequired true passes it to confirmation options`() = runTest(dispatcher) {
+        val configuration = TestFactory.LINK_CONFIGURATION
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(
+            confirmationHandler = confirmationHandler,
+            configuration = configuration,
+            attestationRequired = true
+        )
+
+        confirmationHandler.awaitResultTurbine.add(
+            item = ConfirmationHandler.Result.Succeeded(
+                intent = configuration.stripeIntent,
+                deferredIntentConfirmationType = null
+            )
+        )
+
+        val result = handler.confirm(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = CVC,
+            billingPhone = null
+        )
+
+        assertThat(result).isEqualTo(Result.Succeeded)
+        confirmationHandler.startTurbine.awaitItem().assertConfirmationArgs(
+            configuration = configuration,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            cvc = CVC,
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    postalCode = "12312",
+                    country = "US",
+                ),
+            ),
+            allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+            attestationRequired = true
+        )
+    }
+
+    @Test
+    fun `handler with attestationRequired true in passthrough mode passes it to confirmation options`() =
+        runTest(dispatcher) {
+            val configuration = TestFactory.LINK_CONFIGURATION.copy(passthroughModeEnabled = true)
+            val confirmationHandler = FakeConfirmationHandler()
+            val handler = createHandler(
+                confirmationHandler = confirmationHandler,
+                configuration = configuration,
+                attestationRequired = true
+            )
+
+            confirmationHandler.awaitResultTurbine.add(
+                item = ConfirmationHandler.Result.Succeeded(
+                    intent = configuration.stripeIntent,
+                    deferredIntentConfirmationType = null
+                )
+            )
+
+            val result = handler.confirm(
+                paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                cvc = CVC,
+                billingPhone = null
+            )
+
+            assertThat(result).isEqualTo(Result.Succeeded)
+
+            val args = confirmationHandler.startTurbine.awaitItem()
+            assertThat(args.intent).isEqualTo(configuration.stripeIntent)
+
+            val option = args.confirmationOption as LinkPassthroughConfirmationOption
+            assertThat(option.paymentDetailsId).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id)
+            assertThat(option.expectedPaymentMethodType).isEqualTo(ConsumerPaymentDetails.Card.TYPE)
+            assertThat(option.attestationRequired).isEqualTo(true)
         }
 
     @Test
@@ -599,7 +681,8 @@ internal class DefaultLinkConfirmationHandlerTest {
         cvc: String?,
         billingDetails: PaymentMethod.BillingDetails?,
         allowRedisplay: PaymentMethod.AllowRedisplay?,
-        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS
+        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS,
+        attestationRequired: Boolean = false
     ) {
         assertThat(intent).isEqualTo(configuration.stripeIntent)
         val option = confirmationOption as PaymentMethodConfirmationOption.New
@@ -613,6 +696,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             )
         )
         assertThat(option.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
+        assertThat(option.attestationRequired).isEqualTo(attestationRequired)
         assertThat(shippingDetails).isEqualTo(configuration.shippingDetails)
         assertThat(initializationMode).isEqualTo(configuration.initializationMode)
     }
@@ -621,12 +705,14 @@ internal class DefaultLinkConfirmationHandlerTest {
         configuration: LinkConfiguration,
         paymentDetails: LinkPaymentDetails.Saved,
         cvc: String?,
-        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS
+        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS,
+        attestationRequired: Boolean = false
     ) {
         assertThat(intent).isEqualTo(configuration.stripeIntent)
         val option = confirmationOption as PaymentMethodConfirmationOption.Saved
         assertThat(option.paymentMethod.id).isEqualTo(paymentDetails.paymentDetails.paymentMethodId)
         assertThat(option.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
+        assertThat(option.attestationRequired).isEqualTo(attestationRequired)
 
         val optionsCard = option.optionsParams as? PaymentMethodOptionsParams.Card
         assertThat(optionsCard?.cvc).isEqualTo(cvc)
@@ -638,13 +724,15 @@ internal class DefaultLinkConfirmationHandlerTest {
         configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         logger: Logger = FakeLogger(),
         confirmationHandler: FakeConfirmationHandler = FakeConfirmationHandler(),
-        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS
+        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS,
+        attestationRequired: Boolean = false
     ): DefaultLinkConfirmationHandler {
         val handler = DefaultLinkConfirmationHandler(
             confirmationHandler = confirmationHandler,
             configuration = configuration,
             logger = logger,
-            passiveCaptchaParams = passiveCaptchaParams
+            passiveCaptchaParams = passiveCaptchaParams,
+            attestationRequired = attestationRequired
         )
         confirmationHandler.validate()
         return handler

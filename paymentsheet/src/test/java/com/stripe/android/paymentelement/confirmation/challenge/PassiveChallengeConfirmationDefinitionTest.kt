@@ -480,6 +480,8 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             extraParams = null,
             shouldSave = false,
             passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
+            attestationRequired = false,
+            clientAttributionMetadata = null
         )
 
         private val PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED = PaymentMethodConfirmationOption.Saved(
@@ -488,6 +490,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             originatedFromWallet = false,
             passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
             hCaptchaToken = null,
+            attestationRequired = false
         )
 
         private val launcherArgs = PassiveChallengeActivityContract.Args(

@@ -285,7 +285,8 @@ class BacsConfirmationDefinitionTest {
                 )
             ),
             optionsParams = null,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+            attestationRequired = false,
         )
     }
 

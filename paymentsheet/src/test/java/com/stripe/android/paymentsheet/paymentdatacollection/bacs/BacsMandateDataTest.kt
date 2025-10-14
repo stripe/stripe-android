@@ -66,7 +66,8 @@ class BacsMandateDataTest {
         return BacsConfirmationOption(
             createParams = createParams,
             optionsParams = null,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+            attestationRequired = false,
         )
     }
 }

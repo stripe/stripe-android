@@ -10,5 +10,6 @@ import kotlinx.parcelize.Parcelize
 internal data class BacsConfirmationOption(
     val createParams: PaymentMethodCreateParams,
     val optionsParams: PaymentMethodOptionsParams?,
-    val passiveCaptchaParams: PassiveCaptchaParams?
+    val passiveCaptchaParams: PassiveCaptchaParams?,
+    val attestationRequired: Boolean,
 ) : ConfirmationHandler.Option

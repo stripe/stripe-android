@@ -94,6 +94,7 @@ class GooglePayConfirmationFlowTest {
                 originatedFromWallet = true,
                 passiveCaptchaParams = null,
                 clientAttributionMetadata = GOOGLE_PAY_CONFIRMATION_OPTION.clientAttributionMetadata,
+                attestationRequired = false
             ),
             arguments = CONFIRMATION_PARAMETERS,
         )
@@ -115,6 +116,7 @@ class GooglePayConfirmationFlowTest {
             ),
             passiveCaptchaParams = null,
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            attestationRequired = false,
         )
 
         private val PAYMENT_METHOD = PaymentMethodFactory.card()

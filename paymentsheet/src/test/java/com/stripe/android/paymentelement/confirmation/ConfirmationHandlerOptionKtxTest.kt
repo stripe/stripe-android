@@ -68,7 +68,9 @@ class ConfirmationHandlerOptionKtxTest {
                 optionsParams = PaymentMethodOptionsParams.Card(network = "cartes_bancaires"),
                 shouldSave = false,
                 extraParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                clientAttributionMetadata = null,
+                attestationRequired = false
             )
         )
     }
@@ -92,7 +94,9 @@ class ConfirmationHandlerOptionKtxTest {
                 optionsParams = null,
                 shouldSave = false,
                 extraParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                clientAttributionMetadata = null,
+                attestationRequired = false
             )
         )
     }
@@ -116,7 +120,9 @@ class ConfirmationHandlerOptionKtxTest {
                 optionsParams = null,
                 shouldSave = true,
                 extraParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                clientAttributionMetadata = null,
+                attestationRequired = false
             )
         )
     }
@@ -149,7 +155,8 @@ class ConfirmationHandlerOptionKtxTest {
             BacsConfirmationOption(
                 createParams = bacsDebitParams,
                 optionsParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                attestationRequired = false
             )
         )
     }
@@ -173,7 +180,9 @@ class ConfirmationHandlerOptionKtxTest {
                 optionsParams = null,
                 shouldSave = false,
                 extraParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                clientAttributionMetadata = null,
+                attestationRequired = false
             )
         )
     }
@@ -202,6 +211,7 @@ class ConfirmationHandlerOptionKtxTest {
                 ),
                 passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
                 clientAttributionMetadata = null,
+                attestationRequired = false
             )
         )
     }
@@ -315,6 +325,7 @@ class ConfirmationHandlerOptionKtxTest {
                 ),
                 passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
                 clientAttributionMetadata = expectedClientAttributionMetadata,
+                attestationRequired = false,
             )
         )
     }
@@ -344,7 +355,8 @@ class ConfirmationHandlerOptionKtxTest {
             LinkConfirmationOption(
                 configuration = LINK_CONFIGURATION,
                 linkExpressMode = LinkExpressMode.DISABLED,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                attestationRequired = false,
             )
         )
     }
@@ -364,7 +376,8 @@ class ConfirmationHandlerOptionKtxTest {
             LinkConfirmationOption(
                 configuration = LINK_CONFIGURATION,
                 linkExpressMode = LinkExpressMode.ENABLED,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                attestationRequired = false,
             )
         )
     }
@@ -421,6 +434,7 @@ class ConfirmationHandlerOptionKtxTest {
                 paymentMethod = expectedPaymentMethod,
                 passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
                 clientAttributionMetadata = null,
+                attestationRequired = false
             )
         )
     }
@@ -444,6 +458,7 @@ class ConfirmationHandlerOptionKtxTest {
                 paymentMethod = expectedPaymentMethod,
                 passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
                 clientAttributionMetadata = null,
+                attestationRequired = false
             )
         )
     }
@@ -609,7 +624,8 @@ class ConfirmationHandlerOptionKtxTest {
                 saveOption = expectedSaveOption,
                 linkConfiguration = LINK_CONFIGURATION,
                 userInput = userInput,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                attestationRequired = false,
             )
         )
     }

@@ -77,7 +77,9 @@ internal class BacsConfirmationActivityTest {
                         optionsParams = CONFIRMATION_OPTION.optionsParams,
                         shouldSave = false,
                         extraParams = null,
-                        passiveCaptchaParams = null
+                        passiveCaptchaParams = null,
+                        attestationRequired = false,
+                        clientAttributionMetadata = null
                     )
                 )
 
@@ -192,7 +194,8 @@ internal class BacsConfirmationActivityTest {
                 )
             ),
             optionsParams = null,
-            passiveCaptchaParams = null
+            passiveCaptchaParams = null,
+            attestationRequired = false,
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(

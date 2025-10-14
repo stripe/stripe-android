@@ -94,6 +94,7 @@ class HCaptchaConfirmationInterceptorTest {
                 optionsParams = null,
                 passiveCaptchaParams = null,
                 hCaptchaToken = hCaptchaToken,
+                attestationRequired = false
             ),
             shippingValues = null,
         )
@@ -138,6 +139,7 @@ class HCaptchaConfirmationInterceptorTest {
                 optionsParams = null,
                 passiveCaptchaParams = null,
                 hCaptchaToken = hCaptchaToken,
+                attestationRequired = false
             ),
             shippingValues = null,
         )

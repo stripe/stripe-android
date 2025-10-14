@@ -441,7 +441,8 @@ internal class PaymentSheetViewModelTest {
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = optionsParams,
                 originatedFromWallet = false,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -516,7 +517,8 @@ internal class PaymentSheetViewModelTest {
                 paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT,
                 optionsParams = optionsParams,
                 originatedFromWallet = false,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -544,7 +546,8 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = SEPA_DEBIT_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
+                    attestationRequired = false,
                 )
             )
             assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -579,7 +582,8 @@ internal class PaymentSheetViewModelTest {
                 ),
                 extraParams = null,
                 shouldSave = true,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -625,7 +629,8 @@ internal class PaymentSheetViewModelTest {
                 optionsParams = optionsParams,
                 extraParams = null,
                 shouldSave = true,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -978,7 +983,8 @@ internal class PaymentSheetViewModelTest {
                 LinkConfirmationOption(
                     linkExpressMode = LinkExpressMode.DISABLED,
                     configuration = TestFactory.LINK_CONFIGURATION,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
+                    attestationRequired = false,
                 )
             )
 
@@ -1015,7 +1021,8 @@ internal class PaymentSheetViewModelTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
 
@@ -1085,7 +1092,8 @@ internal class PaymentSheetViewModelTest {
                 optionsParams = null,
                 extraParams = null,
                 shouldSave = true,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
 
@@ -1145,7 +1153,8 @@ internal class PaymentSheetViewModelTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
 
@@ -1627,7 +1636,8 @@ internal class PaymentSheetViewModelTest {
                 LinkConfirmationOption(
                     configuration = TestFactory.LINK_CONFIGURATION,
                     linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
+                    attestationRequired = false,
                 )
             )
 
@@ -2130,7 +2140,8 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
+                    attestationRequired = false,
                 )
             )
 
@@ -2169,7 +2180,8 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
+                    attestationRequired = false,
                 )
             )
 
@@ -2268,7 +2280,8 @@ internal class PaymentSheetViewModelTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
 
@@ -2303,7 +2316,8 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
+                    attestationRequired = false,
                 )
             )
 
@@ -2338,7 +2352,8 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
+                    attestationRequired = false,
                 )
             )
 
@@ -2373,7 +2388,8 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
+                    attestationRequired = false,
                 )
             )
 
@@ -2549,7 +2565,8 @@ internal class PaymentSheetViewModelTest {
             BacsConfirmationOption(
                 createParams = bacsPaymentSelection.paymentMethodCreateParams,
                 optionsParams = bacsPaymentSelection.paymentMethodOptionsParams,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
     }
@@ -2721,7 +2738,8 @@ internal class PaymentSheetViewModelTest {
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
                 passiveCaptchaParams = null,
-                clientAttributionMetadata = null
+                clientAttributionMetadata = null,
+                attestationRequired = false,
             )
         )
 
@@ -2766,7 +2784,8 @@ internal class PaymentSheetViewModelTest {
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
                 passiveCaptchaParams = null,
-                clientAttributionMetadata = null
+                clientAttributionMetadata = null,
+                attestationRequired = false,
             )
         )
 
@@ -2804,7 +2823,8 @@ internal class PaymentSheetViewModelTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
 
@@ -2842,7 +2862,8 @@ internal class PaymentSheetViewModelTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
 
@@ -2881,7 +2902,8 @@ internal class PaymentSheetViewModelTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
 
@@ -2919,7 +2941,8 @@ internal class PaymentSheetViewModelTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
 
@@ -3255,7 +3278,8 @@ internal class PaymentSheetViewModelTest {
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
                 originatedFromWallet = false,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
     }
@@ -3276,7 +3300,8 @@ internal class PaymentSheetViewModelTest {
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = optionsParams,
                 originatedFromWallet = false,
-                passiveCaptchaParams = passiveCaptchaParams
+                passiveCaptchaParams = passiveCaptchaParams,
+                attestationRequired = false,
             )
         )
     }
@@ -3296,7 +3321,8 @@ internal class PaymentSheetViewModelTest {
                 optionsParams = optionsParams,
                 extraParams = null,
                 shouldSave = false,
-                passiveCaptchaParams = passiveCaptchaParams
+                passiveCaptchaParams = passiveCaptchaParams,
+                attestationRequired = false,
             )
         )
     }
@@ -3314,7 +3340,8 @@ internal class PaymentSheetViewModelTest {
                 saveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest,
                 linkConfiguration = LINK_CONFIG,
                 userInput = PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION.input,
-                passiveCaptchaParams = passiveCaptchaParams
+                passiveCaptchaParams = passiveCaptchaParams,
+                attestationRequired = false,
             ),
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             paymentElementLoader = FakePaymentElementLoader(
@@ -3348,7 +3375,8 @@ internal class PaymentSheetViewModelTest {
                 optionsParams = optionsParams,
                 extraParams = null,
                 shouldSave = false,
-                passiveCaptchaParams = passiveCaptchaParams
+                passiveCaptchaParams = passiveCaptchaParams,
+                attestationRequired = false,
             )
         )
     }
@@ -3363,7 +3391,8 @@ internal class PaymentSheetViewModelTest {
                 configuration = LINK_CONFIG,
                 linkExpressMode = LinkExpressMode.DISABLED,
                 linkLaunchMode = LinkLaunchMode.Full,
-                passiveCaptchaParams = passiveCaptchaParams
+                passiveCaptchaParams = passiveCaptchaParams,
+                attestationRequired = false,
             ),
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             paymentElementLoader = FakePaymentElementLoader(
@@ -3719,7 +3748,8 @@ internal class PaymentSheetViewModelTest {
                 createParams = createParams,
                 optionsParams = null,
                 extraParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
 

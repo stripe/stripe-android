@@ -39,6 +39,7 @@ internal class FakeCustomerSheetLoader(
     ),
     private val isPaymentMethodSyncDefaultEnabled: Boolean = false,
     private val passiveCaptchaParams: PassiveCaptchaParams? = null,
+    private val attestOnIntentConfirmation: Boolean = false,
 ) : CustomerSheetLoader {
 
     override suspend fun load(configuration: CustomerSheet.Configuration): Result<CustomerSheetState.Full> {
@@ -58,6 +59,7 @@ internal class FakeCustomerSheetLoader(
                         isGooglePayReady = isGooglePayAvailable,
                         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
                         passiveCaptchaParams = passiveCaptchaParams,
+                        attestOnIntentConfirmation = attestOnIntentConfirmation,
                     ),
                     supportedPaymentMethods = supportedPaymentMethods,
                     customerPaymentMethods = customerPaymentMethods,

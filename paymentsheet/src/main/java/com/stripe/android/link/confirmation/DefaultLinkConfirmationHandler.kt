@@ -4,6 +4,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.injection.ATTESTATION_REQUIRED
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
@@ -24,12 +25,14 @@ import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfir
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import javax.inject.Inject
+import javax.inject.Named
 
 internal class DefaultLinkConfirmationHandler @Inject constructor(
     private val configuration: LinkConfiguration,
     private val logger: Logger,
     private val confirmationHandler: ConfirmationHandler,
-    private val passiveCaptchaParams: PassiveCaptchaParams?
+    private val passiveCaptchaParams: PassiveCaptchaParams?,
+    private val attestationRequired: Boolean
 ) : LinkConfirmationHandler {
 
     override suspend fun confirm(
@@ -144,7 +147,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 cvc = cvc,
                 billingPhone = billingPhone,
                 allowRedisplay = allowRedisplay,
-                passiveCaptchaParams = passiveCaptchaParams
+                passiveCaptchaParams = passiveCaptchaParams,
+                attestationRequired = attestationRequired,
             )
         } else {
             PaymentMethodConfirmationOption.New(
@@ -158,7 +162,9 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 extraParams = null,
                 optionsParams = null,
                 shouldSave = false,
-                passiveCaptchaParams = passiveCaptchaParams
+                passiveCaptchaParams = passiveCaptchaParams,
+                clientAttributionMetadata = null,
+                attestationRequired = attestationRequired
             )
         }
 
@@ -210,6 +216,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 ),
                 passiveCaptchaParams = passiveCaptchaParams,
                 clientAttributionMetadata = null,
+                attestationRequired = attestationRequired
             ),
             appearance = PaymentSheet.Appearance(),
             initializationMode = configuration.initializationMode,
@@ -221,13 +228,15 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         private val configuration: LinkConfiguration,
         private val passiveCaptchaParams: PassiveCaptchaParams?,
         private val logger: Logger,
+        @Named(ATTESTATION_REQUIRED) private val attestationRequired: Boolean
     ) : LinkConfirmationHandler.Factory {
         override fun create(confirmationHandler: ConfirmationHandler): LinkConfirmationHandler {
             return DefaultLinkConfirmationHandler(
                 confirmationHandler = confirmationHandler,
                 logger = logger,
                 configuration = configuration,
-                passiveCaptchaParams = passiveCaptchaParams
+                passiveCaptchaParams = passiveCaptchaParams,
+                attestationRequired = attestationRequired
             )
         }
     }
