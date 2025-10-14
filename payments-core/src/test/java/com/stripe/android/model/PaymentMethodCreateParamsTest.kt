@@ -260,7 +260,8 @@ class PaymentMethodCreateParamsTest {
                 paymentDetailsId,
                 consumerSessionClientSecret,
                 billingDetails,
-                extraParams
+                extraParams,
+                clientAttributionMetadata = null
             ).toParamMap()
         ).isEqualTo(
             mapOf(

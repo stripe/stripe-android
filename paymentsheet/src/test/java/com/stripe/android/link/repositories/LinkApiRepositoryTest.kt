@@ -452,7 +452,8 @@ class LinkApiRepositoryTest {
                     paymentDetails.paymentDetails.first().id,
                     consumerSessionSecret,
                     null,
-                    mapOf("card" to mapOf("cvc" to "123"))
+                    mapOf("card" to mapOf("cvc" to "123")),
+                    clientAttributionMetadata = null
                 )
             )
         assertThat(newLinkPaymentDetails.buildFormValues()).isEqualTo(
@@ -574,7 +575,8 @@ class LinkApiRepositoryTest {
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!,
                     consumerSessionSecret,
                     null,
-                    mapOf("card" to mapOf("cvc" to "123"))
+                    mapOf("card" to mapOf("cvc" to "123")),
+                    clientAttributionMetadata = null
                 )
             )
     }

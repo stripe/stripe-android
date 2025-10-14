@@ -43,7 +43,7 @@ constructor(
     private val radarOptions: RadarOptions? = null,
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
-    private val clientAttributionMetadata: ClientAttributionMetadata? = null,
+    val clientAttributionMetadata: ClientAttributionMetadata? = null,
 
     /**
      * If provided, will be used as the representation of this object when calling the Stripe API,
@@ -1406,6 +1406,7 @@ constructor(
             billingDetails: PaymentMethod.BillingDetails? = null,
             extraParams: Map<String, @RawValue Any>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+            clientAttributionMetadata: ClientAttributionMetadata?,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Link,
@@ -1416,6 +1417,7 @@ constructor(
                 ),
                 allowRedisplay = allowRedisplay,
                 billingDetails = billingDetails,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 

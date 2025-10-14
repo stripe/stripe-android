@@ -280,6 +280,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         val fraudDetectionData = fraudDetectionDataRepository.getCached()?.params.orEmpty()
         val expandParams = mapOf("expand" to listOf("payment_method"))
 
+        // TODO: add client attribution metadata
         return consumersApiService.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsId = paymentDetailsId,

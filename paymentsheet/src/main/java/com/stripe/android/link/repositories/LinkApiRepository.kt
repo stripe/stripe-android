@@ -235,7 +235,8 @@ internal class LinkApiRepository @Inject constructor(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = consumerSessionClientSecret,
                 extraParams = extraParams,
-                allowRedisplay = paymentMethodCreateParams.allowRedisplay
+                allowRedisplay = paymentMethodCreateParams.allowRedisplay,
+                clientAttributionMetadata = paymentMethodCreateParams.clientAttributionMetadata,
             )
 
             LinkPaymentDetails.New(
@@ -314,7 +315,8 @@ internal class LinkApiRepository @Inject constructor(
                 paymentMethodCreateParams = PaymentMethodCreateParams.createLink(
                     paymentDetailsId = paymentMethodId,
                     consumerSessionClientSecret = consumerSessionClientSecret,
-                    extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
+                    extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
+                    clientAttributionMetadata = null
                 ),
             )
         }
@@ -366,6 +368,7 @@ internal class LinkApiRepository @Inject constructor(
             consumerSessionClientSecret = consumerSessionClientSecret,
             cvc = paymentMethod.collectedCvc,
             billingPhone = paymentMethod.billingPhone,
+            clientAttributionMetadata = null,
         )
         stripeRepository.createPaymentMethod(
             paymentMethodCreateParams = params,

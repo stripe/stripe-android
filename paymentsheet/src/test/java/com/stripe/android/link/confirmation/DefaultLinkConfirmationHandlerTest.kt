@@ -607,9 +607,10 @@ internal class DefaultLinkConfirmationHandlerTest {
             PaymentMethodCreateParams.createLink(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = linkAccount.clientSecret,
-                extraParams = cvc?.let { mapOf("card" to mapOf("cvc" to cvc)) },
                 billingDetails = billingDetails,
+                extraParams = cvc?.let { mapOf("card" to mapOf("cvc" to cvc)) },
                 allowRedisplay = allowRedisplay,
+                clientAttributionMetadata = null,
             )
         )
         assertThat(option.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)

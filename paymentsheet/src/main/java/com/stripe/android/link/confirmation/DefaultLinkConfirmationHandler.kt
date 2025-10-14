@@ -7,6 +7,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
@@ -138,6 +139,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         val allowRedisplay = allowRedisplay(paymentMethodType = paymentMethodType)
 
         val confirmationOption = if (configuration.passthroughModeEnabled) {
+            // TODO: do I need to add CAM here?
             LinkPassthroughConfirmationOption(
                 paymentDetailsId = paymentDetails.id,
                 expectedPaymentMethodType = paymentMethodType,
@@ -154,6 +156,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     cvc = cvc,
                     billingPhone = billingPhone,
                     allowRedisplay = allowRedisplay,
+                    clientAttributionMetadata = configuration.clientAttributionMetadata,
                 ),
                 extraParams = null,
                 optionsParams = null,
@@ -239,6 +242,7 @@ internal fun createPaymentMethodCreateParams(
     cvc: String?,
     billingPhone: String?,
     allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+    clientAttributionMetadata: ClientAttributionMetadata?,
 ): PaymentMethodCreateParams {
     val billingDetails = PaymentMethod.BillingDetails(
         address = selectedPaymentDetails.billingAddress?.let {
@@ -262,6 +266,7 @@ internal fun createPaymentMethodCreateParams(
         billingDetails = billingDetails.takeIf { it != PaymentMethod.BillingDetails() },
         extraParams = cvc?.let { mapOf("card" to mapOf("cvc" to cvc)) },
         allowRedisplay = allowRedisplay,
+        clientAttributionMetadata = clientAttributionMetadata,
     )
 }
 

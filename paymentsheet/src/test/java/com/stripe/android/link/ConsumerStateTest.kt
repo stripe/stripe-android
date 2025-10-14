@@ -273,7 +273,8 @@ class ConsumerStateTest {
             LinkPaymentMethod.ConsumerPaymentDetails(
                 details = CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
                 collectedCvc = null,
-                billingPhone = null // No phone
+                billingPhone = null
+                // No phone
             )
         )
         val existingState = ConsumerState(existingPaymentDetails)
@@ -376,12 +377,14 @@ class ConsumerStateTest {
             LinkPaymentMethod.ConsumerPaymentDetails(
                 details = CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
                 collectedCvc = null,
-                billingPhone = null // No phone
+                billingPhone = null
+                // No phone
             ),
             LinkPaymentMethod.ConsumerPaymentDetails(
                 details = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
                 collectedCvc = null,
-                billingPhone = null // No phone
+                billingPhone = null
+                // No phone
             )
         )
         val existingState = ConsumerState(existingPaymentDetails)
@@ -420,7 +423,8 @@ class ConsumerStateTest {
             LinkPaymentMethod.ConsumerPaymentDetails(
                 details = CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
                 collectedCvc = null,
-                billingPhone = null // No phone
+                billingPhone = null
+                // No phone
             )
         )
         val existingState = ConsumerState(existingPaymentDetails)
