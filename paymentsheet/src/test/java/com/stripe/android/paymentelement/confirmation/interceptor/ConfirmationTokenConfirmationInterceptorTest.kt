@@ -453,6 +453,47 @@ class ConfirmationTokenConfirmationInterceptorTest {
             )
         }
 
+    @Test
+    fun `Saved PM - Fails if creating confirmation token did not succeed`() = runTest {
+        val invalidRequestException = InvalidRequestException(
+            stripeError = StripeError(
+                type = "card_error",
+                message = "Your card is not supported.",
+                code = "card_declined",
+            ),
+            requestId = "req_123",
+            statusCode = 400,
+        )
+
+        val interceptor = createIntentConfirmationInterceptor(
+            ephemeralKeySecret = "ek_test_123",
+            initializationMode = DEFAULT_DEFERRED_INTENT,
+            stripeRepository = object : AbsFakeStripeRepository() {
+                override suspend fun createConfirmationToken(
+                    confirmationTokenParams: ConfirmationTokenParams,
+                    options: ApiRequest.Options
+                ): Result<ConfirmationToken> {
+                    return Result.failure(invalidRequestException)
+                }
+            },
+            intentCreationConfirmationTokenCallbackProvider = Provider {
+                CreateIntentWithConfirmationTokenCallback { _ ->
+                    CreateIntentResult.Success(clientSecret = "pi_123")
+                }
+            },
+        )
+
+        val nextStep = interceptor.interceptDefaultSavedPaymentMethod()
+
+        assertThat(nextStep).isEqualTo(
+            ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>(
+                cause = invalidRequestException,
+                message = "Your card is not supported.".resolvableString,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        )
+    }
+
     private fun createFakeStripeRepositoryForConfirmationToken(): StripeRepository {
         return object : AbsFakeStripeRepository() {
             override suspend fun createConfirmationToken(
