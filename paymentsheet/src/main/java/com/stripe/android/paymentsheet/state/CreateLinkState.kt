@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.LinkConfiguration
@@ -21,6 +22,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -200,43 +202,23 @@ internal class DefaultCreateLinkState @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata?,
     ): LinkConfiguration {
-        val isCardBrandFilteringRequired =
-            elementsSession.linkPassthroughModeEnabled &&
-                configuration.cardBrandAcceptance != PaymentSheet.CardBrandAcceptance.All
-
-        val cardBrandFilter =
-            if (isCardBrandFilteringRequired) {
-                PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
-            } else {
-                DefaultCardBrandFilter
-            }
-
+        val cardBrandFilter = getCardBrandFilter(
+            elementsSession = elementsSession,
+            configuration = configuration,
+        )
         val shippingDetails = configuration.shippingDetails
-
-        val customerPhone = if (shippingDetails?.isCheckboxSelected == true) {
-            shippingDetails.phoneNumber
-        } else {
-            configuration.defaultBillingDetails?.phone
-        }
-
+        val customerPhone = getCustomerPhone(shippingDetails, configuration)
         val customerEmail = retrieveCustomerEmail(
             configuration = configuration,
             customer = customer
         )
-
         val customerInfo = LinkConfiguration.CustomerInfo(
             name = configuration.defaultBillingDetails?.name,
             email = customerEmail,
             phone = customerPhone,
             billingCountryCode = configuration.defaultBillingDetails?.address?.country,
         )
-
-        val cardBrandChoice = elementsSession.cardBrandChoice?.let { cardBrandChoice ->
-            LinkConfiguration.CardBrandChoice(
-                eligible = cardBrandChoice.eligible,
-                preferredNetworks = cardBrandChoice.preferredNetworks,
-            )
-        }
+        val cardBrandChoice = getCardBrandChoice(elementsSession)
 
         return LinkConfiguration(
             stripeIntent = elementsSession.stripeIntent,
@@ -278,5 +260,38 @@ internal class DefaultCreateLinkState @Inject constructor(
             elementsSession.linkSettings?.linkSupportedPaymentMethodsOnboardingEnabled.orEmpty(),
             clientAttributionMetadata = clientAttributionMetadata,
         )
+    }
+
+    private fun getCardBrandChoice(elementsSession: ElementsSession): LinkConfiguration.CardBrandChoice? {
+        return elementsSession.cardBrandChoice?.let { cardBrandChoice ->
+            LinkConfiguration.CardBrandChoice(
+                eligible = cardBrandChoice.eligible,
+                preferredNetworks = cardBrandChoice.preferredNetworks,
+            )
+        }
+    }
+
+    private fun getCustomerPhone(
+        shippingDetails: AddressDetails?,
+        configuration: CommonConfiguration
+    ) = if (shippingDetails?.isCheckboxSelected == true) {
+        shippingDetails.phoneNumber
+    } else {
+        configuration.defaultBillingDetails?.phone
+    }
+
+    private fun getCardBrandFilter(
+        elementsSession: ElementsSession,
+        configuration: CommonConfiguration,
+    ): CardBrandFilter {
+        val isCardBrandFilteringRequired =
+            elementsSession.linkPassthroughModeEnabled &&
+                configuration.cardBrandAcceptance != PaymentSheet.CardBrandAcceptance.All
+
+        return if (isCardBrandFilteringRequired) {
+            PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
+        } else {
+            DefaultCardBrandFilter
+        }
     }
 }
