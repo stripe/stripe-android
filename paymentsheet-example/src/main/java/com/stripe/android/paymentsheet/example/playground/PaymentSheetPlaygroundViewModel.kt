@@ -212,9 +212,11 @@ internal class PaymentSheetPlaygroundViewModel(
                 return kotlin.Result.success(
                     CustomerSheet.IntentConfiguration.Builder()
                         .paymentMethodTypes(playgroundState.supportedPaymentMethodTypes)
-                        .apply { if (playgroundState.onBehalfOf.isNotBlank()) {
-                            this.onBehalfOf(playgroundState.onBehalfOf)
-                        }}
+                        .apply {
+                            if (playgroundState.onBehalfOf.isNotBlank()) {
+                                this.onBehalfOf(playgroundState.onBehalfOf)
+                            }
+                        }
                         .build()
                 )
             }
