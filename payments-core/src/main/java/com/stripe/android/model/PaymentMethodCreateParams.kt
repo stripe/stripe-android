@@ -43,7 +43,7 @@ constructor(
     private val radarOptions: RadarOptions? = null,
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
-    private val clientAttributionMetadata: ClientAttributionMetadata? = null,
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val clientAttributionMetadata: ClientAttributionMetadata? = null,
 
     /**
      * If provided, will be used as the representation of this object when calling the Stripe API,
