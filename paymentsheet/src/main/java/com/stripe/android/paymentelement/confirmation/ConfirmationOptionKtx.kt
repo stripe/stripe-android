@@ -29,7 +29,7 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.CustomPaymentMethod -> toConfirmationOption(configuration)
         is PaymentSelection.New.USBankAccount -> toConfirmationOption(passiveCaptchaParams, clientAttributionMetadata)
         is PaymentSelection.New.LinkInline -> toConfirmationOption(linkConfiguration, passiveCaptchaParams)
-        is PaymentSelection.New -> toConfirmationOption(passiveCaptchaParams, clientAttributionMetadata)
+        is PaymentSelection.New -> toConfirmationOption(passiveCaptchaParams)
         is PaymentSelection.GooglePay -> toConfirmationOption(
             configuration,
             passiveCaptchaParams,
@@ -79,7 +79,6 @@ private fun PaymentSelection.New.USBankAccount.toConfirmationOption(
             extraParams = paymentMethodExtraParams,
             shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
             passiveCaptchaParams = passiveCaptchaParams,
-            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 }
@@ -110,7 +109,6 @@ private fun PaymentSelection.New.LinkInline.toConfirmationOption(
 
 private fun PaymentSelection.New.toConfirmationOption(
     passiveCaptchaParams: PassiveCaptchaParams?,
-    clientAttributionMetadata: ClientAttributionMetadata?,
 ): ConfirmationHandler.Option {
     return if (paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code) {
         BacsConfirmationOption(
@@ -125,7 +123,6 @@ private fun PaymentSelection.New.toConfirmationOption(
             extraParams = paymentMethodExtraParams,
             shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
             passiveCaptchaParams = passiveCaptchaParams,
-            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 }
