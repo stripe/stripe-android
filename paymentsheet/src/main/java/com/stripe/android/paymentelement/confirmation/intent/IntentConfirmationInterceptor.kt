@@ -29,6 +29,7 @@ internal interface IntentConfirmationInterceptor {
     interface Factory {
         suspend fun create(
             initializationMode: PaymentElementLoader.InitializationMode,
+            customerId: String?,
             ephemeralKeySecret: String?
         ): IntentConfirmationInterceptor
     }
@@ -48,6 +49,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
 ) : IntentConfirmationInterceptor.Factory {
     override suspend fun create(
         initializationMode: PaymentElementLoader.InitializationMode,
+        customerId: String?,
         ephemeralKeySecret: String?
     ): IntentConfirmationInterceptor {
         return when (initializationMode) {
@@ -61,6 +63,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                         confirmationTokenConfirmationInterceptorFactory.create(
                             intentConfiguration = initializationMode.intentConfiguration,
                             createIntentCallback = deferredIntentCallback.callback,
+                            customerId = customerId,
                             ephemeralKeySecret = ephemeralKeySecret,
                         )
                     }

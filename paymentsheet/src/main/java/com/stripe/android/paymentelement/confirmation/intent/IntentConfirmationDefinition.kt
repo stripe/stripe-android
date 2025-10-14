@@ -30,6 +30,9 @@ internal class IntentConfirmationDefinition(
     override val key: String = "IntentConfirmation"
 
     @Volatile
+    private var customerId: String? = null
+
+    @Volatile
     private var ephemeralKeySecret: String? = null
 
     override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption? {
@@ -37,6 +40,7 @@ internal class IntentConfirmationDefinition(
     }
 
     override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
+        customerId = paymentMethodMetadata.customerMetadata?.id
         ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.ephemeralKeySecret
     }
 
@@ -48,6 +52,7 @@ internal class IntentConfirmationDefinition(
         try {
             interceptor = intentConfirmationInterceptorFactory.create(
                 initializationMode = confirmationArgs.initializationMode,
+                customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
             )
         } catch (e: DeferredIntentCallbackNotFoundException) {

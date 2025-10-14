@@ -31,7 +31,8 @@ import dagger.assisted.AssistedInject
 internal class ConfirmationTokenConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
     @Assisted private val createIntentCallback: CreateIntentWithConfirmationTokenCallback,
-    @Assisted private val ephemeralKeySecret: String?,
+    @Assisted(CUSTOMER_ID) private val customerId: String?,
+    @Assisted(EPHEMERAL_KEY_SECRET) private val ephemeralKeySecret: String?,
     private val context: Context,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
@@ -72,12 +73,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     ): ConfirmationDefinition.Action<Args> {
         val paymentMethod = confirmationOption.paymentMethod
         return stripeRepository.createConfirmationToken(
-            confirmationTokenParams = ConfirmationTokenParams(
-                returnUrl = DefaultReturnUrl.create(context).value,
-                paymentMethodId = paymentMethod.id ?: "".also {
-                    userFacingLogger.logWarningWithoutPii(ERROR_MISSING_PAYMENT_METHOD_ID)
-                }
-            ),
+            confirmationTokenParams = prepareConfirmationTokenParams(confirmationOption),
             options = if (paymentMethod.customerId != null) {
                 requestOptions.copy(
                     apiKey = ephemeralKeySecret ?: "".also {
@@ -188,6 +184,12 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         val updatedConfirmationOption = confirmationOption.updatedForDeferredIntent(intentConfiguration)
         return ConfirmationTokenParams(
             returnUrl = DefaultReturnUrl.create(context).value,
+            paymentMethodId =
+            if (confirmationOption is PaymentMethodConfirmationOption.Saved) {
+                confirmationOption.paymentMethod.id
+            } else {
+                null
+            },
             paymentMethodData = (updatedConfirmationOption as? PaymentMethodConfirmationOption.New)?.createParams,
             clientContext = prepareConfirmationTokenClientContextParams(
                 confirmationOption.optionsParams
@@ -197,16 +199,20 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
 
     private fun prepareConfirmationTokenClientContextParams(paymentMethodOptions: PaymentMethodOptionsParams?):
         ConfirmationTokenClientContextParams {
-        return with (intentConfiguration.toDeferredIntentParams()) {
+        return with(intentConfiguration.toDeferredIntentParams()) {
             ConfirmationTokenClientContextParams(
                 mode = mode.code,
                 currency = mode.currency,
                 setupFutureUsage = mode.setupFutureUsage?.code,
                 captureMethod = (mode as? DeferredIntentParams.Mode.Payment)?.captureMethod?.code,
-                paymentMethodTypes = paymentMethodTypes,
+                paymentMethodTypes = paymentMethodTypes.takeIf {
+                    // Empty values are an attempt to unset a parameter;
+                    // however, paymentMethodTypes cannot be unset.
+                    it.isNotEmpty()
+                },
                 onBehalfOf = onBehalfOf,
                 paymentMethodConfiguration = paymentMethodConfigurationId,
-                customer = TODO(),
+                customer = customerId,
                 paymentMethodOptions = paymentMethodOptions,
             )
         }
@@ -217,12 +223,14 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         fun create(
             intentConfiguration: PaymentSheet.IntentConfiguration,
             createIntentCallback: CreateIntentWithConfirmationTokenCallback,
-            ephemeralKeySecret: String?,
+            @Assisted(CUSTOMER_ID) customerId: String?,
+            @Assisted(EPHEMERAL_KEY_SECRET) ephemeralKeySecret: String?,
         ): ConfirmationTokenConfirmationInterceptor
     }
 
     companion object {
-        private const val ERROR_MISSING_PAYMENT_METHOD_ID = "PaymentMethod must have an ID"
+        private const val CUSTOMER_ID = "customerId"
+        private const val EPHEMERAL_KEY_SECRET = "ephemeralKeySecret"
         private const val ERROR_MISSING_EPHEMERAL_KEY_SECRET =
             "Ephemeral key secret is required to confirm with saved payment method"
     }

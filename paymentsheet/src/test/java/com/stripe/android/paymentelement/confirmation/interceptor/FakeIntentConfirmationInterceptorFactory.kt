@@ -10,6 +10,7 @@ internal open class FakeIntentConfirmationInterceptorFactory(
     lateinit var interceptor: FakeIntentConfirmationInterceptor
     override suspend fun create(
         initializationMode: PaymentElementLoader.InitializationMode,
+        customerId: String?,
         ephemeralKeySecret: String?
     ): IntentConfirmationInterceptor {
         interceptor = FakeIntentConfirmationInterceptor().apply(enqueueStep)

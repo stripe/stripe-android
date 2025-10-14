@@ -25,7 +25,7 @@ data class ConfirmationTokenParams(
             shipping?.let { put(PARAM_SHIPPING, it.toParamMap()) }
             mandateDataParams?.let { put(PARAM_MANDATE_DATA, it.toParamMap()) }
             setAsDefaultPaymentMethod?.let { put(PARAM_SET_AS_DEFAULT_PAYMENT_METHOD, it) }
-            clientContext?.toParamMap()?.let { put(PARAM_CLIENT_CONTEXT, it) }
+            clientContext?.let { put(PARAM_CLIENT_CONTEXT, it.toParamMap()) }
         }
     }
 
