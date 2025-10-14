@@ -285,7 +285,8 @@ internal class IntentConfirmationFlowTest {
             intentConfirmationInterceptorFactory =
             object : IntentConfirmationInterceptor.Factory {
                 override suspend fun create(
-                    initializationMode: PaymentElementLoader.InitializationMode
+                    initializationMode: PaymentElementLoader.InitializationMode,
+                    ephemeralKeySecret: String?
                 ): IntentConfirmationInterceptor {
                     return createIntentConfirmationInterceptor(
                         initializationMode = initializationMode,

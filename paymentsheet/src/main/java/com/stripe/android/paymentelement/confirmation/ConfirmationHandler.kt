@@ -90,7 +90,7 @@ internal interface ConfirmationHandler {
         /**
          * The shipping details of the customer that can be attached during the confirmation flow
          */
-        val shippingDetails: AddressDetails?
+        val shippingDetails: AddressDetails?,
     ) : Parcelable
 
     /**

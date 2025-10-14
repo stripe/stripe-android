@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -28,8 +29,15 @@ internal class IntentConfirmationDefinition(
     > {
     override val key: String = "IntentConfirmation"
 
+    @Volatile
+    private var ephemeralKeySecret: String? = null
+
     override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption? {
         return confirmationOption as? PaymentMethodConfirmationOption
+    }
+
+    override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
+        ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.ephemeralKeySecret
     }
 
     override suspend fun action(
@@ -40,6 +48,7 @@ internal class IntentConfirmationDefinition(
         try {
             interceptor = intentConfirmationInterceptorFactory.create(
                 initializationMode = confirmationArgs.initializationMode,
+                ephemeralKeySecret = ephemeralKeySecret,
             )
         } catch (e: DeferredIntentCallbackNotFoundException) {
             return ConfirmationDefinition.Action.Fail(

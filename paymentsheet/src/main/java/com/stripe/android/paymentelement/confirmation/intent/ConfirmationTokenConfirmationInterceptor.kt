@@ -5,6 +5,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenParams
@@ -26,9 +27,11 @@ import dagger.assisted.AssistedInject
 internal class ConfirmationTokenConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
     @Assisted private val createIntentCallback: CreateIntentWithConfirmationTokenCallback,
+    @Assisted private val ephemeralKeySecret: String?,
     private val context: Context,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
+    private val userFacingLogger: UserFacingLogger,
 ) : IntentConfirmationInterceptor {
     private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptions.apiKeyIsLiveMode)
 
@@ -48,7 +51,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             onSuccess = { confirmationToken ->
                 handleDeferredOnConfirmationTokenCreated(
                     intent = intent,
-                    callback = createIntentCallback,
                     confirmationToken = confirmationToken,
                     shippingValues = shippingValues,
                 )
@@ -68,16 +70,47 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): ConfirmationDefinition.Action<Args> {
-        TODO("Not yet implemented")
+        val paymentMethod = confirmationOption.paymentMethod
+        return stripeRepository.createConfirmationToken(
+            confirmationTokenParams = ConfirmationTokenParams(
+                returnUrl = DefaultReturnUrl.create(context).value,
+                paymentMethodId = paymentMethod.id ?: "".also {
+                    userFacingLogger.logWarningWithoutPii(ERROR_MISSING_PAYMENT_METHOD_ID)
+                }
+            ),
+            options = if (paymentMethod.customerId != null) {
+                requestOptions.copy(
+                    apiKey = ephemeralKeySecret ?: "".also {
+                        userFacingLogger.logWarningWithoutPii(ERROR_MISSING_EPHEMERAL_KEY_SECRET)
+                    }
+                )
+            } else {
+                requestOptions
+            },
+        ).fold(
+            onSuccess = { confirmationToken ->
+                handleDeferredOnConfirmationTokenCreated(
+                    intent = intent,
+                    confirmationToken = confirmationToken,
+                    shippingValues = shippingValues,
+                )
+            },
+            onFailure = { error ->
+                ConfirmationDefinition.Action.Fail(
+                    cause = error,
+                    message = error.stripeErrorMessage(),
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                )
+            }
+        )
     }
 
     private suspend fun handleDeferredOnConfirmationTokenCreated(
         intent: StripeIntent,
-        callback: CreateIntentWithConfirmationTokenCallback,
         confirmationToken: ConfirmationToken,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
-        val result = callback.onCreateIntent(confirmationToken)
+        val result = createIntentCallback.onCreateIntent(confirmationToken)
 
         return when (result) {
             is CreateIntentResult.Success -> {
@@ -155,7 +188,14 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         fun create(
             intentConfiguration: PaymentSheet.IntentConfiguration,
             createIntentCallback: CreateIntentWithConfirmationTokenCallback,
+            ephemeralKeySecret: String?,
         ): ConfirmationTokenConfirmationInterceptor
+    }
+
+    companion object {
+        private const val ERROR_MISSING_PAYMENT_METHOD_ID = "PaymentMethod must have an ID"
+        private const val ERROR_MISSING_EPHEMERAL_KEY_SECRET =
+            "Ephemeral key secret is required to confirm with saved payment method"
     }
 }
 
