@@ -3,7 +3,6 @@ package com.stripe.android.crypto.onramp
 import android.content.ContentResolver
 import android.net.Uri
 import androidx.activity.ComponentActivity
-import androidx.core.net.toUri
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.exception.APIException
@@ -65,12 +64,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             }
         }
 
-        // Update the identity verification sheet when the merchant logo URL changes.
-        lifecycleOwner.lifecycleScope.launch {
-            linkControllerState.distinctUntilChangedBy { it.merchantLogoUrl }.collect { state ->
-                identityVerificationSheet = createIdentityVerificationSheet(state.merchantLogoUrl)
-            }
-        }
+        identityVerificationSheet = createIdentityVerificationSheet()
 
         // Observe checkout state changes and react accordingly
         lifecycleOwner.lifecycleScope.launch {
@@ -243,20 +237,18 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    private fun createIdentityVerificationSheet(merchantLogoUrl: String?): IdentityVerificationSheet {
-        check(R.drawable.stripe_ic_business_with_bg != 0)
-        val fallbackMerchantLogoUri: Uri = Uri.Builder()
+    private fun createIdentityVerificationSheet(): IdentityVerificationSheet {
+        check(com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_link_arrow != 0)
+        val linkLogoUri: Uri = Uri.Builder()
             .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
             .authority(activity.packageName)
             .appendPath("drawable")
-            .appendPath("stripe_ic_business_with_bg")
+            .appendPath("stripe_ic_paymentsheet_link_arrow")
             .build()
-
-        val logoUri = merchantLogoUrl?.toUri() ?: fallbackMerchantLogoUri
 
         return IdentityVerificationSheet.onrampCreate(
             from = activity,
-            configuration = IdentityVerificationSheet.Configuration(brandLogo = logoUri),
+            configuration = IdentityVerificationSheet.Configuration(brandLogo = linkLogoUri),
             identityVerificationCallback = ::handleIdentityVerificationResult
         )
     }
