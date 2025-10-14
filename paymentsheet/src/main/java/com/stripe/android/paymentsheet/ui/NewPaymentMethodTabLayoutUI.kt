@@ -43,8 +43,7 @@ internal fun NewPaymentMethodTabLayoutUI(
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
-    shouldTrackRenderedLPMs: Boolean = false,
-    reportInitialPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit = { _, _ -> },
+    reportInitialPaymentMethodVisibilitySnapshot: (AddPaymentMethodInitialVisibilityTrackerData) -> Unit = {},
     state: LazyListState = rememberLazyListState(),
 ) {
     // This is to fix an issue in tests involving this composable
@@ -62,23 +61,18 @@ internal fun NewPaymentMethodTabLayoutUI(
     BoxWithConstraints(
         modifier = modifier.testTag(TEST_TAG_LIST + "1")
     ) {
-        val viewWidth = rememberViewWidth(
-            this.maxWidth,
-            paymentMethods.size
-        )
-
-        val configuration = LocalConfiguration.current
+        val viewWidth = rememberViewWidth(maxWidth = this.maxWidth, numberOfPaymentMethods = paymentMethods.size)
+        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
         val innerPadding = PaymentMethodsUISpacing.carouselInnerPadding
-        if (shouldTrackRenderedLPMs) {
-            LaunchedEffect(paymentMethodCodes) {
-                reportInitialPaymentMethodVisibilitySnapshot(
-                    paymentMethods = paymentMethods,
+        LaunchedEffect(paymentMethodCodes) {
+            reportInitialPaymentMethodVisibilitySnapshot(
+                AddPaymentMethodInitialVisibilityTrackerData(
+                    paymentMethodCodes = paymentMethodCodes,
                     tabWidth = viewWidth,
-                    screenWidth = configuration.screenWidthDp.dp,
-                    innerPadding = innerPadding,
-                    callback = reportInitialPaymentMethodVisibilitySnapshot
+                    screenWidth = screenWidth,
+                    innerPadding = innerPadding
                 )
-            }
+            )
         }
 
         LazyRow(
@@ -109,29 +103,6 @@ internal fun NewPaymentMethodTabLayoutUI(
             }
         }
     }
-}
-
-private fun reportInitialPaymentMethodVisibilitySnapshot(
-    paymentMethods: List<SupportedPaymentMethod>,
-    tabWidth: Dp,
-    screenWidth: Dp,
-    innerPadding: Dp,
-    callback: (List<String>, List<String>) -> Unit,
-) {
-    val numberOfVisibleItems = calculateNumberOfVisibleItems(
-        totalItems = paymentMethods.size,
-        tabWidth = tabWidth,
-        screenWidth = screenWidth,
-        innerPadding = innerPadding
-    )
-
-    val visibleLpms = paymentMethods
-        .take(numberOfVisibleItems)
-        .map { pm -> pm.code }
-    val hiddenLpms = paymentMethods
-        .drop(numberOfVisibleItems)
-        .map { pm -> pm.code }
-    callback(visibleLpms, hiddenLpms)
 }
 
 /**

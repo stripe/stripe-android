@@ -19,15 +19,13 @@ internal class FakeAddPaymentMethodInteractor(
 ) : AddPaymentMethodInteractor {
     override val state: StateFlow<AddPaymentMethodInteractor.State> = stateFlowOf(initialState)
     override val isLiveMode: Boolean = true
-    override val shouldTrackRenderedLPMs: Boolean = true
 
     override fun handleViewAction(viewAction: AddPaymentMethodInteractor.ViewAction) {
         viewActionRecorder.record(viewAction)
     }
 
     override fun reportInitialPaymentMethodVisibilitySnapshot(
-        visiblePaymentMethods: List<String>,
-        hiddenPaymentMethods: List<String>
+        initialVisibilityTrackerData: AddPaymentMethodInitialVisibilityTrackerData
     ) {
         // Do nothing
     }

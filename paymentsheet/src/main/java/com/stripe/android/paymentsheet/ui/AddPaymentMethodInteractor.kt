@@ -27,15 +27,12 @@ import kotlin.coroutines.CoroutineContext
 internal interface AddPaymentMethodInteractor {
     val isLiveMode: Boolean
 
-    val shouldTrackRenderedLPMs: Boolean
-
     val state: StateFlow<State>
 
     fun handleViewAction(viewAction: ViewAction)
 
     fun reportInitialPaymentMethodVisibilitySnapshot(
-        visiblePaymentMethods: List<String>,
-        hiddenPaymentMethods: List<String>,
+        initialVisibilityTrackerData: AddPaymentMethodInitialVisibilityTrackerData
     )
 
     fun close()
@@ -137,8 +134,6 @@ internal class DefaultAddPaymentMethodInteractor(
         }
     }
 
-    override val shouldTrackRenderedLPMs: Boolean = true
-
     private val _selectedPaymentMethodCode: MutableStateFlow<String> =
         MutableStateFlow(initiallySelectedPaymentMethodType)
     private val selectedPaymentMethodCode: StateFlow<String> = _selectedPaymentMethodCode
@@ -232,13 +227,13 @@ internal class DefaultAddPaymentMethodInteractor(
     }
 
     override fun reportInitialPaymentMethodVisibilitySnapshot(
-        visiblePaymentMethods: List<String>,
-        hiddenPaymentMethods: List<String>,
+        initialVisibilityTrackerData: AddPaymentMethodInitialVisibilityTrackerData
     ) {
-        onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
-            visiblePaymentMethods,
-            hiddenPaymentMethods,
-        )
+        AddPaymentMethodInitialVisibilityTracker
+            .reportInitialPaymentMethodVisibilitySnapshot(
+                data = initialVisibilityTrackerData,
+                callback = onInitiallyDisplayedPaymentMethodVisibilitySnapshot
+            )
     }
 
     override fun close() {
