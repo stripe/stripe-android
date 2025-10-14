@@ -1,9 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.layout.AlignmentLine
-import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.unit.IntSize
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,7 +32,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
             expectedItems = listOf("card", "klarna"),
             renderedLpmCallback = callback
         )
-        val coordinates = createFakeCoordinates(
+        val coordinates = FakeLayoutCoordinates.create(
             size = defaultCoordinateSize,
             bounds = defaultBounds,
         )
@@ -53,7 +50,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
             expectedItems = emptyList(),
             renderedLpmCallback = callback
         )
-        val coordinates = createFakeCoordinates(
+        val coordinates = FakeLayoutCoordinates.create(
             size = defaultCoordinateSize,
             bounds = defaultBounds,
         )
@@ -72,7 +69,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
         )
 
         // Create coordinates where item is fully visible (95%+ threshold)
-        val coordinates1 = createFakeCoordinates(
+        val coordinates1 = FakeLayoutCoordinates.create(
             size = defaultCoordinateSize,
             bounds = defaultBounds,
         )
@@ -94,7 +91,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
         )
 
         // Create coordinates where item is completely hidden
-        val coordinates1 = createFakeCoordinates(
+        val coordinates1 = FakeLayoutCoordinates.create(
             size = defaultCoordinateSize,
             bounds = Rect(0f, 0f, 0f, 0f) // Hidden
         )
@@ -116,7 +113,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
         )
 
         // Create coordinates where 98% is visible (above 95% threshold)
-        val coordinates1 = createFakeCoordinates(
+        val coordinates1 = FakeLayoutCoordinates.create(
             size = defaultCoordinateSize,
             bounds = Rect(0f, 0f, 100f, 49f) // 98% visible
         )
@@ -138,7 +135,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
         )
 
         // Create coordinates where only 50% is visible (below 95% threshold)
-        val coordinates1 = createFakeCoordinates(
+        val coordinates1 = FakeLayoutCoordinates.create(
             size = defaultCoordinateSize,
             bounds = Rect(0f, 0f, 100f, 25f) // 50% visible
         )
@@ -159,11 +156,11 @@ class PaymentMethodInitialVisibilityTrackerTest {
             renderedLpmCallback = callback
         )
 
-        val coordinates1 = createFakeCoordinates(
+        val coordinates1 = FakeLayoutCoordinates.create(
             size = defaultCoordinateSize,
             bounds = Rect(0f, 0f, 100f, 50f)
         )
-        val coordinates2 = createFakeCoordinates(
+        val coordinates2 = FakeLayoutCoordinates.create(
             size = defaultCoordinateSize,
             bounds = Rect(10f, 10f, 110f, 60f) // Different position
         )
@@ -182,10 +179,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
             renderedLpmCallback = callback
         )
 
-        val coordinates = createFakeCoordinates(
-            size = defaultCoordinateSize,
-            bounds = defaultBounds,
-        )
+        val coordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
 
         // Update twice to achieve stability
         tracker.updateVisibility("card", coordinates)
@@ -206,10 +200,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
             renderedLpmCallback = callback
         )
 
-        val coordinates = createFakeCoordinates(
-            size = defaultCoordinateSize,
-            bounds = defaultBounds,
-        )
+        val coordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
 
         // Update twice to achieve stability
         tracker.updateVisibility("card", coordinates)
@@ -238,10 +229,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
             renderedLpmCallback = callback
         )
 
-        val coordinates = createFakeCoordinates(
-            size = defaultCoordinateSize,
-            bounds = defaultBounds,
-        )
+        val coordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
 
         // Update multiple times to achieve stability
         tracker.updateVisibility("card", coordinates)
@@ -263,10 +251,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
             renderedLpmCallback = callback
         )
 
-        val coordinates = createFakeCoordinates(
-            size = IntSize(100, 50),
-            bounds = Rect(0f, 0f, 100f, 50f)
-        )
+        val coordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
 
         // Update only two of three items
         tracker.updateVisibility("card", coordinates)
@@ -300,10 +285,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
             renderedLpmCallback = callback
         )
 
-        val coordinates = createFakeCoordinates(
-            size = IntSize(100, 50),
-            bounds = Rect(0f, 0f, 100f, 50f)
-        )
+        val coordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
 
         // Set up for dispatch but dispose before it happens
         tracker.updateVisibility("card", coordinates)
@@ -323,15 +305,9 @@ class PaymentMethodInitialVisibilityTrackerTest {
             renderedLpmCallback = callback
         )
 
-        val visibleCoordinates = createFakeCoordinates(
-            size = IntSize(100, 50),
-            bounds = Rect(0f, 0f, 100f, 50f) // Fully visible
-        )
+        val visibleCoordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
 
-        val hiddenCoordinates = createFakeCoordinates(
-            size = IntSize(100, 50),
-            bounds = Rect(0f, 0f, 0f, 0f) // Hidden
-        )
+        val hiddenCoordinates = FakeLayoutCoordinatesFixtures.FULLY_HIDDEN_COORDINATES
 
         // Make card visible and klarna hidden, both stable
         tracker.updateVisibility("card", visibleCoordinates)
@@ -356,15 +332,9 @@ class PaymentMethodInitialVisibilityTrackerTest {
             renderedLpmCallback = callback
         )
 
-        val visibleCoordinates = createFakeCoordinates(
-            size = IntSize(100, 50),
-            bounds = Rect(0f, 0f, 100f, 50f) // Fully visible
-        )
+        val visibleCoordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
 
-        val hiddenCoordinates = createFakeCoordinates(
-            size = IntSize(100, 50),
-            bounds = Rect(0f, 75f, 100f, 100f) // 50% visible
-        )
+        val hiddenCoordinates = FakeLayoutCoordinatesFixtures.FULLY_HIDDEN_COORDINATES
 
         // Make card visible and klarna hidden, both stable
         tracker.updateVisibility("card", visibleCoordinates)
@@ -389,46 +359,32 @@ class PaymentMethodInitialVisibilityTrackerTest {
             renderedLpmCallback = callback
         )
 
-        val fullyHiddenCoordinates = createFakeCoordinates(
-            size = IntSize(100, 50),
-            bounds = Rect(0f, 0f, 0f, 0f)
-        )
+        val fullyHiddenCoordinates = FakeLayoutCoordinatesFixtures.FULLY_HIDDEN_COORDINATES
 
         tracker.updateVisibility("card", fullyHiddenCoordinates)
         tracker.updateVisibility("klarna", fullyHiddenCoordinates)
         tracker.updateVisibility("paypal", fullyHiddenCoordinates)
 
-        val partiallyHiddenFirst = createFakeCoordinates(
-            size = IntSize(100, 50),
-            bounds = Rect(0f, 0f, 100f, 25f)
-        )
+        val partiallyHiddenCoordinates = FakeLayoutCoordinatesFixtures.PARTIALLY_HIDDEN_COORDINATES
 
-        tracker.updateVisibility("card", partiallyHiddenFirst)
+        tracker.updateVisibility("card", partiallyHiddenCoordinates)
         tracker.updateVisibility("klarna", fullyHiddenCoordinates)
         tracker.updateVisibility("paypal", fullyHiddenCoordinates)
 
         advanceTimeBy(TIME_ADVANCE_1S)
         verify(callback, never()).invoke(any())
 
-        val fullyVisibleFirst = createFakeCoordinates(
-            size = IntSize(100, 50),
-            bounds = Rect(0f, 0f, 100f, 50f)
-        )
+        val fullyVisibleCoordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
 
-        val partiallyHiddenSecond = createFakeCoordinates(
-            size = IntSize(100, 50),
-            bounds = Rect(0f, 75f, 100f, 100f)
-        )
-
-        tracker.updateVisibility("card", fullyVisibleFirst)
-        tracker.updateVisibility("klarna", partiallyHiddenSecond)
+        tracker.updateVisibility("card", fullyVisibleCoordinates)
+        tracker.updateVisibility("klarna", partiallyHiddenCoordinates)
         tracker.updateVisibility("paypal", fullyHiddenCoordinates)
 
         advanceTimeBy(TIME_ADVANCE_1S)
         verify(callback, never()).invoke(any())
 
-        tracker.updateVisibility("card", fullyVisibleFirst)
-        tracker.updateVisibility("klarna", partiallyHiddenSecond)
+        tracker.updateVisibility("card", fullyVisibleCoordinates)
+        tracker.updateVisibility("klarna", partiallyHiddenCoordinates)
         tracker.updateVisibility("paypal", fullyHiddenCoordinates)
 
         advanceTimeBy(TIME_ADVANCE_1S)
@@ -444,51 +400,4 @@ class PaymentMethodInitialVisibilityTrackerTest {
 
     private val defaultCoordinateSize = IntSize(100, 50)
     private val defaultBounds = Rect(0f, 0f, 100f, 50f)
-
-    private fun createFakeCoordinates(
-        size: IntSize,
-        bounds: Rect,
-        position: Offset = Offset(bounds.left, bounds.top)
-    ): LayoutCoordinates {
-        return FakeLayoutCoordinates(
-            size = size,
-            bounds = bounds,
-            position = position
-        )
-    }
-}
-
-private class FakeLayoutCoordinates(
-    override val isAttached: Boolean = true,
-    override val parentCoordinates: LayoutCoordinates? = null,
-    override val parentLayoutCoordinates: LayoutCoordinates? = null,
-    override val providedAlignmentLines: Set<AlignmentLine> = emptySet(),
-    override val size: IntSize,
-    private val bounds: Rect,
-    private val position: Offset = Offset.Zero
-) : LayoutCoordinates {
-
-    override fun get(alignmentLine: AlignmentLine): Int {
-        return AlignmentLine.Unspecified
-    }
-
-    override fun localBoundingBoxOf(sourceCoordinates: LayoutCoordinates, clipBounds: Boolean): Rect {
-        return bounds
-    }
-
-    override fun localPositionOf(sourceCoordinates: LayoutCoordinates, relativeToSource: Offset): Offset {
-        return position
-    }
-
-    override fun localToRoot(relativeToLocal: Offset): Offset {
-        return position + relativeToLocal
-    }
-
-    override fun localToWindow(relativeToLocal: Offset): Offset {
-        return position + relativeToLocal
-    }
-
-    override fun windowToLocal(relativeToWindow: Offset): Offset {
-        return relativeToWindow - position
-    }
 }
