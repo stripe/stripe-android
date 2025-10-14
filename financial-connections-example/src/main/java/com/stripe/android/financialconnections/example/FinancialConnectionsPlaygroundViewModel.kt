@@ -161,6 +161,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
                                 amount = it.amount,
                                 currency = it.currency,
                                 linkMode = LinkMode.LinkPaymentMethod,
+                                allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                                 billingDetails = ElementsSessionContext.BillingDetails(
                                     email = settings.get<EmailSetting>().selectedOption,
                                 ),
@@ -169,8 +170,8 @@ internal class FinancialConnectionsPlaygroundViewModel(
                                     phone = null,
                                     phoneCountryCode = null,
                                 ),
-                                allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                                 incentiveEligibilitySession = null,
+                                clientAttributionMetadataParams = emptyMap(),
                             ),
                             experience = settings.get<ExperienceSetting>().selectedOption,
                             integrationType = settings.get<IntegrationTypeSetting>().selectedOption,

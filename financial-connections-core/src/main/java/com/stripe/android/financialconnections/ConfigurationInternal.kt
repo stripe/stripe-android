@@ -6,6 +6,7 @@ import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 import java.io.Serializable
 
 @Parcelize
@@ -30,7 +31,8 @@ data class ElementsSessionContext(
     val allowRedisplay: AllowRedisplay?,
     val billingDetails: BillingDetails?,
     val prefillDetails: PrefillDetails,
-    val incentiveEligibilitySession: IncentiveEligibilitySession?
+    val incentiveEligibilitySession: IncentiveEligibilitySession?,
+    val clientAttributionMetadataParams: @RawValue Map<String, Any>,
 ) : Parcelable {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -264,7 +264,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
                 bankAccountId = bankAccountId,
                 billingAddress = billingDetails?.toConsumerBillingAddressParams(),
                 billingEmailAddress = billingDetails?.email,
-                clientAttributionMetadata = null, // TODO: set value.
+                clientAttributionMetadata = elementsSessionContext?.clientAttributionMetadataParams,
             ),
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = true),
@@ -280,7 +280,6 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         val fraudDetectionData = fraudDetectionDataRepository.getCached()?.params.orEmpty()
         val expandParams = mapOf("expand" to listOf("payment_method"))
 
-        // TODO: add client attribution metadata
         return consumersApiService.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsId = paymentDetailsId,
@@ -288,7 +287,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             billingPhone = elementsSessionContext?.billingDetails?.phone?.takeIf { it.isNotBlank() },
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
-            extraParams = fraudDetectionData + expandParams,
+            extraParams = fraudDetectionData + expandParams + (elementsSessionContext?.clientAttributionMetadataParams ?: emptyMap()),
         ).getOrThrow()
     }
 

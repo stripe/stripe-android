@@ -887,6 +887,7 @@ class USBankAccountFormViewModelTest {
                         amount = 5099,
                         currency = "usd",
                         linkMode = LinkMode.LinkPaymentMethod,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                         billingDetails = ElementsSessionContext.BillingDetails(
                             name = "Jenny Rose",
                             email = "email@email.com",
@@ -897,7 +898,7 @@ class USBankAccountFormViewModelTest {
                             phoneCountryCode = "US",
                         ),
                         incentiveEligibilitySession = null,
-                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
+                        clientAttributionMetadata = null,
                     ),
                 )
             ),
@@ -937,6 +938,7 @@ class USBankAccountFormViewModelTest {
                         amount = null,
                         currency = null,
                         linkMode = LinkMode.LinkPaymentMethod,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                         billingDetails = ElementsSessionContext.BillingDetails(
                             name = "Jenny Rose",
                             email = "email@email.com",
@@ -947,7 +949,7 @@ class USBankAccountFormViewModelTest {
                             phoneCountryCode = "US",
                         ),
                         incentiveEligibilitySession = null,
-                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
+                        clientAttributionMetadata = null,
                     ),
                 )
             ),
@@ -1111,6 +1113,7 @@ class USBankAccountFormViewModelTest {
                         amount = 5099,
                         currency = "usd",
                         linkMode = null,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                         billingDetails = ElementsSessionContext.BillingDetails(
                             name = "Some Name",
                             email = "email@email.com",
@@ -1121,7 +1124,7 @@ class USBankAccountFormViewModelTest {
                             phoneCountryCode = "US",
                         ),
                         incentiveEligibilitySession = null,
-                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
+                        clientAttributionMetadata = null,
                     ),
                 )
             ),
@@ -1154,6 +1157,7 @@ class USBankAccountFormViewModelTest {
                         amount = 5099,
                         currency = "usd",
                         linkMode = LinkMode.LinkCardBrand,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                         billingDetails = ElementsSessionContext.BillingDetails(
                             email = "email@email.com",
                         ),
@@ -1163,7 +1167,7 @@ class USBankAccountFormViewModelTest {
                             phoneCountryCode = "US",
                         ),
                         incentiveEligibilitySession = null,
-                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
+                        clientAttributionMetadata = null,
                     ),
                 )
             ),

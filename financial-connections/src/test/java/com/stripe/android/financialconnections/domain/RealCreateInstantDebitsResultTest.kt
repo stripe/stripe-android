@@ -295,6 +295,7 @@ class RealCreateInstantDebitsResultTest {
             amount = 100L,
             currency = "usd",
             linkMode = linkMode,
+            allowRedisplay = null,
             billingDetails = billingDetails,
             prefillDetails = ElementsSessionContext.PrefillDetails(
                 email = null,
@@ -302,7 +303,7 @@ class RealCreateInstantDebitsResultTest {
                 phoneCountryCode = null,
             ),
             incentiveEligibilitySession = incentiveEligibilitySession,
-            allowRedisplay = null,
+            clientAttributionMetadata = null,
         )
     }
 }

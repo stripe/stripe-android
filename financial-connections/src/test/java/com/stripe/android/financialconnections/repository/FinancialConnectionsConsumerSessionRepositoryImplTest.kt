@@ -146,6 +146,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 amount = 1234,
                 currency = "cad",
                 linkMode = LinkMode.LinkPaymentMethod,
+                allowRedisplay = null,
                 billingDetails = null,
                 prefillDetails = ElementsSessionContext.PrefillDetails(
                     email = null,
@@ -153,7 +154,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                     phoneCountryCode = null,
                 ),
                 incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
-                allowRedisplay = null,
+                clientAttributionMetadata = null,
             )
         )
 

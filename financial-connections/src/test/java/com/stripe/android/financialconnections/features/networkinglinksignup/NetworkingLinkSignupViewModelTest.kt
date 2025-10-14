@@ -145,6 +145,7 @@ class NetworkingLinkSignupViewModelTest {
                 amount = null,
                 currency = null,
                 linkMode = LinkMode.LinkPaymentMethod,
+                allowRedisplay = null,
                 billingDetails = null,
                 prefillDetails = ElementsSessionContext.PrefillDetails(
                     email = "email@email.com",
@@ -152,7 +153,7 @@ class NetworkingLinkSignupViewModelTest {
                     phoneCountryCode = "US",
                 ),
                 incentiveEligibilitySession = null,
-                allowRedisplay = null,
+                clientAttributionMetadata = null,
             )
         )
 

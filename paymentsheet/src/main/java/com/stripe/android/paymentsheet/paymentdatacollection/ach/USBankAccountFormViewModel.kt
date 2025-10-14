@@ -610,6 +610,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             billingDetails = makeElementsSessionContextBillingDetails(),
             prefillDetails = makePrefillDetails(),
             incentiveEligibilitySession = incentiveEligibilitySession,
+            clientAttributionMetadataParams = args.clientAttributionMetadata?.let {
+                mapOf("client_attribution_metadata" to it.toParamMap())
+            } ?: emptyMap(),
         )
     }
 

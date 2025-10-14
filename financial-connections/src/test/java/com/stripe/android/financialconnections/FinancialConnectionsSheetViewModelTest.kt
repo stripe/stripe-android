@@ -175,6 +175,7 @@ class FinancialConnectionsSheetViewModelTest {
                             amount = 123,
                             currency = "usd",
                             linkMode = LinkMode.LinkPaymentMethod,
+                            allowRedisplay = null,
                             billingDetails = null,
                             prefillDetails = ElementsSessionContext.PrefillDetails(
                                 email = null,
@@ -182,7 +183,7 @@ class FinancialConnectionsSheetViewModelTest {
                                 phoneCountryCode = null,
                             ),
                             incentiveEligibilitySession = null,
-                            allowRedisplay = null,
+                            clientAttributionMetadata = null,
                         ),
                     )
                 )
@@ -212,6 +213,7 @@ class FinancialConnectionsSheetViewModelTest {
                             amount = 123,
                             currency = "usd",
                             linkMode = LinkMode.LinkPaymentMethod,
+                            allowRedisplay = null,
                             billingDetails = null,
                             prefillDetails = ElementsSessionContext.PrefillDetails(
                                 email = null,
@@ -219,7 +221,7 @@ class FinancialConnectionsSheetViewModelTest {
                                 phoneCountryCode = null,
                             ),
                             incentiveEligibilitySession = null,
-                            allowRedisplay = null,
+                            clientAttributionMetadata = null,
                         ),
                     )
                 )
@@ -248,6 +250,7 @@ class FinancialConnectionsSheetViewModelTest {
                         amount = 123,
                         currency = "usd",
                         linkMode = null,
+                        allowRedisplay = null,
                         billingDetails = null,
                         prefillDetails = ElementsSessionContext.PrefillDetails(
                             email = null,
@@ -255,7 +258,7 @@ class FinancialConnectionsSheetViewModelTest {
                             phoneCountryCode = null,
                         ),
                         incentiveEligibilitySession = null,
-                        allowRedisplay = null,
+                        clientAttributionMetadata = null,
                     ),
                 )
             )
@@ -284,6 +287,7 @@ class FinancialConnectionsSheetViewModelTest {
                         amount = 123,
                         currency = "usd",
                         linkMode = null,
+                        allowRedisplay = null,
                         billingDetails = null,
                         prefillDetails = ElementsSessionContext.PrefillDetails(
                             email = null,
@@ -291,7 +295,7 @@ class FinancialConnectionsSheetViewModelTest {
                             phoneCountryCode = null,
                         ),
                         incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
-                        allowRedisplay = null,
+                        clientAttributionMetadata = null,
                     ),
                 )
             )
@@ -321,6 +325,7 @@ class FinancialConnectionsSheetViewModelTest {
                         amount = 123,
                         currency = "usd",
                         linkMode = null,
+                        allowRedisplay = null,
                         billingDetails = null,
                         prefillDetails = ElementsSessionContext.PrefillDetails(
                             email = null,
@@ -328,7 +333,7 @@ class FinancialConnectionsSheetViewModelTest {
                             phoneCountryCode = null,
                         ),
                         incentiveEligibilitySession = null,
-                        allowRedisplay = null,
+                        clientAttributionMetadata = null,
                     ),
                 )
             )
@@ -358,6 +363,7 @@ class FinancialConnectionsSheetViewModelTest {
                         amount = 123,
                         currency = "usd",
                         linkMode = null,
+                        allowRedisplay = null,
                         billingDetails = null,
                         prefillDetails = ElementsSessionContext.PrefillDetails(
                             email = "email@email.com",
@@ -365,7 +371,7 @@ class FinancialConnectionsSheetViewModelTest {
                             phoneCountryCode = "US",
                         ),
                         incentiveEligibilitySession = null,
-                        allowRedisplay = null,
+                        clientAttributionMetadata = null,
                     ),
                 )
             )
@@ -396,6 +402,7 @@ class FinancialConnectionsSheetViewModelTest {
                         amount = 123,
                         currency = "usd",
                         linkMode = null,
+                        allowRedisplay = null,
                         billingDetails = ElementsSessionContext.BillingDetails(
                             name = "John Doe",
                             address = ElementsSessionContext.BillingDetails.Address(
@@ -415,7 +422,7 @@ class FinancialConnectionsSheetViewModelTest {
                             phoneCountryCode = null,
                         ),
                         incentiveEligibilitySession = null,
-                        allowRedisplay = null,
+                        clientAttributionMetadata = null,
                     ),
                 )
             )
@@ -472,6 +479,7 @@ class FinancialConnectionsSheetViewModelTest {
                         amount = 123,
                         currency = "usd",
                         linkMode = null,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                         billingDetails = null,
                         prefillDetails = ElementsSessionContext.PrefillDetails(
                             email = null,
@@ -479,7 +487,7 @@ class FinancialConnectionsSheetViewModelTest {
                             phoneCountryCode = null,
                         ),
                         incentiveEligibilitySession = null,
-                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
+                        clientAttributionMetadata = null,
                     ),
                 )
             )
@@ -508,6 +516,7 @@ class FinancialConnectionsSheetViewModelTest {
                         amount = 123,
                         currency = "usd",
                         linkMode = null,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Limited,
                         billingDetails = null,
                         prefillDetails = ElementsSessionContext.PrefillDetails(
                             email = null,
@@ -515,7 +524,7 @@ class FinancialConnectionsSheetViewModelTest {
                             phoneCountryCode = null,
                         ),
                         incentiveEligibilitySession = null,
-                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Limited,
+                        clientAttributionMetadata = null,
                     ),
                 )
             )
@@ -544,6 +553,7 @@ class FinancialConnectionsSheetViewModelTest {
                         amount = 123,
                         currency = "usd",
                         linkMode = null,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Always,
                         billingDetails = null,
                         prefillDetails = ElementsSessionContext.PrefillDetails(
                             email = null,
@@ -551,7 +561,7 @@ class FinancialConnectionsSheetViewModelTest {
                             phoneCountryCode = null,
                         ),
                         incentiveEligibilitySession = null,
-                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Always,
+                        clientAttributionMetadata = null,
                     ),
                 )
             )
@@ -580,6 +590,7 @@ class FinancialConnectionsSheetViewModelTest {
                         amount = 123,
                         currency = "usd",
                         linkMode = null,
+                        allowRedisplay = null,
                         billingDetails = null,
                         prefillDetails = ElementsSessionContext.PrefillDetails(
                             email = null,
@@ -587,7 +598,7 @@ class FinancialConnectionsSheetViewModelTest {
                             phoneCountryCode = null,
                         ),
                         incentiveEligibilitySession = null,
-                        allowRedisplay = null,
+                        clientAttributionMetadata = null,
                     ),
                 )
             )
@@ -615,6 +626,7 @@ class FinancialConnectionsSheetViewModelTest {
                             amount = 123,
                             currency = "usd",
                             linkMode = null,
+                            allowRedisplay = ElementsSessionContext.AllowRedisplay.Always,
                             billingDetails = null,
                             prefillDetails = ElementsSessionContext.PrefillDetails(
                                 email = null,
@@ -622,7 +634,7 @@ class FinancialConnectionsSheetViewModelTest {
                                 phoneCountryCode = null,
                             ),
                             incentiveEligibilitySession = null,
-                            allowRedisplay = ElementsSessionContext.AllowRedisplay.Always,
+                            clientAttributionMetadata = null,
                         ),
                     )
                 )
