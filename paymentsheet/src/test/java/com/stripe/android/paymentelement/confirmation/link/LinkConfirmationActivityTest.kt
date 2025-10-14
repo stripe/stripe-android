@@ -227,7 +227,8 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
         val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
             linkExpressMode = LinkExpressMode.ENABLED,
-            passiveCaptchaParams = null
+            passiveCaptchaParams = null,
+            clientAttributionMetadata = null
         )
 
         const val LINK_COMPLETE_CODE = 49871

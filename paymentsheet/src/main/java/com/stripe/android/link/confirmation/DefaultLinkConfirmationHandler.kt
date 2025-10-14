@@ -139,14 +139,14 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         val allowRedisplay = allowRedisplay(paymentMethodType = paymentMethodType)
 
         val confirmationOption = if (configuration.passthroughModeEnabled) {
-            // TODO: do I need to add CAM here?
             LinkPassthroughConfirmationOption(
                 paymentDetailsId = paymentDetails.id,
                 expectedPaymentMethodType = paymentMethodType,
                 cvc = cvc,
                 billingPhone = billingPhone,
                 allowRedisplay = allowRedisplay,
-                passiveCaptchaParams = passiveCaptchaParams
+                passiveCaptchaParams = passiveCaptchaParams,
+                clientAttributionMetadata = configuration.clientAttributionMetadata,
             )
         } else {
             PaymentMethodConfirmationOption.New(
@@ -161,7 +161,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 extraParams = null,
                 optionsParams = null,
                 shouldSave = false,
-                passiveCaptchaParams = passiveCaptchaParams
+                passiveCaptchaParams = passiveCaptchaParams,
+                clientAttributionMetadata = configuration.clientAttributionMetadata,
             )
         }
 
@@ -170,7 +171,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             confirmationOption = confirmationOption,
             appearance = PaymentSheet.Appearance(),
             initializationMode = configuration.initializationMode,
-            shippingDetails = configuration.shippingDetails
+            shippingDetails = configuration.shippingDetails,
         )
     }
 
@@ -212,7 +213,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     }
                 ),
                 passiveCaptchaParams = passiveCaptchaParams,
-                clientAttributionMetadata = null,
+                clientAttributionMetadata = configuration.clientAttributionMetadata,
             ),
             appearance = PaymentSheet.Appearance(),
             initializationMode = configuration.initializationMode,

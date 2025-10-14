@@ -976,9 +976,10 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(arguments.confirmationOption).isEqualTo(
                 LinkConfirmationOption(
-                    linkExpressMode = LinkExpressMode.DISABLED,
                     configuration = TestFactory.LINK_CONFIGURATION,
-                    passiveCaptchaParams = null
+                    linkExpressMode = LinkExpressMode.DISABLED,
+                    passiveCaptchaParams = null,
+                    clientAttributionMetadata = null
                 )
             )
 
@@ -1627,7 +1628,8 @@ internal class PaymentSheetViewModelTest {
                 LinkConfirmationOption(
                     configuration = TestFactory.LINK_CONFIGURATION,
                     linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
+                    clientAttributionMetadata = null
                 )
             )
 
@@ -2802,9 +2804,10 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             LinkConfirmationOption(
-                linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = null
+                linkExpressMode = LinkExpressMode.DISABLED,
+                passiveCaptchaParams = null,
+                clientAttributionMetadata = null
             )
         )
 
@@ -2840,9 +2843,10 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             LinkConfirmationOption(
-                linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = null
+                linkExpressMode = LinkExpressMode.DISABLED,
+                passiveCaptchaParams = null,
+                clientAttributionMetadata = null
             )
         )
 
@@ -2879,9 +2883,10 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             LinkConfirmationOption(
-                linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = null
+                linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
+                passiveCaptchaParams = null,
+                clientAttributionMetadata = null
             )
         )
 
@@ -2917,9 +2922,10 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             LinkConfirmationOption(
-                linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = null
+                linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
+                passiveCaptchaParams = null,
+                clientAttributionMetadata = null
             )
         )
 
@@ -3361,9 +3367,10 @@ internal class PaymentSheetViewModelTest {
             paymentSelection = PaymentSelection.Link(),
             expectedConfirmationOption = LinkConfirmationOption(
                 configuration = LINK_CONFIG,
-                linkExpressMode = LinkExpressMode.DISABLED,
                 linkLaunchMode = LinkLaunchMode.Full,
-                passiveCaptchaParams = passiveCaptchaParams
+                linkExpressMode = LinkExpressMode.DISABLED,
+                passiveCaptchaParams = passiveCaptchaParams,
+                clientAttributionMetadata = null
             ),
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             paymentElementLoader = FakePaymentElementLoader(

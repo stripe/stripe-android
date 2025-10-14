@@ -344,7 +344,8 @@ class ConfirmationHandlerOptionKtxTest {
             LinkConfirmationOption(
                 configuration = LINK_CONFIGURATION,
                 linkExpressMode = LinkExpressMode.DISABLED,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                clientAttributionMetadata = null
             )
         )
     }
@@ -364,7 +365,8 @@ class ConfirmationHandlerOptionKtxTest {
             LinkConfirmationOption(
                 configuration = LINK_CONFIGURATION,
                 linkExpressMode = LinkExpressMode.ENABLED,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                clientAttributionMetadata = null
             )
         )
     }

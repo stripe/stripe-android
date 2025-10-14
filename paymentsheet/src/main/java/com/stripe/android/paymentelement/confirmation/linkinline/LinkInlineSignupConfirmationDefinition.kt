@@ -171,7 +171,7 @@ internal class LinkInlineSignupConfirmationDefinition(
             ),
             originatedFromWallet = true,
             passiveCaptchaParams = passiveCaptchaParams,
-            clientAttributionMetadata = null,
+            clientAttributionMetadata = this.paymentMethodCreateParams.clientAttributionMetadata,
         )
     }
 
@@ -194,7 +194,8 @@ internal class LinkInlineSignupConfirmationDefinition(
             optionsParams = optionsParams,
             extraParams = extraParams,
             shouldSave = saveOption.shouldSave(),
-            passiveCaptchaParams = passiveCaptchaParams
+            passiveCaptchaParams = passiveCaptchaParams,
+            clientAttributionMetadata = this.paymentMethodCreateParams.clientAttributionMetadata,
         )
     }
 

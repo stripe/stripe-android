@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.link
 
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -13,4 +14,5 @@ internal data class LinkPassthroughConfirmationOption(
     val billingPhone: String?,
     val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
     val passiveCaptchaParams: PassiveCaptchaParams?,
+    val clientAttributionMetadata: ClientAttributionMetadata?,
 ) : ConfirmationHandler.Option

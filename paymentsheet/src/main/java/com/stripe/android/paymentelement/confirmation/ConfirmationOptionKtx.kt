@@ -155,19 +155,20 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
 
 private fun PaymentSelection.Link.toConfirmationOption(
     linkConfiguration: LinkConfiguration?,
-    passiveCaptchaParams: PassiveCaptchaParams?
+    passiveCaptchaParams: PassiveCaptchaParams?,
 ): LinkConfirmationOption? {
     return linkConfiguration?.let {
         LinkConfirmationOption(
             configuration = linkConfiguration,
-            linkExpressMode = linkExpressMode,
             linkLaunchMode = when {
                 // If a payment is included in the confirmation option, launch confirmation right away
                 selectedPayment != null -> LinkLaunchMode.Confirmation(selectedPayment)
                 // If a payment is not included, launch the link flow regularly
                 else -> LinkLaunchMode.Full
             },
-            passiveCaptchaParams = passiveCaptchaParams
+            linkExpressMode = linkExpressMode,
+            passiveCaptchaParams = passiveCaptchaParams,
+            clientAttributionMetadata = linkConfiguration.clientAttributionMetadata,
         )
     }
 }

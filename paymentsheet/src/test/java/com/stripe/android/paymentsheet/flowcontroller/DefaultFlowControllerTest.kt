@@ -1028,9 +1028,10 @@ internal class DefaultFlowControllerTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             LinkConfirmationOption(
-                linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = TestFactory.LINK_CONFIGURATION,
-                passiveCaptchaParams = null
+                linkExpressMode = LinkExpressMode.DISABLED,
+                passiveCaptchaParams = null,
+                clientAttributionMetadata = null
             )
         )
     }
@@ -1473,9 +1474,10 @@ internal class DefaultFlowControllerTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             LinkConfirmationOption(
-                linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = TestFactory.LINK_CONFIGURATION,
-                passiveCaptchaParams = null
+                linkExpressMode = LinkExpressMode.DISABLED,
+                passiveCaptchaParams = null,
+                clientAttributionMetadata = null
             )
         )
     }

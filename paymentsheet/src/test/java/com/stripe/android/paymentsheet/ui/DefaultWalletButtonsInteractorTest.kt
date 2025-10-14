@@ -324,9 +324,10 @@ class DefaultWalletButtonsInteractorTest {
             confirmationHandler = FakeConfirmationHandler().apply {
                 state.value = ConfirmationHandler.State.Confirming(
                     LinkConfirmationOption(
-                        linkExpressMode = LinkExpressMode.DISABLED,
                         configuration = mock(),
-                        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                        linkExpressMode = LinkExpressMode.DISABLED,
+                        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                        clientAttributionMetadata = null
                     )
                 )
             }
@@ -837,9 +838,10 @@ class DefaultWalletButtonsInteractorTest {
             confirmationHandler = FakeConfirmationHandler().apply {
                 state.value = ConfirmationHandler.State.Confirming(
                     LinkConfirmationOption(
-                        linkExpressMode = LinkExpressMode.DISABLED,
                         configuration = mock(),
-                        passiveCaptchaParams = null
+                        linkExpressMode = LinkExpressMode.DISABLED,
+                        passiveCaptchaParams = null,
+                        clientAttributionMetadata = null
                     )
                 )
             }

@@ -96,7 +96,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
                 optionsParams = null,
                 originatedFromWallet = true,
                 passiveCaptchaParams = confirmationOption.passiveCaptchaParams,
-                clientAttributionMetadata = null, // TODO: set this.
+                clientAttributionMetadata = confirmationOption.clientAttributionMetadata,
             )
         }
     }
