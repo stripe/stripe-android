@@ -406,7 +406,7 @@ internal class LinkControllerInteractor @Inject constructor(
             )
     }
 
-    suspend fun lookupConsumerWithLinkAuthTokenClientSecret(token: String): LinkController.LookupConsumerResult {
+    suspend fun authenticateWithToken(token: String): LinkController.AuthenticateWithTokenResult {
         return requireLinkComponent()
             .flatMapCatching { component ->
                 component.linkAccountManager.lookupByLinkAuthTokenClientSecret(
@@ -416,10 +416,10 @@ internal class LinkControllerInteractor @Inject constructor(
             .fold(
                 onSuccess = { account ->
                     updateStateOnAccountUpdate(LinkAccountUpdate.Value(account))
-                    LinkController.LookupConsumerResult.Success(account?.email ?: "", account != null)
+                    LinkController.AuthenticateWithTokenResult.Success
                 },
                 onFailure = {
-                    LinkController.LookupConsumerResult.Failed("", it)
+                    LinkController.AuthenticateWithTokenResult.Failed(it)
                 }
             )
     }

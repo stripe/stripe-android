@@ -566,9 +566,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    override suspend fun lookupByLinkAuthTokenClientSecret(token: String): Result<LinkAccount?> {
+    override suspend fun lookupByLinkAuthTokenClientSecret(linkAuthTokenClientSecret: String): Result<LinkAccount?> {
         return linkAuth.lookup(
-            linkAuthTokenClientSecret = token,
+            linkAuthTokenClientSecret = linkAuthTokenClientSecret,
             sessionId = config.elementsSessionId,
             email = null,
             emailSource = null,

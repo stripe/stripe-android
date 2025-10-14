@@ -93,16 +93,16 @@ internal class OnrampInteractor @Inject constructor(
 
     suspend fun authenticateUserWithToken(linkAuthTokenClientSecret: String): OnrampTokenAuthenticationResult {
         return when (
-            val result = linkController.lookupConsumerWithLinkAuthTokenClientSecret(linkAuthTokenClientSecret)
+            val result = linkController.authenticateWithToken(linkAuthTokenClientSecret)
         ) {
-            is LinkController.LookupConsumerResult.Success -> {
+            is LinkController.AuthenticateWithTokenResult.Success -> {
                 analyticsService?.track(
                     OnrampAnalyticsEvent.LinkUserAuthenticationWithTokenCompleted
                 )
 
                 OnrampTokenAuthenticationResult.Completed
             }
-            is LinkController.LookupConsumerResult.Failed -> {
+            is LinkController.AuthenticateWithTokenResult.Failed -> {
                 analyticsService?.track(
                     OnrampAnalyticsEvent.ErrorOccurred(
                         operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AuthenticateUserWithAuthToken,
