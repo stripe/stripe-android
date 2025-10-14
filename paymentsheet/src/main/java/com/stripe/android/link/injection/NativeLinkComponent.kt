@@ -121,6 +121,11 @@ internal interface NativeLinkComponent {
             requestSurface: RequestSurface
         ): Builder
 
+        @BindsInstance
+        fun attestationRequired(
+            @Named(ATTESTATION_REQUIRED) attestationRequired: Boolean
+        ): Builder
+
         fun build(): NativeLinkComponent
     }
 }

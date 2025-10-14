@@ -37,12 +37,17 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.New -> {
             toConfirmationOption(passiveCaptchaParams, clientAttributionMetadata, attestOnIntentConfirmation)
         }
-        is PaymentSelection.GooglePay -> toConfirmationOption(
-            configuration,
-            passiveCaptchaParams,
-            clientAttributionMetadata,
-        )
-        is PaymentSelection.Link -> toConfirmationOption(linkConfiguration, passiveCaptchaParams)
+        is PaymentSelection.GooglePay -> {
+            toConfirmationOption(
+                configuration,
+                passiveCaptchaParams,
+                clientAttributionMetadata,
+                attestOnIntentConfirmation
+            )
+        }
+        is PaymentSelection.Link -> {
+            toConfirmationOption(linkConfiguration, passiveCaptchaParams, attestOnIntentConfirmation)
+        }
         is PaymentSelection.ShopPay -> toConfirmationOption(configuration)
     }
 }
@@ -130,6 +135,7 @@ private fun PaymentSelection.New.toConfirmationOption(
             createParams = paymentMethodCreateParams,
             optionsParams = paymentMethodOptionsParams,
             passiveCaptchaParams = passiveCaptchaParams,
+            attestationRequired = attestOnIntentConfirmation
         )
     } else {
         PaymentMethodConfirmationOption.New(
@@ -148,6 +154,7 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
     configuration: CommonConfiguration,
     passiveCaptchaParams: PassiveCaptchaParams?,
     clientAttributionMetadata: ClientAttributionMetadata?,
+    attestOnIntentConfirmation: Boolean,
 ): GooglePayConfirmationOption? {
     return configuration.googlePay?.let { googlePay ->
         GooglePayConfirmationOption(
@@ -163,13 +170,15 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
             ),
             passiveCaptchaParams = passiveCaptchaParams,
             clientAttributionMetadata = clientAttributionMetadata,
+            attestationRequired = attestOnIntentConfirmation,
         )
     }
 }
 
 private fun PaymentSelection.Link.toConfirmationOption(
     linkConfiguration: LinkConfiguration?,
-    passiveCaptchaParams: PassiveCaptchaParams?
+    passiveCaptchaParams: PassiveCaptchaParams?,
+    attestOnIntentConfirmation: Boolean,
 ): LinkConfirmationOption? {
     return linkConfiguration?.let {
         LinkConfirmationOption(
@@ -181,7 +190,8 @@ private fun PaymentSelection.Link.toConfirmationOption(
                 // If a payment is not included, launch the link flow regularly
                 else -> LinkLaunchMode.Full
             },
-            passiveCaptchaParams = passiveCaptchaParams
+            passiveCaptchaParams = passiveCaptchaParams,
+            attestationRequired = attestOnIntentConfirmation,
         )
     }
 }

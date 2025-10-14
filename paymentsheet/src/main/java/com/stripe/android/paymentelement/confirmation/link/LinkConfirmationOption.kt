@@ -12,5 +12,6 @@ internal data class LinkConfirmationOption(
     val configuration: LinkConfiguration,
     val linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
     val linkExpressMode: LinkExpressMode,
-    val passiveCaptchaParams: PassiveCaptchaParams?
+    val passiveCaptchaParams: PassiveCaptchaParams?,
+    val attestationRequired: Boolean,
 ) : ConfirmationHandler.Option

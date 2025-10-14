@@ -97,7 +97,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
                 originatedFromWallet = true,
                 passiveCaptchaParams = confirmationOption.passiveCaptchaParams,
                 clientAttributionMetadata = null,
-                attestationRequired = false
+                attestationRequired = confirmationOption.attestationRequired,
             )
         }
     }

@@ -13,4 +13,5 @@ internal data class LinkPassthroughConfirmationOption(
     val billingPhone: String?,
     val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
     val passiveCaptchaParams: PassiveCaptchaParams?,
+    val attestationRequired: Boolean,
 ) : ConfirmationHandler.Option

@@ -124,6 +124,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         val extraParams = linkInlineSignupConfirmationOption.extraParams
         val configuration = linkInlineSignupConfirmationOption.linkConfiguration
         val passiveCaptchaParams = linkInlineSignupConfirmationOption.passiveCaptchaParams
+        val attestationRequired = linkInlineSignupConfirmationOption.attestationRequired
 
         val linkPaymentDetails = linkConfigurationCoordinator.attachNewCardToAccount(
             configuration,
@@ -134,12 +135,23 @@ internal class LinkInlineSignupConfirmationDefinition(
             is LinkPaymentDetails.New -> {
                 linkStore.markLinkAsUsed()
 
-                linkPaymentDetails.toNewOption(saveOption, configuration, extraParams, passiveCaptchaParams)
+                linkPaymentDetails.toNewOption(
+                    saveOption,
+                    configuration,
+                    extraParams,
+                    passiveCaptchaParams,
+                    attestationRequired
+                )
             }
             is LinkPaymentDetails.Saved -> {
                 linkStore.markLinkAsUsed()
 
-                linkPaymentDetails.toSavedOption(createParams, saveOption, passiveCaptchaParams)
+                linkPaymentDetails.toSavedOption(
+                    createParams,
+                    saveOption,
+                    passiveCaptchaParams,
+                    attestationRequired
+                )
             }
             null -> linkInlineSignupConfirmationOption.toNewOption()
         }
@@ -148,7 +160,8 @@ internal class LinkInlineSignupConfirmationDefinition(
     private fun LinkPaymentDetails.Saved.toSavedOption(
         createParams: PaymentMethodCreateParams,
         saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption,
-        passiveCaptchaParams: PassiveCaptchaParams?
+        passiveCaptchaParams: PassiveCaptchaParams?,
+        attestationRequired: Boolean,
     ): PaymentMethodConfirmationOption.Saved {
         val last4 = paymentDetails.last4
 
@@ -172,7 +185,7 @@ internal class LinkInlineSignupConfirmationDefinition(
             originatedFromWallet = true,
             passiveCaptchaParams = passiveCaptchaParams,
             clientAttributionMetadata = null,
-            attestationRequired = false
+            attestationRequired = attestationRequired,
         )
     }
 
@@ -180,7 +193,8 @@ internal class LinkInlineSignupConfirmationDefinition(
         saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption,
         configuration: LinkConfiguration,
         extraParams: PaymentMethodExtraParams?,
-        passiveCaptchaParams: PassiveCaptchaParams?
+        passiveCaptchaParams: PassiveCaptchaParams?,
+        attestationRequired: Boolean,
     ): PaymentMethodConfirmationOption.New {
         val passthroughMode = configuration.passthroughModeEnabled
 
@@ -197,7 +211,7 @@ internal class LinkInlineSignupConfirmationDefinition(
             shouldSave = saveOption.shouldSave(),
             passiveCaptchaParams = passiveCaptchaParams,
             clientAttributionMetadata = null,
-            attestationRequired = false
+            attestationRequired = attestationRequired,
         )
     }
 
@@ -209,7 +223,7 @@ internal class LinkInlineSignupConfirmationDefinition(
             shouldSave = saveOption.shouldSave(),
             passiveCaptchaParams = passiveCaptchaParams,
             clientAttributionMetadata = null,
-            attestationRequired = false
+            attestationRequired = attestationRequired,
         )
     }
 

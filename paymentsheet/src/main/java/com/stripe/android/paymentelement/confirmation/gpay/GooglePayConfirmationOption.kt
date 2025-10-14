@@ -13,6 +13,7 @@ internal data class GooglePayConfirmationOption(
     val config: Config,
     val passiveCaptchaParams: PassiveCaptchaParams?,
     val clientAttributionMetadata: ClientAttributionMetadata?,
+    val attestationRequired: Boolean,
 ) : ConfirmationHandler.Option {
     @Parcelize
     data class Config(

@@ -18,7 +18,8 @@ internal data class LinkInlineSignupConfirmationOption(
     val saveOption: PaymentMethodSaveOption,
     val linkConfiguration: LinkConfiguration,
     private val userInput: UserInput,
-    val passiveCaptchaParams: PassiveCaptchaParams?
+    val passiveCaptchaParams: PassiveCaptchaParams?,
+    val attestationRequired: Boolean,
 ) : ConfirmationHandler.Option {
     enum class PaymentMethodSaveOption(val setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?) {
         RequestedReuse(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession),

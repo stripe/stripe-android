@@ -599,7 +599,8 @@ internal class DefaultLinkConfirmationHandlerTest {
         cvc: String?,
         billingDetails: PaymentMethod.BillingDetails?,
         allowRedisplay: PaymentMethod.AllowRedisplay?,
-        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS
+        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS,
+        attestationRequired: Boolean = false
     ) {
         assertThat(intent).isEqualTo(configuration.stripeIntent)
         val option = confirmationOption as PaymentMethodConfirmationOption.New
@@ -613,6 +614,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             )
         )
         assertThat(option.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
+        assertThat(option.attestationRequired).isEqualTo(attestationRequired)
         assertThat(shippingDetails).isEqualTo(configuration.shippingDetails)
         assertThat(initializationMode).isEqualTo(configuration.initializationMode)
     }
@@ -621,12 +623,14 @@ internal class DefaultLinkConfirmationHandlerTest {
         configuration: LinkConfiguration,
         paymentDetails: LinkPaymentDetails.Saved,
         cvc: String?,
-        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS
+        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS,
+        attestationRequired: Boolean = false
     ) {
         assertThat(intent).isEqualTo(configuration.stripeIntent)
         val option = confirmationOption as PaymentMethodConfirmationOption.Saved
         assertThat(option.paymentMethod.id).isEqualTo(paymentDetails.paymentDetails.paymentMethodId)
         assertThat(option.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
+        assertThat(option.attestationRequired).isEqualTo(attestationRequired)
 
         val optionsCard = option.optionsParams as? PaymentMethodOptionsParams.Card
         assertThat(optionsCard?.cvc).isEqualTo(cvc)
@@ -638,13 +642,15 @@ internal class DefaultLinkConfirmationHandlerTest {
         configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         logger: Logger = FakeLogger(),
         confirmationHandler: FakeConfirmationHandler = FakeConfirmationHandler(),
-        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS
+        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS,
+        attestationRequired: Boolean = false
     ): DefaultLinkConfirmationHandler {
         val handler = DefaultLinkConfirmationHandler(
             confirmationHandler = confirmationHandler,
             configuration = configuration,
             logger = logger,
-            passiveCaptchaParams = passiveCaptchaParams
+            passiveCaptchaParams = passiveCaptchaParams,
+            attestationRequired = attestationRequired
         )
         confirmationHandler.validate()
         return handler
