@@ -186,9 +186,14 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             returnUrl = DefaultReturnUrl.create(context).value,
             paymentMethodId = (confirmationOption as? PaymentMethodConfirmationOption.Saved)?.paymentMethod?.id,
             paymentMethodData = (updatedConfirmationOption as? PaymentMethodConfirmationOption.New)?.createParams,
-            clientContext = prepareConfirmationTokenClientContextParams(
-                confirmationOption.optionsParams
-            )
+            clientContext =
+            if (requestOptions.apiKeyIsLiveMode) {
+                null
+            } else {
+                prepareConfirmationTokenClientContextParams(
+                    confirmationOption.optionsParams
+                )
+            }
         )
     }
 
