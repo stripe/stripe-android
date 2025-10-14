@@ -39,8 +39,8 @@ internal class IntentConfirmationFlowTest {
             confirmationOption = PaymentMethodConfirmationOption.New(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = null,
-                shouldSave = false,
                 extraParams = null,
+                shouldSave = false,
                 passiveCaptchaParams = null
             ),
             confirmationArgs = defaultConfirmationDefinitionParams(
@@ -76,8 +76,8 @@ internal class IntentConfirmationFlowTest {
             confirmationOption = PaymentMethodConfirmationOption.New(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = null,
-                shouldSave = false,
                 extraParams = null,
+                shouldSave = false,
                 passiveCaptchaParams = null
             ),
             confirmationArgs = defaultConfirmationDefinitionParams(
@@ -226,10 +226,10 @@ internal class IntentConfirmationFlowTest {
             confirmationOption = PaymentMethodConfirmationOption.New(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = null,
-                shouldSave = true,
                 extraParams = PaymentMethodExtraParams.Card(
                     setAsDefault = true
                 ),
+                shouldSave = true,
                 passiveCaptchaParams = null
             ),
             confirmationArgs = defaultConfirmationDefinitionParams(
@@ -253,10 +253,10 @@ internal class IntentConfirmationFlowTest {
             confirmationOption = PaymentMethodConfirmationOption.New(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = null,
-                shouldSave = true,
                 extraParams = PaymentMethodExtraParams.Card(
                     setAsDefault = true
                 ),
+                shouldSave = true,
                 passiveCaptchaParams = null
             ),
             confirmationArgs = defaultConfirmationDefinitionParams(
@@ -359,8 +359,8 @@ internal class IntentConfirmationFlowTest {
         val CONFIRMATION_OPTION = PaymentMethodConfirmationOption.New(
             createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             optionsParams = null,
-            shouldSave = false,
             extraParams = null,
+            shouldSave = false,
             passiveCaptchaParams = null
         )
 

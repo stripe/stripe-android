@@ -75,8 +75,8 @@ internal class BacsConfirmationActivityTest {
                     PaymentMethodConfirmationOption.New(
                         createParams = CONFIRMATION_OPTION.createParams,
                         optionsParams = CONFIRMATION_OPTION.optionsParams,
-                        shouldSave = false,
                         extraParams = null,
+                        shouldSave = false,
                         passiveCaptchaParams = null
                     )
                 )

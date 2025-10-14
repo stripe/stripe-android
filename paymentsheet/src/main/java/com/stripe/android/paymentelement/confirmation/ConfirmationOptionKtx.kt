@@ -79,7 +79,6 @@ private fun PaymentSelection.New.USBankAccount.toConfirmationOption(
             extraParams = paymentMethodExtraParams,
             shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
             passiveCaptchaParams = passiveCaptchaParams,
-            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 }
@@ -125,7 +124,6 @@ private fun PaymentSelection.New.toConfirmationOption(
             extraParams = paymentMethodExtraParams,
             shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
             passiveCaptchaParams = passiveCaptchaParams,
-            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 }

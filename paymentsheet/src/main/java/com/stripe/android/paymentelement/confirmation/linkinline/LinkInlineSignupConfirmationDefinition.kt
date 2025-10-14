@@ -195,7 +195,6 @@ internal class LinkInlineSignupConfirmationDefinition(
             extraParams = extraParams,
             shouldSave = saveOption.shouldSave(),
             passiveCaptchaParams = passiveCaptchaParams,
-            clientAttributionMetadata = this.paymentMethodCreateParams.clientAttributionMetadata,
         )
     }
 

@@ -66,8 +66,8 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentMethodConfirmationOption.New(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = PaymentMethodOptionsParams.Card(network = "cartes_bancaires"),
-                shouldSave = false,
                 extraParams = null,
+                shouldSave = false,
                 passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
@@ -90,8 +90,8 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentMethodConfirmationOption.New(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = null,
-                shouldSave = false,
                 extraParams = null,
+                shouldSave = false,
                 passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
@@ -114,8 +114,8 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentMethodConfirmationOption.New(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = null,
-                shouldSave = true,
                 extraParams = null,
+                shouldSave = true,
                 passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
@@ -171,8 +171,8 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentMethodConfirmationOption.New(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = null,
-                shouldSave = false,
                 extraParams = null,
+                shouldSave = false,
                 passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )

@@ -42,14 +42,16 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
     }
 
     @Parcelize
-    data class New(
+    data class New constructor(
         val createParams: PaymentMethodCreateParams,
         override val optionsParams: PaymentMethodOptionsParams?,
         val extraParams: PaymentMethodExtraParams?,
         val shouldSave: Boolean,
         override val passiveCaptchaParams: PassiveCaptchaParams?,
-        override val clientAttributionMetadata: ClientAttributionMetadata? = null,
     ) : PaymentMethodConfirmationOption {
+
+        override val clientAttributionMetadata
+            get() = createParams.clientAttributionMetadata
 
         override fun updatedForDeferredIntent(
             intentConfiguration: PaymentSheet.IntentConfiguration,

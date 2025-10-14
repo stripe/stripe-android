@@ -75,7 +75,6 @@ class ConfirmSetupIntentParamsTest {
                 clientSecret = CLIENT_SECRET,
                 setAsDefaultPaymentMethod = true,
                 radarOptions = null,
-                clientAttributionMetadata = null,
             ).toParamMap()
         ).isEqualTo(
             mapOf(
@@ -274,7 +273,6 @@ class ConfirmSetupIntentParamsTest {
                 clientSecret = CLIENT_SECRET,
                 setAsDefaultPaymentMethod = true,
                 radarOptions = radarOptions,
-                clientAttributionMetadata = null,
             )
             .toParamMap()
 

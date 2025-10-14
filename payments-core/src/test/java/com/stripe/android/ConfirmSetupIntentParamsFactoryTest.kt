@@ -186,7 +186,6 @@ class ConfirmSetupIntentParamsFactoryTest {
             optionsParams = null,
             extraParams = extraParams,
             radarOptions = null,
-            clientAttributionMetadata = null,
         )
     }
 

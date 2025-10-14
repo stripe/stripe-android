@@ -42,8 +42,8 @@ internal class PassiveChallengeConfirmationFlowTest {
                     radarOptions = RadarOptions("test_token")
                 ),
                 optionsParams = NEW_CONFIRMATION_OPTION.optionsParams,
-                shouldSave = false,
                 extraParams = null,
+                shouldSave = false,
                 passiveCaptchaParams = null
             ),
             arguments = CONFIRMATION_PARAMETERS,
@@ -78,8 +78,8 @@ internal class PassiveChallengeConfirmationFlowTest {
             confirmationOption = PaymentMethodConfirmationOption.New(
                 createParams = NEW_CONFIRMATION_OPTION.createParams,
                 optionsParams = NEW_CONFIRMATION_OPTION.optionsParams,
-                shouldSave = false,
                 extraParams = null,
+                shouldSave = false,
                 passiveCaptchaParams = null
             ),
             arguments = CONFIRMATION_PARAMETERS,

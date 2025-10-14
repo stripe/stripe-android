@@ -256,7 +256,6 @@ constructor(
                 mandateData = mandateData,
                 setAsDefaultPaymentMethod = null,
                 radarOptions = null,
-                clientAttributionMetadata = null,
             )
         }
 
@@ -267,7 +266,6 @@ constructor(
             mandateId: String? = null,
             setAsDefaultPaymentMethod: Boolean?,
             radarOptions: RadarOptions?,
-            clientAttributionMetadata: ClientAttributionMetadata?
         ): ConfirmSetupIntentParams {
             return ConfirmSetupIntentParams(
                 clientSecret = clientSecret,
@@ -277,7 +275,7 @@ constructor(
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCreateParams.code,
                 radarOptions = radarOptions,
-                clientAttributionMetadata = clientAttributionMetadata,
+                clientAttributionMetadata = paymentMethodCreateParams.clientAttributionMetadata,
             )
         }
 

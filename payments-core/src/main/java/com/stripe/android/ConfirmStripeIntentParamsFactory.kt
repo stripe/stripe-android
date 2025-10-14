@@ -38,8 +38,7 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
         createParams: PaymentMethodCreateParams,
         optionsParams: PaymentMethodOptionsParams? = null,
         extraParams: PaymentMethodExtraParams? = null,
-        radarOptions: RadarOptions? = null,
-        clientAttributionMetadata: ClientAttributionMetadata?
+        radarOptions: RadarOptions? = null
     ): T
 
     abstract fun create(
@@ -118,7 +117,6 @@ internal class ConfirmPaymentIntentParamsFactory(
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
         radarOptions: RadarOptions?,
-        clientAttributionMetadata: ClientAttributionMetadata?,
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodCreateParams = createParams,
@@ -127,7 +125,7 @@ internal class ConfirmPaymentIntentParamsFactory(
             shipping = shipping,
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
             radarOptions = radarOptions,
-            clientAttributionMetadata = clientAttributionMetadata,
+            clientAttributionMetadata = createParams.clientAttributionMetadata,
         )
     }
 
@@ -170,15 +168,13 @@ internal class ConfirmSetupIntentParamsFactory(
         createParams: PaymentMethodCreateParams,
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
-        radarOptions: RadarOptions?,
-        clientAttributionMetadata: ClientAttributionMetadata?
+        radarOptions: RadarOptions?
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodCreateParams = createParams,
             clientSecret = clientSecret,
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
             radarOptions = radarOptions,
-            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 

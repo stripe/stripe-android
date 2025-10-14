@@ -2442,10 +2442,10 @@ internal class DefaultFlowControllerTest {
 
         assertThat(startTurbine.awaitItem().confirmationOption).isEqualTo(
             PaymentMethodConfirmationOption.New(
-                shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
                 createParams = createParams,
                 optionsParams = null,
                 extraParams = null,
+                shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
                 passiveCaptchaParams = null
             )
         )

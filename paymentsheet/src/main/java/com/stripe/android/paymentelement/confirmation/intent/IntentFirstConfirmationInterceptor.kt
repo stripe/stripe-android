@@ -33,7 +33,6 @@ internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
                 confirmationOption.createParams,
                 confirmationOption.optionsParams,
                 confirmationOption.extraParams,
-                clientAttributionMetadata = confirmationOption.clientAttributionMetadata,
             )
         }
     }

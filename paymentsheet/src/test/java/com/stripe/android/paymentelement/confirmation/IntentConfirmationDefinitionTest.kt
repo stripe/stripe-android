@@ -67,8 +67,8 @@ class IntentConfirmationDefinitionTest {
                 confirmationOption = PaymentMethodConfirmationOption.New(
                     createParams = createParams,
                     optionsParams = null,
-                    shouldSave = true,
                     extraParams = null,
+                    shouldSave = true,
                     passiveCaptchaParams = null
                 ),
                 confirmationArgs = CONFIRMATION_PARAMETERS,

@@ -158,11 +158,10 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     allowRedisplay = allowRedisplay,
                     clientAttributionMetadata = configuration.clientAttributionMetadata,
                 ),
-                extraParams = null,
                 optionsParams = null,
+                extraParams = null,
                 shouldSave = false,
                 passiveCaptchaParams = passiveCaptchaParams,
-                clientAttributionMetadata = configuration.clientAttributionMetadata,
             )
         }
 

@@ -33,8 +33,8 @@ class BacsConfirmationFlowTest {
             confirmationOption = PaymentMethodConfirmationOption.New(
                 createParams = BACS_CONFIRMATION_OPTION.createParams,
                 optionsParams = BACS_CONFIRMATION_OPTION.optionsParams,
-                shouldSave = false,
                 extraParams = null,
+                shouldSave = false,
                 passiveCaptchaParams = null
             ),
             arguments = CONFIRMATION_PARAMETERS,
