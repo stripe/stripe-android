@@ -70,7 +70,9 @@ internal suspend fun IntentConfirmationInterceptor.interceptDefaultNewPaymentMet
         optionsParams = null,
         extraParams = null,
         shouldSave = false,
-        passiveCaptchaParams = null
+        passiveCaptchaParams = null,
+        clientAttributionMetadata = null,
+        attestationRequired = false
     ),
     shippingValues = null,
 )
@@ -83,6 +85,7 @@ internal suspend fun IntentConfirmationInterceptor.interceptDefaultSavedPaymentM
         optionsParams = null,
         passiveCaptchaParams = null,
         hCaptchaToken = null,
+        attestationRequired = false
     ),
     shippingValues = null,
 )

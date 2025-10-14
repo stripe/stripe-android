@@ -300,6 +300,7 @@ class DeferredIntentConfirmationInterceptorTest {
                     ).takeIf { input },
                     passiveCaptchaParams = null,
                     hCaptchaToken = null,
+                    attestationRequired = false
                 ),
                 shippingValues = null,
             )

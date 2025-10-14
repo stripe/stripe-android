@@ -41,7 +41,9 @@ internal class IntentConfirmationFlowTest {
                 optionsParams = null,
                 shouldSave = false,
                 extraParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
+                clientAttributionMetadata = null
             ),
             confirmationArgs = defaultConfirmationDefinitionParams(
                 initializationMode = defaultPaymentIntentInitializationMode,
@@ -78,7 +80,9 @@ internal class IntentConfirmationFlowTest {
                 optionsParams = null,
                 shouldSave = false,
                 extraParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
+                clientAttributionMetadata = null
             ),
             confirmationArgs = defaultConfirmationDefinitionParams(
                 initializationMode = defaultSetupIntentInitializationMode,
@@ -230,7 +234,9 @@ internal class IntentConfirmationFlowTest {
                 extraParams = PaymentMethodExtraParams.Card(
                     setAsDefault = true
                 ),
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
+                clientAttributionMetadata = null
             ),
             confirmationArgs = defaultConfirmationDefinitionParams(
                 initializationMode = defaultSetupIntentInitializationMode,
@@ -257,7 +263,9 @@ internal class IntentConfirmationFlowTest {
                 extraParams = PaymentMethodExtraParams.Card(
                     setAsDefault = true
                 ),
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
+                clientAttributionMetadata = null
             ),
             confirmationArgs = defaultConfirmationDefinitionParams(
                 initializationMode = defaultPaymentIntentInitializationMode,
@@ -361,7 +369,9 @@ internal class IntentConfirmationFlowTest {
             optionsParams = null,
             shouldSave = false,
             extraParams = null,
-            passiveCaptchaParams = null
+            passiveCaptchaParams = null,
+            attestationRequired = false,
+            clientAttributionMetadata = null
         )
 
         val DEFERRED_CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(

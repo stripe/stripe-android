@@ -1175,6 +1175,7 @@ internal class PaymentMethodMetadataTest {
                 paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                 paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
             ),
+            attestOnIntentConfirmation = false,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1258,6 +1259,7 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodSelectionFlow = null,
                 paymentIntentCreationFlow = null,
             ),
+            attestOnIntentConfirmation = false,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -2120,6 +2122,20 @@ internal class PaymentMethodMetadataTest {
 
         assertThat(metadata.passiveCaptchaParams)
             .isEqualTo(PassiveCaptchaParamsFactory.passiveCaptchaParams())
+    }
+
+    fun `attestOnIntentConfirmation for Native Link PaymentMethodMetadata is always false`() {
+        val linkConfiguration = LinkTestUtils.createLinkConfiguration(
+            cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
+        )
+
+        val metadata = PaymentMethodMetadata.createForNativeLink(
+            configuration = linkConfiguration,
+            linkAccount = linkAccount(),
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+        )
+
+        assertThat(metadata.attestOnIntentConfirmation).isFalse()
     }
 
     private fun createLinkConfiguration(): LinkConfiguration {

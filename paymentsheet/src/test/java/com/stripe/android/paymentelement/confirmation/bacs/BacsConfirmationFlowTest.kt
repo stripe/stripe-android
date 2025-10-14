@@ -35,7 +35,9 @@ class BacsConfirmationFlowTest {
                 optionsParams = BACS_CONFIRMATION_OPTION.optionsParams,
                 shouldSave = false,
                 extraParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
+                clientAttributionMetadata = null
             ),
             arguments = CONFIRMATION_PARAMETERS,
         ),

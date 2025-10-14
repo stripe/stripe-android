@@ -44,7 +44,9 @@ internal class PassiveChallengeConfirmationFlowTest {
                 optionsParams = NEW_CONFIRMATION_OPTION.optionsParams,
                 shouldSave = false,
                 extraParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
+                clientAttributionMetadata = null
             ),
             arguments = CONFIRMATION_PARAMETERS,
         ),
@@ -62,7 +64,8 @@ internal class PassiveChallengeConfirmationFlowTest {
                 optionsParams = SAVED_CONFIRMATION_OPTION.optionsParams,
                 originatedFromWallet = false,
                 passiveCaptchaParams = null,
-                hCaptchaToken = "test_token"
+                hCaptchaToken = "test_token",
+                attestationRequired = false
             ),
             arguments = CONFIRMATION_PARAMETERS,
         ),
@@ -80,7 +83,9 @@ internal class PassiveChallengeConfirmationFlowTest {
                 optionsParams = NEW_CONFIRMATION_OPTION.optionsParams,
                 shouldSave = false,
                 extraParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
+                clientAttributionMetadata = null
             ),
             arguments = CONFIRMATION_PARAMETERS,
         ),
@@ -98,7 +103,8 @@ internal class PassiveChallengeConfirmationFlowTest {
                 optionsParams = SAVED_CONFIRMATION_OPTION.optionsParams,
                 originatedFromWallet = false,
                 passiveCaptchaParams = null,
-                hCaptchaToken = null
+                hCaptchaToken = null,
+                attestationRequired = false
             ),
             arguments = CONFIRMATION_PARAMETERS,
         ),
@@ -115,6 +121,8 @@ internal class PassiveChallengeConfirmationFlowTest {
             extraParams = null,
             shouldSave = false,
             passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
+            attestationRequired = false,
+            clientAttributionMetadata = null
         )
 
         private val SAVED_CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
@@ -123,6 +131,7 @@ internal class PassiveChallengeConfirmationFlowTest {
             originatedFromWallet = false,
             passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
             hCaptchaToken = null,
+            attestationRequired = false
         )
     }
 

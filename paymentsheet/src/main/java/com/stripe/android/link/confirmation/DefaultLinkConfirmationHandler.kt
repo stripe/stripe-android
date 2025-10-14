@@ -158,7 +158,9 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 extraParams = null,
                 optionsParams = null,
                 shouldSave = false,
-                passiveCaptchaParams = passiveCaptchaParams
+                passiveCaptchaParams = passiveCaptchaParams,
+                clientAttributionMetadata = null,
+                attestationRequired = false
             )
         }
 
@@ -210,6 +212,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 ),
                 passiveCaptchaParams = passiveCaptchaParams,
                 clientAttributionMetadata = null,
+                attestationRequired = false
             ),
             appearance = PaymentSheet.Appearance(),
             initializationMode = configuration.initializationMode,

@@ -82,6 +82,7 @@ internal class GooglePayConfirmationActivityTest {
                         originatedFromWallet = true,
                         passiveCaptchaParams = null,
                         clientAttributionMetadata = GOOGLE_PAY_CONFIRMATION_OPTION.clientAttributionMetadata,
+                        attestationRequired = false
                     )
                 )
 
@@ -157,6 +158,7 @@ internal class GooglePayConfirmationActivityTest {
                         originatedFromWallet = true,
                         passiveCaptchaParams = null,
                         clientAttributionMetadata = GOOGLE_PAY_CONFIRMATION_OPTION.clientAttributionMetadata,
+                        attestationRequired = false
                     )
                 )
 
@@ -219,6 +221,7 @@ internal class GooglePayConfirmationActivityTest {
                         originatedFromWallet = true,
                         passiveCaptchaParams = null,
                         clientAttributionMetadata = GOOGLE_PAY_CONFIRMATION_OPTION.clientAttributionMetadata,
+                        attestationRequired = false
                     )
                 )
 

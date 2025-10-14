@@ -305,7 +305,8 @@ internal class DefaultFlowControllerTest {
                     extraParams = selection.paymentMethodExtraParams,
                     shouldSave = selection.customerRequestedSave == PaymentSelection
                         .CustomerRequestedSave.RequestReuse,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
+                    attestationRequired = false,
                 )
             )
 
@@ -1229,7 +1230,8 @@ internal class DefaultFlowControllerTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
     }
@@ -1291,7 +1293,8 @@ internal class DefaultFlowControllerTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
     }
@@ -1309,7 +1312,8 @@ internal class DefaultFlowControllerTest {
                 optionsParams = expectedPaymentMethodOptions,
                 extraParams = null,
                 shouldSave = false,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
         assertThat(arguments.intent).isEqualTo(intent)
@@ -1433,7 +1437,8 @@ internal class DefaultFlowControllerTest {
                 extraParams = GENERIC_PAYMENT_SELECTION.paymentMethodExtraParams,
                 shouldSave = GENERIC_PAYMENT_SELECTION.customerRequestedSave ==
                     PaymentSelection.CustomerRequestedSave.RequestReuse,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
 
@@ -1681,7 +1686,8 @@ internal class DefaultFlowControllerTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
         assertThat(arguments.initializationMode)
@@ -2341,7 +2347,8 @@ internal class DefaultFlowControllerTest {
                     cvc = "505"
                 ),
                 originatedFromWallet = false,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
         assertThat(arguments.shippingDetails).isEqualTo(shippingDetails)
@@ -2390,7 +2397,8 @@ internal class DefaultFlowControllerTest {
                 optionsParams = null,
                 extraParams = null,
                 shouldSave = true,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
         assertThat(arguments.shippingDetails).isNull()
@@ -2444,7 +2452,8 @@ internal class DefaultFlowControllerTest {
                 createParams = createParams,
                 optionsParams = null,
                 extraParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
 

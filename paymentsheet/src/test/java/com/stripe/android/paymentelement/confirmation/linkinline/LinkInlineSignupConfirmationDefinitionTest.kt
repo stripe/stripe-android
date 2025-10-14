@@ -299,7 +299,8 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             optionsParams = PaymentMethodOptionsParams.Card(
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession,
             ),
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+            attestationRequired = false,
         )
 
         definition.launch(
@@ -325,7 +326,8 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             optionsParams = PaymentMethodOptionsParams.Card(
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession,
             ),
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+            attestationRequired = false,
         )
 
         val result = definition.toResult(

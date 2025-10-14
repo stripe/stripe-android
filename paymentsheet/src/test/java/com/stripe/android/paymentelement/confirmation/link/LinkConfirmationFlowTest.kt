@@ -120,7 +120,8 @@ class LinkConfirmationFlowTest {
                     paymentMethod = PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = true,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
+                    attestationRequired = false,
                 ),
                 arguments = CONFIRMATION_PARAMETERS,
             )
