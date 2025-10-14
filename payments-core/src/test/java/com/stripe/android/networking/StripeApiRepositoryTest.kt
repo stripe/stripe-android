@@ -3599,9 +3599,7 @@ internal class StripeApiRepositoryTest {
         verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
         val apiRequest = apiRequestArgumentCaptor.firstValue
         val clientContextParams = apiRequest.params?.get("client_context") as Map<*, *>
-        assertThat(clientContextParams["mode"]).isEqualTo("payment")
-        assertThat(clientContextParams["currency"]).isEqualTo("usd")
-        assertThat(clientContextParams["payment_method_types"]).isEqualTo(listOf("card"))
+        assertThat(clientContextParams).isEqualTo(clientContext.toParamMap())
     }
 
     @Test
@@ -3640,14 +3638,7 @@ internal class StripeApiRepositoryTest {
         verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
         val apiRequest = apiRequestArgumentCaptor.firstValue
         val clientContextParams = apiRequest.params?.get("client_context") as Map<*, *>
-        assertThat(clientContextParams["mode"]).isEqualTo("payment")
-        assertThat(clientContextParams["currency"]).isEqualTo("eur")
-        assertThat(clientContextParams["setup_future_usage"]).isEqualTo("off_session")
-        assertThat(clientContextParams["capture_method"]).isEqualTo("automatic")
-        assertThat(clientContextParams["payment_method_types"]).isEqualTo(listOf("sepa_debit"))
-        assertThat(clientContextParams["customer"]).isEqualTo("cus_test_customer")
-        assertThat(clientContextParams["on_behalf_of"]).isEqualTo("acct_123456")
-        assertThat(clientContextParams["payment_method_configuration"]).isEqualTo("pmc_123456")
+        assertThat(clientContextParams).isEqualTo(clientContext.toParamMap())
     }
 
     @Test

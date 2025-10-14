@@ -270,17 +270,7 @@ class ConfirmationTokenParamsTest {
         val paramMap = params.toParamMap()
         assertThat(paramMap["payment_method_data"]).isNotNull()
         assertThat(paramMap["return_url"]).isEqualTo("https://example.com/return")
-
-        val clientContextMap = paramMap["client_context"] as Map<*, *>
-        assertThat(clientContextMap["mode"]).isEqualTo("payment")
-        assertThat(clientContextMap["currency"]).isEqualTo("usd")
-        assertThat(clientContextMap["setup_future_usage"]).isEqualTo("on_session")
-        assertThat(clientContextMap["capture_method"]).isEqualTo("automatic")
-        assertThat(clientContextMap["payment_method_types"]).isEqualTo(listOf("card", "apple_pay"))
-        assertThat(clientContextMap["on_behalf_of"]).isEqualTo("acct_123")
-        assertThat(clientContextMap["payment_method_configuration"]).isEqualTo("pmc_123")
-        assertThat(clientContextMap["customer"]).isEqualTo("cus_123")
-        assertThat(clientContextMap["payment_method_options"]).isNotNull()
+        assertThat(paramMap["client_context"]).isEqualTo(clientContext.toParamMap())
     }
 
     @Test
