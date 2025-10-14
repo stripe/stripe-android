@@ -356,6 +356,7 @@ internal class DefaultFlowControllerTest {
                 ),
                 passiveCaptchaParams = null,
                 clientAttributionMetadata = null,
+                attestationRequired = false,
             )
         )
 
@@ -1031,7 +1032,8 @@ internal class DefaultFlowControllerTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = TestFactory.LINK_CONFIGURATION,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
     }
@@ -1081,7 +1083,8 @@ internal class DefaultFlowControllerTest {
                     saveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest,
                     linkConfiguration = TestFactory.LINK_CONFIGURATION,
                     userInput = paymentSelection.input,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
+                    attestationRequired = false,
                 )
             )
 
@@ -1140,7 +1143,8 @@ internal class DefaultFlowControllerTest {
                     userInput = paymentSelection.input,
                     linkConfiguration = linkConfiguration,
                     saveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
+                    attestationRequired = false,
                 )
             )
             assertThat(arguments.intent).isEqualTo(intent)
@@ -1195,7 +1199,8 @@ internal class DefaultFlowControllerTest {
                     saveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest,
                     linkConfiguration = linkConfig,
                     userInput = paymentSelection.input,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
+                    attestationRequired = false,
                 )
             )
             assertThat(arguments.intent).isEqualTo(intent)
@@ -1353,6 +1358,7 @@ internal class DefaultFlowControllerTest {
                 ),
                 passiveCaptchaParams = null,
                 clientAttributionMetadata = null,
+                attestationRequired = false,
             )
         )
     }
@@ -1480,7 +1486,8 @@ internal class DefaultFlowControllerTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = TestFactory.LINK_CONFIGURATION,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
     }
@@ -2023,6 +2030,7 @@ internal class DefaultFlowControllerTest {
                 ),
                 passiveCaptchaParams = null,
                 clientAttributionMetadata = null,
+                attestationRequired = false,
             )
         )
     }
@@ -2061,7 +2069,8 @@ internal class DefaultFlowControllerTest {
             BacsConfirmationOption(
                 createParams = selection.paymentMethodCreateParams,
                 optionsParams = selection.paymentMethodOptionsParams,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
         assertThat(arguments.appearance).isEqualTo(appearance)

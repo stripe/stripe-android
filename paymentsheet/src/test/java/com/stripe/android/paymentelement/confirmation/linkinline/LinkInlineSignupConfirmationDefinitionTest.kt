@@ -718,7 +718,8 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
             ),
             userInput = userInput,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+            attestationRequired = false,
         )
     }
 

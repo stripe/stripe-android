@@ -288,6 +288,7 @@ internal class GooglePayConfirmationActivityTest {
             ),
             passiveCaptchaParams = null,
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            attestationRequired = false,
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(

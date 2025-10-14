@@ -33,7 +33,9 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.New.USBankAccount -> {
             toConfirmationOption(passiveCaptchaParams, clientAttributionMetadata, attestOnIntentConfirmation)
         }
-        is PaymentSelection.New.LinkInline -> toConfirmationOption(linkConfiguration, passiveCaptchaParams)
+        is PaymentSelection.New.LinkInline -> {
+            toConfirmationOption(linkConfiguration, passiveCaptchaParams, attestOnIntentConfirmation)
+        }
         is PaymentSelection.New -> {
             toConfirmationOption(passiveCaptchaParams, clientAttributionMetadata, attestOnIntentConfirmation)
         }
@@ -103,7 +105,8 @@ private fun PaymentSelection.New.USBankAccount.toConfirmationOption(
 
 private fun PaymentSelection.New.LinkInline.toConfirmationOption(
     linkConfiguration: LinkConfiguration?,
-    passiveCaptchaParams: PassiveCaptchaParams?
+    passiveCaptchaParams: PassiveCaptchaParams?,
+    attestationRequired: Boolean
 ): LinkInlineSignupConfirmationOption? {
     return linkConfiguration?.let {
         LinkInlineSignupConfirmationOption(
@@ -120,7 +123,8 @@ private fun PaymentSelection.New.LinkInline.toConfirmationOption(
             },
             linkConfiguration = linkConfiguration,
             userInput = input,
-            passiveCaptchaParams = passiveCaptchaParams
+            passiveCaptchaParams = passiveCaptchaParams,
+            attestationRequired = attestationRequired
         )
     }
 }

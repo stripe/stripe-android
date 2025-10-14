@@ -194,7 +194,8 @@ internal class BacsConfirmationActivityTest {
                 )
             ),
             optionsParams = null,
-            passiveCaptchaParams = null
+            passiveCaptchaParams = null,
+            attestationRequired = false,
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(

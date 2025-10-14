@@ -116,6 +116,7 @@ class GooglePayConfirmationFlowTest {
             ),
             passiveCaptchaParams = null,
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            attestationRequired = false,
         )
 
         private val PAYMENT_METHOD = PaymentMethodFactory.card()

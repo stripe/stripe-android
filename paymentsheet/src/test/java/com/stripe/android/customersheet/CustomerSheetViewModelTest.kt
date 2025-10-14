@@ -3306,6 +3306,66 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `When starting confirmation, should pass attestationRequired true when required`() = runTest(testDispatcher) {
+        assertAttestationRequiredPassedToConfirmationHandler(attestOnIntentConfirmation = true)
+    }
+
+    @Test
+    fun `When starting confirmation, should pass attestationRequired false when not required`() = runTest(testDispatcher) {
+        assertAttestationRequiredPassedToConfirmationHandler(attestOnIntentConfirmation = false)
+    }
+
+    private suspend fun assertAttestationRequiredPassedToConfirmationHandler(attestOnIntentConfirmation: Boolean) {
+        val fakeConfirmationHandler = FakeConfirmationHandler()
+        val confirmationHandlerFactory = ConfirmationHandler.Factory { fakeConfirmationHandler }
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            customerPaymentMethods = listOf(),
+            isGooglePayAvailable = false,
+            confirmationHandlerFactory = confirmationHandlerFactory,
+            customerSheetLoader = FakeCustomerSheetLoader(
+                customerPaymentMethods = emptyList(),
+                isGooglePayAvailable = false,
+                attestOnIntentConfirmation = attestOnIntentConfirmation
+            ),
+            intentDataSource = FakeCustomerSheetIntentDataSource(
+                canCreateSetupIntents = true,
+                onRetrieveSetupIntentClientSecret = {
+                    CustomerSheetDataResult.success("seti_123")
+                }
+            ),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                onAttachPaymentMethod = {
+                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
+                }
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+            ),
+        ).apply {
+            handleViewAction(
+                CustomerSheetViewAction.OnFormFieldValuesCompleted(
+                    formFieldValues = TEST_FORM_VALUES,
+                )
+            )
+        }
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
+        }
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+        val capturedArgs = fakeConfirmationHandler.startTurbine.awaitItem()
+        assertThat(capturedArgs.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
+
+        val savedOption = capturedArgs.confirmationOption as PaymentMethodConfirmationOption.Saved
+        assertThat(savedOption.attestationRequired).isEqualTo(attestOnIntentConfirmation)
+    }
+
+    @Test
     fun `When setting up with intent, should call 'IntentConfirmationInterceptor' with expected params`() =
         runTest(testDispatcher) {
             val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory()

@@ -668,6 +668,7 @@ class GooglePayConfirmationDefinitionTest {
             ),
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            attestationRequired = false,
         )
 
         private val APPEARANCE = PaymentSheet.Appearance.Builder()

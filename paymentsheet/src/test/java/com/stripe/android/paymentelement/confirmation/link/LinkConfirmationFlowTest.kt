@@ -142,7 +142,8 @@ class LinkConfirmationFlowTest {
         private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
             linkExpressMode = LinkExpressMode.ENABLED,
-            passiveCaptchaParams = null
+            passiveCaptchaParams = null,
+            attestationRequired = false,
         )
     }
 }

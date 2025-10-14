@@ -56,7 +56,8 @@ class BacsConfirmationFlowTest {
                 )
             ),
             optionsParams = null,
-            passiveCaptchaParams = null
+            passiveCaptchaParams = null,
+            attestationRequired = false,
         )
     }
 }

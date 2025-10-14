@@ -983,7 +983,8 @@ internal class PaymentSheetViewModelTest {
                 LinkConfirmationOption(
                     linkExpressMode = LinkExpressMode.DISABLED,
                     configuration = TestFactory.LINK_CONFIGURATION,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
+                    attestationRequired = false,
                 )
             )
 
@@ -1635,7 +1636,8 @@ internal class PaymentSheetViewModelTest {
                 LinkConfirmationOption(
                     configuration = TestFactory.LINK_CONFIGURATION,
                     linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
+                    attestationRequired = false,
                 )
             )
 
@@ -2563,7 +2565,8 @@ internal class PaymentSheetViewModelTest {
             BacsConfirmationOption(
                 createParams = bacsPaymentSelection.paymentMethodCreateParams,
                 optionsParams = bacsPaymentSelection.paymentMethodOptionsParams,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
     }
@@ -2735,7 +2738,8 @@ internal class PaymentSheetViewModelTest {
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
                 passiveCaptchaParams = null,
-                clientAttributionMetadata = null
+                clientAttributionMetadata = null,
+                attestationRequired = false,
             )
         )
 
@@ -2780,7 +2784,8 @@ internal class PaymentSheetViewModelTest {
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
                 passiveCaptchaParams = null,
-                clientAttributionMetadata = null
+                clientAttributionMetadata = null,
+                attestationRequired = false,
             )
         )
 
@@ -2818,7 +2823,8 @@ internal class PaymentSheetViewModelTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
 
@@ -2856,7 +2862,8 @@ internal class PaymentSheetViewModelTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
 
@@ -2895,7 +2902,8 @@ internal class PaymentSheetViewModelTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
 
@@ -2933,7 +2941,8 @@ internal class PaymentSheetViewModelTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                attestationRequired = false,
             )
         )
 
@@ -3331,7 +3340,8 @@ internal class PaymentSheetViewModelTest {
                 saveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest,
                 linkConfiguration = LINK_CONFIG,
                 userInput = PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION.input,
-                passiveCaptchaParams = passiveCaptchaParams
+                passiveCaptchaParams = passiveCaptchaParams,
+                attestationRequired = false,
             ),
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             paymentElementLoader = FakePaymentElementLoader(
@@ -3381,7 +3391,8 @@ internal class PaymentSheetViewModelTest {
                 configuration = LINK_CONFIG,
                 linkExpressMode = LinkExpressMode.DISABLED,
                 linkLaunchMode = LinkLaunchMode.Full,
-                passiveCaptchaParams = passiveCaptchaParams
+                passiveCaptchaParams = passiveCaptchaParams,
+                attestationRequired = false,
             ),
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             paymentElementLoader = FakePaymentElementLoader(

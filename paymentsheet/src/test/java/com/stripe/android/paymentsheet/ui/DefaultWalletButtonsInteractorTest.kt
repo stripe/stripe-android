@@ -326,7 +326,8 @@ class DefaultWalletButtonsInteractorTest {
                     LinkConfirmationOption(
                         linkExpressMode = LinkExpressMode.DISABLED,
                         configuration = mock(),
-                        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                        attestationRequired = false,
                     )
                 )
             }
@@ -533,6 +534,7 @@ class DefaultWalletButtonsInteractorTest {
                     ),
                     passiveCaptchaParams = null,
                     clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+                    attestationRequired = false,
                 )
             )
         }
@@ -839,7 +841,8 @@ class DefaultWalletButtonsInteractorTest {
                     LinkConfirmationOption(
                         linkExpressMode = LinkExpressMode.DISABLED,
                         configuration = mock(),
-                        passiveCaptchaParams = null
+                        passiveCaptchaParams = null,
+                        attestationRequired = false,
                     )
                 )
             }
