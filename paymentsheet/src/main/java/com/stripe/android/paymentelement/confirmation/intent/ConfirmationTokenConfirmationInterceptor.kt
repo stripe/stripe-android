@@ -184,12 +184,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         val updatedConfirmationOption = confirmationOption.updatedForDeferredIntent(intentConfiguration)
         return ConfirmationTokenParams(
             returnUrl = DefaultReturnUrl.create(context).value,
-            paymentMethodId =
-            if (confirmationOption is PaymentMethodConfirmationOption.Saved) {
-                confirmationOption.paymentMethod.id
-            } else {
-                null
-            },
+            paymentMethodId = (confirmationOption as? PaymentMethodConfirmationOption.Saved)?.paymentMethod?.id,
             paymentMethodData = (updatedConfirmationOption as? PaymentMethodConfirmationOption.New)?.createParams,
             clientContext = prepareConfirmationTokenClientContextParams(
                 confirmationOption.optionsParams
@@ -205,11 +200,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 currency = mode.currency,
                 setupFutureUsage = mode.setupFutureUsage?.code,
                 captureMethod = (mode as? DeferredIntentParams.Mode.Payment)?.captureMethod?.code,
-                paymentMethodTypes = paymentMethodTypes.takeIf {
-                    // Empty values are an attempt to unset a parameter;
-                    // however, paymentMethodTypes cannot be unset.
-                    it.isNotEmpty()
-                },
+                paymentMethodTypes = paymentMethodTypes,
                 onBehalfOf = onBehalfOf,
                 paymentMethodConfiguration = paymentMethodConfigurationId,
                 customer = customerId,

@@ -102,6 +102,24 @@ class ConfirmationTokenClientContextParamsTest {
     }
 
     @Test
+    fun toParamMap_withEmptyPaymentMethodTypes_shouldNotIncludePaymentTypes() {
+        val paymentMethodTypes = listOf<String>()
+        val params = ConfirmationTokenClientContextParams(
+            mode = "payment",
+            currency = "usd",
+            paymentMethodTypes = paymentMethodTypes,
+        )
+
+        assertThat(params.toParamMap())
+            .isEqualTo(
+                mapOf(
+                    "mode" to "payment",
+                    "currency" to "usd"
+                )
+            )
+    }
+
+    @Test
     fun toParamMap_withSepaDebitPaymentMethodOptions_shouldCreateExpectedMap() {
         val paymentMethodOptions = PaymentMethodOptionsParams.SepaDebit(
             setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession

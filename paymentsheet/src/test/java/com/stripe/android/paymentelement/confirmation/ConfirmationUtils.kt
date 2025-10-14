@@ -103,6 +103,7 @@ internal suspend fun createIntentConfirmationInterceptor(
             ): ConfirmationTokenConfirmationInterceptor {
                 return ConfirmationTokenConfirmationInterceptor(
                     intentConfiguration = intentConfiguration,
+                    customerId = customerId,
                     createIntentCallback = createIntentCallback,
                     ephemeralKeySecret = ephemeralKeySecret,
                     context = ApplicationProvider.getApplicationContext(),

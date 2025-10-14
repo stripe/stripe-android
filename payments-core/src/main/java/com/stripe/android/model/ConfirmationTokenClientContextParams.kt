@@ -39,7 +39,13 @@ data class ConfirmationTokenClientContextParams(
             currency?.let { put(PARAM_CURRENCY, it) }
             setupFutureUsage?.let { put(PARAM_SETUP_FUTURE_USAGE, it) }
             captureMethod?.let { put(PARAM_CAPTURE_METHOD, it) }
-            paymentMethodTypes?.let { put(PARAM_PAYMENT_METHOD_TYPES, it) }
+            paymentMethodTypes?.let {
+                if (it.isNotEmpty()) {
+                    // Empty values are an attempt to unset a parameter;
+                    // however, paymentMethodTypes cannot be unset.
+                    put(PARAM_PAYMENT_METHOD_TYPES, it)
+                }
+            }
             onBehalfOf?.let { put(PARAM_ON_BEHALF_OF, it) }
             paymentMethodConfiguration?.let { put(PARAM_PAYMENT_METHOD_CONFIGURATION, it) }
             customer?.let { put(PARAM_CUSTOMER, it) }
