@@ -276,12 +276,6 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun testConsumerPaymentDetailsUrl() {
-        assertThat(StripeApiRepository.consumerPaymentDetailsUrl)
-            .isEqualTo("https://api.stripe.com/v1/consumers/payment_details")
-    }
-
-    @Test
     fun testListConsumerPaymentDetailsUrl() {
         assertThat(StripeApiRepository.listConsumerPaymentDetailsUrl)
             .isEqualTo("https://api.stripe.com/v1/consumers/payment_details/list")
