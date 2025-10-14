@@ -12,6 +12,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT
 import com.stripe.android.model.LinkDisabledReason
@@ -30,6 +31,7 @@ internal interface CreateLinkState {
         configuration: CommonConfiguration,
         customer: CustomerRepository.CustomerInfo?,
         initializationMode: PaymentElementLoader.InitializationMode,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): LinkStateResult
 }
 
@@ -66,6 +68,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         configuration: CommonConfiguration,
         customer: CustomerRepository.CustomerInfo?,
         initializationMode: PaymentElementLoader.InitializationMode,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): LinkStateResult {
         val linkDisabledReasons = getLinkDisabledReasons(
             elementsSession = elementsSession,
@@ -82,6 +85,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             customer = customer,
             elementsSession = elementsSession,
             initializationMode = initializationMode,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
         val accountStatus = accountStatusProvider(linkConfiguration)
         val loginState = accountStatus.toLoginState()
@@ -194,6 +198,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         customer: CustomerRepository.CustomerInfo?,
         elementsSession: ElementsSession,
         initializationMode: PaymentElementLoader.InitializationMode,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): LinkConfiguration {
         val isCardBrandFilteringRequired =
             elementsSession.linkPassthroughModeEnabled &&
@@ -271,6 +276,7 @@ internal class DefaultCreateLinkState @Inject constructor(
                 .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
             linkSupportedPaymentMethodsOnboardingEnabled =
             elementsSession.linkSettings?.linkSupportedPaymentMethodsOnboardingEnabled.orEmpty(),
+            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 }
