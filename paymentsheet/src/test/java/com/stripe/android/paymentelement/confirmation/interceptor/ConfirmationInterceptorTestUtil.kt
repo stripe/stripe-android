@@ -35,6 +35,7 @@ import javax.inject.Provider
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
 internal data class InterceptorTestScenario(
+    val ephemeralKeySecret: String? = null,
     val stripeRepository: StripeRepository = object : AbsFakeStripeRepository() {},
     val publishableKeyProvider: () -> String = { "pk" },
     val errorReporter: ErrorReporter = FakeErrorReporter(),
@@ -52,6 +53,7 @@ internal fun runInterceptorScenario(
 ) = runTest {
     val interceptor = createIntentConfirmationInterceptor(
         initializationMode = initializationMode,
+        ephemeralKeySecret = scenario.ephemeralKeySecret,
         stripeRepository = scenario.stripeRepository,
         publishableKeyProvider = scenario.publishableKeyProvider,
         errorReporter = scenario.errorReporter,

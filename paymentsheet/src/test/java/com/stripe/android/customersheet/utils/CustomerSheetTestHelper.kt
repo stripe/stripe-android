@@ -87,7 +87,8 @@ internal object CustomerSheetTestHelper {
         intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory =
             object : IntentConfirmationInterceptor.Factory {
                 override suspend fun create(
-                    initializationMode: PaymentElementLoader.InitializationMode
+                    initializationMode: PaymentElementLoader.InitializationMode,
+                    ephemeralKeySecret: String?
                 ): IntentConfirmationInterceptor {
                     return FakeIntentConfirmationInterceptor().apply {
                         enqueueCompleteStep(true)

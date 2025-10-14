@@ -11,6 +11,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.ConfirmationTokenJsonParser
 import com.stripe.android.networking.StripeRepository
@@ -18,6 +19,7 @@ import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallba
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTokenFixtures
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.createIntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.CreateIntentWithConfirmationTokenCallbackFailureException
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
@@ -359,6 +361,137 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
         assertThat(observedTokens).hasSize(1)
         assertThat(observedTokens[0]).isEqualTo(confirmationToken)
+    }
+
+    @Test
+    fun `Saved PM - succeed without ephemeralKeySecret if the payment method is not attached`() =
+        runInterceptorScenario(
+            initializationMode = DEFAULT_DEFERRED_INTENT,
+            scenario = InterceptorTestScenario(
+                stripeRepository = object : AbsFakeStripeRepository() {
+                    override suspend fun createConfirmationToken(
+                        confirmationTokenParams: ConfirmationTokenParams,
+                        options: ApiRequest.Options
+                    ): Result<ConfirmationToken> {
+                        return Result.success(confirmationToken)
+                    }
+
+                    override suspend fun retrieveStripeIntent(
+                        clientSecret: String,
+                        options: ApiRequest.Options,
+                        expandFields: List<String>
+                    ): Result<StripeIntent> {
+                        return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+                    }
+                },
+                intentCreationConfirmationTokenCallbackProvider = Provider {
+                    CreateIntentWithConfirmationTokenCallback { _ ->
+                        CreateIntentResult.Success(clientSecret = "pi_123_secret_456")
+                    }
+                },
+            )
+        ) { interceptor ->
+
+            val nextStep = interceptor.intercept(
+                intent = PaymentIntentFactory.create(),
+                confirmationOption = PaymentMethodConfirmationOption.Saved(
+                    paymentMethod = PaymentMethodFixtures.AU_BECS_DEBIT,
+                    optionsParams = null,
+                    passiveCaptchaParams = null,
+                    hCaptchaToken = null,
+                ),
+                shippingValues = null,
+            )
+
+            assertThat(nextStep).isEqualTo(
+                ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
+                    intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    completedFullPaymentFlow = true,
+                )
+            )
+        }
+
+    @Test
+    fun `Saved PM - succeed if a ephemeralKeySecret associated with the customer is provided`() =
+        runInterceptorScenario(
+            initializationMode = DEFAULT_DEFERRED_INTENT,
+            scenario = InterceptorTestScenario(
+                ephemeralKeySecret = "ek_test_123",
+                stripeRepository = object : AbsFakeStripeRepository() {
+                    override suspend fun createConfirmationToken(
+                        confirmationTokenParams: ConfirmationTokenParams,
+                        options: ApiRequest.Options
+                    ): Result<ConfirmationToken> {
+                        return Result.success(confirmationToken)
+                    }
+
+                    override suspend fun retrieveStripeIntent(
+                        clientSecret: String,
+                        options: ApiRequest.Options,
+                        expandFields: List<String>
+                    ): Result<StripeIntent> {
+                        return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+                    }
+                },
+                intentCreationConfirmationTokenCallbackProvider = Provider {
+                    CreateIntentWithConfirmationTokenCallback { _ ->
+                        CreateIntentResult.Success(clientSecret = "pi_123_secret_456")
+                    }
+                },
+            )
+        ) { interceptor ->
+
+            val nextStep = interceptor.interceptDefaultSavedPaymentMethod()
+
+            assertThat(nextStep).isEqualTo(
+                ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
+                    intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    completedFullPaymentFlow = true,
+                )
+            )
+        }
+
+    @Test
+    fun `Saved PM - Fails if creating confirmation token did not succeed`() = runTest {
+        val invalidRequestException = InvalidRequestException(
+            stripeError = StripeError(
+                type = "card_error",
+                message = "Your card is not supported.",
+                code = "card_declined",
+            ),
+            requestId = "req_123",
+            statusCode = 400,
+        )
+
+        val interceptor = createIntentConfirmationInterceptor(
+            ephemeralKeySecret = "ek_test_123",
+            initializationMode = DEFAULT_DEFERRED_INTENT,
+            stripeRepository = object : AbsFakeStripeRepository() {
+                override suspend fun createConfirmationToken(
+                    confirmationTokenParams: ConfirmationTokenParams,
+                    options: ApiRequest.Options
+                ): Result<ConfirmationToken> {
+                    return Result.failure(invalidRequestException)
+                }
+            },
+            intentCreationConfirmationTokenCallbackProvider = Provider {
+                CreateIntentWithConfirmationTokenCallback { _ ->
+                    CreateIntentResult.Success(clientSecret = "pi_123")
+                }
+            },
+        )
+
+        val nextStep = interceptor.interceptDefaultSavedPaymentMethod()
+
+        assertThat(nextStep).isEqualTo(
+            ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>(
+                cause = invalidRequestException,
+                message = "Your card is not supported.".resolvableString,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        )
     }
 
     private fun createFakeStripeRepositoryForConfirmationToken(): StripeRepository {
