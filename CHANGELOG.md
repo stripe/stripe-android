@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Financial Connections
+* [Added] `StripeFinancialConnections` SDK is now localized!
+
 ## 21.28.2 - 2025-10-13
 
 Bug fixes and improvements.
