@@ -12,6 +12,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.confirmation.createPaymentMethodCreateParams
 import com.stripe.android.link.utils.toConsumerBillingAddress
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
@@ -278,6 +279,7 @@ internal class LinkApiRepository @Inject constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
         consumerSessionClientSecret: String,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): Result<LinkPaymentDetails.Saved> = withContext(workContext) {
         val allowRedisplay = paymentMethodCreateParams.allowRedisplay?.let {
             mapOf(ALLOW_REDISPLAY_PARAM to it.value)
@@ -289,12 +291,14 @@ internal class LinkApiRepository @Inject constructor(
 
         val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
 
+        val clientAttributionMetadataParams = clientAttributionMetadata.toParams()
+
         stripeRepository.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             id = id,
             extraParams = mapOf(
                 "payment_method_options" to extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
-            ) + allowRedisplay + billingPhone + paymentMethodParams,
+            ) + allowRedisplay + billingPhone + paymentMethodParams + clientAttributionMetadataParams,
             requestOptions = apiRequestOptions,
         ).onFailure {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
@@ -324,7 +328,8 @@ internal class LinkApiRepository @Inject constructor(
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String?,
-        apiKey: String?
+        apiKey: String?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): Result<SharePaymentDetails> = withContext(workContext) {
         val fraudParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
         val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
@@ -334,6 +339,12 @@ internal class LinkApiRepository @Inject constructor(
         val allowRedisplayParams = allowRedisplay?.let {
             mapOf("allow_redisplay" to allowRedisplay)
         } ?: emptyMap()
+        val clientAttributionMetadataParams = clientAttributionMetadata.toParams()
+        val extraParams = paymentMethodParams +
+            fraudParams +
+            optionsParams +
+            allowRedisplayParams +
+            clientAttributionMetadataParams
 
         // Allow using a custom API key so that payment methods can be created under the
         // merchant-of-record if necessary.
@@ -345,7 +356,7 @@ internal class LinkApiRepository @Inject constructor(
             expectedPaymentMethodType = expectedPaymentMethodType,
             requestOptions = requestOptions,
             requestSurface = requestSurface.value,
-            extraParams = paymentMethodParams + fraudParams + optionsParams + allowRedisplayParams,
+            extraParams = extraParams,
             billingPhone = billingPhone,
         )
     }
@@ -510,7 +521,14 @@ internal class LinkApiRepository @Inject constructor(
         }
     }
 
+    private fun ClientAttributionMetadata?.toParams(): Map<String, Map<String, Any>> {
+        return this?.let {
+            mapOf(CLIENT_ATTRIBUTION_METADATA_PARAM to it.toParamMap())
+        } ?: emptyMap()
+    }
+
     private companion object {
         const val ALLOW_REDISPLAY_PARAM = "allow_redisplay"
+        const val CLIENT_ATTRIBUTION_METADATA_PARAM = "client_attribution_metadata"
     }
 }

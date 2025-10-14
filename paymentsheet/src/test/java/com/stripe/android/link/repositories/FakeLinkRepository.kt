@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -167,7 +168,8 @@ internal open class FakeLinkRepository : LinkRepository {
     override suspend fun shareCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
-        consumerSessionClientSecret: String
+        consumerSessionClientSecret: String,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): Result<LinkPaymentDetails.Saved> = shareCardPaymentDetailsResult
 
     override suspend fun sharePaymentDetails(
@@ -177,7 +179,8 @@ internal open class FakeLinkRepository : LinkRepository {
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String?,
-        apiKey: String?
+        apiKey: String?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): Result<SharePaymentDetails> = sharePaymentDetails
 
     override suspend fun createPaymentMethod(

@@ -378,6 +378,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details/share"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-share-success.json")
         }
@@ -492,6 +493,7 @@ internal class LinkTest {
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/consumers/payment_details/share"),
+                topLevelClientAttributionMetadataParams(),
             ) { response ->
                 response.testBodyFromFile("consumer-payment-details-share-success.json")
             }
@@ -590,6 +592,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details/share"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-share-success.json")
         }
@@ -793,6 +796,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details/share"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.setResponseCode(500)
         }
@@ -1133,6 +1137,7 @@ internal class LinkTest {
             method("POST"),
             path("/v1/consumers/payment_details/share"),
             bodyPart("allow_redisplay", "always"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-share-success.json")
         }
