@@ -224,4 +224,61 @@ class ConfirmationTokenParamsTest {
                 )
             )
     }
+
+    @Test
+    fun toParamMap_withClientContext_shouldCreateExpectedMap() {
+        val clientContext = ConfirmationTokenClientContextParams(
+            mode = "payment",
+            currency = "usd",
+            setupFutureUsage = "off_session",
+            captureMethod = "automatic"
+        )
+        val params = ConfirmationTokenParams(
+            clientContext = clientContext
+        )
+
+        assertThat(params.toParamMap())
+            .isEqualTo(
+                mapOf(
+                    "client_context" to clientContext.toParamMap()
+                )
+            )
+    }
+
+    @Test
+    fun toParamMap_withComprehensiveClientContext_shouldCreateExpectedMap() {
+        val paymentMethodOptions = PaymentMethodOptionsParams.Card(
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+        )
+        val clientContext = ConfirmationTokenClientContextParams(
+            mode = "payment",
+            currency = "usd",
+            setupFutureUsage = "on_session",
+            captureMethod = "automatic",
+            paymentMethodTypes = listOf("card", "apple_pay"),
+            onBehalfOf = "acct_123",
+            paymentMethodConfiguration = "pmc_123",
+            customer = "cus_123",
+            paymentMethodOptions = paymentMethodOptions
+        )
+        val params = ConfirmationTokenParams(
+            paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            returnUrl = "https://example.com/return",
+            clientContext = clientContext
+        )
+
+        val paramMap = params.toParamMap()
+        assertThat(paramMap["payment_method_data"]).isNotNull()
+        assertThat(paramMap["return_url"]).isEqualTo("https://example.com/return")
+        assertThat(paramMap["client_context"]).isEqualTo(clientContext.toParamMap())
+    }
+
+    @Test
+    fun toParamMap_withoutClientContext_shouldNotIncludeClientContext() {
+        val params = ConfirmationTokenParams(
+            paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+        )
+
+        assertThat(params.toParamMap().containsKey("client_context")).isFalse()
+    }
 }
