@@ -12,10 +12,13 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -77,16 +80,16 @@ internal fun PaymentMethodVerticalLayoutUI(
             )
         },
         imageLoader = imageLoader,
-        reportInitialPaymentMethodVisibilitySnapshot = { visibilityMap ->
-            val visiblePaymentMethods = visibilityMap.filter { it.value }.keys.toList()
-            val hiddenPaymentMethods = visibilityMap.filter { !it.value }.keys.toList()
-
-            interactor.reportInitialPaymentMethodVisibilitySnapshot(
-                visiblePaymentMethods = buildList {
-                    if (state.displayedSavedPaymentMethod != null) add("saved")
-                    addAll(visiblePaymentMethods)
-                },
-                hiddenPaymentMethods = hiddenPaymentMethods,
+        updatePaymentMethodVisibility = {itemCode, coordinates ->
+            interactor.handleViewAction(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.UpdatePaymentMethodVisibility(
+                    itemCode, coordinates
+                )
+            )
+        },
+        cancelPaymentMethodVisibilityTracking = {
+            interactor.handleViewAction(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.CancelPaymentMethodVisibilityTracking
             )
         },
         modifier = modifier
@@ -94,6 +97,7 @@ internal fun PaymentMethodVerticalLayoutUI(
     )
 }
 
+@Suppress("LongMethod")
 @VisibleForTesting
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(
@@ -107,8 +111,16 @@ internal fun PaymentMethodVerticalLayoutUI(
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
-    reportInitialPaymentMethodVisibilitySnapshot: (Map<String, Boolean>) -> Unit = {},
+    updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
+    cancelPaymentMethodVisibilityTracking: () -> Unit = {},
 ) {
+    val paymentMethodCodes = remember(paymentMethods, displayedSavedPaymentMethod) {
+        val output = paymentMethods.map { it.code }
+        output.plus("saved_${displayedSavedPaymentMethod?.paymentMethod?.id}")
+            .takeIf { displayedSavedPaymentMethod != null } ?: output
+    }
+    DisposableEffect(paymentMethodCodes) { onDispose { cancelPaymentMethodVisibilityTracking.invoke() } }
+
     Column(modifier = modifier) {
         val textStyle = MaterialTheme.typography.subtitle1
         val textColor = MaterialTheme.stripeColors.onComponent
@@ -129,6 +141,9 @@ internal fun PaymentMethodVerticalLayoutUI(
             )
             Spacer(Modifier.size(16.dp))
             SavedPaymentMethodRowButton(
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    updatePaymentMethodVisibility.invoke("saved", coordinates)
+                },
                 displayableSavedPaymentMethod = displayedSavedPaymentMethod,
                 isEnabled = isEnabled,
                 isSelected = selection?.isSaved == true,
@@ -162,7 +177,7 @@ internal fun PaymentMethodVerticalLayoutUI(
             isEnabled = isEnabled,
             imageLoader = imageLoader,
             rowStyle = rowStyle,
-            reportInitialPaymentMethodVisibilitySnapshot = reportInitialPaymentMethodVisibilitySnapshot,
+            updatePaymentMethodVisibility = updatePaymentMethodVisibility,
         )
     }
 }

@@ -23,7 +23,7 @@ import kotlin.coroutines.CoroutineContext
  * Once stable, it dispatches a single analytics event.
  */
 internal class PaymentMethodInitialVisibilityTracker(
-    private val expectedItems: List<String>,
+    private var expectedItems: List<String> = emptyList(),
     private val renderedLpmCallback: (List<String>, List<String>) -> Unit,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) {
@@ -34,6 +34,14 @@ internal class PaymentMethodInitialVisibilityTracker(
 
     private val coroutineScope = CoroutineScope(dispatcher)
     private var dispatchEventJob: Job? = null
+
+    fun updateExpectedItems(items: List<String>) {
+        if (this.expectedItems != items) {
+            // Reset to initial state with new items
+            this.expectedItems = items
+            reset()
+        }
+    }
 
     /**
      * When this function is called from onGloballyPositioned
@@ -137,7 +145,11 @@ internal class PaymentMethodInitialVisibilityTracker(
         }
     }
 
-    fun dispose() {
+    fun reset() {
+        coordinateStabilityMap.clear()
+        previousCoordinates.clear()
+        visibilityMap.clear()
+        hasDispatched = false
         dispatchEventJob?.cancel()
         coroutineScope.cancel() // Cancel the entire scope
     }
