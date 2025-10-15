@@ -1,22 +1,22 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>Wallet</title>
-<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../";</script>
-    <script>document.documentElement.classList.replace("no-js","js");</script>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-    if (storage == null) {
+      if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    } else {
+      } else {
         const savedDarkMode = JSON.parse(storage)
-        if(savedDarkMode === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    }
+      }
     </script>
 <script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
 <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
@@ -24,152 +24,184 @@
 <link href="../../../styles/main.css" rel="Stylesheet">
 <link href="../../../styles/prism.css" rel="Stylesheet">
 <link href="../../../styles/logo-styles.css" rel="Stylesheet">
-<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
-<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
 <script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
 <script type="text/javascript" src="../../../scripts/main.js" defer></script>
 <script type="text/javascript" src="../../../scripts/prism.js" async></script>
-<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
 <body>
-    <div class="root">
-<nav class="navigation" id="navigation-wrapper">
-    <div class="navigation--inner">
-        <div class="navigation-title">
-            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
-            <div class="library-name">
-<a class="library-name--link" href="../../../index.html">
-                            stripe-android
-                    </a>            </div>
-            <div class="library-version">
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    stripe-android
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":payments-core/main">androidJvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":payments-core/main" data-filter=":payments-core/main">
+                                <span class="checkbox--icon"></span>
+                                androidJvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
             </div>
         </div>
-        <div class="filter-section" id="filter-section">
-                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":payments-core:dokkaHtmlPartial/release">androidJvm</button>
-        </div>
-    </div>
-    <div class="navigation-controls">
-        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
-        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
-    </div>
-</nav>
-        <div id="container">
-            <div class="sidebar" id="leftColumn">
-                <div class="sidebar--inner" id="sideMenu"></div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    stripe-android
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
             </div>
-            <div id="main">
-<div class="main-content" data-page-type="classlike" id="content" pageids="payments-core::com.stripe.android.model.wallets/Wallet///PointingToDeclaration//-1622557690">
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="payments-core::com.stripe.android.model.wallets/Wallet///PointingToDeclaration//1599408092">
   <div class="breadcrumbs"><a href="../../index.html">payments-core</a><span class="delimiter">/</span><a href="../index.html">com.stripe.android.model.wallets</a><span class="delimiter">/</span><span class="current">Wallet</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Wallet</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">class </span><a href="index.html">Wallet</a> : <span data-unresolved-link="com.stripe.android.core.model/StripeModel///PointingToDeclaration/">StripeModel</span></div><p class="paragraph">Details of the card wallet.</p><p class="paragraph"><a href="https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-wallet">card.wallet</a></p><h4 class="">Inheritors</h4><div class="table"><div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-amex-express-checkout-wallet/index.html">AmexExpressCheckoutWallet</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-apple-pay-wallet/index.html">ApplePayWallet</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-google-pay-wallet/index.html">GooglePayWallet</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-masterpass-wallet/index.html">MasterpassWallet</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-samsung-pay-wallet/index.html">SamsungPayWallet</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-visa-checkout-wallet/index.html">VisaCheckoutWallet</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-link-wallet/index.html">LinkWallet</a></div></span></div><div></div></div></div></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">class </span><a href="index.html">Wallet</a> : <span data-unresolved-link="com.stripe.android.core.model/StripeModel///PointingToDeclaration/">StripeModel</span></div><p class="paragraph">Details of the card wallet.</p><p class="paragraph"><a href="https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-wallet">card.wallet</a></p><h4 class="tableheader">Inheritors</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-amex-express-checkout-wallet/index.html">AmexExpressCheckoutWallet</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-apple-pay-wallet/index.html">ApplePayWallet</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-google-pay-wallet/index.html">GooglePayWallet</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-masterpass-wallet/index.html">MasterpassWallet</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-samsung-pay-wallet/index.html">SamsungPayWallet</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-visa-checkout-wallet/index.html">VisaCheckoutWallet</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-link-wallet/index.html">LinkWallet</a></div></span></div><div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="TYPE">
-        <h2 class="">Types</h2>
-        <div class="table"><a data-name="1844678569%2FClasslikes%2F-1622557690" anchor-label="AmexExpressCheckoutWallet" id="1844678569%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="1844678569%2FClasslikes%2F1599408092" anchor-label="AmexExpressCheckoutWallet" id="1844678569%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-amex-express-checkout-wallet/index.html"><span>Amex</span><wbr><span>Express</span><wbr><span>Checkout</span><wbr><span><span>Wallet</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1844678569%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1844678569%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-amex-express-checkout-wallet/index.html">AmexExpressCheckoutWallet</a> : <a href="index.html">Wallet</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-amex-express-checkout-wallet/index.html">AmexExpressCheckoutWallet</a> : <a href="index.html">Wallet</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-660526782%2FClasslikes%2F-1622557690" anchor-label="ApplePayWallet" id="-660526782%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-660526782%2FClasslikes%2F1599408092" anchor-label="ApplePayWallet" id="-660526782%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-apple-pay-wallet/index.html"><span>Apple</span><wbr><span>Pay</span><wbr><span><span>Wallet</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-660526782%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-660526782%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-apple-pay-wallet/index.html">ApplePayWallet</a> : <a href="index.html">Wallet</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-apple-pay-wallet/index.html">ApplePayWallet</a> : <a href="index.html">Wallet</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-257318927%2FClasslikes%2F-1622557690" anchor-label="GooglePayWallet" id="-257318927%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-257318927%2FClasslikes%2F1599408092" anchor-label="GooglePayWallet" id="-257318927%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-google-pay-wallet/index.html"><span>Google</span><wbr><span>Pay</span><wbr><span><span>Wallet</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-257318927%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-257318927%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-google-pay-wallet/index.html">GooglePayWallet</a> : <a href="index.html">Wallet</a>, <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-google-pay-wallet/index.html">GooglePayWallet</a> : <a href="index.html">Wallet</a>, <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-849562954%2FClasslikes%2F-1622557690" anchor-label="LinkWallet" id="-849562954%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-849562954%2FClasslikes%2F1599408092" anchor-label="LinkWallet" id="-849562954%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-link-wallet/index.html"><span>Link</span><wbr><span><span>Wallet</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-849562954%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-849562954%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-link-wallet/index.html">LinkWallet</a> : <a href="index.html">Wallet</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-link-wallet/index.html">LinkWallet</a> : <a href="index.html">Wallet</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1262828573%2FClasslikes%2F-1622557690" anchor-label="MasterpassWallet" id="1262828573%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="1262828573%2FClasslikes%2F1599408092" anchor-label="MasterpassWallet" id="1262828573%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-masterpass-wallet/index.html"><span>Masterpass</span><wbr><span><span>Wallet</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1262828573%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1262828573%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-masterpass-wallet/index.html">MasterpassWallet</a> : <a href="index.html">Wallet</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-masterpass-wallet/index.html">MasterpassWallet</a> : <a href="index.html">Wallet</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1805013022%2FClasslikes%2F-1622557690" anchor-label="SamsungPayWallet" id="-1805013022%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-1805013022%2FClasslikes%2F1599408092" anchor-label="SamsungPayWallet" id="-1805013022%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-samsung-pay-wallet/index.html"><span>Samsung</span><wbr><span>Pay</span><wbr><span><span>Wallet</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1805013022%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1805013022%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-samsung-pay-wallet/index.html">SamsungPayWallet</a> : <a href="index.html">Wallet</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-samsung-pay-wallet/index.html">SamsungPayWallet</a> : <a href="index.html">Wallet</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1015105431%2FClasslikes%2F-1622557690" anchor-label="VisaCheckoutWallet" id="-1015105431%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-1015105431%2FClasslikes%2F1599408092" anchor-label="VisaCheckoutWallet" id="-1015105431%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-visa-checkout-wallet/index.html"><span>Visa</span><wbr><span>Checkout</span><wbr><span><span>Wallet</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1015105431%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1015105431%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-visa-checkout-wallet/index.html">VisaCheckoutWallet</a> : <a href="index.html">Wallet</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-visa-checkout-wallet/index.html">VisaCheckoutWallet</a> : <a href="index.html">Wallet</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -177,18 +209,18 @@
         </div>
       </div>
       <div data-togglable="PROPERTY">
-        <h2 class="">Properties</h2>
-        <div class="table"><a data-name="1121948289%2FProperties%2F-1622557690" anchor-label="walletType" id="1121948289%2FProperties%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="1121948289%2FProperties%2F1599408092" anchor-label="walletType" id="1121948289%2FProperties%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="wallet-type.html"><span>wallet</span><wbr><span><span>Type</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1121948289%2FProperties%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1121948289%2FProperties%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="wallet-type.html">walletType</a><span class="token operator">: </span><a href="../../../payments-core/com.stripe.android.model.wallets/-wallet/-type/index.html">Wallet.Type</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="wallet-type.html">walletType</a><span class="token operator">: </span><a href="../../../payments-core/com.stripe.android.model.wallets/-wallet/-type/index.html">Wallet.Type</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -196,33 +228,33 @@
         </div>
       </div>
       <div data-togglable="FUNCTION">
-        <h2 class="">Functions</h2>
-        <div class="table"><a data-name="-1578325224%2FFunctions%2F-1622557690" anchor-label="describeContents" id="-1578325224%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-1578325224%2FFunctions%2F1599408092" anchor-label="describeContents" id="-1578325224%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="../../com.stripe.android.payments.paymentlauncher/-payment-result/-canceled/index.html#-1578325224%2FFunctions%2F-1622557690"><span>describe</span><wbr><span><span>Contents</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1578325224%2FFunctions%2F-1622557690"></span>
+                  <div><a href="../../com.stripe.android.payments.paymentlauncher/-payment-result/-canceled/index.html#-1578325224%2FFunctions%2F1599408092"><span>describe</span><wbr><span><span>Contents</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1578325224%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="../../com.stripe.android.payments.paymentlauncher/-payment-result/-canceled/index.html#-1578325224%2FFunctions%2F-1622557690"><span class="token function">describeContents</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="../../com.stripe.android.payments.paymentlauncher/-payment-result/-canceled/index.html#-1578325224%2FFunctions%2F1599408092"><span class="token function">describeContents</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1754457655%2FFunctions%2F-1622557690" anchor-label="writeToParcel" id="-1754457655%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-1754457655%2FFunctions%2F1599408092" anchor-label="writeToParcel" id="-1754457655%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="../../com.stripe.android.payments.paymentlauncher/-payment-result/-canceled/index.html#-1754457655%2FFunctions%2F-1622557690"><span>write</span><wbr><span>To</span><wbr><span><span>Parcel</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1754457655%2FFunctions%2F-1622557690"></span>
+                  <div><a href="../../com.stripe.android.payments.paymentlauncher/-payment-result/-canceled/index.html#-1754457655%2FFunctions%2F1599408092"><span>write</span><wbr><span>To</span><wbr><span><span>Parcel</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1754457655%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="../../com.stripe.android.payments.paymentlauncher/-payment-result/-canceled/index.html#-1754457655%2FFunctions%2F-1622557690"><span class="token function">writeToParcel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Parcel.html">Parcel</a><span class="token punctuation">, </span></span><span class="parameter ">p1<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="../../com.stripe.android.payments.paymentlauncher/-payment-result/-canceled/index.html#-1754457655%2FFunctions%2F1599408092"><span class="token function">writeToParcel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Parcel.html">Parcel</a><span class="token punctuation">, </span></span><span class="parameter ">p1<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -232,12 +264,22 @@
     </div>
   </div>
 </div>
-      <div class="footer">
-        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
-      </div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2025 Copyright</div>
+                </div>
             </div>
         </div>
     </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
-

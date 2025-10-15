@@ -26,10 +26,6 @@ module:financial-connections-core
 com.stripe.android.financialconnections
 com.stripe.android.financialconnections.launcher
 com.stripe.android.financialconnections.model
-module:identity
-com.stripe.android.identity
-com.stripe.android.identity.navigation
-com.stripe.android.identity.utils
 module:payments-core
 com.stripe.android
 com.stripe.android.exception

@@ -86,9 +86,21 @@ nexusPublishing {
 apply plugin: 'binary-compatibility-validator'
 apply plugin: 'org.jetbrains.dokka'
 
+dokka {
+    dokkaPublications.html {
+        outputDirectory.set(new File("${project.rootDir}/docs"))
+    }
+}
 
-tasks.dokkaHtmlMultiModule.configure {
-    outputDirectory = new File("${project.rootDir}/docs")
+dependencies {
+    dokka(project(":3ds2sdk"))
+    dokka(project(":connect"))
+    dokka(project(":financial-connections"))
+    dokka(project(":financial-connections-core"))
+    dokka(project(":financial-connections-lite"))
+    dokka(project(":paymentsheet"))
+    dokka(project(":payments-core"))
+    dokka(project(":payments-model"))
 }
 
 apiValidation {
