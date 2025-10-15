@@ -230,6 +230,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 paymentMethodConfiguration = paymentMethodConfigurationId,
                 customer = customerId,
                 paymentMethodOptions = paymentMethodOptions,
+                requireCvcRecollection = intentConfiguration.requireCvcRecollection
             )
         }
     }
