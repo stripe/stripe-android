@@ -45,7 +45,8 @@ class WebLinkActivityContractTest {
             linkExpressMode = LinkExpressMode.DISABLED,
             linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
             launchMode = LinkLaunchMode.Full,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+            attestOnIntentConfirmation = false,
         )
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)

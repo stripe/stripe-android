@@ -51,4 +51,5 @@ internal class FakeNativeLinkComponent(
     override val oAuthConsentViewModelComponentFactory: OAuthConsentViewModelComponent.Factory = mock(),
     override val webLinkAuthChannel: WebLinkAuthChannel = WebLinkAuthChannel(),
     override val passiveCaptchaParams: PassiveCaptchaParams? = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+    override val attestOnIntentConfirmation: Boolean = false,
 ) : NativeLinkComponent

@@ -28,7 +28,8 @@ class LinkActivityContractTest {
             lastUpdateReason = null
         ),
         launchMode = LinkLaunchMode.Full,
-        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+        attestOnIntentConfirmation = false,
     )
 
     @Test

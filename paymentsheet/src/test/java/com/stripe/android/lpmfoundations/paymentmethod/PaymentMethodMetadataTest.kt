@@ -1170,6 +1170,7 @@ internal class PaymentMethodMetadataTest {
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             openCardScanAutomatically = false,
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            attestOnIntentConfirmation = false,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1253,6 +1254,7 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodSelectionFlow = null,
                 paymentIntentCreationFlow = null,
             ),
+            attestOnIntentConfirmation = false,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -1753,7 +1755,8 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadata.createForNativeLink(
             configuration = linkConfiguration,
             linkAccount = linkAccount(),
-            passiveCaptchaParams = null
+            passiveCaptchaParams = null,
+            attestOnIntentConfirmation = false
         )
 
         assertThat(metadata.cbcEligibility).isEqualTo(
@@ -1775,7 +1778,8 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadata.createForNativeLink(
             configuration = linkConfiguration,
             linkAccount = linkAccount(),
-            passiveCaptchaParams = null
+            passiveCaptchaParams = null,
+            attestOnIntentConfirmation = false,
         )
 
         assertThat(metadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
@@ -2098,12 +2102,14 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadata.createForNativeLink(
             configuration = linkConfiguration,
             linkAccount = linkAccount(),
-            passiveCaptchaParams = null
+            passiveCaptchaParams = null,
+            attestOnIntentConfirmation = false
         )
 
         assertThat(metadata.cardBrandFilter).isEqualTo(linkConfiguration.cardBrandFilter)
     }
 
+    @Test
     fun `Passes passiveCaptchaParams along to Link`() {
         val linkConfiguration = LinkTestUtils.createLinkConfiguration(
             cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
@@ -2112,11 +2118,114 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadata.createForNativeLink(
             configuration = linkConfiguration,
             linkAccount = linkAccount(),
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+            attestOnIntentConfirmation = false
         )
 
         assertThat(metadata.passiveCaptchaParams)
             .isEqualTo(PassiveCaptchaParamsFactory.passiveCaptchaParams())
+    }
+
+    @Test
+    fun `createForNativeLink passes attestOnIntentConfirmation true correctly`() {
+        val metadata = createNativeLinkMetadata(attestOnIntentConfirmation = true)
+        assertThat(metadata.attestOnIntentConfirmation).isTrue()
+    }
+
+    @Test
+    fun `createForNativeLink passes attestOnIntentConfirmation false correctly`() {
+        val metadata = createNativeLinkMetadata(attestOnIntentConfirmation = false)
+        assertThat(metadata.attestOnIntentConfirmation).isFalse()
+    }
+
+    @Test
+    fun `createForPaymentElement reads attestOnIntentConfirmation from elements session when true`() {
+        val metadata = createPaymentElementMetadata(attestOnIntentConfirmationFlag = true)
+        assertThat(metadata.attestOnIntentConfirmation).isTrue()
+    }
+
+    @Test
+    fun `createForPaymentElement reads attestOnIntentConfirmation from elements session when false`() {
+        val metadata = createPaymentElementMetadata(attestOnIntentConfirmationFlag = false)
+        assertThat(metadata.attestOnIntentConfirmation).isFalse()
+    }
+
+    @Test
+    fun `createForPaymentElement defaults attestOnIntentConfirmation to false when not in flags`() {
+        val metadata = createPaymentElementMetadata(attestOnIntentConfirmationFlag = null)
+        assertThat(metadata.attestOnIntentConfirmation).isFalse()
+    }
+
+    @Test
+    fun `createForCustomerSheet reads attestOnIntentConfirmation from elements session when true`() {
+        val metadata = createCustomerSheetMetadata(attestOnIntentConfirmationFlag = true)
+        assertThat(metadata.attestOnIntentConfirmation).isTrue()
+    }
+
+    @Test
+    fun `createForCustomerSheet reads attestOnIntentConfirmation from elements session when false`() {
+        val metadata = createCustomerSheetMetadata(attestOnIntentConfirmationFlag = false)
+        assertThat(metadata.attestOnIntentConfirmation).isFalse()
+    }
+
+    private fun createNativeLinkMetadata(attestOnIntentConfirmation: Boolean): PaymentMethodMetadata {
+        return PaymentMethodMetadata.createForNativeLink(
+            configuration = LinkTestUtils.createLinkConfiguration(),
+            linkAccount = linkAccount(),
+            passiveCaptchaParams = null,
+            attestOnIntentConfirmation = attestOnIntentConfirmation
+        )
+    }
+
+    private fun createPaymentElementMetadata(attestOnIntentConfirmationFlag: Boolean?): PaymentMethodMetadata {
+        val elementsSession = createElementsSession(
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        ).copy(
+            flags = if (attestOnIntentConfirmationFlag != null) {
+                mapOf(
+                    ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION to attestOnIntentConfirmationFlag
+                )
+            } else {
+                emptyMap()
+            }
+        )
+
+        return PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+            sharedDataSpecs = emptyList(),
+            externalPaymentMethodSpecs = emptyList(),
+            isGooglePayReady = false,
+            linkStateResult = null,
+            customerMetadata = null,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+            clientAttributionMetadata = null,
+        )
+    }
+
+    private fun createCustomerSheetMetadata(attestOnIntentConfirmationFlag: Boolean): PaymentMethodMetadata {
+        val elementsSession = createElementsSession(
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        ).copy(
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION to attestOnIntentConfirmationFlag
+            )
+        )
+
+        val configuration = createCustomerSheetConfiguration(
+            billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration(),
+            defaultBillingDetails = PaymentSheet.BillingDetails(),
+            cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all()
+        )
+
+        return PaymentMethodMetadata.createForCustomerSheet(
+            elementsSession = elementsSession,
+            configuration = configuration,
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            sharedDataSpecs = emptyList(),
+            isGooglePayReady = false,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
+        )
     }
 
     private fun createLinkConfiguration(): LinkConfiguration {

@@ -141,6 +141,7 @@ internal class LinkActivity : ComponentActivity() {
                 ),
                 launchMode = LinkLaunchMode.Full,
                 passiveCaptchaParams = null,
+                attestOnIntentConfirmation = false,
             )
         )
     }

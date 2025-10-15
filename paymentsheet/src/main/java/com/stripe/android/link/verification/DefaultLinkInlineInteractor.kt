@@ -42,7 +42,8 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
         key = LINK_EMBEDDED_STATE_KEY,
         initialValue = LinkInlineState(
             verificationState = VerificationState.Loading,
-            passiveCaptchaParams = null
+            passiveCaptchaParams = null,
+            attestOnIntentConfirmation = false,
         )
     )
 
@@ -50,7 +51,12 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
      * Sets up Link verification domain logic (should be called once when initializing)
      */
     override fun setup(paymentMethodMetadata: PaymentMethodMetadata) {
-        updateState { it.copy(passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams) }
+        updateState {
+            it.copy(
+                passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams,
+                attestOnIntentConfirmation = paymentMethodMetadata.attestOnIntentConfirmation,
+            )
+        }
         val linkConfiguration = paymentMethodMetadata.linkState?.configuration
         if (linkConfiguration == null) {
             // If there is no Link account manager, we don't need to handle verification.
@@ -110,7 +116,8 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                     linkAccountInfo = accountManager.linkAccountInfo.value,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(null),
                     linkExpressMode = LinkExpressMode.ENABLED,
-                    passiveCaptchaParams = state.value.passiveCaptchaParams
+                    passiveCaptchaParams = state.value.passiveCaptchaParams,
+                    attestOnIntentConfirmation = state.value.attestOnIntentConfirmation
                 )
                 // No UI changes - keep the 2FA until we get a result from the Link payment selection flow.
             }.onFailure { error ->

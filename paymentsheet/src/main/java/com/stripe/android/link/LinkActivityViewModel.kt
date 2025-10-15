@@ -538,6 +538,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     .builder()
                     .configuration(args.configuration)
                     .passiveCaptchaParams(args.passiveCaptchaParams)
+                    .attestOnIntentConfirmation(args.attestOnIntentConfirmation)
                     .requestSurface(args.requestSurface)
                     .publishableKeyProvider { args.publishableKey }
                     .stripeAccountIdProvider { args.stripeAccountId }

@@ -420,6 +420,52 @@ class DefaultWalletButtonsInteractorTest {
     }
 
     @Test
+    fun `on Link button pressed, should pass attestOnIntentConfirmation true to linkPaymentLauncher`() = runTest {
+        testLinkButtonWithAttestOnIntentConfirmation(attestOnIntentConfirmation = true)
+    }
+
+    @Test
+    fun `on Link button pressed, should pass attestOnIntentConfirmation false to linkPaymentLauncher`() = runTest {
+        testLinkButtonWithAttestOnIntentConfirmation(attestOnIntentConfirmation = false)
+    }
+
+    private suspend fun testLinkButtonWithAttestOnIntentConfirmation(attestOnIntentConfirmation: Boolean) {
+        RecordingLinkPaymentLauncher.test {
+            val linkConfiguration = mock<LinkConfiguration>()
+            val interactor = createInteractor(
+                arguments = createArguments(
+                    availableWallets = listOf(WalletType.Link),
+                    linkState = LinkState(
+                        configuration = linkConfiguration,
+                        loginState = LinkState.LoginState.LoggedOut,
+                        signupMode = null,
+                    ),
+                    attestOnIntentConfirmation = attestOnIntentConfirmation
+                ),
+                linkPaymentLauncher = launcher,
+            )
+
+            interactor.state.test {
+                val state = awaitItem()
+
+                assertThat(state.walletButtons).hasSize(1)
+                assertThat(state.walletButtons.firstOrNull()).isInstanceOf<WalletButtonsInteractor.WalletButton.Link>()
+
+                interactor.handleViewAction(
+                    WalletButtonsInteractor.ViewAction.OnButtonPressed(state.walletButtons.first()) { false }
+                )
+            }
+
+            analyticsEventCallbackRule.assertMatchesExpectedEvent(
+                AnalyticEvent.TapsButtonInWalletsButtonsView(walletType = "link")
+            )
+
+            val call = presentCalls.awaitItem()
+            assertThat(call.attestOnIntentConfirmation).isEqualTo(attestOnIntentConfirmation)
+        }
+    }
+
+    @Test
     fun `on Google Pay button, should have expected state`() = googlePayButtonRenderTest(
         arguments = createArguments(
             availableWallets = listOf(WalletType.GooglePay),
@@ -1012,7 +1058,8 @@ class DefaultWalletButtonsInteractorTest {
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
         initializationMode: PaymentElementLoader.InitializationMode =
-            PaymentElementLoader.InitializationMode.SetupIntent(clientSecret = "seti_123_secret_123")
+            PaymentElementLoader.InitializationMode.SetupIntent(clientSecret = "seti_123_secret_123"),
+        attestOnIntentConfirmation: Boolean = false
     ): DefaultWalletButtonsInteractor.Arguments {
         return DefaultWalletButtonsInteractor.Arguments(
             linkEmail = linkEmail,
@@ -1020,6 +1067,7 @@ class DefaultWalletButtonsInteractorTest {
                 availableWallets = availableWallets,
                 linkState = linkState,
                 clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+                attestOnIntentConfirmation = attestOnIntentConfirmation,
             ),
             configuration = CommonConfigurationFactory.create(
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,

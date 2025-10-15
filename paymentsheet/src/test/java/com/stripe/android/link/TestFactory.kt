@@ -295,7 +295,8 @@ internal object TestFactory {
         linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
         launchMode = LinkLaunchMode.Full,
-        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+        attestOnIntentConfirmation = false,
     )
 
     val FINANCIAL_CONNECTIONS_CHECKING_ACCOUNT = FinancialConnectionsAccount(

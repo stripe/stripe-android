@@ -242,7 +242,8 @@ internal class PaymentOptionsViewModelTest {
             linkAccountInfo = eq(LinkAccountUpdate.Value(unverifiedAccount)),
             launchMode = eq(LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)),
             linkExpressMode = eq(LinkExpressMode.ENABLED),
-            passiveCaptchaParams = anyOrNull()
+            passiveCaptchaParams = anyOrNull(),
+            attestOnIntentConfirmation = eq(false),
         )
     }
 
@@ -281,7 +282,8 @@ internal class PaymentOptionsViewModelTest {
             linkAccountInfo = any(),
             launchMode = any(),
             linkExpressMode = any(),
-            passiveCaptchaParams = any()
+            passiveCaptchaParams = any(),
+            attestOnIntentConfirmation = any(),
         )
     }
 

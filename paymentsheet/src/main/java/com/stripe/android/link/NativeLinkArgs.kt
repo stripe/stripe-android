@@ -15,5 +15,6 @@ internal data class NativeLinkArgs(
     val linkAccountInfo: LinkAccountUpdate.Value,
     val paymentElementCallbackIdentifier: String,
     val launchMode: LinkLaunchMode,
-    val passiveCaptchaParams: PassiveCaptchaParams?
+    val passiveCaptchaParams: PassiveCaptchaParams?,
+    val attestOnIntentConfirmation: Boolean,
 ) : Parcelable

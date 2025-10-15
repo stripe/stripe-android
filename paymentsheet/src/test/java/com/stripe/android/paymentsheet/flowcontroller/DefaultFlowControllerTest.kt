@@ -528,7 +528,8 @@ internal class DefaultFlowControllerTest {
             linkAccountInfo = anyOrNull(),
             launchMode = any(),
             linkExpressMode = any(),
-            passiveCaptchaParams = anyOrNull()
+            passiveCaptchaParams = anyOrNull(),
+            attestOnIntentConfirmation = any(),
         )
 
         verify(paymentOptionActivityLauncher, never()).launch(any(), anyOrNull())
@@ -569,7 +570,8 @@ internal class DefaultFlowControllerTest {
             linkAccountInfo = anyOrNull(),
             launchMode = any(),
             linkExpressMode = any(),
-            passiveCaptchaParams = anyOrNull()
+            passiveCaptchaParams = anyOrNull(),
+            attestOnIntentConfirmation = any(),
         )
 
         // Simulate user dismissing 2FA with back press
@@ -592,7 +594,8 @@ internal class DefaultFlowControllerTest {
             linkAccountInfo = anyOrNull(),
             linkExpressMode = any(),
             launchMode = any(),
-            passiveCaptchaParams = any()
+            passiveCaptchaParams = any(),
+            attestOnIntentConfirmation = any(),
         )
 
         // Verify payment option launcher was called instead

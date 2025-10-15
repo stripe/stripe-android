@@ -42,7 +42,7 @@ internal object RecordingLinkPaymentLauncher {
                 unregisterCalls.add(Unit)
             }
 
-            on { present(any(), anyOrNull(), any(), any(), anyOrNull()) } doAnswer { invocation ->
+            on { present(any(), anyOrNull(), any(), any(), anyOrNull(), any()) } doAnswer { invocation ->
                 val arguments = invocation.arguments
 
                 presentCalls.add(
@@ -52,6 +52,7 @@ internal object RecordingLinkPaymentLauncher {
                         launchMode = arguments[2] as LinkLaunchMode,
                         linkExpressMode = arguments[3] as LinkExpressMode,
                         passiveCaptchaParams = arguments[4] as? PassiveCaptchaParams,
+                        attestOnIntentConfirmation = arguments[5] as Boolean,
                     )
                 )
             }
@@ -88,6 +89,7 @@ internal object RecordingLinkPaymentLauncher {
         val linkAccount: LinkAccount?,
         val launchMode: LinkLaunchMode,
         val linkExpressMode: LinkExpressMode,
-        val passiveCaptchaParams: PassiveCaptchaParams?
+        val passiveCaptchaParams: PassiveCaptchaParams?,
+        val attestOnIntentConfirmation: Boolean,
     )
 }

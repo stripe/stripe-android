@@ -57,6 +57,9 @@ internal interface NativeLinkComponent {
     val linkAccountManager: LinkAccountManager
     val configuration: LinkConfiguration
     val passiveCaptchaParams: PassiveCaptchaParams?
+
+    @get:Named(ATTEST_ON_INTENT_CONFIRMATION)
+    val attestOnIntentConfirmation: Boolean
     val linkEventsReporter: LinkEventsReporter
     val errorReporter: ErrorReporter
     val logger: Logger
@@ -81,6 +84,11 @@ internal interface NativeLinkComponent {
 
         @BindsInstance
         fun passiveCaptchaParams(passiveCaptchaParams: PassiveCaptchaParams?): Builder
+
+        @BindsInstance
+        fun attestOnIntentConfirmation(
+            @Named(ATTEST_ON_INTENT_CONFIRMATION) attestOnIntentConfirmation: Boolean
+        ): Builder
 
         @BindsInstance
         fun publishableKeyProvider(@Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String): Builder
