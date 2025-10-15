@@ -93,7 +93,6 @@ class GooglePayConfirmationFlowTest {
                 optionsParams = null,
                 originatedFromWallet = true,
                 passiveCaptchaParams = null,
-                clientAttributionMetadata = GOOGLE_PAY_CONFIRMATION_OPTION.clientAttributionMetadata,
             ),
             arguments = CONFIRMATION_PARAMETERS,
         )

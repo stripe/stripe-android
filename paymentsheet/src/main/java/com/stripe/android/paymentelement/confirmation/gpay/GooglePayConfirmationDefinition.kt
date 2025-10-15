@@ -117,7 +117,6 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                     optionsParams = null,
                     originatedFromWallet = true,
                     passiveCaptchaParams = confirmationOption.passiveCaptchaParams,
-                    clientAttributionMetadata = confirmationOption.clientAttributionMetadata,
                 )
 
                 ConfirmationDefinition.Result.NextStep(

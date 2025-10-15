@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -401,7 +402,8 @@ class IntentConfirmationDefinitionTest {
                 override suspend fun create(
                     initializationMode: PaymentElementLoader.InitializationMode,
                     customerId: String?,
-                    ephemeralKeySecret: String?
+                    ephemeralKeySecret: String?,
+                    clientAttributionMetadata: ClientAttributionMetadata?,
                 ): IntentConfirmationInterceptor {
                     return FakeIntentConfirmationInterceptor()
                 }

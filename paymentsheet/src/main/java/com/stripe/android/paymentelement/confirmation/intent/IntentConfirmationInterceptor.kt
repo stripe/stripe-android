@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -30,7 +31,8 @@ internal interface IntentConfirmationInterceptor {
         suspend fun create(
             initializationMode: PaymentElementLoader.InitializationMode,
             customerId: String?,
-            ephemeralKeySecret: String?
+            ephemeralKeySecret: String?,
+            clientAttributionMetadata: ClientAttributionMetadata?,
         ): IntentConfirmationInterceptor
     }
 
@@ -50,7 +52,8 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
     override suspend fun create(
         initializationMode: PaymentElementLoader.InitializationMode,
         customerId: String?,
-        ephemeralKeySecret: String?
+        ephemeralKeySecret: String?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): IntentConfirmationInterceptor {
         return when (initializationMode) {
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
@@ -71,6 +74,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                         deferredIntentConfirmationInterceptorFactory.create(
                             initializationMode.intentConfiguration,
                             deferredIntentCallback.callback,
+                            clientAttributionMetadata,
                         )
                     }
                     is DeferredIntentCallback.SharedPaymentToken -> {
@@ -83,7 +87,10 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
             }
             is PaymentElementLoader.InitializationMode.PaymentIntent,
             is PaymentElementLoader.InitializationMode.SetupIntent -> {
-                intentFirstConfirmationInterceptorFactory.create(initializationMode.clientSecret)
+                intentFirstConfirmationInterceptorFactory.create(
+                    initializationMode.clientSecret,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                )
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.interceptor
 
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
@@ -11,7 +12,8 @@ internal open class FakeIntentConfirmationInterceptorFactory(
     override suspend fun create(
         initializationMode: PaymentElementLoader.InitializationMode,
         customerId: String?,
-        ephemeralKeySecret: String?
+        ephemeralKeySecret: String?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): IntentConfirmationInterceptor {
         interceptor = FakeIntentConfirmationInterceptor().apply(enqueueStep)
         return interceptor

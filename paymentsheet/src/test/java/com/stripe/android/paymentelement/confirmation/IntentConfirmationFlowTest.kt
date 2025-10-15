@@ -5,6 +5,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.model.Address
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -287,7 +288,8 @@ internal class IntentConfirmationFlowTest {
                 override suspend fun create(
                     initializationMode: PaymentElementLoader.InitializationMode,
                     customerId: String?,
-                    ephemeralKeySecret: String?
+                    ephemeralKeySecret: String?,
+                    clientAttributionMetadata: ClientAttributionMetadata?,
                 ): IntentConfirmationInterceptor {
                     return createIntentConfirmationInterceptor(
                         initializationMode = initializationMode,

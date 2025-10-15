@@ -15,17 +15,14 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PassiveCaptchaParamsFactory
-import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationOption
@@ -201,31 +198,7 @@ class ConfirmationHandlerOptionKtxTest {
                     cvc = "505"
                 ),
                 passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
-                clientAttributionMetadata = null,
             )
-        )
-    }
-
-    @Test
-    fun `On saved selection, client attribution metadata is set properly`() {
-        val paymentSelection = PaymentSelection.Saved(
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-        )
-        val expectedClientAttributionMetadata = ClientAttributionMetadata(
-            elementsSessionConfigId = "elements_session_123",
-            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
-            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic
-        )
-
-        val confirmationOption = paymentSelection.toConfirmationOption(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-            linkConfiguration = null,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
-            clientAttributionMetadata = expectedClientAttributionMetadata,
-        )
-
-        assertThat(confirmationOption?.asSaved()?.clientAttributionMetadata).isEqualTo(
-            expectedClientAttributionMetadata
         )
     }
 
@@ -420,7 +393,6 @@ class ConfirmationHandlerOptionKtxTest {
                 optionsParams = null,
                 paymentMethod = expectedPaymentMethod,
                 passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
-                clientAttributionMetadata = null,
             )
         )
     }
@@ -443,7 +415,6 @@ class ConfirmationHandlerOptionKtxTest {
                 optionsParams = null,
                 paymentMethod = expectedPaymentMethod,
                 passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
-                clientAttributionMetadata = null,
             )
         )
     }

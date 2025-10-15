@@ -103,7 +103,8 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            linkInformation()
+            linkInformation(),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -210,6 +211,7 @@ internal class LinkTest {
                 method("POST"),
                 path("/v1/payment_intents/pi_example/confirm"),
                 bodyPart(urlEncode("payment_method_options[link][setup_future_usage]"), "off_session"),
+                topLevelClientAttributionMetadataParams(),
             ) { response ->
                 response.testBodyFromFile("payment-intent-confirm.json")
             }
@@ -292,7 +294,8 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            linkInformation()
+            linkInformation(),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -387,7 +390,8 @@ internal class LinkTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart("payment_method", "pm_1234"),
-            not(linkInformation())
+            not(linkInformation()),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -502,6 +506,7 @@ internal class LinkTest {
                 method("POST"),
                 path("/v1/payment_intents/pi_example/confirm"),
                 bodyPart(urlEncode("payment_method_options[card][setup_future_usage]"), "off_session"),
+                topLevelClientAttributionMetadataParams(),
             ) { response ->
                 response.testBodyFromFile("payment-intent-confirm.json")
             }
@@ -601,7 +606,8 @@ internal class LinkTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart("payment_method", "pm_1234"),
-            not(linkInformation())
+            not(linkInformation()),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -666,7 +672,8 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            not(linkInformation())
+            not(linkInformation()),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -732,6 +739,7 @@ internal class LinkTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             not(bodyPart("payment_method", "pm_1234")),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -805,6 +813,7 @@ internal class LinkTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             not(bodyPart("payment_method", "pm_1234")),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -861,7 +870,8 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            not(linkInformation())
+            not(linkInformation()),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -901,7 +911,8 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            not(linkInformation())
+            not(linkInformation()),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -964,7 +975,8 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            linkInformation()
+            linkInformation(),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -1039,6 +1051,7 @@ internal class LinkTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             linkInformation(),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -1146,6 +1159,7 @@ internal class LinkTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart(urlEncode("payment_method_options[card][setup_future_usage]"), "off_session"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }

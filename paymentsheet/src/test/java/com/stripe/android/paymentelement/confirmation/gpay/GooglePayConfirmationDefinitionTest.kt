@@ -127,9 +127,6 @@ class GooglePayConfirmationDefinitionTest {
         assertThat(savedOption.paymentMethod).isEqualTo(savedOption.paymentMethod)
         assertThat(savedOption.optionsParams).isNull()
         assertThat(savedOption.originatedFromWallet).isTrue()
-        assertThat(savedOption.clientAttributionMetadata).isEqualTo(
-            GOOGLE_PAY_CONFIRMATION_OPTION.clientAttributionMetadata
-        )
     }
 
     @Test

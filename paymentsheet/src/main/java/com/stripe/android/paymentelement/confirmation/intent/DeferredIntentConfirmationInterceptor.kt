@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodExtraParams
@@ -32,6 +33,7 @@ import javax.inject.Named
 internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
     @Assisted private val createIntentCallback: CreateIntentCallback,
+    @Assisted private val clientAttributionMetadata: ClientAttributionMetadata?,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
     @Named(ALLOWS_MANUAL_CONFIRMATION) private val allowsManualConfirmation: Boolean,
@@ -223,7 +225,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                         intentConfigSetupFutureUsage = intentConfiguration
                             .mode.setupFutureUse?.toConfirmParamsSetupFutureUsage(),
                         radarOptions = hCaptchaToken?.let { RadarOptions(it) },
-                        clientAttributionMetadata = confirmationOption.clientAttributionMetadata,
+                        clientAttributionMetadata = clientAttributionMetadata,
                     )
                 }
             }
@@ -272,7 +274,8 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
     interface Factory {
         fun create(
             intentConfiguration: PaymentSheet.IntentConfiguration,
-            createIntentCallback: CreateIntentCallback
+            createIntentCallback: CreateIntentCallback,
+            clientAttributionMetadata: ClientAttributionMetadata?,
         ): DeferredIntentConfirmationInterceptor
     }
 }

@@ -24,10 +24,10 @@ internal fun PaymentSelection.toConfirmationOption(
     clientAttributionMetadata: ClientAttributionMetadata?
 ): ConfirmationHandler.Option? {
     return when (this) {
-        is PaymentSelection.Saved -> toConfirmationOption(passiveCaptchaParams, clientAttributionMetadata)
+        is PaymentSelection.Saved -> toConfirmationOption(passiveCaptchaParams)
         is PaymentSelection.ExternalPaymentMethod -> toConfirmationOption()
         is PaymentSelection.CustomPaymentMethod -> toConfirmationOption(configuration)
-        is PaymentSelection.New.USBankAccount -> toConfirmationOption(passiveCaptchaParams, clientAttributionMetadata)
+        is PaymentSelection.New.USBankAccount -> toConfirmationOption(passiveCaptchaParams)
         is PaymentSelection.New.LinkInline -> toConfirmationOption(linkConfiguration, passiveCaptchaParams)
         is PaymentSelection.New -> toConfirmationOption(passiveCaptchaParams)
         is PaymentSelection.GooglePay -> toConfirmationOption(
@@ -42,13 +42,11 @@ internal fun PaymentSelection.toConfirmationOption(
 
 private fun PaymentSelection.Saved.toConfirmationOption(
     passiveCaptchaParams: PassiveCaptchaParams?,
-    clientAttributionMetadata: ClientAttributionMetadata?
 ): PaymentMethodConfirmationOption.Saved {
     return PaymentMethodConfirmationOption.Saved(
         paymentMethod = paymentMethod,
         optionsParams = paymentMethodOptionsParams,
         passiveCaptchaParams = passiveCaptchaParams,
-        clientAttributionMetadata = clientAttributionMetadata,
     )
 }
 
@@ -61,7 +59,6 @@ private fun PaymentSelection.ExternalPaymentMethod.toConfirmationOption(): Exter
 
 private fun PaymentSelection.New.USBankAccount.toConfirmationOption(
     passiveCaptchaParams: PassiveCaptchaParams?,
-    clientAttributionMetadata: ClientAttributionMetadata?,
 ): PaymentMethodConfirmationOption {
     return if (instantDebits != null) {
         // For Instant Debits, we create the PaymentMethod inside the bank auth flow. Therefore,
@@ -70,7 +67,6 @@ private fun PaymentSelection.New.USBankAccount.toConfirmationOption(
             paymentMethod = instantDebits.paymentMethod,
             optionsParams = paymentMethodOptionsParams,
             passiveCaptchaParams = passiveCaptchaParams,
-            clientAttributionMetadata = clientAttributionMetadata,
         )
     } else {
         PaymentMethodConfirmationOption.New(

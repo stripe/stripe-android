@@ -28,6 +28,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
@@ -89,7 +90,8 @@ internal object CustomerSheetTestHelper {
                 override suspend fun create(
                     initializationMode: PaymentElementLoader.InitializationMode,
                     customerId: String?,
-                    ephemeralKeySecret: String?
+                    ephemeralKeySecret: String?,
+                    clientAttributionMetadata: ClientAttributionMetadata?,
                 ): IntentConfirmationInterceptor {
                     return FakeIntentConfirmationInterceptor().apply {
                         enqueueCompleteStep(true)
