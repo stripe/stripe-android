@@ -127,7 +127,7 @@ internal fun SignUpBody(
             )
         }
         AnimatedVisibility(
-            visible = signUpScreenState.suggestedEmail != null && 
+            visible = signUpScreenState.suggestedEmail != null &&
                 signUpScreenState.signUpState != SignUpState.VerifyingEmail,
             modifier = Modifier.fillMaxWidth(),
         ) {
