@@ -1,22 +1,22 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>CustomManualEntryRequiredError</title>
-<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../";</script>
-    <script>document.documentElement.classList.replace("no-js","js");</script>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-    if (storage == null) {
+      if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    } else {
+      } else {
         const savedDarkMode = JSON.parse(storage)
-        if(savedDarkMode === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    }
+      }
     </script>
 <script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
 <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
@@ -24,62 +24,94 @@
 <link href="../../../styles/main.css" rel="Stylesheet">
 <link href="../../../styles/prism.css" rel="Stylesheet">
 <link href="../../../styles/logo-styles.css" rel="Stylesheet">
-<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
-<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
 <script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
 <script type="text/javascript" src="../../../scripts/main.js" defer></script>
 <script type="text/javascript" src="../../../scripts/prism.js" async></script>
-<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
 <body>
-    <div class="root">
-<nav class="navigation" id="navigation-wrapper">
-    <div class="navigation--inner">
-        <div class="navigation-title">
-            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
-            <div class="library-name">
-<a class="library-name--link" href="../../../index.html">
-                            stripe-android
-                    </a>            </div>
-            <div class="library-version">
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    stripe-android
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":financial-connections/main">androidJvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":financial-connections/main" data-filter=":financial-connections/main">
+                                <span class="checkbox--icon"></span>
+                                androidJvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
             </div>
         </div>
-        <div class="filter-section" id="filter-section">
-                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":financial-connections:dokkaHtmlPartial/release">androidJvm</button>
-        </div>
-    </div>
-    <div class="navigation-controls">
-        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
-        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
-    </div>
-</nav>
-        <div id="container">
-            <div class="sidebar" id="leftColumn">
-                <div class="sidebar--inner" id="sideMenu"></div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    stripe-android
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
             </div>
-            <div id="main">
-<div class="main-content" data-page-type="classlike" id="content" pageids="financial-connections::com.stripe.android.financialconnections.exception/CustomManualEntryRequiredError///PointingToDeclaration//-649234444">
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="financial-connections::com.stripe.android.financialconnections.exception/CustomManualEntryRequiredError///PointingToDeclaration//1531938506">
   <div class="breadcrumbs"><a href="../../index.html">financial-connections</a><span class="delimiter">/</span><a href="../index.html">com.stripe.android.financialconnections.exception</a><span class="delimiter">/</span><span class="current">CustomManualEntryRequiredError</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Custom</span><wbr><span>Manual</span><wbr><span>Entry</span><wbr><span>Required</span><wbr><span><span>Error</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">CustomManualEntryRequiredError</a> : <span data-unresolved-link="com.stripe.android.core.exception/StripeException///PointingToDeclaration/">StripeException</span></div><p class="paragraph">The AuthFlow was prematurely cancelled due to user requesting manual entry.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">CustomManualEntryRequiredError</a> : <span data-unresolved-link="com.stripe.android.core.exception/StripeException///PointingToDeclaration/">StripeException</span></div><p class="paragraph">The AuthFlow was prematurely cancelled due to user requesting manual entry.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
-        <h2 class="">Constructors</h2>
-        <div class="table"><a data-name="-1768662307%2FConstructors%2F-649234444" anchor-label="CustomManualEntryRequiredError" id="-1768662307%2FConstructors%2F-649234444" data-filterable-set=":financial-connections:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":financial-connections:dokkaHtmlPartial/release" data-filterable-set=":financial-connections:dokkaHtmlPartial/release">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-1768662307%2FConstructors%2F1531938506" anchor-label="CustomManualEntryRequiredError" id="-1768662307%2FConstructors%2F1531938506" data-filterable-set=":financial-connections/main"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":financial-connections/main" data-filterable-set=":financial-connections/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-custom-manual-entry-required-error.html"><span>Custom</span><wbr><span>Manual</span><wbr><span>Entry</span><wbr><span>Required</span><wbr><span><span>Error</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1768662307%2FConstructors%2F-649234444"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1768662307%2FConstructors%2F1531938506"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections/main"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -87,78 +119,123 @@
         </div>
       </div>
       <div data-togglable="PROPERTY">
-        <h2 class="">Properties</h2>
-        <div class="table"><a data-name="-654012527%2FProperties%2F-649234444" anchor-label="cause" id="-654012527%2FProperties%2F-649234444" data-filterable-set=":financial-connections:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":financial-connections:dokkaHtmlPartial/release" data-filterable-set=":financial-connections:dokkaHtmlPartial/release">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-654012527%2FProperties%2F1531938506" anchor-label="cause" id="-654012527%2FProperties%2F1531938506" data-filterable-set=":financial-connections/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":financial-connections/main" data-filterable-set=":financial-connections/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="index.html#-654012527%2FProperties%2F-649234444"><span><span>cause</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-654012527%2FProperties%2F-649234444"></span>
+                  <div><a href="index.html#-654012527%2FProperties%2F1531938506"><span><span>cause</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-654012527%2FProperties%2F1531938506"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="index.html#-654012527%2FProperties%2F-649234444">cause</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token operator">?</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="index.html#-654012527%2FProperties%2F1531938506">cause</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1824300659%2FProperties%2F-649234444" anchor-label="message" id="1824300659%2FProperties%2F-649234444" data-filterable-set=":financial-connections:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":financial-connections:dokkaHtmlPartial/release" data-filterable-set=":financial-connections:dokkaHtmlPartial/release">
+<a data-name="-1049134860%2FProperties%2F1531938506" anchor-label="localizedMessage" id="-1049134860%2FProperties%2F1531938506" data-filterable-set=":financial-connections/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":financial-connections/main" data-filterable-set=":financial-connections/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="index.html#1824300659%2FProperties%2F-649234444"><span><span>message</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1824300659%2FProperties%2F-649234444"></span>
+                  <div><a href="index.html#-1049134860%2FProperties%2F1531938506"><span>localized</span><wbr><span><span>Message</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1049134860%2FProperties%2F1531938506"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="index.html#1824300659%2FProperties%2F-649234444">message</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="index.html#-1049134860%2FProperties%2F1531938506">localizedMessage</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1862668316%2FProperties%2F-649234444" anchor-label="requestId" id="1862668316%2FProperties%2F-649234444" data-filterable-set=":financial-connections:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":financial-connections:dokkaHtmlPartial/release" data-filterable-set=":financial-connections:dokkaHtmlPartial/release">
+<a data-name="1824300659%2FProperties%2F1531938506" anchor-label="message" id="1824300659%2FProperties%2F1531938506" data-filterable-set=":financial-connections/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":financial-connections/main" data-filterable-set=":financial-connections/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="index.html#1862668316%2FProperties%2F-649234444"><span>request</span><wbr><span><span>Id</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1862668316%2FProperties%2F-649234444"></span>
+                  <div><a href="index.html#1824300659%2FProperties%2F1531938506"><span><span>message</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1824300659%2FProperties%2F1531938506"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1862668316%2FProperties%2F-649234444">requestId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="index.html#1824300659%2FProperties%2F1531938506">message</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1887873941%2FProperties%2F-649234444" anchor-label="statusCode" id="1887873941%2FProperties%2F-649234444" data-filterable-set=":financial-connections:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":financial-connections:dokkaHtmlPartial/release" data-filterable-set=":financial-connections:dokkaHtmlPartial/release">
+<a data-name="1862668316%2FProperties%2F1531938506" anchor-label="requestId" id="1862668316%2FProperties%2F1531938506" data-filterable-set=":financial-connections/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":financial-connections/main" data-filterable-set=":financial-connections/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="index.html#1887873941%2FProperties%2F-649234444"><span>status</span><wbr><span><span>Code</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1887873941%2FProperties%2F-649234444"></span>
+                  <div><a href="index.html#1862668316%2FProperties%2F1531938506"><span>request</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1862668316%2FProperties%2F1531938506"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1887873941%2FProperties%2F-649234444">statusCode</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1862668316%2FProperties%2F1531938506">requestId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1159893685%2FProperties%2F-649234444" anchor-label="stripeError" id="-1159893685%2FProperties%2F-649234444" data-filterable-set=":financial-connections:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":financial-connections:dokkaHtmlPartial/release" data-filterable-set=":financial-connections:dokkaHtmlPartial/release">
+<a data-name="-775050045%2FProperties%2F1531938506" anchor-label="stackTrace" id="-775050045%2FProperties%2F1531938506" data-filterable-set=":financial-connections/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":financial-connections/main" data-filterable-set=":financial-connections/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="index.html#-1159893685%2FProperties%2F-649234444"><span>stripe</span><wbr><span><span>Error</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1159893685%2FProperties%2F-649234444"></span>
+                  <div><a href="index.html#-775050045%2FProperties%2F1531938506"><span>stack</span><wbr><span><span>Trace</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-775050045%2FProperties%2F1531938506"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1159893685%2FProperties%2F-649234444">stripeError</a><span class="token operator">: </span><span data-unresolved-link="com.stripe.android.core/StripeError///PointingToDeclaration/">StripeError</span><span class="token operator">?</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="index.html#-775050045%2FProperties%2F1531938506">stackTrace</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://developer.android.com/reference/kotlin/java/lang/StackTraceElement.html">StackTraceElement</a><span class="token operator">?</span><span class="token operator">&gt;</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1887873941%2FProperties%2F1531938506" anchor-label="statusCode" id="1887873941%2FProperties%2F1531938506" data-filterable-set=":financial-connections/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":financial-connections/main" data-filterable-set=":financial-connections/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1887873941%2FProperties%2F1531938506"><span>status</span><wbr><span><span>Code</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1887873941%2FProperties%2F1531938506"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1887873941%2FProperties%2F1531938506">statusCode</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1159893685%2FProperties%2F1531938506" anchor-label="stripeError" id="-1159893685%2FProperties%2F1531938506" data-filterable-set=":financial-connections/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":financial-connections/main" data-filterable-set=":financial-connections/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1159893685%2FProperties%2F1531938506"><span>stripe</span><wbr><span><span>Error</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1159893685%2FProperties%2F1531938506"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1159893685%2FProperties%2F1531938506">stripeError</a><span class="token operator">: </span><span data-unresolved-link="com.stripe.android.core/StripeError///PointingToDeclaration/">StripeError</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2141506092%2FProperties%2F1531938506" anchor-label="suppressed" id="2141506092%2FProperties%2F1531938506" data-filterable-set=":financial-connections/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":financial-connections/main" data-filterable-set=":financial-connections/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#2141506092%2FProperties%2F1531938506"><span><span>suppressed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2141506092%2FProperties%2F1531938506"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#2141506092%2FProperties%2F1531938506">suppressed</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token operator">?</span><span class="token operator">&gt;</span><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -166,168 +243,48 @@
         </div>
       </div>
       <div data-togglable="FUNCTION">
-        <h2 class="">Functions</h2>
-        <div class="table"><a data-name="282858770%2FFunctions%2F-649234444" anchor-label="addSuppressed" id="282858770%2FFunctions%2F-649234444" data-filterable-set=":financial-connections:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":financial-connections:dokkaHtmlPartial/release" data-filterable-set=":financial-connections:dokkaHtmlPartial/release">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="1700181133%2FFunctions%2F1531938506" anchor-label="equals" id="1700181133%2FFunctions%2F1531938506" data-filterable-set=":financial-connections/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":financial-connections/main" data-filterable-set=":financial-connections/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="index.html#282858770%2FFunctions%2F-649234444"><span>add</span><wbr><span><span>Suppressed</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="282858770%2FFunctions%2F-649234444"></span>
+                  <div><a href="index.html#1700181133%2FFunctions%2F1531938506"><span><span>equals</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1700181133%2FFunctions%2F1531938506"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#282858770%2FFunctions%2F-649234444"><span class="token function">addSuppressed</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">operator override </span><span class="token keyword">fun </span><a href="index.html#1700181133%2FFunctions%2F1531938506"><span class="token function">equals</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">other<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1700181133%2FFunctions%2F-649234444" anchor-label="equals" id="1700181133%2FFunctions%2F-649234444" data-filterable-set=":financial-connections:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":financial-connections:dokkaHtmlPartial/release" data-filterable-set=":financial-connections:dokkaHtmlPartial/release">
+<a data-name="1289662905%2FFunctions%2F1531938506" anchor-label="hashCode" id="1289662905%2FFunctions%2F1531938506" data-filterable-set=":financial-connections/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":financial-connections/main" data-filterable-set=":financial-connections/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="index.html#1700181133%2FFunctions%2F-649234444"><span><span>equals</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1700181133%2FFunctions%2F-649234444"></span>
+                  <div><a href="index.html#1289662905%2FFunctions%2F1531938506"><span>hash</span><wbr><span><span>Code</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1289662905%2FFunctions%2F1531938506"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">operator override </span><span class="token keyword">fun </span><a href="index.html#1700181133%2FFunctions%2F-649234444"><span class="token function">equals</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">other<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="index.html#1289662905%2FFunctions%2F1531938506"><span class="token function">hashCode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1102069925%2FFunctions%2F-649234444" anchor-label="fillInStackTrace" id="-1102069925%2FFunctions%2F-649234444" data-filterable-set=":financial-connections:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":financial-connections:dokkaHtmlPartial/release" data-filterable-set=":financial-connections:dokkaHtmlPartial/release">
+<a data-name="1111496840%2FFunctions%2F1531938506" anchor-label="toString" id="1111496840%2FFunctions%2F1531938506" data-filterable-set=":financial-connections/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":financial-connections/main" data-filterable-set=":financial-connections/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="index.html#-1102069925%2FFunctions%2F-649234444"><span>fill</span><wbr><span>In</span><wbr><span>Stack</span><wbr><span><span>Trace</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1102069925%2FFunctions%2F-649234444"></span>
+                  <div><a href="index.html#1111496840%2FFunctions%2F1531938506"><span>to</span><wbr><span><span>String</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1111496840%2FFunctions%2F1531938506"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-1102069925%2FFunctions%2F-649234444"><span class="token function">fillInStackTrace</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="1043865560%2FFunctions%2F-649234444" anchor-label="getLocalizedMessage" id="1043865560%2FFunctions%2F-649234444" data-filterable-set=":financial-connections:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":financial-connections:dokkaHtmlPartial/release" data-filterable-set=":financial-connections:dokkaHtmlPartial/release">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="index.html#1043865560%2FFunctions%2F-649234444"><span>get</span><wbr><span>Localized</span><wbr><span><span>Message</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1043865560%2FFunctions%2F-649234444"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#1043865560%2FFunctions%2F-649234444"><span class="token function">getLocalizedMessage</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="2050903719%2FFunctions%2F-649234444" anchor-label="getStackTrace" id="2050903719%2FFunctions%2F-649234444" data-filterable-set=":financial-connections:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":financial-connections:dokkaHtmlPartial/release" data-filterable-set=":financial-connections:dokkaHtmlPartial/release">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="index.html#2050903719%2FFunctions%2F-649234444"><span>get</span><wbr><span>Stack</span><wbr><span><span>Trace</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2050903719%2FFunctions%2F-649234444"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#2050903719%2FFunctions%2F-649234444"><span class="token function">getStackTrace</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/StackTraceElement.html">StackTraceElement</a><span class="token operator">&gt;</span></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="672492560%2FFunctions%2F-649234444" anchor-label="getSuppressed" id="672492560%2FFunctions%2F-649234444" data-filterable-set=":financial-connections:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":financial-connections:dokkaHtmlPartial/release" data-filterable-set=":financial-connections:dokkaHtmlPartial/release">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="index.html#672492560%2FFunctions%2F-649234444"><span>get</span><wbr><span><span>Suppressed</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="672492560%2FFunctions%2F-649234444"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#672492560%2FFunctions%2F-649234444"><span class="token function">getSuppressed</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token operator">&gt;</span></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="1289662905%2FFunctions%2F-649234444" anchor-label="hashCode" id="1289662905%2FFunctions%2F-649234444" data-filterable-set=":financial-connections:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":financial-connections:dokkaHtmlPartial/release" data-filterable-set=":financial-connections:dokkaHtmlPartial/release">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="index.html#1289662905%2FFunctions%2F-649234444"><span>hash</span><wbr><span><span>Code</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1289662905%2FFunctions%2F-649234444"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="index.html#1289662905%2FFunctions%2F-649234444"><span class="token function">hashCode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-418225042%2FFunctions%2F-649234444" anchor-label="initCause" id="-418225042%2FFunctions%2F-649234444" data-filterable-set=":financial-connections:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":financial-connections:dokkaHtmlPartial/release" data-filterable-set=":financial-connections:dokkaHtmlPartial/release">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="index.html#-418225042%2FFunctions%2F-649234444"><span>init</span><wbr><span><span>Cause</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-418225042%2FFunctions%2F-649234444"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-418225042%2FFunctions%2F-649234444"><span class="token function">initCause</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-762248569%2FFunctions%2F-649234444" anchor-label="printStackTrace" id="-762248569%2FFunctions%2F-649234444" data-filterable-set=":financial-connections:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":financial-connections:dokkaHtmlPartial/release" data-filterable-set=":financial-connections:dokkaHtmlPartial/release">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="index.html#-1769529168%2FFunctions%2F-649234444"><span>print</span><wbr><span>Stack</span><wbr><span><span>Trace</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-762248569%2FFunctions%2F-649234444"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-1769529168%2FFunctions%2F-649234444"><span class="token function">printStackTrace</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#1841853697%2FFunctions%2F-649234444"><span class="token function">printStackTrace</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/PrintStream.html">PrintStream</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#1175535278%2FFunctions%2F-649234444"><span class="token function">printStackTrace</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/PrintWriter.html">PrintWriter</a></span></span><span class="token punctuation">)</span></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="2135801318%2FFunctions%2F-649234444" anchor-label="setStackTrace" id="2135801318%2FFunctions%2F-649234444" data-filterable-set=":financial-connections:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":financial-connections:dokkaHtmlPartial/release" data-filterable-set=":financial-connections:dokkaHtmlPartial/release">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="index.html#2135801318%2FFunctions%2F-649234444"><span>set</span><wbr><span>Stack</span><wbr><span><span>Trace</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2135801318%2FFunctions%2F-649234444"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#2135801318%2FFunctions%2F-649234444"><span class="token function">setStackTrace</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/StackTraceElement.html">StackTraceElement</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="1111496840%2FFunctions%2F-649234444" anchor-label="toString" id="1111496840%2FFunctions%2F-649234444" data-filterable-set=":financial-connections:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":financial-connections:dokkaHtmlPartial/release" data-filterable-set=":financial-connections:dokkaHtmlPartial/release">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="index.html#1111496840%2FFunctions%2F-649234444"><span>to</span><wbr><span><span>String</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1111496840%2FFunctions%2F-649234444"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="index.html#1111496840%2FFunctions%2F-649234444"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="index.html#1111496840%2FFunctions%2F1531938506"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -337,12 +294,22 @@
     </div>
   </div>
 </div>
-      <div class="footer">
-        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
-      </div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2025 Copyright</div>
+                </div>
             </div>
         </div>
     </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
-
