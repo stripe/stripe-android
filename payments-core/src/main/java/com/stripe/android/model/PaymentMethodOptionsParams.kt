@@ -13,13 +13,7 @@ sealed class PaymentMethodOptionsParams(
         val typeParams: Map<String, Any> = createTypeParams()
             .fold(emptyMap()) { acc, (key, value) ->
                 acc.plus(
-                    if (key == "setup_future_usage" && value == "") {
-                        // Empty values are an attempt to unset a parameter;
-                        // however, setup_future_usage cannot be unset.
-                        emptyMap()
-                    } else {
-                        value?.let { mapOf(key to it) }.orEmpty()
-                    }
+                    value?.let { mapOf(key to it) }.orEmpty()
                 )
             }
 

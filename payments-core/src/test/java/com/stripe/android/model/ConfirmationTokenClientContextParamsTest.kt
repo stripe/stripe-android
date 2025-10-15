@@ -36,7 +36,6 @@ class ConfirmationTokenClientContextParamsTest {
                     "customer" to "cus_123456",
                     "payment_method_options" to mapOf(
                         "card" to mapOf(
-                            "network" to "visa",
                             "setup_future_usage" to "off_session"
                         )
                     )
@@ -148,6 +147,53 @@ class ConfirmationTokenClientContextParamsTest {
                             "setup_future_usage" to "off_session"
                         )
                     )
+                )
+            )
+    }
+
+    @Test
+    fun toParamMap_withRequireCvcRecollection_shouldCreateExpectedMap() {
+        val paymentMethodOptions = PaymentMethodOptionsParams.Card(
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+        )
+        val params = ConfirmationTokenClientContextParams(
+            mode = "payment",
+            currency = "usd",
+            paymentMethodOptions = paymentMethodOptions,
+            requireCvcRecollection = true
+        )
+
+        assertThat(params.toParamMap())
+            .isEqualTo(
+                mapOf(
+                    "mode" to "payment",
+                    "currency" to "usd",
+                    "payment_method_options" to mapOf(
+                        "card" to mapOf(
+                            "setup_future_usage" to "off_session",
+                            "require_cvc_recollection" to true
+                        )
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun toParamMap_withBlankSetupFutureUsage_shouldNotIncludeSetupFutureUsage() {
+        val paymentMethodOptions = PaymentMethodOptionsParams.Card(
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+        )
+        val params = ConfirmationTokenClientContextParams(
+            mode = "payment",
+            currency = "usd",
+            paymentMethodOptions = paymentMethodOptions
+        )
+
+        assertThat(params.toParamMap())
+            .isEqualTo(
+                mapOf(
+                    "mode" to "payment",
+                    "currency" to "usd"
                 )
             )
     }

@@ -31,7 +31,10 @@ data class ConfirmationTokenClientContextParams(
     val customer: String? = null,
 
     /** Payment method specific options as a dictionary */
-    val paymentMethodOptions: PaymentMethodOptionsParams? = null
+    val paymentMethodOptions: PaymentMethodOptionsParams? = null,
+
+    /** Indicates whether the customer is required to re-enter their CVC code */
+    val requireCvcRecollection: Boolean? = null,
 ) : StripeParamsModel {
     override fun toParamMap(): Map<String, Any> {
         return buildMap {
@@ -49,11 +52,43 @@ data class ConfirmationTokenClientContextParams(
             onBehalfOf?.let { put(PARAM_ON_BEHALF_OF, it) }
             paymentMethodConfiguration?.let { put(PARAM_PAYMENT_METHOD_CONFIGURATION, it) }
             customer?.let { put(PARAM_CUSTOMER, it) }
-            paymentMethodOptions?.toParamMap()?.let {
-                if (it.isNotEmpty()) {
-                    put(PARAM_PAYMENT_METHOD_OPTIONS, it)
+            preparePaymentMethodOptionsParamMap(
+                paymentMethodOptions,
+                requireCvcRecollection,
+            )?.let {
+                put(PARAM_PAYMENT_METHOD_OPTIONS, it)
+            }
+        }
+    }
+
+    /**
+     * https://stripe.sourcegraphcloud.com/stripe-internal/pay-server/-/blob/lib/elements/api/client_context/param.rb
+     */
+    private fun preparePaymentMethodOptionsParamMap(
+        paymentMethodOptions: PaymentMethodOptionsParams?,
+        requireCvcRecollection: Boolean?,
+    ): Map<String, Any>? {
+        if (paymentMethodOptions?.type == null) return null
+
+        val sfu = paymentMethodOptions.setupFutureUsage()
+        val valueMap = buildMap {
+            sfu.takeIf {
+                // Empty values are an attempt to unset a parameter;
+                // however, setup_future_usage cannot be unset.
+                it != null && it != ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+            }?.let {
+                put(PARAM_SETUP_FUTURE_USAGE, it.code)
+            }
+
+            if (paymentMethodOptions.type == PaymentMethod.Type.Card) {
+                requireCvcRecollection?.let {
+                    put(PARAM_REQUIRE_CVC_RECOLLECTION, it)
                 }
             }
+        }.takeIf { it.isNotEmpty() }
+
+        return valueMap?.let {
+            mapOf(paymentMethodOptions.type.code to it)
         }
     }
 
@@ -67,5 +102,6 @@ data class ConfirmationTokenClientContextParams(
         const val PARAM_PAYMENT_METHOD_CONFIGURATION = "payment_method_configuration"
         const val PARAM_CUSTOMER = "customer"
         const val PARAM_PAYMENT_METHOD_OPTIONS = "payment_method_options"
+        const val PARAM_REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
     }
 }
