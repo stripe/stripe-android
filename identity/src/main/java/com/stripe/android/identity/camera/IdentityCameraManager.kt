@@ -1,7 +1,6 @@
 package com.stripe.android.identity.camera
 
 import android.graphics.Bitmap
-import android.util.Log
 import android.util.Size
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
@@ -31,7 +30,7 @@ internal abstract class IdentityCameraManager {
 
     fun requireCameraView() = requireNotNull(cameraView)
     fun requireCameraAdapter() = requireNotNull(cameraAdapter)
-    
+
     /**
      * Get the camera lens model if available.
      */

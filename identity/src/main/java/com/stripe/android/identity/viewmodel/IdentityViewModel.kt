@@ -384,14 +384,14 @@ internal class IdentityViewModel(
 
     // Store camera lens model for document uploads
     private var currentCameraLensModel: String? = null
-    
+
     /**
      * Set the camera lens model for subsequent uploads.
      */
     fun setCameraLensModel(cameraLensModel: String?) {
         currentCameraLensModel = cameraLensModel
     }
-    
+
     /**
      * Upload high_res of an image Uri manually picked from local file storage or taken from camera.
      */
@@ -627,8 +627,7 @@ internal class IdentityViewModel(
         isHighRes: Boolean,
         isFront: Boolean,
         scanType: IdentityScanState.ScanType,
-        compressionQuality: Float,
-        cameraLensModel: String? = currentCameraLensModel
+        compressionQuality: Float
     ) {
         viewModelScope.launch {
             if (isFront) {
