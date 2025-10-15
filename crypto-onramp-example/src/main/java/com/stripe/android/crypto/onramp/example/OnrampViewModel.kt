@@ -142,6 +142,72 @@ internal class OnrampViewModel(
         }
     }
 
+    fun registerUser(email: String, password: String) = viewModelScope.launch {
+        if (email.isBlank()) {
+            _message.value = "Please enter an email address"
+            return@launch
+        }
+
+        if (password.isBlank()) {
+            _message.value = "Please enter an valid password"
+            return@launch
+        }
+
+        val currentEmail = email.trim()
+        _uiState.update { it.copy(screen = Screen.Loading, email = currentEmail, loadingMessage = "Registering...") }
+
+        val result = testBackendRepository.signUp(currentEmail, password, false)
+        when (result) {
+            is Result.Success -> {
+                val response = result.value
+                if (response.success) {
+                    _message.value = "Sign up successful!"
+                    _uiState.update { it.copy(screen = Screen.Authentication, authToken = response.token) }
+                } else {
+                    _message.value = "Sign up failed: Unknown Error"
+                    _uiState.update { it.copy(screen = Screen.EmailInput, loadingMessage = null) }
+                }
+            }
+            is Result.Failure -> {
+                _message.value = "Sign up failed: ${result.error.message}"
+                _uiState.update { it.copy(screen = Screen.EmailInput, loadingMessage = null) }
+            }
+        }
+    }
+
+    fun loginUser(email: String, password: String) = viewModelScope.launch {
+        if (email.isBlank()) {
+            _message.value = "Please enter an email address"
+            return@launch
+        }
+
+        if (password.isBlank()) {
+            _message.value = "Please enter an valid password"
+            return@launch
+        }
+
+        val currentEmail = email.trim()
+        _uiState.update { it.copy(screen = Screen.Loading, email = currentEmail, loadingMessage = "Logging in...") }
+
+        val result = testBackendRepository.logIn(currentEmail, password, false)
+        when (result) {
+            is Result.Success -> {
+                val response = result.value
+                if (response.success) {
+                    _message.value = "Log in successful!"
+                    _uiState.update { it.copy(screen = Screen.Authentication, authToken = response.token) }
+                } else {
+                    _message.value = "Log in failed: Unknown Error"
+                    _uiState.update { it.copy(screen = Screen.EmailInput, loadingMessage = null) }
+                }
+            }
+            is Result.Failure -> {
+                _message.value = "Log in failed: ${result.error.message}"
+                _uiState.update { it.copy(screen = Screen.EmailInput, loadingMessage = null) }
+            }
+        }
+    }
+
     fun onBackToEmailInput() {
         _uiState.update { OnrampUiState(screen = Screen.EmailInput) }
     }
@@ -264,7 +330,7 @@ internal class OnrampViewModel(
 
         val result = testBackendRepository.checkout(
             cosId = sessionId,
-            authToken = authToken
+            tokenWithLAI = authToken
         )
 
         return when (result) {
@@ -425,7 +491,7 @@ internal class OnrampViewModel(
                 paymentToken = paymentToken!!,
                 walletAddress = walletAddress!!,
                 cryptoCustomerId = customerId!!,
-                authToken = authToken!!,
+                tokenWithLAI = authToken!!,
                 destinationNetwork = destinationNetwork
             )
 
@@ -504,21 +570,24 @@ internal class OnrampViewModel(
 
     suspend fun createLinkAuthIntent(oauthScopes: String): String? {
         val currentState = _uiState.value
-        val email = currentState.email
+
         return createAuthIntentForUser(
-            email = email,
-            oauthScopes = oauthScopes
+            oauthScopes = oauthScopes,
+            token = currentState.authToken ?: ""
         )
     }
 
-    private suspend fun createAuthIntentForUser(email: String, oauthScopes: String): String? {
-        val result = testBackendRepository.createAuthIntent(email = email, oauthScopes = oauthScopes)
+    private suspend fun createAuthIntentForUser(token: String, oauthScopes: String): String? {
+        val result = testBackendRepository.create(
+            oauthScopes = oauthScopes,
+            tokenWithoutLAI = token
+        )
         when (result) {
             is Result.Success -> {
                 val response = result.value
                 _uiState.update { it.copy(authToken = response.token) }
                 _message.value = "Auth intent created successfully"
-                return response.data.id
+                return response.authIntentId
             }
             is Result.Failure -> {
                 _message.value = "Failed to create auth intent: ${result.error.message}"

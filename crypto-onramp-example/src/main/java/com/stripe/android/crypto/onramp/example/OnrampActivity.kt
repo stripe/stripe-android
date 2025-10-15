@@ -198,8 +198,11 @@ internal fun OnrampScreen(
         when (uiState.screen) {
             Screen.EmailInput -> {
                 EmailInputScreen(
-                    onCheckUser = { email ->
-                        viewModel.checkIfLinkUser(email)
+                    onRegister = { email, password ->
+                        viewModel.registerUser(email, password)
+                    },
+                    onLogin = { email, password ->
+                        viewModel.loginUser(email, password)
                     },
                     onAuthorize = onAuthorize
                 )
@@ -263,26 +266,44 @@ internal fun OnrampScreen(
 
 @Composable
 private fun EmailInputScreen(
-    onCheckUser: (String) -> Unit,
+    onRegister: (String, String) -> Unit,
+    onLogin: (String, String) -> Unit,
     onAuthorize: (String) -> Unit
 ) {
     var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
     Column {
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email Address") },
+            label = { Text("Email") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        )
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
         )
 
         Button(
-            onClick = { onCheckUser(email) },
+            onClick = { onLogin(email, password) },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Check if Link User Exists")
+            Text("Login")
+        }
+
+        Button(
+            onClick = { onRegister(email, password) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Register")
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -463,7 +484,7 @@ private fun AuthenticationScreen(
 fun AuthenticateSection(
     onAuthenticate: (oauthScopes: String?) -> Unit,
 ) {
-    var oauthScopes by remember { mutableStateOf("kyc.status:read,crypto:ramp") }
+    var oauthScopes by remember { mutableStateOf("kyc.status:read,crypto:ramp,auth.persist_login:read") }
     OutlinedTextField(
         value = oauthScopes,
         onValueChange = { oauthScopes = it },
