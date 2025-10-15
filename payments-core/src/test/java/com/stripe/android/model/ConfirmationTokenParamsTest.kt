@@ -166,17 +166,14 @@ class ConfirmationTokenParamsTest {
     }
 
     @Test
-    fun toParamMap_withBlankSetupFutureUsage_shouldCreateExpectedMap() {
+    fun toParamMap_withBlankSetupFutureUsage_shouldNotIncludeSetupFutureUsage() {
         val params = ConfirmationTokenParams(
             setUpFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
         )
 
-        assertThat(params.toParamMap())
-            .isEqualTo(
-                mapOf(
-                    "setup_future_usage" to ""
-                )
-            )
+        val paramMap = params.toParamMap()
+        // Blank values should not be included
+        assertThat(paramMap.containsKey("setup_future_usage")).isFalse()
     }
 
     @Test
@@ -230,7 +227,7 @@ class ConfirmationTokenParamsTest {
         val clientContext = ConfirmationTokenClientContextParams(
             mode = "payment",
             currency = "usd",
-            setupFutureUsage = "off_session",
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
             captureMethod = "automatic"
         )
         val params = ConfirmationTokenParams(
@@ -253,7 +250,7 @@ class ConfirmationTokenParamsTest {
         val clientContext = ConfirmationTokenClientContextParams(
             mode = "payment",
             currency = "usd",
-            setupFutureUsage = "on_session",
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession,
             captureMethod = "automatic",
             paymentMethodTypes = listOf("card", "apple_pay"),
             onBehalfOf = "acct_123",
@@ -300,5 +297,37 @@ class ConfirmationTokenParamsTest {
                     )
                 )
             )
+    }
+
+    @Test
+    fun toParamMap_withSetAsDefaultPaymentMethodTrue_shouldCreateExpectedMap() {
+        val params = ConfirmationTokenParams(
+            paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            setAsDefaultPaymentMethod = true
+        )
+
+        val paramMap = params.toParamMap()
+        assertThat(paramMap["set_as_default_payment_method"]).isEqualTo(true)
+    }
+
+    @Test
+    fun toParamMap_withSetAsDefaultPaymentMethodFalse_shouldCreateExpectedMap() {
+        val params = ConfirmationTokenParams(
+            paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            setAsDefaultPaymentMethod = false
+        )
+
+        val paramMap = params.toParamMap()
+        assertThat(paramMap["set_as_default_payment_method"]).isEqualTo(false)
+    }
+
+    @Test
+    fun toParamMap_withoutSetAsDefaultPaymentMethod_shouldNotIncludeParameter() {
+        val params = ConfirmationTokenParams(
+            paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+        )
+
+        val paramMap = params.toParamMap()
+        assertThat(paramMap.containsKey("set_as_default_payment_method")).isFalse()
     }
 }

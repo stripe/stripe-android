@@ -64,7 +64,7 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         }
 
         override fun shouldSaveAsDefault(): Boolean {
-            return when(extraParams) {
+            return when (extraParams) {
                 is PaymentMethodExtraParams.Card -> extraParams.setAsDefault == true
                 is PaymentMethodExtraParams.USBankAccount -> extraParams.setAsDefault == true
                 is PaymentMethodExtraParams.Link -> extraParams.setAsDefault == true

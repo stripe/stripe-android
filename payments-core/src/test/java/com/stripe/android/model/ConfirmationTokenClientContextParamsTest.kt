@@ -14,7 +14,7 @@ class ConfirmationTokenClientContextParamsTest {
         val params = ConfirmationTokenClientContextParams(
             mode = "payment",
             currency = "usd",
-            setupFutureUsage = "off_session",
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
             captureMethod = "automatic_async",
             paymentMethodTypes = listOf("card", "apple_pay"),
             onBehalfOf = "acct_123456",
@@ -126,7 +126,7 @@ class ConfirmationTokenClientContextParamsTest {
         val params = ConfirmationTokenClientContextParams(
             mode = "payment",
             currency = "eur",
-            setupFutureUsage = "off_session",
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
             captureMethod = "automatic",
             paymentMethodTypes = listOf("sepa_debit"),
             customer = "cus_test_customer",
@@ -196,5 +196,75 @@ class ConfirmationTokenClientContextParamsTest {
                     "currency" to "usd"
                 )
             )
+    }
+
+    @Test
+    fun toParamMap_withPmoSetupFutureUsage_shouldIncludeBothValues() {
+        val paymentMethodOptions = PaymentMethodOptionsParams.Card(
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+        )
+        val params = ConfirmationTokenClientContextParams(
+            mode = "payment",
+            currency = "usd",
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+            paymentMethodOptions = paymentMethodOptions
+        )
+
+        val paramMap = params.toParamMap()
+        // Both top-level and PMO should have the same value
+        assertThat(paramMap["setup_future_usage"]).isEqualTo("off_session")
+        val pmoMap = paramMap["payment_method_options"] as? Map<*, *>
+        val cardOptions = pmoMap?.get("card") as? Map<*, *>
+        assertThat(cardOptions?.get("setup_future_usage")).isEqualTo("off_session")
+    }
+
+    @Test
+    fun toParamMap_withoutPmoSetupFutureUsage_shouldUseTopLevelValue() {
+        val paymentMethodOptions = PaymentMethodOptionsParams.Card()
+        val params = ConfirmationTokenClientContextParams(
+            mode = "payment",
+            currency = "usd",
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession,
+            paymentMethodOptions = paymentMethodOptions
+        )
+
+        val paramMap = params.toParamMap()
+        assertThat(paramMap["setup_future_usage"]).isEqualTo("on_session")
+    }
+
+    @Test
+    fun toParamMap_withPmoBlankSetupFutureUsage_shouldNotIncludeSetupFutureUsage() {
+        val paymentMethodOptions = PaymentMethodOptionsParams.Card(
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+        )
+        val params = ConfirmationTokenClientContextParams(
+            mode = "payment",
+            currency = "usd",
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank,
+            paymentMethodOptions = paymentMethodOptions
+        )
+
+        val paramMap = params.toParamMap()
+        // Blank values should not be included anywhere
+        assertThat(paramMap.containsKey("setup_future_usage")).isFalse()
+        val pmoMap = paramMap["payment_method_options"] as? Map<*, *>
+        val cardOptions = pmoMap?.get("card") as? Map<*, *>
+        assertThat(cardOptions?.containsKey("setup_future_usage")).isNotEqualTo(true)
+    }
+
+    @Test
+    fun toParamMap_withPmoNullSetupFutureUsage_shouldUseTopLevelValue() {
+        val paymentMethodOptions = PaymentMethodOptionsParams.Card(
+            setupFutureUsage = null
+        )
+        val params = ConfirmationTokenClientContextParams(
+            mode = "payment",
+            currency = "usd",
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+            paymentMethodOptions = paymentMethodOptions
+        )
+
+        val paramMap = params.toParamMap()
+        assertThat(paramMap["setup_future_usage"]).isEqualTo("off_session")
     }
 }
