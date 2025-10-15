@@ -24,7 +24,7 @@ internal class MessagingContentHelper @Inject constructor(
             currency = state.currency,
             locale = state.locale,
             country = state.countryCode,
-            requestOptions = ApiRequest.Options("pk_test_51RlchZG0ltIrPQjG7ZWZUY16t6oRDSah9oy6Hhclt3h2c3JgDEd7SljmQAgGr74dh3ECDZkDJdLhiQCDK6FDarWI00nK1B9C3c")
+            requestOptions = ApiRequest.Options(paymentConfiguration.publishableKey)
         )
 
         result.getOrNull()?.let {
