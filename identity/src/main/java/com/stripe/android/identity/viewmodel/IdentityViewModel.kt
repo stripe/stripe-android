@@ -382,6 +382,16 @@ internal class IdentityViewModel(
         errorCause.removeObserver(errorCauseObServer)
     }
 
+    // Store camera lens model for document uploads
+    private var currentCameraLensModel: String? = null
+    
+    /**
+     * Set the camera lens model for subsequent uploads.
+     */
+    fun setCameraLensModel(cameraLensModel: String?) {
+        currentCameraLensModel = cameraLensModel
+    }
+    
     /**
      * Upload high_res of an image Uri manually picked from local file storage or taken from camera.
      */
@@ -617,7 +627,8 @@ internal class IdentityViewModel(
         isHighRes: Boolean,
         isFront: Boolean,
         scanType: IdentityScanState.ScanType,
-        compressionQuality: Float
+        compressionQuality: Float,
+        cameraLensModel: String? = currentCameraLensModel
     ) {
         viewModelScope.launch {
             if (isFront) {
@@ -1554,12 +1565,14 @@ internal class IdentityViewModel(
                     collectedDataParam = if (isFront) {
                         CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
                             frontHighResResult = requireNotNull(uploadedState.highResResult.data),
-                            frontLowResResult = requireNotNull(uploadedState.lowResResult.data)
+                            frontLowResResult = requireNotNull(uploadedState.lowResResult.data),
+                            cameraLensModel = currentCameraLensModel
                         )
                     } else {
                         CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
                             backHighResResult = requireNotNull(uploadedState.highResResult.data),
-                            backLowResResult = requireNotNull(uploadedState.lowResResult.data)
+                            backLowResResult = requireNotNull(uploadedState.lowResResult.data),
+                            cameraLensModel = currentCameraLensModel
                         )
                     },
                     fromRoute = route,
