@@ -12,6 +12,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
@@ -73,17 +74,22 @@ internal suspend fun createIntentConfirmationInterceptor(
     return DefaultIntentConfirmationInterceptorFactory(
         deferredIntentCallbackRetriever = deferredIntentCallbackRetriever,
         intentFirstConfirmationInterceptorFactory = object : IntentFirstConfirmationInterceptor.Factory {
-            override fun create(clientSecret: String): IntentFirstConfirmationInterceptor {
+            override fun create(
+                clientSecret: String,
+                clientAttributionMetadata: ClientAttributionMetadata?
+            ): IntentFirstConfirmationInterceptor {
                 return IntentFirstConfirmationInterceptor(
                     clientSecret = clientSecret,
                     requestOptions = requestOptions,
+                    clientAttributionMetadata = clientAttributionMetadata,
                 )
             }
         },
         deferredIntentConfirmationInterceptorFactory = object : DeferredIntentConfirmationInterceptor.Factory {
             override fun create(
                 intentConfiguration: PaymentSheet.IntentConfiguration,
-                createIntentCallback: CreateIntentCallback
+                createIntentCallback: CreateIntentCallback,
+                clientAttributionMetadata: ClientAttributionMetadata?
             ): DeferredIntentConfirmationInterceptor {
                 return DeferredIntentConfirmationInterceptor(
                     intentConfiguration = intentConfiguration,
@@ -91,6 +97,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     stripeRepository = stripeRepository,
                     allowsManualConfirmation = false,
                     requestOptions = requestOptions,
+                    clientAttributionMetadata = clientAttributionMetadata,
                 )
             }
         },
@@ -131,6 +138,7 @@ internal suspend fun createIntentConfirmationInterceptor(
         initializationMode = initializationMode,
         customerId = customerId,
         ephemeralKeySecret = ephemeralKeySecret,
+        clientAttributionMetadata = null,
     )
 }
 

@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -35,6 +36,9 @@ internal class IntentConfirmationDefinition(
     @Volatile
     private var ephemeralKeySecret: String? = null
 
+    @Volatile
+    private var clientAttributionMetadata: ClientAttributionMetadata? = null
+
     override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption? {
         return confirmationOption as? PaymentMethodConfirmationOption
     }
@@ -42,6 +46,7 @@ internal class IntentConfirmationDefinition(
     override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
         customerId = paymentMethodMetadata.customerMetadata?.id
         ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.ephemeralKeySecret
+        clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata
     }
 
     override suspend fun action(
@@ -54,6 +59,7 @@ internal class IntentConfirmationDefinition(
                 initializationMode = confirmationArgs.initializationMode,
                 customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         } catch (e: DeferredIntentCallbackNotFoundException) {
             return ConfirmationDefinition.Action.Fail(

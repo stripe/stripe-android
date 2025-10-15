@@ -48,6 +48,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -1260,7 +1261,8 @@ internal class PaymentSheetActivityTest {
                         override suspend fun create(
                             initializationMode: PaymentElementLoader.InitializationMode,
                             customerId: String?,
-                            ephemeralKeySecret: String?
+                            ephemeralKeySecret: String?,
+                            clientAttributionMetadata: ClientAttributionMetadata?,
                         ): IntentConfirmationInterceptor {
                             return fakeIntentConfirmationInterceptor
                         }

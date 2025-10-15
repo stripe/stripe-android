@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.StripeIntent
@@ -14,6 +15,7 @@ import dagger.assisted.AssistedInject
 
 internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val clientSecret: String,
+    @Assisted private val clientAttributionMetadata: ClientAttributionMetadata?,
     requestOptions: ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
     private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptions.apiKeyIsLiveMode)
@@ -33,7 +35,7 @@ internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
                 confirmationOption.createParams,
                 confirmationOption.optionsParams,
                 confirmationOption.extraParams,
-                clientAttributionMetadata = confirmationOption.clientAttributionMetadata,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
     }
@@ -55,13 +57,16 @@ internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
                 extraParams = null,
                 intentConfigSetupFutureUsage = null,
                 radarOptions = confirmationOption.hCaptchaToken?.let { RadarOptions(it) },
-                clientAttributionMetadata = confirmationOption.clientAttributionMetadata,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
     }
 
     @AssistedFactory
     interface Factory {
-        fun create(clientSecret: String): IntentFirstConfirmationInterceptor
+        fun create(
+            clientSecret: String,
+            clientAttributionMetadata: ClientAttributionMetadata?,
+        ): IntentFirstConfirmationInterceptor
     }
 }

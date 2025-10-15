@@ -171,7 +171,6 @@ internal class LinkInlineSignupConfirmationDefinition(
             ),
             originatedFromWallet = true,
             passiveCaptchaParams = passiveCaptchaParams,
-            clientAttributionMetadata = null,
         )
     }
 

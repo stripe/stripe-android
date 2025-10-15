@@ -209,7 +209,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     }
                 ),
                 passiveCaptchaParams = passiveCaptchaParams,
-                clientAttributionMetadata = null,
             ),
             appearance = PaymentSheet.Appearance(),
             initializationMode = configuration.initializationMode,
