@@ -13,7 +13,7 @@ data class LoginSignUpResponse(
 @Serializable
 data class User(
     @SerialName("user_id")
-    val id: String,
+    val id: Int,
 
     val email: String,
 
