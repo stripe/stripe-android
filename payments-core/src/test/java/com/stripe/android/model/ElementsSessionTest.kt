@@ -91,6 +91,42 @@ class ElementsSessionTest {
             .isEqualTo("elements_enable_passive_captcha")
     }
 
+    @Test
+    fun `ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION flag has correct value`() {
+        assertThat(ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION.flagValue)
+            .isEqualTo("elements_mobile_attest_on_intent_confirmation")
+    }
+
+    @Test
+    fun `enableAttestationOnIntentConfirmation returns true when flag is enabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION to true)
+        )
+
+        assertThat(session.enableAttestationOnIntentConfirmation).isTrue()
+    }
+
+    @Test
+    fun `enableAttestationOnIntentConfirmation returns false when flag is disabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION to false)
+        )
+
+        assertThat(session.enableAttestationOnIntentConfirmation).isFalse()
+    }
+
+    @Test
+    fun `enableAttestationOnIntentConfirmation returns false when flag is missing`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = emptyMap()
+        )
+
+        assertThat(session.enableAttestationOnIntentConfirmation).isFalse()
+    }
+
     private fun createElementsSession(
         passiveCaptcha: PassiveCaptchaParams?,
         flags: Map<ElementsSession.Flag, Boolean>
