@@ -15,6 +15,7 @@ import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -192,11 +193,12 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         confirmationOption: PaymentMethodConfirmationOption,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationTokenParams {
-        val updatedConfirmationOption = confirmationOption.updatedForDeferredIntent(intentConfiguration)
+        val confirmationOption = confirmationOption.updatedForDeferredIntent(intentConfiguration)
         return ConfirmationTokenParams(
             returnUrl = DefaultReturnUrl.create(context).value,
             paymentMethodId = (confirmationOption as? PaymentMethodConfirmationOption.Saved)?.paymentMethod?.id,
-            paymentMethodData = (updatedConfirmationOption as? PaymentMethodConfirmationOption.New)?.createParams,
+            paymentMethodData = (confirmationOption as? PaymentMethodConfirmationOption.New)?.createParams,
+            setUpFutureUsage = confirmationOption.optionsParams?.setupFutureUsage(),
             shipping = shippingValues,
             mandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT).takeIf {
                 when (confirmationOption) {
@@ -231,7 +233,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             ConfirmationTokenClientContextParams(
                 mode = mode.code,
                 currency = mode.currency,
-                setupFutureUsage = mode.setupFutureUsage?.code,
+                // Use paymentMethodOptions to correctly set PMO SFU value
+                setupFutureUsage = paymentMethodOptions?.setupFutureUsage(),
                 captureMethod = (mode as? DeferredIntentParams.Mode.Payment)?.captureMethod?.code,
                 paymentMethodTypes = paymentMethodTypes,
                 onBehalfOf = onBehalfOf,

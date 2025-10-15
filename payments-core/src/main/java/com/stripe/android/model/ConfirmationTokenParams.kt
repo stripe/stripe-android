@@ -22,7 +22,7 @@ data class ConfirmationTokenParams(
             paymentMethodId?.let { put(PARAM_PAYMENT_METHOD, it) }
             paymentMethodData?.let { put(PARAM_PAYMENT_METHOD_DATA, it.toParamMap()) }
             returnUrl?.let { put(PARAM_RETURN_URL, it) }
-            setUpFutureUsage?.let { put(PARAM_SETUP_FUTURE_USAGE, it.code) }
+            putNonEmptySfu(setUpFutureUsage)
             shipping?.let { put(PARAM_SHIPPING, it.toParamMap()) }
             mandateDataParams?.let { put(PARAM_MANDATE_DATA, it.toParamMap()) }
             setAsDefaultPaymentMethod?.let { put(PARAM_SET_AS_DEFAULT_PAYMENT_METHOD, it) }
@@ -35,11 +35,21 @@ data class ConfirmationTokenParams(
         const val PARAM_PAYMENT_METHOD = "payment_method"
         const val PARAM_PAYMENT_METHOD_DATA = "payment_method_data"
         const val PARAM_RETURN_URL = "return_url"
-        const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
         const val PARAM_SHIPPING = "shipping"
         const val PARAM_MANDATE_DATA = "mandate_data"
         const val PARAM_SET_AS_DEFAULT_PAYMENT_METHOD = "set_as_default_payment_method"
         const val PARAM_PAYMENT_METHOD_OPTIONS = "payment_method_options"
         const val PARAM_CLIENT_CONTEXT = "client_context"
+    }
+}
+
+private const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
+fun MutableMap<String, Any>.putNonEmptySfu(sfu: ConfirmPaymentIntentParams.SetupFutureUsage?) {
+    sfu.takeIf {
+        // Empty values are an attempt to unset a parameter;
+        // however, setup_future_usage cannot be unset.
+        it != null && it != ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+    }?.let {
+        put(PARAM_SETUP_FUTURE_USAGE, it.code)
     }
 }
