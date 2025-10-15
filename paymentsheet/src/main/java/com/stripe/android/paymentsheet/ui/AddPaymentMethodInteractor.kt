@@ -31,10 +31,6 @@ internal interface AddPaymentMethodInteractor {
 
     fun handleViewAction(viewAction: ViewAction)
 
-    fun reportInitialPaymentMethodVisibilitySnapshot(
-        initialVisibilityTrackerData: AddPaymentMethodInitialVisibilityTrackerData
-    )
-
     fun close()
 
     data class State(
@@ -61,6 +57,10 @@ internal interface AddPaymentMethodInteractor {
         ) : ViewAction()
 
         data class ReportFieldInteraction(val code: PaymentMethodCode) : ViewAction()
+
+        data class UpdatePaymentMethodVisibility(
+            val initialVisibilityTrackerData: AddPaymentMethodInitialVisibilityTrackerData
+        ): ViewAction()
     }
 }
 
@@ -223,10 +223,15 @@ internal class DefaultAddPaymentMethodInteractor(
                     reportPaymentMethodTypeSelected(viewAction.code)
                 }
             }
+            is AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility -> {
+                updatePaymentMethodVisibility(
+                    viewAction.initialVisibilityTrackerData
+                )
+            }
         }
     }
 
-    override fun reportInitialPaymentMethodVisibilitySnapshot(
+    private fun updatePaymentMethodVisibility(
         initialVisibilityTrackerData: AddPaymentMethodInitialVisibilityTrackerData
     ) {
         AddPaymentMethodInitialVisibilityTracker

@@ -43,7 +43,7 @@ internal fun NewPaymentMethodTabLayoutUI(
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
-    reportInitialPaymentMethodVisibilitySnapshot: (AddPaymentMethodInitialVisibilityTrackerData) -> Unit = {},
+    updatePaymentMethodVisibility: (AddPaymentMethodInitialVisibilityTrackerData) -> Unit = {},
     state: LazyListState = rememberLazyListState(),
 ) {
     // This is to fix an issue in tests involving this composable
@@ -65,7 +65,7 @@ internal fun NewPaymentMethodTabLayoutUI(
         val screenWidth = LocalConfiguration.current.screenWidthDp.dp
         val innerPadding = PaymentMethodsUISpacing.carouselInnerPadding
         LaunchedEffect(paymentMethodCodes) {
-            reportInitialPaymentMethodVisibilitySnapshot(
+            updatePaymentMethodVisibility(
                 AddPaymentMethodInitialVisibilityTrackerData(
                     paymentMethodCodes = paymentMethodCodes,
                     tabWidth = viewWidth,

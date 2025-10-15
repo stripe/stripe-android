@@ -24,12 +24,6 @@ internal class FakeAddPaymentMethodInteractor(
         viewActionRecorder.record(viewAction)
     }
 
-    override fun reportInitialPaymentMethodVisibilitySnapshot(
-        initialVisibilityTrackerData: AddPaymentMethodInitialVisibilityTrackerData
-    ) {
-        // Do nothing
-    }
-
     override fun close() {
         // Do nothing.
     }

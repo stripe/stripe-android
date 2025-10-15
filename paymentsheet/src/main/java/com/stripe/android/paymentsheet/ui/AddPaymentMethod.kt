@@ -60,7 +60,13 @@ internal fun AddPaymentMethod(
                 )
             )
         },
-        reportInitialPaymentMethodVisibilitySnapshot = interactor::reportInitialPaymentMethodVisibilitySnapshot,
+        updatePaymentMethodVisibility = {
+            interactor.handleViewAction(
+                AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility(
+                    initialVisibilityTrackerData = it
+                )
+            )
+        },
     )
 }
 
