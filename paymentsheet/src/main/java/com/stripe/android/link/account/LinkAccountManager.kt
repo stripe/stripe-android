@@ -39,6 +39,11 @@ internal interface LinkAccountManager {
     var cachedShippingAddresses: ConsumerShippingAddresses?
 
     /**
+     * Suggested email from the last lookup, when the user may have made a typo.
+     */
+    val suggestedEmail: StateFlow<String?>
+
+    /**
      * Retrieves the Link account associated with the email if it exists.
      *
      * Optionally starts a user session, by storing the cookie for the account and starting a

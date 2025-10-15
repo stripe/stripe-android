@@ -83,6 +83,9 @@ internal class SignUpViewModel @Inject constructor(
         viewModelScope.launch {
             emailListener()
         }
+        viewModelScope.launch {
+            suggestedEmailListener()
+        }
         linkEventsReporter.onSignupFlowPresented()
     }
 
@@ -118,11 +121,18 @@ internal class SignUpViewModel @Inject constructor(
                 }
             } else {
                 updateSignUpState(SignUpState.InputtingPrimaryField)
+                updateState { it.copy(suggestedEmail = null) }
             }
 
             if (email != configuration.customerInfo.email) {
                 emailHasChanged = true
             }
+        }
+    }
+
+    private suspend fun suggestedEmailListener() {
+        linkAccountManager.suggestedEmail.collectLatest { suggestedEmail ->
+            updateState { it.copy(suggestedEmail = suggestedEmail) }
         }
     }
 
@@ -172,6 +182,10 @@ internal class SignUpViewModel @Inject constructor(
         updateState {
             it.copy(isSubmitting = false)
         }
+    }
+
+    fun onSuggestedEmailClick(suggestedEmail: String) {
+        emailController.onRawValueChange(suggestedEmail)
     }
 
     private suspend fun performSignup() {

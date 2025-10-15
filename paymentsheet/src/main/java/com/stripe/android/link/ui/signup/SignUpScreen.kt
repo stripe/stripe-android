@@ -2,6 +2,8 @@ package com.stripe.android.link.ui.signup
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -68,7 +70,8 @@ internal fun SignUpScreen(
         phoneNumberController = viewModel.phoneNumberController,
         nameController = viewModel.nameController,
         signUpScreenState = signUpScreenState,
-        onSignUpClick = viewModel::onSignUpClick
+        onSignUpClick = viewModel::onSignUpClick,
+        onSuggestedEmailClick = viewModel::onSuggestedEmailClick
     )
 }
 
@@ -78,7 +81,8 @@ internal fun SignUpBody(
     phoneNumberController: PhoneNumberController,
     nameController: TextFieldController,
     signUpScreenState: SignUpScreenState,
-    onSignUpClick: () -> Unit
+    onSignUpClick: () -> Unit,
+    onSuggestedEmailClick: (String) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val isSigningUp = signUpScreenState.signUpState == SignUpState.InputtingRemainingFields
@@ -120,6 +124,16 @@ internal fun SignUpBody(
                 emailController = emailController,
                 signUpState = signUpScreenState.signUpState,
                 focusRequester = emailFocusRequester,
+            )
+        }
+        AnimatedVisibility(
+            visible = signUpScreenState.suggestedEmail != null && 
+                signUpScreenState.signUpState != SignUpState.VerifyingEmail,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            EmailSuggestion(
+                suggestedEmail = signUpScreenState.suggestedEmail.orEmpty(),
+                onSuggestedEmailClick = onSuggestedEmailClick
             )
         }
         AnimatedVisibility(
@@ -275,6 +289,39 @@ private fun SecondaryFields(
     }
 }
 
+@Composable
+private fun EmailSuggestion(
+    suggestedEmail: String,
+    onSuggestedEmailClick: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val suggestionText = context.getString(R.string.stripe_link_email_suggestion, suggestedEmail)
+    val updateText = stringResource(R.string.stripe_link_email_suggestion_update)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = suggestionText,
+            style = LinkTheme.typography.detail,
+            color = LinkTheme.colors.textSecondary
+        )
+        Spacer(modifier = Modifier.size(4.dp))
+        Text(
+            text = updateText,
+            modifier = Modifier
+                .testTag("emailSuggestionUpdateTag")
+                .clickable { onSuggestedEmailClick(suggestedEmail) },
+            style = LinkTheme.typography.detail,
+            color = LinkTheme.colors.textBrand
+        )
+    }
+}
+
 internal const val SIGN_UP_HEADER_TAG = "signUpHeaderTag"
 internal const val SIGN_UP_ERROR_TAG = "signUpErrorTag"
 
@@ -293,7 +340,8 @@ private fun SignUpScreenLoadingPreview() {
                 requiresNameCollection = true,
                 canEditEmail = true,
             ),
-            onSignUpClick = {}
+            onSignUpClick = {},
+            onSuggestedEmailClick = {}
         )
     }
 }
@@ -313,7 +361,8 @@ private fun SignUpScreenPreview() {
                 requiresNameCollection = true,
                 canEditEmail = true,
             ),
-            onSignUpClick = {}
+            onSignUpClick = {},
+            onSuggestedEmailClick = {}
         )
     }
 }
