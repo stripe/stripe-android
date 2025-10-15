@@ -34,11 +34,8 @@ data class AfterpayClearpayHeaderElement(
         return resources.getString(
             R.string.stripe_afterpay_clearpay_marketing
         )
-            // The no break space will keep the afterpay logo and (i) on the same line.
-            .replace(
-                "<img/>",
-                "<img/>$NO_BREAK_SPACE<b>ⓘ</b>"
-            )
+            // The no break space will keep the (i) on the same line as the rest of the label.
+            .plus("$NO_BREAK_SPACE<b>ⓘ</b>")
     }
 
     companion object {
