@@ -8,6 +8,7 @@ import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.verification.VerificationViewState
@@ -33,7 +34,8 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     @Named(WALLETS_BUTTON_LINK_LAUNCHER) private val linkLauncher: LinkPaymentLauncher,
     private val logger: Logger,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val linkEventsReporter: LinkEventsReporter
 ) : LinkInlineInteractor {
 
     override val otpElement = OTPSpec.transform()
@@ -174,6 +176,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     }
 
     override fun resendCode() {
+        linkEventsReporter.on2FAResendCode(verificationType = "SMS")
         otpElement.controller.reset()
         update2FAState { viewState ->
             viewState.copy(

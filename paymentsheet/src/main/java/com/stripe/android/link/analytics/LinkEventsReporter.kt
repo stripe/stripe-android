@@ -16,6 +16,7 @@ internal interface LinkEventsReporter {
     fun on2FAComplete()
     fun on2FAFailure()
     fun on2FACancel()
+    fun on2FAResendCode(verificationType: String)
 
     fun onPopupShow()
     fun onPopupSuccess()

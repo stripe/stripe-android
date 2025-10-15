@@ -99,6 +99,13 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.TwoFACancel)
     }
 
+    override fun on2FAResendCode(verificationType: String) {
+        fireEvent(
+            LinkEvent.TwoFAResendCode(verificationType),
+            mapOf("verification_type" to verificationType)
+        )
+    }
+
     override fun onPopupShow() {
         fireEvent(LinkEvent.PopupShow)
     }
