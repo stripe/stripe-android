@@ -81,6 +81,8 @@ internal class CompleteFlowActivity : AppCompatActivity() {
                     onQuantityChanged = viewModel::updateQuantity
                 ) {
 
+                    // Some integrations may have other views related to PMME they want to conditionally display
+                    // How can you add/remove this view based on the state of PMME?
                     Text("More ways to pay!")
                     // TODO: Add PMME here
                     // Option 1:
