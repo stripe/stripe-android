@@ -104,7 +104,8 @@ internal class FormActivityScreenShotTest {
             configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = OnClickDelegateOverrideImpl(),
-            eventReporter = FakeEventReporter()
+            eventReporter = FakeEventReporter(),
+            confirmationSaver = {},
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
