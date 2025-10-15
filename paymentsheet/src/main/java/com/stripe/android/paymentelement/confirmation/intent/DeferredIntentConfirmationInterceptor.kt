@@ -6,7 +6,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.StripeIntent
@@ -185,9 +184,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
             options = requestOptions,
         ).mapCatching { intent ->
             if (intent.isConfirmed) {
-                failIfSetAsDefaultFeatureIsEnabled(
-                    (confirmationOption as? PaymentMethodConfirmationOption.New)?.extraParams
-                )
+                failIfSetAsDefaultFeatureIsEnabled(confirmationOption)
 
                 ConfirmationDefinition.Action.Complete(
                     intent = intent,
@@ -238,21 +235,13 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         }
     }
 
-    private fun failIfSetAsDefaultFeatureIsEnabled(paymentMethodExtraParams: PaymentMethodExtraParams?) {
+    private fun failIfSetAsDefaultFeatureIsEnabled(paymentMethodOption: PaymentMethodConfirmationOption) {
         // Ideally, we would crash anytime the set as default checkbox is shown, rather than just when it is checked.
         // We could check if it is shown by asserting that setAsDefault != null instead of asserting that it is true.
         // However, we don't have good end-to-end test coverage of this for now, so if we made a change to start
         // sending the set as default flag as false more frequently, we could accidentally start failing here more
         // often as well.
-        val setAsDefaultChecked = when (paymentMethodExtraParams) {
-            is PaymentMethodExtraParams.Card -> paymentMethodExtraParams.setAsDefault == true
-            is PaymentMethodExtraParams.USBankAccount -> paymentMethodExtraParams.setAsDefault == true
-            is PaymentMethodExtraParams.Link -> paymentMethodExtraParams.setAsDefault == true
-            is PaymentMethodExtraParams.SepaDebit -> paymentMethodExtraParams.setAsDefault == true
-            is PaymentMethodExtraParams.BacsDebit, null -> false
-        }
-
-        if (setAsDefaultChecked && !requestOptions.apiKeyIsLiveMode) {
+        if (paymentMethodOption.shouldSaveAsDefault() && !requestOptions.apiKeyIsLiveMode) {
             throw IllegalStateException(
                 "(Test-mode only error) The default payment methods feature is not yet supported with deferred " +
                     "server-side confirmation. Please contact us if you'd like to use this feature via a Github " +
