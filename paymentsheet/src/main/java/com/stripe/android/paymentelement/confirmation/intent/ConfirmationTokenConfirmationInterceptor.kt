@@ -206,6 +206,11 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     }
                 }
             },
+            cvc = if (intentConfiguration.requireCvcRecollection) {
+                (confirmationOption.optionsParams as? PaymentMethodOptionsParams.Card)?.cvc
+            } else {
+                null
+            },
             clientContext =
             if (requestOptions.apiKeyIsLiveMode) {
                 null
