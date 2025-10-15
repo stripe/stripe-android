@@ -254,7 +254,6 @@ class CameraXAdapter(
     }
 
     override fun onCreate() {
-        // Initialize our background executor
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         previewView.post {
@@ -379,8 +378,8 @@ class CameraXAdapter(
     }
 
     override fun bindToLifecycle(lifecycleOwner: LifecycleOwner) {
-        super.bindToLifecycle(lifecycleOwner)
         this.lifecycleOwner = lifecycleOwner
+        super.bindToLifecycle(lifecycleOwner)
     }
 
     /** Returns true if the device has an available back camera. False otherwise */
