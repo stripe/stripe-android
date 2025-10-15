@@ -77,12 +77,6 @@ android {
         disable 'MissingTranslation', 'StateFlowValueCalledInComposition', 'CoroutineCreationDuringComposition', 'FlowOperatorInvokedInComposition'
     }
 
-    if (project.hasProperty("enable_dokka") && project.enable_dokka) {
-        dokkaHtml {
-            outputDirectory = new File("${project.rootDir}/docs/$project.name")
-        }
-    }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
@@ -96,6 +90,18 @@ android {
         kotlin {
             jvmToolchain {
                 languageVersion.set(JavaLanguageVersion.of("17"))
+            }
+        }
+    }
+}
+
+if (project.hasProperty("enable_dokka") && project.enable_dokka) {
+    dokka {
+        dokkaSourceSets {
+            configureEach {
+                if (it.name != 'main') {
+                    suppress.set(true)
+                }
             }
         }
     }
