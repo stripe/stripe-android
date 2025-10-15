@@ -65,7 +65,7 @@ internal object AddPaymentMethodInitialVisibilityTracker {
     }
 }
 
-internal data class AddPaymentMethodInitialVisibilityTrackerData (
+internal data class AddPaymentMethodInitialVisibilityTrackerData(
     val paymentMethodCodes: List<String>,
     val tabWidth: Dp,
     val screenWidth: Dp,

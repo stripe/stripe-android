@@ -262,6 +262,7 @@ class DefaultAddPaymentMethodInteractorTest {
             assertThat(clearErrorMessagesTurbine.awaitItem()).isNotNull()
         }
     }
+
     @Test
     fun updatingVisibilityTrackerWith1ItemEmitsRightEvent() = runScenario {
         interactor.handleViewAction(

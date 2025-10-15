@@ -80,10 +80,11 @@ internal fun PaymentMethodVerticalLayoutUI(
             )
         },
         imageLoader = imageLoader,
-        updatePaymentMethodVisibility = {itemCode, coordinates ->
+        updatePaymentMethodVisibility = { itemCode, coordinates ->
             interactor.handleViewAction(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.UpdatePaymentMethodVisibility(
-                    itemCode, coordinates
+                    itemCode,
+                    coordinates,
                 )
             )
         },

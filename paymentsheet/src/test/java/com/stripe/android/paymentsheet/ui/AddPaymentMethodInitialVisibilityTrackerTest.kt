@@ -65,8 +65,7 @@ class AddPaymentMethodInitialVisibilityTrackerTest {
     fun expect_four_visible_items_reported() = runTest {
         reportInitialPaymentMethodVisibilitySnapshot(
             data = FOUR_ITEMS_ONE_95_PERCENT_VISIBLE,
-            expectedVisible = FOUR_ITEMS_ONE_95_PERCENT_VISIBLE_EXPECTED_VISIBLE
-            ,
+            expectedVisible = FOUR_ITEMS_ONE_95_PERCENT_VISIBLE_EXPECTED_VISIBLE,
             expectedHidden = emptyList(),
         )
     }

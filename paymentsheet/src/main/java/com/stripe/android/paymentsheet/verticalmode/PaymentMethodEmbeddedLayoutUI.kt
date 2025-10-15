@@ -80,10 +80,11 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.OnManageOneSavedPaymentMethod(it)
             )
         },
-        updatePaymentMethodVisibility = {itemCode, coordinates ->
+        updatePaymentMethodVisibility = { itemCode, coordinates ->
             interactor.handleViewAction(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.UpdatePaymentMethodVisibility(
-                    itemCode, coordinates
+                    itemCode,
+                    coordinates,
                 )
             )
         },

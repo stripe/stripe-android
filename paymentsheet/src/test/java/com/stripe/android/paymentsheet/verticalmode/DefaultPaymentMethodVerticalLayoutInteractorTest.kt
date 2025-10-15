@@ -1551,7 +1551,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             testScope.testScheduler.advanceUntilIdle()
 
             assertThat(visibilitySnapshotTurbine.awaitItem()).isEqualTo(
-                Pair(listOf("saved","card"), listOf("cashapp"))
+                Pair(listOf("saved", "card"), listOf("cashapp"))
             )
         }
     }
@@ -1579,7 +1579,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
         visibilitySnapshotTurbine.expectNoEvents()
     }
-
 
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
@@ -1652,7 +1651,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val reportPaymentMethodTypeSelectedTurbine = Turbine<PaymentMethodCode>()
         val reportFormShownTurbine = Turbine<PaymentMethodCode>()
         val onFormFieldValuesChangedTurbine = Turbine<Pair<FormFieldValues, String>>()
-        val visibilitySnapshotTurbine = Turbine<Pair<List<String>,List<String>>>()
+        val visibilitySnapshotTurbine = Turbine<Pair<List<String>, List<String>>>()
 
         val interactor = DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,

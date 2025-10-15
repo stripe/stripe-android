@@ -74,8 +74,8 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         data class OnManageOneSavedPaymentMethod(val savedPaymentMethod: DisplayableSavedPaymentMethod) : ViewAction
         data class PaymentMethodSelected(val selectedPaymentMethodCode: String) : ViewAction
         data class SavedPaymentMethodSelected(val savedPaymentMethod: PaymentMethod) : ViewAction
-        data class UpdatePaymentMethodVisibility(val itemCode: String, val coordinates: LayoutCoordinates): ViewAction
-        data object CancelPaymentMethodVisibilityTracking: ViewAction
+        data class UpdatePaymentMethodVisibility(val itemCode: String, val coordinates: LayoutCoordinates) : ViewAction
+        data object CancelPaymentMethodVisibilityTracking : ViewAction
     }
 
     enum class SavedPaymentMethodAction {

@@ -60,7 +60,7 @@ internal interface AddPaymentMethodInteractor {
 
         data class UpdatePaymentMethodVisibility(
             val initialVisibilityTrackerData: AddPaymentMethodInitialVisibilityTrackerData
-        ): ViewAction()
+        ) : ViewAction()
     }
 }
 

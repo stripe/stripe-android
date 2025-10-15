@@ -62,7 +62,7 @@ internal object AddPaymentMethodInitialVisibilityTrackerDataFixtures {
     )
 
     val FOUR_ITEMS_ONE_BELOW_THRESHOLD_EXPECTED_VISIBLE = PAYMENT_METHOD_CODES.take(3)
-    val FOUR_ITEMS_ONE_BELOW_THRESHOLD_EXPECTED_HIDDEN = PAYMENT_METHOD_CODES.subList(3,4)
+    val FOUR_ITEMS_ONE_BELOW_THRESHOLD_EXPECTED_HIDDEN = PAYMENT_METHOD_CODES.subList(3, 4)
 
     // 105 * 3 = 315
     // 100 * 0.5 = 50 [95% is the threshold]
