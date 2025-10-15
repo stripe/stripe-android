@@ -39,6 +39,16 @@ internal class CompleteFlowViewModel(
     val config: StateFlow<PaymentMethodMessagingElement.Configuration.State?> = _config
 
     // TODO: Initialize PMME either by calling configure OR by creating a config that can be passed to the PMME composable
+//    val configuration = PaymentMethodMessagingElement.Configuration()
+//        .amount(someAmountOfMoney)
+//        .currency("usd")
+//        .locale("en")
+//        .countryCode("US")
+//    viewModelScope.launch {
+//        paymentMethodMessagingElement.configure(
+//            configuration = configuration
+//        )
+//    }
 
     fun updateQuantity(product: CartProduct.Id, quantity: Int) {
         // TODO update PMME config
