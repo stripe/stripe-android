@@ -24,7 +24,7 @@ data class CartState(
         get() = total?.toAmountString() ?: "…"
 
     fun updateQuantity(productId: CartProduct.Id, newQuantity: Int): CartState {
-        return copy(
+        val newState = copy(
             products = products.map { product ->
                 if (product.id == productId) {
                     product.copy(quantity = newQuantity)
@@ -32,6 +32,12 @@ data class CartState(
                     product
                 }
             },
+        )
+
+        return newState.copy(
+            total = newState.products.sumOf {
+                it.quantity * it.unitPrice
+            }
         )
     }
 

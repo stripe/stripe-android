@@ -9,27 +9,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.text.InlineTextContent
-import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.Button
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.Placeholder
-import androidx.compose.ui.text.PlaceholderVerticalAlign
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.unit.sp
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.paymentmethodmessaging.view.messagingelement.PaymentMethodMessagingElement
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -38,8 +27,6 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.CompletedPaymen
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.example.samples.ui.shared.Receipt
 import com.stripe.android.paymentsheet.rememberPaymentSheet
-import com.stripe.android.uicore.image.StripeImage
-import com.stripe.android.uicore.image.StripeImageLoader
 
 internal class CompleteFlowActivity : AppCompatActivity() {
 
@@ -53,8 +40,6 @@ internal class CompleteFlowActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        viewModel.configurePaymentMethodMessagingElement()
 
         setContent {
             val paymentSheet = rememberPaymentSheet(
@@ -92,79 +77,27 @@ internal class CompleteFlowActivity : AppCompatActivity() {
                         ),
                     isLoading = uiState.isProcessing,
                     cartState = uiState.cartState,
+                    isEditable = true,
+                    onQuantityChanged = viewModel::updateQuantity
                 ) {
 
-                    // Old
-                    //viewModel.paymentMethodMessagingElement.Content()
-                    // New
-                    val config by viewModel.config.collectAsState()
-                    val context = LocalContext.current
-                    config?.let {
-                        PaymentMethodMessagingElement(
-                            it
-                        ) { state ->
-                            Toast.makeText(context, state.toString(), Toast.LENGTH_LONG).show()
-                        }
-                    }
+                    Text("More ways to pay!")
+                    // TODO: Add PMME here
+                    // Option 1:
+                    // viewModel.paymentMethodMessagingElement.Content()
+                    // Option 2:
+//                    PaymentMethodMessagingElement(
+//                        configuration =
+//                    ) {
+//
+//                    }
 
-
-                    Button(
-                        onClick = viewModel::updateConfig
-                    ) {
-                        Text("Update configuration")
-                    }
                     BuyButton(
                         buyButtonEnabled = !uiState.isProcessing,
                         onClick = viewModel::checkout,
                     )
                 }
             }
-        }
-    }
-
-    @Composable
-    fun TextWithLogo(label: String) {
-        val context = LocalContext.current
-        val imageLoader = remember {
-            StripeImageLoader(context.applicationContext)
-        }
-        val style = TextStyle(
-            fontSize = 16.sp
-        )
-        Text(
-            text = label.buildLogoAnnotatedString(),
-            style = style,
-            inlineContent = mapOf(
-                "logo_here" to InlineTextContent(
-                    placeholder = Placeholder(
-                        width = style.fontSize,
-                        height = style.fontSize,
-                        placeholderVerticalAlign = PlaceholderVerticalAlign.Center
-                    )
-                ) {
-                    StripeImage(
-                        url = "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-klarna@3x-cbd108f6432733bea9ef16827d10f5c5.png",
-                        imageLoader = imageLoader,
-                        contentDescription = "",
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-            )
-        )
-    }
-
-    @Composable
-    fun String.buildLogoAnnotatedString(): AnnotatedString = buildAnnotatedString {
-        val parts = split("logo_here")
-        val preLogoString = parts.getOrNull(0)
-        val postLogoString = parts.getOrNull(1)
-        if (preLogoString == null || postLogoString == null) {
-            // logo_here not found, just show label
-            append(this@buildLogoAnnotatedString)
-        } else {
-            append(preLogoString)
-            appendInlineContent(id = "logo_here")
-            append(postLogoString)
         }
     }
 

@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.Fuel
@@ -11,6 +10,7 @@ import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentmethodmessaging.view.messagingelement.PaymentMethodMessagingElement
 import com.stripe.android.paymentsheet.PaymentSheetResult
+import com.stripe.android.paymentsheet.example.samples.model.CartProduct
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
@@ -33,45 +33,19 @@ internal class CompleteFlowViewModel(
     )
     val state: StateFlow<CompleteFlowViewState> = _state
 
-    private val _pmmeHasContent = MutableStateFlow(false)
-    val pmmeHasContent: StateFlow<Boolean> = _pmmeHasContent
-
     val paymentMethodMessagingElement = PaymentMethodMessagingElement.create(getApplication())
 
     private val _config: MutableStateFlow<PaymentMethodMessagingElement.Configuration.State?> = MutableStateFlow(null)
     val config: StateFlow<PaymentMethodMessagingElement.Configuration.State?> = _config
 
-    fun configurePaymentMethodMessagingElement() {
-        viewModelScope.launch {
-            val result = paymentMethodMessagingElement.configure(
-                configuration = PaymentMethodMessagingElement.Configuration()
-                    .amount(10000L)
-                    .currency("usd")
-                    .locale("en")
-                    .countryCode("US")
-            )
+    // TODO: Initialize PMME either by calling configure OR by creating a config that can be passed to the PMME composable
 
-            when (result) {
-                is PaymentMethodMessagingElement.Result.Succeeded -> {
-                    _pmmeHasContent.value = true
-                }
-                is PaymentMethodMessagingElement.Result.NoContent -> {
-                    _pmmeHasContent.value = false
-                }
-                is PaymentMethodMessagingElement.Result.Failed -> {
-                    // Handle error
-                }
-            }
+    fun updateQuantity(product: CartProduct.Id, quantity: Int) {
+        // TODO update PMME config
+        val newCartState = _state.value.cartState.updateQuantity(product, quantity)
+        _state.update {
+            it.copy(cartState = newCartState)
         }
-    }
-
-    fun updateConfig() {
-        val oldPrice = config.value?.amount ?: 1000L
-        _config.value = PaymentMethodMessagingElement.Configuration()
-            .amount(oldPrice * 2L)
-            .locale("en")
-            .currency("USD")
-            .build()
     }
 
     fun checkout() {
