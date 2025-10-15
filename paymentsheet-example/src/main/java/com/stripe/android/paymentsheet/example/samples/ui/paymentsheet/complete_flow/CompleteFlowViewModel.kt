@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.Fuel
@@ -32,17 +33,45 @@ internal class CompleteFlowViewModel(
     )
     val state: StateFlow<CompleteFlowViewState> = _state
 
+    private val _pmmeHasContent = MutableStateFlow(false)
+    val pmmeHasContent: StateFlow<Boolean> = _pmmeHasContent
+
     val paymentMethodMessagingElement = PaymentMethodMessagingElement.create(getApplication())
+
+    private val _config: MutableStateFlow<PaymentMethodMessagingElement.Configuration.State?> = MutableStateFlow(null)
+    val config: StateFlow<PaymentMethodMessagingElement.Configuration.State?> = _config
 
     fun configurePaymentMethodMessagingElement() {
         viewModelScope.launch {
-            paymentMethodMessagingElement.configure(
-                configuration = PaymentMethodMessagingElement.Configuration.Builder()
+            val result = paymentMethodMessagingElement.configure(
+                configuration = PaymentMethodMessagingElement.Configuration()
                     .amount(10000L)
                     .currency("usd")
-                    .build()
+                    .locale("en")
+                    .countryCode("US")
             )
+
+            when (result) {
+                is PaymentMethodMessagingElement.Result.Succeeded -> {
+                    _pmmeHasContent.value = true
+                }
+                is PaymentMethodMessagingElement.Result.NoContent -> {
+                    _pmmeHasContent.value = false
+                }
+                is PaymentMethodMessagingElement.Result.Failed -> {
+                    // Handle error
+                }
+            }
         }
+    }
+
+    fun updateConfig() {
+        val oldPrice = config.value?.amount ?: 1000L
+        _config.value = PaymentMethodMessagingElement.Configuration()
+            .amount(oldPrice * 2L)
+            .locale("en")
+            .currency("USD")
+            .build()
     }
 
     fun checkout() {

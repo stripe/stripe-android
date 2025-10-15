@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete
 
 import android.graphics.Color
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,6 +31,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.sp
 import com.google.android.material.snackbar.Snackbar
+import com.stripe.android.paymentmethodmessaging.view.messagingelement.PaymentMethodMessagingElement
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CompletedPaymentAlertDialog
@@ -91,8 +94,25 @@ internal class CompleteFlowActivity : AppCompatActivity() {
                     cartState = uiState.cartState,
                 ) {
 
-                    viewModel.paymentMethodMessagingElement.Content()
+                    // Old
+                    //viewModel.paymentMethodMessagingElement.Content()
+                    // New
+                    val config by viewModel.config.collectAsState()
+                    val context = LocalContext.current
+                    config?.let {
+                        PaymentMethodMessagingElement(
+                            it
+                        ) { state ->
+                            Toast.makeText(context, state.toString(), Toast.LENGTH_LONG).show()
+                        }
+                    }
 
+
+                    Button(
+                        onClick = viewModel::updateConfig
+                    ) {
+                        Text("Update configuration")
+                    }
                     BuyButton(
                         buyButtonEnabled = !uiState.isProcessing,
                         onClick = viewModel::checkout,

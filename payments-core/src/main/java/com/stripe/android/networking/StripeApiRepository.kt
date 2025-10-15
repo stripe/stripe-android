@@ -1474,6 +1474,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     "country" to country,
                     "currency" to currency,
                     "locale" to locale,
+                    "key" to requestOptions.apiKey
                 )
             ),
             PaymentMethodMessageJsonParser()

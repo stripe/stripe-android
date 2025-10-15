@@ -6,8 +6,9 @@ import org.json.JSONObject
 
 internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMessage> {
     override fun parse(json: JSONObject): PaymentMethodMessage? {
-        return if (!json.isNull("payment_methods")) {
-            PaymentMethodMessage(json.getJSONArray("payment_methods").join(", "))
-        } else null
+        val content = json.optJSONObject("content")
+        val summary = content?.optJSONObject("summary")
+        val message = summary?.optString("message")
+        return if (!message.isNullOrBlank()) PaymentMethodMessage(message) else null
     }
 }

@@ -17,13 +17,14 @@ internal class MessagingContentHelper @Inject constructor(
     suspend fun configure(
         configuration: PaymentMethodMessagingElement.Configuration
     ): PaymentMethodMessagingElement.Result {
+        val state = configuration.build()
         val result = stripeRepository.retrievePaymentMethodMessage(
-            paymentMethods = configuration.paymentMethodList?.map { it.code },
-            amount = configuration.amount,
-            currency = configuration.currency,
-            locale = configuration.locale,
-            country = configuration.countryCode,
-            requestOptions = ApiRequest.Options(paymentConfiguration.publishableKey)
+            paymentMethods = null,
+            amount = state.amount,
+            currency = state.currency,
+            locale = state.locale,
+            country = state.countryCode,
+            requestOptions = ApiRequest.Options("pk_test_51RlchZG0ltIrPQjG7ZWZUY16t6oRDSah9oy6Hhclt3h2c3JgDEd7SljmQAgGr74dh3ECDZkDJdLhiQCDK6FDarWI00nK1B9C3c")
         )
 
         result.getOrNull()?.let {
@@ -38,7 +39,7 @@ internal class MessagingContentHelper @Inject constructor(
     }
 
     @Composable
-    fun Content() {
+    fun Content(appearance: PaymentMethodMessagingElement.Appearance) {
         val state = _state.collectAsState().value
 
         if (state != null) {
