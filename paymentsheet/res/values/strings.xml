@@ -60,10 +60,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message_v2">Pay faster everywhere Link is accepted.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[By continuing you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
-  <!-- Email suggestion prompt shown when we detect a typo. The %1$s is a placeholder for the suggested email address. -->
-  <string name="stripe_link_email_suggestion">Did you mean %1$s?</string>
-  <!-- CTA text for accepting the suggested email correction -->
-  <string name="stripe_link_email_suggestion_update">Yes, update</string>
   <!-- Confirm CTA for the update card screen in Link native -->
   <string name="stripe_link_update_card_confirm_cta">Update card</string>
   <!-- Text informing the user that the card to be updated is their default -->
