@@ -136,7 +136,8 @@ internal class SignUpBodyTest {
                     errorMessage = errorMessage,
                     signUpState = signUpState,
                 ),
-                onSignUpClick = {}
+                onSignUpClick = {},
+                onSuggestedEmailClick = {}
             )
         }
     }
