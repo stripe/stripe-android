@@ -235,6 +235,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 id = paymentDetails.id,
                 consumerSessionClientSecret = account.clientSecret,
                 paymentMethodCreateParams = paymentMethodCreateParams,
+                clientAttributionMetadata = config.clientAttributionMetadata,
             ).getOrThrow()
         }
     }
@@ -276,6 +277,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 cvc = cvc,
                 allowRedisplay = allowRedisplay,
                 apiKey = apiKey,
+                clientAttributionMetadata = config.clientAttributionMetadata,
             ).getOrThrow()
         }
     }

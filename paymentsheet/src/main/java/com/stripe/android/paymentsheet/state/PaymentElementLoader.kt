@@ -20,6 +20,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata.Permissi
 import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.create
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -193,12 +195,19 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             )
         }
 
+        val clientAttributionMetadata = ClientAttributionMetadata.create(
+            elementsSessionConfigId = elementsSession.elementsSessionId,
+            initializationMode = initializationMode,
+            automaticPaymentMethodsEnabled = elementsSession.stripeIntent.automaticPaymentMethodsEnabled,
+        )
+
         val linkState = async {
             createLinkState(
                 elementsSession = elementsSession,
                 configuration = configuration,
                 customer = customerInfo?.toCustomerInfo(),
                 initializationMode = initializationMode,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 
@@ -207,9 +216,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 configuration = configuration,
                 elementsSession = elementsSession,
                 customerInfo = customerInfo,
-                isGooglePayReady = isGooglePayReady,
                 linkStateResult = linkState.await(),
+                isGooglePayReady = isGooglePayReady,
                 initializationMode = initializationMode,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 
@@ -321,6 +331,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         linkStateResult: LinkStateResult,
         isGooglePayReady: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): PaymentMethodMetadata {
         val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
             stripeIntent = elementsSession.stripeIntent,
@@ -355,6 +366,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customerInfo = customerInfo,
             ),
             initializationMode = initializationMode,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 

@@ -75,7 +75,7 @@ internal class PaymentSheetTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             clientAttributionMetadataParamsInPaymentMethodData(),
-            clientAttributionMetadataParamsForPaymentIntent(),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -110,7 +110,7 @@ internal class PaymentSheetTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             clientAttributionMetadataParamsInPaymentMethodData(),
-            clientAttributionMetadataParamsForPaymentIntent(),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -156,7 +156,7 @@ internal class PaymentSheetTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             clientAttributionMetadataParamsInPaymentMethodData(),
-            clientAttributionMetadataParamsForPaymentIntent(),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -580,7 +580,7 @@ internal class PaymentSheetTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            clientAttributionMetadataParamsForPaymentIntent(),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -643,7 +643,7 @@ internal class PaymentSheetTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            clientAttributionMetadataParamsForPaymentIntent(),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }

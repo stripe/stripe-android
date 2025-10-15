@@ -33,6 +33,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     val mobileSignUpCalls = arrayListOf<SignUpCall>()
     val lookupCalls = arrayListOf<LookupCall>()
     val mobileLookupCalls = arrayListOf<MobileLookupCall>()
+    val sharePaymentDetailsCalls = arrayListOf<SharePaymentDetailsCall>()
 
     override suspend fun signUp(
         params: SignUpParams,
@@ -169,7 +170,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         requestOptions: ApiRequest.Options,
         extraParams: Map<String, Any?>
     ): Result<SharePaymentDetails> {
-        TODO("Not yet implemented")
+        sharePaymentDetailsCalls.add(SharePaymentDetailsCall(extraParams))
+        return Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     }
 
     override suspend fun updateAvailableIncentives(
@@ -231,5 +233,9 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     data class SignUpCall(
         val params: SignUpParams,
         val requestOptions: ApiRequest.Options
+    )
+
+    data class SharePaymentDetailsCall(
+        val extraParams: Map<String, Any?>,
     )
 }

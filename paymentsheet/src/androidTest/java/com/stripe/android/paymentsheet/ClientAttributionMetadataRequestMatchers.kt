@@ -40,7 +40,7 @@ internal fun clientAttributionMetadataParamsInPaymentMethodData(): RequestMatche
     )
 }
 
-internal fun clientAttributionMetadataParamsForPaymentIntent(): RequestMatcher {
+internal fun topLevelClientAttributionMetadataParams(): RequestMatcher {
     return RequestMatchers.composite(
         bodyPart(
             urlEncode("client_attribution_metadata[elements_session_config_id]"),
