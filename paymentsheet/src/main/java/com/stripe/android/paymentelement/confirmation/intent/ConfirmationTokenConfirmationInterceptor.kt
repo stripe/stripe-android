@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
@@ -186,7 +187,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         }
     }
 
-    private fun prepareConfirmationTokenParams(
+    @VisibleForTesting
+    fun prepareConfirmationTokenParams(
         confirmationOption: PaymentMethodConfirmationOption,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationTokenParams {
@@ -222,7 +224,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         )
     }
 
-    private fun prepareConfirmationTokenClientContextParams(paymentMethodOptions: PaymentMethodOptionsParams?):
+    @VisibleForTesting
+    fun prepareConfirmationTokenClientContextParams(paymentMethodOptions: PaymentMethodOptionsParams?):
         ConfirmationTokenClientContextParams {
         return with(intentConfiguration.toDeferredIntentParams()) {
             ConfirmationTokenClientContextParams(
