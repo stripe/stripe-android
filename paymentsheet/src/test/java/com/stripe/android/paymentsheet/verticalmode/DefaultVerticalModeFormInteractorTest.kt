@@ -253,7 +253,8 @@ internal class DefaultVerticalModeFormInteractorTest {
             configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = OnClickDelegateOverrideImpl(),
-            eventReporter = FakeEventReporter()
+            eventReporter = FakeEventReporter(),
+            confirmationSaver = {},
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -302,7 +303,8 @@ internal class DefaultVerticalModeFormInteractorTest {
             configuration = EmbeddedConfirmationStateFixtures.defaultStateWithOpenCardScanAutomatically().configuration,
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = OnClickDelegateOverrideImpl(),
-            eventReporter = FakeEventReporter()
+            eventReporter = FakeEventReporter(),
+            confirmationSaver = {},
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
