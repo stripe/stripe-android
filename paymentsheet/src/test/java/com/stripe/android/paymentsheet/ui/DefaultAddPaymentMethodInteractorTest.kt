@@ -14,6 +14,15 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodInitialVisibilityTrackerDataFixtures.MANY_ITEMS_ONE_PARTIALLY_VISIBLE
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodInitialVisibilityTrackerDataFixtures.MANY_ITEMS_ONE_PARTIALLY_VISIBLE_EXPECTED_HIDDEN
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodInitialVisibilityTrackerDataFixtures.MANY_ITEMS_ONE_PARTIALLY_VISIBLE_EXPECTED_VISIBLE
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodInitialVisibilityTrackerDataFixtures.ONE_ITEM
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodInitialVisibilityTrackerDataFixtures.ONE_ITEM_EXPECTED_VISIBLE
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodInitialVisibilityTrackerDataFixtures.THREE_ITEMS
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodInitialVisibilityTrackerDataFixtures.THREE_ITEMS_EXPECTED_VISIBLE
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodInitialVisibilityTrackerDataFixtures.TWO_ITEMS
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodInitialVisibilityTrackerDataFixtures.TWO_ITEMS_EXPECTED_VISIBLE
 import com.stripe.android.paymentsheet.utils.errorTest
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -253,6 +262,65 @@ class DefaultAddPaymentMethodInteractorTest {
             assertThat(clearErrorMessagesTurbine.awaitItem()).isNotNull()
         }
     }
+    @Test
+    fun updatingVisibilityTrackerWith1ItemEmitsRightEvent() = runScenario {
+        interactor.handleViewAction(
+            viewAction = AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility(
+                initialVisibilityTrackerData = ONE_ITEM,
+            )
+        )
+
+        val visibilityItem = initialVisibilityTrackerTurbine.awaitItem()
+
+        assertThat(visibilityItem.first).isEqualTo(ONE_ITEM_EXPECTED_VISIBLE)
+
+        assertThat(visibilityItem.second).isEqualTo(emptyList<String>())
+    }
+
+    @Test
+    fun updatingVisibilityTrackerWith2ItemsEmitsRightEvent() = runScenario {
+        interactor.handleViewAction(
+            viewAction = AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility(
+                initialVisibilityTrackerData = TWO_ITEMS,
+            )
+        )
+
+        val visibilityItem = initialVisibilityTrackerTurbine.awaitItem()
+
+        assertThat(visibilityItem.first).isEqualTo(TWO_ITEMS_EXPECTED_VISIBLE)
+
+        assertThat(visibilityItem.second).isEqualTo(emptyList<String>())
+    }
+
+    @Test
+    fun updatingVisibilityTrackerWith3ItemsEmitsRightEvent() = runScenario {
+        interactor.handleViewAction(
+            viewAction = AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility(
+                initialVisibilityTrackerData = THREE_ITEMS,
+            )
+        )
+
+        val visibilityItem = initialVisibilityTrackerTurbine.awaitItem()
+
+        assertThat(visibilityItem.first).isEqualTo(THREE_ITEMS_EXPECTED_VISIBLE)
+
+        assertThat(visibilityItem.second).isEqualTo(emptyList<String>())
+    }
+
+    @Test
+    fun updatingVisibilityTrackerWithManyItemsEmitsRightEvent() = runScenario {
+        interactor.handleViewAction(
+            viewAction = AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility(
+                initialVisibilityTrackerData = MANY_ITEMS_ONE_PARTIALLY_VISIBLE,
+            )
+        )
+
+        val visibilityItem = initialVisibilityTrackerTurbine.awaitItem()
+
+        assertThat(visibilityItem.first).isEqualTo(MANY_ITEMS_ONE_PARTIALLY_VISIBLE_EXPECTED_VISIBLE)
+
+        assertThat(visibilityItem.second).isEqualTo(MANY_ITEMS_ONE_PARTIALLY_VISIBLE_EXPECTED_HIDDEN)
+    }
 
     private fun runScenario(
         initiallySelectedPaymentMethodType: PaymentMethodCode = PaymentMethod.Type.Card.code,
@@ -282,6 +350,7 @@ class DefaultAddPaymentMethodInteractorTest {
         val onFormFieldValuesChangedTurbine = Turbine<Pair<FormFieldValues?, String>>()
         val clearErrorMessagesTurbine = Turbine<Unit>()
         val reportPaymentMethodTypeSelectedTurbine = Turbine<PaymentMethodCode>()
+        val initialVisibilityTrackerTurbine = Turbine<Pair<List<String>, List<String>>>()
 
         val interactor = DefaultAddPaymentMethodInteractor(
             initiallySelectedPaymentMethodType = initiallySelectedPaymentMethodType,
@@ -308,7 +377,9 @@ class DefaultAddPaymentMethodInteractorTest {
             validationRequested = validationRequestedSource,
             isLiveMode = true,
             uiContext = dispatcher,
-            onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { _, _ -> }
+            onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visible, hidden ->
+                initialVisibilityTrackerTurbine.add(Pair(visible, hidden))
+            }
         )
 
         TestParams(
@@ -319,6 +390,7 @@ class DefaultAddPaymentMethodInteractorTest {
             onFormFieldValuesChangedTurbine = onFormFieldValuesChangedTurbine,
             clearErrorMessagesTurbine = clearErrorMessagesTurbine,
             reportPaymentMethodTypeSelectedTurbine = reportPaymentMethodTypeSelectedTurbine,
+            initialVisibilityTrackerTurbine = initialVisibilityTrackerTurbine,
         ).apply {
             runTest {
                 testBlock()
@@ -335,12 +407,14 @@ class DefaultAddPaymentMethodInteractorTest {
         val onFormFieldValuesChangedTurbine: ReceiveTurbine<Pair<FormFieldValues?, String>>,
         val clearErrorMessagesTurbine: ReceiveTurbine<Unit>,
         val reportPaymentMethodTypeSelectedTurbine: ReceiveTurbine<PaymentMethodCode>,
+        val initialVisibilityTrackerTurbine: ReceiveTurbine<Pair<List<String>, List<String>>>
     ) {
         fun ensureAllEventsConsumed() {
             reportFieldInteractionTurbine.ensureAllEventsConsumed()
             onFormFieldValuesChangedTurbine.ensureAllEventsConsumed()
             clearErrorMessagesTurbine.ensureAllEventsConsumed()
             reportPaymentMethodTypeSelectedTurbine.ensureAllEventsConsumed()
+            initialVisibilityTrackerTurbine.ensureAllEventsConsumed()
         }
     }
 }
