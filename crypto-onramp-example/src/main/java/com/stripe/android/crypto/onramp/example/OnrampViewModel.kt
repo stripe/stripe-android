@@ -490,7 +490,6 @@ internal class OnrampViewModel(
             val result = testBackendRepository.createOnrampSession(
                 paymentToken = paymentToken!!,
                 walletAddress = walletAddress!!,
-                cryptoCustomerId = customerId!!,
                 tokenWithLAI = authToken!!,
                 destinationNetwork = destinationNetwork
             )

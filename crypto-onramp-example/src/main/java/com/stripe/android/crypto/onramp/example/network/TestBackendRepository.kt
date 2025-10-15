@@ -33,7 +33,6 @@ class TestBackendRepository {
     suspend fun createOnrampSession(
         paymentToken: String,
         walletAddress: String,
-        cryptoCustomerId: String,
         tokenWithLAI: String,
         destinationNetwork: String = "ethereum",
         sourceAmount: Double = 10.0,
@@ -50,7 +49,6 @@ class TestBackendRepository {
                 destinationCurrency = destinationCurrency,
                 destinationNetwork = destinationNetwork,
                 walletAddress = walletAddress,
-                cryptoCustomerId = cryptoCustomerId,
                 customerIpAddress = customerIpAddress
             )
 
