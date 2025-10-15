@@ -61,7 +61,6 @@ data class ConfirmationTokenClientContextParams(
         }
     }
 
-
     /**
      * https://stripe.sourcegraphcloud.com/stripe-internal/pay-server/-/blob/lib/elements/api/client_context/param.rb
      */
@@ -86,7 +85,6 @@ data class ConfirmationTokenClientContextParams(
                     put(PARAM_REQUIRE_CVC_RECOLLECTION, it)
                 }
             }
-
         }.takeIf { it.isNotEmpty() }
 
         return valueMap?.let {

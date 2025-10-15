@@ -281,4 +281,24 @@ class ConfirmationTokenParamsTest {
 
         assertThat(params.toParamMap().containsKey("client_context")).isFalse()
     }
+
+    @Test
+    fun toParamMap_withCvc_shouldCreateExpectedMap() {
+        val params = ConfirmationTokenParams(
+            paymentMethodId = "pm_12345",
+            cvc = "123"
+        )
+
+        assertThat(params.toParamMap())
+            .isEqualTo(
+                mapOf(
+                    "payment_method" to "pm_12345",
+                    "payment_method_options" to mapOf(
+                        "card" to mapOf(
+                            "cvc" to "123"
+                        )
+                    )
+                )
+            )
+    }
 }
