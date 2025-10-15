@@ -285,7 +285,7 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
-            response.setResponseCode(400)
+            response.setResponseCode(500)
         }
 
         networkRule.enqueue(
