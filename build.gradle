@@ -98,6 +98,7 @@ dependencies {
     dokka(project(":financial-connections"))
     dokka(project(":financial-connections-core"))
     dokka(project(":financial-connections-lite"))
+    dokka(project(":identity"))
     dokka(project(":paymentsheet"))
     dokka(project(":payments-core"))
     dokka(project(":payments-model"))
