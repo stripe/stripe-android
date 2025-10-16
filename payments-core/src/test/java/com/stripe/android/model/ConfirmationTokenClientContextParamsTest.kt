@@ -199,6 +199,23 @@ class ConfirmationTokenClientContextParamsTest {
     }
 
     @Test
+    fun toParamMap_withOnlyPmoSetupFutureUsage_shouldIncludePmoSfuValues() {
+        val paymentMethodOptions = PaymentMethodOptionsParams.Card(
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession,
+        )
+        val params = ConfirmationTokenClientContextParams(
+            mode = "payment",
+            currency = "usd",
+            paymentMethodOptions = paymentMethodOptions
+        )
+
+        val paramMap = params.toParamMap()
+        val pmoMap = paramMap["payment_method_options"] as? Map<*, *>
+        val cardOptions = pmoMap?.get("card") as? Map<*, *>
+        assertThat(cardOptions?.get("setup_future_usage")).isEqualTo("on_session")
+    }
+
+    @Test
     fun toParamMap_withPmoSetupFutureUsage_shouldIncludeBothValues() {
         val paymentMethodOptions = PaymentMethodOptionsParams.Card(
             setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
