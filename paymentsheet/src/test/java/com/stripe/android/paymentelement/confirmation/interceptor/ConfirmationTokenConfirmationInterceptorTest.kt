@@ -1178,22 +1178,4 @@ class ConfirmationTokenConfirmationInterceptorTest {
             test = block
         )
     }
-
-    private fun runConfirmationTokenInterceptorScenario(
-        observedParams: Turbine<ConfirmationTokenParams> = Turbine(),
-        initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_DEFERRED_INTENT,
-        block: suspend (IntentConfirmationInterceptor) -> Unit
-    ) {
-        runInterceptorScenario(
-            initializationMode = initializationMode,
-            scenario = InterceptorTestScenario(
-                ephemeralKeySecret = "ek_test_123",
-                stripeRepository = createFakeStripeRepositoryForConfirmationToken(observedParams),
-                intentCreationConfirmationTokenCallbackProvider = Provider {
-                    succeedingCreateIntentWithConfirmationTokenCallback(confirmationToken)
-                },
-            ),
-            test = block
-        )
-    }
 }
