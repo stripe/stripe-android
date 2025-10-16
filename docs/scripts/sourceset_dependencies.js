@@ -1,1 +1,1 @@
-sourceset_dependencies = '{":payments-model/main":[],":3ds2sdk/main":[],":payments-core/main":[],":financial-connections-core/main":[],":financial-connections/main":[],":paymentsheet/main":[],":connect/main":[]}'
+sourceset_dependencies = '{":payments-model/main":[],":3ds2sdk/main":[],":payments-core/main":[],":financial-connections-core/main":[],":identity/main":[],":financial-connections/main":[],":paymentsheet/main":[],":connect/main":[]}'
