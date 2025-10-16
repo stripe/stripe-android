@@ -1699,11 +1699,12 @@ internal class DefaultPaymentElementLoaderTest {
 
         val result = loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG.copy(
-                defaultBillingDetails = PaymentSheet.BillingDetails(
-                    email = "john@doe.com",
-                ),
-            ),
+            paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG.newBuilder()
+                .defaultBillingDetails(
+                    defaultBillingDetails = PaymentSheet.BillingDetails(
+                        email = "john@doe.com",
+                    )
+                ).build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
