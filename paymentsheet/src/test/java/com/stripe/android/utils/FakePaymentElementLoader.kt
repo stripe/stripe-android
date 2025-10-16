@@ -17,7 +17,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
 
-internal class FakePaymentElementLoader constructor(
+internal class FakePaymentElementLoader(
     private val stripeIntent: StripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
     private val shouldFail: Boolean = false,
     private var customer: CustomerState? = null,
