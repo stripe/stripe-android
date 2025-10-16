@@ -91,6 +91,9 @@ class AnalyticsRequestFactoryTest : TestCase() {
         assertNotNull(params[AnalyticsFields.OS_RELEASE])
         assertNotNull(params[AnalyticsFields.OS_NAME])
         assertNotNull(params[AnalyticsFields.SESSION_ID])
+        assertNotNull(params[AnalyticsFields.TIMESTAMP])
+        // Verify timestamp is in seconds, not milliseconds: seconds are ~billions, millis are ~trillions
+        assertThat(params[AnalyticsFields.TIMESTAMP] as? Long).isLessThan(10_000_000_000L)
     }
 
     @Test

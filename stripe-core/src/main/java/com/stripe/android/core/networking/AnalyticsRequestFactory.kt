@@ -65,6 +65,7 @@ open class AnalyticsRequestFactory(
         AnalyticsFields.BINDINGS_VERSION to StripeSdkVersion.VERSION_NAME,
         AnalyticsFields.IS_DEVELOPMENT to BuildConfig.DEBUG,
         AnalyticsFields.SESSION_ID to sessionId,
+        AnalyticsFields.TIMESTAMP to System.currentTimeMillis() / MILLIS_TO_SECONDS,
         AnalyticsFields.LOCALE to Locale.getDefault().toString(),
     ) + networkType() + pluginType()
 
@@ -109,6 +110,7 @@ open class AnalyticsRequestFactory(
         private const val ANALYTICS_PREFIX = "analytics"
         private const val ANALYTICS_NAME = "stripe_android"
         private const val ANALYTICS_VERSION = "1.0"
+        private const val MILLIS_TO_SECONDS = 1000L
 
         private val DEVICE_TYPE: String = "${Build.MANUFACTURER}_${Build.BRAND}_${Build.MODEL}"
 

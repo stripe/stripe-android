@@ -100,13 +100,17 @@ class PaymentAnalyticsRequestFactoryTest {
 
     @Test
     fun getPaymentMethodCreationParams() {
-        assertThat(
-            analyticsRequestFactory
-                .createPaymentMethodCreation(
-                    PaymentMethod.Type.Card.code,
-                    ATTRIBUTION
-                ).params
-        ).isEqualTo(
+        val params = analyticsRequestFactory
+            .createPaymentMethodCreation(
+                PaymentMethod.Type.Card.code,
+                ATTRIBUTION
+            ).params
+
+        val timestamp = params["timestamp"] as? Long
+        assertThat(timestamp).isNotNull()
+        assertThat(timestamp).isGreaterThan(0L)
+
+        assertThat(params).isEqualTo(
             mapOf(
                 "analytics_ua" to "analytics.stripe_android-1.0",
                 "event" to "stripe_android.payment_method_creation",
@@ -122,6 +126,7 @@ class PaymentAnalyticsRequestFactoryTest {
                 "source_type" to "card",
                 "is_development" to true,
                 "session_id" to AnalyticsRequestFactory.sessionId,
+                "timestamp" to timestamp,
                 "network_type" to "2G",
                 "locale" to "en_US",
             )
@@ -130,13 +135,17 @@ class PaymentAnalyticsRequestFactoryTest {
 
     @Test
     fun getPaymentMethodUpdateParams() {
-        assertThat(
-            analyticsRequestFactory
-                .createPaymentMethodUpdate(
-                    PaymentMethod.Type.Card.code,
-                    ATTRIBUTION
-                ).params
-        ).isEqualTo(
+        val params = analyticsRequestFactory
+            .createPaymentMethodUpdate(
+                PaymentMethod.Type.Card.code,
+                ATTRIBUTION
+            ).params
+
+        val timestamp = params["timestamp"] as? Long
+        assertThat(timestamp).isNotNull()
+        assertThat(timestamp).isGreaterThan(0L)
+
+        assertThat(params).isEqualTo(
             mapOf(
                 "analytics_ua" to "analytics.stripe_android-1.0",
                 "event" to "stripe_android.payment_method_update",
@@ -152,6 +161,7 @@ class PaymentAnalyticsRequestFactoryTest {
                 "source_type" to "card",
                 "is_development" to true,
                 "session_id" to AnalyticsRequestFactory.sessionId,
+                "timestamp" to timestamp,
                 "network_type" to "2G",
                 "locale" to "en_US",
             )
@@ -371,8 +381,32 @@ class PaymentAnalyticsRequestFactoryTest {
                         "\"model\":\"robolectric\"}"
                 )
             )
-        assertThat(analyticsRequest.url)
-            .isEqualTo("https://q.stripe.com?publishable_key=pk_abc123&app_version=0&bindings_version=$sdkVersion&os_version=30&session_id=${AnalyticsRequestFactory.sessionId}&os_release=11&device_type=robolectric_robolectric_robolectric&source_type=card&locale=en_US&app_name=com.stripe.android.test&analytics_ua=analytics.stripe_android-1.0&os_name=REL&network_type=2G&event=stripe_android.payment_method_creation&is_development=true")
+
+        // Verify URL contains all expected parameters including timestamp
+        val url = analyticsRequest.url
+        assertThat(url).contains("https://q.stripe.com?")
+        assertThat(url).contains("publishable_key=pk_abc123")
+        assertThat(url).contains("app_version=0")
+        assertThat(url).contains("bindings_version=$sdkVersion")
+        assertThat(url).contains("os_version=30")
+        assertThat(url).contains("session_id=${AnalyticsRequestFactory.sessionId}")
+        assertThat(url).contains("os_release=11")
+        assertThat(url).contains("device_type=robolectric_robolectric_robolectric")
+        assertThat(url).contains("source_type=card")
+        assertThat(url).contains("locale=en_US")
+        assertThat(url).contains("app_name=com.stripe.android.test")
+        assertThat(url).contains("analytics_ua=analytics.stripe_android-1.0")
+        assertThat(url).contains("os_name=REL")
+        assertThat(url).contains("network_type=2G")
+        assertThat(url).contains("event=stripe_android.payment_method_creation")
+        assertThat(url).contains("is_development=true")
+        assertThat(url).contains("timestamp=")
+
+        // Verify timestamp is a valid number
+        val timestampParam = url.substringAfter("timestamp=").substringBefore("&")
+        val timestamp = timestampParam.toLongOrNull()
+        assertThat(timestamp).isNotNull()
+        assertThat(timestamp).isGreaterThan(0L)
     }
 
     @Test
@@ -444,6 +478,7 @@ class PaymentAnalyticsRequestFactoryTest {
             AnalyticsFields.OS_RELEASE,
             AnalyticsFields.PUBLISHABLE_KEY,
             AnalyticsFields.SESSION_ID,
+            AnalyticsFields.TIMESTAMP,
             PaymentAnalyticsRequestFactory.FIELD_PRODUCT_USAGE,
             PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE,
             PaymentAnalyticsRequestFactory.FIELD_TOKEN_TYPE,
