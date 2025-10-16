@@ -231,7 +231,8 @@ private fun String.isEKClientSecretValid(): Boolean {
     return Regex(EK_CLIENT_SECRET_VALID_REGEX_PATTERN).matches(this)
 }
 
-private const val EK_CLIENT_SECRET_VALID_REGEX_PATTERN = "^ek_[^_](.)+$"
+// The `uk_` prefix is used by the Stripe Dashboard Mobile App for MOTO
+private const val EK_CLIENT_SECRET_VALID_REGEX_PATTERN = "^(ek_|uk_)[^_](.)+\$"
 
 internal fun CommonConfiguration.containsVolatileDifferences(
     other: CommonConfiguration

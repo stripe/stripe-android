@@ -44,6 +44,8 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should succeed when ephemeral key secret is of correct format`() {
         getConfig("ek_askljdlkasfhgasdfjls").validate(isLiveMode = false)
         getConfig("ek_test_iiuwfhdaiuhasdvkcjn32n").validate(isLiveMode = false)
+        getConfig("uk_iiuwfhdaiuhasdvkcjn32n").validate(isLiveMode = false)
+        getConfig("uk_test_iiuwfhdaiuhasdvkcjn32n").validate(isLiveMode = false)
     }
 
     @Test
