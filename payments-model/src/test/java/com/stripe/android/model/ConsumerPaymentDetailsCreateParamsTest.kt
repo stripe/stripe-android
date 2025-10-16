@@ -51,6 +51,42 @@ class ConsumerPaymentDetailsCreateParamsTest {
     }
 
     @Test
+    fun consumerPaymentDetailsCreateParams_Card_toParamMap_includesClientAttributionMetadata() {
+        val clientAttributionMetadataMap = mapOf(
+            "elements_session_config_id" to "elements_session_123",
+        )
+        val params = ConsumerPaymentDetailsCreateParams.Card(
+            cardPaymentMethodCreateParamsMap = mapOf(
+                "client_attribution_metadata" to clientAttributionMetadataMap,
+            ),
+            email = "email@stripe.com",
+        ).toParamMap()
+
+        assertThat(params).containsEntry(
+            "client_attribution_metadata",
+            clientAttributionMetadataMap,
+        )
+    }
+
+    @Test
+    fun consumerPaymentDetailsCreateParams_Bank_toParamMap_includesClientAttributionMetadata() {
+        val clientAttributionMetadataMap = mapOf(
+            "elements_session_config_id" to "elements_session_123",
+        )
+        val params = ConsumerPaymentDetailsCreateParams.BankAccount(
+            bankAccountId = "bank_123",
+            billingAddress = emptyMap(),
+            billingEmailAddress = null,
+            clientAttributionMetadata = mapOf("client_attribution_metadata" to clientAttributionMetadataMap),
+        ).toParamMap()
+
+        assertThat(params).containsEntry(
+            "client_attribution_metadata",
+            clientAttributionMetadataMap,
+        )
+    }
+
+    @Test
     fun `ConsumerPaymentDetailsCreateParams_Card_toParamMap_withPreferredNetwork`() {
         assertThat(
             ConsumerPaymentDetailsCreateParams.Card(
