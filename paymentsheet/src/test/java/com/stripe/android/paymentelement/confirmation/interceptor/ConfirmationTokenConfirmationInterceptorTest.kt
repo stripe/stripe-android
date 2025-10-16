@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.interceptor
 
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.StripeError
@@ -8,17 +9,21 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.ConfirmationTokenJsonParser
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
+import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTokenFixtures
@@ -47,6 +52,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
 
+@Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 @OptIn(SharedPaymentTokenSessionPreview::class)
 class ConfirmationTokenConfirmationInterceptorTest {
@@ -569,12 +575,15 @@ class ConfirmationTokenConfirmationInterceptorTest {
         )
     }
 
-    private fun createFakeStripeRepositoryForConfirmationToken(): StripeRepository {
+    private fun createFakeStripeRepositoryForConfirmationToken(
+        observedParams: Turbine<ConfirmationTokenParams> = Turbine(),
+    ): StripeRepository {
         return object : AbsFakeStripeRepository() {
             override suspend fun createConfirmationToken(
                 confirmationTokenParams: ConfirmationTokenParams,
                 options: ApiRequest.Options
             ): Result<ConfirmationToken> {
+                observedParams.add(confirmationTokenParams)
                 return Result.success(confirmationToken)
             }
 
@@ -974,5 +983,143 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
         assertThat(observedParams).hasSize(1)
         assertThat(observedParams[0].clientContext?.requireCvcRecollection).isEqualTo(true)
+    }
+
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    @Test
+    fun `SFU priority - user checkbox takes highest priority over PMO SFU for New payment method`() {
+        val observedParams = Turbine<ConfirmationTokenParams>()
+        runConfirmationTokenInterceptorScenario(
+            observedParams = observedParams,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                        paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
+                            mapOf(
+                                PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession
+                            )
+                        )
+                    ),
+                )
+            ),
+        ) { interceptor ->
+            val confirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                optionsParams = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                ),
+                extraParams = null,
+                shouldSave = true,
+                passiveCaptchaParams = null,
+            )
+
+            interceptor.intercept(
+                intent = PaymentIntentFactory.create(),
+                confirmationOption = confirmationOption,
+                shippingValues = null,
+            )
+
+            // User checkbox sets OffSession, should not be overridden by PMO SFU
+            assertThat(observedParams.awaitItem().setUpFutureUsage)
+                .isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
+        }
+    }
+
+    @Test
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    fun `SFU priority - PMO SFU used when no user checkbox for New payment method`() {
+        val observedParams = Turbine<ConfirmationTokenParams>()
+        runConfirmationTokenInterceptorScenario(
+            observedParams = observedParams,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                        paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
+                            mapOf(
+                                PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                            )
+                        )
+                    ),
+                )
+            ),
+        ) { interceptor ->
+            interceptor.interceptDefaultNewPaymentMethod()
+
+            // No user checkbox, should use PMO SFU from IntentConfiguration
+            assertThat(observedParams.awaitItem().setUpFutureUsage)
+                .isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
+        }
+    }
+
+    @Test
+    fun `SFU priority - no SFU when no user checkbox and no PMO SFU`() {
+        val observedParams = Turbine<ConfirmationTokenParams>()
+        runConfirmationTokenInterceptorScenario(
+            observedParams = observedParams,
+            initializationMode = DEFAULT_DEFERRED_INTENT,
+        ) { interceptor ->
+            interceptor.interceptDefaultNewPaymentMethod()
+
+            // No user checkbox, no PMO SFU
+            assertThat(observedParams.awaitItem().setUpFutureUsage).isNull()
+        }
+    }
+
+    @Test
+    fun `setAsDefaultPaymentMethod reflects shouldSaveAsDefault for New payment method`() {
+        val observedParams = Turbine<ConfirmationTokenParams>()
+        runConfirmationTokenInterceptorScenario(
+            observedParams = observedParams,
+        ) { interceptor ->
+            val confirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                optionsParams = null,
+                extraParams = PaymentMethodExtraParams.Card(setAsDefault = true),
+                shouldSave = true,
+                passiveCaptchaParams = null,
+            )
+
+            interceptor.intercept(
+                intent = PaymentIntentFactory.create(),
+                confirmationOption = confirmationOption,
+                shippingValues = null,
+            )
+
+            assertThat(observedParams.awaitItem().setAsDefaultPaymentMethod).isTrue()
+        }
+    }
+
+    @Test
+    fun `setAsDefaultPaymentMethod is false for Saved payment method`() {
+        val observedParams = Turbine<ConfirmationTokenParams>()
+        runConfirmationTokenInterceptorScenario(
+            observedParams = observedParams,
+        ) { interceptor ->
+            interceptor.interceptDefaultSavedPaymentMethod()
+
+            assertThat(observedParams.awaitItem().setAsDefaultPaymentMethod).isFalse()
+        }
+    }
+
+    private fun runConfirmationTokenInterceptorScenario(
+        observedParams: Turbine<ConfirmationTokenParams> = Turbine(),
+        initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_DEFERRED_INTENT,
+        block: suspend (IntentConfirmationInterceptor) -> Unit
+    ) {
+        runInterceptorScenario(
+            initializationMode = initializationMode,
+            scenario = InterceptorTestScenario(
+                ephemeralKeySecret = "ek_test_123",
+                stripeRepository = createFakeStripeRepositoryForConfirmationToken(observedParams),
+                intentCreationConfirmationTokenCallbackProvider = Provider {
+                    succeedingCreateIntentWithConfirmationTokenCallback(confirmationToken)
+                },
+            ),
+            test = block
+        )
     }
 }

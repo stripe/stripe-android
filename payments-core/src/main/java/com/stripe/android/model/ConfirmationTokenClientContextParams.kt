@@ -13,7 +13,7 @@ data class ConfirmationTokenClientContextParams(
     val currency: String?,
 
     /** Indicates how the payment method is intended to be used in the future */
-    val setupFutureUsage: String? = null,
+    val setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
 
     /** Controls when the funds will be captured (payment mode only) */
     val captureMethod: String? = null,
@@ -40,7 +40,7 @@ data class ConfirmationTokenClientContextParams(
         return buildMap {
             put(PARAM_MODE, mode)
             currency?.let { put(PARAM_CURRENCY, it) }
-            setupFutureUsage?.let { put(PARAM_SETUP_FUTURE_USAGE, it) }
+            putNonEmptySfu(setupFutureUsage)
             captureMethod?.let { put(PARAM_CAPTURE_METHOD, it) }
             paymentMethodTypes?.let {
                 if (it.isNotEmpty()) {
@@ -70,15 +70,8 @@ data class ConfirmationTokenClientContextParams(
     ): Map<String, Any>? {
         if (paymentMethodOptions?.type == null) return null
 
-        val sfu = paymentMethodOptions.setupFutureUsage()
         val valueMap = buildMap {
-            sfu.takeIf {
-                // Empty values are an attempt to unset a parameter;
-                // however, setup_future_usage cannot be unset.
-                it != null && it != ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-            }?.let {
-                put(PARAM_SETUP_FUTURE_USAGE, it.code)
-            }
+            putNonEmptySfu(paymentMethodOptions.setupFutureUsage())
 
             if (paymentMethodOptions.type == PaymentMethod.Type.Card) {
                 requireCvcRecollection?.let {
@@ -95,7 +88,6 @@ data class ConfirmationTokenClientContextParams(
     private companion object {
         const val PARAM_MODE = "mode"
         const val PARAM_CURRENCY = "currency"
-        const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
         const val PARAM_CAPTURE_METHOD = "capture_method"
         const val PARAM_PAYMENT_METHOD_TYPES = "payment_method_types"
         const val PARAM_ON_BEHALF_OF = "on_behalf_of"

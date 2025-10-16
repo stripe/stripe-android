@@ -17,6 +17,8 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         intentConfiguration: PaymentSheet.IntentConfiguration,
     ): PaymentMethodConfirmationOption
 
+    fun shouldSaveAsDefault(): Boolean = false
+
     @Parcelize
     data class Saved(
         val paymentMethod: com.stripe.android.model.PaymentMethod,
@@ -59,6 +61,16 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
                 createParams = updatedCreateParams,
                 optionsParams = updatedOptionsParams,
             )
+        }
+
+        override fun shouldSaveAsDefault(): Boolean {
+            return when (extraParams) {
+                is PaymentMethodExtraParams.Card -> extraParams.setAsDefault == true
+                is PaymentMethodExtraParams.USBankAccount -> extraParams.setAsDefault == true
+                is PaymentMethodExtraParams.Link -> extraParams.setAsDefault == true
+                is PaymentMethodExtraParams.SepaDebit -> extraParams.setAsDefault == true
+                is PaymentMethodExtraParams.BacsDebit, null -> false
+            }
         }
     }
 }

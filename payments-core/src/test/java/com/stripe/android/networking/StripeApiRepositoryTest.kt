@@ -3609,7 +3609,7 @@ internal class StripeApiRepositoryTest {
         val clientContext = ConfirmationTokenClientContextParams(
             mode = "payment",
             currency = "eur",
-            setupFutureUsage = "off_session",
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
             captureMethod = "automatic",
             paymentMethodTypes = listOf("sepa_debit"),
             customer = "cus_test_customer",
