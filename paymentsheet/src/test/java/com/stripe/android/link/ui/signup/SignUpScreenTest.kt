@@ -314,7 +314,8 @@ internal class SignUpScreenTest {
 
         viewModel.emailController.onRawValueChange("valid@email.com")
         composeTestRule.waitForIdle()
-        dispatcher.scheduler.advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds) // Wait for debounce and state change
+        // Wait for debounce and state change
+        dispatcher.scheduler.advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
         // Simulate manager clearing suggestion on new lookup (like real implementation does)
         linkAccountManager._suggestedEmail.value = null
         composeTestRule.waitForIdle()
