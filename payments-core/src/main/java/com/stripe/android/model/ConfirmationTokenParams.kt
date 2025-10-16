@@ -44,7 +44,7 @@ data class ConfirmationTokenParams(
 }
 
 private const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
-fun MutableMap<String, Any>.putNonEmptySfu(sfu: ConfirmPaymentIntentParams.SetupFutureUsage?) {
+internal fun MutableMap<String, Any>.putNonEmptySfu(sfu: ConfirmPaymentIntentParams.SetupFutureUsage?) {
     sfu.takeIf {
         // Empty values are an attempt to unset a parameter;
         // however, setup_future_usage cannot be unset.
