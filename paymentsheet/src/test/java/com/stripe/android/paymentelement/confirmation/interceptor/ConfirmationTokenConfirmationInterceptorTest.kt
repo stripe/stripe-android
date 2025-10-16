@@ -1106,236 +1106,142 @@ class ConfirmationTokenConfirmationInterceptorTest {
     }
 
     @Test
-    fun `Fails with Konbini payment method in test mode`() = runTest {
+    fun `Fails with Konbini payment method in test mode`() {
         val konbiniCreateParams = PaymentMethodCreateParams(
             code = "konbini",
             requiresMandate = false,
             billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS,
         )
 
-        val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
-            publishableKeyProvider = { "pk_test_123" },
-            stripeRepository = object : AbsFakeStripeRepository() {
-                override suspend fun createConfirmationToken(
-                    confirmationTokenParams: ConfirmationTokenParams,
-                    options: ApiRequest.Options
-                ): Result<ConfirmationToken> {
-                    return Result.success(confirmationToken)
-                }
-
-                override suspend fun retrieveStripeIntent(
-                    clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
-                ): Result<StripeIntent> {
-                    return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
-                }
-            },
-            intentCreationConfirmationTokenCallbackProvider = Provider {
-                CreateIntentWithConfirmationTokenCallback { _ ->
-                    CreateIntentResult.Success("pi_123_secret_456")
-                }
-            },
-        )
-
-        val confirmationOption = PaymentMethodConfirmationOption.New(
-            createParams = konbiniCreateParams,
-            optionsParams = null,
-            extraParams = null,
-            shouldSave = false,
-            passiveCaptchaParams = null,
-        )
-
-        val exception = runCatching {
-            interceptor.intercept(
-                intent = PaymentIntentFactory.create(),
-                confirmationOption = confirmationOption,
-                shippingValues = null,
+        runConfirmationTokenInterceptorScenario { interceptor ->
+            val confirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = konbiniCreateParams,
+                optionsParams = null,
+                extraParams = null,
+                shouldSave = false,
+                passiveCaptchaParams = null,
             )
-        }.exceptionOrNull()
 
-        assertThat(exception).isInstanceOf<IllegalStateException>()
-        assertThat(exception?.message).contains("konbini")
-        assertThat(exception?.message).contains("not yet supported")
-        assertThat(exception?.message).contains("confirmation token")
+            val exception = runCatching {
+                interceptor.intercept(
+                    intent = PaymentIntentFactory.create(),
+                    confirmationOption = confirmationOption,
+                    shippingValues = null,
+                )
+            }.exceptionOrNull()
+
+            assertThat(exception).isInstanceOf<IllegalStateException>()
+            assertThat(exception?.message).contains("konbini")
+            assertThat(exception?.message).contains("not yet supported")
+            assertThat(exception?.message).contains("confirmation token")
+        }
     }
 
     @Test
-    fun `Fails with Blik payment method in test mode`() = runTest {
+    fun `Fails with Blik payment method in test mode`() {
         val blikCreateParams = PaymentMethodCreateParams.createBlik(
             billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS,
         )
 
-        val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
-            publishableKeyProvider = { "pk_test_123" },
-            stripeRepository = object : AbsFakeStripeRepository() {
-                override suspend fun createConfirmationToken(
-                    confirmationTokenParams: ConfirmationTokenParams,
-                    options: ApiRequest.Options
-                ): Result<ConfirmationToken> {
-                    return Result.success(confirmationToken)
-                }
-
-                override suspend fun retrieveStripeIntent(
-                    clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
-                ): Result<StripeIntent> {
-                    return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
-                }
-            },
-            intentCreationConfirmationTokenCallbackProvider = Provider {
-                CreateIntentWithConfirmationTokenCallback { _ ->
-                    CreateIntentResult.Success("pi_123_secret_456")
-                }
-            },
-        )
-
-        val confirmationOption = PaymentMethodConfirmationOption.New(
-            createParams = blikCreateParams,
-            optionsParams = null,
-            extraParams = null,
-            shouldSave = false,
-            passiveCaptchaParams = null,
-        )
-
-        val exception = runCatching {
-            interceptor.intercept(
-                intent = PaymentIntentFactory.create(),
-                confirmationOption = confirmationOption,
-                shippingValues = null,
+        runConfirmationTokenInterceptorScenario { interceptor ->
+            val confirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = blikCreateParams,
+                optionsParams = null,
+                extraParams = null,
+                shouldSave = false,
+                passiveCaptchaParams = null,
             )
-        }.exceptionOrNull()
 
-        assertThat(exception).isInstanceOf<IllegalStateException>()
-        assertThat(exception?.message).contains("blik")
-        assertThat(exception?.message).contains("not yet supported")
-        assertThat(exception?.message).contains("confirmation token")
+            val exception = runCatching {
+                interceptor.intercept(
+                    intent = PaymentIntentFactory.create(),
+                    confirmationOption = confirmationOption,
+                    shippingValues = null,
+                )
+            }.exceptionOrNull()
+
+            assertThat(exception).isInstanceOf<IllegalStateException>()
+            assertThat(exception?.message).contains("blik")
+            assertThat(exception?.message).contains("not yet supported")
+            assertThat(exception?.message).contains("confirmation token")
+        }
     }
 
     @Test
-    fun `Succeeds with Konbini payment method in live mode`() = runTest {
+    fun `Succeeds with Konbini payment method in live mode`() {
         val konbiniCreateParams = PaymentMethodCreateParams(
             code = "konbini",
             requiresMandate = false,
             billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS,
         )
 
-        val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
-            publishableKeyProvider = { "pk_live_123" },
-            stripeRepository = object : AbsFakeStripeRepository() {
-                override suspend fun createConfirmationToken(
-                    confirmationTokenParams: ConfirmationTokenParams,
-                    options: ApiRequest.Options
-                ): Result<ConfirmationToken> {
-                    return Result.success(confirmationToken)
-                }
-
-                override suspend fun retrieveStripeIntent(
-                    clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
-                ): Result<StripeIntent> {
-                    return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
-                }
-            },
-            intentCreationConfirmationTokenCallbackProvider = Provider {
-                CreateIntentWithConfirmationTokenCallback { _ ->
-                    CreateIntentResult.Success("pi_123_secret_456")
-                }
-            },
-        )
-
-        val confirmationOption = PaymentMethodConfirmationOption.New(
-            createParams = konbiniCreateParams,
-            optionsParams = null,
-            extraParams = null,
-            shouldSave = false,
-            passiveCaptchaParams = null,
-        )
-
-        val nextStep = interceptor.intercept(
-            intent = PaymentIntentFactory.create(),
-            confirmationOption = confirmationOption,
-            shippingValues = null,
-        )
-
-        assertThat(nextStep).isEqualTo(
-            ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
-                intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                completedFullPaymentFlow = true,
+        runConfirmationTokenInterceptorScenario(isLiveMode = true) { interceptor ->
+            val confirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = konbiniCreateParams,
+                optionsParams = null,
+                extraParams = null,
+                shouldSave = false,
+                passiveCaptchaParams = null,
             )
-        )
+
+            val nextStep = interceptor.intercept(
+                intent = PaymentIntentFactory.create(),
+                confirmationOption = confirmationOption,
+                shippingValues = null,
+            )
+
+            assertThat(nextStep).isEqualTo(
+                ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
+                    intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    completedFullPaymentFlow = true,
+                )
+            )
+        }
     }
 
     @Test
-    fun `Succeeds with Blik payment method in live mode`() = runTest {
+    fun `Succeeds with Blik payment method in live mode`() {
         val blikCreateParams = PaymentMethodCreateParams.createBlik(
             billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS,
         )
 
-        val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
-            publishableKeyProvider = { "pk_live_123" },
-            stripeRepository = object : AbsFakeStripeRepository() {
-                override suspend fun createConfirmationToken(
-                    confirmationTokenParams: ConfirmationTokenParams,
-                    options: ApiRequest.Options
-                ): Result<ConfirmationToken> {
-                    return Result.success(confirmationToken)
-                }
-
-                override suspend fun retrieveStripeIntent(
-                    clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
-                ): Result<StripeIntent> {
-                    return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
-                }
-            },
-            intentCreationConfirmationTokenCallbackProvider = Provider {
-                CreateIntentWithConfirmationTokenCallback { _ ->
-                    CreateIntentResult.Success("pi_123_secret_456")
-                }
-            },
-        )
-
-        val confirmationOption = PaymentMethodConfirmationOption.New(
-            createParams = blikCreateParams,
-            optionsParams = null,
-            extraParams = null,
-            shouldSave = false,
-            passiveCaptchaParams = null,
-        )
-
-        val nextStep = interceptor.intercept(
-            intent = PaymentIntentFactory.create(),
-            confirmationOption = confirmationOption,
-            shippingValues = null,
-        )
-
-        assertThat(nextStep).isEqualTo(
-            ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
-                intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                completedFullPaymentFlow = true,
+        runConfirmationTokenInterceptorScenario(isLiveMode = true) { interceptor ->
+            val confirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = blikCreateParams,
+                optionsParams = null,
+                extraParams = null,
+                shouldSave = false,
+                passiveCaptchaParams = null,
             )
-        )
+
+            val nextStep = interceptor.intercept(
+                intent = PaymentIntentFactory.create(),
+                confirmationOption = confirmationOption,
+                shippingValues = null,
+            )
+
+            assertThat(nextStep).isEqualTo(
+                ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
+                    intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    completedFullPaymentFlow = true,
+                )
+            )
+        }
     }
 
     private fun runConfirmationTokenInterceptorScenario(
         observedParams: Turbine<ConfirmationTokenParams> = Turbine(),
         initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_DEFERRED_INTENT,
+        isLiveMode: Boolean = false,
         block: suspend (IntentConfirmationInterceptor) -> Unit
     ) {
         runInterceptorScenario(
             initializationMode = initializationMode,
             scenario = InterceptorTestScenario(
                 ephemeralKeySecret = "ek_test_123",
+                publishableKeyProvider = { if (isLiveMode) "pk_live_123" else "pk_test_123" },
                 stripeRepository = createFakeStripeRepositoryForConfirmationToken(observedParams),
                 intentCreationConfirmationTokenCallbackProvider = Provider {
                     succeedingCreateIntentWithConfirmationTokenCallback(confirmationToken)
