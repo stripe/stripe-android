@@ -54,9 +54,7 @@ internal open class FakeLinkEventsReporter : LinkEventsReporter {
         throw NotImplementedError()
     }
 
-    override fun on2FAResendCode(verificationType: String) {
-        throw NotImplementedError()
-    }
+    override fun on2FAResendCode(verificationType: String) = Unit
 
     override fun onPopupShow() {
         throw NotImplementedError()
