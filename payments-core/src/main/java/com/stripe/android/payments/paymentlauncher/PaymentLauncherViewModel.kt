@@ -332,9 +332,15 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 PaymentAnalyticsEvent.PaymentLauncherNextActionFinished
             }
 
+            val resultStatus = when (stripeInternalResult) {
+                is InternalPaymentResult.Completed -> "succeeded"
+                is InternalPaymentResult.Canceled -> "canceled"
+                is InternalPaymentResult.Failed -> "failed"
+            }
+
             val intentParams = mapOf(
                 "intent_id" to intent?.clientSecret?.toStripeId(),
-                "status" to intent?.status?.code,
+                "status" to resultStatus,
                 "payment_method_type" to intent?.paymentMethod?.type?.code,
             ).filterNotNullValues()
 

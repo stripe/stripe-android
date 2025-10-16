@@ -579,6 +579,64 @@ class PaymentLauncherViewModelTest {
     }
 
     @Test
+    fun `verify confirm finished analytics includes succeeded status for completed result`() = runTest {
+        verifyConfirmFinishedAnalyticsStatus(
+            expectedStatus = "succeeded",
+            setup = { whenever(paymentIntent.requiresAction()).thenReturn(false) },
+            action = { viewModel, _ ->
+                viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
+            }
+        )
+    }
+
+    @Test
+    fun `verify confirm finished analytics includes failed status for failed result`() = runTest {
+        verifyConfirmFinishedAnalyticsStatus(
+            expectedStatus = "failed",
+            setup = {
+                whenever(stripeApiRepository.confirmPaymentIntent(any(), any(), any()))
+                    .thenReturn(Result.failure(APIConnectionException()))
+            },
+            action = { viewModel, _ ->
+                viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
+            }
+        )
+    }
+
+    @Test
+    fun `verify confirm finished analytics includes canceled status for canceled result`() = runTest {
+        verifyConfirmFinishedAnalyticsStatus(
+            expectedStatus = "canceled",
+            setup = {
+                val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
+                whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
+                    .thenReturn(Result.success(canceledPaymentResult))
+                paymentFlowResult
+            },
+            action = { viewModel, paymentFlowResult ->
+                viewModel.onPaymentFlowResult(paymentFlowResult)
+            }
+        )
+    }
+
+    private suspend fun <T> verifyConfirmFinishedAnalyticsStatus(
+        expectedStatus: String,
+        setup: suspend () -> T,
+        action: suspend (PaymentLauncherViewModel, T) -> Unit
+    ) {
+        val setupResult = setup()
+        val viewModel = createViewModel()
+        action(viewModel, setupResult)
+
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished),
+            additionalParams = argThat { params ->
+                params["status"] == expectedStatus
+            }
+        )
+    }
+
+    @Test
     fun `verify next action finished analytics includes duration parameter`() = runTest {
         val savedStateHandle = SavedStateHandle()
         val viewModel = createViewModel(savedStateHandle = savedStateHandle)
