@@ -19,7 +19,7 @@ import com.github.kittinunf.result.Result as ApiResult
 
 class TestBackendRepository {
 
-    private val baseUrl = "https://crypto-onramp-example.stripedemos.com/v1"
+    private val baseUrl = "https://crypto-onramp-example.stripedemos.com"
 
     private val manager = FuelManager()
         .addRequestInterceptor(LogRequestInterceptor)
@@ -30,11 +30,29 @@ class TestBackendRepository {
         ignoreUnknownKeys = true
     }
 
+    suspend fun createAuthIntent(
+        email: String,
+        oauthScopes: String,
+    ): ApiResult<CreateAuthIntentResponse, FuelError> {
+        return withContext(Dispatchers.IO) {
+            val request = CreateAuthIntentRequest(
+                email = email,
+                oauthScopes = oauthScopes,
+            )
+            val requestBody = json.encodeToString(CreateAuthIntentRequest.serializer(), request)
+
+            manager.post("$baseUrl/auth_intent/create")
+                .jsonBody(requestBody)
+                .suspendable()
+                .awaitModel(CreateAuthIntentResponse.serializer(), json)
+        }
+    }
+
     suspend fun createOnrampSession(
         paymentToken: String,
         walletAddress: String,
         cryptoCustomerId: String,
-        tokenWithLAI: String,
+        authToken: String,
         destinationNetwork: String = "ethereum",
         sourceAmount: Double = 10.0,
         sourceCurrency: String = "usd",
@@ -59,7 +77,7 @@ class TestBackendRepository {
             manager.post("$baseUrl/create_onramp_session")
                 .timeout(SESSION_CREATION_TIMEOUT)
                 .timeoutRead(SESSION_CREATION_TIMEOUT)
-                .header("Authorization", "Bearer $tokenWithLAI")
+                .header("Authorization", "Bearer $authToken")
                 .jsonBody(requestBody)
                 .suspendable()
                 .awaitModel(OnrampSessionResponse.serializer(), json)
@@ -69,7 +87,7 @@ class TestBackendRepository {
     @Suppress("unused")
     suspend fun checkout(
         cosId: String,
-        tokenWithLAI: String
+        authToken: String
     ): ApiResult<OnrampSessionResponse, FuelError> {
         return withContext(Dispatchers.IO) {
             val request = CheckoutRequest(cosId = cosId)
@@ -78,7 +96,7 @@ class TestBackendRepository {
             manager.post("$baseUrl/checkout")
                 .timeout(SESSION_CREATION_TIMEOUT)
                 .timeoutRead(SESSION_CREATION_TIMEOUT)
-                .header("Authorization", "Bearer $tokenWithLAI")
+                .header("Authorization", "Bearer $authToken")
                 .jsonBody(requestBody)
                 .suspendable()
                 .awaitModel(OnrampSessionResponse.serializer(), json)
