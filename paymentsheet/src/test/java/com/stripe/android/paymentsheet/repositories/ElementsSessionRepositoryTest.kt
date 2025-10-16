@@ -213,13 +213,10 @@ internal class ElementsSessionRepositoryTest {
     }
 
     @Test
-    fun `Does not create fallback for exception cause by client error`() = runTest {
+    fun `Does not create fallback for exception caused by client error`() = runTest {
         whenever(
             stripeRepository.retrieveElementsSession(any(), any())
         ).thenReturn(Result.failure(APIException(statusCode = 401)))
-
-        whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
-            .thenReturn(Result.success(PaymentIntentFixtures.PI_WITH_SHIPPING))
 
         val session = createRepository().get(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
