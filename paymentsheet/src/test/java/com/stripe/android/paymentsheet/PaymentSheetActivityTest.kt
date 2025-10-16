@@ -1262,7 +1262,7 @@ internal class PaymentSheetActivityTest {
                             initializationMode: PaymentElementLoader.InitializationMode,
                             customerId: String?,
                             ephemeralKeySecret: String?,
-                            clientAttributionMetadata: ClientAttributionMetadata?,
+                            clientAttributionMetadata: ClientAttributionMetadata,
                         ): IntentConfirmationInterceptor {
                             return fakeIntentConfirmationInterceptor
                         }

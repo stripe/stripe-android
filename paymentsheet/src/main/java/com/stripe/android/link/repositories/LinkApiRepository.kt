@@ -283,7 +283,7 @@ internal class LinkApiRepository @Inject constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
         consumerSessionClientSecret: String,
-        clientAttributionMetadata: ClientAttributionMetadata?,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): Result<LinkPaymentDetails.Saved> = withContext(workContext) {
         val allowRedisplay = paymentMethodCreateParams.allowRedisplay?.let {
             mapOf(ALLOW_REDISPLAY_PARAM to it.value)
@@ -333,7 +333,7 @@ internal class LinkApiRepository @Inject constructor(
         cvc: String?,
         allowRedisplay: String?,
         apiKey: String?,
-        clientAttributionMetadata: ClientAttributionMetadata?,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): Result<SharePaymentDetails> = withContext(workContext) {
         val fraudParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
         val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
@@ -525,11 +525,8 @@ internal class LinkApiRepository @Inject constructor(
         }
     }
 
-    private fun ClientAttributionMetadata?.toParams(): Map<String, Map<String, Any>> {
-        return this?.let {
-            mapOf(CLIENT_ATTRIBUTION_METADATA_PARAM to it.toParamMap())
-        } ?: emptyMap()
-    }
+    private fun ClientAttributionMetadata.toParams(): Map<String, Map<String, Any>> =
+        mapOf(CLIENT_ATTRIBUTION_METADATA_PARAM to this.toParamMap())
 
     private companion object {
         const val ALLOW_REDISPLAY_PARAM = "allow_redisplay"

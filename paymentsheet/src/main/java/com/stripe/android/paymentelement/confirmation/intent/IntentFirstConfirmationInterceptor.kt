@@ -15,7 +15,7 @@ import dagger.assisted.AssistedInject
 
 internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val clientSecret: String,
-    @Assisted private val clientAttributionMetadata: ClientAttributionMetadata?,
+    @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     requestOptions: ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
     private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptions.apiKeyIsLiveMode)

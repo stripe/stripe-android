@@ -21,7 +21,7 @@ internal fun PaymentSelection.toConfirmationOption(
     configuration: CommonConfiguration,
     linkConfiguration: LinkConfiguration?,
     passiveCaptchaParams: PassiveCaptchaParams?,
-    clientAttributionMetadata: ClientAttributionMetadata?
+    clientAttributionMetadata: ClientAttributionMetadata?,
 ): ConfirmationHandler.Option? {
     return when (this) {
         is PaymentSelection.Saved -> toConfirmationOption(passiveCaptchaParams)

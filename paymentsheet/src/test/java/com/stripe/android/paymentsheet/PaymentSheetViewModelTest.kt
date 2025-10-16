@@ -3774,7 +3774,7 @@ internal class PaymentSheetViewModelTest {
         validationError: PaymentSheetLoadingException? = null,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         passiveCaptchaParams: PassiveCaptchaParams? = null,
-        clientAttributionMetadata: ClientAttributionMetadata? = null,
+        clientAttributionMetadata: ClientAttributionMetadata = null,
         paymentElementLoader: PaymentElementLoader = FakePaymentElementLoader(
             stripeIntent = stripeIntent,
             shouldFail = shouldFailLoad,
