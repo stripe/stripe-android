@@ -18,6 +18,7 @@ import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
@@ -714,7 +715,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                 forceSetupFutureUseBehaviorAndNewMandate = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
-                clientAttributionMetadata = null,
+                clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             ),
             userInput = userInput,
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
