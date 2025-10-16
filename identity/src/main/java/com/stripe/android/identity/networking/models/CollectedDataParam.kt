@@ -138,7 +138,8 @@ internal data class CollectedDataParam(
             trainingConsent: Boolean,
             bestFaceScore: Float,
             faceScoreVariance: Float,
-            numFrames: Int
+            numFrames: Int,
+            bestCameraLensModel: String? = null
         ) = CollectedDataParam(
             face = FaceUploadParam(
                 bestHighResImage = requireNotNull(bestHighResResult.uploadedStripeFile.id),
@@ -150,7 +151,8 @@ internal data class CollectedDataParam(
                 bestFaceScore = bestFaceScore,
                 faceScoreVariance = faceScoreVariance,
                 numFrames = numFrames,
-                trainingConsent = trainingConsent
+                trainingConsent = trainingConsent,
+                bestCameraLensModel = bestCameraLensModel
             )
         )
 

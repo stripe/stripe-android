@@ -266,7 +266,7 @@ private fun SelfieCaptureScreen(
                     allowImageCollection = it
                 }
             } else {
-                SelfieCameraViewFinder(imageAlpha, cameraManager)
+                SelfieCameraViewFinder(imageAlpha, cameraManager, identityViewModel)
             }
         }
         var loadingButtonState by remember(selfieScannerState) {
@@ -393,7 +393,16 @@ private fun ResultView(
 private fun SelfieCameraViewFinder(
     imageAlpha: Float,
     cameraManager: IdentityCameraManager,
+    identityViewModel: IdentityViewModel
 ) {
+    // Wait for camera adapter to be initialized before accessing lens model
+    LaunchedEffect(cameraManager.cameraAdapter) {
+        if (cameraManager.cameraAdapter != null) {
+            // Camera is initialized, set the lens model
+            identityViewModel.setSelfieCameraLensModel(cameraManager)
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
