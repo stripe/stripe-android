@@ -196,6 +196,7 @@ internal open class FakeLinkRepository : LinkRepository {
 
     override suspend fun startVerification(
         consumerSessionClientSecret: String,
+        isResendSmsCode: Boolean
     ) = startVerificationResult
 
     override suspend fun confirmVerification(

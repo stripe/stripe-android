@@ -119,7 +119,7 @@ internal open class FakeLinkAccountManager(
     private val lookupByLinkAuthTokenTurbine = Turbine<LookupCallByLinkAuthToken>()
 
     private val updateCardDetailsTurbine = Turbine<ConsumerPaymentDetailsUpdateParams>()
-    private val startVerificationTurbine = Turbine<Unit>()
+    private val startVerificationTurbine = Turbine<Boolean>()
 
     val confirmVerificationTurbine = Turbine<String>()
 
@@ -238,8 +238,8 @@ internal open class FakeLinkAccountManager(
         return createPaymentMethodResult
     }
 
-    override suspend fun startVerification(): Result<LinkAccount> {
-        startVerificationTurbine.add(Unit)
+    override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
+        startVerificationTurbine.add(isResendSmsCode)
         return startVerificationResult
     }
 
@@ -284,7 +284,7 @@ internal open class FakeLinkAccountManager(
         return lookupByAuthIntentTurbine.awaitItem()
     }
 
-    suspend fun awaitStartVerificationCall() {
+    suspend fun awaitStartVerificationCall(): Boolean {
         return startVerificationTurbine.awaitItem()
     }
 

@@ -152,6 +152,7 @@ internal interface LinkRepository {
      */
     suspend fun startVerification(
         consumerSessionClientSecret: String,
+        isResendSmsCode: Boolean = false
     ): Result<ConsumerSession>
 
     /**

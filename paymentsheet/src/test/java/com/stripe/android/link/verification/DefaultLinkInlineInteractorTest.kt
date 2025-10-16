@@ -354,8 +354,9 @@ class DefaultLinkInlineInteractorTest {
         // Execute
         interactor.resendCode()
 
-        // Verify
-        linkAccountManager.awaitStartVerificationCall()
+        // Verify startVerification was called with isResendSmsCode = true
+        val isResendSmsCode = linkAccountManager.awaitStartVerificationCall()
+        assertThat(isResendSmsCode).isTrue()
 
         interactor.state.test {
             val state = awaitItem()

@@ -181,7 +181,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                 errorMessage = null
             )
         }
-        startVerification()
+        startVerification(isResend = true)
     }
 
     override fun didShowCodeSentNotification() {
@@ -190,7 +190,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
         }
     }
 
-    private fun startVerification() {
+    private fun startVerification(isResend: Boolean = false) {
         update2FAState { viewState ->
             viewState.copy(errorMessage = null)
         }
@@ -199,7 +199,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
             val currentState = state.value.verificationState
             if (currentState is Render2FA) {
                 val linkAccountManager = currentState.linkAccountManager()
-                val result = linkAccountManager.startVerification()
+                val result = linkAccountManager.startVerification(isResendSmsCode = isResend)
                 val error = result.exceptionOrNull()
 
                 update2FAState { viewState ->
