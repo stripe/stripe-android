@@ -581,7 +581,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
     private fun createFakeStripeRepositoryForConfirmationToken(
         observedParams: Turbine<ConfirmationTokenParams> = Turbine(),
         retrievedIntentStatus: StripeIntent.Status = StripeIntent.Status.Succeeded,
-        observedConfirmParams: Turbine<ConfirmPaymentIntentParams> = Turbine(),
     ): StripeRepository {
         return object : AbsFakeStripeRepository() {
             override suspend fun createConfirmationToken(
@@ -600,15 +599,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 return Result.success(
                     PaymentIntentFixtures.PI_SUCCEEDED.copy(status = retrievedIntentStatus)
                 )
-            }
-
-            override suspend fun confirmPaymentIntent(
-                confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-                options: ApiRequest.Options,
-                expandFields: List<String>
-            ): Result<PaymentIntent> {
-                observedConfirmParams.add(confirmPaymentIntentParams)
-                return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
             }
         }
     }
@@ -1123,11 +1113,8 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
     @Test
     fun `Saved PM - includes radarOptions when hCaptchaToken is provided for CSC flow`() {
-        val observedConfirmParams = Turbine<ConfirmPaymentIntentParams>()
         runConfirmationTokenInterceptorScenario(
-            observedParams = Turbine(),
             retrievedIntentStatus = StripeIntent.Status.RequiresConfirmation,
-            observedConfirmParams = observedConfirmParams,
         ) { interceptor ->
             val confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -1149,11 +1136,8 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
     @Test
     fun `Saved PM - excludes radarOptions when hCaptchaToken is null for CSC flow`() {
-        val observedConfirmParams = Turbine<ConfirmPaymentIntentParams>()
         runConfirmationTokenInterceptorScenario(
-            observedParams = Turbine(),
             retrievedIntentStatus = StripeIntent.Status.RequiresConfirmation,
-            observedConfirmParams = observedConfirmParams,
         ) { interceptor ->
             val confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -1177,7 +1161,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
     private fun runConfirmationTokenInterceptorScenario(
         observedParams: Turbine<ConfirmationTokenParams> = Turbine(),
         retrievedIntentStatus: StripeIntent.Status = StripeIntent.Status.Succeeded,
-        observedConfirmParams: Turbine<ConfirmPaymentIntentParams> = Turbine(),
         initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_DEFERRED_INTENT,
         block: suspend (IntentConfirmationInterceptor) -> Unit
     ) {
@@ -1188,7 +1171,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 stripeRepository = createFakeStripeRepositoryForConfirmationToken(
                     observedParams,
                     retrievedIntentStatus,
-                    observedConfirmParams
                 ),
                 intentCreationConfirmationTokenCallbackProvider = Provider {
                     succeedingCreateIntentWithConfirmationTokenCallback(confirmationToken)
