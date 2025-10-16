@@ -52,6 +52,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
 
+@Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 @OptIn(SharedPaymentTokenSessionPreview::class)
 class ConfirmationTokenConfirmationInterceptorTest {
