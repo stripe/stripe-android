@@ -43,7 +43,8 @@ class NativeLinkActivityContractTest {
             linkExpressMode = LinkExpressMode.DISABLED,
             linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
             launchMode = LinkLaunchMode.Full,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+            attestOnIntentConfirmation = false,
         )
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)
@@ -63,7 +64,8 @@ class NativeLinkActivityContractTest {
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
                 launchMode = LinkLaunchMode.Full,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                attestOnIntentConfirmation = false,
             )
         )
     }

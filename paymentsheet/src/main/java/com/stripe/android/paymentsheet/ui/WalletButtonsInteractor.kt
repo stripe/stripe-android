@@ -270,7 +270,8 @@ internal class DefaultWalletButtonsInteractor constructor(
                 linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                 launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment?.details),
                 linkExpressMode = LinkExpressMode.ENABLED,
-                passiveCaptchaParams = arguments.paymentMethodMetadata.passiveCaptchaParams
+                passiveCaptchaParams = arguments.paymentMethodMetadata.passiveCaptchaParams,
+                attestOnIntentConfirmation = arguments.paymentMethodMetadata.attestOnIntentConfirmation
             )
         } else {
             handleButtonPressed(

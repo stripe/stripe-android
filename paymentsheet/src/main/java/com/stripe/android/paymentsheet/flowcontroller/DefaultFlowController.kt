@@ -289,6 +289,7 @@ internal class DefaultFlowController @Inject internal constructor(
             )
 
             if (shouldPresentLink) {
+                val paymentMethodMetadata = state.paymentSheetState.paymentMethodMetadata
                 flowControllerLinkLauncher.present(
                     configuration = linkConfiguration,
                     linkAccountInfo = linkAccountInfo,
@@ -296,7 +297,8 @@ internal class DefaultFlowController @Inject internal constructor(
                     launchMode = LinkLaunchMode.PaymentMethodSelection(
                         selectedPayment = (paymentSelection as? Link)?.selectedPayment?.details
                     ),
-                    passiveCaptchaParams = state.paymentSheetState.paymentMethodMetadata.passiveCaptchaParams
+                    passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams,
+                    attestOnIntentConfirmation = paymentMethodMetadata.attestOnIntentConfirmation,
                 )
             } else {
                 showPaymentOptionList(state, paymentSelection)

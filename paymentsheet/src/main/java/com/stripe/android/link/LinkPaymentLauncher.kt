@@ -79,14 +79,16 @@ internal class LinkPaymentLauncher @Inject internal constructor(
         linkAccountInfo: LinkAccountUpdate.Value,
         launchMode: LinkLaunchMode,
         linkExpressMode: LinkExpressMode,
-        passiveCaptchaParams: PassiveCaptchaParams?
+        passiveCaptchaParams: PassiveCaptchaParams?,
+        attestOnIntentConfirmation: Boolean,
     ) {
         val args = LinkActivityContract.Args(
             configuration = configuration,
             linkExpressMode = linkExpressMode,
             linkAccountInfo = linkAccountInfo,
             launchMode = launchMode,
-            passiveCaptchaParams = passiveCaptchaParams
+            passiveCaptchaParams = passiveCaptchaParams,
+            attestOnIntentConfirmation = attestOnIntentConfirmation
         )
         linkActivityResultLauncher?.launch(args)
         analyticsHelper.onLinkLaunched()

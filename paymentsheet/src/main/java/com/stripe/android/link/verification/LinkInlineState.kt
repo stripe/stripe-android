@@ -15,7 +15,8 @@ internal data class LinkInlineState(
      * Current verification state representing the different stages in the verification process.
      */
     val verificationState: VerificationState,
-    val passiveCaptchaParams: PassiveCaptchaParams?
+    val passiveCaptchaParams: PassiveCaptchaParams?,
+    val attestOnIntentConfirmation: Boolean,
 ) : Parcelable
 
 /**

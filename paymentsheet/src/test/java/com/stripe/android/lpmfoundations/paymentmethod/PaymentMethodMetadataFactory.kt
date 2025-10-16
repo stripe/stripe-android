@@ -56,6 +56,7 @@ internal object PaymentMethodMetadataFactory {
         passiveCaptchaParams: PassiveCaptchaParams? = null,
         openCardScanAutomatically: Boolean = false,
         clientAttributionMetadata: ClientAttributionMetadata? = null,
+        attestOnIntentConfirmation: Boolean = false,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -97,6 +98,7 @@ internal object PaymentMethodMetadataFactory {
             passiveCaptchaParams = passiveCaptchaParams,
             openCardScanAutomatically = openCardScanAutomatically,
             clientAttributionMetadata = clientAttributionMetadata,
+            attestOnIntentConfirmation = attestOnIntentConfirmation,
         )
     }
 

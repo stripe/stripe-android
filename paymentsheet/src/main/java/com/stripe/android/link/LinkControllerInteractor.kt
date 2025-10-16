@@ -551,7 +551,8 @@ internal class LinkControllerInteractor @Inject constructor(
                         linkExpressMode = LinkExpressMode.ENABLED,
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         launchMode = launchMode,
-                        passiveCaptchaParams = null
+                        passiveCaptchaParams = null,
+                        attestOnIntentConfirmation = false,
                     )
                 )
             }

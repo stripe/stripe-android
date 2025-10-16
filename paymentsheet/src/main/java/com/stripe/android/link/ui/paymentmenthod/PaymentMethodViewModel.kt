@@ -203,6 +203,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                                 configuration = parentComponent.configuration.withLinkRequiredSettings(),
                                 linkAccount = linkAccount,
                                 passiveCaptchaParams = parentComponent.passiveCaptchaParams,
+                                attestOnIntentConfirmation = parentComponent.attestOnIntentConfirmation,
                             ),
                             eventReporter = parentComponent.eventReporter,
                             savedStateHandle = parentComponent.viewModel.savedStateHandle,

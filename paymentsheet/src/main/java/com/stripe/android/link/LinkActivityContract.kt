@@ -41,7 +41,8 @@ internal class LinkActivityContract @Inject internal constructor(
         internal val linkExpressMode: LinkExpressMode,
         internal val linkAccountInfo: LinkAccountUpdate.Value,
         internal val launchMode: LinkLaunchMode,
-        internal val passiveCaptchaParams: PassiveCaptchaParams?
+        internal val passiveCaptchaParams: PassiveCaptchaParams?,
+        internal val attestOnIntentConfirmation: Boolean,
     )
 
     data class Result(

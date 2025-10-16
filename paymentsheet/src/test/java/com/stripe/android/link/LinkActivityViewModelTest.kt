@@ -155,7 +155,8 @@ internal class LinkActivityViewModelTest {
             ),
             paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
             launchMode = LinkLaunchMode.Full,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+            attestOnIntentConfirmation = false,
         )
         val savedStateHandle = SavedStateHandle()
         val factory = LinkActivityViewModel.factory(savedStateHandle)

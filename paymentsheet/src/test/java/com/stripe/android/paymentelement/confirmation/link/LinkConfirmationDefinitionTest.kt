@@ -11,6 +11,7 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -163,6 +164,24 @@ internal class LinkConfirmationDefinitionTest {
         assertThat(presentCall.configuration).isEqualTo(LINK_CONFIRMATION_OPTION.configuration)
         assertThat(presentCall.linkAccount).isNull()
         assertThat(presentCall.linkExpressMode).isEqualTo(LinkExpressMode.DISABLED)
+    }
+
+    @Test
+    fun `'launch' should pass attestOnIntentConfirmation true when bootstrapped with true`() = test {
+        val presentCall = launchWithAttestationFlag(attestOnIntentConfirmation = true)
+        assertThat(presentCall.attestOnIntentConfirmation).isTrue()
+    }
+
+    @Test
+    fun `'launch' should pass attestOnIntentConfirmation false when bootstrapped with false`() = test {
+        val presentCall = launchWithAttestationFlag(attestOnIntentConfirmation = false)
+        assertThat(presentCall.attestOnIntentConfirmation).isFalse()
+    }
+
+    @Test
+    fun `'launch' should default attestOnIntentConfirmation to false when not bootstrapped`() = test {
+        val presentCall = launchWithAttestationFlag(attestOnIntentConfirmation = null)
+        assertThat(presentCall.attestOnIntentConfirmation).isFalse()
     }
 
     @Test
@@ -333,6 +352,29 @@ internal class LinkConfirmationDefinitionTest {
             linkStore = linkStore,
             linkAccountHolder = linkAccountHolder
         )
+    }
+
+    private fun createMetadata(attestOnIntentConfirmation: Boolean) = PaymentMethodMetadataFactory.create(
+        attestOnIntentConfirmation = attestOnIntentConfirmation
+    )
+
+    private suspend fun Scenario.launchWithAttestationFlag(
+        attestOnIntentConfirmation: Boolean?
+    ): RecordingLinkPaymentLauncher.PresentCall {
+        val definition = createLinkConfirmationDefinition()
+
+        if (attestOnIntentConfirmation != null) {
+            definition.bootstrap(createMetadata(attestOnIntentConfirmation = attestOnIntentConfirmation))
+        }
+
+        definition.launch(
+            confirmationOption = LINK_CONFIRMATION_OPTION,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcher = launcherScenario.launcher,
+            arguments = Unit,
+        )
+
+        return launcherScenario.presentCalls.awaitItem()
     }
 
     data class Scenario(
