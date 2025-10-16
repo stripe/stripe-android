@@ -1688,7 +1688,8 @@ internal class IdentityViewModel(
                                 trainingConsent = allowImageCollection,
                                 faceScoreVariance = faceDetectorTransitioner.scoreVariance,
                                 bestFaceScore = faceDetectorTransitioner.bestFaceScore,
-                                numFrames = faceDetectorTransitioner.numFrames
+                                numFrames = faceDetectorTransitioner.numFrames,
+                                bestCameraLensModel = selfieCameraLensModel
                             ),
                             fromRoute = SelfieDestination.ROUTE.route
                         ) {
