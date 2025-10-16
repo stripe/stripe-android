@@ -257,13 +257,15 @@ internal class LinkApiRepository @Inject constructor(
         bankAccountId: String,
         userEmail: String,
         consumerSessionClientSecret: String,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): Result<ConsumerPaymentDetails.PaymentDetails> = withContext(workContext) {
         consumersApiService.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.BankAccount(
                 bankAccountId = bankAccountId,
+                billingAddress = null,
                 billingEmailAddress = userEmail,
-                billingAddress = null
+                clientAttributionMetadata = clientAttributionMetadata.toParams(),
             ),
             requestSurface = requestSurface.value,
             requestOptions = apiRequestOptions,

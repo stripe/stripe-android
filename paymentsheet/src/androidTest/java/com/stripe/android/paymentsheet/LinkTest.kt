@@ -96,6 +96,7 @@ internal class LinkTest {
              * 2-digit shorthand (should send "2034", not "34")
              */
             bodyPart(urlEncode("card[exp_year]"), "2034"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
@@ -203,6 +204,7 @@ internal class LinkTest {
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/consumers/payment_details"),
+                topLevelClientAttributionMetadataParams(),
             ) { response ->
                 response.testBodyFromFile("consumer-payment-details-success.json")
             }
@@ -287,6 +289,7 @@ internal class LinkTest {
              * Ensures card brand choice is passed properly.
              */
             bodyPart(urlEncode("card[preferred_network]"), "cartes_bancaires"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
@@ -374,6 +377,7 @@ internal class LinkTest {
              * In passthrough mode, should use the publishable key from base configuration
              */
             header("Authorization", "Bearer pk_test_123"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
@@ -490,6 +494,7 @@ internal class LinkTest {
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/consumers/payment_details"),
+                topLevelClientAttributionMetadataParams(),
             ) { response ->
                 response.testBodyFromFile("consumer-payment-details-success.json")
             }
@@ -590,6 +595,7 @@ internal class LinkTest {
              * In passthrough mode, should use the publishable key from base configuration
              */
             header("Authorization", "Bearer pk_test_123"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
@@ -665,6 +671,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.setResponseCode(500)
         }
@@ -731,6 +738,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.setResponseCode(500)
         }
@@ -797,6 +805,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
@@ -968,6 +977,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
@@ -1043,6 +1053,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
@@ -1142,6 +1153,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }

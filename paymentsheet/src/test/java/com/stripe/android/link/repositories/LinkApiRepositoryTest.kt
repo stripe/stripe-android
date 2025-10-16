@@ -512,6 +512,7 @@ class LinkApiRepositoryTest {
             bankAccountId = "id_123",
             userEmail = "email@stripe.com",
             consumerSessionClientSecret = "secret",
+            clientAttributionMetadata = null,
         )
         val loggedErrors = errorReporter.getLoggedErrors()
 
@@ -519,6 +520,31 @@ class LinkApiRepositoryTest {
         assertThat(loggedErrors.size).isEqualTo(1)
         assertThat(loggedErrors.first())
             .isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_CREATE_PAYMENT_DETAILS_FAILURE.eventName)
+    }
+
+    @Test
+    fun `createBankAccountPaymentDetails sends client attribution metadata properly`() = runTest {
+        val clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA
+        linkRepository.createBankAccountPaymentDetails(
+            bankAccountId = "id_123",
+            userEmail = "email@stripe.com",
+            consumerSessionClientSecret = "secret",
+            clientAttributionMetadata = clientAttributionMetadata,
+        )
+
+        val paramsCaptor = argumentCaptor<ConsumerPaymentDetailsCreateParams>()
+        verify(consumersApiService).createPaymentDetails(
+            consumerSessionClientSecret = any(),
+            paymentDetailsCreateParams = paramsCaptor.capture(),
+            requestSurface = any(),
+            requestOptions = any(),
+        )
+
+        val capturedParams = paramsCaptor.firstValue
+        assertThat(capturedParams.toParamMap()).containsEntry(
+            "client_attribution_metadata",
+            clientAttributionMetadata.toParamMap(),
+        )
     }
 
     @Test

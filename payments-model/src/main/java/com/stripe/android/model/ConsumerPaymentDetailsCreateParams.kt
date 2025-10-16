@@ -32,6 +32,10 @@ sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcela
                 params += it
             }
 
+            cardPaymentMethodCreateParamsMap[PARAM_CLIENT_ATTRIBUTION_METADATA]?.let {
+                params += mapOf(PARAM_CLIENT_ATTRIBUTION_METADATA to it)
+            }
+
             // only card number, exp_month and exp_year are included
             (cardPaymentMethodCreateParamsMap[BASE_PARAM_CARD] as? Map<*, *>)?.let { createParamsMap ->
                 params[LINK_PARAM_CARD] = createParamsMap.filterKeys { key ->
@@ -62,6 +66,8 @@ sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcela
             private const val LINK_PARAM_BILLING_EMAIL_ADDRESS = "billing_email_address"
             private const val LINK_PARAM_PREFERRED_NETWORK = "preferred_network"
 
+            private const val PARAM_CLIENT_ATTRIBUTION_METADATA = "client_attribution_metadata"
+
             /**
              * A map containing additional parameters that must be sent during payment confirmation.
              * CVC is not passed during creation, and must be included when confirming the payment.
@@ -79,6 +85,7 @@ sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcela
         private val bankAccountId: String,
         private val billingAddress: Map<String, @RawValue Any>?,
         private val billingEmailAddress: String?,
+        private val clientAttributionMetadata: Map<String, @RawValue Any>,
     ) : ConsumerPaymentDetailsCreateParams {
 
         override fun toParamMap(): Map<String, Any> {
@@ -97,7 +104,7 @@ sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcela
                 ),
             )
 
-            return accountParams + billingParams
+            return accountParams + billingParams + clientAttributionMetadata
         }
     }
 }
