@@ -673,6 +673,7 @@ class LinkApiRepositoryTest {
             customEmailType = null,
             connectionsMerchantName = null,
             requestOptions = ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID),
+            isResendSmsCode = false
         )
     }
 
@@ -688,6 +689,7 @@ class LinkApiRepositoryTest {
                 customEmailType = anyOrNull(),
                 connectionsMerchantName = anyOrNull(),
                 requestOptions = any(),
+                isResendSmsCode = any()
             )
         )
             .thenReturn(consumerSession)
@@ -709,6 +711,7 @@ class LinkApiRepositoryTest {
                 customEmailType = anyOrNull(),
                 connectionsMerchantName = anyOrNull(),
                 requestOptions = any(),
+                isResendSmsCode = any()
             )
         )
             .thenThrow(RuntimeException("error"))
