@@ -1105,24 +1105,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         }
     }
 
-    private fun runConfirmationTokenInterceptorScenario(
-        observedParams: Turbine<ConfirmationTokenParams> = Turbine(),
-        initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_DEFERRED_INTENT,
-        block: suspend (IntentConfirmationInterceptor) -> Unit
-    ) {
-        runInterceptorScenario(
-            initializationMode = initializationMode,
-            scenario = InterceptorTestScenario(
-                ephemeralKeySecret = "ek_test_123",
-                stripeRepository = createFakeStripeRepositoryForConfirmationToken(observedParams),
-                intentCreationConfirmationTokenCallbackProvider = Provider {
-                    succeedingCreateIntentWithConfirmationTokenCallback(confirmationToken)
-                },
-            ),
-            test = block
-        )
-    }
-
     @Test
     fun `Fails with Konbini payment method in test mode`() = runTest {
         val konbiniCreateParams = PaymentMethodCreateParams(
@@ -1342,6 +1324,24 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                 completedFullPaymentFlow = true,
             )
+        )
+    }
+
+    private fun runConfirmationTokenInterceptorScenario(
+        observedParams: Turbine<ConfirmationTokenParams> = Turbine(),
+        initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_DEFERRED_INTENT,
+        block: suspend (IntentConfirmationInterceptor) -> Unit
+    ) {
+        runInterceptorScenario(
+            initializationMode = initializationMode,
+            scenario = InterceptorTestScenario(
+                ephemeralKeySecret = "ek_test_123",
+                stripeRepository = createFakeStripeRepositoryForConfirmationToken(observedParams),
+                intentCreationConfirmationTokenCallbackProvider = Provider {
+                    succeedingCreateIntentWithConfirmationTokenCallback(confirmationToken)
+                },
+            ),
+            test = block
         )
     }
 }

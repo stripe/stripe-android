@@ -47,6 +47,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         confirmationOption: PaymentMethodConfirmationOption.New,
         shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): ConfirmationDefinition.Action<Args> {
+        failIfUnsupportedPaymentMethod(confirmationOption.createParams.typeCode)
+
         return stripeRepository.createConfirmationToken(
             confirmationTokenParams = prepareConfirmationTokenParams(
                 confirmationOption,
@@ -77,6 +79,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): ConfirmationDefinition.Action<Args> {
         val paymentMethod = confirmationOption.paymentMethod
+        failIfUnsupportedPaymentMethod(paymentMethod.type?.code)
+
         return stripeRepository.createConfirmationToken(
             confirmationTokenParams = prepareConfirmationTokenParams(
                 confirmationOption,
@@ -240,6 +244,18 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 customer = customerId,
                 paymentMethodOptions = paymentMethodOptions,
                 requireCvcRecollection = intentConfiguration.requireCvcRecollection
+            )
+        }
+    }
+
+    private fun failIfUnsupportedPaymentMethod(paymentMethodCode: String?) {
+        val unsupportedPaymentMethods = setOf("konbini", "blik")
+
+        if (paymentMethodCode in unsupportedPaymentMethods && !requestOptions.apiKeyIsLiveMode) {
+            throw IllegalStateException(
+                "(Test-mode only error) The payment method '$paymentMethodCode' is not yet supported with " +
+                    "confirmation tokens. Please contact us if you'd like to use this feature via a GitHub " +
+                    "issue on stripe-android."
             )
         }
     }
