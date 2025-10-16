@@ -53,6 +53,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
+import kotlin.test.assertNull
 
 @Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
@@ -1135,13 +1136,14 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 hCaptchaToken = "test_hcaptcha_token_123",
             )
 
-            interceptor.intercept(
+            val nextAction = interceptor.intercept(
                 intent = PaymentIntentFactory.create(),
                 confirmationOption = confirmationOption,
                 shippingValues = null,
             )
 
-            assertThat(observedConfirmParams.awaitItem().radarOptions).isEqualTo(RadarOptions("test_hcaptcha_token_123"))
+            assertThat(nextAction.asConfirmParams<ConfirmPaymentIntentParams>()?.radarOptions)
+                .isEqualTo(RadarOptions("test_hcaptcha_token_123"))
         }
     }
 
@@ -1160,13 +1162,15 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 hCaptchaToken = null,
             )
 
-            interceptor.intercept(
+            val nextAction = interceptor.intercept(
                 intent = PaymentIntentFactory.create(),
                 confirmationOption = confirmationOption,
                 shippingValues = null,
             )
 
-            assertThat(observedConfirmParams.awaitItem().radarOptions).isNull()
+            assertThat(nextAction)
+                .isInstanceOf<ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>>()
+            assertNull(nextAction.asConfirmParams<ConfirmPaymentIntentParams>()?.radarOptions)
         }
     }
 
