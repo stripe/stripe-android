@@ -377,6 +377,7 @@ class CustomerSheet internal constructor(
     @ExperimentalCustomerSessionApi
     class IntentConfiguration internal constructor(
         internal val paymentMethodTypes: List<String>,
+        internal val onBehalfOf: String?,
     ) {
         /**
          * Builder for creating a [IntentConfiguration]
@@ -384,6 +385,7 @@ class CustomerSheet internal constructor(
         @ExperimentalCustomerSessionApi
         class Builder {
             private var paymentMethodTypes = listOf<String>()
+            private var onBehalfOf: String? = null
 
             /**
              * The payment methods types to display. If empty, we dynamically determine the
@@ -395,11 +397,23 @@ class CustomerSheet internal constructor(
             }
 
             /**
+             * The connected account whose payment method configurations will apply to the CustomerSheet session.
+             * Affects the allowed payment methods and whether card brand choice is enabled.
+             * When provided, the payment method will be saved to your platform account. See our
+             * [SetupIntent docs](https://docs.stripe.com/api/setup_intents/object#setup_intent_object-on_behalf_of)
+             * for more information.
+             */
+            fun onBehalfOf(onBehalfOf: String) = apply {
+                this.onBehalfOf = onBehalfOf
+            }
+
+            /**
              * Creates the [IntentConfiguration] instance.
              */
             fun build(): IntentConfiguration {
                 return IntentConfiguration(
                     paymentMethodTypes = paymentMethodTypes,
+                    onBehalfOf = onBehalfOf,
                 )
             }
         }

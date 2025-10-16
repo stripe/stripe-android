@@ -212,6 +212,11 @@ internal class PaymentSheetPlaygroundViewModel(
                 return kotlin.Result.success(
                     CustomerSheet.IntentConfiguration.Builder()
                         .paymentMethodTypes(playgroundState.supportedPaymentMethodTypes)
+                        .apply {
+                            if (playgroundState.onBehalfOf.isNotBlank()) {
+                                this.onBehalfOf(playgroundState.onBehalfOf)
+                            }
+                        }
                         .build()
                 )
             }
@@ -272,6 +277,7 @@ internal class PaymentSheetPlaygroundViewModel(
                 val request = CreateSetupIntentRequest(
                     customerId = customerId,
                     merchantCountryCode = playgroundState.countryCode.value,
+                    onBehalfOf = playgroundState.onBehalfOf.takeIf { it.isNotBlank() }
                 )
 
                 val apiResponse = Fuel.post(baseUrl + "create_setup_intent")

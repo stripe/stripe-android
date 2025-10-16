@@ -371,10 +371,21 @@ class CustomerSessionCustomerSheetActivityTest {
             savedPaymentMethodsPage.onSavedPaymentMethod(last4 = "1001").assertExists()
         }
 
+    @Test
+    fun `OnBehalfOf correctly passed to elementsSession request`() =
+        runTest(
+            cards = listOf(
+                PaymentMethodFactory.card(last4 = "4242"),
+            ),
+            onBehalfOf = "acct_connected_account_a",
+            test = {}
+        )
+
     @OptIn(ExperimentalCustomerSessionApi::class)
     private fun runTest(
         cards: List<PaymentMethod> = listOf(),
         isPaymentMethodRemoveEnabled: Boolean = true,
+        onBehalfOf: String? = null,
         paymentMethodRemoveLastFeature: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature =
             ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
         allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
@@ -401,6 +412,7 @@ class CustomerSessionCustomerSheetActivityTest {
                         return Result.success(
                             CustomerSheet.IntentConfiguration(
                                 paymentMethodTypes = listOf("card", "us_bank_account"),
+                                onBehalfOf = onBehalfOf,
                             )
                         )
                     }
@@ -418,6 +430,7 @@ class CustomerSessionCustomerSheetActivityTest {
             savedCards = cards,
             isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
             paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeature,
+            onBehalfOf = onBehalfOf,
         )
 
         ActivityScenario.launch<CustomerSheetActivity>(
@@ -462,6 +475,7 @@ class CustomerSessionCustomerSheetActivityTest {
         savedCards: List<PaymentMethod> = listOf(),
         isPaymentMethodRemoveEnabled: Boolean,
         paymentMethodRemoveLastFeature: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature,
+        onBehalfOf: String?,
     ) {
         networkRule.enqueue(
             host("api.stripe.com"),
@@ -472,6 +486,7 @@ class CustomerSessionCustomerSheetActivityTest {
             query(urlEncode("deferred_intent[mode]"), "setup"),
             query(urlEncode("deferred_intent[payment_method_types][0]"), "card"),
             query(urlEncode("deferred_intent[payment_method_types][1]"), "us_bank_account"),
+            query(urlEncode("deferred_intent[on_behalf_of]"), onBehalfOf),
             query("customer_session_client_secret", "cuss_123"),
         ) { response ->
             response.createElementsSessionResponse(

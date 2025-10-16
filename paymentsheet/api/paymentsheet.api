@@ -180,6 +180,7 @@ public final class com/stripe/android/customersheet/CustomerSheet$IntentConfigur
 	public static final field $stable I
 	public fun <init> ()V
 	public final fun build ()Lcom/stripe/android/customersheet/CustomerSheet$IntentConfiguration;
+	public final fun onBehalfOf (Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerSheet$IntentConfiguration$Builder;
 	public final fun paymentMethodTypes (Ljava/util/List;)Lcom/stripe/android/customersheet/CustomerSheet$IntentConfiguration$Builder;
 }
 
