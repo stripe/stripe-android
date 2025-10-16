@@ -26,6 +26,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -99,24 +100,7 @@ internal fun SignUpBody(
     }
 
     ScrollableTopLevelColumn {
-        Text(
-            text = stringResource(R.string.stripe_link_sign_up_header_v2),
-            modifier = Modifier
-                .testTag(SIGN_UP_HEADER_TAG)
-                .padding(vertical = 4.dp),
-            textAlign = TextAlign.Center,
-            style = LinkTheme.typography.title,
-            color = LinkTheme.colors.textPrimary
-        )
-        Text(
-            text = stringResource(R.string.stripe_link_sign_up_message_v2),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 4.dp, bottom = 30.dp),
-            textAlign = TextAlign.Center,
-            style = LinkTheme.typography.body,
-            color = LinkTheme.colors.textTertiary
-        )
+        SignUpHeader()
         StripeThemeForLink(sectionStyle = SectionStyle.Bordered) {
             EmailCollectionSection(
                 canEditForm = signUpScreenState.canEditForm,
@@ -155,22 +139,11 @@ internal fun SignUpBody(
             )
         }
 
-        PrimaryButton(
-            modifier = Modifier.padding(vertical = 16.dp),
-            label = if (isSigningUp) {
-                stringResource(PaymentsUiCoreR.string.stripe_continue_button_label)
-            } else {
-                stringResource(R.string.stripe_link_log_in_or_sign_up)
-            },
-            state = when {
-                signUpScreenState.isSubmitting -> PrimaryButtonState.Processing
-                signUpScreenState.signUpEnabled -> PrimaryButtonState.Enabled
-                else -> PrimaryButtonState.Disabled
-            },
-            onButtonClick = {
-                onSignUpClick()
-                keyboardController?.hide()
-            }
+        SignUpButton(
+            isSigningUp = isSigningUp,
+            signUpScreenState = signUpScreenState,
+            onSignUpClick = onSignUpClick,
+            keyboardController = keyboardController
         )
     }
 }
@@ -287,6 +260,54 @@ private fun SecondaryFields(
             )
         }
     }
+}
+
+@Composable
+private fun SignUpHeader() {
+    Text(
+        text = stringResource(R.string.stripe_link_sign_up_header_v2),
+        modifier = Modifier
+            .testTag(SIGN_UP_HEADER_TAG)
+            .padding(vertical = 4.dp),
+        textAlign = TextAlign.Center,
+        style = LinkTheme.typography.title,
+        color = LinkTheme.colors.textPrimary
+    )
+    Text(
+        text = stringResource(R.string.stripe_link_sign_up_message_v2),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp, bottom = 30.dp),
+        textAlign = TextAlign.Center,
+        style = LinkTheme.typography.body,
+        color = LinkTheme.colors.textTertiary
+    )
+}
+
+@Composable
+private fun SignUpButton(
+    isSigningUp: Boolean,
+    signUpScreenState: SignUpScreenState,
+    onSignUpClick: () -> Unit,
+    keyboardController: SoftwareKeyboardController?
+) {
+    PrimaryButton(
+        modifier = Modifier.padding(vertical = 16.dp),
+        label = if (isSigningUp) {
+            stringResource(PaymentsUiCoreR.string.stripe_continue_button_label)
+        } else {
+            stringResource(R.string.stripe_link_log_in_or_sign_up)
+        },
+        state = when {
+            signUpScreenState.isSubmitting -> PrimaryButtonState.Processing
+            signUpScreenState.signUpEnabled -> PrimaryButtonState.Enabled
+            else -> PrimaryButtonState.Disabled
+        },
+        onButtonClick = {
+            onSignUpClick()
+            keyboardController?.hide()
+        }
+    )
 }
 
 @Composable
