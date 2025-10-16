@@ -296,6 +296,11 @@ internal class AddPaymentMethodTest {
     @Test
     fun `selecting a new payment method starts an OnPaymentMethodSelected ViewAction`() = runTest {
         runScenario {
+            viewActionRecorder.consume {
+                it is AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility &&
+                    it.initialVisibilityTrackerData.paymentMethodCodes == listOf("card", "klarna")
+            }
+
             assertThat(viewActionRecorder.viewActions).isEmpty()
 
             composeRule.onNodeWithTag("PaymentMethodsUITestTagcard", useUnmergedTree = true).performClick()
@@ -311,6 +316,11 @@ internal class AddPaymentMethodTest {
     @Test
     fun `interacting with a form field sends form events`() = runTest {
         runScenario {
+            viewActionRecorder.consume {
+                it is AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility &&
+                    it.initialVisibilityTrackerData.paymentMethodCodes == listOf("card", "klarna")
+            }
+
             assertThat(viewActionRecorder.viewActions).isEmpty()
 
             composeRule.onNodeWithTag(DEFAULT_CHECKBOX_TEST_TAG, useUnmergedTree = true).performClick()
