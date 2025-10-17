@@ -323,6 +323,8 @@ class LinkApiRepositoryTest {
                         "postal_code" to "12345"
                     ),
                     "active" to true,
+                    "client_attribution_metadata" to
+                        PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.toParamMap()
                 )
             },
             requestSurface = eq("android_payment_element"),
@@ -416,6 +418,8 @@ class LinkApiRepositoryTest {
                             "postal_code" to "12345"
                         ),
                         "active" to true,
+                        "client_attribution_metadata" to
+                            PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.toParamMap()
                     )
                 },
                 requestSurface = eq("android_payment_element"),
@@ -531,7 +535,7 @@ class LinkApiRepositoryTest {
             bankAccountId = "id_123",
             userEmail = "email@stripe.com",
             consumerSessionClientSecret = "secret",
-            clientAttributionMetadata = null,
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
         )
         val loggedErrors = errorReporter.getLoggedErrors()
 
