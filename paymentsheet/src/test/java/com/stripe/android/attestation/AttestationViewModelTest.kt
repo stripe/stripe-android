@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.testing.CoroutineTestRule
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -13,9 +14,10 @@ import java.io.IOException
 
 @RunWith(RobolectricTestRunner::class)
 internal class AttestationViewModelTest {
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
     fun `attest should emit Success result when integrity request succeeds`() = runTest {
@@ -25,8 +27,6 @@ internal class AttestationViewModelTest {
         }
 
         val viewModel = createViewModel(fakeIntegrityRequestManager)
-
-        viewModel.attest()
 
         assertThat(fakeIntegrityRequestManager.awaitRequestTokenCall()).isNull()
 
@@ -50,8 +50,6 @@ internal class AttestationViewModelTest {
 
         val viewModel = createViewModel(fakeIntegrityRequestManager)
 
-        viewModel.attest()
-
         assertThat(fakeIntegrityRequestManager.awaitRequestTokenCall()).isNull()
 
         viewModel.result.test {
@@ -68,6 +66,7 @@ internal class AttestationViewModelTest {
     private fun createViewModel(
         integrityRequestManager: FakeIntegrityRequestManager
     ) = AttestationViewModel(
-        integrityRequestManager = integrityRequestManager
+        integrityRequestManager = integrityRequestManager,
+        workContext = testDispatcher
     )
 }

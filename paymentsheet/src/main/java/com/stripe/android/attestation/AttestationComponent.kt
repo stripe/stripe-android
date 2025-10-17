@@ -1,7 +1,6 @@
 package com.stripe.android.attestation
 
 import android.app.Application
-import android.content.Context
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -27,9 +26,6 @@ internal interface AttestationComponent {
 
     @Component.Builder
     interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
         @BindsInstance
         fun application(application: Application): Builder
 

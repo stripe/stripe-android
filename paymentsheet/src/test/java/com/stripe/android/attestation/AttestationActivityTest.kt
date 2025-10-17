@@ -13,6 +13,7 @@ import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.injectableActivityScenario
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -22,9 +23,10 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class AttestationActivityTest {
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
     fun `activity should dismiss with success result when attestation succeeds`() = runTest {
@@ -136,7 +138,8 @@ internal class AttestationActivityTest {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return AttestationViewModel(
-                    integrityRequestManager = integrityRequestManager
+                    integrityRequestManager = integrityRequestManager,
+                    workContext = testDispatcher
                 ) as T
             }
         }

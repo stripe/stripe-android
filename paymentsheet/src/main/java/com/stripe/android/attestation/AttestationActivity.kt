@@ -27,10 +27,6 @@ internal class AttestationActivity : AppCompatActivity() {
                 dismissWithResult(result)
             }
         }
-
-        lifecycleScope.launch {
-            viewModel.attest()
-        }
     }
 
     private fun dismissWithResult(result: AttestationActivityResult) {
