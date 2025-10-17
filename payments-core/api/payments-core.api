@@ -1906,6 +1906,14 @@ public final class com/stripe/android/model/AlipayAuthResult$Creator : android/o
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/AndroidVerificationObject$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/AndroidVerificationObject;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/AndroidVerificationObject;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/model/BankAccountTokenParams : com/stripe/android/model/TokenParams {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
