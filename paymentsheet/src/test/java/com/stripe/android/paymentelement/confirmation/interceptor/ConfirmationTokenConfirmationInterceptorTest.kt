@@ -991,66 +991,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
     }
 
     @Test
-    fun `ClientContext SFU uses intent SFU as fallback when no PMO SFU in test mode`() = runTest {
-        val observedParams = mutableListOf<ConfirmationTokenParams>()
-
-        val interceptor = createIntentConfirmationInterceptor(
-            ephemeralKeySecret = "ek_test_123",
-            publishableKeyProvider = { "pk_test_123" },
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 1099L,
-                        currency = "usd",
-                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
-                    ),
-                )
-            ),
-            stripeRepository = object : AbsFakeStripeRepository() {
-                override suspend fun createConfirmationToken(
-                    confirmationTokenParams: ConfirmationTokenParams,
-                    options: ApiRequest.Options
-                ): Result<ConfirmationToken> {
-                    observedParams += confirmationTokenParams
-                    return Result.success(confirmationToken)
-                }
-
-                override suspend fun retrieveStripeIntent(
-                    clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
-                ): Result<StripeIntent> {
-                    return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
-                }
-            },
-            intentCreationConfirmationTokenCallbackProvider = Provider {
-                CreateIntentWithConfirmationTokenCallback { _ ->
-                    CreateIntentResult.Success("pi_123_secret_456")
-                }
-            },
-        )
-
-        val confirmationOption = PaymentMethodConfirmationOption.New(
-            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            optionsParams = null,
-            extraParams = null,
-            shouldSave = false,
-            passiveCaptchaParams = null,
-        )
-
-        interceptor.intercept(
-            intent = PaymentIntentFactory.create(),
-            confirmationOption = confirmationOption,
-            shippingValues = null,
-        )
-
-        assertThat(observedParams).hasSize(1)
-        // ClientContext should use intent SFU when no PMO SFU is provided
-        assertThat(observedParams[0].clientContext?.setupFutureUsage)
-            .isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OnSession)
-    }
-
-    @Test
     @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
     fun `SFU priority - user checkbox takes highest priority over PMO SFU for New payment method`() {
         runSfuPriorityTest(
@@ -1346,6 +1286,9 @@ class ConfirmationTokenConfirmationInterceptorTest {
     /**
      * Helper to test SFU priority scenarios with cleaner syntax.
      *
+     * Validates that both setUpFutureUsage and clientContext.setupFutureUsage
+     * use the same resolution logic and stay in sync.
+     *
      * @param intentSfu Setup future usage on the intent configuration
      * @param pmoSfu Setup future usage in payment method options (PMO)
      * @param userCheckbox Whether user checked the "save for future use" checkbox (highest priority)
@@ -1399,7 +1342,13 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 interceptor.interceptDefaultNewPaymentMethod()
             }
 
-            assertThat(observedParams.awaitItem().setUpFutureUsage).isEqualTo(expectedSfu)
+            val params = observedParams.awaitItem()
+
+            // Verify main SFU value
+            assertThat(params.setUpFutureUsage).isEqualTo(expectedSfu)
+
+            // Verify clientContext SFU matches (clientContext is only populated in test mode)
+            assertThat(params.clientContext?.setupFutureUsage).isEqualTo(expectedSfu)
         }
     }
 }
