@@ -138,13 +138,13 @@ internal class VerificationViewModel @Inject constructor(
         )
     }
 
-    private fun startVerification() {
+    private fun startVerification(isResend: Boolean = false) {
         updateViewState {
             it.copy(errorMessage = null)
         }
 
         viewModelScope.launch {
-            val result = linkAccountManager.startVerification()
+            val result = linkAccountManager.startVerification(isResendSmsCode = isResend)
             val error = result.exceptionOrNull()
 
             updateViewState {
@@ -198,7 +198,7 @@ internal class VerificationViewModel @Inject constructor(
     fun resendCode() {
         linkEventsReporter.on2FAResendCode(verificationType = "SMS")
         updateViewState { it.copy(isSendingNewCode = true) }
-        startVerification()
+        startVerification(isResend = true)
     }
 
     fun didShowCodeSentNotification() {

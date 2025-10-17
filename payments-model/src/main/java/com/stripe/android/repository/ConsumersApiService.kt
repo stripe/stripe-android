@@ -88,7 +88,8 @@ interface ConsumersApiService {
         type: VerificationType,
         customEmailType: CustomEmailType?,
         connectionsMerchantName: String?,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        isResendSmsCode: Boolean = false
     ): ConsumerSession
 
     suspend fun confirmConsumerVerification(
@@ -318,6 +319,7 @@ class ConsumersApiServiceImpl(
         customEmailType: CustomEmailType?,
         connectionsMerchantName: String?,
         requestOptions: ApiRequest.Options,
+        isResendSmsCode: Boolean
     ): ConsumerSession {
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -325,16 +327,17 @@ class ConsumersApiServiceImpl(
             request = apiRequestFactory.createPost(
                 startConsumerVerificationUrl,
                 requestOptions,
-                mapOf(
-                    "request_surface" to requestSurface,
-                    "credentials" to mapOf(
-                        "consumer_session_client_secret" to consumerSessionClientSecret
-                    ),
-                    "type" to type.value,
-                    "custom_email_type" to customEmailType?.value,
-                    "connections_merchant_name" to connectionsMerchantName,
-                    "locale" to locale.toLanguageTag()
-                ).filterValues { it != null }
+                buildMap {
+                    put("request_surface", requestSurface)
+                    put("credentials", mapOf("consumer_session_client_secret" to consumerSessionClientSecret))
+                    put("type", type.value)
+                    customEmailType?.value?.let { put("custom_email_type", it) }
+                    connectionsMerchantName?.let { put("connections_merchant_name", it) }
+                    put("locale", locale.toLanguageTag())
+                    if (isResendSmsCode) {
+                        put("is_resend_sms_code", true)
+                    }
+                }
             ),
             responseJsonParser = ConsumerSessionJsonParser()
         )

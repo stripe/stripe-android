@@ -133,7 +133,7 @@ internal interface LinkAccountManager {
     /**
      * Triggers sending a verification code to the user.
      */
-    suspend fun startVerification(): Result<LinkAccount>
+    suspend fun startVerification(isResendSmsCode: Boolean = false): Result<LinkAccount>
 
     /**
      * Confirms a verification code sent to the user.

@@ -502,9 +502,10 @@ class DefaultLinkAccountManagerTest {
             var callCount = 0
             override suspend fun startVerification(
                 consumerSessionClientSecret: String,
+                isResendSmsCode: Boolean
             ): Result<ConsumerSession> {
                 callCount += 1
-                return super.startVerification(consumerSessionClientSecret)
+                return super.startVerification(consumerSessionClientSecret, isResendSmsCode)
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository)

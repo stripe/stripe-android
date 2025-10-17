@@ -125,9 +125,9 @@ internal class VerificationScreenTest {
     @Test
     fun `title, email, otp and loader should be displayed when resending code`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
-            override suspend fun startVerification(): Result<LinkAccount> {
+            override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
                 delay(1500)
-                return super.startVerification()
+                return super.startVerification(isResendSmsCode)
             }
         }
 
