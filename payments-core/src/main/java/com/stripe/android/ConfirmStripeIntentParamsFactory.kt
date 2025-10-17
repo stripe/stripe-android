@@ -43,7 +43,8 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
     ): T
 
     abstract fun create(
-        confirmationTokenId: String
+        confirmationTokenId: String,
+        radarOptions: RadarOptions?,
     ): T
 
     fun create(
@@ -132,11 +133,13 @@ internal class ConfirmPaymentIntentParamsFactory(
     }
 
     override fun create(
-        confirmationTokenId: String
+        confirmationTokenId: String,
+        radarOptions: RadarOptions?
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams(
             confirmationTokenId = confirmationTokenId,
             clientSecret = clientSecret,
+            radarOptions = radarOptions,
         )
     }
 }
@@ -183,11 +186,13 @@ internal class ConfirmSetupIntentParamsFactory(
     }
 
     override fun create(
-        confirmationTokenId: String
+        confirmationTokenId: String,
+        radarOptions: RadarOptions?
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams(
             confirmationTokenId = confirmationTokenId,
             clientSecret = clientSecret,
+            radarOptions = radarOptions,
         )
     }
 }

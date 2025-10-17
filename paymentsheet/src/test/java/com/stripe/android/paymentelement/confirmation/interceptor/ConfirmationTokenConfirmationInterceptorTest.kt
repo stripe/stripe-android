@@ -19,6 +19,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.ConfirmationTokenJsonParser
 import com.stripe.android.networking.StripeRepository
@@ -51,6 +52,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
+import kotlin.test.assertNull
 
 @Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
@@ -577,6 +579,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
     private fun createFakeStripeRepositoryForConfirmationToken(
         observedParams: Turbine<ConfirmationTokenParams> = Turbine(),
+        retrievedIntentStatus: StripeIntent.Status = StripeIntent.Status.Succeeded,
     ): StripeRepository {
         return object : AbsFakeStripeRepository() {
             override suspend fun createConfirmationToken(
@@ -592,7 +595,9 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 options: ApiRequest.Options,
                 expandFields: List<String>
             ): Result<StripeIntent> {
-                return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+                return Result.success(
+                    PaymentIntentFixtures.PI_SUCCEEDED.copy(status = retrievedIntentStatus)
+                )
             }
         }
     }
@@ -1105,8 +1110,56 @@ class ConfirmationTokenConfirmationInterceptorTest {
         }
     }
 
+    @Test
+    fun `Saved PM - includes radarOptions when hCaptchaToken is provided for CSC flow`() {
+        runConfirmationTokenInterceptorScenario(
+            retrievedIntentStatus = StripeIntent.Status.RequiresConfirmation,
+        ) { interceptor ->
+            val confirmationOption = PaymentMethodConfirmationOption.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                optionsParams = null,
+                passiveCaptchaParams = null,
+                hCaptchaToken = "test_hcaptcha_token_123",
+            )
+
+            val nextAction = interceptor.intercept(
+                intent = PaymentIntentFactory.create(),
+                confirmationOption = confirmationOption,
+                shippingValues = null,
+            )
+
+            assertThat(nextAction.asConfirmParams<ConfirmPaymentIntentParams>()?.radarOptions)
+                .isEqualTo(RadarOptions("test_hcaptcha_token_123"))
+        }
+    }
+
+    @Test
+    fun `Saved PM - excludes radarOptions when hCaptchaToken is null for CSC flow`() {
+        runConfirmationTokenInterceptorScenario(
+            retrievedIntentStatus = StripeIntent.Status.RequiresConfirmation,
+        ) { interceptor ->
+            val confirmationOption = PaymentMethodConfirmationOption.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                optionsParams = null,
+                passiveCaptchaParams = null,
+                hCaptchaToken = null,
+            )
+
+            val nextAction = interceptor.intercept(
+                intent = PaymentIntentFactory.create(),
+                confirmationOption = confirmationOption,
+                shippingValues = null,
+            )
+
+            assertThat(nextAction)
+                .isInstanceOf<ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>>()
+            assertNull(nextAction.asConfirmParams<ConfirmPaymentIntentParams>()?.radarOptions)
+        }
+    }
+
     private fun runConfirmationTokenInterceptorScenario(
         observedParams: Turbine<ConfirmationTokenParams> = Turbine(),
+        retrievedIntentStatus: StripeIntent.Status = StripeIntent.Status.Succeeded,
         initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_DEFERRED_INTENT,
         block: suspend (IntentConfirmationInterceptor) -> Unit
     ) {
@@ -1114,7 +1167,10 @@ class ConfirmationTokenConfirmationInterceptorTest {
             initializationMode = initializationMode,
             scenario = InterceptorTestScenario(
                 ephemeralKeySecret = "ek_test_123",
-                stripeRepository = createFakeStripeRepositoryForConfirmationToken(observedParams),
+                stripeRepository = createFakeStripeRepositoryForConfirmationToken(
+                    observedParams,
+                    retrievedIntentStatus,
+                ),
                 intentCreationConfirmationTokenCallbackProvider = Provider {
                     succeedingCreateIntentWithConfirmationTokenCallback(confirmationToken)
                 },
