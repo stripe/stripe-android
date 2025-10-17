@@ -23,6 +23,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.paymentelement.confirmation.utils.ConfirmActionHelper
+import com.stripe.android.paymentelement.confirmation.utils.toConfirmParamsSetupFutureUsage
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -205,7 +206,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             returnUrl = DefaultReturnUrl.create(context).value,
             paymentMethodId = (confirmationOption as? PaymentMethodConfirmationOption.Saved)?.paymentMethod?.id,
             paymentMethodData = (confirmationOption as? PaymentMethodConfirmationOption.New)?.createParams,
-            setUpFutureUsage = confirmationOption.optionsParams?.setupFutureUsage(),
+            setUpFutureUsage = resolveSetupFutureUsage(confirmationOption.optionsParams),
             shipping = shippingValues,
             mandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT).takeIf {
                 when (confirmationOption) {
@@ -240,8 +241,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             ConfirmationTokenClientContextParams(
                 mode = mode.code,
                 currency = mode.currency,
-                // Use paymentMethodOptions to correctly set PMO SFU value
-                setupFutureUsage = paymentMethodOptions?.setupFutureUsage(),
+                setupFutureUsage = resolveSetupFutureUsage(paymentMethodOptions),
                 captureMethod = (mode as? DeferredIntentParams.Mode.Payment)?.captureMethod?.code,
                 paymentMethodTypes = paymentMethodTypes,
                 onBehalfOf = onBehalfOf,
@@ -251,6 +251,20 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 requireCvcRecollection = intentConfiguration.requireCvcRecollection
             )
         }
+    }
+
+    /**
+     * Resolves the setup future usage value following this priority:
+     * 1. User checkbox (via paymentMethodOptions) - highest priority
+     * 2. Payment method options from IntentConfiguration
+     * 3. Intent configuration setupFutureUse - fallback
+     * 4. null - when nothing is set
+     */
+    private fun resolveSetupFutureUsage(
+        paymentMethodOptions: PaymentMethodOptionsParams?
+    ): ConfirmPaymentIntentParams.SetupFutureUsage? {
+        return paymentMethodOptions?.setupFutureUsage()
+            ?: intentConfiguration.mode.setupFutureUse?.toConfirmParamsSetupFutureUsage()
     }
 
     @AssistedFactory
