@@ -288,13 +288,10 @@ internal class LinkApiRepository @Inject constructor(
         val allowRedisplay = paymentMethodCreateParams.allowRedisplay?.let {
             mapOf(ALLOW_REDISPLAY_PARAM to it.value)
         } ?: emptyMap()
-
         val billingPhone: Map<String, String> = paymentMethodCreateParams.billingDetails?.phone?.let {
             mapOf("billing_phone" to it)
         } ?: emptyMap()
-
         val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
-
         val clientAttributionMetadataParams = clientAttributionMetadata.toParams()
 
         stripeRepository.sharePaymentDetails(
