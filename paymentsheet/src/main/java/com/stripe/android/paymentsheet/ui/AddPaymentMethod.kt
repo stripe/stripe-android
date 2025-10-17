@@ -60,8 +60,13 @@ internal fun AddPaymentMethod(
                 )
             )
         },
-        shouldTrackRenderedLPMs = interactor.shouldTrackRenderedLPMs,
-        reportInitialPaymentMethodVisibilitySnapshot = interactor::reportInitialPaymentMethodVisibilitySnapshot
+        updatePaymentMethodVisibility = {
+            interactor.handleViewAction(
+                AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility(
+                    initialVisibilityTrackerData = it
+                )
+            )
+        },
     )
 }
 

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -47,11 +48,6 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 
     fun handleViewAction(viewAction: ViewAction)
 
-    fun reportInitialPaymentMethodVisibilitySnapshot(
-        visiblePaymentMethods: List<String>,
-        hiddenPaymentMethods: List<String>,
-    )
-
     data class State(
         val displayablePaymentMethods: List<DisplayablePaymentMethod>,
         val isProcessing: Boolean,
@@ -78,6 +74,8 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         data class OnManageOneSavedPaymentMethod(val savedPaymentMethod: DisplayableSavedPaymentMethod) : ViewAction
         data class PaymentMethodSelected(val selectedPaymentMethodCode: String) : ViewAction
         data class SavedPaymentMethodSelected(val savedPaymentMethod: PaymentMethod) : ViewAction
+        data class UpdatePaymentMethodVisibility(val itemCode: String, val coordinates: LayoutCoordinates) : ViewAction
+        data object CancelPaymentMethodVisibilityTracking : ViewAction
     }
 
     enum class SavedPaymentMethodAction {
@@ -332,13 +330,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
     }
 
-    override fun reportInitialPaymentMethodVisibilitySnapshot(
-        visiblePaymentMethods: List<String>,
-        hiddenPaymentMethods: List<String>,
-    ) {
-        onInitiallyDisplayedPaymentMethodVisibilitySnapshot(visiblePaymentMethods, hiddenPaymentMethods)
-    }
-
     private fun getDisplayablePaymentMethods(
         paymentMethods: List<PaymentMethod>,
         walletsState: WalletsState?,
@@ -468,13 +459,54 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 updateSelection(selection, true)
                 invokeRowSelectionCallback?.invoke()
             }
-            ViewAction.TransitionToManageSavedPaymentMethods -> {
+            is ViewAction.TransitionToManageSavedPaymentMethods -> {
                 transitionToManageScreen()
             }
             is ViewAction.OnManageOneSavedPaymentMethod -> {
                 onUpdatePaymentMethod(viewAction.savedPaymentMethod)
             }
+            is ViewAction.UpdatePaymentMethodVisibility -> {
+                updatePaymentMethodVisibility(
+                    itemCode = viewAction.itemCode,
+                    layoutCoordinates = viewAction.coordinates,
+                )
+            }
+            is ViewAction.CancelPaymentMethodVisibilityTracking -> {
+                cancelPaymentMethodVisibilityTracking()
+            }
         }
+    }
+
+    private val visibilityTracker = PaymentMethodInitialVisibilityTracker(
+        expectedItems = getExpectedItems(),
+        renderedLpmCallback = { visiblePaymentMethods, hiddenPaymentMethods ->
+            onInitiallyDisplayedPaymentMethodVisibilitySnapshot(visiblePaymentMethods, hiddenPaymentMethods)
+        },
+        dispatcher = dispatcher
+    )
+
+    private fun getExpectedItems(): List<String> {
+        val currentSavedPaymentMethodCode = displayedSavedPaymentMethod.value?.paymentMethod?.type
+        val currentDisplayablePaymentMethodCodes = displayablePaymentMethods.value.map { it.code }
+
+        val output = buildList {
+            if (currentSavedPaymentMethodCode != null) {
+                add("saved")
+            }
+            addAll(currentDisplayablePaymentMethodCodes)
+        }
+
+        println(output)
+        return output
+    }
+
+    private fun updatePaymentMethodVisibility(itemCode: String, layoutCoordinates: LayoutCoordinates) {
+        visibilityTracker.updateExpectedItems(getExpectedItems())
+        visibilityTracker.updateVisibility(itemCode, layoutCoordinates)
+    }
+
+    private fun cancelPaymentMethodVisibilityTracking() {
+        visibilityTracker.reset()
     }
 
     private fun updateSelectedPaymentMethod(selectedPaymentMethodCode: String) {

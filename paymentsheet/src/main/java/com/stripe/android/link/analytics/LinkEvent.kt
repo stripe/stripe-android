@@ -56,6 +56,12 @@ internal sealed class LinkEvent : AnalyticsEvent {
         override val eventName = "link.2fa.cancel"
     }
 
+    data class TwoFAResendCode(
+        val verificationType: String
+    ) : LinkEvent() {
+        override val eventName = "link.2fa.resend_code"
+    }
+
     object PopupShow : LinkEvent() {
         override val eventName = "link.popup.show"
     }

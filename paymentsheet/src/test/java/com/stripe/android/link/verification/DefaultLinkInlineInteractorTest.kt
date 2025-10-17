@@ -10,6 +10,7 @@ import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
@@ -598,7 +599,8 @@ class DefaultLinkInlineInteractorTest {
         linkConfigurationCoordinator = linkConfigurationCoordinator,
         linkLauncher = linkLauncher,
         savedStateHandle = savedStateHandle,
-        logger = FakeLogger()
+        logger = FakeLogger(),
+        linkEventsReporter = FakeLinkEventsReporter()
     )
 
     private fun createPaymentMethodMetadata(

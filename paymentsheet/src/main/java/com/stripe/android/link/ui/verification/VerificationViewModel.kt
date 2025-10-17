@@ -196,6 +196,7 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     fun resendCode() {
+        linkEventsReporter.on2FAResendCode(verificationType = "SMS")
         updateViewState { it.copy(isSendingNewCode = true) }
         startVerification()
     }

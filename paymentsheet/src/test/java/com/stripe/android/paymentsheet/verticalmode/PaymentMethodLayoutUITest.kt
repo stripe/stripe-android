@@ -251,6 +251,19 @@ internal class PaymentMethodLayoutUITest(
             }
         }
 
+        initialState.displayedSavedPaymentMethod?.let {
+            viewActionRecorder.consume {
+                it is PaymentMethodVerticalLayoutInteractor.ViewAction.UpdatePaymentMethodVisibility &&
+                    it.itemCode == "saved"
+            }
+        }
+        initialState.displayablePaymentMethods.forEach { paymentMethod ->
+            viewActionRecorder.consume {
+                it is PaymentMethodVerticalLayoutInteractor.ViewAction.UpdatePaymentMethodVisibility &&
+                    it.itemCode == paymentMethod.code
+            }
+        }
+
         Scenario(viewActionRecorder).apply(block)
     }
 

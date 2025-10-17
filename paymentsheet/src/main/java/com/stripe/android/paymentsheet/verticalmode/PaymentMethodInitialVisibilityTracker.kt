@@ -10,6 +10,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Tracks stability of payment method positioning and dispatches analytics when stable
@@ -22,16 +23,25 @@ import kotlinx.coroutines.launch
  * Once stable, it dispatches a single analytics event.
  */
 internal class PaymentMethodInitialVisibilityTracker(
-    private val expectedItems: List<String>,
-    private val renderedLpmCallback: (Map<String, Boolean>) -> Unit,
+    private var expectedItems: List<String> = emptyList(),
+    private val renderedLpmCallback: (List<String>, List<String>) -> Unit,
+    dispatcher: CoroutineContext = Dispatchers.Default,
 ) {
     private val visibilityMap = mutableMapOf<String, Boolean>()
     private val previousCoordinates = mutableMapOf<String, LayoutCoordinates>()
     private val coordinateStabilityMap = mutableMapOf<String, Boolean>()
     private var hasDispatched = false
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    private val coroutineScope = CoroutineScope(dispatcher)
     private var dispatchEventJob: Job? = null
+
+    fun updateExpectedItems(items: List<String>) {
+        if (this.expectedItems != items) {
+            // Reset to initial state with new items
+            this.expectedItems = items
+            reset()
+        }
+    }
 
     /**
      * When this function is called from onGloballyPositioned
@@ -124,12 +134,22 @@ internal class PaymentMethodInitialVisibilityTracker(
                 delay(DEFAULT_DEBOUNCE_DELAY_MS)
                 if (!isActive) return@launch
                 hasDispatched = true
-                renderedLpmCallback(visibilityMap.toMap())
+                val visiblePaymentMethods = visibilityMap.filter { it.value }.keys.toList()
+                val hiddenPaymentMethods = visibilityMap.filter { !it.value }.keys.toList()
+
+                renderedLpmCallback(
+                    visiblePaymentMethods,
+                    hiddenPaymentMethods
+                )
             }
         }
     }
 
-    fun dispose() {
+    fun reset() {
+        coordinateStabilityMap.clear()
+        previousCoordinates.clear()
+        visibilityMap.clear()
+        hasDispatched = false
         dispatchEventJob?.cancel()
         coroutineScope.cancel() // Cancel the entire scope
     }
