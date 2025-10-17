@@ -117,7 +117,7 @@ internal interface LinkRepository {
         bankAccountId: String,
         userEmail: String,
         consumerSessionClientSecret: String,
-        clientAttributionMetadata: ClientAttributionMetadata?,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): Result<ConsumerPaymentDetails.PaymentDetails>
 
     suspend fun shareCardPaymentDetails(
