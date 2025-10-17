@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
@@ -97,7 +98,7 @@ class CardUiDefinitionFactoryTest {
                         ),
                     ),
                     productUsage = emptySet(),
-                    clientAttributionMetadata = null,
+                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
                 )
             )
         }
@@ -288,7 +289,7 @@ class CardUiDefinitionFactoryTest {
                         ),
                     ),
                     productUsage = emptySet(),
-                    clientAttributionMetadata = null,
+                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -321,7 +322,7 @@ class CardUiDefinitionFactoryTest {
                         "billing_details" to emptyMap<IdentifierSpec, String?>(),
                     ),
                     productUsage = emptySet(),
-                    clientAttributionMetadata = null,
+                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -351,7 +352,7 @@ class CardUiDefinitionFactoryTest {
                     requiresMandate = false,
                     overrideParamMap = mapOf(),
                     productUsage = emptySet(),
-                    clientAttributionMetadata = null,
+                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -381,7 +382,7 @@ class CardUiDefinitionFactoryTest {
                     requiresMandate = false,
                     overrideParamMap = emptyMap(),
                     productUsage = emptySet(),
-                    clientAttributionMetadata = null,
+                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -429,7 +430,7 @@ class CardUiDefinitionFactoryTest {
                         ),
                     ),
                     productUsage = emptySet(),
-                    clientAttributionMetadata = null,
+                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(

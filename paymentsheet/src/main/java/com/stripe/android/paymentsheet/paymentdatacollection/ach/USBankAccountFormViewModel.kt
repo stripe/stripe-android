@@ -870,7 +870,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val termsDisplay: PaymentSheet.TermsDisplay,
         val sellerBusinessName: String?,
         val forceSetupFutureUseBehavior: Boolean,
-        val clientAttributionMetadata: ClientAttributionMetadata?,
+        val clientAttributionMetadata: ClientAttributionMetadata,
     )
 
     private companion object {

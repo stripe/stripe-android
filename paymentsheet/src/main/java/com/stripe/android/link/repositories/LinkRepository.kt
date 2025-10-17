@@ -124,7 +124,7 @@ internal interface LinkRepository {
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
         consumerSessionClientSecret: String,
-        clientAttributionMetadata: ClientAttributionMetadata?,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): Result<LinkPaymentDetails.Saved>
 
     suspend fun sharePaymentDetails(
@@ -135,7 +135,7 @@ internal interface LinkRepository {
         cvc: String?,
         allowRedisplay: String?,
         apiKey: String?,
-        clientAttributionMetadata: ClientAttributionMetadata?,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): Result<SharePaymentDetails>
 
     suspend fun createPaymentMethod(

@@ -33,7 +33,7 @@ internal interface CreateLinkState {
         configuration: CommonConfiguration,
         customer: CustomerRepository.CustomerInfo?,
         initializationMode: PaymentElementLoader.InitializationMode,
-        clientAttributionMetadata: ClientAttributionMetadata?,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkStateResult
 }
 
@@ -70,7 +70,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         configuration: CommonConfiguration,
         customer: CustomerRepository.CustomerInfo?,
         initializationMode: PaymentElementLoader.InitializationMode,
-        clientAttributionMetadata: ClientAttributionMetadata?,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkStateResult {
         val linkDisabledReasons = getLinkDisabledReasons(
             elementsSession = elementsSession,
@@ -200,7 +200,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         customer: CustomerRepository.CustomerInfo?,
         elementsSession: ElementsSession,
         initializationMode: PaymentElementLoader.InitializationMode,
-        clientAttributionMetadata: ClientAttributionMetadata?,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkConfiguration {
         val cardBrandFilter = getCardBrandFilter(
             elementsSession = elementsSession,
