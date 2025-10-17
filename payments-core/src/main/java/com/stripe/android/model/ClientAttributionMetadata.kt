@@ -9,7 +9,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class ClientAttributionMetadata(
+data class ClientAttributionMetadata constructor(
     @get:VisibleForTesting val elementsSessionConfigId: String,
     @get:VisibleForTesting val paymentIntentCreationFlow: PaymentIntentCreationFlow?,
     @get:VisibleForTesting val paymentMethodSelectionFlow: PaymentMethodSelectionFlow?,

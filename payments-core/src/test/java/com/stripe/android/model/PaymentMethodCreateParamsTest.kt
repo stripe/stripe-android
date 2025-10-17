@@ -477,7 +477,7 @@ class PaymentMethodCreateParamsTest {
     @Test
     fun `toParamMap() includes ClientAttributionMetadata if not null`() {
         val clientAttributionMetadata = ClientAttributionMetadata(
-            elementsSessionConfigId = "elements_session_123",
+            elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
         )

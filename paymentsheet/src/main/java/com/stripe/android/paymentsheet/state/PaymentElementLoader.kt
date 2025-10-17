@@ -196,7 +196,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
 
         val clientAttributionMetadata = ClientAttributionMetadata.create(
-            elementsSessionConfigId = elementsSession.elementsSessionId,
+            elementsSessionConfigId = elementsSession.elementsSessionConfigId,
             initializationMode = initializationMode,
             automaticPaymentMethodsEnabled = elementsSession.stripeIntent.automaticPaymentMethodsEnabled,
         )
