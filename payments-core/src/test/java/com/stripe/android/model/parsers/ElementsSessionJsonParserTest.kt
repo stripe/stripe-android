@@ -39,6 +39,12 @@ class ElementsSessionJsonParserTest {
         isEnabled = true
     )
 
+    @get:Rule
+    val enableAttestationOnIntentConfirmationRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enableAttestationOnIntentConfirmation,
+        isEnabled = true
+    )
+
     @Test
     fun parsePaymentIntent_shouldCreateObjectWithOrderedPaymentMethods() {
         val elementsSession = ElementsSessionJsonParser(

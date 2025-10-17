@@ -69,6 +69,12 @@ internal class PaymentMethodMetadataTest {
         isEnabled = true
     )
 
+    @get:Rule
+    val enableAttestationOnIntentConfirmationRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enableAttestationOnIntentConfirmation,
+        isEnabled = true
+    )
+
     @Test
     fun `hasIntentToSetup returns true for setup_intent`() {
         val metadata = PaymentMethodMetadataFactory.create(
