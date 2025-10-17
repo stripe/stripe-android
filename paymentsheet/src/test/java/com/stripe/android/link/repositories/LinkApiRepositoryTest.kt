@@ -423,6 +423,7 @@ class LinkApiRepositoryTest {
             )
         }
 
+    @Suppress("LongMethod")
     @Test
     fun `createPaymentDetails for card returns new LinkPaymentDetails when successful`() = runTest {
         val consumerSessionSecret = "consumer_session_secret"
@@ -461,25 +462,32 @@ class LinkApiRepositoryTest {
             )
         val formValues = newLinkPaymentDetails.buildFormValues()
         assertThat(formValues).containsEntry(
-            IdentifierSpec.get("type"), "card"
+            IdentifierSpec.get("type"),
+            "card"
         )
         assertThat(formValues).containsEntry(
-            IdentifierSpec.CardNumber, "5555555555554444"
+            IdentifierSpec.CardNumber,
+            "5555555555554444"
         )
         assertThat(formValues).containsEntry(
-            IdentifierSpec.CardCvc, "123"
+            IdentifierSpec.CardCvc,
+            "123"
         )
         assertThat(formValues).containsEntry(
-            IdentifierSpec.CardExpMonth, "12"
+            IdentifierSpec.CardExpMonth,
+            "12"
         )
         assertThat(formValues).containsEntry(
-            IdentifierSpec.CardExpYear, "2050"
+            IdentifierSpec.CardExpYear,
+            "2050"
         )
         assertThat(formValues).containsEntry(
-            IdentifierSpec.Country, "US"
+            IdentifierSpec.Country,
+            "US"
         )
         assertThat(formValues).containsEntry(
-            IdentifierSpec.PostalCode, "12345"
+            IdentifierSpec.PostalCode,
+            "12345"
         )
     }
 
