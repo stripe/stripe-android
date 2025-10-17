@@ -24,6 +24,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.paymentelement.confirmation.utils.ConfirmActionHelper
+import com.stripe.android.paymentelement.confirmation.utils.toConfirmParamsSetupFutureUsage
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -210,7 +211,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             returnUrl = DefaultReturnUrl.create(context).value,
             paymentMethodId = (confirmationOption as? PaymentMethodConfirmationOption.Saved)?.paymentMethod?.id,
             paymentMethodData = (confirmationOption as? PaymentMethodConfirmationOption.New)?.createParams,
-            setUpFutureUsage = confirmationOption.optionsParams?.setupFutureUsage(),
+            setUpFutureUsage = confirmationOption.optionsParams?.setupFutureUsage()
+                ?: intentConfiguration.mode.setupFutureUse?.toConfirmParamsSetupFutureUsage(),
             shipping = shippingValues,
             mandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT).takeIf {
                 when (confirmationOption) {
@@ -246,7 +248,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 mode = mode.code,
                 currency = mode.currency,
                 // Use paymentMethodOptions to correctly set PMO SFU value
-                setupFutureUsage = paymentMethodOptions?.setupFutureUsage(),
+                setupFutureUsage = paymentMethodOptions?.setupFutureUsage()
+                    ?: intentConfiguration.mode.setupFutureUse?.toConfirmParamsSetupFutureUsage(),
                 captureMethod = (mode as? DeferredIntentParams.Mode.Payment)?.captureMethod?.code,
                 paymentMethodTypes = paymentMethodTypes,
                 onBehalfOf = onBehalfOf,
