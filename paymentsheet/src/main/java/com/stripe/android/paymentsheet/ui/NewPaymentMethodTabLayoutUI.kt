@@ -43,8 +43,7 @@ internal fun NewPaymentMethodTabLayoutUI(
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
-    shouldTrackRenderedLPMs: Boolean = false,
-    reportInitialPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit = { _, _ -> },
+    updatePaymentMethodVisibility: (AddPaymentMethodInitialVisibilityTrackerData) -> Unit = {},
     state: LazyListState = rememberLazyListState(),
 ) {
     // This is to fix an issue in tests involving this composable
@@ -62,23 +61,18 @@ internal fun NewPaymentMethodTabLayoutUI(
     BoxWithConstraints(
         modifier = modifier.testTag(TEST_TAG_LIST + "1")
     ) {
-        val viewWidth = rememberViewWidth(
-            this.maxWidth,
-            paymentMethods.size
-        )
-
-        val configuration = LocalConfiguration.current
+        val viewWidth = rememberViewWidth(maxWidth = this.maxWidth, numberOfPaymentMethods = paymentMethods.size)
+        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
         val innerPadding = PaymentMethodsUISpacing.carouselInnerPadding
-        if (shouldTrackRenderedLPMs) {
-            LaunchedEffect(paymentMethodCodes) {
-                reportInitialPaymentMethodVisibilitySnapshot(
-                    paymentMethods = paymentMethods,
+        LaunchedEffect(paymentMethodCodes) {
+            updatePaymentMethodVisibility(
+                AddPaymentMethodInitialVisibilityTrackerData(
+                    paymentMethodCodes = paymentMethodCodes,
                     tabWidth = viewWidth,
-                    screenWidth = configuration.screenWidthDp.dp,
-                    innerPadding = innerPadding,
-                    callback = reportInitialPaymentMethodVisibilitySnapshot
+                    screenWidth = screenWidth,
+                    innerPadding = innerPadding
                 )
-            }
+            )
         }
 
         LazyRow(
@@ -109,64 +103,6 @@ internal fun NewPaymentMethodTabLayoutUI(
             }
         }
     }
-}
-
-private fun reportInitialPaymentMethodVisibilitySnapshot(
-    paymentMethods: List<SupportedPaymentMethod>,
-    tabWidth: Dp,
-    screenWidth: Dp,
-    innerPadding: Dp,
-    callback: (List<String>, List<String>) -> Unit,
-) {
-    val numberOfVisibleItems = calculateNumberOfVisibleItems(
-        totalItems = paymentMethods.size,
-        tabWidth = tabWidth,
-        screenWidth = screenWidth,
-        innerPadding = innerPadding
-    )
-
-    val visibleLpms = paymentMethods
-        .take(numberOfVisibleItems)
-        .map { pm -> pm.code }
-    val hiddenLpms = paymentMethods
-        .drop(numberOfVisibleItems)
-        .map { pm -> pm.code }
-    callback(visibleLpms, hiddenLpms)
-}
-
-/**
- * Calculates the number of payment method tabs that are visible on screen.
- */
-private fun calculateNumberOfVisibleItems(
-    totalItems: Int,
-    tabWidth: Dp,
-    screenWidth: Dp,
-    innerPadding: Dp,
-): Int {
-    if (totalItems <= 0) return 0
-    if (totalItems == 1) return 1
-
-    // Calculate how many items can fit with their spacing
-    val itemWithPadding = tabWidth + innerPadding
-    val maxItemsThatFit = (screenWidth / itemWithPadding).toInt()
-
-    // Check if there's enough remaining space for a partially visible item
-    val usedWidth = maxItemsThatFit * itemWithPadding
-    val remainingWidth = screenWidth - usedWidth
-
-    // Consider an item visible if at least 95% of it is shown
-    @Suppress("MagicNumber")
-    val visibilityThreshold = tabWidth * 0.95f
-    val hasPartiallyVisibleItem = remainingWidth >= visibilityThreshold
-
-    val totalVisibleItems = if (hasPartiallyVisibleItem) {
-        maxItemsThatFit + 1
-    } else {
-        maxItemsThatFit
-    }
-
-    // Ensure we don't exceed the total number of items and always show at least 1
-    return totalVisibleItems.coerceIn(1, totalItems)
 }
 
 @Composable

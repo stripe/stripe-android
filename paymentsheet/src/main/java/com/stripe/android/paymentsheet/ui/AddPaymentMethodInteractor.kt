@@ -27,16 +27,9 @@ import kotlin.coroutines.CoroutineContext
 internal interface AddPaymentMethodInteractor {
     val isLiveMode: Boolean
 
-    val shouldTrackRenderedLPMs: Boolean
-
     val state: StateFlow<State>
 
     fun handleViewAction(viewAction: ViewAction)
-
-    fun reportInitialPaymentMethodVisibilitySnapshot(
-        visiblePaymentMethods: List<String>,
-        hiddenPaymentMethods: List<String>,
-    )
 
     fun close()
 
@@ -64,6 +57,10 @@ internal interface AddPaymentMethodInteractor {
         ) : ViewAction()
 
         data class ReportFieldInteraction(val code: PaymentMethodCode) : ViewAction()
+
+        data class UpdatePaymentMethodVisibility(
+            val initialVisibilityTrackerData: AddPaymentMethodInitialVisibilityTrackerData
+        ) : ViewAction()
     }
 }
 
@@ -136,8 +133,6 @@ internal class DefaultAddPaymentMethodInteractor(
             )
         }
     }
-
-    override val shouldTrackRenderedLPMs: Boolean = true
 
     private val _selectedPaymentMethodCode: MutableStateFlow<String> =
         MutableStateFlow(initiallySelectedPaymentMethodType)
@@ -228,17 +223,22 @@ internal class DefaultAddPaymentMethodInteractor(
                     reportPaymentMethodTypeSelected(viewAction.code)
                 }
             }
+            is AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility -> {
+                updatePaymentMethodVisibility(
+                    viewAction.initialVisibilityTrackerData
+                )
+            }
         }
     }
 
-    override fun reportInitialPaymentMethodVisibilitySnapshot(
-        visiblePaymentMethods: List<String>,
-        hiddenPaymentMethods: List<String>,
+    private fun updatePaymentMethodVisibility(
+        initialVisibilityTrackerData: AddPaymentMethodInitialVisibilityTrackerData
     ) {
-        onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
-            visiblePaymentMethods,
-            hiddenPaymentMethods,
-        )
+        AddPaymentMethodInitialVisibilityTracker
+            .reportInitialPaymentMethodVisibilitySnapshot(
+                data = initialVisibilityTrackerData,
+                callback = onInitiallyDisplayedPaymentMethodVisibilitySnapshot
+            )
     }
 
     override fun close() {
