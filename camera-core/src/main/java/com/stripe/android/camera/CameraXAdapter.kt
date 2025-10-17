@@ -238,6 +238,24 @@ class CameraXAdapter(
 
     override fun getCurrentCamera(): Int = lensFacing
 
+    /**
+     * Get the camera lens model from the current camera.
+     * Returns the device model with lens facing since individual camera lens models aren't directly exposed.
+     */
+    fun getCameraLensModel(): String? {
+        return camera?.let {
+            // Determine lens facing
+            val facing = when (lensFacing) {
+                CameraSelector.LENS_FACING_BACK -> "back"
+                CameraSelector.LENS_FACING_FRONT -> "front"
+                else -> "unknown"
+            }
+            // Return device model with lens facing
+            // Format: "Manufacturer Model (facing)"
+            "${Build.MANUFACTURER} ${Build.MODEL} ($facing)"
+        }
+    }
+
     override fun setFocus(point: PointF) {
         camera?.let { cam ->
             val meteringPointFactory = DisplayOrientedMeteringPointFactory(
