@@ -28,7 +28,7 @@ data class ElementsSession(
     val customPaymentMethods: List<CustomPaymentMethod>,
     val elementsSessionId: String,
     private val passiveCaptcha: PassiveCaptchaParams?,
-    val elementsSessionConfigId: String,
+    val elementsSessionConfigId: String?,
 ) : StripeModel {
 
     val linkPassthroughModeEnabled: Boolean

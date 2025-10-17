@@ -104,7 +104,7 @@ internal class ElementsSessionJsonParser(
                 orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
                 elementsSessionId = elementsSessionId.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString(),
                 passiveCaptcha = passiveCaptcha,
-                elementsSessionConfigId = elementsSessionConfigId ?: UUID.randomUUID().toString(),
+                elementsSessionConfigId = elementsSessionConfigId,
             )
         } else {
             null
