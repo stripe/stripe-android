@@ -1,7 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.activity.compose.ManagedActivityResultLauncher
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,7 +11,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,11 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityOptionsCompat
-import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
-import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.cardscan.CardScanContract
 import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher
 import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher.Companion.rememberCardScanGoogleLauncher
 import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
@@ -41,52 +34,30 @@ internal fun ScanCardButtonUI(
     launchOptions: ActivityOptionsCompat? = null,
     controller: CardDetailsSectionController
 ) {
-    if (controller.isStripeCardScanAvailable() || FeatureFlags.cardScanGooglePayMigration.isEnabled) {
-        val context = LocalContext.current
-        val cardScanLauncher: ManagedActivityResultLauncher<CardScanContract.Args, CardScanSheetResult>?
-        val cardScanGoogleLauncher: CardScanGoogleLauncher?
+    val context = LocalContext.current
+    val eventsReporter = LocalCardScanEventsReporter.current
+    val cardScanGoogleLauncher = rememberCardScanGoogleLauncher(
+        context,
+        eventsReporter,
+        options = launchOptions,
+        controller.cardDetailsElement.controller.onCardScanResult
+    )
 
-        if (FeatureFlags.cardScanGooglePayMigration.isEnabled) {
-            val eventsReporter = LocalCardScanEventsReporter.current
-            cardScanGoogleLauncher = rememberCardScanGoogleLauncher(
-                context,
-                eventsReporter,
-                options = launchOptions,
-                controller.cardDetailsElement.controller.onCardScanResult
-            )
-            cardScanLauncher = null
-        } else {
-            cardScanLauncher = rememberLauncherForActivityResult(CardScanContract()) {
-                controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(it)
-            }
-            cardScanGoogleLauncher = null
-        }
-
-        ScanCardButtonContent(
-            enabled = enabled,
-            elementsSessionId = controller.elementsSessionId,
-            cardScanLauncher = cardScanLauncher,
-            cardScanGoogleLauncher = cardScanGoogleLauncher,
-        )
-    }
+    ScanCardButtonContent(
+        enabled = enabled,
+        cardScanGoogleLauncher = cardScanGoogleLauncher,
+    )
 }
 
 @Composable
-@Suppress("LongMethod") // Should be removed along with feature flag when ready
 private fun ScanCardButtonContent(
     enabled: Boolean,
-    elementsSessionId: String?,
-    cardScanLauncher: ManagedActivityResultLauncher<CardScanContract.Args, CardScanSheetResult>?,
-    cardScanGoogleLauncher: CardScanGoogleLauncher?
+    cardScanGoogleLauncher: CardScanGoogleLauncher
 ) {
     val context = LocalContext.current
-    val isCardScanGoogleAvailable by if (FeatureFlags.cardScanGooglePayMigration.isEnabled) {
-        cardScanGoogleLauncher?.isAvailable?.collectAsState() ?: remember { mutableStateOf(false) }
-    } else {
-        remember { mutableStateOf(false) }
-    }
+    val isCardScanGoogleAvailable by cardScanGoogleLauncher.isAvailable.collectAsState()
 
-    if (!FeatureFlags.cardScanGooglePayMigration.isEnabled || isCardScanGoogleAvailable) {
+    if (isCardScanGoogleAvailable) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.clickable(
@@ -94,17 +65,7 @@ private fun ScanCardButtonContent(
                 indication = null,
                 enabled = enabled,
                 onClick = {
-                    if (FeatureFlags.cardScanGooglePayMigration.isEnabled) {
-                        cardScanGoogleLauncher?.launch(context)
-                    } else {
-                        cardScanLauncher?.launch(
-                            input = CardScanContract.Args(
-                                configuration = CardScanConfiguration(
-                                    elementsSessionId = elementsSessionId
-                                )
-                            )
-                        )
-                    }
+                    cardScanGoogleLauncher.launch(context)
                 }
             )
         ) {
