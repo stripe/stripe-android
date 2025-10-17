@@ -6,6 +6,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
@@ -217,6 +218,27 @@ internal class ElementsSessionRepositoryTest {
         whenever(
             stripeRepository.retrieveElementsSession(any(), any())
         ).thenReturn(Result.failure(APIException(statusCode = 401)))
+
+        val session = createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+        )
+
+        verify(stripeRepository).retrieveElementsSession(any(), any())
+        assertThat(session.isFailure).isTrue()
+    }
+
+    @Test
+    fun `Does not create fallback for exception when no response`() = runTest {
+        whenever(
+            stripeRepository.retrieveElementsSession(any(), any())
+        ).thenReturn(Result.failure(APIConnectionException()))
 
         val session = createRepository().get(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
