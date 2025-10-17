@@ -185,6 +185,7 @@ internal class SignUpViewModel @Inject constructor(
     }
 
     fun onSuggestedEmailClick(suggestedEmail: String) {
+        linkEventsReporter.onEmailSuggestionAccepted()
         emailController.onRawValueChange(suggestedEmail)
     }
 
