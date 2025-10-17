@@ -1131,12 +1131,14 @@ class ConfirmationTokenConfirmationInterceptorTest {
         observedParams: Turbine<ConfirmationTokenParams> = Turbine(),
         retrievedIntentStatus: StripeIntent.Status = StripeIntent.Status.Succeeded,
         initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_DEFERRED_INTENT,
+        isLiveMode: Boolean = true,
         block: suspend (IntentConfirmationInterceptor) -> Unit
     ) {
         runInterceptorScenario(
             initializationMode = initializationMode,
             scenario = InterceptorTestScenario(
                 ephemeralKeySecret = "ek_test_123",
+                publishableKeyProvider = { if (isLiveMode) "pk_live_123" else "pk_test_123" },
                 stripeRepository = createFakeStripeRepositoryForConfirmationToken(
                     observedParams,
                     retrievedIntentStatus,
@@ -1183,6 +1185,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
         runConfirmationTokenInterceptorScenario(
             observedParams = observedParams,
+            isLiveMode = false,
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(mode = paymentMode)
             ),
