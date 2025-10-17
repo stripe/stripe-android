@@ -56,6 +56,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import java.util.UUID
 import kotlin.test.assertFails
 import com.stripe.android.core.R as CoreR
 import com.stripe.android.uicore.R as UiCoreR
@@ -1376,7 +1377,8 @@ internal class PaymentMethodMetadataTest {
             orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
             experimentsData = null,
             merchantLogoUrl = null,
-            passiveCaptcha = passiveCaptchaParams
+            passiveCaptcha = passiveCaptchaParams,
+            elementsSessionConfigId = UUID.randomUUID().toString(),
         )
     }
 

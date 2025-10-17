@@ -47,6 +47,7 @@ internal class ElementsSessionJsonParser(
         val flags = json.optJSONObject(FIELD_FLAGS)?.let { flags -> parseSessionFlags(json = flags) } ?: emptyMap()
 
         val elementsSessionId = json.optString(FIELD_ELEMENTS_SESSION_ID)
+        val elementsSessionConfigId = json.optString(FIELD_ELEMENTS_SESSION_CONFIG_ID)
         val customer = parseCustomer(
             json = json.optJSONObject(FIELD_CUSTOMER),
             enableLinkInSpm = flags[ElementsSession.Flag.ELEMENTS_ENABLE_LINK_SPM] == true
@@ -102,7 +103,8 @@ internal class ElementsSessionJsonParser(
                 experimentsData = experimentsData,
                 orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
                 elementsSessionId = elementsSessionId.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString(),
-                passiveCaptcha = passiveCaptcha
+                passiveCaptcha = passiveCaptcha,
+                elementsSessionConfigId = elementsSessionConfigId ?: UUID.randomUUID().toString(),
             )
         } else {
             null
@@ -479,6 +481,7 @@ internal class ElementsSessionJsonParser(
     internal companion object {
         private const val FIELD_OBJECT = "object"
         private const val FIELD_ELEMENTS_SESSION_ID = "session_id"
+        private const val FIELD_ELEMENTS_SESSION_CONFIG_ID = "config_id"
         private const val FIELD_COUNTRY_CODE = "country_code"
         private const val FIELD_PAYMENT_METHOD_TYPES = "payment_method_types"
         private const val FIELD_ORDERED_PAYMENT_METHOD_TYPES = "ordered_payment_method_types"

@@ -55,6 +55,7 @@ import org.junit.Test
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import java.util.UUID
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -720,7 +721,8 @@ internal class DefaultCustomerSheetLoaderTest {
             orderedPaymentMethodTypesAndWallets = intent.paymentMethodTypes,
             experimentsData = null,
             passiveCaptcha = null,
-            merchantLogoUrl = null
+            merchantLogoUrl = null,
+            elementsSessionConfigId = UUID.randomUUID().toString(),
         )
     }
 

@@ -6,6 +6,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import java.util.UUID
 
 internal class FakeElementsSessionRepository(
     private val stripeIntent: StripeIntent,
@@ -71,7 +72,8 @@ internal class FakeElementsSessionRepository(
                     orderedPaymentMethodTypesAndWallets = stripeIntent.paymentMethodTypes,
                     experimentsData = null,
                     passiveCaptcha = passiveCaptchaParams,
-                    merchantLogoUrl = null
+                    merchantLogoUrl = null,
+                    elementsSessionConfigId = UUID.randomUUID().toString(),
                 )
             )
         }

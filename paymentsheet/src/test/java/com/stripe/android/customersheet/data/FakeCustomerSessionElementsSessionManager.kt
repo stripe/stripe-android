@@ -4,6 +4,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.SetupIntentFactory
+import java.util.UUID
 
 internal class FakeCustomerSessionElementsSessionManager(
     private val ephemeralKey: Result<CachedCustomerEphemeralKey> = Result.success(
@@ -59,7 +60,8 @@ internal class FakeCustomerSessionElementsSessionManager(
                 flags = emptyMap(),
                 experimentsData = null,
                 passiveCaptcha = null,
-                merchantLogoUrl = null
+                merchantLogoUrl = null,
+                elementsSessionConfigId = UUID.randomUUID().toString(),
             ),
             customer = customer,
             ephemeralKey = CachedCustomerEphemeralKey(

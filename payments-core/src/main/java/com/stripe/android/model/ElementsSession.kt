@@ -27,7 +27,8 @@ data class ElementsSession(
     val sessionsError: Throwable? = null,
     val customPaymentMethods: List<CustomPaymentMethod>,
     val elementsSessionId: String,
-    private val passiveCaptcha: PassiveCaptchaParams?
+    private val passiveCaptcha: PassiveCaptchaParams?,
+    val elementsSessionConfigId: String,
 ) : StripeModel {
 
     val linkPassthroughModeEnabled: Boolean
@@ -268,7 +269,8 @@ data class ElementsSession(
                 isGooglePayEnabled = true,
                 sessionsError = sessionsError,
                 elementsSessionId = elementsSessionId,
-                passiveCaptcha = null
+                passiveCaptcha = null,
+                elementsSessionConfigId = UUID.randomUUID().toString(),
             )
         }
     }
