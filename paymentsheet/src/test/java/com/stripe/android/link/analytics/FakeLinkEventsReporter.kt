@@ -26,6 +26,10 @@ internal open class FakeLinkEventsReporter : LinkEventsReporter {
         throw NotImplementedError()
     }
 
+    override fun onEmailSuggestionAccepted() {
+        calledCount++
+    }
+
     override fun onAccountLookupFailure(error: Throwable) {
         throw NotImplementedError()
     }
