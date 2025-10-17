@@ -12,6 +12,7 @@ import com.stripe.android.model.ConfirmationTokenClientContextParams
 import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.MandateDataParams
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.setupFutureUsage
@@ -249,7 +250,10 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     }
 
     private fun failIfUnsupportedPaymentMethod(paymentMethodCode: String?) {
-        val unsupportedPaymentMethods = setOf("konbini", "blik")
+        val unsupportedPaymentMethods = setOf(
+            PaymentMethod.Type.Konbini.code,
+            PaymentMethod.Type.Blik.code,
+        )
 
         if (paymentMethodCode in unsupportedPaymentMethods && !requestOptions.apiKeyIsLiveMode) {
             throw IllegalStateException(

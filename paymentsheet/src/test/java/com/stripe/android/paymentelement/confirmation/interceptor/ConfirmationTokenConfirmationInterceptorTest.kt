@@ -1131,9 +1131,12 @@ class ConfirmationTokenConfirmationInterceptorTest {
             }.exceptionOrNull()
 
             assertThat(exception).isInstanceOf<IllegalStateException>()
-            assertThat(exception?.message).contains("konbini")
-            assertThat(exception?.message).contains("not yet supported")
-            assertThat(exception?.message).contains("confirmation token")
+            assertThat(exception?.message).isEqualTo(
+                "(Test-mode only error) The payment method 'konbini' " +
+                    "is not yet supported with confirmation tokens. " +
+                    "Please contact us if you'd like to use this feature via a GitHub " +
+                    "issue on stripe-android."
+            )
         }
     }
 
@@ -1161,9 +1164,12 @@ class ConfirmationTokenConfirmationInterceptorTest {
             }.exceptionOrNull()
 
             assertThat(exception).isInstanceOf<IllegalStateException>()
-            assertThat(exception?.message).contains("blik")
-            assertThat(exception?.message).contains("not yet supported")
-            assertThat(exception?.message).contains("confirmation token")
+            assertThat(exception?.message).isEqualTo(
+                "(Test-mode only error) The payment method 'blik' " +
+                    "is not yet supported with confirmation tokens. " +
+                    "Please contact us if you'd like to use this feature via a GitHub " +
+                    "issue on stripe-android."
+            )
         }
     }
 
