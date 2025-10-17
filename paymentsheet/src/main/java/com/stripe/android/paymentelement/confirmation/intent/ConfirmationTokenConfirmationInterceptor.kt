@@ -60,6 +60,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     intent = intent,
                     confirmationToken = confirmationToken,
                     shippingValues = shippingValues,
+                    // For new PM, radar options is attached in paymentMethodData.radarOptions if provided.
+                    // hCaptchaToken = null here means we don't need to send a separate one when confirming the intent.
                     hCaptchaToken = null,
                 )
             },
