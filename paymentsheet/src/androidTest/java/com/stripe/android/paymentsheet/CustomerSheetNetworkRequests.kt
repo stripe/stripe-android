@@ -96,7 +96,7 @@ internal fun clientAttributionMetadataParams(): RequestMatcher {
     return RequestMatchers.composite(
         bodyPart(
             urlEncode("client_attribution_metadata[elements_session_config_id]"),
-            urlEncode("elements_session_123")
+            urlEncode("e961790f-43ed-4fcc-a534-74eeca28d042")
         ),
         bodyPart(
             urlEncode("client_attribution_metadata[merchant_integration_source]"),

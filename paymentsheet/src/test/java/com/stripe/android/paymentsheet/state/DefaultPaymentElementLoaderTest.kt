@@ -67,7 +67,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
-import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_ELEMENTS_SESSION_ID
+import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_ELEMENTS_SESSION_CONFIG_ID
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -175,7 +175,7 @@ internal class DefaultPaymentElementLoaderTest {
                     ),
                     shopPayConfiguration = null,
                     clientAttributionMetadata = ClientAttributionMetadata(
-                        elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_ID,
+                        elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
                         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
                     )

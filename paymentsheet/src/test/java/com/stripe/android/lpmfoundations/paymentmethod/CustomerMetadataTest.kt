@@ -14,6 +14,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.SavedSelection
 import org.junit.Test
+import java.util.UUID
 
 internal class CustomerMetadataTest {
 
@@ -250,7 +251,8 @@ internal class CustomerMetadataTest {
             flags = emptyMap(),
             experimentsData = null,
             passiveCaptcha = null,
-            merchantLogoUrl = null
+            merchantLogoUrl = null,
+            elementsSessionConfigId = UUID.randomUUID().toString(),
         )
 
         return CustomerSheetSession(

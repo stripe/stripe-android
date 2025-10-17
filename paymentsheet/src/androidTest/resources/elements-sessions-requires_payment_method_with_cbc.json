@@ -832,5 +832,6 @@
     "bancontact",
     "ideal"
   ],
-  "unverified_payment_methods_on_domain": ["apple_pay"]
+  "unverified_payment_methods_on_domain": ["apple_pay"],
+  "config_id": "e961790f-43ed-4fcc-a534-74eeca28d042"
 }

@@ -53,7 +53,7 @@ class ConsumerPaymentDetailsCreateParamsTest {
     @Test
     fun consumerPaymentDetailsCreateParams_Card_toParamMap_includesClientAttributionMetadata() {
         val clientAttributionMetadataMap = mapOf(
-            "elements_session_config_id" to "elements_session_123",
+            "elements_session_config_id" to "e961790f-43ed-4fcc-a534-74eeca28d042",
         )
         val params = ConsumerPaymentDetailsCreateParams.Card(
             cardPaymentMethodCreateParamsMap = mapOf(
@@ -71,7 +71,7 @@ class ConsumerPaymentDetailsCreateParamsTest {
     @Test
     fun consumerPaymentDetailsCreateParams_Bank_toParamMap_includesClientAttributionMetadata() {
         val clientAttributionMetadataMap = mapOf(
-            "elements_session_config_id" to "elements_session_123",
+            "elements_session_config_id" to "e961790f-43ed-4fcc-a534-74eeca28d042",
         )
         val params = ConsumerPaymentDetailsCreateParams.BankAccount(
             bankAccountId = "bank_123",
