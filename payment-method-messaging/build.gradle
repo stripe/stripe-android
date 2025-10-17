@@ -5,6 +5,7 @@ apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+apply plugin: 'dev.drewhamilton.poko'
 
 android {
     testOptions {
@@ -24,16 +25,33 @@ dependencies {
     implementation project(":payments-core")
     implementation project(":payments-ui-core")
     implementation project(":stripe-ui-core")
+    api libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+    implementation libs.kotlin.serialization
+
+    // AndroidX
+    api libs.androidx.activity
     implementation libs.androidx.annotation
+    implementation libs.androidx.appCompat
     implementation libs.androidx.browser
+    api libs.androidx.fragment
+    implementation libs.androidx.lifecycle
+    implementation libs.androidx.lifecycleCompose
+    implementation libs.androidx.savedState
+    implementation libs.androidx.viewModel
+
+    // Compose
+    api libs.compose.ui
+    implementation libs.compose.uiViewBinding
     implementation libs.compose.foundation
     implementation libs.compose.material
+    implementation libs.compose.materialIcons
+    implementation libs.compose.activity
     implementation libs.compose.navigation
-    implementation libs.compose.ui
-    implementation libs.dagger
-    implementation libs.kotlin.coroutines
-    implementation libs.kotlin.coroutinesAndroid
+    implementation libs.accompanist.systemUiController
 
+    // DI
+    implementation libs.dagger
     ksp libs.daggerCompiler
 
     testImplementation testLibs.androidx.archCore
