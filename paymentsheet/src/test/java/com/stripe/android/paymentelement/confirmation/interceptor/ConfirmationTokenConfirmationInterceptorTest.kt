@@ -1111,6 +1111,138 @@ class ConfirmationTokenConfirmationInterceptorTest {
     }
 
     @Test
+    fun `Fails with Konbini payment method in test mode`() {
+        val konbiniCreateParams = PaymentMethodCreateParams(
+            code = "konbini",
+            requiresMandate = false,
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS,
+        )
+
+        runConfirmationTokenInterceptorScenario { interceptor ->
+            val confirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = konbiniCreateParams,
+                optionsParams = null,
+                extraParams = null,
+                shouldSave = false,
+                passiveCaptchaParams = null,
+            )
+
+            val exception = runCatching {
+                interceptor.intercept(
+                    intent = PaymentIntentFactory.create(),
+                    confirmationOption = confirmationOption,
+                    shippingValues = null,
+                )
+            }.exceptionOrNull()
+
+            assertThat(exception).isInstanceOf<IllegalStateException>()
+            assertThat(exception?.message).isEqualTo(
+                "(Test-mode only error) The payment method 'konbini' " +
+                    "is not yet supported with confirmation tokens. " +
+                    "Please contact us if you'd like to use this feature via a GitHub " +
+                    "issue on stripe-android."
+            )
+        }
+    }
+
+    @Test
+    fun `Fails with Blik payment method in test mode`() {
+        val blikCreateParams = PaymentMethodCreateParams.createBlik(
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS,
+        )
+
+        runConfirmationTokenInterceptorScenario { interceptor ->
+            val confirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = blikCreateParams,
+                optionsParams = null,
+                extraParams = null,
+                shouldSave = false,
+                passiveCaptchaParams = null,
+            )
+
+            val exception = runCatching {
+                interceptor.intercept(
+                    intent = PaymentIntentFactory.create(),
+                    confirmationOption = confirmationOption,
+                    shippingValues = null,
+                )
+            }.exceptionOrNull()
+
+            assertThat(exception).isInstanceOf<IllegalStateException>()
+            assertThat(exception?.message).isEqualTo(
+                "(Test-mode only error) The payment method 'blik' " +
+                    "is not yet supported with confirmation tokens. " +
+                    "Please contact us if you'd like to use this feature via a GitHub " +
+                    "issue on stripe-android."
+            )
+        }
+    }
+
+    @Test
+    fun `Succeeds with Konbini payment method in live mode`() {
+        val konbiniCreateParams = PaymentMethodCreateParams(
+            code = "konbini",
+            requiresMandate = false,
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS,
+        )
+
+        runConfirmationTokenInterceptorScenario(isLiveMode = true) { interceptor ->
+            val confirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = konbiniCreateParams,
+                optionsParams = null,
+                extraParams = null,
+                shouldSave = false,
+                passiveCaptchaParams = null,
+            )
+
+            val nextStep = interceptor.intercept(
+                intent = PaymentIntentFactory.create(),
+                confirmationOption = confirmationOption,
+                shippingValues = null,
+            )
+
+            assertThat(nextStep).isEqualTo(
+                ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
+                    intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    completedFullPaymentFlow = true,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `Succeeds with Blik payment method in live mode`() {
+        val blikCreateParams = PaymentMethodCreateParams.createBlik(
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS,
+        )
+
+        runConfirmationTokenInterceptorScenario(isLiveMode = true) { interceptor ->
+            val confirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = blikCreateParams,
+                optionsParams = null,
+                extraParams = null,
+                shouldSave = false,
+                passiveCaptchaParams = null,
+            )
+
+            val nextStep = interceptor.intercept(
+                intent = PaymentIntentFactory.create(),
+                confirmationOption = confirmationOption,
+                shippingValues = null,
+            )
+
+            assertThat(nextStep).isEqualTo(
+                ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
+                    intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    completedFullPaymentFlow = true,
+                )
+            )
+        }
+    }
+
+    @Test
     fun `Saved PM - includes radarOptions when hCaptchaToken is provided for CSC flow`() {
         runConfirmationTokenInterceptorScenario(
             retrievedIntentStatus = StripeIntent.Status.RequiresConfirmation,
@@ -1161,12 +1293,14 @@ class ConfirmationTokenConfirmationInterceptorTest {
         observedParams: Turbine<ConfirmationTokenParams> = Turbine(),
         retrievedIntentStatus: StripeIntent.Status = StripeIntent.Status.Succeeded,
         initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_DEFERRED_INTENT,
+        isLiveMode: Boolean = false,
         block: suspend (IntentConfirmationInterceptor) -> Unit
     ) {
         runInterceptorScenario(
             initializationMode = initializationMode,
             scenario = InterceptorTestScenario(
                 ephemeralKeySecret = "ek_test_123",
+                publishableKeyProvider = { if (isLiveMode) "pk_live_123" else "pk_test_123" },
                 stripeRepository = createFakeStripeRepositoryForConfirmationToken(
                     observedParams,
                     retrievedIntentStatus,
