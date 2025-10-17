@@ -164,14 +164,14 @@ internal open class FakeLinkRepository : LinkRepository {
         bankAccountId: String,
         userEmail: String,
         consumerSessionClientSecret: String,
-        clientAttributionMetadata: ClientAttributionMetadata?,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ) = createBankAccountPaymentDetailsResult
 
     override suspend fun shareCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
         consumerSessionClientSecret: String,
-        clientAttributionMetadata: ClientAttributionMetadata?,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): Result<LinkPaymentDetails.Saved> = shareCardPaymentDetailsResult
 
     override suspend fun sharePaymentDetails(
@@ -182,7 +182,7 @@ internal open class FakeLinkRepository : LinkRepository {
         cvc: String?,
         allowRedisplay: String?,
         apiKey: String?,
-        clientAttributionMetadata: ClientAttributionMetadata?,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): Result<SharePaymentDetails> = sharePaymentDetails
 
     override suspend fun createPaymentMethod(

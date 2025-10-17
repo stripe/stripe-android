@@ -1424,7 +1424,7 @@ constructor(
             requiresMandate: Boolean,
             productUsage: Set<String>,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
-            clientAttributionMetadata: ClientAttributionMetadata? = null,
+            clientAttributionMetadata: ClientAttributionMetadata,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 code = PaymentMethod.Type.Link.code,
@@ -1456,7 +1456,7 @@ constructor(
             overrideParamMap: Map<String, @RawValue Any>?,
             productUsage: Set<String>,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
-            clientAttributionMetadata: ClientAttributionMetadata? = null,
+            clientAttributionMetadata: ClientAttributionMetadata,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 code = code,

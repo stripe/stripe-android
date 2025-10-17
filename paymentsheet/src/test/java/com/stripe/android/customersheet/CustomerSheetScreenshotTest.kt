@@ -9,6 +9,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
@@ -87,7 +88,7 @@ internal class CustomerSheetScreenshotTest {
         termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         sellerBusinessName = null,
         forceSetupFutureUseBehavior = false,
-        clientAttributionMetadata = null,
+        clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
     )
 
     private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(

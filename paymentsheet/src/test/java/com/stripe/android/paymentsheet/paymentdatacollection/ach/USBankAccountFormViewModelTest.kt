@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -92,7 +93,7 @@ class USBankAccountFormViewModelTest {
         termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         sellerBusinessName = null,
         forceSetupFutureUseBehavior = false,
-        clientAttributionMetadata = null,
+        clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()

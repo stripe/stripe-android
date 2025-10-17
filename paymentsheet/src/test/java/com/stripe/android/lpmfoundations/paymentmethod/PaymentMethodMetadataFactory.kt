@@ -97,7 +97,8 @@ internal object PaymentMethodMetadataFactory {
             forceSetupFutureUseBehaviorAndNewMandate = forceSetupFutureUseBehaviorAndNewMandate,
             passiveCaptchaParams = passiveCaptchaParams,
             openCardScanAutomatically = openCardScanAutomatically,
-            clientAttributionMetadata = clientAttributionMetadata,
+            clientAttributionMetadata =
+            clientAttributionMetadata ?: PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             attestOnIntentConfirmation = attestOnIntentConfirmation,
         )
     }

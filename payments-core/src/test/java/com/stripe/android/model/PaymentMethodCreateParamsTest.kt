@@ -319,7 +319,8 @@ class PaymentMethodCreateParamsTest {
             ),
             productUsage = setOf(),
             billingDetails = null,
-            requiresMandate = false
+            requiresMandate = false,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
 
         assertThat(
@@ -354,7 +355,8 @@ class PaymentMethodCreateParamsTest {
             ),
             productUsage = setOf(),
             billingDetails = null,
-            requiresMandate = false
+            requiresMandate = false,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
 
         assertThat(
@@ -384,7 +386,8 @@ class PaymentMethodCreateParamsTest {
             ),
             productUsage = setOf(),
             billingDetails = null,
-            requiresMandate = false
+            requiresMandate = false,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
 
         assertThat(
@@ -499,6 +502,12 @@ class PaymentMethodCreateParamsTest {
             clientAttributionMetadata.toParamMap(),
         )
     }
+
+    private val clientAttributionMetadata = ClientAttributionMetadata(
+        elementsSessionConfigId = "elements_session_123",
+        paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+        paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+    )
 
     private fun createFpx(): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(

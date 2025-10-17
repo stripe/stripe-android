@@ -2,6 +2,7 @@ package com.stripe.android.utils
 
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -66,7 +67,8 @@ internal class FakePaymentElementLoader(
                         cbcEligibility = cbcEligibility,
                         linkState = linkState,
                         passiveCaptchaParams = passiveCaptchaParams,
-                        clientAttributionMetadata = clientAttributionMetadata,
+                        clientAttributionMetadata =
+                        clientAttributionMetadata ?: PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                     ),
                 )
             )

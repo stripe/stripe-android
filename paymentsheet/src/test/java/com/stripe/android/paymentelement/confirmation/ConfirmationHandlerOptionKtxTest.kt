@@ -691,7 +691,7 @@ class ConfirmationHandlerOptionKtxTest {
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             forceSetupFutureUseBehaviorAndNewMandate = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
-            clientAttributionMetadata = null,
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
         )
     }
 }

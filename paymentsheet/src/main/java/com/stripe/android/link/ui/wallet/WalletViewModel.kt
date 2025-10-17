@@ -31,6 +31,7 @@ import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.utils.supports
 import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentIntent
@@ -317,7 +318,9 @@ internal class WalletViewModel(
     }
 
     private suspend fun handleExpiredCard(paymentDetail: ConsumerPaymentDetails.PaymentDetails) {
-        val paymentMethodCreateParams = uiState.value.toPaymentMethodCreateParams()
+        val paymentMethodCreateParams = uiState.value.toPaymentMethodCreateParams(
+            configuration.clientAttributionMetadata
+        )
         dismissalCoordinator.withDismissalDisabled {
             val updateParams = ConsumerPaymentDetailsUpdateParams(
                 id = paymentDetail.id,
@@ -656,13 +659,15 @@ internal class WalletViewModel(
     }
 }
 
-private fun WalletUiState.toPaymentMethodCreateParams(): PaymentMethodCreateParams {
+private fun WalletUiState.toPaymentMethodCreateParams(
+    clientAttributionMetadata: ClientAttributionMetadata,
+): PaymentMethodCreateParams {
     val expiryDateValues = createExpiryDateFormFieldValues(expiryDateInput)
     return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
         fieldValuePairs = expiryDateValues,
         code = Card.code,
         requiresMandate = false,
-        clientAttributionMetadata = null
+        clientAttributionMetadata = clientAttributionMetadata,
     )
 }
 

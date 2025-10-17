@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -104,7 +105,7 @@ internal object LinkTestUtils {
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             forceSetupFutureUseBehaviorAndNewMandate = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
-            clientAttributionMetadata = null,
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
         )
     }
 }

@@ -83,7 +83,7 @@ internal data class PaymentMethodMetadata(
     val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
     val passiveCaptchaParams: PassiveCaptchaParams?,
     val openCardScanAutomatically: Boolean,
-    val clientAttributionMetadata: ClientAttributionMetadata?,
+    val clientAttributionMetadata: ClientAttributionMetadata,
     val attestOnIntentConfirmation: Boolean,
 ) : Parcelable {
 
@@ -327,7 +327,7 @@ internal data class PaymentMethodMetadata(
             linkStateResult: LinkStateResult?,
             customerMetadata: CustomerMetadata?,
             initializationMode: PaymentElementLoader.InitializationMode,
-            clientAttributionMetadata: ClientAttributionMetadata?,
+            clientAttributionMetadata: ClientAttributionMetadata,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(

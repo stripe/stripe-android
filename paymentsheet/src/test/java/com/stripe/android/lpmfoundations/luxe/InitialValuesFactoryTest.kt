@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.luxe
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -52,7 +53,7 @@ class InitialValuesFactoryTest {
             )
         ),
         productUsage = emptySet(),
-        clientAttributionMetadata = null,
+        clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
     )
 
     @Test

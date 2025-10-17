@@ -43,6 +43,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
@@ -844,7 +845,10 @@ internal class CustomerSheetViewModel(
                 formFieldValues = null,
                 formElements = formElements,
                 formArguments = formArguments,
-                usBankAccountFormArguments = createDefaultUsBankArguments(stripeIntent),
+                usBankAccountFormArguments = createDefaultUsBankArguments(
+                    stripeIntent,
+                    paymentMethodMetadata.clientAttributionMetadata,
+                ),
                 draftPaymentSelection = null,
                 enabled = true,
                 isLiveMode = isLiveModeProvider(),
@@ -860,7 +864,10 @@ internal class CustomerSheetViewModel(
         )
     }
 
-    private fun createDefaultUsBankArguments(stripeIntent: StripeIntent?): USBankAccountFormArguments {
+    private fun createDefaultUsBankArguments(
+        stripeIntent: StripeIntent?,
+        clientAttributionMetadata: ClientAttributionMetadata,
+    ): USBankAccountFormArguments {
         return USBankAccountFormArguments(
             instantDebits = false,
             incentive = null,
@@ -896,7 +903,7 @@ internal class CustomerSheetViewModel(
             termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             sellerBusinessName = null,
             forceSetupFutureUseBehavior = false,
-            clientAttributionMetadata = customerState.value.metadata?.clientAttributionMetadata,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 
