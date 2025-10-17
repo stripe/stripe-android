@@ -106,9 +106,9 @@ class PaymentAnalyticsRequestFactoryTest {
                 ATTRIBUTION
             ).params
 
-        val timestamp = params["timestamp"] as? Long
+        val timestamp = params["timestamp"] as? Double
         assertThat(timestamp).isNotNull()
-        assertThat(timestamp).isGreaterThan(0L)
+        assertThat(timestamp).isGreaterThan(0.0)
 
         assertThat(params).isEqualTo(
             mapOf(
@@ -141,9 +141,9 @@ class PaymentAnalyticsRequestFactoryTest {
                 ATTRIBUTION
             ).params
 
-        val timestamp = params["timestamp"] as? Long
+        val timestamp = params["timestamp"] as? Double
         assertThat(timestamp).isNotNull()
-        assertThat(timestamp).isGreaterThan(0L)
+        assertThat(timestamp).isGreaterThan(0.0)
 
         assertThat(params).isEqualTo(
             mapOf(
@@ -404,9 +404,9 @@ class PaymentAnalyticsRequestFactoryTest {
 
         // Verify timestamp is a valid number
         val timestampParam = url.substringAfter("timestamp=").substringBefore("&")
-        val timestamp = timestampParam.toLongOrNull()
+        val timestamp = timestampParam.toDoubleOrNull()
         assertThat(timestamp).isNotNull()
-        assertThat(timestamp).isGreaterThan(0L)
+        assertThat(timestamp).isGreaterThan(0.0)
     }
 
     @Test

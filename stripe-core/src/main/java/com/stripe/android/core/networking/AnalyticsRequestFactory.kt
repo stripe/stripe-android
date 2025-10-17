@@ -110,7 +110,7 @@ open class AnalyticsRequestFactory(
         private const val ANALYTICS_PREFIX = "analytics"
         private const val ANALYTICS_NAME = "stripe_android"
         private const val ANALYTICS_VERSION = "1.0"
-        private const val MILLIS_TO_SECONDS = 1000L
+        private const val MILLIS_TO_SECONDS = 1000.0
 
         private val DEVICE_TYPE: String = "${Build.MANUFACTURER}_${Build.BRAND}_${Build.MODEL}"
 
