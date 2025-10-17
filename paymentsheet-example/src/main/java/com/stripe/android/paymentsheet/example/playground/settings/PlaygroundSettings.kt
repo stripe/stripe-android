@@ -561,6 +561,7 @@ internal class PlaygroundSettings private constructor(
                 )
             ),
             PassiveCaptchaDefinition,
+            AttestationOnIntentConfirmationDefinition,
             EnablePromptPaySettingsDefinition,
         )
 

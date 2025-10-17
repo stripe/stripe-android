@@ -82,7 +82,10 @@ data class ElementsSession(
         get() = linkSettings?.linkSignUpOptInInitialValue ?: false
 
     val enableAttestationOnIntentConfirmation: Boolean
-        get() = flags[Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION] == true
+        get() {
+            return flags[Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION] == true &&
+                FeatureFlags.enableAttestationOnIntentConfirmation.isEnabled
+        }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize

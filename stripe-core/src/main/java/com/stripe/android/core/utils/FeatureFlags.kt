@@ -17,6 +17,7 @@ object FeatureFlags {
     val enablePassiveCaptcha = FeatureFlag("Enable Passive Captcha")
     val forceLinkWebAuth = FeatureFlag("Link: Force web auth")
     val enablePromptPay = FeatureFlag("Enable PromptPay")
+    val enableAttestationOnIntentConfirmation = FeatureFlag("Enable Attestation on Intent Confirmation")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
