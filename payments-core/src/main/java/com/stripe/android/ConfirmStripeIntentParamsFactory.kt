@@ -44,7 +44,7 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
 
     abstract fun create(
         confirmationTokenId: String,
-        radarOptions: RadarOptions? = null
+        radarOptions: RadarOptions?,
     ): T
 
     fun create(
