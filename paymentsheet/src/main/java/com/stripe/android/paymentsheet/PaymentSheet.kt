@@ -47,6 +47,8 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
+import com.stripe.android.reactnative.ReactNativeSdkInternal
+import com.stripe.android.reactnative.UnregisterSignal
 import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
@@ -364,6 +366,18 @@ class PaymentSheet internal constructor(
         fun build(activity: ComponentActivity): PaymentSheet {
             initializeCallbacks()
             return PaymentSheet(DefaultPaymentSheetLauncher(activity, resultCallback))
+        }
+
+        /**
+         * Returns a [PaymentSheet].
+         *
+         * @param activity The Activity that is presenting [PaymentSheet].
+         * @param signal
+         */
+        @ReactNativeSdkInternal
+        fun build(activity: ComponentActivity, signal: UnregisterSignal): PaymentSheet {
+            initializeCallbacks()
+            return PaymentSheet(DefaultPaymentSheetLauncher(activity, signal, resultCallback))
         }
 
         /**
