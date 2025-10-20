@@ -42,6 +42,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_card_type_unknown">Tarjeta %1$s</string>
   <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
   <string name="stripe_link_confirm_payment_title">Confirmar detalles de pago</string>
+  <!-- Email suggestion prompt shown when we detect a typo. The %1$s is a placeholder for the suggested email address. -->
+  <string name="stripe_link_email_suggestion">¿Querías decir %1$s?</string>
+  <!-- CTA text for accepting the suggested email correction -->
+  <string name="stripe_link_email_suggestion_update">Sí, actualizar</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Inicia sesión o crea tu cuenta</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
