@@ -259,8 +259,9 @@ class PaymentMethodCreateParamsTest {
             PaymentMethodCreateParams.createLink(
                 paymentDetailsId,
                 consumerSessionClientSecret,
+                clientAttributionMetadata,
                 billingDetails,
-                extraParams
+                extraParams,
             ).toParamMap()
         ).isEqualTo(
             mapOf(
@@ -286,6 +287,7 @@ class PaymentMethodCreateParamsTest {
                     "email" to "john@doe.com",
                     "phone" to "+15555555555",
                 ),
+                "client_attribution_metadata" to clientAttributionMetadata.toParamMap(),
             )
         )
     }

@@ -196,6 +196,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             linkRepository.createPaymentMethod(
                 consumerSessionClientSecret = account.clientSecret,
                 paymentMethod = linkPaymentMethod,
+                clientAttributionMetadata = config.clientAttributionMetadata,
             ).getOrThrow()
         }
     }
@@ -211,6 +212,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     userEmail = account.email,
                     stripeIntent = config.stripeIntent,
                     consumerSessionClientSecret = account.clientSecret,
+                    clientAttributionMetadata = config.clientAttributionMetadata,
                 ).onSuccess {
                     errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
                 }

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
@@ -103,7 +104,8 @@ class PaymentMethodConfirmationOptionTest {
         val option = PaymentMethodConfirmationOption.New(
             createParams = PaymentMethodCreateParams.createLink(
                 paymentDetailsId = "payment_details_id",
-                consumerSessionClientSecret = "consumer_secret"
+                consumerSessionClientSecret = "consumer_secret",
+                clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             ),
             optionsParams = null,
             extraParams = PaymentMethodExtraParams.Link(setAsDefault = true),
@@ -119,7 +121,8 @@ class PaymentMethodConfirmationOptionTest {
         val option = PaymentMethodConfirmationOption.New(
             createParams = PaymentMethodCreateParams.createLink(
                 paymentDetailsId = "payment_details_id",
-                consumerSessionClientSecret = "consumer_secret"
+                consumerSessionClientSecret = "consumer_secret",
+                clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             ),
             optionsParams = null,
             extraParams = PaymentMethodExtraParams.Link(setAsDefault = false),

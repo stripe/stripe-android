@@ -7,6 +7,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
@@ -154,6 +155,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     cvc = cvc,
                     billingPhone = billingPhone,
                     allowRedisplay = allowRedisplay,
+                    clientAttributionMetadata = configuration.clientAttributionMetadata,
                 ),
                 extraParams = null,
                 optionsParams = null,
@@ -237,6 +239,7 @@ internal fun createPaymentMethodCreateParams(
     consumerSessionClientSecret: String,
     cvc: String?,
     billingPhone: String?,
+    clientAttributionMetadata: ClientAttributionMetadata,
     allowRedisplay: PaymentMethod.AllowRedisplay? = null,
 ): PaymentMethodCreateParams {
     val billingDetails = PaymentMethod.BillingDetails(
@@ -261,6 +264,7 @@ internal fun createPaymentMethodCreateParams(
         billingDetails = billingDetails.takeIf { it != PaymentMethod.BillingDetails() },
         extraParams = cvc?.let { mapOf("card" to mapOf("cvc" to cvc)) },
         allowRedisplay = allowRedisplay,
+        clientAttributionMetadata = clientAttributionMetadata,
     )
 }
 
