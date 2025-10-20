@@ -79,6 +79,10 @@ internal sealed interface PlaygroundState : Parcelable {
         val requireCvcRecollectionForDeferred
             get() = snapshot[RequireCvcRecollectionDefinition]
 
+        val onBehalfOf: String?
+            get() = snapshot[CustomerSessionOnBehalfOfSettingsDefinition]
+                    .value.takeIf { it.isNotBlank() }
+
         override val endpoint: String
             get() = snapshot[CustomEndpointDefinition] ?: defaultEndpoint
 
@@ -96,7 +100,8 @@ internal sealed interface PlaygroundState : Parcelable {
                 mode = checkoutMode.intentConfigurationMode(this),
                 paymentMethodTypes = paymentMethodTypes,
                 paymentMethodConfigurationId = paymentMethodConfigurationId,
-                requireCvcRecollection = requireCvcRecollectionForDeferred
+                requireCvcRecollection = requireCvcRecollectionForDeferred,
+                onBehalfOf = onBehalfOf,
             )
         }
 
@@ -149,9 +154,9 @@ internal sealed interface PlaygroundState : Parcelable {
                     value.isBlank()
                 }
 
-        val onBehalfOf: String
+        val onBehalfOf: String?
             get() = snapshot[CustomerSessionOnBehalfOfSettingsDefinition]
-                .value
+                .value.takeIf { it.isNotBlank() }
 
         fun customerSheetConfiguration(): CustomerSheet.Configuration {
             return snapshot.customerSheetConfiguration(this)
