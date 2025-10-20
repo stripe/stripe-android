@@ -158,6 +158,52 @@ class IntentFirstConfirmationInterceptorTest {
         assertRadarOptionsIsNull(confirmParams)
     }
 
+    @Test
+    fun `Returns confirm params with androidVerificationObject set to null for Saved payment method`() =
+        runInterceptorScenario(
+            initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+        ) { interceptor ->
+            val hCaptchaToken = "test-hcaptcha-token"
+            val nextStep = interceptor.intercept(
+                intent = PaymentIntentFactory.create(),
+                confirmationOption = PaymentMethodConfirmationOption.Saved(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    optionsParams = null,
+                    hCaptchaToken = hCaptchaToken,
+                    passiveCaptchaParams = null
+                ),
+                shippingValues = null,
+            )
+
+            val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
+
+            assertThat(confirmParams?.radarOptions?.hCaptchaToken).isEqualTo(hCaptchaToken)
+            assertThat(confirmParams?.radarOptions?.androidVerificationObject).isNull()
+        }
+
+    @Test
+    fun `Returns confirm params with RadarOptions always created for Saved payment method with null hCaptchaToken`() =
+        runInterceptorScenario(
+            initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+        ) { interceptor ->
+            val nextStep = interceptor.intercept(
+                intent = PaymentIntentFactory.create(),
+                confirmationOption = PaymentMethodConfirmationOption.Saved(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    optionsParams = null,
+                    hCaptchaToken = null,
+                    passiveCaptchaParams = null
+                ),
+                shippingValues = null,
+            )
+
+            val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
+
+            assertThat(confirmParams?.radarOptions).isNotNull()
+            assertThat(confirmParams?.radarOptions?.hCaptchaToken).isNull()
+            assertThat(confirmParams?.radarOptions?.androidVerificationObject).isNull()
+        }
+
     @OptIn(SharedPaymentTokenSessionPreview::class)
     private suspend fun interceptWithSavedPaymentMethod(
         hCaptchaToken: String?
