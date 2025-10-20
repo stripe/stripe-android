@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.testing.RadarOptionsFactory
 import kotlin.test.Test
 
 class ConfirmSetupIntentParamsTest {
@@ -236,7 +237,9 @@ class ConfirmSetupIntentParamsTest {
 
     @Test
     fun toParamMap_withRadarOptions_shouldCreateExpectedMap() {
-        val radarOptions = RadarOptions(hCaptchaToken = "test_token")
+        val radarOptions = RadarOptionsFactory.create(
+            verificationObject = null
+        )
         val params = ConfirmSetupIntentParams(
             paymentMethodId = "pm_123",
             clientSecret = CLIENT_SECRET,
@@ -267,7 +270,9 @@ class ConfirmSetupIntentParamsTest {
 
     @Test
     fun toParamMap_withSetAsDefaultPaymentMethodAndRadarOptions_shouldCreateExpectedMap() {
-        val radarOptions = RadarOptions(hCaptchaToken = "test_token")
+        val radarOptions = RadarOptionsFactory.create(
+            verificationObject = null
+        )
         val params = ConfirmSetupIntentParams
             .createWithSetAsDefaultPaymentMethod(
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,

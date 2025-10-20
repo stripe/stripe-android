@@ -42,6 +42,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.RadarOptionsFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -1089,7 +1090,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
                 passiveCaptchaParams = null,
-                hCaptchaToken = "test_hcaptcha_token_123",
+                hCaptchaToken = "test_token",
             )
 
             val nextAction = interceptor.intercept(
@@ -1099,7 +1100,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
             )
 
             assertThat(nextAction.asConfirmParams<ConfirmPaymentIntentParams>()?.radarOptions)
-                .isEqualTo(RadarOptions("test_hcaptcha_token_123"))
+                .isEqualTo(RadarOptionsFactory.create(verificationObject = null))
         }
     }
 
