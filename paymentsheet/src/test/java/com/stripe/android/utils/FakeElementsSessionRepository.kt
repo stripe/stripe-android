@@ -71,7 +71,8 @@ internal class FakeElementsSessionRepository(
                     orderedPaymentMethodTypesAndWallets = stripeIntent.paymentMethodTypes,
                     experimentsData = null,
                     passiveCaptcha = passiveCaptchaParams,
-                    merchantLogoUrl = null
+                    merchantLogoUrl = null,
+                    elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
                 )
             )
         }
@@ -79,5 +80,6 @@ internal class FakeElementsSessionRepository(
 
     companion object {
         const val DEFAULT_ELEMENTS_SESSION_ID = "session_1234"
+        const val DEFAULT_ELEMENTS_SESSION_CONFIG_ID = "config_1234"
     }
 }

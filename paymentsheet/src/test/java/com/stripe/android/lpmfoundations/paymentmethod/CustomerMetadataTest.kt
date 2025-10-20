@@ -250,7 +250,8 @@ internal class CustomerMetadataTest {
             flags = emptyMap(),
             experimentsData = null,
             passiveCaptcha = null,
-            merchantLogoUrl = null
+            merchantLogoUrl = null,
+            elementsSessionConfigId = null,
         )
 
         return CustomerSheetSession(

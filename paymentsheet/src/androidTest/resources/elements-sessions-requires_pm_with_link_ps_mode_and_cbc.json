@@ -268,5 +268,6 @@
     "autocomplete_allowed": true
   },
   "unactivated_payment_method_types": [],
-  "session_id": "elements_session_123"
+  "session_id": "elements_session_123",
+  "config_id": "e961790f-43ed-4fcc-a534-74eeca28d042"
 }

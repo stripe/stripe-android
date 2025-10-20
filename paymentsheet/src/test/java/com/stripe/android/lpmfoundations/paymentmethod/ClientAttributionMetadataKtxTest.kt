@@ -55,7 +55,7 @@ class ClientAttributionMetadataKtxTest {
 
     @Test
     fun `elements session config ID is set properly`() {
-        val expectedElementsSessionConfigId = "elements_session_123"
+        val expectedElementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042"
 
         val clientAttributionMetadata = createClientAttributionMetadata(
             elementsSessionConfigId = expectedElementsSessionConfigId,
@@ -89,7 +89,7 @@ class ClientAttributionMetadataKtxTest {
     }
 
     private fun createClientAttributionMetadata(
-        elementsSessionConfigId: String = "elements_session_123",
+        elementsSessionConfigId: String = "e961790f-43ed-4fcc-a534-74eeca28d042",
         initializationMode: PaymentElementLoader.InitializationMode =
             PaymentElementLoader.InitializationMode.PaymentIntent(
                 "cs_123"

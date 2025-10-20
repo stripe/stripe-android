@@ -464,7 +464,8 @@ class LogLinkGlobalHoldbackExposureTest {
             flags = emptyMap(),
             experimentsData = experimentsData,
             passiveCaptcha = null,
-            merchantLogoUrl = null
+            merchantLogoUrl = null,
+            elementsSessionConfigId = null,
         )
     }
 

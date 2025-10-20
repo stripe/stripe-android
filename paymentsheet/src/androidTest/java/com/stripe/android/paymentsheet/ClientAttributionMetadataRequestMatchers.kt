@@ -11,7 +11,7 @@ internal fun clientAttributionMetadataParamsInPaymentMethodData(): RequestMatche
     return RequestMatchers.composite(
         bodyPart(
             urlEncode("payment_method_data[client_attribution_metadata][elements_session_config_id]"),
-            urlEncode("elements_session_123")
+            urlEncode("e961790f-43ed-4fcc-a534-74eeca28d042")
         ),
         bodyPart(
             urlEncode("payment_method_data[client_attribution_metadata][payment_intent_creation_flow]"),
@@ -44,7 +44,7 @@ internal fun topLevelClientAttributionMetadataParams(): RequestMatcher {
     return RequestMatchers.composite(
         bodyPart(
             urlEncode("client_attribution_metadata[elements_session_config_id]"),
-            urlEncode("elements_session_123")
+            urlEncode("e961790f-43ed-4fcc-a534-74eeca28d042")
         ),
         bodyPart(
             urlEncode("client_attribution_metadata[payment_intent_creation_flow]"),
@@ -77,7 +77,7 @@ internal fun clientAttributionMetadataParamsForDeferredIntent(): RequestMatcher 
     return RequestMatchers.composite(
         bodyPart(
             urlEncode("client_attribution_metadata[elements_session_config_id]"),
-            urlEncode("elements_session_123")
+            urlEncode("e961790f-43ed-4fcc-a534-74eeca28d042")
         ),
         bodyPart(
             urlEncode("client_attribution_metadata[payment_intent_creation_flow]"),

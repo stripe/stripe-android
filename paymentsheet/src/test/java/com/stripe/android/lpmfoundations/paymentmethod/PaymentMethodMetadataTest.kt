@@ -1256,7 +1256,7 @@ internal class PaymentMethodMetadataTest {
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             openCardScanAutomatically = false,
             clientAttributionMetadata = ClientAttributionMetadata(
-                elementsSessionConfigId = elementsSession.elementsSessionId,
+                elementsSessionConfigId = elementsSession.elementsSessionConfigId,
                 paymentMethodSelectionFlow = null,
                 paymentIntentCreationFlow = null,
             ),
@@ -1382,7 +1382,8 @@ internal class PaymentMethodMetadataTest {
             orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
             experimentsData = null,
             merchantLogoUrl = null,
-            passiveCaptcha = passiveCaptchaParams
+            passiveCaptcha = passiveCaptchaParams,
+            elementsSessionConfigId = null,
         )
     }
 
