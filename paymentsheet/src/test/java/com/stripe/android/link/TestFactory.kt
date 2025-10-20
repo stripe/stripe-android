@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinitio
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
@@ -25,9 +26,11 @@ import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.MobileFallbackWebviewParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
+import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -251,7 +254,11 @@ internal object TestFactory {
         saveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
         forceSetupFutureUseBehaviorAndNewMandate = false,
         linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
-        clientAttributionMetadata = null,
+        clientAttributionMetadata = ClientAttributionMetadata(
+            elementsSessionConfigId = "elements_session_123",
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+        ),
     )
 
     val LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING = LINK_CONFIGURATION.copy(
@@ -292,7 +299,7 @@ internal object TestFactory {
         publishableKey = "",
         stripeAccountId = "",
         linkExpressMode = LinkExpressMode.DISABLED,
-        linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+        linkAccountInfo = LinkAccountUpdate.Value(LINK_ACCOUNT),
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
         launchMode = LinkLaunchMode.Full,
         passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),

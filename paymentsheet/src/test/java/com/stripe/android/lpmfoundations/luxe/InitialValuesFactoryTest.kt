@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.luxe
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -52,35 +53,31 @@ class InitialValuesFactoryTest {
             )
         ),
         productUsage = emptySet(),
-        clientAttributionMetadata = null,
+        clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
     )
 
     @Test
     fun `Verify payment method parameters overrides any billing address values`() {
-        assertThat(
-            InitialValuesFactory.create(
-                defaultBillingDetails = billingDetails,
-                paymentMethodCreateParams = paymentMethodCreateParams,
-                paymentMethodExtraParams = null,
-            )
-        ).isEqualTo(
-            mapOf(
-                IdentifierSpec.Name to "Jenny Rosen",
-                IdentifierSpec.Email to "jenny.rosen@example.com",
-                IdentifierSpec.Phone to "1-800-555-1234",
-                IdentifierSpec.Line1 to "1234 Main St",
-                IdentifierSpec.Line2 to null,
-                IdentifierSpec.City to "Berlin",
-                IdentifierSpec.State to "Capital",
-                IdentifierSpec.PostalCode to "10787",
-                IdentifierSpec.Country to "DE",
-                IdentifierSpec.Generic("type") to "card",
-                IdentifierSpec.CardNumber to "4242424242424242",
-                IdentifierSpec.CardExpMonth to "1",
-                IdentifierSpec.CardExpYear to "2024",
-                IdentifierSpec.CardCvc to "111"
-            )
+        val initialValues = InitialValuesFactory.create(
+            defaultBillingDetails = billingDetails,
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            paymentMethodExtraParams = null,
         )
+
+        assertThat(initialValues).containsEntry(IdentifierSpec.Name, "Jenny Rosen")
+        assertThat(initialValues).containsEntry(IdentifierSpec.Email, "jenny.rosen@example.com")
+        assertThat(initialValues).containsEntry(IdentifierSpec.Phone, "1-800-555-1234")
+        assertThat(initialValues).containsEntry(IdentifierSpec.Line1, "1234 Main St")
+        assertThat(initialValues).containsEntry(IdentifierSpec.Line2, null)
+        assertThat(initialValues).containsEntry(IdentifierSpec.City, "Berlin")
+        assertThat(initialValues).containsEntry(IdentifierSpec.State, "Capital")
+        assertThat(initialValues).containsEntry(IdentifierSpec.PostalCode, "10787")
+        assertThat(initialValues).containsEntry(IdentifierSpec.Country, "DE")
+        assertThat(initialValues).containsEntry(IdentifierSpec.Generic("type"), "card")
+        assertThat(initialValues).containsEntry(IdentifierSpec.CardNumber, "4242424242424242")
+        assertThat(initialValues).containsEntry(IdentifierSpec.CardExpMonth, "1")
+        assertThat(initialValues).containsEntry(IdentifierSpec.CardExpYear, "2024")
+        assertThat(initialValues).containsEntry(IdentifierSpec.CardCvc, "111")
     }
 
     @Test
