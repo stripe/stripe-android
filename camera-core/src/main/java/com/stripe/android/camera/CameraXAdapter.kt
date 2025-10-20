@@ -26,9 +26,11 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.camera.framework.exception.ImageTypeNotSupportedException
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import android.hardware.camera2.CameraCharacteristics
-import com.stripe.android.camera.framework.exception.ImageTypeNotSupportedException
+import android.hardware.camera2.CameraManager
+import android.content.Context
 import com.stripe.android.camera.framework.image.NV21Image
 import com.stripe.android.camera.framework.image.getRenderScript
 import com.stripe.android.camera.framework.util.mapArray
@@ -181,6 +183,11 @@ class CameraXAdapter(
     private val cameraProviderFuture = ProcessCameraProvider.getInstance(activity)
     private lateinit var lifecycleOwner: LifecycleOwner
 
+    // latest camera metadata from analyzer frames
+    private var latestExposureIso: Float? = null
+    private var latestFocalLength: Float? = null
+    private var currentCameraId: String? = null
+
     private val cameraListeners = mutableListOf<(Camera) -> Unit>()
 
     /** Blocking camera operations are performed using this executor */
@@ -257,20 +264,22 @@ class CameraXAdapter(
 
     /** Return current focal length in mm if available. */
     fun getFocalLength(): Float? {
-        return camera?.cameraInfo?.let { info ->
-            runCatching {
-                val c2Info = Camera2CameraInfo.from(info)
-                val chars = c2Info.getCameraCharacteristics()
-                val focalLengths = chars.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)
-                focalLengths?.firstOrNull()
-            }.getOrNull()
-        }
+        // Prefer cached value from characteristics if set
+        latestFocalLength?.let { return it }
+        return runCatching {
+            val camId = currentCameraId ?: Camera2CameraInfo.from(requireNotNull(camera).cameraInfo).cameraId
+            val cm = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+            val chars = cm.getCameraCharacteristics(camId)
+            val focal = chars.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.firstOrNull()
+            latestFocalLength = focal
+            focal
+        }.getOrNull()
     }
 
-    /** Return current exposure ISO if available. Not always readable via CameraX; may return null. */
+    /** Return current exposure ISO if available. May be null if not yet measured. */
     fun getExposureIso(): Float? {
-        // Not directly exposed by CameraX without custom capture callbacks; return null for now.
-        return null
+        // CameraX does not provide current ISO without deeper interop; return null until available
+        return latestExposureIso
     }
 
     override fun setFocus(point: PointF) {
@@ -359,6 +368,7 @@ class CameraXAdapter(
                 analysis.setAnalyzer(
                     cameraExecutor
                 ) { image ->
+                    // Analyzer path does not provide per-frame ISO across all CameraX versions; keep latestExposureIso as-is.
                     val bitmap = image.toBitmap(getRenderScript(activity))
                         .rotate(image.imageInfo.rotationDegrees.toFloat())
                     image.close()
@@ -385,6 +395,10 @@ class CameraXAdapter(
                 preview,
                 imageAnalyzer
             )
+            // save camera id for characteristics lookup
+            runCatching {
+                currentCameraId = Camera2CameraInfo.from(newCamera.cameraInfo).cameraId
+            }
             notifyCameraListeners(newCamera)
             camera = newCamera
 
