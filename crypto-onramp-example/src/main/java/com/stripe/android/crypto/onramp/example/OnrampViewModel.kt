@@ -135,7 +135,23 @@ internal class OnrampViewModel(
                 val response = result.value
                 if (response.success) {
                     _message.value = "Sign up successful!"
-                    _uiState.update { it.copy(screen = Screen.Authentication, authToken = response.token) }
+
+                    val hasLinkAccountResult = onrampCoordinator.hasLinkAccount(currentEmail)
+
+                    when (hasLinkAccountResult) {
+                        is OnrampHasLinkAccountResult.Completed -> {
+                            if (hasLinkAccountResult.hasLinkAccount) {
+                                _uiState.update { it.copy(screen = Screen.Authentication, authToken = response.token) }
+                            } else {
+                                _message.value = "No account found, register!"
+                                _uiState.update { it.copy(screen = Screen.Registration, authToken = response.token) }
+                            }
+                        }
+                        is OnrampHasLinkAccountResult.Failed -> {
+                            _message.value = "Has Link Account failed: ${hasLinkAccountResult.error}"
+                            _uiState.update { it.copy(screen = Screen.LoginSignup, authToken = response.token) }
+                        }
+                    }
                 } else {
                     _message.value = "Sign up failed: Unknown Error"
                     _uiState.update { it.copy(screen = Screen.LoginSignup, loadingMessage = null) }
