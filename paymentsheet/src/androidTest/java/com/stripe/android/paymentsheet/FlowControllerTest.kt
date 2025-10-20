@@ -39,6 +39,7 @@ import com.stripe.android.paymentsheet.utils.MultipleInstancesTestTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
+import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.paymentsheet.utils.runMultipleFlowControllerInstancesTest
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST
@@ -352,31 +353,39 @@ internal class FlowControllerTest {
     }
 
     @Test
-    fun testElementsSessionSocketError(
-        @TestParameter integrationType: IntegrationType,
-    ) = runFlowControllerTest(
-        networkRule = networkRule,
-        integrationType = integrationType,
-        resultCallback = ::assertFailed,
-    ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.socketPolicy = SocketPolicy.DISCONNECT_AFTER_REQUEST
+    fun testElementsSessionSocketError() {
+        lateinit var flowController: PaymentSheet.FlowController
+        val scenario = ActivityScenario.launch(MainActivity::class.java)
+
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            @Suppress("Deprecation")
+            flowController = PaymentSheet.FlowController.create(
+                activity = it,
+                paymentOptionCallback = {
+                    throw AssertionError("Not expected")
+                },
+                paymentResultCallback = {
+                    throw AssertionError("Not expected")
+                },
+            )
         }
 
-        testContext.configureFlowController {
-            configureWithPaymentIntent(
+        val countDownLatch = CountDownLatch(1)
+
+        scenario.onActivity {
+            flowController.configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = defaultConfiguration,
                 callback = { success, error ->
-                    assertThat(success).isTrue()
-                    assertThat(error).isNull()
-                    presentPaymentOptions()
+                    assertThat(success).isFalse()
+                    assertThat(error).isNotNull()
+                    countDownLatch.countDown()
                 }
             )
         }
+
+        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
     @Test
