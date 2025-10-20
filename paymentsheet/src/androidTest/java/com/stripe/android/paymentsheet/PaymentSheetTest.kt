@@ -285,7 +285,7 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
-            response.setResponseCode(400)
+            response.setResponseCode(500)
         }
 
         networkRule.enqueue(
@@ -775,5 +775,26 @@ internal class PaymentSheetTest {
 
         page.assertMandateIsMissing()
         testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testSocketErrorElementsSessions() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertFailed,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.socketPolicy = SocketPolicy.DISCONNECT_AFTER_REQUEST
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = defaultConfiguration,
+            )
+        }
     }
 }
