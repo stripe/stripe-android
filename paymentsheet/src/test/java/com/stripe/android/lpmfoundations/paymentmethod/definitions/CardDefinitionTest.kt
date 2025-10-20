@@ -581,7 +581,6 @@ class CardDefinitionTest {
         assertThat(
             (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
         ).isTrue()
-
     }
 
     @Test
@@ -603,7 +602,6 @@ class CardDefinitionTest {
         assertThat(
             (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
         ).isFalse()
-
     }
 
     @Test
@@ -625,7 +623,6 @@ class CardDefinitionTest {
         assertThat(
             (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
         ).isFalse()
-
     }
 
     private fun createLinkConfiguration(): LinkConfiguration {

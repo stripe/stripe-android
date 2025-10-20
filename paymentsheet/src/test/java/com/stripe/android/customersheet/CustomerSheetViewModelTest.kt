@@ -3614,7 +3614,6 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `init emits CustomerSheetViewState#AddPaymentMethod shouldAutomaticallyLaunchCardScan true when no payment methods available`() = runTest(testDispatcher) {
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             configuration = CustomerSheet.Configuration(
@@ -3641,7 +3640,6 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `When CustomerViewAction#OnAddCardPressed, shouldAutomaticallyLaunchCardScan true`() = runTest(testDispatcher) {
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             configuration = CustomerSheet.Configuration(
@@ -3714,7 +3712,6 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `After confirming a card, the card scan should be shown when trying to add another card`() = runTest(testDispatcher) {
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             intentDataSource = FakeCustomerSheetIntentDataSource(
@@ -3774,7 +3771,6 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `After leaving card form, the card scan should be shown when trying to add another card`() = runTest(testDispatcher) {
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             intentDataSource = FakeCustomerSheetIntentDataSource(
