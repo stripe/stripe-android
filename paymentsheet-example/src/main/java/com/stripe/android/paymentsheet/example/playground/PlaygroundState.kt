@@ -81,7 +81,7 @@ internal sealed interface PlaygroundState : Parcelable {
 
         val onBehalfOf: String?
             get() = snapshot[CustomerSessionOnBehalfOfSettingsDefinition]
-                    .value.takeIf { it.isNotBlank() }
+                .value.takeIf { it.isNotBlank() }
 
         override val endpoint: String
             get() = snapshot[CustomEndpointDefinition] ?: defaultEndpoint
