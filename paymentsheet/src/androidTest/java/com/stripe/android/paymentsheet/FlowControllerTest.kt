@@ -39,12 +39,14 @@ import com.stripe.android.paymentsheet.utils.MultipleInstancesTestTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
+import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.paymentsheet.utils.runMultipleFlowControllerInstancesTest
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
+import okhttp3.mockwebserver.SocketPolicy
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
@@ -314,7 +316,7 @@ internal class FlowControllerTest {
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
-            response.setResponseCode(400)
+            response.setResponseCode(500)
         }
 
         networkRule.enqueue(
@@ -348,6 +350,42 @@ internal class FlowControllerTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+    }
+
+    @Test
+    fun testElementsSessionSocketError() {
+        lateinit var flowController: PaymentSheet.FlowController
+        val scenario = ActivityScenario.launch(MainActivity::class.java)
+
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            @Suppress("Deprecation")
+            flowController = PaymentSheet.FlowController.create(
+                activity = it,
+                paymentOptionCallback = {
+                    throw AssertionError("Not expected")
+                },
+                paymentResultCallback = {
+                    throw AssertionError("Not expected")
+                },
+            )
+        }
+
+        val countDownLatch = CountDownLatch(1)
+
+        scenario.onActivity {
+            flowController.configureWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = defaultConfiguration,
+                callback = { success, error ->
+                    assertThat(success).isFalse()
+                    assertThat(error).isNotNull()
+                    countDownLatch.countDown()
+                }
+            )
+        }
+
+        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
     @Test
@@ -1012,7 +1050,7 @@ internal class FlowControllerTest {
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
-            response.setResponseCode(400)
+            response.setResponseCode(500)
         }
 
         networkRule.enqueue(

@@ -4,8 +4,10 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.common.di.MOBILE_SESSION_ID
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.HTTP_INTERNAL_SERVER_ERROR
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
@@ -81,7 +83,11 @@ internal class RealElementsSessionRepository @Inject constructor(
         )
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->
-            fallback(params, elementsSessionFailure)
+            if (shouldFallback(elementsSession)) {
+                fallback(params, elementsSessionFailure)
+            } else {
+                elementsSession
+            }
         }
     }
 
@@ -114,6 +120,12 @@ internal class RealElementsSessionRepository @Inject constructor(
                 sessionsError = elementsSessionFailure
             )
         }
+    }
+
+    private fun shouldFallback(elementsSession: Result<ElementsSession>): Boolean {
+        return (elementsSession.exceptionOrNull() as? StripeException)?.let {
+            it.statusCode >= HTTP_INTERNAL_SERVER_ERROR
+        } ?: false
     }
 }
 

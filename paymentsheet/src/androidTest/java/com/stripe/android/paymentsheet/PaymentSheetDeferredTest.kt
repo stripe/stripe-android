@@ -657,7 +657,7 @@ internal class PaymentSheetDeferredTest {
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
-            response.setResponseCode(400)
+            response.setResponseCode(500)
         }
 
         testContext.presentPaymentSheet {
@@ -730,7 +730,7 @@ internal class PaymentSheetDeferredTest {
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
-            response.setResponseCode(400)
+            response.setResponseCode(500)
         }
 
         testContext.presentPaymentSheet {
