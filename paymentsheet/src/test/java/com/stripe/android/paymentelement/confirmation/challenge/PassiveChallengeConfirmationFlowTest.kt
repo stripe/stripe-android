@@ -4,7 +4,6 @@ import com.stripe.android.challenge.PassiveChallengeActivityResult
 import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
-import com.stripe.android.model.RadarOptions
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption

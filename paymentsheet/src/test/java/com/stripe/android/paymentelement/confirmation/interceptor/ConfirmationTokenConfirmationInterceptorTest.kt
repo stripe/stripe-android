@@ -19,7 +19,6 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.ConfirmationTokenJsonParser
 import com.stripe.android.networking.StripeRepository
