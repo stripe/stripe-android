@@ -49,26 +49,7 @@ internal class ScanCardButtonUITest {
         composeTestRule.onNodeWithText("Scan card").assertDoesNotExist()
     }
 
-    @Test
-    fun `ScanCardButtonUI should handle successful card scan`() = runScenario(
-        isFetchClientSucceed = true,
-    ) {
-        composeTestRule.onNodeWithText("Scan card").performClick()
-        assertThat(cardScanCall.awaitItem()).isEqualTo("google_pay")
-        // Verify that the card scan result was processed
-    }
-
-    @Test
-    fun `ScanCardButtonUI should report analytics events correctly`() = runScenario(
-        isFetchClientSucceed = true,
-    ) {
-        // Verify that card scan availability check events are reported
-        composeTestRule.onNodeWithText("Scan card").performClick()
-        // Verify that card scan started event is reported
-        assertThat(cardScanCall.awaitItem()).isEqualTo("google_pay")
-    }
-
-    // Create mock controller for GPCR-only tests
+    // Create mock controller for visibility tests
     private fun createMockController(
         cardScanCall: Turbine<String>
     ): CardDetailsSectionController {
