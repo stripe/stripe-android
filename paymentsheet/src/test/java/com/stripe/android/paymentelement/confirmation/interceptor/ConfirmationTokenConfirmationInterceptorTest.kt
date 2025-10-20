@@ -990,88 +990,58 @@ class ConfirmationTokenConfirmationInterceptorTest {
         assertThat(observedParams[0].clientContext?.requireCvcRecollection).isEqualTo(true)
     }
 
-    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
     @Test
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
     fun `SFU priority - user checkbox takes highest priority over PMO SFU for New payment method`() {
-        val observedParams = Turbine<ConfirmationTokenParams>()
-        runConfirmationTokenInterceptorScenario(
-            observedParams = observedParams,
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 1099L,
-                        currency = "usd",
-                        paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-                            mapOf(
-                                PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession
-                            )
-                        )
-                    ),
-                )
-            ),
-        ) { interceptor ->
-            val confirmationOption = PaymentMethodConfirmationOption.New(
-                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                optionsParams = PaymentMethodOptionsParams.Card(
-                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-                ),
-                extraParams = null,
-                shouldSave = true,
-                passiveCaptchaParams = null,
-            )
-
-            interceptor.intercept(
-                intent = PaymentIntentFactory.create(),
-                confirmationOption = confirmationOption,
-                shippingValues = null,
-            )
-
-            // User checkbox sets OffSession, should not be overridden by PMO SFU
-            assertThat(observedParams.awaitItem().setUpFutureUsage)
-                .isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
-        }
+        runSfuPriorityTest(
+            pmoSfu = PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
+            userCheckbox = true,
+            expectedSfu = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+        )
     }
 
     @Test
     @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
     fun `SFU priority - PMO SFU used when no user checkbox for New payment method`() {
-        val observedParams = Turbine<ConfirmationTokenParams>()
-        runConfirmationTokenInterceptorScenario(
-            observedParams = observedParams,
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 1099L,
-                        currency = "usd",
-                        paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-                            mapOf(
-                                PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
-                            )
-                        )
-                    ),
-                )
-            ),
-        ) { interceptor ->
-            interceptor.interceptDefaultNewPaymentMethod()
-
-            // No user checkbox, should use PMO SFU from IntentConfiguration
-            assertThat(observedParams.awaitItem().setUpFutureUsage)
-                .isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
-        }
+        runSfuPriorityTest(
+            pmoSfu = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+            expectedSfu = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+        )
     }
 
     @Test
-    fun `SFU priority - no SFU when no user checkbox and no PMO SFU`() {
-        val observedParams = Turbine<ConfirmationTokenParams>()
-        runConfirmationTokenInterceptorScenario(
-            observedParams = observedParams,
-            initializationMode = DEFAULT_DEFERRED_INTENT,
-        ) { interceptor ->
-            interceptor.interceptDefaultNewPaymentMethod()
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    fun `SFU priority - user checkbox takes priority over intent SFU`() {
+        runSfuPriorityTest(
+            intentSfu = PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
+            userCheckbox = true,
+            expectedSfu = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+        )
+    }
 
-            // No user checkbox, no PMO SFU
-            assertThat(observedParams.awaitItem().setUpFutureUsage).isNull()
-        }
+    @Test
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    fun `SFU priority - PMO SFU takes priority over intent SFU`() {
+        runSfuPriorityTest(
+            intentSfu = PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
+            pmoSfu = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+            expectedSfu = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+        )
+    }
+
+    @Test
+    fun `SFU priority - intent SFU used as fallback when no user checkbox and no PMO SFU`() {
+        runSfuPriorityTest(
+            intentSfu = PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
+            expectedSfu = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+        )
+    }
+
+    @Test
+    fun `SFU priority - no SFU when no user checkbox, no PMO SFU, and no intent SFU`() {
+        runSfuPriorityTest(
+            expectedSfu = null
+        )
     }
 
     @Test
@@ -1161,12 +1131,14 @@ class ConfirmationTokenConfirmationInterceptorTest {
         observedParams: Turbine<ConfirmationTokenParams> = Turbine(),
         retrievedIntentStatus: StripeIntent.Status = StripeIntent.Status.Succeeded,
         initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_DEFERRED_INTENT,
+        isLiveMode: Boolean = true,
         block: suspend (IntentConfirmationInterceptor) -> Unit
     ) {
         runInterceptorScenario(
             initializationMode = initializationMode,
             scenario = InterceptorTestScenario(
                 ephemeralKeySecret = "ek_test_123",
+                publishableKeyProvider = { if (isLiveMode) "pk_live_123" else "pk_test_123" },
                 stripeRepository = createFakeStripeRepositoryForConfirmationToken(
                     observedParams,
                     retrievedIntentStatus,
@@ -1177,5 +1149,75 @@ class ConfirmationTokenConfirmationInterceptorTest {
             ),
             test = block
         )
+    }
+
+    /**
+     * Helper to test SFU priority scenarios with cleaner syntax.
+     *
+     * Validates that both setUpFutureUsage and clientContext.setupFutureUsage
+     * use the same resolution logic and stay in sync.
+     *
+     * @param intentSfu Setup future usage on the intent configuration
+     * @param pmoSfu Setup future usage in payment method options (PMO)
+     * @param userCheckbox Whether user checked the "save for future use" checkbox (highest priority)
+     * @param expectedSfu Expected SFU result
+     */
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    private fun runSfuPriorityTest(
+        intentSfu: PaymentSheet.IntentConfiguration.SetupFutureUse? = null,
+        pmoSfu: PaymentSheet.IntentConfiguration.SetupFutureUse? = null,
+        userCheckbox: Boolean = false,
+        expectedSfu: ConfirmPaymentIntentParams.SetupFutureUsage?,
+    ) {
+        val observedParams = Turbine<ConfirmationTokenParams>()
+
+        // Build payment mode with optional PMO
+        val paymentMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+            amount = 1099L,
+            currency = "usd",
+            setupFutureUse = intentSfu,
+            paymentMethodOptions = pmoSfu?.let {
+                PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
+                    mapOf(PaymentMethod.Type.Card to it)
+                )
+            }
+        )
+
+        runConfirmationTokenInterceptorScenario(
+            observedParams = observedParams,
+            isLiveMode = false,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(mode = paymentMode)
+            ),
+        ) { interceptor ->
+            if (userCheckbox) {
+                // Test with user checkbox checked (always OffSession)
+                val confirmationOption = PaymentMethodConfirmationOption.New(
+                    createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    optionsParams = PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                    ),
+                    extraParams = null,
+                    shouldSave = true,
+                    passiveCaptchaParams = null,
+                )
+                interceptor.intercept(
+                    intent = PaymentIntentFactory.create(),
+                    confirmationOption = confirmationOption,
+                    shippingValues = null,
+                )
+            } else {
+                // Test without user checkbox
+                interceptor.interceptDefaultNewPaymentMethod()
+            }
+
+            val params = observedParams.awaitItem()
+
+            // Verify main SFU value
+            assertThat(params.setUpFutureUsage).isEqualTo(expectedSfu)
+
+            // Verify clientContext SFU matches (clientContext is only populated in test mode)
+            assertThat(params.clientContext?.setupFutureUsage).isEqualTo(expectedSfu)
+        }
     }
 }
