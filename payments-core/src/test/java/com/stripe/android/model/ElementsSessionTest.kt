@@ -165,6 +165,7 @@ class ElementsSessionTest {
             customPaymentMethods = emptyList(),
             elementsSessionId = "elements_session_test",
             passiveCaptcha = passiveCaptcha,
+            elementsSessionConfigId = null,
         )
     }
 }

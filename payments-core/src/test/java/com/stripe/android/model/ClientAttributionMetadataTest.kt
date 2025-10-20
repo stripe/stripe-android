@@ -10,7 +10,7 @@ class ClientAttributionMetadataTest {
     @Test
     fun `toParamMap() creates correct params`() {
         val clientAttributionMetadataParams = ClientAttributionMetadata(
-            elementsSessionConfigId = "elements_session_123",
+            elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
         ).toParamMap()
@@ -18,7 +18,7 @@ class ClientAttributionMetadataTest {
         assertThat(clientAttributionMetadataParams).hasSize(7)
         assertThat(clientAttributionMetadataParams).containsEntry(
             "elements_session_config_id",
-            "elements_session_123"
+            "e961790f-43ed-4fcc-a534-74eeca28d042"
         )
         assertThat(clientAttributionMetadataParams).containsEntry(
             "payment_intent_creation_flow",
@@ -49,7 +49,7 @@ class ClientAttributionMetadataTest {
     @Test
     fun `toParamMap() omits paymentIntentCreationFlow if null`() {
         val clientAttributionMetadataParams = ClientAttributionMetadata(
-            elementsSessionConfigId = "elements_session_123",
+            elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
             paymentIntentCreationFlow = null,
         ).toParamMap()
@@ -61,12 +61,24 @@ class ClientAttributionMetadataTest {
     @Test
     fun `toParamMap() omits paymentMethodSelectionFlow if null`() {
         val clientAttributionMetadataParams = ClientAttributionMetadata(
-            elementsSessionConfigId = "elements_session_123",
+            elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = null,
         ).toParamMap()
 
         assertThat(clientAttributionMetadataParams).hasSize(6)
         assertThat(clientAttributionMetadataParams).doesNotContainKey("payment_method_selection_flow")
+    }
+
+    @Test
+    fun `toParamMap() omits elementsSessionConfigId if null`() {
+        val clientAttributionMetadataParams = ClientAttributionMetadata(
+            elementsSessionConfigId = null,
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
+        ).toParamMap()
+
+        assertThat(clientAttributionMetadataParams).hasSize(6)
+        assertThat(clientAttributionMetadataParams).doesNotContainKey("elements_session_config_id")
     }
 }

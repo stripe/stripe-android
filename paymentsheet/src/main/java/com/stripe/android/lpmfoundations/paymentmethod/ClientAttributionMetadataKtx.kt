@@ -6,7 +6,7 @@ import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal fun ClientAttributionMetadata.Companion.create(
-    elementsSessionConfigId: String,
+    elementsSessionConfigId: String?,
     initializationMode: PaymentElementLoader.InitializationMode,
     automaticPaymentMethodsEnabled: Boolean,
 ): ClientAttributionMetadata {

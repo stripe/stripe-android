@@ -720,7 +720,8 @@ internal class DefaultCustomerSheetLoaderTest {
             orderedPaymentMethodTypesAndWallets = intent.paymentMethodTypes,
             experimentsData = null,
             passiveCaptcha = null,
-            merchantLogoUrl = null
+            merchantLogoUrl = null,
+            elementsSessionConfigId = null,
         )
     }
 
