@@ -12,7 +12,9 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
+import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.parcelize.Parcelize
 
@@ -35,6 +37,29 @@ class AddressLauncher internal constructor(
     ) : this(
         application = activity.application,
         activityResultLauncher = activity.registerForActivityResult(
+            AddressElementActivityContract
+        ) {
+            callback.onAddressLauncherResult(it)
+        },
+    )
+
+    /**
+     * Constructor to be used when launching the address element from an Activity.
+     *
+     * @param activity  the Activity that is presenting the address element.
+     * @param signal
+     * @param callback  called with the result after the address element is dismissed.
+     */
+    @ReactNativeSdkInternal
+    constructor(
+        activity: ComponentActivity,
+        signal: UnregisterSignal,
+        callback: AddressLauncherResultCallback
+    ) : this(
+        application = activity.application,
+        activityResultLauncher = registerForReactNativeActivityResult(
+            activity,
+            signal,
             AddressElementActivityContract
         ) {
             callback.onAddressLauncherResult(it)

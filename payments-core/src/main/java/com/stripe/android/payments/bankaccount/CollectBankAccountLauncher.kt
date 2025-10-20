@@ -13,6 +13,9 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResu
 import com.stripe.android.payments.bankaccount.navigation.toUSBankAccountResult
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
+import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -85,6 +88,28 @@ interface CollectBankAccountLauncher {
                 // L1 (public standalone) integration is not hosted by any Stripe surface.
                 hostedSurface = null,
                 hostActivityLauncher = activity.registerForActivityResult(CollectBankAccountContract()) {
+                    callback(it.toUSBankAccountResult())
+                },
+                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
+            )
+        }
+
+        /**
+         * Create a [CollectBankAccountLauncher] instance with [ComponentActivity].
+         *
+         * This API registers an [ActivityResultLauncher] into the [ComponentActivity],  it needs
+         * to be called before the [ComponentActivity] is created.
+         */
+        @ReactNativeSdkInternal
+        fun create(
+            activity: ComponentActivity,
+            signal: UnregisterSignal,
+            callback: (CollectBankAccountResult) -> Unit
+        ): CollectBankAccountLauncher {
+            return CollectBankAccountForACHLauncher(
+                // L1 (public standalone) integration is not hosted by any Stripe surface.
+                hostedSurface = null,
+                hostActivityLauncher = registerForReactNativeActivityResult(activity, signal,CollectBankAccountContract()) {
                     callback(it.toUSBankAccountResult())
                 },
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),

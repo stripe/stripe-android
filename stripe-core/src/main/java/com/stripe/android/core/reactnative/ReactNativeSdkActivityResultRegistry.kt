@@ -1,4 +1,4 @@
-package com.stripe.android.reactnative
+package com.stripe.android.core.reactnative
 
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCallback

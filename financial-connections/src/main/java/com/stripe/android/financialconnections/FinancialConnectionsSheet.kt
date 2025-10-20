@@ -6,6 +6,8 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForTokenLauncher
@@ -80,6 +82,30 @@ class FinancialConnectionsSheet internal constructor(
         }
 
         /**
+         * Constructor to be used when launching the [FinancialConnectionsSheet] from an Activity.
+         *
+         * @param activity  the Activity that is presenting the [FinancialConnectionsSheet].
+         * @param signal
+         * @param callback  called with the result of the connections session after the connections sheet is dismissed.
+         */
+        @JvmStatic
+        @ReactNativeSdkInternal
+        fun create(
+            activity: ComponentActivity,
+            signal: UnregisterSignal,
+            callback: FinancialConnectionsSheetResultCallback
+        ): FinancialConnectionsSheet {
+            return FinancialConnectionsSheet(
+                FinancialConnectionsSheetForDataLauncher(
+                    activity = activity,
+                    signal = signal,
+                    callback = callback,
+                    intentBuilder = intentBuilder(activity)
+                )
+            )
+        }
+
+        /**
          * Constructor to be used when launching the payment sheet from a Fragment.
          *
          * @param fragment the Fragment that is presenting the payment sheet.
@@ -113,6 +139,30 @@ class FinancialConnectionsSheet internal constructor(
             return FinancialConnectionsSheet(
                 FinancialConnectionsSheetForTokenLauncher(
                     activity = activity,
+                    callback = callback,
+                    intentBuilder = intentBuilder(activity)
+                )
+            )
+        }
+
+        /**
+         * Constructor to be used when launching the connections sheet from an Activity.
+         *
+         * @param activity  the Activity that is presenting the connections sheet.
+         * @param signal
+         * @param callback  called with the result of the connections session after the connections sheet is dismissed.
+         */
+        @JvmStatic
+        @ReactNativeSdkInternal
+        fun createForBankAccountToken(
+            activity: ComponentActivity,
+            signal: UnregisterSignal,
+            callback: FinancialConnectionsSheetResultForTokenCallback
+        ): FinancialConnectionsSheet {
+            return FinancialConnectionsSheet(
+                FinancialConnectionsSheetForTokenLauncher(
+                    activity = activity,
+                    signal = signal,
                     callback = callback,
                     intentBuilder = intentBuilder(activity)
                 )

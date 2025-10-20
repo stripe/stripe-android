@@ -1,4 +1,4 @@
-package com.stripe.android.reactnative
+package com.stripe.android.core.reactnative
 
 @RequiresOptIn(
     level = RequiresOptIn.Level.ERROR,

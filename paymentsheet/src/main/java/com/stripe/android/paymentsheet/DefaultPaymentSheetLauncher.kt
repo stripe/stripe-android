@@ -12,9 +12,9 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.reactnative.ReactNativeSdkInternal
-import com.stripe.android.reactnative.UnregisterSignal
-import com.stripe.android.reactnative.registerForReactNativeActivityResult
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
+import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.uicore.utils.AnimationConstants
 import org.jetbrains.annotations.TestOnly
 
