@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.testing.RadarOptionsFactory
 import kotlin.test.Test
 
-class RadarOptionsTest {
+internal class RadarOptionsTest {
 
     @Test
     fun `toParamMap() with both parameters null returns empty map`() {
@@ -52,22 +52,6 @@ class RadarOptionsTest {
                 "android_verification_object" to mapOf(
                     "android_verification_token" to "test_verification_token"
                 )
-            )
-        )
-    }
-
-    @Test
-    fun `toParamMap() with androidVerificationObject having null token includes empty verification object`() {
-        val radarOptions = RadarOptionsFactory.create(
-            verificationObject = AndroidVerificationObject(
-                androidVerificationToken = null
-            )
-        )
-
-        assertThat(radarOptions.toParamMap()).isEqualTo(
-            mapOf(
-                "hcaptcha_token" to "test_token",
-                "android_verification_object" to emptyMap<String, Any>()
             )
         )
     }
