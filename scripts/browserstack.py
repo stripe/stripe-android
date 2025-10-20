@@ -273,7 +273,8 @@ def executeTests(appUrl, testUrl, isNightly):
         ]
     else:
         devices = [
-            "Samsung Galaxy S22-12.0",
+            "Samsung Galaxy A10-9.0",
+#             "Samsung Galaxy S22-12.0",
         ]
 
     # We only have 25 parallel runs, and we want multiple PRs to run at the same time.

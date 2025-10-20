@@ -1380,7 +1380,8 @@ internal class PlaygroundTestDriver(
                         browserIconAtPrompt(selectedBrowser).click()
                     }
 
-                    assertThat(browserWindow(selectedBrowser)?.exists()).isTrue()
+                    // This is the line that is failing.
+                    assertThat(browserWindow(selectedBrowser)?.waitForExists(5_000)).isTrue()
 
                     blockUntilAuthorizationPageLoaded(isSetup = testParameters.isSetupMode)
                 }
