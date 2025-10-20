@@ -35,7 +35,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -466,7 +465,7 @@ class LogLinkGlobalHoldbackExposureTest {
             experimentsData = experimentsData,
             passiveCaptcha = null,
             merchantLogoUrl = null,
-            elementsSessionConfigId = UUID.randomUUID().toString(),
+            elementsSessionConfigId = null,
         )
     }
 

@@ -270,7 +270,7 @@ data class ElementsSession(
                 sessionsError = sessionsError,
                 elementsSessionId = elementsSessionId,
                 passiveCaptcha = null,
-                elementsSessionConfigId = UUID.randomUUID().toString(),
+                elementsSessionConfigId = null,
             )
         }
     }

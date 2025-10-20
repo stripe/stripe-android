@@ -10,7 +10,6 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
-import java.util.UUID
 
 internal object CustomerSheetFixtures {
     val MINIMUM_CONFIG = CustomerSheet.Configuration
@@ -90,7 +89,7 @@ internal object CustomerSheetFixtures {
             experimentsData = null,
             passiveCaptcha = null,
             merchantLogoUrl = null,
-            elementsSessionConfigId = UUID.randomUUID().toString(),
+            elementsSessionConfigId = null,
         )
 
         return CustomerSheetSession(

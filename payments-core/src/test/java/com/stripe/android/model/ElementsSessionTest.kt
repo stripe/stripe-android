@@ -5,7 +5,6 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Rule
 import org.junit.Test
-import java.util.UUID
 
 class ElementsSessionTest {
 
@@ -149,7 +148,7 @@ class ElementsSessionTest {
             customPaymentMethods = emptyList(),
             elementsSessionId = "elements_session_test",
             passiveCaptcha = passiveCaptcha,
-            elementsSessionConfigId = UUID.randomUUID().toString(),
+            elementsSessionConfigId = null,
         )
     }
 }
