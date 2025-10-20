@@ -394,6 +394,7 @@ internal class LinkApiRepository @Inject constructor(
 
     override suspend fun startVerification(
         consumerSessionClientSecret: String,
+        isResendSmsCode: Boolean
     ): Result<ConsumerSession> {
         return runCatching {
             requireNotNull(
@@ -405,6 +406,7 @@ internal class LinkApiRepository @Inject constructor(
                     customEmailType = null,
                     connectionsMerchantName = null,
                     requestOptions = apiRequestOptions,
+                    isResendSmsCode = isResendSmsCode
                 )
             )
         }

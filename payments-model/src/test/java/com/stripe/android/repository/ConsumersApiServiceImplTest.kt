@@ -187,6 +187,65 @@ class ConsumersApiServiceImplTest {
     }
 
     @Test
+    fun `startConsumerVerification() includes is_resend_sms_code when true`() = runTest {
+        val clientSecret = "secret"
+        val locale = Locale.US
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/start_verification"),
+            header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
+            bodyPart("request_surface", "android_payment_element"),
+            bodyPart(urlEncode("credentials[consumer_session_client_secret]"), clientSecret),
+            bodyPart("type", "SMS"),
+            bodyPart("locale", locale.toLanguageTag()),
+            bodyPart("is_resend_sms_code", "true"),
+        ) { response ->
+            response.setBody(ConsumerFixtures.CONSUMER_VERIFICATION_STARTED_JSON.toString())
+        }
+
+        consumersApiService.startConsumerVerification(
+            consumerSessionClientSecret = clientSecret,
+            locale = locale,
+            requestSurface = "android_payment_element",
+            type = VerificationType.SMS,
+            customEmailType = null,
+            connectionsMerchantName = null,
+            requestOptions = DEFAULT_OPTIONS,
+            isResendSmsCode = true
+        )
+    }
+
+    @Test
+    fun `startConsumerVerification() excludes is_resend_sms_code when false`() = runTest {
+        val clientSecret = "secret"
+        val locale = Locale.US
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/start_verification"),
+            header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
+            bodyPart("request_surface", "android_payment_element"),
+            bodyPart(urlEncode("credentials[consumer_session_client_secret]"), clientSecret),
+            bodyPart("type", "SMS"),
+            bodyPart("locale", locale.toLanguageTag()),
+        ) { response ->
+            response.setBody(ConsumerFixtures.CONSUMER_VERIFICATION_STARTED_JSON.toString())
+        }
+
+        consumersApiService.startConsumerVerification(
+            consumerSessionClientSecret = clientSecret,
+            locale = locale,
+            requestSurface = "android_payment_element",
+            type = VerificationType.SMS,
+            customEmailType = null,
+            connectionsMerchantName = null,
+            requestOptions = DEFAULT_OPTIONS,
+            isResendSmsCode = false
+        )
+    }
+
+    @Test
     fun `confirmConsumerVerification() sends all parameters`() = runTest {
         val clientSecret = "secret"
         val verificationCode = "1234"

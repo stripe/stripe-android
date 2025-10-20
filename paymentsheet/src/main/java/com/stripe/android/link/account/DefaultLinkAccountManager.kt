@@ -341,12 +341,13 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    override suspend fun startVerification(): Result<LinkAccount> {
+    override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
         linkEventsReporter.on2FAStart()
         return linkRepository.startVerification(
             consumerSessionClientSecret = linkAccount.clientSecret,
+            isResendSmsCode = isResendSmsCode
         )
             .onFailure {
                 linkEventsReporter.on2FAStartFailure()

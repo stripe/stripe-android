@@ -118,7 +118,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         type: VerificationType,
         customEmailType: CustomEmailType?,
         connectionsMerchantName: String?,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        isResendSmsCode: Boolean
     ): ConsumerSession {
         TODO("Not yet implemented")
     }

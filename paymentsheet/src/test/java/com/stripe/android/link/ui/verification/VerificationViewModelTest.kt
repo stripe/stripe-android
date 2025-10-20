@@ -43,7 +43,7 @@ internal class VerificationViewModelTest {
     fun `init starts verification with link account manager`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
             var callCount = 0
-            override suspend fun startVerification(): Result<LinkAccount> {
+            override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
                 callCount += 1
                 return Result.success(TestFactory.LINK_ACCOUNT)
             }
@@ -146,9 +146,9 @@ internal class VerificationViewModelTest {
     @Test
     fun `Resending code is reflected in state`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
-            override suspend fun startVerification(): Result<LinkAccount> {
+            override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
                 delay(100)
-                return super.startVerification()
+                return super.startVerification(isResendSmsCode)
             }
         }
 
@@ -176,7 +176,7 @@ internal class VerificationViewModelTest {
     @Test
     fun `Failing to resend code is reflected in state`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
-            override suspend fun startVerification(): Result<LinkAccount> {
+            override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
                 delay(100)
                 return Result.failure(RuntimeException("error"))
             }
