@@ -351,6 +351,42 @@ internal class FlowControllerTest {
     }
 
     @Test
+    fun testElementsSessionSocketError() {
+        lateinit var flowController: PaymentSheet.FlowController
+        val scenario = ActivityScenario.launch(MainActivity::class.java)
+
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            @Suppress("Deprecation")
+            flowController = PaymentSheet.FlowController.create(
+                activity = it,
+                paymentOptionCallback = {
+                    throw AssertionError("Not expected")
+                },
+                paymentResultCallback = {
+                    throw AssertionError("Not expected")
+                },
+            )
+        }
+
+        val countDownLatch = CountDownLatch(1)
+
+        scenario.onActivity {
+            flowController.configureWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = defaultConfiguration,
+                callback = { success, error ->
+                    assertThat(success).isFalse()
+                    assertThat(error).isNotNull()
+                    countDownLatch.countDown()
+                }
+            )
+        }
+
+        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+    }
+
+    @Test
     fun testFailedConfirmCall(
         @TestParameter integrationType: IntegrationType,
     ) {
