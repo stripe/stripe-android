@@ -110,8 +110,74 @@ internal class OnrampViewModel(
             )
 
             onrampCoordinator.configure(configuration = configuration)
-            // Set initial state to EmailInput after configuration
-            _uiState.update { it.copy(screen = Screen.EmailInput) }
+            // Set initial state to LoginSignup after configuration
+            _uiState.update { it.copy(screen = Screen.LoginSignup) }
+        }
+    }
+
+    fun registerUser(email: String, password: String) = viewModelScope.launch {
+        if (email.isBlank()) {
+            _message.value = "Please enter an email address"
+            return@launch
+        }
+
+        if (password.isBlank()) {
+            _message.value = "Please enter an valid password"
+            return@launch
+        }
+
+        val currentEmail = email.trim()
+        _uiState.update { it.copy(screen = Screen.Loading, email = currentEmail, loadingMessage = "Registering...") }
+
+        val result = testBackendRepository.signUp(currentEmail, password, false)
+        when (result) {
+            is Result.Success -> {
+                val response = result.value
+                if (response.success) {
+                    _message.value = "Sign up successful!"
+                    _uiState.update { it.copy(screen = Screen.Authentication, authToken = response.token) }
+                } else {
+                    _message.value = "Sign up failed: Unknown Error"
+                    _uiState.update { it.copy(screen = Screen.LoginSignup, loadingMessage = null) }
+                }
+            }
+            is Result.Failure -> {
+                _message.value = "Sign up failed: ${result.error.message}"
+                _uiState.update { it.copy(screen = Screen.LoginSignup, loadingMessage = null) }
+            }
+        }
+    }
+
+    fun loginUser(email: String, password: String) = viewModelScope.launch {
+        if (email.isBlank()) {
+            _message.value = "Please enter an email address"
+            return@launch
+        }
+
+        if (password.isBlank()) {
+            _message.value = "Please enter an valid password"
+            return@launch
+        }
+
+        val currentEmail = email.trim()
+        _uiState.update { it.copy(screen = Screen.Loading, email = currentEmail, loadingMessage = "Logging in...") }
+
+        val result = testBackendRepository.logIn(currentEmail, password, false)
+        when (result) {
+            is Result.Success -> {
+                val response = result.value
+                if (response.success) {
+                    _message.value = "Log in successful!"
+                    _uiState.update { it.copy(screen = Screen.Authentication, authToken = response.token) }
+                } else {
+                    _message.value = "Log in failed: Unknown Error"
+                    _uiState.update { it.copy(screen = Screen.LoginSignup, loadingMessage = null) }
+                }
+            }
+            is Result.Failure -> {
+                _message.value = "Log in failed: ${result.error.message}"
+                _uiState.update { it.copy(screen = Screen.LoginSignup, loadingMessage = null) }
+            }
         }
     }
 
@@ -137,13 +203,13 @@ internal class OnrampViewModel(
             }
             is OnrampHasLinkAccountResult.Failed -> {
                 _message.value = "Lookup failed: ${result.error.message}"
-                _uiState.update { it.copy(screen = Screen.EmailInput) }
+                _uiState.update { it.copy(screen = Screen.LoginSignup) }
             }
         }
     }
 
-    fun onBackToEmailInput() {
-        _uiState.update { OnrampUiState(screen = Screen.EmailInput) }
+    fun onBackToLoginSignup() {
+        _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
     }
 
     fun clearMessage() {
@@ -166,7 +232,7 @@ internal class OnrampViewModel(
             }
             is OnrampAuthenticateResult.Failed -> {
                 _message.value = "Authentication failed: ${result.error.message}"
-                _uiState.update { it.copy(screen = Screen.EmailInput) }
+                _uiState.update { it.copy(screen = Screen.LoginSignup) }
             }
         }
     }
@@ -182,7 +248,7 @@ internal class OnrampViewModel(
             }
             is OnrampVerifyIdentityResult.Failed -> {
                 _message.value = "Identity Verification failed: ${result.error.message}"
-                _uiState.update { it.copy(screen = Screen.EmailInput) }
+                _uiState.update { it.copy(screen = Screen.LoginSignup) }
             }
         }
     }
@@ -297,7 +363,7 @@ internal class OnrampViewModel(
                 }
                 is OnrampRegisterLinkUserResult.Failed -> {
                     _message.value = "Registration failed: ${result.error.message}"
-                    _uiState.update { it.copy(screen = Screen.EmailInput) }
+                    _uiState.update { it.copy(screen = Screen.LoginSignup) }
                 }
             }
         }
@@ -535,7 +601,7 @@ internal class OnrampViewModel(
             when (result) {
                 is OnrampLogOutResult.Completed -> {
                     _message.value = "Successfully logged out"
-                    _uiState.update { OnrampUiState(screen = Screen.EmailInput) }
+                    _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
                 }
                 is OnrampLogOutResult.Failed -> {
                     _message.value = "Logout failed: ${result.error.message}"
@@ -573,7 +639,7 @@ data class OnrampUiState(
 )
 
 enum class Screen {
-    EmailInput,
+    LoginSignup,
     Loading,
     Registration,
     Authentication,

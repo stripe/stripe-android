@@ -19,7 +19,7 @@ import com.github.kittinunf.result.Result as ApiResult
 
 class TestBackendRepository {
 
-    private val baseUrl = "https://crypto-onramp-example.stripedemos.com"
+    private val baseUrl = "https://crypto-onramp-example.stripedemos.com/v1"
 
     private val manager = FuelManager()
         .addRequestInterceptor(LogRequestInterceptor)

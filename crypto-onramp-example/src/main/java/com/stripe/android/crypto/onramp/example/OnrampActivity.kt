@@ -162,6 +162,50 @@ internal class OnrampActivity : ComponentActivity() {
 }
 
 @Composable
+internal fun LoginSignupScreen(
+    onRegister: (email: String, password: String) -> Unit,
+    onLogin: (email: String, password: String) -> Unit
+) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    Column {
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email Address") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        )
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        )
+
+        Button(
+            onClick = { onLogin(email, password) },
+            modifier = Modifier.fillMaxWidth()
+                .padding(bottom = 16.dp)
+        ) {
+            Text("Login")
+        }
+
+        Button(
+            onClick = { onRegister(email, password) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Register")
+        }
+    }
+}
+
+@Composable
 @Suppress("LongMethod")
 internal fun OnrampScreen(
     viewModel: OnrampViewModel,
@@ -177,8 +221,8 @@ internal fun OnrampScreen(
     val message by viewModel.message.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    BackHandler(enabled = uiState.screen != Screen.EmailInput) {
-        viewModel.onBackToEmailInput()
+    BackHandler(enabled = uiState.screen != Screen.LoginSignup) {
+        viewModel.onBackToLoginSignup()
     }
 
     // Show toast messages
@@ -196,12 +240,10 @@ internal fun OnrampScreen(
             .padding(16.dp)
     ) {
         when (uiState.screen) {
-            Screen.EmailInput -> {
-                EmailInputScreen(
-                    onCheckUser = { email ->
-                        viewModel.checkIfLinkUser(email)
-                    },
-                    onAuthorize = onAuthorize
+            Screen.LoginSignup -> {
+                LoginSignupScreen(
+                    onRegister = { email, password -> viewModel.registerUser(email, password) },
+                    onLogin = { email, password -> viewModel.loginUser(email, password) }
                 )
             }
             Screen.Loading -> {
@@ -220,7 +262,7 @@ internal fun OnrampScreen(
                         viewModel.registerNewLinkUser(userInfo)
                     },
                     onBack = {
-                        viewModel.onBackToEmailInput()
+                        viewModel.onBackToLoginSignup()
                     }
                 )
             }
@@ -232,7 +274,7 @@ internal fun OnrampScreen(
                         viewModel.updatePhoneNumber(phoneNumber)
                     },
                     onBack = {
-                        viewModel.onBackToEmailInput()
+                        viewModel.onBackToLoginSignup()
                     }
                 )
             }
@@ -253,41 +295,11 @@ internal fun OnrampScreen(
                     onPerformCheckout = { viewModel.performCheckout() },
                     onLogOut = { viewModel.logOut() },
                     onBack = {
-                        viewModel.onBackToEmailInput()
+                        viewModel.onBackToLoginSignup()
                     }
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun EmailInputScreen(
-    onCheckUser: (String) -> Unit,
-    onAuthorize: (String) -> Unit
-) {
-    var email by remember { mutableStateOf("") }
-
-    Column {
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email Address") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        )
-
-        Button(
-            onClick = { onCheckUser(email) },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Check if Link User Exists")
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        AuthorizeSection(onAuthorize = onAuthorize)
     }
 }
 
