@@ -102,6 +102,107 @@ class TestBackendRepository {
                 .awaitModel(OnrampSessionResponse.serializer(), json)
         }
     }
+
+    suspend fun signUp(
+        email: String,
+        password: String,
+        livemode: Boolean
+    ): ApiResult<LoginSignUpResponse, FuelError> {
+        return withContext(Dispatchers.IO) {
+            val request = LoginSignUpRequest(
+                email = email,
+                password = password,
+                livemode = livemode
+            )
+
+            val requestBody = json.encodeToString(LoginSignUpRequest.serializer(), request)
+
+            manager.post("$baseUrl/auth/signup")
+                .timeout(SESSION_CREATION_TIMEOUT)
+                .timeoutRead(SESSION_CREATION_TIMEOUT)
+                .jsonBody(requestBody)
+                .suspendable()
+                .awaitModel(LoginSignUpResponse.serializer(), json)
+        }
+    }
+
+    suspend fun logIn(
+        email: String,
+        password: String,
+        livemode: Boolean,
+    ): ApiResult<LoginSignUpResponse, FuelError> {
+        return withContext(Dispatchers.IO) {
+            val request = LoginSignUpRequest(
+                email = email,
+                password = password,
+                livemode = livemode
+            )
+
+            val requestBody = json.encodeToString(LoginSignUpRequest.serializer(), request)
+
+            manager.post("$baseUrl/auth/login")
+                .timeout(SESSION_CREATION_TIMEOUT)
+                .timeoutRead(SESSION_CREATION_TIMEOUT)
+                .jsonBody(requestBody)
+                .suspendable()
+                .awaitModel(LoginSignUpResponse.serializer(), json)
+        }
+    }
+
+    suspend fun create(
+        oauthScopes: String,
+        tokenWithoutLAI: String
+    ): ApiResult<AuthCreateResponse, FuelError> {
+        return withContext(Dispatchers.IO) {
+            val request = AuthCreateRequest(
+                oauthScopes = oauthScopes
+            )
+
+            val requestBody = json.encodeToString(AuthCreateRequest.serializer(), request)
+
+            manager.post("$baseUrl/auth/create")
+                .timeout(SESSION_CREATION_TIMEOUT)
+                .timeoutRead(SESSION_CREATION_TIMEOUT)
+                .header("Authorization", "Bearer $tokenWithoutLAI")
+                .jsonBody(requestBody)
+                .suspendable()
+                .awaitModel(AuthCreateResponse.serializer(), json)
+        }
+    }
+
+    suspend fun saveUser(
+        cryptoCustomerId: String,
+        tokenWithLAI: String
+    ): ApiResult<SaveUserResponse, FuelError> {
+        return withContext(Dispatchers.IO) {
+            val request = SaveUserRequest(
+                cryptoCustomerId = cryptoCustomerId
+            )
+
+            val requestBody = json.encodeToString(SaveUserRequest.serializer(), request)
+
+            manager.post("$baseUrl/auth/save_user")
+                .timeout(SESSION_CREATION_TIMEOUT)
+                .timeoutRead(SESSION_CREATION_TIMEOUT)
+                .header("Authorization", "Bearer $tokenWithLAI")
+                .jsonBody(requestBody)
+                .suspendable()
+                .awaitModel(SaveUserResponse.serializer(), json)
+        }
+    }
+
+    suspend fun createLinkAuthToken(
+        tokenWithLAI: String
+    ): ApiResult<CreateLinkAuthTokenResponse, FuelError> {
+        return withContext(Dispatchers.IO) {
+            manager.post("$baseUrl/auth/create_link_auth_token")
+                .timeout(SESSION_CREATION_TIMEOUT)
+                .timeoutRead(SESSION_CREATION_TIMEOUT)
+                .header("Authorization", "Bearer $tokenWithLAI")
+                .suspendable()
+                .awaitModel(CreateLinkAuthTokenResponse.serializer(), json)
+        }
+    }
 }
 
 /**
