@@ -26,6 +26,7 @@ class DateConfig : TextFieldConfig {
     override val layoutDirection: LayoutDirection = LayoutDirection.Ltr
     override val shouldAnnounceFieldValue = false
     override val shouldAnnounceLabel = false
+    override val optional: Boolean = false
 
     override fun filter(userTyped: String) = userTyped.filter { it.isDigit() }
 

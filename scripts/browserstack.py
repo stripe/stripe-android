@@ -1,13 +1,9 @@
 #!/bin/python
-import requests
-import time
-import os
-from requests.auth import HTTPBasicAuth
-from requests_toolbelt.multipart import encoder
 import argparse
+import os
+import requests
 import sys
-import json
-import math
+import time
 import zipfile
 from collections import defaultdict
 
@@ -119,7 +115,7 @@ def uploadApk(apkFile):
 def uploadAppLiveApk(apkFile):
     # print step description
     print("UPLOADING the file: {file}...".format(file=apkFile), end="")
-    url = "https://api-cloud.browserstack.com/app-live/upload"
+    url = "https://api-cloud.browserstack.com/app-automate/espresso/v2/app"
     files = {
         "file": (os.path.basename(apkFile), open(apkFile, "rb")),
     }
@@ -267,13 +263,13 @@ def executeTests(appUrl, testUrl, isNightly):
     devices = []
     if isNightly:
         devices = [
+            "Google Pixel 10 Pro XL-16.0",
+            "Google Pixel 9 Pro-15.0",
             "Google Pixel 8-14.0",
             "Google Pixel 7-13.0",
             "Samsung Galaxy S22-12.0",
             "Google Pixel 5-11.0",
-            "Google Pixel 4 XL-10.0",
-            "Google Pixel 3-9.0",
-            "Samsung Galaxy S9-8.0",
+            "Samsung Galaxy A10-9.0",
         ]
     else:
         devices = [
@@ -492,7 +488,8 @@ def retryFailedTests(buildId, numRetries):
             if deviceExitStatus != 0:
                 updatedFailedTestsDictionary[failedDevice] = getFailedTestsForBuild(deviceTestResults["buildId"])[failedDevice]
 
-        if len(updatedFailedTestsDictionary) == 0:
+        # prevent error cases where not a single test is run.
+        if len(updatedFailedTestsDictionary) == 0 and len(failedTestsDictionary) != 0:
             return 0
         failedTestsDictionary = updatedFailedTestsDictionary
     return -1

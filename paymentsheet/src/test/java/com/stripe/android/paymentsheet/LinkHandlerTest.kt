@@ -111,6 +111,14 @@ class LinkHandlerTest {
     }
 
     @Test
+    fun `setupLinkWithEagerLaunch returns false in NeedsWebVerification state`() {
+        setupLinkWithEagerLaunchTest(
+            loginState = LinkState.LoginState.NeedsWebVerification,
+            expectedResult = false
+        )
+    }
+
+    @Test
     fun `setupLinkWithEagerLaunch returns false when suppress2faModal is true`() {
         setupLinkWithEagerLaunchTest(
             loginState = LinkState.LoginState.LoggedOut,

@@ -40,6 +40,7 @@ private object BoletoUiDefinitionFactory : UiDefinitionFactory.Simple {
         paymentMethodDefinition = BoletoDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_boleto,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_boleto,
+        iconResourceNight = null
     )
 
     override fun createFormElements(

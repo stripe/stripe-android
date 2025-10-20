@@ -79,6 +79,7 @@ internal class PaymentSheetDeferredTest {
                 "payment_user_agent",
                 Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
             ),
+            clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
@@ -145,6 +146,7 @@ internal class PaymentSheetDeferredTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_methods"),
+            clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
@@ -159,6 +161,67 @@ internal class PaymentSheetDeferredTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/setup_intents/seti_example/confirm"),
+        ) { response ->
+            response.testBodyFromFile("setup-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testDeferredIntentSavedCardPayment_forSetup() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        builder = {
+            createIntentCallback { _, shouldSavePaymentMethod ->
+                assertThat(shouldSavePaymentMethod).isFalse()
+                CreateIntentResult.Success("seti_example_secret_example")
+            }
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
+        }
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/payment_methods"),
+            query("type", "card"),
+            query("customer", "cus_foobar"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+
+                ),
+                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", "ek_test_foobar"))
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .build(),
+            )
+        }
+
+        page.assertSavedSelection("pm_12345")
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/setup_intents/seti_example"),
+        ) { response ->
+            response.testBodyFromFile("setup-intent-get.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/setup_intents/seti_example/confirm"),
+            clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
             response.testBodyFromFile("setup-intent-confirm.json")
         }
@@ -244,6 +307,69 @@ internal class PaymentSheetDeferredTest {
                     Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
                 )
             ),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testDeferredIntentWithSavedCard_sendsClientAttributionMetadata() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        builder = {
+            createIntentCallback { _, shouldSavePaymentMethod ->
+                assertThat(shouldSavePaymentMethod).isFalse()
+                CreateIntentResult.Success("pi_example_secret_example")
+            }
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
+        }
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/payment_methods"),
+            query("type", "card"),
+            query("customer", "cus_foobar"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 5099,
+                        currency = "usd"
+                    )
+                ),
+                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", "ek_test_foobar"))
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .build(),
+            )
+        }
+
+        page.assertSavedSelection("pm_12345")
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/payment_intents/pi_example"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -483,6 +609,7 @@ internal class PaymentSheetDeferredTest {
                 "payment_user_agent",
                 Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
             ),
+            clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
@@ -530,7 +657,7 @@ internal class PaymentSheetDeferredTest {
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
-            response.setResponseCode(400)
+            response.setResponseCode(500)
         }
 
         testContext.presentPaymentSheet {
@@ -603,7 +730,7 @@ internal class PaymentSheetDeferredTest {
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
-            response.setResponseCode(400)
+            response.setResponseCode(500)
         }
 
         testContext.presentPaymentSheet {

@@ -79,6 +79,66 @@ class DefaultCustomerSessionElementsSessionManagerTest {
     }
 
     @Test
+    fun `on fetch elements session with obo, should set parameters properly & report successful load`() = runTest {
+        val errorReporter = FakeErrorReporter()
+        val elementsSessionRepository = FakeElementsSessionRepository(
+            stripeIntent = PaymentIntentFactory.create(),
+            error = null,
+            linkSettings = null,
+            sessionsCustomer = createDefaultCustomer(),
+        )
+
+        val manager = createElementsSessionManager(
+            elementsSessionRepository = elementsSessionRepository,
+            errorReporter = errorReporter,
+            savedSelection = SavedSelection.PaymentMethod(id = "pm_123"),
+            intentConfiguration = Result.success(
+                CustomerSheet.IntentConfiguration.Builder()
+                    .paymentMethodTypes(paymentMethodTypes = listOf("card", "us_bank_account", "sepa_debit"))
+                    .onBehalfOf("acct_connected_account_a")
+                    .build()
+            ),
+            customerSessionClientSecret = Result.success(
+                CustomerSheet.CustomerSessionClientSecret.create(
+                    customerId = "cus_1",
+                    clientSecret = "cuss_123",
+                )
+            ),
+        )
+
+        manager.fetchElementsSession()
+
+        val lastParams = elementsSessionRepository.lastParams
+
+        assertThat(lastParams?.savedPaymentMethodSelectionId).isEqualTo("pm_123")
+        assertThat(lastParams?.externalPaymentMethods).isEmpty()
+        assertThat(lastParams?.customPaymentMethods).isEmpty()
+
+        val initializationMode = lastParams?.initializationMode
+        assertThat(initializationMode).isInstanceOf(InitializationMode.DeferredIntent::class.java)
+
+        val intentConfiguration = initializationMode.asDeferred().intentConfiguration
+        assertThat(intentConfiguration.paymentMethodTypes).containsExactly(
+            "card",
+            "us_bank_account",
+            "sepa_debit"
+        )
+        assertThat(intentConfiguration.onBehalfOf).isEqualTo(
+            "acct_connected_account_a"
+        )
+        assertThat(intentConfiguration.mode).isInstanceOf<PaymentSheet.IntentConfiguration.Mode.Setup>()
+
+        val customer = lastParams?.customer
+        assertThat(customer?.id).isEqualTo("cus_1")
+        assertThat(customer?.accessType)
+            .isEqualTo(PaymentSheet.CustomerAccessType.CustomerSession(customerSessionClientSecret = "cuss_123"))
+
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_SUCCESS.eventName,
+        )
+    }
+
+    @Test
     fun `on fetch elements session, should fail & report if elements session request failed`() = runTest {
         val exception = IllegalStateException("Failed to load!")
 

@@ -11,7 +11,6 @@ import com.stripe.android.stripe3ds2.transaction.ChallengeRequestResultFixures
 import com.stripe.android.stripe3ds2.transaction.FakeTransactionTimer
 import com.stripe.android.stripe3ds2.transaction.TransactionTimer
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -21,8 +20,6 @@ import kotlin.test.Test
 class ChallengeActivityViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
-
-    private val testDispatcher = StandardTestDispatcher()
 
     private val actionHandler = object : ChallengeActionHandler {
         override suspend fun submit(action: ChallengeAction): ChallengeRequestResult {
@@ -72,7 +69,6 @@ class ChallengeActivityViewModelTest {
             actionHandler,
             transactionTimer,
             FakeErrorReporter(),
-            workContext = testDispatcher
         )
     }
 }

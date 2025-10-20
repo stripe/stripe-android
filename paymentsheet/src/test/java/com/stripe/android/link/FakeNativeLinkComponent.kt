@@ -4,15 +4,18 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.Logger
 import com.stripe.android.link.account.FakeLinkAccountManager
-import com.stripe.android.link.account.FakeLinkAuth
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.NativeLinkComponent
+import com.stripe.android.link.ui.oauth.OAuthConsentViewModelComponent
+import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.TestNavigationManager
+import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AutocompleteLauncher
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
@@ -25,6 +28,7 @@ import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import org.mockito.kotlin.mock
 
 internal class FakeNativeLinkComponent(
+    override val linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
     override val linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
     override val configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
     override val linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
@@ -37,11 +41,15 @@ internal class FakeNativeLinkComponent(
         NullCardAccountRangeRepositoryFactory,
     override val viewModel: LinkActivityViewModel = mock(),
     override val errorReporter: ErrorReporter = FakeErrorReporter(),
-    override val linkAuth: LinkAuth = FakeLinkAuth(),
     override val savedStateHandle: SavedStateHandle = SavedStateHandle(),
     override val eventReporter: EventReporter = FakeEventReporter(),
     override val navigationManager: NavigationManager = TestNavigationManager(),
     override val dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
     override val linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
     override val autocompleteLauncher: AutocompleteLauncher = TestAutocompleteLauncher.noOp(),
+    override val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory = mock(),
+    override val oAuthConsentViewModelComponentFactory: OAuthConsentViewModelComponent.Factory = mock(),
+    override val webLinkAuthChannel: WebLinkAuthChannel = WebLinkAuthChannel(),
+    override val passiveCaptchaParams: PassiveCaptchaParams? = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+    override val attestOnIntentConfirmation: Boolean = false,
 ) : NativeLinkComponent

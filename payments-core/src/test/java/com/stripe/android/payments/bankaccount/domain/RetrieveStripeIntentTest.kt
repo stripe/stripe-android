@@ -33,6 +33,7 @@ class RetrieveStripeIntentTest {
             // When
             val intent = retrieveStripeIntent(
                 publishableKey = publishableKey,
+                stripeAccountId = null,
                 clientSecret = clientSecret
             ).getOrNull()
 
@@ -60,6 +61,7 @@ class RetrieveStripeIntentTest {
             // When
             val intent = retrieveStripeIntent(
                 publishableKey = publishableKey,
+                stripeAccountId = null,
                 clientSecret = clientSecret
             )
 
@@ -86,6 +88,7 @@ class RetrieveStripeIntentTest {
             // When
             val intent = retrieveStripeIntent(
                 publishableKey = publishableKey,
+                stripeAccountId = null,
                 clientSecret = clientSecret
             ).getOrNull()
 
@@ -112,6 +115,7 @@ class RetrieveStripeIntentTest {
             // When
             val intent = retrieveStripeIntent(
                 publishableKey = publishableKey,
+                stripeAccountId = null,
                 clientSecret = clientSecret
             )
 

@@ -4,13 +4,15 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.webkit.WebView
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.networking.RequestHeadersFactory
 import com.stripe.android.view.PaymentAuthWebViewClient.Companion.BLANK_PAGE
 
 /**
  * A `WebView` used for authenticating payment details
  */
-internal class PaymentAuthWebView @JvmOverloads constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class PaymentAuthWebView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0

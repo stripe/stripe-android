@@ -1,0 +1,44 @@
+apply from: configs.androidLibrary
+
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+apply plugin: 'kotlinx-serialization'
+apply plugin: 'dev.drewhamilton.poko'
+apply plugin: 'com.google.devtools.ksp'
+
+dependencies {
+    implementation project(':stripe-core')
+    implementation project(':payments-core')
+    implementation project(":paymentsheet")
+    implementation project(":stripe-ui-core")
+    implementation project(":payments-ui-core")
+    implementation project(":identity")
+
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.appCompat
+    implementation libs.material
+    implementation libs.kotlin.serialization
+
+    implementation libs.dagger
+
+    ksp libs.daggerCompiler
+
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.junit
+    testImplementation testLibs.androidx.lifecycle
+    testImplementation testLibs.androidx.testRunner
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
+
+    androidTestImplementation testLibs.androidx.junit
+    androidTestImplementation testLibs.espresso.core
+}
+
+ext {
+    artifactId = "crypto-onramp"
+    artifactName = "cyrpto-onramp"
+    artifactDescrption = "Stripe Crypto Onramp Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

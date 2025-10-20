@@ -2,10 +2,12 @@ package com.stripe.android.link.ui.updatecard
 
 import androidx.compose.runtime.Immutable
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkScreen.UpdateCard.BillingDetailsUpdateFlow
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.CardUpdateParams
+import com.stripe.android.paymentsheet.R
 
 @Immutable
 internal data class UpdateCardScreenState(
@@ -32,6 +34,10 @@ internal data class UpdateCardScreenState(
             else -> PrimaryButtonState.Enabled
         }
 
-    val shouldShowDefaultTag
-        get() = isDefault && !isBillingDetailsUpdateFlow
+    val thisIsYourDefaultHint: ResolvableString?
+        get() = if (isDefault && !isBillingDetailsUpdateFlow) {
+            R.string.stripe_link_update_card_default_card.resolvableString
+        } else {
+            null
+        }
 }

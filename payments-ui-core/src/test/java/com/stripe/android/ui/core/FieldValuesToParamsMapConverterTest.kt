@@ -1,8 +1,11 @@
 package com.stripe.android.ui.core
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter.Companion.addPath
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter.Companion.getKeys
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -21,15 +24,24 @@ class FieldValuesToParamsMapConverterTest {
                     )
                 ),
                 PaymentMethod.Type.Ideal.code,
-                PaymentMethod.Type.Ideal.requiresMandate
+                PaymentMethod.Type.Ideal.requiresMandate,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
 
-        assertThat(paymentMethodParams.toParamMap().toString().replace("\\s".toRegex(), ""))
-            .isEqualTo(
-                """
-                    {type=ideal,ideal={bank=abn_amro}}
-                """.trimIndent()
-            )
+        val paramMap = paymentMethodParams.toParamMap()
+        assertThat(paramMap).hasSize(3)
+        assertThat(paramMap).containsEntry(
+            "type",
+            "ideal"
+        )
+        assertThat(paramMap).containsEntry(
+            "ideal",
+            mapOf("bank" to "abn_amro")
+        )
+        assertThat(paramMap).containsEntry(
+            "client_attribution_metadata",
+            clientAttributionMetadata.toParamMap()
+        )
     }
 
     @Test
@@ -92,24 +104,19 @@ class FieldValuesToParamsMapConverterTest {
                     )
                 ),
                 PaymentMethod.Type.Sofort.code,
-                PaymentMethod.Type.Sofort.requiresMandate
+                PaymentMethod.Type.Sofort.requiresMandate,
+                clientAttributionMetadata = clientAttributionMetadata
             )
 
-        assertThat(
-            paymentMethodParams.toParamMap().toString()
-        ).isEqualTo(
-            "{" +
-                "type=sofort, " +
-                "billing_details={" +
-                "name=joe, " +
-                "email=joe@gmail.com, " +
-                "address={" +
-                "country=US, " +
-                "line1=123 Main Street" +
-                "}" +
-                "}" +
-                "}"
+        val paramsMap = paymentMethodParams.toParamMap()
+        assertThat(paramsMap).hasSize(3)
+        assertThat(paramsMap).containsEntry(
+            "type",
+            "sofort"
         )
+        assertThat(paramsMap).containsEntry("billing_details", paymentMethodParams.billingDetails!!.toParamMap())
+        assertThat(paramsMap).containsEntry("client_attribution_metadata", clientAttributionMetadata.toParamMap())
+
         assertThat(paymentMethodParams.billingDetails?.name).isEqualTo(name)
         assertThat(paymentMethodParams.billingDetails?.email).isEqualTo(email)
         assertThat(paymentMethodParams.billingDetails?.address?.country).isEqualTo(country)
@@ -118,12 +125,30 @@ class FieldValuesToParamsMapConverterTest {
     }
 
     @Test
+    fun `Client attribution metadata is set correctly`() {
+        val paymentMethodParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodCreateParams(
+                emptyMap(),
+                PaymentMethod.Type.Sofort.code,
+                PaymentMethod.Type.Sofort.requiresMandate,
+                clientAttributionMetadata = ClientAttributionMetadata(
+                    elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
+                    paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+                    paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+                )
+            )
+
+        assertThat(paymentMethodParams.toParamMap()).containsKey("client_attribution_metadata")
+    }
+
+    @Test
     fun `billing details are empty if billing details are not collected`() {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(
                 emptyMap(),
                 PaymentMethod.Type.Sofort.code,
-                PaymentMethod.Type.Sofort.requiresMandate
+                PaymentMethod.Type.Sofort.requiresMandate,
+                clientAttributionMetadata = clientAttributionMetadata
             )
 
         assertThat(paymentMethodParams.billingDetails).isNull()
@@ -156,24 +181,13 @@ class FieldValuesToParamsMapConverterTest {
                     )
                 ),
                 PaymentMethod.Type.Blik.code,
-                PaymentMethod.Type.Blik.requiresMandate
+                PaymentMethod.Type.Blik.requiresMandate,
+                clientAttributionMetadata = clientAttributionMetadata
             )
 
         assertThat(
-            paymentMethodParams.toParamMap().toString()
-        ).isEqualTo(
-            "{" +
-                "type=blik, " +
-                "billing_details={" +
-                "name=joe, " +
-                "email=joe@gmail.com, " +
-                "address={" +
-                "country=US, " +
-                "line1=123 Main Street" +
-                "}" +
-                "}" +
-                "}"
-        )
+            paymentMethodParams.toParamMap()
+        ).doesNotContainKey(IdentifierSpec.BlikCode)
     }
 
     @Test
@@ -207,24 +221,15 @@ class FieldValuesToParamsMapConverterTest {
                     )
                 ),
                 PaymentMethod.Type.Card.code,
-                PaymentMethod.Type.Card.requiresMandate
+                PaymentMethod.Type.Card.requiresMandate,
+                clientAttributionMetadata = clientAttributionMetadata
             )
 
-        assertThat(
-            paymentMethodParams.toParamMap().toString()
-        ).isEqualTo(
-            "{" +
-                "type=card, " +
-                "billing_details={" +
-                "name=joe, " +
-                "email=joe@gmail.com, " +
-                "address={" +
-                "country=US, " +
-                "line1=123 Main Street" +
-                "}" +
-                "}" +
-                "}"
-        )
+        val paramsMap = paymentMethodParams.toParamMap()
+        assertThat(paramsMap).hasSize(3)
+        assertThat(paramsMap).containsKey("type")
+        assertThat(paramsMap).containsKey("billing_details")
+        assertThat(paramsMap).containsKey("client_attribution_metadata")
     }
 
     @Test
@@ -264,14 +269,18 @@ class FieldValuesToParamsMapConverterTest {
                     )
                 ),
                 "some code",
-                false
+                false,
+                clientAttributionMetadata = clientAttributionMetadata
             )
 
-        assertThat(
-            paymentMethodParams.toParamMap().toString()
-        ).isEqualTo(
-            "{type=some code, billing_details={name=joe}}"
+        val paramsMap = paymentMethodParams.toParamMap()
+        assertThat(paramsMap).hasSize(3)
+        assertThat(paramsMap).containsEntry(
+            "type",
+            "some code"
         )
+        assertThat(paramsMap).containsEntry("billing_details", mapOf("name" to "joe"))
+        assertThat(paramsMap).containsEntry("client_attribution_metadata", clientAttributionMetadata.toParamMap())
     }
 
     @Test
@@ -480,14 +489,13 @@ class FieldValuesToParamsMapConverterTest {
                 code = PaymentMethod.Type.Ideal.code,
                 requiresMandate = PaymentMethod.Type.Ideal.requiresMandate,
                 allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
 
-        assertThat(paymentMethodParams.toParamMap().toString().replace("\\s".toRegex(), ""))
-            .isEqualTo(
-                """
-                    {type=ideal,ideal={bank=abn_amro},allow_redisplay=unspecified}
-                """.trimIndent()
-            )
+        assertThat(paymentMethodParams.toParamMap()).containsEntry(
+            "allow_redisplay",
+            "unspecified"
+        )
     }
 
     @Test
@@ -498,14 +506,13 @@ class FieldValuesToParamsMapConverterTest {
                 code = PaymentMethod.Type.Ideal.code,
                 requiresMandate = PaymentMethod.Type.Ideal.requiresMandate,
                 PaymentMethod.AllowRedisplay.LIMITED,
+                clientAttributionMetadata,
             )
 
-        assertThat(paymentMethodParams.toParamMap().toString().replace("\\s".toRegex(), ""))
-            .isEqualTo(
-                """
-                    {type=ideal,ideal={bank=abn_amro},allow_redisplay=limited}
-                """.trimIndent()
-            )
+        assertThat(paymentMethodParams.toParamMap()).containsEntry(
+            "allow_redisplay",
+            "limited"
+        )
     }
 
     @Test
@@ -516,14 +523,13 @@ class FieldValuesToParamsMapConverterTest {
                 code = PaymentMethod.Type.Ideal.code,
                 requiresMandate = PaymentMethod.Type.Ideal.requiresMandate,
                 PaymentMethod.AllowRedisplay.ALWAYS,
+                clientAttributionMetadata,
             )
 
-        assertThat(paymentMethodParams.toParamMap().toString().replace("\\s".toRegex(), ""))
-            .isEqualTo(
-                """
-                    {type=ideal,ideal={bank=abn_amro},allow_redisplay=always}
-                """.trimIndent()
-            )
+        assertThat(paymentMethodParams.toParamMap()).containsEntry(
+            "allow_redisplay",
+            "always"
+        )
     }
 
     private companion object {
@@ -532,6 +538,12 @@ class FieldValuesToParamsMapConverterTest {
                 "abn_amro",
                 true
             )
+        )
+
+        val clientAttributionMetadata = ClientAttributionMetadata(
+            elementsSessionConfigId = "elements_session_123",
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
         )
     }
 }

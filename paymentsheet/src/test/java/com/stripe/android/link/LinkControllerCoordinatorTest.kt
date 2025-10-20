@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.FakeActivityResultRegistry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,20 +31,18 @@ internal class LinkControllerCoordinatorTest {
     private val linkActivityContract: NativeLinkActivityContract = mock()
 
     private val presentPaymentMethodsResultFlow = MutableSharedFlow<LinkController.PresentPaymentMethodsResult>()
-    private val lookupConsumerResultFlow = MutableSharedFlow<LinkController.LookupConsumerResult>()
-    private val createPaymentMethodResultFlow = MutableSharedFlow<LinkController.CreatePaymentMethodResult>()
     private val authenticationResultFlow = MutableSharedFlow<LinkController.AuthenticationResult>()
+    private val authorizeResultFlow = MutableSharedFlow<LinkController.AuthorizeResult>()
 
-    private val viewModel: LinkControllerViewModel = mock {
+    private val viewModel: LinkControllerInteractor = mock {
         on { presentPaymentMethodsResultFlow } doReturn presentPaymentMethodsResultFlow
-        on { lookupConsumerResultFlow } doReturn lookupConsumerResultFlow
-        on { createPaymentMethodResultFlow } doReturn createPaymentMethodResultFlow
         on { authenticationResultFlow } doReturn authenticationResultFlow
+        on { authorizeResultFlow } doReturn authorizeResultFlow
     }
 
     private val presentPaymentMethodsResults = mutableListOf<LinkController.PresentPaymentMethodsResult>()
-    private val lookupConsumerResults = mutableListOf<LinkController.LookupConsumerResult>()
-    private val createPaymentMethodResults = mutableListOf<LinkController.CreatePaymentMethodResult>()
+    private val authenticationResults = mutableListOf<LinkController.AuthenticationResult>()
+    private val authorizeResults = mutableListOf<LinkController.AuthorizeResult>()
 
     private val lifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.INITIALIZED)
 
@@ -54,15 +53,15 @@ internal class LinkControllerCoordinatorTest {
         val activityResultRegistryOwner = object : ActivityResultRegistryOwner {
             override val activityResultRegistry = registry
         }
+
         return LinkControllerCoordinator(
-            viewModel = viewModel,
+            interactor = viewModel,
             lifecycleOwner = lifecycleOwner,
             activityResultRegistryOwner = activityResultRegistryOwner,
             linkActivityContract = linkActivityContract,
             selectedPaymentMethodCallback = { presentPaymentMethodsResults.add(it) },
-            lookupConsumerCallback = { lookupConsumerResults.add(it) },
-            createPaymentMethodCallback = { createPaymentMethodResults.add(it) },
-            authenticationCallback = { },
+            authenticationCallback = { authenticationResults.add(it) },
+            authorizeCallback = { authorizeResults.add(it) },
         )
     }
 
@@ -89,15 +88,15 @@ internal class LinkControllerCoordinatorTest {
         val presentResult = LinkController.PresentPaymentMethodsResult.Success
         presentPaymentMethodsResultFlow.emit(presentResult)
 
-        val lookupResult = LinkController.LookupConsumerResult.Success("test@example.com", true)
-        lookupConsumerResultFlow.emit(lookupResult)
+        val authResult = LinkController.AuthenticationResult.Success
+        authenticationResultFlow.emit(authResult)
 
-        val createResult = LinkController.CreatePaymentMethodResult.Success
-        createPaymentMethodResultFlow.emit(createResult)
+        val authorizeResult = LinkController.AuthorizeResult.Denied
+        authorizeResultFlow.emit(authorizeResult)
 
         assertThat(presentPaymentMethodsResults).containsExactly(presentResult)
-        assertThat(lookupConsumerResults).containsExactly(lookupResult)
-        assertThat(createPaymentMethodResults).containsExactly(createResult)
+        assertThat(authenticationResults).containsExactly(authResult)
+        assertThat(authorizeResults).containsExactly(authorizeResult)
     }
 
     @Test
@@ -105,13 +104,15 @@ internal class LinkControllerCoordinatorTest {
         lifecycleOwner.setCurrentState(Lifecycle.State.CREATED)
         createCoordinator()
 
-        presentPaymentMethodsResultFlow.emit(LinkController.PresentPaymentMethodsResult.Success)
-        lookupConsumerResultFlow.emit(LinkController.LookupConsumerResult.Success("test@example.com", true))
-        createPaymentMethodResultFlow.emit(LinkController.CreatePaymentMethodResult.Success)
+        presentPaymentMethodsResultFlow.emit(
+            LinkController.PresentPaymentMethodsResult.Success
+        )
+        authenticationResultFlow.emit(LinkController.AuthenticationResult.Success)
+        authorizeResultFlow.emit(LinkController.AuthorizeResult.Denied)
 
         assertThat(presentPaymentMethodsResults).isEmpty()
-        assertThat(lookupConsumerResults).isEmpty()
-        assertThat(createPaymentMethodResults).isEmpty()
+        assertThat(authenticationResults).isEmpty()
+        assertThat(authorizeResults).isEmpty()
     }
 
     @Test
@@ -144,12 +145,16 @@ internal class LinkControllerCoordinatorTest {
         coordinator.linkActivityResultLauncher.launch(
             LinkActivityContract.Args(
                 configuration = TestFactory.LINK_CONFIGURATION,
-                startWithVerificationDialog = false,
+                linkExpressMode = LinkExpressMode.DISABLED,
                 linkAccountInfo = LinkAccountUpdate.Value(null),
                 launchMode = LinkLaunchMode.PaymentMethodSelection(null),
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                attestOnIntentConfirmation = false,
             )
         )
-        verify(viewModel).onLinkActivityResult(testResult)
+        verify(viewModel).onLinkActivityResult(
+            testResult,
+        )
     }
 
     @Test
@@ -157,7 +162,9 @@ internal class LinkControllerCoordinatorTest {
         lifecycleOwner.setCurrentState(Lifecycle.State.CREATED)
         createCoordinator()
 
-        presentPaymentMethodsResultFlow.emit(LinkController.PresentPaymentMethodsResult.Success)
+        presentPaymentMethodsResultFlow.emit(
+            LinkController.PresentPaymentMethodsResult.Success
+        )
         assertThat(presentPaymentMethodsResults).isEmpty()
 
         lifecycleOwner.setCurrentState(Lifecycle.State.STARTED)

@@ -116,6 +116,7 @@ internal class IdentityActivity :
             .verificationFlowFinishable(this)
             .identityViewModelFactory(viewModelFactory)
             .fallbackUrlLauncher(this)
+            .viewModelStoreOwner(this)
             .build()
         identityViewModel.retrieveAndBufferVerificationPage()
         identityViewModel.initializeTfLite()

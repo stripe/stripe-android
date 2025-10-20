@@ -6,7 +6,6 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
 import org.robolectric.RobolectricTestRunner
 import java.security.InvalidParameterException
 import kotlin.test.assertFailsWith
@@ -15,9 +14,11 @@ import kotlin.test.assertFailsWith
 class FinancialConnectionsSheetForDataContractTest {
 
     @Test
-    fun `parseResult() with missing data should return failed result`() {
-        assertThat(FinancialConnectionsSheetForDataContract(intentBuilder(mock())).parseResult(0, Intent()))
-            .isInstanceOf(FinancialConnectionsSheetResult.Failed::class.java)
+    fun `parseResult() with RESULT_CANCELED should return canceled result`() {
+        val contract = FinancialConnectionsSheetForDataContract { Intent() }
+        val result = contract.parseResult(android.app.Activity.RESULT_CANCELED, null)
+
+        assertThat(result).isInstanceOf(FinancialConnectionsSheetResult.Canceled::class.java)
     }
 
     @Test

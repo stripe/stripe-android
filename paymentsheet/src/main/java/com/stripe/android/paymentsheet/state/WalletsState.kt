@@ -4,21 +4,56 @@ import androidx.annotation.StringRes
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.BillingAddressConfig
+import com.stripe.android.link.ui.LinkButtonState
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.model.PaymentMethod.Type.Card
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 
+internal enum class WalletLocation {
+    HEADER,
+    INLINE
+}
+
 internal data class WalletsState(
-    val link: Link?,
-    val googlePay: GooglePay?,
+    private val link: Link?,
+    private val googlePay: GooglePay?,
+    private val walletsAllowedInHeader: List<WalletType>,
     val buttonsEnabled: Boolean,
     @StringRes val dividerTextResource: Int,
     val onGooglePayPressed: () -> Unit,
     val onLinkPressed: () -> Unit,
 ) {
 
+    /**
+     * Returns Link data if it should be displayed in the specified location, null otherwise.
+     */
+    fun link(location: WalletLocation): Link? {
+        return when (location) {
+            WalletLocation.HEADER -> link?.takeIf { walletsAllowedInHeader.contains(WalletType.Link) }
+            WalletLocation.INLINE -> link?.takeUnless { walletsAllowedInHeader.contains(WalletType.Link) }
+        }
+    }
+
+    /**
+     * Returns GooglePay data if it should be displayed in the specified location, null otherwise.
+     */
+    fun googlePay(location: WalletLocation): GooglePay? {
+        return when (location) {
+            WalletLocation.HEADER -> googlePay?.takeIf { walletsAllowedInHeader.contains(WalletType.GooglePay) }
+            WalletLocation.INLINE -> googlePay?.takeUnless { walletsAllowedInHeader.contains(WalletType.GooglePay) }
+        }
+    }
+
+    val walletsInHeader
+        get() = link(WalletLocation.HEADER) != null || googlePay(WalletLocation.HEADER) != null
+
     data class Link(
-        val email: String?,
+        val state: LinkButtonState,
+        val theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
     )
 
     data class GooglePay(
@@ -39,9 +74,26 @@ internal data class WalletsState(
             googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?,
             onGooglePayPressed: () -> Unit,
             onLinkPressed: () -> Unit,
-            isSetupIntent: Boolean
+            isSetupIntent: Boolean,
+            walletsAllowedInHeader: List<WalletType>,
+            paymentDetails: DisplayablePaymentDetails? = null,
+            enableDefaultValues: Boolean = false,
+            buttonThemes: PaymentSheet.ButtonThemes = PaymentSheet.ButtonThemes(
+                link = LinkButtonTheme.DEFAULT
+            )
         ): WalletsState? {
-            val link = Link(email = linkEmail).takeIf { isLinkAvailable == true }
+            val link = if (isLinkAvailable == true) {
+                Link(
+                    state = LinkButtonState.create(
+                        linkEmail = linkEmail,
+                        paymentDetails = paymentDetails,
+                        enableDefaultValues = enableDefaultValues
+                    ),
+                    theme = buttonThemes.link
+                )
+            } else {
+                null
+            }
 
             val googlePay = GooglePay(
                 allowCreditCards = googlePayLauncherConfig?.allowCreditCards ?: false,
@@ -78,6 +130,7 @@ internal data class WalletsState(
                     },
                     onGooglePayPressed = onGooglePayPressed,
                     onLinkPressed = onLinkPressed,
+                    walletsAllowedInHeader = walletsAllowedInHeader,
                 )
             } else {
                 null

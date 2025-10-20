@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.utils.rememberActivity
 
@@ -80,7 +81,7 @@ private fun rememberCustomerSheet(
             viewModelStoreOwner = viewModelStoreOwner,
             integration = integration,
             callback = callback,
-            statusBarColor = { activity.window?.statusBarColor },
+            statusBarColor = { StatusBarCompat.color(activity) },
         )
     }
 }

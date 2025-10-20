@@ -24,6 +24,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -104,15 +105,13 @@ class AutocompleteViewModelTest {
 
             assertThat(awaitItem()).isEqualTo(
                 AutocompleteViewModel.Event.GoBack(
-                    addressDetails = AddressDetails(
-                        address = PaymentSheet.Address(
-                            city = "South San Francisco",
-                            country = "US",
-                            line1 = "123 King Street",
-                            line2 = null,
-                            postalCode = "99999",
-                            state = "CA"
-                        )
+                    address = PaymentSheet.Address(
+                        city = "South San Francisco",
+                        country = "US",
+                        line1 = "123 King Street",
+                        line2 = null,
+                        postalCode = "99999",
+                        state = "CA"
                     )
                 )
             )
@@ -140,7 +139,7 @@ class AutocompleteViewModelTest {
 
             assertThat(viewModel.loading.value).isEqualTo(false)
 
-            assertThat(awaitItem()).isEqualTo(AutocompleteViewModel.Event.GoBack(addressDetails = null))
+            assertThat(awaitItem()).isEqualTo(AutocompleteViewModel.Event.GoBack(address = null))
         }
     }
 
@@ -168,10 +167,8 @@ class AutocompleteViewModelTest {
 
             assertThat(awaitItem()).isEqualTo(
                 AutocompleteViewModel.Event.EnterManually(
-                    addressDetails = AddressDetails(
-                        address = PaymentSheet.Address(
-                            line1 = "Some query"
-                        )
+                    address = PaymentSheet.Address(
+                        line1 = "Some query"
                     )
                 )
             )
@@ -187,7 +184,7 @@ class AutocompleteViewModelTest {
 
             assertThat(awaitItem()).isEqualTo(
                 AutocompleteViewModel.Event.EnterManually(
-                    addressDetails = null,
+                    address = null,
                 )
             )
         }
@@ -201,6 +198,41 @@ class AutocompleteViewModelTest {
         (trailingIcon.value as? TextFieldIcon.Trailing)?.onClick?.invoke()
 
         assertThat(viewModel.textFieldController.rawFieldValue.value).isEqualTo("")
+    }
+
+    @Test
+    fun `query is valid when 2 characters are entered`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel()
+
+        viewModel.textFieldController.onRawValueChange("12")
+
+        whenever(mockClient.findAutocompletePredictions(any(), any(), any())).thenReturn(
+            Result.success(
+                FindAutocompletePredictionsResponse(
+                    listOf(
+                        AutocompletePrediction(
+                            SpannableString("primaryText"),
+                            SpannableString("secondaryText"),
+                            "placeId"
+                        )
+                    )
+                )
+            )
+        )
+
+        // Advance past search debounce delay
+        advanceTimeBy(AutocompleteViewModel.SEARCH_DEBOUNCE_MS + 1)
+
+        assertThat(viewModel.predictions.value?.size).isEqualTo(1)
+    }
+
+    @Test
+    fun `query is invalid when less than 2 characters are entered`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel()
+
+        viewModel.textFieldController.onRawValueChange("1")
+
+        verify(mockClient, never()).findAutocompletePredictions(any(), any(), any())
     }
 
     @Test
@@ -263,7 +295,7 @@ class AutocompleteViewModelTest {
             viewModel.onBackPressed()
 
             assertThat(awaitItem()).isEqualTo(
-                AutocompleteViewModel.Event.GoBack(addressDetails = null)
+                AutocompleteViewModel.Event.GoBack(address = null)
             )
         }
     }
@@ -277,7 +309,7 @@ class AutocompleteViewModelTest {
             viewModel.onBackPressed()
 
             assertThat(awaitItem()).isEqualTo(
-                AutocompleteViewModel.Event.GoBack(addressDetails = null)
+                AutocompleteViewModel.Event.GoBack(address = null)
             )
         }
     }

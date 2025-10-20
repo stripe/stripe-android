@@ -99,6 +99,8 @@
   <string name="stripe_paypal_mandate">A fizetés megerősítésével a PayPalon engedélyezi, hogy a(z) %s a feltételeinek megfelelően a jövőbeni kifizetésekkel megterhelje a PayPal számláját.</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">A fizetés megerősítésével a RevolutPayen engedélyezi, hogy a(z) %s a feltételeinek megfelelően a későbbi kifizetésekkel megterhelje a RevolutPay számláját.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">A folytatással felhatalmazza a(z) %1$s vállalatot, hogy a vásárlásának vagy előfizetési csomagjának megfelelően rendszeresen automatikusan megterhelje Satispay egyenlegét.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Mentés a jövőbeni %s fizetésekhez</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->

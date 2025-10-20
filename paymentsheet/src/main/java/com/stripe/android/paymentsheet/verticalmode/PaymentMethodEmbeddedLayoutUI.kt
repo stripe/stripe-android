@@ -13,11 +13,14 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -77,6 +80,19 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.OnManageOneSavedPaymentMethod(it)
             )
         },
+        updatePaymentMethodVisibility = { itemCode, coordinates ->
+            interactor.handleViewAction(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.UpdatePaymentMethodVisibility(
+                    itemCode,
+                    coordinates,
+                )
+            )
+        },
+        cancelPaymentMethodVisibilityTracking = {
+            interactor.handleViewAction(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.CancelPaymentMethodVisibilityTracking
+            )
+        },
         imageLoader = imageLoader,
         modifier = modifier
             .testTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT),
@@ -100,6 +116,8 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
+    cancelPaymentMethodVisibilityTracking: () -> Unit = {},
     imageLoader: StripeImageLoader,
     appearance: Embedded,
     modifier: Modifier = Modifier,
@@ -109,6 +127,16 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     } else {
         Arrangement.Top
     }
+
+    val paymentMethodCodes = remember(paymentMethods, displayedSavedPaymentMethod) {
+        val output = paymentMethods.map { it.code }
+        output.plus("saved_${displayedSavedPaymentMethod?.paymentMethod?.id}")
+            .takeIf { displayedSavedPaymentMethod != null } ?: output
+    }
+
+    // Cancel tracking and any pending dispatches, when the paymentMethods used change
+    DisposableEffect(paymentMethodCodes) { onDispose { cancelPaymentMethodVisibilityTracking.invoke() } }
+
     Column(modifier = modifier, verticalArrangement = arrangement) {
         if (appearance.style.topSeparatorEnabled()) OptionalEmbeddedDivider(appearance.style)
 
@@ -121,6 +149,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
             onViewMorePaymentMethods = onViewMorePaymentMethods,
             onManageOneSavedPaymentMethod = onManageOneSavedPaymentMethod,
             onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
+            updatePaymentMethodVisibility = updatePaymentMethodVisibility,
             appearance = appearance
         )
 
@@ -130,6 +159,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
             isEnabled = isEnabled,
             imageLoader = imageLoader,
             appearance = appearance,
+            updatePaymentMethodVisibility = updatePaymentMethodVisibility
         )
 
         if (appearance.style.bottomSeparatorEnabled()) OptionalEmbeddedDivider(appearance.style)
@@ -173,7 +203,7 @@ private fun Embedded.RowStyle.bottomSeparatorEnabled(): Boolean {
         is Embedded.RowStyle.FloatingButton -> false
         is Embedded.RowStyle.FlatWithRadio -> bottomSeparatorEnabled
         is Embedded.RowStyle.FlatWithCheckmark -> bottomSeparatorEnabled
-        is Embedded.RowStyle.FlatWithChevron -> bottomSeparatorEnabled
+        is Embedded.RowStyle.FlatWithDisclosure -> bottomSeparatorEnabled
     }
 }
 
@@ -182,7 +212,7 @@ private fun Embedded.RowStyle.topSeparatorEnabled(): Boolean {
         is Embedded.RowStyle.FloatingButton -> false
         is Embedded.RowStyle.FlatWithRadio -> topSeparatorEnabled
         is Embedded.RowStyle.FlatWithCheckmark -> topSeparatorEnabled
-        is Embedded.RowStyle.FlatWithChevron -> topSeparatorEnabled
+        is Embedded.RowStyle.FlatWithDisclosure -> topSeparatorEnabled
     }
 }
 
@@ -191,7 +221,7 @@ private fun Embedded.RowStyle.separatorThickness(): Dp {
         is Embedded.RowStyle.FloatingButton -> 0.dp
         is Embedded.RowStyle.FlatWithRadio -> separatorThicknessDp.dp
         is Embedded.RowStyle.FlatWithCheckmark -> separatorThicknessDp.dp
-        is Embedded.RowStyle.FlatWithChevron -> separatorThicknessDp.dp
+        is Embedded.RowStyle.FlatWithDisclosure -> separatorThicknessDp.dp
     }
 }
 
@@ -200,7 +230,7 @@ private fun Embedded.RowStyle.separatorColor(isDarkMode: Boolean): Int {
         is Embedded.RowStyle.FloatingButton -> 0
         is Embedded.RowStyle.FlatWithRadio -> getColors(isDarkMode).separatorColor
         is Embedded.RowStyle.FlatWithCheckmark -> getColors(isDarkMode).separatorColor
-        is Embedded.RowStyle.FlatWithChevron -> getColors(isDarkMode).separatorColor
+        is Embedded.RowStyle.FlatWithDisclosure -> getColors(isDarkMode).separatorColor
     }
 }
 
@@ -209,7 +239,7 @@ private fun Embedded.RowStyle.startSeparatorInset(): Dp {
         is Embedded.RowStyle.FloatingButton -> 0.dp
         is Embedded.RowStyle.FlatWithRadio -> startSeparatorInsetDp.dp
         is Embedded.RowStyle.FlatWithCheckmark -> startSeparatorInsetDp.dp
-        is Embedded.RowStyle.FlatWithChevron -> startSeparatorInsetDp.dp
+        is Embedded.RowStyle.FlatWithDisclosure -> startSeparatorInsetDp.dp
     }
 }
 
@@ -218,7 +248,7 @@ private fun Embedded.RowStyle.endSeparatorInset(): Dp {
         is Embedded.RowStyle.FloatingButton -> 0.dp
         is Embedded.RowStyle.FlatWithRadio -> endSeparatorInsetDp.dp
         is Embedded.RowStyle.FlatWithCheckmark -> endSeparatorInsetDp.dp
-        is Embedded.RowStyle.FlatWithChevron -> endSeparatorInsetDp.dp
+        is Embedded.RowStyle.FlatWithDisclosure -> endSeparatorInsetDp.dp
     }
 }
 
@@ -232,6 +262,7 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
     appearance: Embedded,
 ) {
     if (displayedSavedPaymentMethod != null) {
@@ -246,6 +277,9 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
                     onViewMorePaymentMethods = onViewMorePaymentMethods,
                     onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
                 )
+            },
+            modifier = Modifier.onGloballyPositioned { coordinates ->
+                updatePaymentMethodVisibility("saved", coordinates)
             },
             onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
             appearance = appearance
@@ -262,6 +296,7 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
     isEnabled: Boolean,
     imageLoader: StripeImageLoader,
     appearance: Embedded,
+    updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
 ) {
     val selectedIndex = remember(selection, paymentMethods) {
         if (selection is PaymentMethodVerticalLayoutInteractor.Selection.New) {
@@ -286,10 +321,15 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
                 imageLoader = imageLoader,
                 appearance = appearance,
                 trailingContent = {
-                    EmbeddedNewPaymentMethodTrailingContent(
-                        showChevron = appearance.style !is RowStyle.FlatWithCheckmark,
-                    )
-                }
+                    if (appearance.style !is RowStyle.FlatWithDisclosure) {
+                        EmbeddedNewPaymentMethodTrailingContent(
+                            showChevron = appearance.style !is RowStyle.FlatWithCheckmark,
+                        )
+                    }
+                },
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    updatePaymentMethodVisibility(item.code, coordinates)
+                },
             )
         } else {
             NewPaymentMethodRowButton(
@@ -297,7 +337,10 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
                 isSelected = isSelected,
                 displayablePaymentMethod = item,
                 imageLoader = imageLoader,
-                appearance = appearance
+                appearance = appearance,
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    updatePaymentMethodVisibility(item.code, coordinates)
+                },
             )
         }
 
@@ -310,7 +353,7 @@ private val RowStyle.viewMoreShowsChevron: Boolean
         is RowStyle.FloatingButton -> true
         is RowStyle.FlatWithRadio -> true
         is RowStyle.FlatWithCheckmark -> false
-        is RowStyle.FlatWithChevron -> false
+        is RowStyle.FlatWithDisclosure -> false
     }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

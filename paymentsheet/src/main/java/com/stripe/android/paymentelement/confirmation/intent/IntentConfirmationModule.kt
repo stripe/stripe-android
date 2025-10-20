@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 import androidx.annotation.ColorInt
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -20,9 +21,9 @@ import javax.inject.Provider
 @Module
 internal interface IntentConfirmationModule {
     @Binds
-    fun bindsIntentConfirmationInterceptor(
-        defaultConfirmationHandlerFactory: DefaultIntentConfirmationInterceptor
-    ): IntentConfirmationInterceptor
+    fun bindsIntentConfirmationInterceptorFactory(
+        defaultConfirmationInterceptorFactory: DefaultIntentConfirmationInterceptorFactory
+    ): IntentConfirmationInterceptor.Factory
 
     companion object {
         @Provides
@@ -30,6 +31,14 @@ internal interface IntentConfirmationModule {
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): CreateIntentCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.createIntentCallback
+        }
+
+        @Provides
+        fun providesCreateIntentWithConfirmationTokenCallback(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        ): CreateIntentWithConfirmationTokenCallback? {
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
+                ?.createIntentWithConfirmationTokenCallback
         }
 
         @OptIn(SharedPaymentTokenSessionPreview::class)
@@ -44,13 +53,13 @@ internal interface IntentConfirmationModule {
         @Provides
         @IntoSet
         fun providesIntentConfirmationDefinition(
-            intentConfirmationInterceptor: IntentConfirmationInterceptor,
+            interceptorFactory: IntentConfirmationInterceptor.Factory,
             stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
             @Named(STATUS_BAR_COLOR) @ColorInt statusBarColor: Int?,
             paymentConfigurationProvider: Provider<PaymentConfiguration>,
         ): ConfirmationDefinition<*, *, *, *> {
             return IntentConfirmationDefinition(
-                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                intentConfirmationInterceptorFactory = interceptorFactory,
                 paymentLauncherFactory = { hostActivityLauncher ->
                     stripePaymentLauncherAssistedFactory.create(
                         publishableKey = { paymentConfigurationProvider.get().publishableKey },

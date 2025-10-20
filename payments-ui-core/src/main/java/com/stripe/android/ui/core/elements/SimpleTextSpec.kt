@@ -97,10 +97,10 @@ data class SimpleTextSpec(
                         KeyboardType.Email -> androidx.compose.ui.text.input.KeyboardType.Email
                         KeyboardType.Password -> androidx.compose.ui.text.input.KeyboardType.Password
                         KeyboardType.NumberPassword -> androidx.compose.ui.text.input.KeyboardType.NumberPassword
-                    }
+                    },
+                    optional = this.showOptionalLabel
                 ),
                 initialValue = initialValues[this.apiPath],
-                showOptionalLabel = this.showOptionalLabel
             )
         )
     )

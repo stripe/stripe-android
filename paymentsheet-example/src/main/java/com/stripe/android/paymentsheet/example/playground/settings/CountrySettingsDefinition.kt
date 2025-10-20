@@ -70,10 +70,16 @@ internal object CountrySettingsDefinition :
             Country.CN to Currency.CNY,
             Country.DE to Currency.EUR,
             Country.IT to Currency.EUR,
+            Country.TH to Currency.THB,
         )
 
         countriesToCurrencyMap[value]?.let { currency ->
             playgroundSettings[CurrencySettingsDefinition] = currency
+        }
+
+        if (value != Country.US) {
+            playgroundSettings[CustomerSessionOnBehalfOfSettingsDefinition] =
+                CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.NO_CONNECTED_ACCOUNT
         }
 
         // When the changes via the UI, reset the customer.
@@ -97,4 +103,5 @@ enum class Country(override val value: String) : ValueEnum {
     CN("CN"),
     DE("DE"),
     IT("IT"),
+    TH("TH"),
 }

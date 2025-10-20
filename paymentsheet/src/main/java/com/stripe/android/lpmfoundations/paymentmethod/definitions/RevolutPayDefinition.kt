@@ -22,7 +22,9 @@ internal object RevolutPayDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type.code)
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean {
+        return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
+    }
 
     override fun uiDefinitionFactory(): UiDefinitionFactory = RevolutPayUiDefinitionFactory
 }
@@ -35,7 +37,8 @@ private object RevolutPayUiDefinitionFactory : UiDefinitionFactory.RequiresShare
         paymentMethodDefinition = RevolutPayDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_revolut_pay,
-        iconResource = R.drawable.stripe_ic_paymentsheet_pm_revolut_pay,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_revolut_pay_day,
+        iconResourceNight = R.drawable.stripe_ic_paymentsheet_pm_revolut_pay_night,
     )
 
     override fun createFormElements(
@@ -52,6 +55,7 @@ private object RevolutPayUiDefinitionFactory : UiDefinitionFactory.RequiresShare
         return transformSpecToElements.transform(
             metadata = metadata,
             specs = sharedDataSpec.fields + localLayoutSpecs,
+            termsDisplay = metadata.termsDisplayForType(RevolutPayDefinition.type),
         )
     }
 }

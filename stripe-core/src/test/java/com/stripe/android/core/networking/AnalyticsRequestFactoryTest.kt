@@ -44,6 +44,23 @@ class AnalyticsRequestFactoryTest : TestCase() {
     }
 
     @Test
+    fun `when publishable key is a user key, it is redacted`() {
+        val exception = APIException(RuntimeException())
+        val factory = AnalyticsRequestFactory(
+            mock(),
+            null,
+            packageName,
+            { "uk_123" },
+            { "5G" },
+        )
+
+        val params = factory.createRequest(mockEvent, emptyMap()).params
+
+        assertThat(params["publishable_key"])
+            .isEqualTo("[REDACTED_LIVE_KEY]")
+    }
+
+    @Test
     fun getEventLoggingParams_withProductUsage_createsAllFields() {
         val expectedUaName = AnalyticsRequestFactory.ANALYTICS_UA
 
@@ -74,6 +91,9 @@ class AnalyticsRequestFactoryTest : TestCase() {
         assertNotNull(params[AnalyticsFields.OS_RELEASE])
         assertNotNull(params[AnalyticsFields.OS_NAME])
         assertNotNull(params[AnalyticsFields.SESSION_ID])
+        assertNotNull(params[AnalyticsFields.TIMESTAMP])
+        // Verify timestamp is in seconds, not milliseconds: seconds are ~billions, millis are ~trillions
+        assertThat(params[AnalyticsFields.TIMESTAMP] as? Double).isLessThan(10_000_000_000.0)
     }
 
     @Test

@@ -4,7 +4,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.TestFactory
+import com.stripe.android.link.ui.LinkButtonState
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -12,6 +16,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.VerticalMode
 import com.stripe.android.paymentsheet.parseAppearance
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
@@ -62,7 +67,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
 
     @Test
     fun displaysVerticalModeList() {
-        val metadata = PaymentMethodMetadataFactory.create()
+        val metadata = createMetadata()
         val initialScreen = VerticalMode(FakePaymentMethodVerticalLayoutInteractor.create(metadata))
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
 
@@ -73,7 +78,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
 
     @Test
     fun displaysVerticalModeListWithError() {
-        val metadata = PaymentMethodMetadataFactory.create()
+        val metadata = createMetadata()
         val initialScreen = VerticalMode(FakePaymentMethodVerticalLayoutInteractor.create(metadata))
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.onError("Example error".resolvableString)
@@ -134,7 +139,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
 
     @Test
     fun displaysVerticalModeListWithLink() {
-        val metadata = PaymentMethodMetadataFactory.create()
+        val metadata = createMetadata()
         val interactor = FakePaymentMethodVerticalLayoutInteractor.create(
             paymentMethodMetadata = metadata,
             initialShowsWalletsHeader = true
@@ -142,14 +147,13 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
         val initialScreen = VerticalMode(interactor)
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.walletsStateSource.value = WalletsState(
-            link = WalletsState.Link(
-                email = null,
-            ),
+            link = WalletsState.Link(state = LinkButtonState.Default),
             googlePay = null,
             buttonsEnabled = true,
             dividerTextResource = R.string.stripe_paymentsheet_or_pay_using,
             onGooglePayPressed = { throw AssertionError("Not expected.") },
             onLinkPressed = { throw AssertionError("Not expected.") },
+            walletsAllowedInHeader = WalletType.entries,
         )
 
         paparazziRule.snapshot {
@@ -183,7 +187,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
 
     @Test
     fun displaysVerticalModeListWithSmallRowPadding() {
-        val metadata = PaymentMethodMetadataFactory.create()
+        val metadata = createMetadata()
         val initialScreen = VerticalMode(FakePaymentMethodVerticalLayoutInteractor.create(metadata))
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
 
@@ -194,7 +198,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
 
     @Test
     fun displaysVerticalModeListWithLargeRowPadding() {
-        val metadata = PaymentMethodMetadataFactory.create()
+        val metadata = createMetadata()
         val initialScreen = VerticalMode(FakePaymentMethodVerticalLayoutInteractor.create(metadata))
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
 
@@ -218,5 +222,15 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
         override fun reset() {
             PaymentSheetAppearance.DefaultAppearance.reset()
         }
+    }
+
+    private fun createMetadata(): PaymentMethodMetadata {
+        return PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+        )
     }
 }

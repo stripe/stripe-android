@@ -6,6 +6,7 @@ import android.os.Parcelable
 import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.edit
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkController
@@ -179,9 +180,15 @@ internal class PlaygroundSettings private constructor(
         }
 
         fun linkControllerConfiguration(
+            context: Context,
             playgroundState: PlaygroundState.Payment
         ): LinkController.Configuration {
-            val builder = LinkController.Configuration.Builder("Example, Inc.")
+            val paymentConfiguration = PaymentConfiguration.getInstance(context)
+            val builder = LinkController.Configuration.Builder(
+                merchantDisplayName = "Example, Inc.",
+                publishableKey = paymentConfiguration.publishableKey,
+                stripeAccountId = paymentConfiguration.stripeAccountId,
+            )
             val linkControllerConfigurationData = PlaygroundSettingDefinition.LinkControllerConfigurationData(builder)
             settings.filter { (definition, _) ->
                 definition.applicable(configurationData)
@@ -483,8 +490,10 @@ internal class PlaygroundSettings private constructor(
             CustomerSessionRedisplaySettingsDefinition,
             CustomerSessionRedisplayFiltersSettingsDefinition,
             CustomerSessionOverrideRedisplaySettingsDefinition,
+            CustomerSessionOnBehalfOfSettingsDefinition,
             CustomerSettingsDefinition,
             CheckoutModeSettingsDefinition,
+            UserCountryOverrideSettingsDefinition,
             LinkSettingsDefinition,
             LinkTypeSettingsDefinition,
             CountrySettingsDefinition,
@@ -496,11 +505,13 @@ internal class PlaygroundSettings private constructor(
             CollectEmailSettingsDefinition,
             CollectPhoneSettingsDefinition,
             CollectAddressSettingsDefinition,
+            AllowedBillingCountriesSettingsDefinition,
             AutocompleteAddressSettingsDefinition,
             DefaultShippingAddressSettingsDefinition,
             DelayedPaymentMethodsSettingsDefinition,
             AutomaticPaymentMethodsSettingsDefinition,
             SupportedPaymentMethodsSettingsDefinition,
+            AutomaticallyLaunchCardScanDefinition,
             RequireCvcRecollectionDefinition,
             PrimaryButtonLabelSettingsDefinition,
             PaymentMethodConfigurationSettingsDefinition,
@@ -534,12 +545,31 @@ internal class PlaygroundSettings private constructor(
             ),
             ShopPaySettingsDefinition,
             LinkControllerAllowUserEmailEditsSettingsDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.forceLinkWebAuth),
+            FeatureFlagSettingsDefinition(
+                FeatureFlags.forceEnableLinkPaymentSelectionHint,
+                listOf(PlaygroundConfigurationData.IntegrationType.LinkController)
+            ),
+            TermsDisplaySettingsDefinition,
+            FeatureFlagSettingsDefinition(
+                FeatureFlags.cardScanGooglePayMigration,
+                listOf(
+                    PlaygroundConfigurationData.IntegrationType.PaymentSheet,
+                    PlaygroundConfigurationData.IntegrationType.FlowController,
+                    PlaygroundConfigurationData.IntegrationType.Embedded,
+                    PlaygroundConfigurationData.IntegrationType.CustomerSheet,
+                )
+            ),
+            PassiveCaptchaDefinition,
+            AttestationOnIntentConfirmationDefinition,
+            EnablePromptPaySettingsDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
             AppearanceSettingsDefinition,
             CustomEndpointDefinition,
             ShippingAddressSettingsDefinition,
+            ConfirmationTokenSettingsDefinition,
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =

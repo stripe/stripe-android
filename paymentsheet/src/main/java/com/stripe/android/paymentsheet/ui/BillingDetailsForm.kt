@@ -2,16 +2,13 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Stable
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.toInternal
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
-import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.NameConfig
-import com.stripe.android.uicore.elements.PhoneNumberController
-import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -25,32 +22,15 @@ import kotlinx.coroutines.flow.flowOn
 internal class BillingDetailsForm(
     billingDetails: PaymentMethod.BillingDetails?,
     addressCollectionMode: AddressCollectionMode,
-    collectName: Boolean,
-    collectEmail: Boolean,
-    collectPhone: Boolean,
+    private val nameCollection: NameCollection,
+    private val collectEmail: Boolean,
+    private val collectPhone: Boolean,
+    allowedBillingCountries: Set<String>
 ) {
-
-    val nameElement: SimpleTextElement? = if (collectName) {
+    val nameElement: SimpleTextElement? = if (nameCollection == NameCollection.OutsideBillingDetailsForm) {
         SimpleTextElement(
             identifier = IdentifierSpec.Name,
             controller = NameConfig.createController(billingDetails?.name)
-        )
-    } else {
-        null
-    }
-
-    val emailElement: EmailElement? = if (collectEmail) {
-        EmailElement(initialValue = billingDetails?.email)
-    } else {
-        null
-    }
-
-    val phoneElement: PhoneNumberElement? = if (collectPhone) {
-        PhoneNumberElement(
-            identifier = IdentifierSpec.Phone,
-            controller = PhoneNumberController.createPhoneNumberController(
-                initialValue = billingDetails?.phone ?: "",
-            )
         )
     } else {
         null
@@ -60,9 +40,21 @@ internal class BillingDetailsForm(
         identifier = IdentifierSpec.BillingAddress,
         sameAsShippingElement = null,
         shippingValuesMap = null,
-        collectionMode = addressCollectionMode.toInternal(),
+        countryCodes = allowedBillingCountries,
+        collectionConfiguration = BillingDetailsCollectionConfiguration(
+            address = when (addressCollectionMode) {
+                AddressCollectionMode.Automatic ->
+                    BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+                AddressCollectionMode.Never -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                AddressCollectionMode.Full -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            },
+            collectName = nameCollection == NameCollection.InBillingDetailsForm,
+            collectEmail = collectEmail,
+            collectPhone = collectPhone,
+        ),
         rawValuesMap = rawAddressValues(billingDetails),
         autocompleteAddressInteractorFactory = null,
+        shouldHideCountryOnNoAddressCollection = false,
     )
 
     val addressSectionElement = SectionElement.wrap(
@@ -74,19 +66,22 @@ internal class BillingDetailsForm(
 
     private fun formFieldsState(): Flow<BillingDetailsFormState> {
         val nameFlow = nameElement?.getFormFieldValueFlow() ?: flowOf(emptyList())
-        val emailFlow = emailElement?.getFormFieldValueFlow() ?: flowOf(emptyList())
-        val phoneFlow = phoneElement?.getFormFieldValueFlow() ?: flowOf(emptyList())
 
         return combine(
             nameFlow,
-            emailFlow,
-            phoneFlow,
             cardBillingAddressElement.getFormFieldValueFlow(),
             hiddenElements
-        ) { nameFormFields, emailFormFields, phoneFormFields, addressFormFields, hiddenIdentifiers ->
-            val name = nameFormFields.find { it.first == IdentifierSpec.Name }?.second
-            val email = emailFormFields.find { it.first == IdentifierSpec.Email }?.second
-            val phone = phoneFormFields.find { it.first == IdentifierSpec.Phone }?.second
+        ) { nameFormFields, addressFormFields, hiddenIdentifiers ->
+            val name = when (nameCollection) {
+                NameCollection.InBillingDetailsForm ->
+                    addressFormFields.valueOrNull(IdentifierSpec.Name, hiddenIdentifiers)
+                NameCollection.OutsideBillingDetailsForm ->
+                    nameFormFields.find { it.first == IdentifierSpec.Name }?.second
+                NameCollection.Disabled -> null
+            }
+
+            val email = addressFormFields.valueOrNull(IdentifierSpec.Email, hiddenIdentifiers)
+            val phone = addressFormFields.valueOrNull(IdentifierSpec.Phone, hiddenIdentifiers)
             val line1 = addressFormFields.valueOrNull(IdentifierSpec.Line1, hiddenIdentifiers)
             val line2 = addressFormFields.valueOrNull(IdentifierSpec.Line2, hiddenIdentifiers)
             val city = addressFormFields.valueOrNull(IdentifierSpec.City, hiddenIdentifiers)
@@ -120,14 +115,30 @@ internal class BillingDetailsForm(
     private fun rawAddressValues(
         billingDetails: PaymentMethod.BillingDetails?,
     ): Map<IdentifierSpec, String?> {
-        val address = billingDetails?.address ?: return emptyMap()
-        return mapOf(
-            IdentifierSpec.Line1 to address.line1,
-            IdentifierSpec.Line2 to address.line2,
-            IdentifierSpec.State to address.state,
-            IdentifierSpec.City to address.city,
-            IdentifierSpec.Country to address.country,
-            IdentifierSpec.PostalCode to address.postalCode
-        )
+        val address = billingDetails?.address
+
+        return listOfNotNull(
+            (IdentifierSpec.Name to billingDetails?.name).takeIf {
+                nameCollection == NameCollection.InBillingDetailsForm
+            },
+            IdentifierSpec.Line1 to address?.line1,
+            IdentifierSpec.Line2 to address?.line2,
+            IdentifierSpec.State to address?.state,
+            IdentifierSpec.City to address?.city,
+            IdentifierSpec.Country to address?.country,
+            IdentifierSpec.PostalCode to address?.postalCode,
+            (IdentifierSpec.Email to billingDetails?.email).takeIf {
+                collectEmail
+            },
+            (IdentifierSpec.Phone to billingDetails?.phone).takeIf {
+                collectPhone
+            },
+        ).toMap()
     }
+}
+
+internal enum class NameCollection {
+    Disabled,
+    InBillingDetailsForm,
+    OutsideBillingDetailsForm,
 }

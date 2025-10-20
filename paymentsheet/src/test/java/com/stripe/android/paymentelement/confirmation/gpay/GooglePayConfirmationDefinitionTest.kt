@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -11,11 +12,14 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
+import com.stripe.android.paymentelement.confirmation.PAYMENT_INTENT
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.confirmation.asCanceled
@@ -29,7 +33,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.utils.DummyActivityResultCaller
@@ -104,7 +107,7 @@ class GooglePayConfirmationDefinitionTest {
         }
         val result = definition.toResult(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = GooglePayPaymentMethodLauncher.Result.Completed(
                 paymentMethod = paymentMethod,
@@ -115,7 +118,7 @@ class GooglePayConfirmationDefinitionTest {
 
         val successResult = result.asNextStep()
 
-        assertThat(successResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(successResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
 
         assertThat(successResult.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
 
@@ -133,7 +136,7 @@ class GooglePayConfirmationDefinitionTest {
         val exception = IllegalStateException("Failed!")
         val result = definition.toResult(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = GooglePayPaymentMethodLauncher.Result.Failed(
                 errorCode = 400,
@@ -157,7 +160,7 @@ class GooglePayConfirmationDefinitionTest {
         val exception = IllegalStateException("Failed!")
         val result = definition.toResult(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = GooglePayPaymentMethodLauncher.Result.Failed(
                 errorCode = GooglePayPaymentMethodLauncher.NETWORK_ERROR,
@@ -183,7 +186,7 @@ class GooglePayConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = GooglePayPaymentMethodLauncher.Result.Canceled,
         )
@@ -297,7 +300,7 @@ class GooglePayConfirmationDefinitionTest {
 
             definition.launch(
                 confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
                 arguments = Unit,
                 launcher = launcher,
             )
@@ -379,6 +382,41 @@ class GooglePayConfirmationDefinitionTest {
             cardBrandFilterShouldBe = DefaultCardBrandFilter,
         )
 
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    @Test
+    fun `On 'launch', should create google pay launcher with expected merchant name from seller`() = runTest {
+        RecordingGooglePayPaymentMethodLauncherFactory.test(mock()) {
+            val definition = createGooglePayConfirmationDefinition(factory)
+            val launcher = FakeActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>()
+
+            definition.launch(
+                confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
+                confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                    initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                        intentConfiguration = PaymentSheet.IntentConfiguration(
+                            sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                                amount = 5000,
+                                currency = "CAD",
+                            ),
+                            sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                                businessName = "My business, Inc.",
+                                networkId = "network_123",
+                                externalId = "external_123"
+                            )
+                        )
+                    )
+                ),
+                arguments = Unit,
+                launcher = launcher,
+            )
+
+            val createGooglePayLauncherCall = createGooglePayPaymentMethodLauncherCalls.awaitItem()
+
+            assertThat(createGooglePayLauncherCall.activityResultLauncher).isEqualTo(launcher)
+            assertThat(createGooglePayLauncherCall.config.merchantName).isEqualTo("My business, Inc.")
+        }
+    }
+
     @Test
     fun `On 'launch', should use payment intent currency code if available`() = runTest {
         val googlePayLauncher = mock<GooglePayPaymentMethodLauncher>()
@@ -393,7 +431,7 @@ class GooglePayConfirmationDefinitionTest {
                         merchantCurrencyCode = "USD",
                     ),
                 ),
-                confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+                confirmationArgs = CONFIRMATION_PARAMETERS.copy(
                     intent = PAYMENT_INTENT.copy(currency = "CAD"),
                 ),
                 arguments = Unit,
@@ -406,7 +444,8 @@ class GooglePayConfirmationDefinitionTest {
                 currencyCode = "CAD",
                 amount = 1000L,
                 transactionId = "pi_12345",
-                label = null
+                label = null,
+                clientAttributionMetadata = GOOGLE_PAY_CONFIRMATION_OPTION.clientAttributionMetadata,
             )
         }
     }
@@ -426,7 +465,7 @@ class GooglePayConfirmationDefinitionTest {
                         customLabel = "Merchant Inc."
                     ),
                 ),
-                confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+                confirmationArgs = CONFIRMATION_PARAMETERS.copy(
                     intent = PAYMENT_INTENT.copy(currency = "CAD"),
                 ),
                 arguments = Unit,
@@ -439,7 +478,8 @@ class GooglePayConfirmationDefinitionTest {
                 currencyCode = "CAD",
                 amount = 1000L,
                 transactionId = "pi_12345",
-                label = "Merchant Inc."
+                label = "Merchant Inc.",
+                clientAttributionMetadata = GOOGLE_PAY_CONFIRMATION_OPTION.clientAttributionMetadata,
             )
         }
     }
@@ -460,7 +500,7 @@ class GooglePayConfirmationDefinitionTest {
                         customLabel = "Merchant Inc."
                     ),
                 ),
-                confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+                confirmationArgs = CONFIRMATION_PARAMETERS.copy(
                     intent = SetupIntentFactory.create(),
                 ),
                 arguments = Unit,
@@ -473,7 +513,8 @@ class GooglePayConfirmationDefinitionTest {
                 currencyCode = "USD",
                 amount = 2099L,
                 transactionId = "pi_12345",
-                label = "Merchant Inc."
+                label = "Merchant Inc.",
+                clientAttributionMetadata = GOOGLE_PAY_CONFIRMATION_OPTION.clientAttributionMetadata,
             )
         }
     }
@@ -492,7 +533,7 @@ class GooglePayConfirmationDefinitionTest {
                     merchantCurrencyCode = merchantCurrencyCode,
                 ),
             ),
-            confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
                 initializationMode = initializationMode,
                 intent = SetupIntentFactory.create(),
             ),
@@ -523,7 +564,7 @@ class GooglePayConfirmationDefinitionTest {
 
             definition.launch(
                 confirmationOption = confirmationOption,
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
                 arguments = Unit,
                 launcher = launcher,
             )
@@ -621,22 +662,18 @@ class GooglePayConfirmationDefinitionTest {
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 ),
                 cardBrandFilter = DefaultCardBrandFilter,
-            )
+            ),
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
         )
-
-        private val PAYMENT_INTENT = PaymentIntentFactory.create()
 
         private val APPEARANCE = PaymentSheet.Appearance.Builder()
             .colorsDark(PaymentSheet.Colors.defaultLight)
             .build()
 
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            intent = PAYMENT_INTENT,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            appearance = APPEARANCE,
-            shippingDetails = null,
-        )
+        private val CONFIRMATION_PARAMETERS =
+            com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS.copy(
+                appearance = APPEARANCE
+            )
     }
 }

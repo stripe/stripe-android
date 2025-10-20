@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.luxe
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specsForConfiguration
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.ui.core.elements.AddressSpec
@@ -47,12 +48,14 @@ internal class TransformSpecToElements(
         metadata: PaymentMethodMetadata?,
         specs: List<FormItemSpec>,
         placeholderOverrideList: List<IdentifierSpec> = emptyList(),
+        termsDisplay: PaymentSheet.TermsDisplay,
     ): List<FormElement> {
         return specsForConfiguration(
             configuration = arguments.billingDetailsCollectionConfiguration,
             placeholderOverrideList = placeholderOverrideList,
             requiresMandate = arguments.requiresMandate,
             specs = specs,
+            termsDisplay = termsDisplay,
         ).flatMap { spec ->
             when (spec) {
                 is StaticTextSpec -> listOf(spec.transform())

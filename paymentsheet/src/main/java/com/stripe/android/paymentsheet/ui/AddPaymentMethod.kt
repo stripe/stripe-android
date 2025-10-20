@@ -34,7 +34,7 @@ internal fun AddPaymentMethod(
         supportedPaymentMethods = state.supportedPaymentMethods,
         selectedItemCode = state.selectedPaymentMethodCode,
         incentive = state.incentive,
-        formElements = state.formElements,
+        formElements = state.formUiElements,
         onItemSelectedListener = { selectedLpm ->
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(
@@ -60,6 +60,13 @@ internal fun AddPaymentMethod(
                 )
             )
         },
+        updatePaymentMethodVisibility = {
+            interactor.handleViewAction(
+                AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility(
+                    initialVisibilityTrackerData = it
+                )
+            )
+        },
     )
 }
 
@@ -72,6 +79,7 @@ internal fun FormFieldValues.transformToPaymentMethodCreateParams(
         code = paymentMethodCode,
         requiresMandate = paymentMethodMetadata.requiresMandate(paymentMethodCode),
         allowRedisplay = paymentMethodMetadata.allowRedisplay(userRequestedReuse, paymentMethodCode),
+        clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
     )
 }
 
@@ -100,9 +108,8 @@ internal fun FormFieldValues.transformToPaymentSelection(
     paymentMethodMetadata: PaymentMethodMetadata,
 ): PaymentSelection {
     val setupFutureUsage = userRequestedReuse.getSetupFutureUseValue(
-        paymentMethodMetadata.hasIntentToSetup(PaymentMethod.Type.Card.code)
+        paymentMethodMetadata.hasIntentToSetup(paymentMethod.code)
     )
-
     val params = transformToPaymentMethodCreateParams(paymentMethod.code, paymentMethodMetadata)
     val options = transformToPaymentMethodOptionsParams(paymentMethod.code, setupFutureUsage)
     val extras = transformToExtraParams(paymentMethod.code)
@@ -135,6 +142,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
         PaymentSelection.New.GenericPaymentMethod(
             label = paymentMethod.displayName,
             iconResource = paymentMethod.iconResource,
+            iconResourceNight = paymentMethod.iconResourceNight,
             lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
             paymentMethodCreateParams = params,

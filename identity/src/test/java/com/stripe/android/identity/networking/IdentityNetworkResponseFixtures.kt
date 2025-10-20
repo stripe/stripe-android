@@ -231,7 +231,9 @@ internal val VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
                 "metadata2": "value2"
             }
         }
-      ]
+      ],
+      "is_stripe": false,
+      "skip_success_page": false
     }
 """.trimIndent()
 
@@ -392,7 +394,9 @@ internal val VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
                 "metadata2": "value2"
             }
         }
-      ]
+      ],
+      "is_stripe": false,
+      "skip_success_page": false
     }
 """.trimIndent()
 
@@ -581,7 +585,9 @@ internal val VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING = """
                 "metadata2": "value2"
             }
         }
-      ]
+      ],
+      "is_stripe": false,
+      "skip_success_page": false
     }
 """.trimIndent()
 
@@ -777,7 +783,9 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ID_NUMBER_JSON_STRING = """
                 "metadata2": "value2"
             }
         }
-      ]
+      ],
+      "is_stripe": false,
+      "skip_success_page": false
     }
 
 """.trimIndent()
@@ -946,7 +954,9 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_JSON_STRING = """
                 "metadata2": "value2"
             }
         }
-      ]
+      ],
+      "is_stripe": false,
+      "skip_success_page": false
     }
 """.trimIndent()
 
@@ -1115,7 +1125,9 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_AND_ID_NUMBER_JSON_
                 "metadata2": "value2"
             }
         }
-      ]
+      ],
+      "is_stripe": false,
+      "skip_success_page": false
     }
 """.trimIndent()
 
@@ -1282,7 +1294,9 @@ internal val VERIFICATION_PAGE_TYPE_ID_NUMBER_JSON_STRING = """
                 "metadata2": "value2"
             }
         }
-      ]
+      ],
+      "is_stripe": false,
+      "skip_success_page": false
     }
 """.trimIndent()
 
@@ -1449,6 +1463,8 @@ internal val VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING = """
                 "metadata2": "value2"
             }
         }
-      ]
+      ],
+      "is_stripe": false,
+      "skip_success_page": false
     }
 """.trimIndent()

@@ -1,4 +1,39 @@
 {
   "object": "payment_method",
-  "payment_method": "pm_1234"
+  "payment_method": {
+    "id": "pm_1234",
+    "object": "payment_method",
+    "created": 1550757934255,
+    "customer": "cus_AQsHpvKfKwJDrF",
+    "livemode": true,
+    "type": "card",
+    "billing_details": {
+      "address": {
+        "city": "San Francisco",
+        "country": "US",
+        "line1": "1234 Main Street",
+        "postal_code": "94111",
+        "state": "CA"
+      },
+      "email": "jenny.rosen@example.com",
+      "name": "Jenny Rosen",
+      "phone": "123-456-7890"
+    },
+    "card": {
+      "brand": "visa",
+      "checks": {
+        "address_line1_check": "unchecked",
+        "cvc_check": "unchecked"
+      },
+      "country": "US",
+      "exp_month": 8,
+      "exp_year": 2022,
+      "funding": "credit",
+      "fingerprint": "fingerprint123",
+      "last4": "4242",
+      "three_d_secure_usage": {
+        "supported": true
+      }
+    }
+  }
 }

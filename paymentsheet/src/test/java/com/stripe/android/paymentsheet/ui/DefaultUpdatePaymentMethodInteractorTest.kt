@@ -1,15 +1,19 @@
 package com.stripe.android.paymentsheet.ui
 
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.isInstanceOf
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.setDefaultPaymentMethodErrorMessage
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updateCardBrandErrorMessage
@@ -136,16 +140,10 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
     @Test
     fun updatingCard_callsOnUpdateSuccess() {
-        var updateSuccessCalled = false
-        fun onUpdateSuccess() {
-            updateSuccessCalled = true
-        }
-
         runScenario(
             displayableSavedPaymentMethod =
             PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(),
             updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
-            onUpdateSuccess = ::onUpdateSuccess,
         ) {
             interactor.cardParamsUpdateAction(CardBrand.Visa)
 
@@ -154,7 +152,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             }
 
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
-            assertThat(updateSuccessCalled).isTrue()
+            assertThat(onUpdateSuccessTurbine.awaitItem()).isNotNull()
         }
     }
 
@@ -169,7 +167,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 updatedPaymentMethod = paymentMethod
                 Result.success(paymentMethod)
             },
-            onUpdateSuccess = {},
         ) {
             interactor.cardParamsUpdateAction(CardBrand.CartesBancaires)
 
@@ -178,6 +175,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             }
 
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
+            assertThat(onUpdateSuccessTurbine.awaitItem()).isNotNull()
 
             assertThat(updatedPaymentMethod).isEqualTo(initialPaymentMethod)
             // The user should be able to change their card brand back to the original value if they wanted to at this
@@ -366,33 +364,19 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
     @Test
     fun setAsDefaultNotChanged_pressSave_doesNotCallOnUpdateSuccess() {
-        var updateSuccessCalled = false
-        fun onUpdateSuccess() {
-            updateSuccessCalled = true
-        }
-
         runScenario(
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.success(Unit) },
-            onUpdateSuccess = ::onUpdateSuccess,
         ) {
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
-
-            assertThat(updateSuccessCalled).isFalse()
         }
     }
 
     @Test
     fun setAsDefault_success_callsOnUpdateSuccess() {
-        var updateSuccessCalled = false
-        fun onUpdateSuccess() {
-            updateSuccessCalled = true
-        }
-
         runScenario(
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.success(Unit) },
-            onUpdateSuccess = ::onUpdateSuccess,
         ) {
             interactor.handleViewAction(
                 UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged(
@@ -402,7 +386,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
 
-            assertThat(updateSuccessCalled).isTrue()
+            assertThat(onUpdateSuccessTurbine.awaitItem()).isNotNull()
         }
     }
 
@@ -426,11 +410,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
     @Test
     fun updateCardAndDefault_cardUpdateFails_displaysError() {
-        var updateSuccessCalled = false
-        fun onUpdateSuccess() {
-            updateSuccessCalled = true
-        }
-
         val expectedError = IllegalStateException("Fake error")
 
         runScenario(
@@ -440,11 +419,9 @@ class DefaultUpdatePaymentMethodInteractorTest {
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.success(Unit) },
             updatePaymentMethodExecutor = { _, _ -> Result.failure(expectedError) },
-            onUpdateSuccess = ::onUpdateSuccess,
         ) {
             updateCardAndDefaultPaymentMethod(interactor)
 
-            assertThat(updateSuccessCalled).isFalse()
             interactor.state.test {
                 assertThat(awaitItem().error).isEqualTo(updateCardBrandErrorMessage)
             }
@@ -453,11 +430,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
     @Test
     fun updateCardAndDefault_setDefaultFails_displaysError() {
-        var updateSuccessCalled = false
-        fun onUpdateSuccess() {
-            updateSuccessCalled = true
-        }
-
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures
                 .CARD_WITH_NETWORKS_PAYMENT_METHOD
@@ -465,11 +437,9 @@ class DefaultUpdatePaymentMethodInteractorTest {
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.failure(IllegalStateException("Fake error")) },
             updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
-            onUpdateSuccess = ::onUpdateSuccess,
         ) {
             updateCardAndDefaultPaymentMethod(interactor)
 
-            assertThat(updateSuccessCalled).isFalse()
             interactor.state.test {
                 assertThat(awaitItem().error).isEqualTo(setDefaultPaymentMethodErrorMessage)
             }
@@ -478,11 +448,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
     @Test
     fun updateCardAndDefault_bothFail_displaysError() {
-        var updateSuccessCalled = false
-        fun onUpdateSuccess() {
-            updateSuccessCalled = true
-        }
-
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures
                 .CARD_WITH_NETWORKS_PAYMENT_METHOD
@@ -490,11 +455,9 @@ class DefaultUpdatePaymentMethodInteractorTest {
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.failure(IllegalStateException("Fake error")) },
             updatePaymentMethodExecutor = { _, _ -> Result.failure(IllegalStateException("Fake error")) },
-            onUpdateSuccess = ::onUpdateSuccess,
         ) {
             updateCardAndDefaultPaymentMethod(interactor)
 
-            assertThat(updateSuccessCalled).isFalse()
             interactor.state.test {
                 assertThat(awaitItem().error).isEqualTo(updatesFailedErrorMessage)
             }
@@ -648,6 +611,78 @@ class DefaultUpdatePaymentMethodInteractorTest {
         }
     }
 
+    @Test
+    fun editCardDetailsInteractorCallback_passesBillingConfigurationProperly_forCard() {
+        val editCardDetailsInteractorFactory = FakeEditCardDetailsInteractorFactory()
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+            addressCollectionMode = AddressCollectionMode.Full,
+            allowedBillingCountries = setOf("us", "CA"),
+            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
+        ) {
+            assertThat(interactor.editCardDetailsInteractor.state.value).isNotNull()
+
+            val configuration = editCardDetailsInteractorFactory.billingDetailsCollectionConfiguration
+
+            assertThat(configuration?.name)
+                .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
+            assertThat(configuration?.email)
+                .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
+            assertThat(configuration?.phone)
+                .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
+
+            assertThat(configuration?.address).isEqualTo(AddressCollectionMode.Full)
+            assertThat(configuration?.allowedBillingCountries).isEqualTo(setOf("US", "CA"))
+            assertThat(configuration?.attachDefaultsToPaymentMethod).isFalse()
+        }
+    }
+
+    @Test
+    fun editCardDetailsInteractorCallback_passesBillingConfigurationProperly_forLink() {
+        val editCardDetailsInteractorFactory = FakeEditCardDetailsInteractorFactory()
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures.displayableLinkPaymentMethod(),
+            addressCollectionMode = AddressCollectionMode.Full,
+            allowedBillingCountries = setOf("us", "CA"),
+            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
+        ) {
+            assertThat(interactor.editCardDetailsInteractor.state.value).isNotNull()
+
+            val configuration = editCardDetailsInteractorFactory.billingDetailsCollectionConfiguration
+
+            assertThat(configuration?.name)
+                .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
+            assertThat(configuration?.email)
+                .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
+            assertThat(configuration?.phone)
+                .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
+
+            assertThat(configuration?.address).isEqualTo(AddressCollectionMode.Never)
+            assertThat(configuration?.allowedBillingCountries).isEqualTo(setOf("US", "CA"))
+            assertThat(configuration?.attachDefaultsToPaymentMethod).isFalse()
+        }
+    }
+
+    @Test
+    fun editCardDetailsInteractor_calledWhenDisabledSaveButtonIsPressed() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures.displayableLinkPaymentMethod(),
+            addressCollectionMode = AddressCollectionMode.Full,
+            allowedBillingCountries = setOf("us", "CA"),
+            editCardDetailsInteractorFactory = FakeEditCardDetailsInteractorFactory()
+        ) {
+            assertThat(interactor.editCardDetailsInteractor).isInstanceOf<FakeEditCardDetailsInteractor>()
+
+            val editCardDetailsInteractor = interactor.editCardDetailsInteractor as FakeEditCardDetailsInteractor
+
+            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.DisabledSaveButtonPressed)
+
+            editCardDetailsInteractor.viewActionRecorder.consume(
+                EditCardDetailsInteractor.ViewAction.Validate
+            )
+        }
+    }
+
     private fun updateCardAndDefaultPaymentMethod(
         interactor: UpdatePaymentMethodInteractor,
     ) {
@@ -674,21 +709,23 @@ class DefaultUpdatePaymentMethodInteractorTest {
             CardUpdateParams
         ) -> Result<PaymentMethod> = { _, _ -> notImplemented() },
         onSetDefaultPaymentMethod: (PaymentMethod) -> Result<Unit> = { _ -> notImplemented() },
-        onUpdateSuccess: () -> Unit = { notImplemented() },
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         isDefaultPaymentMethod: Boolean = false,
         canUpdateFullPaymentMethodDetails: Boolean = false,
+        addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
+        allowedBillingCountries: Set<String> = setOf("US", "CA"),
         editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
             .Factory(),
         onBrandChoiceSelected: (CardBrand) -> Unit = {},
         testBlock: suspend TestParams.() -> Unit
     ) {
+        val onUpdateSuccessTurbine = Turbine<Unit>()
         val interactor = DefaultUpdatePaymentMethodInteractor(
             isLiveMode = isLiveMode,
             canRemove = canRemove,
             canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
-            addressCollectionMode = AddressCollectionMode.Automatic,
+            addressCollectionMode = addressCollectionMode,
             removeExecutor = onRemovePaymentMethod,
             updatePaymentMethodExecutor = updatePaymentMethodExecutor,
             setDefaultPaymentMethodExecutor = onSetDefaultPaymentMethod,
@@ -696,14 +733,29 @@ class DefaultUpdatePaymentMethodInteractorTest {
             onBrandChoiceSelected = onBrandChoiceSelected,
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
             isDefaultPaymentMethod = isDefaultPaymentMethod,
-            onUpdateSuccess = onUpdateSuccess,
-            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
+            onUpdateSuccess = {
+                onUpdateSuccessTurbine.add(Unit)
+            },
+            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory,
+            removeMessage = null,
+            allowedBillingCountries = allowedBillingCountries,
         )
 
-        TestParams(interactor).apply { runTest { testBlock() } }
+        TestParams(
+            interactor = interactor,
+            onUpdateSuccessTurbine = onUpdateSuccessTurbine,
+        ).apply {
+            runTest { testBlock() }
+            ensureAllEventsConsumed()
+        }
     }
 
     private data class TestParams(
         val interactor: UpdatePaymentMethodInteractor,
-    )
+        val onUpdateSuccessTurbine: ReceiveTurbine<Unit>,
+    ) {
+        fun ensureAllEventsConsumed() {
+            onUpdateSuccessTurbine.ensureAllEventsConsumed()
+        }
+    }
 }

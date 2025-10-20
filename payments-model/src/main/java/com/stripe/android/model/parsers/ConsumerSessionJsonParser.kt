@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.MobileFallbackWebviewParams
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -19,6 +20,10 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
                         .mapNotNull { parseVerificationSession(it) }
                 } ?: emptyList()
 
+        val mobileFallbackWebviewParams =
+            consumerSessionJson.optJSONObject(FIELD_MOBILE_FALLBACK_WEBVIEW_PARAMS)
+                ?.let { parseMobileFallbackWebviewParams(it) }
+
         return ConsumerSession(
             clientSecret = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_SECRET),
             emailAddress = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_EMAIL),
@@ -27,6 +32,7 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             unredactedPhoneNumber = optString(consumerSessionJson, FIELD_CONSUMER_SESSION_UNREDACTED_PHONE),
             phoneNumberCountry = optString(consumerSessionJson, FIELD_CONSUMER_SESSION_PHONE_COUNTRY),
             verificationSessions = verificationSession,
+            mobileFallbackWebviewParams = mobileFallbackWebviewParams,
         )
     }
 
@@ -40,6 +46,14 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             )
         )
 
+    private fun parseMobileFallbackWebviewParams(json: JSONObject): MobileFallbackWebviewParams =
+        MobileFallbackWebviewParams(
+            webViewRequirementType = MobileFallbackWebviewParams.WebviewRequirementType.fromValue(
+                json.getString(FIELD_WEBVIEW_REQUIREMENT_TYPE)
+            ),
+            webviewOpenUrl = optString(json, FIELD_WEBVIEW_OPEN_URL)
+        )
+
     private companion object {
         private const val FIELD_CONSUMER_SESSION = "consumer_session"
 
@@ -50,8 +64,12 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
         private const val FIELD_CONSUMER_SESSION_VERIFICATION_SESSIONS = "verification_sessions"
         private const val FIELD_CONSUMER_SESSION_UNREDACTED_PHONE = "unredacted_phone_number"
         private const val FIELD_CONSUMER_SESSION_PHONE_COUNTRY = "phone_number_country"
+        private const val FIELD_MOBILE_FALLBACK_WEBVIEW_PARAMS = "mobile_fallback_webview_params"
 
         private const val FIELD_VERIFICATION_SESSION_TYPE = "type"
         private const val FIELD_VERIFICATION_SESSION_STATE = "state"
+
+        private const val FIELD_WEBVIEW_REQUIREMENT_TYPE = "webview_requirement_type"
+        private const val FIELD_WEBVIEW_OPEN_URL = "webview_open_url"
     }
 }

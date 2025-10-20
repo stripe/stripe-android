@@ -3,6 +3,8 @@ package com.stripe.android.paymentelement.confirmation.intent
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -15,9 +17,10 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
+import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 
 internal class IntentConfirmationDefinition(
-    private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
+    private val intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory,
     private val paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>) -> PaymentLauncher,
 ) : ConfirmationDefinition<
     PaymentMethodConfirmationOption,
@@ -27,53 +30,57 @@ internal class IntentConfirmationDefinition(
     > {
     override val key: String = "IntentConfirmation"
 
+    @Volatile
+    private var customerId: String? = null
+
+    @Volatile
+    private var ephemeralKeySecret: String? = null
+
+    @Volatile
+    private var clientAttributionMetadata: ClientAttributionMetadata? = null
+
     override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption? {
         return confirmationOption as? PaymentMethodConfirmationOption
     }
 
+    override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
+        customerId = paymentMethodMetadata.customerMetadata?.id
+        ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.ephemeralKeySecret
+        clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata
+    }
+
     override suspend fun action(
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<Args> {
-        val nextStep = intentConfirmationInterceptor.intercept(
-            confirmationOption = confirmationOption,
-            intent = confirmationParameters.intent,
-            initializationMode = confirmationParameters.initializationMode,
-            shippingDetails = confirmationParameters.shippingDetails,
-        )
-
-        val deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
-
-        return when (nextStep) {
-            is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
-                ConfirmationDefinition.Action.Launch(
-                    launcherArguments = Args.NextAction(nextStep.clientSecret),
-                    deferredIntentConfirmationType = deferredIntentConfirmationType,
-                    receivesResultInProcess = false,
-                )
-            }
-            is IntentConfirmationInterceptor.NextStep.Confirm -> {
-                ConfirmationDefinition.Action.Launch(
-                    launcherArguments = Args.Confirm(nextStep.confirmParams),
-                    deferredIntentConfirmationType = deferredIntentConfirmationType,
-                    receivesResultInProcess = false,
-                )
-            }
-            is IntentConfirmationInterceptor.NextStep.Fail -> {
-                ConfirmationDefinition.Action.Fail(
-                    cause = nextStep.cause,
-                    message = nextStep.message,
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                )
-            }
-            is IntentConfirmationInterceptor.NextStep.Complete -> {
-                ConfirmationDefinition.Action.Complete(
-                    intent = confirmationParameters.intent,
+        val interceptor: IntentConfirmationInterceptor
+        try {
+            interceptor = intentConfirmationInterceptorFactory.create(
+                initializationMode = confirmationArgs.initializationMode,
+                customerId = customerId,
+                ephemeralKeySecret = ephemeralKeySecret,
+                clientAttributionMetadata = clientAttributionMetadata,
+            )
+        } catch (e: DeferredIntentCallbackNotFoundException) {
+            return ConfirmationDefinition.Action.Fail(
+                cause = IllegalStateException(e.message),
+                message = e.resolvableError,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        }
+        return when (confirmationOption) {
+            is PaymentMethodConfirmationOption.New ->
+                interceptor.intercept(
+                    intent = confirmationArgs.intent,
                     confirmationOption = confirmationOption,
-                    deferredIntentConfirmationType = deferredIntentConfirmationType,
-                    completedFullPaymentFlow = nextStep.completedFullPaymentFlow,
+                    shippingValues = confirmationArgs.shippingDetails?.toConfirmPaymentIntentShipping(),
                 )
-            }
+            is PaymentMethodConfirmationOption.Saved ->
+                interceptor.intercept(
+                    intent = confirmationArgs.intent,
+                    confirmationOption = confirmationOption,
+                    shippingValues = confirmationArgs.shippingDetails?.toConfirmPaymentIntentShipping(),
+                )
         }
     }
 
@@ -93,17 +100,17 @@ internal class IntentConfirmationDefinition(
         launcher: PaymentLauncher,
         arguments: Args,
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ) {
         when (arguments) {
             is Args.Confirm -> launchConfirm(launcher, arguments.confirmNextParams)
-            is Args.NextAction -> launchNextAction(launcher, arguments.clientSecret, confirmationParameters.intent)
+            is Args.NextAction -> launchNextAction(launcher, arguments.clientSecret, confirmationArgs.intent)
         }
     }
 
     override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: InternalPaymentResult
     ): ConfirmationDefinition.Result {

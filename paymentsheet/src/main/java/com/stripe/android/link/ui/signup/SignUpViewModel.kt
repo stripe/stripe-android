@@ -15,11 +15,11 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
-import com.stripe.android.link.LinkLaunchMode.Authentication
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.NoLinkAccountFoundException
-import com.stripe.android.link.account.LinkAuth
+import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuthResult
+import com.stripe.android.link.account.toLinkAuthResult
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
@@ -47,13 +47,14 @@ internal class SignUpViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
-    private val linkAuth: LinkAuth,
+    private val linkAccountManager: LinkAccountManager,
     private val savedStateHandle: SavedStateHandle,
     private val dismissalCoordinator: LinkDismissalCoordinator,
     private val navigateAndClearStack: (LinkScreen) -> Unit,
-    private val moveToWeb: () -> Unit,
+    private val moveToWeb: (Throwable) -> Unit,
     private val linkLaunchMode: LinkLaunchMode,
-    private val dismissWithResult: (LinkActivityResult) -> Unit
+    private val dismissWithResult: (LinkActivityResult) -> Unit,
+    private val verifyDuringSignUp: () -> Unit,
 ) : ViewModel() {
     private val useLinkConfigurationCustomerInfo =
         savedStateHandle.get<Boolean>(USE_LINK_CONFIGURATION_CUSTOMER_INFO) ?: true
@@ -128,16 +129,17 @@ internal class SignUpViewModel @Inject constructor(
     private suspend fun lookupEmail(email: String) {
         updateSignUpState(SignUpState.VerifyingEmail)
 
-        val lookupResult = linkAuth.lookUp(
+        val lookupResult = linkAccountManager.lookupByEmail(
             email = email,
             emailSource = EmailSource.USER_ACTION,
-            startSession = true
+            startSession = true,
+            customerId = configuration.customerIdForEceDefaultValues
         )
 
         updateSignUpState(SignUpState.InputtingPrimaryField)
 
         handleLookupResult(
-            lookupResult = lookupResult,
+            lookupResult = lookupResult.toLinkAuthResult(),
             onNoLinkAccountFound = {
                 // No Link account found -> display remaining fields for signup.
                 updateSignUpState(SignUpState.InputtingRemainingFields)
@@ -154,14 +156,15 @@ internal class SignUpViewModel @Inject constructor(
             }
             val email = emailController.fieldValue.value
             val lookupResult = dismissalCoordinator.withDismissalDisabled {
-                linkAuth.lookUp(
+                linkAccountManager.lookupByEmail(
                     email = email,
                     emailSource = EmailSource.USER_ACTION,
-                    startSession = true
+                    startSession = true,
+                    customerId = configuration.customerIdForEceDefaultValues
                 )
             }
             handleLookupResult(
-                lookupResult = lookupResult,
+                lookupResult = lookupResult.toLinkAuthResult(),
                 onNoLinkAccountFound = { performSignup() }
             )
         }
@@ -173,25 +176,26 @@ internal class SignUpViewModel @Inject constructor(
 
     private suspend fun performSignup() {
         val signupResult = dismissalCoordinator.withDismissalDisabled {
-            linkAuth.signUp(
+            linkAccountManager.signUp(
                 email = emailController.fieldValue.value,
                 phoneNumber = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
                 country = phoneNumberController.getCountryCode(),
+                countryInferringMethod = "PHONE_NUMBER",
                 name = nameController.fieldValue.value,
                 consentAction = SignUpConsentAction.Implied
             )
         }
 
-        when (signupResult) {
+        when (val result = signupResult.toLinkAuthResult()) {
             is LinkAuthResult.AttestationFailed -> {
-                moveToWeb()
+                moveToWeb(result.error)
             }
             is LinkAuthResult.Error -> {
-                onError(signupResult.error)
-                linkEventsReporter.onSignupFailure(error = signupResult.error)
+                onError(result.error)
+                linkEventsReporter.onSignupFailure(error = result.error)
             }
             is LinkAuthResult.Success -> {
-                onAccountFetched(signupResult.account)
+                onAccountFetched(result.account)
                 linkEventsReporter.onSignupCompleted()
             }
             LinkAuthResult.NoLinkAccountFound -> {
@@ -199,7 +203,7 @@ internal class SignUpViewModel @Inject constructor(
                 linkEventsReporter.onSignupFailure(error = NoLinkAccountFoundException())
             }
             is LinkAuthResult.AccountError -> {
-                signupResult.handle()
+                result.handle()
             }
         }
     }
@@ -211,7 +215,7 @@ internal class SignUpViewModel @Inject constructor(
     ) {
         when (lookupResult) {
             is LinkAuthResult.AttestationFailed -> {
-                moveToWeb()
+                moveToWeb(lookupResult.error)
             }
             is LinkAuthResult.Error -> {
                 updateSignUpState(SignUpState.InputtingRemainingFields)
@@ -230,21 +234,23 @@ internal class SignUpViewModel @Inject constructor(
         }
     }
 
-    private fun onAccountFetched(linkAccount: LinkAccount?) {
+    private fun onAccountFetched(linkAccount: LinkAccount) {
         val targetScreen = when {
-            linkAccount?.completedSignup == true -> LinkScreen.PaymentMethod
-            linkAccount?.isVerified == true -> LinkScreen.Wallet
+            linkAccount.completedSignup -> LinkScreen.PaymentMethod
+            linkAccount.isVerified -> LinkScreen.Wallet
             else -> LinkScreen.Verification
         }
 
         // Return the account in authentication mode if verification not required
-        if (linkLaunchMode is Authentication && targetScreen != LinkScreen.Verification) {
+        if (linkLaunchMode is LinkLaunchMode.Authentication && targetScreen != LinkScreen.Verification) {
             dismissWithResult(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
                     selectedPayment = null,
                 )
             )
+        } else if (targetScreen == LinkScreen.Verification) {
+            verifyDuringSignUp()
         } else {
             navigateAndClearStack(targetScreen)
         }
@@ -294,7 +300,7 @@ internal class SignUpViewModel @Inject constructor(
         fun factory(
             parentComponent: NativeLinkComponent,
             navigateAndClearStack: (LinkScreen) -> Unit,
-            moveToWeb: () -> Unit,
+            moveToWeb: (Throwable) -> Unit,
             dismissWithResult: (LinkActivityResult) -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {
@@ -303,13 +309,14 @@ internal class SignUpViewModel @Inject constructor(
                         configuration = parentComponent.configuration,
                         linkEventsReporter = parentComponent.linkEventsReporter,
                         logger = parentComponent.logger,
-                        linkAuth = parentComponent.linkAuth,
+                        linkAccountManager = parentComponent.linkAccountManager,
                         savedStateHandle = parentComponent.savedStateHandle,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,
                         navigateAndClearStack = navigateAndClearStack,
                         moveToWeb = moveToWeb,
                         linkLaunchMode = parentComponent.linkLaunchMode,
-                        dismissWithResult = dismissWithResult
+                        dismissWithResult = dismissWithResult,
+                        verifyDuringSignUp = parentComponent.viewModel::verifyDuringSignUp,
                     )
                 }
             }

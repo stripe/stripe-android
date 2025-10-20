@@ -28,7 +28,7 @@ class APIConnectionException(
                 "IOException during API request to $displayUrl: ${e.message}. " +
                     "Please check your internet connection and try again. " +
                     "If this problem persists, you should check Stripe's " +
-                    "service status at https://twitter.com/stripestatus, " +
+                    "service status at https://status.stripe.com/, " +
                     "or let us know at support@stripe.com.",
                 e
             )

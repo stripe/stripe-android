@@ -30,4 +30,10 @@ class RowElement(
 
     override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> =
         fields.map { it.getTextFieldIdentifiers() }.last()
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        fields.forEach {
+            it.onValidationStateChanged(isValidating)
+        }
+    }
 }

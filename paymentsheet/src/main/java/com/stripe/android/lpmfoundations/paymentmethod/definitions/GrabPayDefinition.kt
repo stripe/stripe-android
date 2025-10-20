@@ -34,5 +34,6 @@ private object GrabPayUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDa
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_grabpay,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_grabpay,
+        iconResourceNight = null,
     )
 }

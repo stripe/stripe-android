@@ -46,6 +46,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.ui.core.elements.CvcController
@@ -325,7 +326,7 @@ internal class WalletScreenTest {
         composeTestRule.waitForIdle()
 
         onWalletPayButton().assertIsNotEnabled()
-        onWalletFormError().assertIsDisplayed()
+        onWalletFormError().assertDoesNotExist()
         onWalletFormFields().assertIsDisplayed()
         onWalletPayButton().assertIsNotEnabled()
     }
@@ -353,7 +354,7 @@ internal class WalletScreenTest {
         composeTestRule.waitForIdle()
 
         onWalletPayButton().assertIsNotEnabled()
-        onWalletFormError().assertIsDisplayed()
+        onWalletFormError().assertDoesNotExist()
         onWalletFormFields().assertIsDisplayed()
         onWalletPayButton().assertIsNotEnabled()
     }
@@ -753,21 +754,26 @@ internal class WalletScreenTest {
             state = WalletUiState(
                 paymentDetailsList = paymentDetails,
                 email = "email@email.com",
+                allowLogOut = true,
                 cardBrandFilter = DefaultCardBrandFilter,
                 selectedItemId = paymentDetails.firstOrNull()?.id,
                 isProcessing = false,
                 isSettingUp = false,
                 merchantName = "Example Inc.",
+                sellerBusinessName = null,
                 primaryButtonLabel = "Buy".resolvableString,
                 secondaryButtonLabel = "Pay another way".resolvableString,
                 hasCompleted = false,
                 addPaymentMethodOptions = addPaymentMethodOptions,
                 userSetIsExpanded = true,
-                collectMissingBillingDetailsForExistingPaymentMethods = true
+                collectMissingBillingDetailsForExistingPaymentMethods = true,
+                signupToggleEnabled = false,
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             ),
             onItemSelected = {},
             onExpandedChanged = {},
             onPrimaryButtonClick = {},
+            onDisabledButtonClick = {},
             onPayAnotherWayClicked = {},
             onRemoveClicked = onRemoveClicked,
             onSetDefaultClicked = onSetDefaultClicked,
@@ -803,6 +809,11 @@ internal class WalletScreenTest {
                 linkConfirmationHandler = linkConfirmationHandler,
                 linkAccountManager = linkAccountManager,
                 dismissalCoordinator = dismissalCoordinator,
+                linkLaunchMode = linkLaunchMode
+            ),
+            addPaymentMethodOptions = AddPaymentMethodOptions(
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                configuration = TestFactory.LINK_CONFIGURATION,
                 linkLaunchMode = linkLaunchMode
             )
         )

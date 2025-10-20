@@ -22,7 +22,9 @@ internal object PayPalDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type.code)
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean {
+        return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
+    }
 
     override fun uiDefinitionFactory(): UiDefinitionFactory = PayPalUiDefinitionFactory
 }
@@ -36,6 +38,7 @@ private object PayPalUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_paypal,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
+        iconResourceNight = null,
     )
 
     override fun createFormElements(
@@ -43,7 +46,7 @@ private object PayPalUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         sharedDataSpec: SharedDataSpec,
         transformSpecToElements: TransformSpecToElements
     ): List<FormElement> {
-        val localLayoutSpecs: List<FormItemSpec> = if (metadata.hasIntentToSetup(PayPalDefinition.type.code)) {
+        val localLayoutSpecs: List<FormItemSpec> = if (PayPalDefinition.requiresMandate(metadata)) {
             listOf(MandateTextSpec(stringResId = R.string.stripe_paypal_mandate))
         } else {
             emptyList()
@@ -52,6 +55,7 @@ private object PayPalUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         return transformSpecToElements.transform(
             metadata = metadata,
             specs = sharedDataSpec.fields + localLayoutSpecs,
+            termsDisplay = metadata.termsDisplayForType(PayPalDefinition.type),
         )
     }
 }

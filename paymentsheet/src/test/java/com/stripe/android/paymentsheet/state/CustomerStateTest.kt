@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -28,7 +27,6 @@ class CustomerStateTest {
         val customerState = CustomerState.createForCustomerSession(
             customer = customer,
             supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card),
-            customerSessionClientSecret = "cuss_123",
         )
 
         return customerState
@@ -63,10 +61,7 @@ class CustomerStateTest {
         )
 
         assertThat(customerState.paymentMethods).isEqualTo(paymentMethods)
-        assertThat(customerState.customerSessionClientSecret).isNull()
         assertThat(customerState.defaultPaymentMethodId).isNull()
-        assertThat(customerState.id).isEqualTo("cus_1")
-        assertThat(customerState.ephemeralKeySecret).isEqualTo("ek_1")
     }
 
     @Test
@@ -82,8 +77,9 @@ class CustomerStateTest {
                 ),
                 mobilePaymentElementComponent = createEnabledMobilePaymentElement(
                     isPaymentMethodSaveEnabled = false,
-                    isPaymentMethodRemoveEnabled = false,
-                    canRemoveLastPaymentMethod = false,
+                    paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
+                    paymentMethodRemoveLast =
+                    ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
                     allowRedisplayOverride = null,
                 ),
             )
@@ -91,7 +87,6 @@ class CustomerStateTest {
             val customerState = CustomerState.createForCustomerSession(
                 customer = customer,
                 supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card),
-                customerSessionClientSecret = "cuss_123",
             )
 
             assertThat(customerState.paymentMethods).containsExactlyElementsIn(cards)
@@ -99,15 +94,17 @@ class CustomerStateTest {
 
     private fun createEnabledMobilePaymentElement(
         isPaymentMethodSaveEnabled: Boolean = true,
-        isPaymentMethodRemoveEnabled: Boolean = false,
-        canRemoveLastPaymentMethod: Boolean = false,
+        paymentMethodRemove: ElementsSession.Customer.Components.PaymentMethodRemoveFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
+        paymentMethodRemoveLast: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
         allowRedisplayOverride: PaymentMethod.AllowRedisplay? = null,
         isPaymentMethodSetAsDefaultEnabled: Boolean = false,
     ): ElementsSession.Customer.Components.MobilePaymentElement {
         return ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
             isPaymentMethodSaveEnabled = isPaymentMethodSaveEnabled,
-            isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
-            canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+            paymentMethodRemove = paymentMethodRemove,
+            paymentMethodRemoveLast = paymentMethodRemoveLast,
             allowRedisplayOverride = allowRedisplayOverride,
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
         )
@@ -117,10 +114,6 @@ class CustomerStateTest {
         paymentMethods: List<PaymentMethod> = emptyList()
     ): CustomerState {
         return CustomerState.createForLegacyEphemeralKey(
-            customerId = "cus_1",
-            accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey(
-                ephemeralKeySecret = "ek_1",
-            ),
             paymentMethods = paymentMethods,
         )
     }

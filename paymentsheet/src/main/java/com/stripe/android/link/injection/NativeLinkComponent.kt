@@ -12,12 +12,18 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.WebLinkActivityContract
+import com.stripe.android.link.WebLinkAuthChannel
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.ui.oauth.OAuthConsentViewModelComponent
+import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
+import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationModule
@@ -40,7 +46,6 @@ internal annotation class NativeLinkScope
 @Component(
     modules = [
         NativeLinkModule::class,
-        LinkViewModelModule::class,
         ApplicationIdModule::class,
         DefaultConfirmationModule::class,
         LinkPassthroughConfirmationModule::class,
@@ -48,15 +53,19 @@ internal annotation class NativeLinkScope
     ]
 )
 internal interface NativeLinkComponent {
+    val linkAccountHolder: LinkAccountHolder
     val linkAccountManager: LinkAccountManager
     val configuration: LinkConfiguration
+    val passiveCaptchaParams: PassiveCaptchaParams?
+
+    @get:Named(ATTEST_ON_INTENT_CONFIRMATION)
+    val attestOnIntentConfirmation: Boolean
     val linkEventsReporter: LinkEventsReporter
     val errorReporter: ErrorReporter
     val logger: Logger
     val linkConfirmationHandlerFactory: LinkConfirmationHandler.Factory
     val webLinkActivityContract: WebLinkActivityContract
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
-    val linkAuth: LinkAuth
     val savedStateHandle: SavedStateHandle
     val viewModel: LinkActivityViewModel
     val eventReporter: EventReporter
@@ -64,11 +73,22 @@ internal interface NativeLinkComponent {
     val dismissalCoordinator: LinkDismissalCoordinator
     val linkLaunchMode: LinkLaunchMode
     val autocompleteLauncher: AutocompleteLauncher
+    val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory
+    val oAuthConsentViewModelComponentFactory: OAuthConsentViewModelComponent.Factory
+    val webLinkAuthChannel: WebLinkAuthChannel
 
     @Component.Builder
     interface Builder {
         @BindsInstance
         fun configuration(configuration: LinkConfiguration): Builder
+
+        @BindsInstance
+        fun passiveCaptchaParams(passiveCaptchaParams: PassiveCaptchaParams?): Builder
+
+        @BindsInstance
+        fun attestOnIntentConfirmation(
+            @Named(ATTEST_ON_INTENT_CONFIRMATION) attestOnIntentConfirmation: Boolean
+        ): Builder
 
         @BindsInstance
         fun publishableKeyProvider(@Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String): Builder
@@ -94,8 +114,8 @@ internal interface NativeLinkComponent {
         fun application(application: Application): Builder
 
         @BindsInstance
-        fun startWithVerificationDialog(
-            @Named(START_WITH_VERIFICATION_DIALOG) startWithVerificationDialog: Boolean
+        fun linkExpressMode(
+            @Named(LINK_EXPRESS_MODE) linkExpressMode: LinkExpressMode
         ): Builder
 
         @BindsInstance
@@ -103,6 +123,11 @@ internal interface NativeLinkComponent {
 
         @BindsInstance
         fun linkAccountUpdate(linkAccountUpdate: LinkAccountUpdate.Value): Builder
+
+        @BindsInstance
+        fun requestSurface(
+            requestSurface: RequestSurface
+        ): Builder
 
         fun build(): NativeLinkComponent
     }

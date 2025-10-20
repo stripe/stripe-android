@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
@@ -120,15 +121,15 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
 
     @Test
     fun testStyleAppearance() {
-        val style = FloatingButton(
-            spacingDp = StripeThemeDefaults.floating.spacing,
-            additionalInsetsDp = 40f
-        )
+        val style = FloatingButton.Builder()
+            .spacingDp(StripeThemeDefaults.floating.spacing)
+            .additionalInsetsDp(40f)
+            .build()
         testPaymentMethodRowButton_FloatingButton(
             trailingContent = {
                 TrailingContent()
             },
-            rowStyle = style,
+            appearance = PaymentSheet.Appearance.Embedded(style),
         )
     }
 
@@ -163,6 +164,46 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
         )
     }
 
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    @Test
+    fun testIconMargins() {
+        testPaymentMethodRowButton_FloatingButton(
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(FloatingButton.default)
+                .paymentMethodIconMargins(
+                    PaymentSheet.Insets(10f, 10f, 10f, 10f)
+                )
+                .build()
+        )
+    }
+
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    @Test
+    fun testFonts() {
+        testPaymentMethodRowButton_FloatingButton(
+            subtitle = "this is a subtitle",
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(FloatingButton.default)
+                .titleFont(
+                    PaymentSheet.Typography.Font(
+                        fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
+                        fontSizeSp = 20f,
+                        fontWeight = 500,
+                        letterSpacingSp = 10f
+                    )
+                )
+                .subtitleFont(
+                    PaymentSheet.Typography.Font(
+                        fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
+                        fontSizeSp = 12f,
+                        fontWeight = 200,
+                        letterSpacingSp = 5f
+                    )
+                )
+                .build()
+        )
+    }
+
     @Composable
     private fun TrailingContent() {
         Row(
@@ -188,7 +229,7 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
         isEnabled: Boolean = true,
         isSelected: Boolean = false,
         iconContent: @Composable RowScope.() -> Unit = { DefaultPaymentMethodRowIcon() },
-        rowStyle: PaymentSheet.Appearance.Embedded.RowStyle = FloatingButton.default,
+        appearance: PaymentSheet.Appearance.Embedded = PaymentSheet.Appearance.Embedded(FloatingButton.default),
         trailingContent: @Composable RowScope.() -> Unit = {},
         title: String = "**** 4242",
         subtitle: String? = null,
@@ -204,7 +245,7 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
             promoText = promoText,
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
-            appearance = PaymentSheet.Appearance.Embedded(rowStyle),
+            appearance = appearance,
             paparazziRule = paparazziRule
         )
     }

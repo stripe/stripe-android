@@ -48,7 +48,6 @@ import com.stripe.android.identity.camera.DocumentScanCameraManager
 import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.IdentityScanState.Companion.isFront
-import com.stripe.android.identity.states.IdentityScanState.Companion.isNullOrFront
 import com.stripe.android.identity.utils.startScanning
 import com.stripe.android.identity.viewmodel.DocumentScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
@@ -125,6 +124,7 @@ internal fun DocumentScanScreen(
                     identityViewModel,
                     lifecycleOwner,
                     cameraManager,
+                    documentScanViewModel
                 ) {
                     coroutineScope.launch {
                         identityViewModel.collectDataForDocumentScanScreen(
@@ -147,6 +147,7 @@ internal fun DocumentScanScreen(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun DocumentCaptureScreen(
     documentScannerState: IdentityScanViewModel.State,
@@ -156,6 +157,7 @@ private fun DocumentCaptureScreen(
     identityViewModel: IdentityViewModel,
     lifecycleOwner: LifecycleOwner,
     cameraManager: IdentityCameraManager,
+    documentScanViewModel: DocumentScanViewModel,
     onContinueClick: () -> Unit
 ) {
     val collectedData by identityViewModel.collectedData.collectAsState()
@@ -178,11 +180,7 @@ private fun DocumentCaptureScreen(
         }
     }
 
-    val title = if (targetScanType.isNullOrFront()) {
-        stringResource(id = R.string.stripe_front_of_id_document)
-    } else {
-        stringResource(id = R.string.stripe_back_of_id_document)
-    }
+    val title = stringResource(id = documentScanViewModel.getDocumentPositionStringRes(targetScanType))
 
     Column(
         modifier = Modifier

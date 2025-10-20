@@ -9,8 +9,8 @@ android {
 dependencies {
     api project(':ml-core:base')
     implementation libs.androidx.annotation
-    implementation libs.tensorflowLite
-    api libs.tensorflowLiteSupport
+    implementation libs.litert
+    api libs.litertSupport
 }
 
 ext {

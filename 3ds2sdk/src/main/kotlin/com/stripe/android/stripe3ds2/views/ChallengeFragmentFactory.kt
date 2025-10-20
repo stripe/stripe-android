@@ -10,7 +10,6 @@ import com.stripe.android.stripe3ds2.transaction.IntentData
 import com.stripe.android.stripe3ds2.transaction.TransactionTimer
 import com.stripe.android.stripe3ds2.transactions.UiType
 import com.stripe.android.stripe3ds2.utils.AnalyticsDelegate
-import kotlin.coroutines.CoroutineContext
 
 internal class ChallengeFragmentFactory(
     private val uiCustomization: StripeUiCustomization,
@@ -21,7 +20,6 @@ internal class ChallengeFragmentFactory(
     private val challengeActionHandler: ChallengeActionHandler,
     private val initialUiType: UiType?,
     private val intentData: IntentData,
-    private val workContext: CoroutineContext
 ) : FragmentFactory() {
     override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
         return when (className) {
@@ -35,7 +33,6 @@ internal class ChallengeFragmentFactory(
                     challengeActionHandler,
                     initialUiType,
                     intentData,
-                    workContext
                 )
             }
             else -> {

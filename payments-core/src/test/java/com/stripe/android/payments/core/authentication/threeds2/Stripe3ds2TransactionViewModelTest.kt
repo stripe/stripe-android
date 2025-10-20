@@ -96,6 +96,7 @@ class Stripe3ds2TransactionViewModelTest {
 
     private fun createViewModel(args: Stripe3ds2TransactionContract.Args = ARGS) =
         Stripe3ds2TransactionViewModel(
+            context = context,
             args = args,
             stripeRepository = stripeRepository,
             analyticsRequestExecutor = mock(),

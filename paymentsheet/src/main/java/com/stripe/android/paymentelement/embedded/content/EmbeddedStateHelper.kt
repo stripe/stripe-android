@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -18,6 +19,7 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     private val embeddedContentHelper: EmbeddedContentHelper,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
+    private val confirmationHandler: ConfirmationHandler
 ) : EmbeddedStateHelper {
     override var state: EmbeddedPaymentElement.State?
         get() {
@@ -54,6 +56,7 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
             appearance = state.confirmationState.configuration.appearance.embeddedAppearance,
             embeddedViewDisplaysMandateText = state.confirmationState.configuration.embeddedViewDisplaysMandateText,
         )
+        confirmationHandler.bootstrap(state.confirmationState.paymentMethodMetadata)
     }
 
     private fun validateRowSelectionBehaviorConfiguration(
@@ -72,19 +75,13 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
                     "Use RowSelectionBehavior.Default or disable Google Pay and saved payment methods."
             )
         }
-        if (configuration.embeddedViewDisplaysMandateText && isRowSelectionImmediateAction) {
-            throw IllegalArgumentException(
-                "Your integration must set `embeddedViewDisplaysMandateText` to false and display the mandate " +
-                    "(`embeddedPaymentElement.paymentOption.mandateText`) to customer near your buy button " +
-                    "and/or before confirmation when `RowSelectionBehavior = ImmediateAction`"
-            )
-        }
     }
 
     private fun clearState() {
         embeddedContentHelper.clearEmbeddedContent()
         confirmationStateHolder.state = null
         selectionHolder.set(null)
+        selectionHolder.previousNewSelections.clear()
         customerStateHolder.setCustomerState(null)
     }
 }

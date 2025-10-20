@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">Juhiloa tagakülg</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">Valitud on juhiloa tagakülg</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">Juhiloa või valitsuse väljastatud fotoga isikut tõendava dokumendi tagakülg</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">ID-kaardi tagakülg</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">Esimene</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">Selfi flash-animatsiooni mask</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">Pöörake oma juhiloa või valitsuse väljastatud fotoga isikut tõendava dokumendi teine pool</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">Pöörake oma valitsuse väljastatud fotoga isikut tõendava dokumendi teine pool</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">Juhiloa, passi või valitsuse väljastatud fotoga isikut tõendava dokumendi esikülg</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">Juhiloa esikülg</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">Valitud on juhiloa esikülg</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">Juhiloa või valitsuse väljastatud fotoga isikut tõendava dokumendi esikülg</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">Juhiloa või passi esikülg</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">ID-kaardi esikülg</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Isikut tõendava dokumendi esikülg</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Valitud on ID-kaardi esikülg</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">Passi esikülg</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">Passi või valitsuse väljastatud fotoga isikut tõendava dokumendi esikülg</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">Mine tagasi</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">Telefoninumber</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">Dokumenti ei tuvastatud</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">Asetage oma juhiluba, pass või valitsuse väljastatud fotoga isikut tõendav dokument kaadri keskele</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Pöörake juhiluba ümber</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">Jälgige, et juhiluba oleks raami keskel</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">Asetage oma juhiluba või valitsuse väljastatud fotoga isikut tõendav dokument kaadri keskele</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">Asetage oma juhiluba või pass kaadri keskele</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">Pöörake ID-kaart ümber</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">Jälgige, et ID-kaart oleks raami keskel</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">Jälgige, et pass oleks raami keskel</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">Asetage oma pass või valitsuse väljastatud fotoga isikut tõendav dokument raami keskele</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Jälgige, et nägu oleks raami keskel.</string>
   <!-- Instructional text when the document is too blurry -->
@@ -205,8 +229,6 @@
   <string name="stripe_test_model_title">Te olete praegu testrežiimis</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Proovi uuesti</string>
-  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="stripe_unexpected_error_try_again">Esines ootamatu tõrge – proovige mõne sekundi pärast uuesti</string>
   <!-- Description to upload a photo -->
   <string name="stripe_upload_a_photo">Laadige üles foto</string>
   <!-- Title of dialog to upload back of driver license -->

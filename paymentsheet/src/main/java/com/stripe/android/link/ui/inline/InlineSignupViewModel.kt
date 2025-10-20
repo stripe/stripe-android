@@ -15,6 +15,7 @@ import com.stripe.android.link.ui.inline.LinkSignupField.Name
 import com.stripe.android.link.ui.inline.LinkSignupField.Phone
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.utils.errorMessage
+import com.stripe.android.model.EmailSource
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -43,10 +44,13 @@ internal class InlineSignupViewModel(
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
     private val lookupDelay: Long = LOOKUP_DEBOUNCE_MS,
+    private val previousLinkSignupCheckboxSelection: Boolean?
 ) : ViewModel() {
-    @AssistedInject constructor(
+    @AssistedInject
+    constructor(
         @Assisted initialUserInput: UserInput?,
         @Assisted signupMode: LinkSignupMode,
+        @Assisted previousLinkSignupCheckboxSelection: Boolean?,
         config: LinkConfiguration,
         linkAccountManager: LinkAccountManager,
         linkEventsReporter: LinkEventsReporter,
@@ -59,6 +63,7 @@ internal class InlineSignupViewModel(
         linkEventsReporter = linkEventsReporter,
         logger = logger,
         lookupDelay = LOOKUP_DEBOUNCE_MS,
+        previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection,
     )
 
     private val hasInitialUserInput = initialUserInput != null
@@ -73,7 +78,12 @@ internal class InlineSignupViewModel(
         config = config,
         initialEmail = initialEmail,
         initialPhone = initialPhone,
-        isExpanded = hasInitialUserInput,
+        isExpanded = if (config.linkSignUpOptInFeatureEnabled) {
+            previousLinkSignupCheckboxSelection ?: config.linkSignUpOptInInitialValue
+        } else {
+            hasInitialUserInput
+        },
+        userHasInteracted = previousLinkSignupCheckboxSelection != null
     )
     private val _viewState = MutableStateFlow(initialViewState)
     val viewState: StateFlow<InlineSignupViewState> = _viewState
@@ -133,7 +143,11 @@ internal class InlineSignupViewModel(
     val requiresNameCollection: Boolean
         get() = Name in initialViewState.fields
 
-    private var hasExpanded = hasInitialUserInput
+    private var hasExpanded = if (config.linkSignUpOptInFeatureEnabled) {
+        previousLinkSignupCheckboxSelection ?: config.linkSignUpOptInInitialValue
+    } else {
+        hasInitialUserInput
+    }
 
     init {
         watchUserInput()
@@ -141,8 +155,12 @@ internal class InlineSignupViewModel(
 
     fun toggleExpanded() {
         _viewState.update { oldState ->
-            oldState.copy(isExpanded = !oldState.isExpanded)
+            oldState.copy(
+                isExpanded = !oldState.isExpanded,
+                userHasInteracted = true
+            )
         }
+
         // First time user checks the box, start listening to inputs
         if (_viewState.value.isExpanded && !hasExpanded) {
             hasExpanded = true
@@ -171,6 +189,7 @@ internal class InlineSignupViewModel(
                 consumerEmail,
                 consumerPhoneNumber,
                 consumerName,
+                _viewState.mapAsStateFlow { it.userHasInteracted },
                 this@InlineSignupViewModel::mapToUserInput
             ).collect {
                 _viewState.update { oldState ->
@@ -199,7 +218,8 @@ internal class InlineSignupViewModel(
                             mapToUserInput(
                                 email = consumerEmail.value,
                                 phoneNumber = consumerPhoneNumber.value,
-                                name = consumerName.value
+                                name = consumerName.value,
+                                userHasInteracted = oldState.userHasInteracted
                             )
                     }
                 )
@@ -222,14 +242,15 @@ internal class InlineSignupViewModel(
     private fun mapToUserInput(
         email: String?,
         phoneNumber: String?,
-        name: String?
+        name: String?,
+        userHasInteracted: Boolean
     ): UserInput? {
         val signUpMode = initialViewState.signupMode
-
-        return if (email != null && phoneNumber != null && signUpMode != null) {
+        val meetsPhoneNumberCriteria = initialViewState.linkSignUpOptInFeatureEnabled ||
+            phoneNumber != null
+        return if (email != null && meetsPhoneNumberCriteria && signUpMode != null) {
             val isNameValid = !requiresNameCollection || !name.isNullOrBlank()
             val country = phoneController.getCountryCode()
-
             UserInput.SignUp(
                 email = email,
                 phone = phoneNumber,
@@ -239,6 +260,9 @@ internal class InlineSignupViewModel(
                     hasPrefilledEmail = prefilledEmail != null,
                     hasPrefilledPhone = prefilledPhone.isNotBlank(),
                     defaultOptIn = initialViewState.allowsDefaultOptIn,
+                    linkSignUpOptInFeatureEnabled = initialViewState.linkSignUpOptInFeatureEnabled,
+                    linkSignUpInitialValue = config.linkSignUpOptInInitialValue,
+                    userHasInteracted = userHasInteracted
                 )
             ).takeIf { isNameValid }
         } else {
@@ -248,7 +272,12 @@ internal class InlineSignupViewModel(
 
     private suspend fun lookupConsumerEmail(email: String) {
         clearError()
-        linkAccountManager.lookupConsumer(email, startSession = false).fold(
+        linkAccountManager.lookupByEmail(
+            email = email,
+            emailSource = EmailSource.USER_ACTION,
+            startSession = false,
+            customerId = null
+        ).fold(
             onSuccess = {
                 if (it != null) {
                     _viewState.update { oldState ->
@@ -323,6 +352,9 @@ internal class InlineSignupViewModel(
         hasPrefilledEmail: Boolean,
         hasPrefilledPhone: Boolean,
         defaultOptIn: Boolean,
+        linkSignUpOptInFeatureEnabled: Boolean,
+        userHasInteracted: Boolean,
+        linkSignUpInitialValue: Boolean
     ): SignUpConsentAction {
         return when (this) {
             LinkSignupMode.AlongsideSaveForFutureUse -> {
@@ -333,15 +365,14 @@ internal class InlineSignupViewModel(
             }
             LinkSignupMode.InsteadOfSaveForFutureUse -> {
                 when {
-                    defaultOptIn -> {
-                        if (hasPrefilledEmail && hasPrefilledPhone) {
-                            SignUpConsentAction.DefaultOptInWithAllPrefilled
-                        } else if (hasPrefilledEmail || hasPrefilledPhone) {
-                            SignUpConsentAction.DefaultOptInWithSomePrefilled
+                    linkSignUpOptInFeatureEnabled -> {
+                        if (linkSignUpInitialValue && !userHasInteracted) {
+                            SignUpConsentAction.SignUpOptInMobilePrechecked
                         } else {
-                            SignUpConsentAction.DefaultOptInWithNonePrefilled
+                            SignUpConsentAction.SignUpOptInMobileChecked
                         }
                     }
+                    defaultOptIn -> getDefaultOptInConsentAction(hasPrefilledEmail, hasPrefilledPhone)
                     hasPrefilledEmail && hasPrefilledPhone ->
                         SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone
                     hasPrefilledEmail ->
@@ -353,14 +384,30 @@ internal class InlineSignupViewModel(
         }
     }
 
+    private fun getDefaultOptInConsentAction(
+        hasPrefilledEmail: Boolean,
+        hasPrefilledPhone: Boolean
+    ): SignUpConsentAction = if (hasPrefilledEmail && hasPrefilledPhone) {
+        SignUpConsentAction.DefaultOptInWithAllPrefilled
+    } else if (hasPrefilledEmail || hasPrefilledPhone) {
+        SignUpConsentAction.DefaultOptInWithSomePrefilled
+    } else {
+        SignUpConsentAction.DefaultOptInWithNonePrefilled
+    }
+
     internal class Factory(
         private val signupMode: LinkSignupMode,
         private val initialUserInput: UserInput?,
+        private val previousLinkSignupCheckboxSelection: Boolean?,
         private val linkComponent: LinkComponent
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return linkComponent.inlineSignupViewModelFactory.create(signupMode, initialUserInput) as T
+            return linkComponent.inlineSignupViewModelFactory.create(
+                signupMode = signupMode,
+                initialUserInput = initialUserInput,
+                previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection
+            ) as T
         }
     }
 }

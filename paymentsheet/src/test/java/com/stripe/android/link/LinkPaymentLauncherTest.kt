@@ -8,6 +8,7 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.testing.CoroutineTestRule
@@ -90,8 +91,10 @@ internal class LinkPaymentLauncherTest {
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                useLinkExpress = true,
-                launchMode = LinkLaunchMode.Full
+                linkExpressMode = LinkExpressMode.ENABLED,
+                launchMode = LinkLaunchMode.Full,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                attestOnIntentConfirmation = false,
             )
 
             val launchCall = awaitLaunchCall()
@@ -100,9 +103,11 @@ internal class LinkPaymentLauncherTest {
                 .isEqualTo(
                     LinkActivityContract.Args(
                         configuration = TestFactory.LINK_CONFIGURATION,
-                        startWithVerificationDialog = true,
+                        linkExpressMode = LinkExpressMode.ENABLED,
                         linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                         launchMode = LinkLaunchMode.Full,
+                        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                        attestOnIntentConfirmation = false,
                     )
                 )
 
@@ -123,12 +128,48 @@ internal class LinkPaymentLauncherTest {
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                useLinkExpress = false,
-                launchMode = LinkLaunchMode.Full
+                linkExpressMode = LinkExpressMode.DISABLED,
+                launchMode = LinkLaunchMode.Full,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                attestOnIntentConfirmation = false,
             )
 
             val launchCall = awaitLaunchCall() as? LinkActivityContract.Args
-            assertThat(launchCall?.startWithVerificationDialog).isFalse()
+            assertThat(launchCall?.linkExpressMode).isEqualTo(LinkExpressMode.DISABLED)
+            awaitNextRegisteredLauncher()
+        }
+    }
+
+    @Test
+    fun `present should launch with correct args when attestOnIntentConfirmation is true`() = runTest {
+        testPresentWithAttestOnIntentConfirmation(attestOnIntentConfirmation = true)
+    }
+
+    @Test
+    fun `present should launch with correct args when attestOnIntentConfirmation is false`() = runTest {
+        testPresentWithAttestOnIntentConfirmation(attestOnIntentConfirmation = false)
+    }
+
+    private suspend fun testPresentWithAttestOnIntentConfirmation(attestOnIntentConfirmation: Boolean) {
+        DummyActivityResultCaller.test {
+            val linkPaymentLauncher = createLinkPaymentLauncher()
+
+            linkPaymentLauncher.register(activityResultCaller) {}
+
+            val registerCall = awaitRegisterCall()
+            assertThat(registerCall).isNotNull()
+
+            linkPaymentLauncher.present(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                linkExpressMode = LinkExpressMode.ENABLED,
+                launchMode = LinkLaunchMode.Full,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                attestOnIntentConfirmation = attestOnIntentConfirmation,
+            )
+
+            val launchCall = awaitLaunchCall() as? LinkActivityContract.Args
+            assertThat(launchCall?.attestOnIntentConfirmation).isEqualTo(attestOnIntentConfirmation)
             awaitNextRegisteredLauncher()
         }
     }
@@ -232,8 +273,10 @@ internal class LinkPaymentLauncherTest {
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                useLinkExpress = true,
-                launchMode = LinkLaunchMode.Full
+                linkExpressMode = LinkExpressMode.ENABLED,
+                launchMode = LinkLaunchMode.Full,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                attestOnIntentConfirmation = false,
             )
 
             verifyActivityResultCallback(
@@ -264,8 +307,10 @@ internal class LinkPaymentLauncherTest {
                 linkPaymentLauncher.present(
                     configuration = TestFactory.LINK_CONFIGURATION,
                     linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                    useLinkExpress = true,
-                    launchMode = LinkLaunchMode.Full
+                    linkExpressMode = LinkExpressMode.ENABLED,
+                    launchMode = LinkLaunchMode.Full,
+                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                    attestOnIntentConfirmation = false,
                 )
 
                 val registerCall = awaitRegisterCall()

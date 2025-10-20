@@ -50,11 +50,11 @@ internal class AutocompleteActivity : AppCompatActivity() {
                     val result = when (event) {
                         is AutocompleteViewModel.Event.EnterManually -> AutocompleteContract.Result.EnterManually(
                             id = starterArgs.id,
-                            addressDetails = event.addressDetails,
+                            address = event.address,
                         )
                         is AutocompleteViewModel.Event.GoBack -> AutocompleteContract.Result.Address(
                             id = starterArgs.id,
-                            addressDetails = event.addressDetails,
+                            address = event.address,
                         )
                     }
 
@@ -95,7 +95,7 @@ internal class AutocompleteActivity : AppCompatActivity() {
             setResult(
                 AutocompleteContract.Result.Address(
                     id = starterArgs?.id ?: "",
-                    addressDetails = null,
+                    address = null,
                 )
             )
             finish()

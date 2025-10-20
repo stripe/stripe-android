@@ -5,7 +5,6 @@ apply plugin: 'com.google.firebase.appdistribution'
 apply plugin: 'io.sentry.android.gradle'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
-apply plugin: 'shot'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 // Read values from gradle.properties or system environment variable
@@ -50,7 +49,6 @@ dependencies {
     implementation project(':payments')
     implementation project(':stripecardscan')
     implementation project(':financial-connections')
-    implementation project(':stripe-crypto-onramp')
 
     implementation libs.androidx.activity
     implementation libs.androidx.appCompat
@@ -109,16 +107,12 @@ dependencies {
     androidTestImplementation testLibs.truth
 }
 
-shot {
-    tolerance = 1 // 1% tolerance because screenshots look slightly different on arm64-v8a vs x86_64 vs m1 emulators
-}
-
 android {
     defaultConfig {
         applicationId "com.stripe.android.paymentsheet.example"
         versionCode 11
 
-        testInstrumentationRunner "com.karumi.shot.ShotTestRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
         buildConfigField "boolean", "IS_NIGHTLY_BUILD", "$gradle.ext.isNightlyBuild"

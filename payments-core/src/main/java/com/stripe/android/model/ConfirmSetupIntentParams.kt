@@ -1,11 +1,14 @@
 package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_ATTRIBUTION_METADATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CONFIRMATION_TOKEN
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RADAR_OPTIONS
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_SET_AS_DEFAULT_PAYMENT_METHOD
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
@@ -56,6 +59,30 @@ constructor(
     internal val setAsDefaultPaymentMethod: Boolean? = null,
 
     internal val paymentMethodCode: PaymentMethodCode? = paymentMethodCreateParams?.code,
+
+    /**
+     * Payment-method-specific configuration for this SetupIntent.
+     *
+     * See [payment_method_options](
+     *   https://docs.stripe.com/api/setup_intents/confirm#confirm_setup_intent-payment_method_options
+     * ).
+     */
+    val paymentMethodOptions: PaymentMethodOptionsParams? = null,
+
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null,
+
+    private val clientAttributionMetadata: ClientAttributionMetadata? = null,
+
+    /**
+     * ID of the ConfirmationToken used to confirm this SetupIntent.
+     *
+     * If the provided ConfirmationToken contains properties that are also being provided in this
+     * request, such as payment_method, then the values in this request will take precedence.
+     *
+     * See
+     * [confirmation_token](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-confirmation_token).
+     */
+    private val confirmationTokenId: String? = null,
 ) : ConfirmStripeIntentParams {
 
     override fun shouldUseStripeSdk(): Boolean {
@@ -86,7 +113,17 @@ constructor(
             setAsDefaultPaymentMethod?.let {
                 mapOf(PARAM_SET_AS_DEFAULT_PAYMENT_METHOD to it)
             }.orEmpty()
-        ).plus(paymentMethodParamMap)
+        ).plus(
+            radarOptions?.let {
+                mapOf(PARAM_RADAR_OPTIONS to it.toParamMap())
+            }.orEmpty()
+        ).plus(
+            paymentMethodParamMap
+        ).plus(
+            clientAttributionMetadata?.let {
+                mapOf(PARAM_CLIENT_ATTRIBUTION_METADATA to it.toParamMap())
+            }.orEmpty()
+        )
     }
 
     private val paymentMethodParamMap: Map<String, Any>
@@ -97,6 +134,9 @@ constructor(
                 }
                 paymentMethodId != null -> {
                     mapOf(PARAM_PAYMENT_METHOD_ID to paymentMethodId)
+                }
+                confirmationTokenId != null -> {
+                    mapOf(PARAM_CONFIRMATION_TOKEN to confirmationTokenId)
                 }
                 else -> {
                     emptyMap()
@@ -215,6 +255,8 @@ constructor(
                 mandateId = mandateId,
                 mandateData = mandateData,
                 setAsDefaultPaymentMethod = null,
+                radarOptions = null,
+                clientAttributionMetadata = null,
             )
         }
 
@@ -224,6 +266,8 @@ constructor(
             mandateData: MandateDataParams? = null,
             mandateId: String? = null,
             setAsDefaultPaymentMethod: Boolean?,
+            radarOptions: RadarOptions?,
+            clientAttributionMetadata: ClientAttributionMetadata?
         ): ConfirmSetupIntentParams {
             return ConfirmSetupIntentParams(
                 clientSecret = clientSecret,
@@ -232,6 +276,8 @@ constructor(
                 mandateData = mandateData,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCreateParams.code,
+                radarOptions = radarOptions,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 
@@ -242,6 +288,8 @@ constructor(
             mandateId: String? = null,
             setAsDefaultPaymentMethod: Boolean?,
             paymentMethodCode: PaymentMethodCode,
+            radarOptions: RadarOptions?,
+            clientAttributionMetadata: ClientAttributionMetadata?
         ): ConfirmSetupIntentParams {
             return ConfirmSetupIntentParams(
                 paymentMethodId = paymentMethodId,
@@ -250,6 +298,26 @@ constructor(
                 mandateData = mandateData,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCode,
+                radarOptions = radarOptions,
+                clientAttributionMetadata = clientAttributionMetadata,
+            )
+        }
+
+        internal fun createForDashboard(
+            clientSecret: String,
+            paymentMethodId: String,
+            paymentMethodOptions: PaymentMethodOptionsParams?,
+        ): ConfirmSetupIntentParams {
+            // Dashboard only supports a specific payment flow today.
+            return ConfirmSetupIntentParams(
+                clientSecret = clientSecret,
+                paymentMethodId = paymentMethodId,
+                paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                    moto = true,
+                    setupFutureUsage = (paymentMethodOptions as? PaymentMethodOptionsParams.Card)?.setupFutureUsage
+                ),
+                useStripeSdk = true,
+                paymentMethodCode = PaymentMethod.Type.Card.code,
             )
         }
     }

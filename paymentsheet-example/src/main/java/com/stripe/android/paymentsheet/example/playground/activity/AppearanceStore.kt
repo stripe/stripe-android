@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults
 import kotlinx.parcelize.Parcelize
@@ -148,21 +149,41 @@ internal object AppearanceStore {
             val selectedColor: Int = Color(0xFF007AFF).toArgb(),
             val unselectedColor: Int = Color(0x33787880).toArgb(),
             val checkmarkColor: Int = Color(0xFF007AFF).toArgb(),
-            val chevronColor: Int = Color.DarkGray.toArgb()
+            val disclosureColor: Int = Color.DarkGray.toArgb(),
+            val horizontalPaymentMethodIconMargin: Float? = null,
+            val verticalPaymentMethodIconMargin: Float? = null,
+            val titleFont: Typography.Font? = null,
+            val subtitleFont: Typography.Font? = null,
+            val disclosureIconRes: Int = R.drawable.stripe_ic_chevron_right
         ) : Parcelable {
             enum class Row {
                 FlatWithRadio,
                 FlatWithCheckmark,
-                FlatWithChevron,
+                FlatWithDisclosure,
                 FloatingButton
             }
 
+            @OptIn(AppearanceAPIAdditionsPreview::class)
             fun getEmbeddedAppearance(): PaymentSheet.Appearance.Embedded {
+                // paymentMethodIconMargins will override defaults so only init if set in playground
+                val insets = if (horizontalPaymentMethodIconMargin != null || verticalPaymentMethodIconMargin != null) {
+                    PaymentSheet.Insets(
+                        horizontalDp = horizontalPaymentMethodIconMargin ?: 0f,
+                        verticalDp = verticalPaymentMethodIconMargin ?: 0f
+                    )
+                } else {
+                    null
+                }
+
                 return PaymentSheet.Appearance.Embedded.Builder()
                     .rowStyle(getRow())
+                    .paymentMethodIconMargins(insets)
+                    .titleFont(titleFont?.build())
+                    .subtitleFont(subtitleFont?.build())
                     .build()
             }
 
+            @OptIn(AppearanceAPIAdditionsPreview::class)
             @Suppress("LongMethod")
             private fun getRow(): PaymentSheet.Appearance.Embedded.RowStyle {
                 return when (embeddedRowStyle) {
@@ -195,7 +216,7 @@ internal object AppearanceStore {
                         .endSeparatorInsetDp(endSeparatorInset)
                         .topSeparatorEnabled(topSeparatorEnabled)
                         .bottomSeparatorEnabled(bottomSeparatorEnabled)
-                        .checkmarkInsetsDp(checkmarkInsetsDp)
+                        .checkmarkInsetDp(checkmarkInsetsDp)
                         .additionalVerticalInsetsDp(additionalVerticalInsetsDp)
                         .horizontalInsetsDp(horizontalInsetsDp)
                         .colorsLight(
@@ -211,7 +232,7 @@ internal object AppearanceStore {
                             )
                         )
                         .build()
-                    Row.FlatWithChevron -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron.Builder()
+                    Row.FlatWithDisclosure -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure.Builder()
                         .separatorThicknessDp(separatorThicknessDp)
                         .startSeparatorInsetDp(startSeparatorInset)
                         .endSeparatorInsetDp(endSeparatorInset)
@@ -220,17 +241,18 @@ internal object AppearanceStore {
                         .additionalVerticalInsetsDp(additionalVerticalInsetsDp)
                         .horizontalInsetsDp(horizontalInsetsDp)
                         .colorsLight(
-                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron.Colors(
+                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure.Colors(
                                 separatorColor = separatorColor,
-                                chevronColor = chevronColor
+                                disclosureColor = disclosureColor
                             )
                         )
                         .colorsDark(
-                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron.Colors(
+                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure.Colors(
                                 separatorColor = Color(0x40FFFFFF).toArgb(),
-                                chevronColor = Color.LightGray.toArgb()
+                                disclosureColor = Color.LightGray.toArgb()
                             )
                         )
+                        .disclosureIconRes(disclosureIconRes)
                         .build()
                     Row.FloatingButton -> PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.Builder()
                         .spacingDp(floatingButtonSpacingDp)
@@ -332,13 +354,15 @@ internal object AppearanceStore {
                 )
             }
 
+            @Serializable
+            @Parcelize
             data class Font(
                 @FontRes
                 val fontFamily: Int? = null,
                 val fontSizeSp: Float? = null,
                 val fontWeight: Int? = null,
                 val letterSpacingSp: Float? = null,
-            ) {
+            ) : Parcelable {
                 fun build(): PaymentSheet.Typography.Font = PaymentSheet.Typography.Font(
                     fontFamily = fontFamily,
                     fontSizeSp = fontSizeSp,

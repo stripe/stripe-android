@@ -14,7 +14,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -121,7 +120,6 @@ sealed class TextFieldIcon {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class SimpleTextFieldController(
     val textFieldConfig: TextFieldConfig,
-    override val showOptionalLabel: Boolean = false,
     override val initialValue: String? = null,
     private val overrideContentDescriptionProvider: ((fieldValue: String) -> ResolvableString)? = null,
 ) : TextFieldController {
@@ -131,6 +129,7 @@ class SimpleTextFieldController(
     override val visualTransformation = stateFlowOf(
         value = textFieldConfig.visualTransformation ?: VisualTransformation.None
     )
+    override val showOptionalLabel: Boolean = textFieldConfig.optional
 
     override val label = MutableStateFlow(textFieldConfig.label)
     override val debugLabel = textFieldConfig.debugLabel
@@ -157,27 +156,37 @@ class SimpleTextFieldController(
         overrideContentDescriptionProvider?.invoke(it) ?: it.resolvableString
     }
 
-    private val _fieldState = MutableStateFlow<TextFieldState>(Blank)
+    private val _fieldState = MutableStateFlow(
+        if (textFieldConfig.optional) {
+            TextFieldStateConstants.Valid.Limitless
+        } else {
+            TextFieldStateConstants.Error.Blank
+        }
+    )
     override val fieldState: StateFlow<TextFieldState> = _fieldState.asStateFlow()
 
     override val loading: StateFlow<Boolean> = textFieldConfig.loading
 
+    private val _isValidating = MutableStateFlow(false)
     private val _hasFocus = MutableStateFlow(false)
 
     override val visibleError: StateFlow<Boolean> =
-        combineAsStateFlow(_fieldState, _hasFocus) { fieldState, hasFocus ->
-            fieldState.shouldShowError(hasFocus)
+        combineAsStateFlow(_fieldState, _hasFocus, _isValidating) { fieldState, hasFocus, isValidating ->
+            fieldState.shouldShowError(hasFocus, isValidating)
         }
 
     /**
      * An error must be emitted if it is visible or not visible.
      **/
-    override val error: StateFlow<FieldError?> = visibleError.mapAsStateFlow { visibleError ->
-        _fieldState.value.getError()?.takeIf { visibleError }
+    override val error: StateFlow<FieldError?> = combineAsStateFlow(
+        visibleError,
+        _fieldState
+    ) { visibleError, fieldState ->
+        fieldState.getError()?.takeIf { visibleError }
     }
 
     override val isComplete: StateFlow<Boolean> = _fieldState.mapAsStateFlow {
-        it.isValid() || (!it.isValid() && showOptionalLabel && it.isBlank())
+        it.isValid() || (!it.isValid() && textFieldConfig.optional && it.isBlank())
     }
 
     override val formFieldValue: StateFlow<FormFieldEntry> =
@@ -215,6 +224,10 @@ class SimpleTextFieldController(
 
     override fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
+    }
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        _isValidating.value = isValidating
     }
 
     @Composable

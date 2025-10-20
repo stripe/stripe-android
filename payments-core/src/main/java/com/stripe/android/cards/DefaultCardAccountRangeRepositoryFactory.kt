@@ -9,6 +9,7 @@ import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.AccountRange
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -26,6 +27,7 @@ import javax.inject.Named
 class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
     context: Context,
     @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String>,
+    private val requestSurface: RequestSurface,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
 ) : CardAccountRangeRepository.Factory {
     private val appContext = context.applicationContext
@@ -44,9 +46,10 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         context: Context,
         productUsageTokens: Set<String> = emptySet()
     ) : this(
-        context,
-        productUsageTokens,
-        DefaultAnalyticsRequestExecutor(),
+        context = context,
+        productUsageTokens = productUsageTokens,
+        requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
+        analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
     )
 
     @Throws(IllegalStateException::class)
@@ -96,8 +99,9 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
             onSuccess = { publishableKey ->
                 RemoteCardAccountRangeSource(
                     StripeApiRepository(
-                        appContext,
-                        { publishableKey }
+                        context = appContext,
+                        publishableKeyProvider = { publishableKey },
+                        requestSurface = requestSurface,
                     ),
                     ApiRequest.Options(
                         publishableKey

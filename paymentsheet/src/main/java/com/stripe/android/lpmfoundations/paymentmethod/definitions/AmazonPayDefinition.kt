@@ -22,7 +22,9 @@ internal object AmazonPayDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type.code)
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean {
+        return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
+    }
 
     override fun uiDefinitionFactory(): UiDefinitionFactory = AmazonPayUiDefinitionFactory
 }
@@ -36,6 +38,7 @@ private object AmazonPayUiDefinitionFactory : UiDefinitionFactory.RequiresShared
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_amazon_pay,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_amazon_pay,
+        iconResourceNight = null,
     )
 
     override fun createFormElements(
@@ -51,6 +54,7 @@ private object AmazonPayUiDefinitionFactory : UiDefinitionFactory.RequiresShared
         return transformSpecToElements.transform(
             metadata = metadata,
             specs = sharedDataSpec.fields + localLayoutSpecs,
+            termsDisplay = metadata.termsDisplayForType(AmazonPayDefinition.type),
         )
     }
 }

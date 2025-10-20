@@ -12,6 +12,7 @@ import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.Orientation
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -78,7 +79,6 @@ internal class WalletScreenScreenshotTest {
         snapshot(
             state = walletUiState(
                 userSetIsExpanded = false,
-
             ),
         )
     }
@@ -137,6 +137,25 @@ internal class WalletScreenScreenshotTest {
     }
 
     @Test
+    fun testCvcCheckFieldValidatedOnDisabledButtonPress() {
+        val paymentDetailsList = listOf(
+            CONSUMER_PAYMENT_DETAILS_CARD.copy(
+                cvcCheck = CvcCheck.Fail
+            ),
+            CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
+            CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
+        )
+        snapshot(
+            state = walletUiState(
+                paymentDetailsList = paymentDetailsList,
+                selectedItem = paymentDetailsList.firstOrNull(),
+                userSetIsExpanded = false,
+                isValidating = true,
+            ),
+        )
+    }
+
+    @Test
     fun testBankAccountSelectedState() {
         snapshot(
             state = walletUiState(
@@ -183,10 +202,41 @@ internal class WalletScreenScreenshotTest {
         )
     }
 
+    @Test
+    fun testPaymentSelectionHint() {
+        snapshot(
+            state = walletUiState(
+                paymentSelectionHint = "Lorem ipsum dolor sit amet".resolvableString,
+            ),
+        )
+    }
+
+    @Test
+    fun testDisallowLogout() {
+        snapshot(
+            state = walletUiState(
+                allowLogOut = false
+            ),
+        )
+    }
+
+    @Test
+    fun testPaymentSelectionHintLong() {
+        snapshot(
+            state = walletUiState(
+                paymentSelectionHint = buildString {
+                    append("Lorem ipsum dolor sit amet, consectetur adipiscing elit, ")
+                    append("sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
+                }.resolvableString
+            )
+        )
+    }
+
     private fun walletUiState(
         paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails> =
             TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
         selectedItem: ConsumerPaymentDetails.PaymentDetails? = paymentDetailsList.firstOrNull(),
+        allowLogOut: Boolean = true,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         hasCompleted: Boolean = false,
         isProcessing: Boolean = false,
@@ -195,15 +245,20 @@ internal class WalletScreenScreenshotTest {
         alertMessage: ResolvableString? = null,
         addPaymentMethodOptions: List<AddPaymentMethodOption> = listOf(AddPaymentMethodOption.Card),
         userSetIsExpanded: Boolean = false,
+        signupToggleEnabled: Boolean = false,
+        paymentSelectionHint: ResolvableString? = null,
+        isValidating: Boolean = false,
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
             email = "email@email.com",
+            allowLogOut = allowLogOut,
             cardBrandFilter = cardBrandFilter,
             selectedItemId = selectedItem?.id,
             isProcessing = isProcessing,
             isSettingUp = false,
             merchantName = "Example Inc.",
+            sellerBusinessName = null,
             primaryButtonLabel = primaryButtonLabel,
             secondaryButtonLabel = secondaryButtonLabel,
             hasCompleted = hasCompleted,
@@ -212,7 +267,11 @@ internal class WalletScreenScreenshotTest {
             expiryDateInput = expiryDateInput,
             cvcInput = cvcInput,
             alertMessage = alertMessage,
-            collectMissingBillingDetailsForExistingPaymentMethods = true
+            paymentSelectionHint = paymentSelectionHint,
+            collectMissingBillingDetailsForExistingPaymentMethods = true,
+            signupToggleEnabled = signupToggleEnabled,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            isValidating = isValidating,
         )
     }
 
@@ -224,6 +283,7 @@ internal class WalletScreenScreenshotTest {
                     onItemSelected = {},
                     onExpandedChanged = {},
                     onPrimaryButtonClick = {},
+                    onDisabledButtonClick = {},
                     onPayAnotherWayClicked = {},
                     onRemoveClicked = {},
                     onUpdateClicked = {},

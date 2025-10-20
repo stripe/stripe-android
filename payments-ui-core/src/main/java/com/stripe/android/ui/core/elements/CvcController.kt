@@ -28,7 +28,6 @@ class CvcController constructor(
     private val cvcTextFieldConfig: CvcConfig = CvcConfig(),
     cardBrandFlow: StateFlow<CardBrand>,
     override val initialValue: String? = null,
-    override val showOptionalLabel: Boolean = false
 ) : TextFieldController {
     override val capitalization: KeyboardCapitalization = cvcTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cvcTextFieldConfig.keyboard
@@ -47,6 +46,8 @@ class CvcController constructor(
     override val debugLabel = cvcTextFieldConfig.debugLabel
 
     override val layoutDirection: LayoutDirection = LayoutDirection.Ltr
+
+    override val showOptionalLabel: Boolean = false
 
     @OptIn(ExperimentalComposeUiApi::class)
     override val autofillType: AutofillType = AutofillType.CreditCardSecurityCode
@@ -71,11 +72,12 @@ class CvcController constructor(
     }
     override val fieldState: StateFlow<TextFieldState> = _fieldState
 
+    private val _isValidating = MutableStateFlow(false)
     private val _hasFocus = MutableStateFlow(false)
 
     override val visibleError: StateFlow<Boolean> =
-        combineAsStateFlow(_fieldState, _hasFocus) { fieldState, hasFocus ->
-            fieldState.shouldShowError(hasFocus)
+        combineAsStateFlow(_fieldState, _hasFocus, _isValidating) { fieldState, hasFocus, isValidating ->
+            fieldState.shouldShowError(hasFocus, isValidating)
         }
 
     /**
@@ -121,5 +123,9 @@ class CvcController constructor(
 
     override fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
+    }
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        _isValidating.value = isValidating
     }
 }

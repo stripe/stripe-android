@@ -237,7 +237,7 @@ class ShippingInfoWidgetTest {
         assertThat(stateTextInputLayout.error)
             .isEqualTo(res.getString(R.string.stripe_address_province_required))
         assertThat(postalCodeTextInputLayout.error)
-            .isEqualTo(res.getString(R.string.stripe_address_postal_code_invalid))
+            .isEqualTo(res.getString(UiCoreR.string.stripe_address_postal_code_invalid))
 
         countryTextInputLayout
             .updateUiForCountryEntered(Locale("", NO_POSTAL_CODE_COUNTRY_CODE).getCountryCode())

@@ -52,13 +52,13 @@ internal fun RemoveButton(
     ) {
         Box(
             modifier = Modifier
-                .testTag(testTag)
                 .fillMaxWidth()
         ) {
             CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
                 TextButton(
                     modifier = Modifier
                         .align(Alignment.Center)
+                        .testTag(testTag)
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = shape.height),
                     border = BorderStroke(

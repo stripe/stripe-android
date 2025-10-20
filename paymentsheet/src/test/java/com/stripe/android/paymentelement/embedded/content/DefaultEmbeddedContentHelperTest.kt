@@ -7,6 +7,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -18,6 +19,7 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.AnalyticEventCallbackRule
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -131,6 +133,7 @@ internal class DefaultEmbeddedContentHelperTest {
         val eventReporter: FakeEventReporter,
     )
 
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     private fun testScenario(
         setup: SavedStateHandle.() -> Unit = {},
         block: suspend Scenario.() -> Unit,
@@ -143,6 +146,7 @@ internal class DefaultEmbeddedContentHelperTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             embeddedSelectionHolder = selectionHolder,
             savedStateHandle = savedStateHandle,
+            selectedPaymentMethodCode = "",
         )
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()
@@ -182,6 +186,7 @@ internal class DefaultEmbeddedContentHelperTest {
             errorReporter = errorReporter,
             internalRowSelectionCallback = { null },
             linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
+            analyticsCallbackProvider = { AnalyticEventCallbackRule() },
             linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         )
         Scenario(

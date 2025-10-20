@@ -10,6 +10,8 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentsheet.LinkInlineHandler
+import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 
@@ -19,9 +21,11 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
+        linkInlineHandler: LinkInlineHandler? = null,
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
         initialLinkUserInput: UserInput? = null,
         setAsDefaultMatchesSaveForFutureUse: Boolean = false,
+        automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
     ): UiDefinitionFactory.Arguments.Factory {
         val context: Context? = try {
             ApplicationProvider.getApplicationContext<Application>()
@@ -38,6 +42,8 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
             onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
             setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            linkInlineHandler = linkInlineHandler,
+            automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
         )
     }
 

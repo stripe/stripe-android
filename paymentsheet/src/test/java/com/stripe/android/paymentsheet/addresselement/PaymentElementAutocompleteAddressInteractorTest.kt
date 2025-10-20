@@ -57,8 +57,8 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val launchCall = scenario.launchCalls.awaitItem()
 
-        val addressDetails = createTestAddressDetails()
-        val result = AutocompleteLauncher.Result.EnterManually(addressDetails)
+        val address = createTestAddress()
+        val result = AutocompleteLauncher.Result.EnterManually(address)
 
         launchCall.resultHandler.onAutocompleteLauncherResult(result)
 
@@ -69,7 +69,16 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val expandFormEvent = event as AutocompleteAddressInteractor.Event.OnExpandForm
 
         assertThat(expandFormEvent.values).isNotNull()
-        assertThat(expandFormEvent.values?.get(IdentifierSpec.Line1)).isEqualTo("123 Main Street")
+        assertThat(expandFormEvent.values).containsExactlyEntriesIn(
+            mapOf(
+                IdentifierSpec.Line1 to "123 Main Street",
+                IdentifierSpec.Line2 to "Apt 4B",
+                IdentifierSpec.City to "San Francisco",
+                IdentifierSpec.State to "CA",
+                IdentifierSpec.PostalCode to "94105",
+                IdentifierSpec.Country to "US",
+            )
+        )
     }
 
     @Test
@@ -85,8 +94,8 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val launchCall = scenario.launchCalls.awaitItem()
 
-        val addressDetails = createTestAddressDetails()
-        val result = AutocompleteLauncher.Result.OnBack(addressDetails)
+        val address = createTestAddress()
+        val result = AutocompleteLauncher.Result.OnBack(address)
 
         launchCall.resultHandler.onAutocompleteLauncherResult(result)
 
@@ -96,8 +105,16 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val valuesEvent = event as AutocompleteAddressInteractor.Event.OnValues
 
-        assertThat(valuesEvent.values).isNotNull()
-        assertThat(valuesEvent.values[IdentifierSpec.Line1]).isEqualTo("123 Main Street")
+        assertThat(valuesEvent.values).containsExactlyEntriesIn(
+            mapOf(
+                IdentifierSpec.Line1 to "123 Main Street",
+                IdentifierSpec.Line2 to "Apt 4B",
+                IdentifierSpec.City to "San Francisco",
+                IdentifierSpec.State to "CA",
+                IdentifierSpec.PostalCode to "94105",
+                IdentifierSpec.Country to "US",
+            )
+        )
     }
 
     @Test
@@ -218,17 +235,12 @@ class PaymentElementAutocompleteAddressInteractorTest {
         autocompleteConfig = autocompleteConfig
     )
 
-    private fun createTestAddressDetails() = AddressDetails(
-        name = "John Doe",
-        address = PaymentSheet.Address(
-            line1 = "123 Main Street",
-            line2 = "Apt 4B",
-            city = "San Francisco",
-            state = "CA",
-            postalCode = "94105",
-            country = "US"
-        ),
-        phoneNumber = "555-123-4567",
-        isCheckboxSelected = true
+    private fun createTestAddress() = PaymentSheet.Address(
+        line1 = "123 Main Street",
+        line2 = "Apt 4B",
+        city = "San Francisco",
+        state = "CA",
+        postalCode = "94105",
+        country = "US"
     )
 }

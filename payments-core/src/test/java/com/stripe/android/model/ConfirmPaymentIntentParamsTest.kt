@@ -84,6 +84,8 @@ class ConfirmPaymentIntentParamsTest {
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 CLIENT_SECRET,
                 setAsDefaultPaymentMethod = true,
+                radarOptions = null,
+                clientAttributionMetadata = null
             )
             .toParamMap()
 
@@ -549,6 +551,65 @@ class ConfirmPaymentIntentParamsTest {
                     "use_stripe_sdk" to false
                 )
             )
+    }
+
+    @Test
+    fun toParamMap_withRadarOptions_shouldCreateExpectedMap() {
+        val radarOptions = RadarOptions(hCaptchaToken = "test_token")
+        val params = ConfirmPaymentIntentParams(
+            paymentMethodId = "pm_123",
+            clientSecret = CLIENT_SECRET,
+            radarOptions = radarOptions
+        ).toParamMap()
+
+        val radarOptionsMap = params["radar_options"] as? Map<*, *>
+        assertThat(radarOptionsMap).isNotNull()
+        assertThat(radarOptionsMap?.get("hcaptcha_token")).isEqualTo("test_token")
+    }
+
+    @Test
+    fun toParamMap_withSetAsDefaultPaymentMethodAndRadarOptions_shouldCreateExpectedMap() {
+        val radarOptions = RadarOptions(hCaptchaToken = "test_token")
+        val params = ConfirmPaymentIntentParams
+            .createWithSetAsDefaultPaymentMethod(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                CLIENT_SECRET,
+                setAsDefaultPaymentMethod = true,
+                radarOptions = radarOptions,
+                clientAttributionMetadata = null
+            )
+            .toParamMap()
+
+        val radarOptionsMap = params["radar_options"] as? Map<*, *>
+        assertThat(radarOptionsMap).isNotNull()
+        assertThat(radarOptionsMap?.get("hcaptcha_token")).isEqualTo("test_token")
+    }
+
+    @Test
+    fun toParamMap_withClientAttributionMetadata_shouldCreateExpectedMap() {
+        val clientAttributionMetadata = ClientAttributionMetadata(
+            elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+        )
+        val params = ConfirmPaymentIntentParams(
+            clientSecret = CLIENT_SECRET,
+            clientAttributionMetadata = clientAttributionMetadata,
+        ).toParamMap()
+
+        assertThat(params).containsKey("client_attribution_metadata")
+        assertThat(params["client_attribution_metadata"]).isEqualTo(clientAttributionMetadata.toParamMap())
+    }
+
+    @Test
+    fun toParamMap_withConfirmationTokenId_shouldCreateExpectedMap() {
+        val params = ConfirmPaymentIntentParams(
+            confirmationTokenId = "ctoken_123",
+            clientSecret = CLIENT_SECRET
+        ).toParamMap()
+
+        assertThat(params).containsKey("confirmation_token")
+        assertThat(params["confirmation_token"]).isEqualTo("ctoken_123")
     }
 
     private companion object {

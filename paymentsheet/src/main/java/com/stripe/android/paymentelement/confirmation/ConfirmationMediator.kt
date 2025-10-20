@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
@@ -34,10 +35,10 @@ internal class ConfirmationMediator<
 
     fun canConfirm(
         confirmationOption: ConfirmationHandler.Option,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ): Boolean {
         return definition.option(confirmationOption)?.let {
-            definition.canConfirm(it, confirmationParameters)
+            definition.canConfirm(it, confirmationArgs)
         } ?: false
     }
 
@@ -49,9 +50,10 @@ internal class ConfirmationMediator<
             activityResultCaller
         ) { result ->
             val confirmationResult = persistedParameters?.let { params ->
+                persistedParameters = null
                 definition.toResult(
                     confirmationOption = params.confirmationOption,
-                    confirmationParameters = params.confirmationParameters,
+                    confirmationArgs = params.confirmationArgs,
                     result = result,
                     deferredIntentConfirmationType = params.deferredIntentConfirmationType
                 )
@@ -71,6 +73,10 @@ internal class ConfirmationMediator<
         }
     }
 
+    fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
+        definition.bootstrap(paymentMethodMetadata)
+    }
+
     fun unregister() {
         launcher?.let {
             definition.unregister(it)
@@ -81,7 +87,7 @@ internal class ConfirmationMediator<
 
     suspend fun action(
         option: ConfirmationHandler.Option,
-        parameters: ConfirmationDefinition.Parameters,
+        arguments: ConfirmationHandler.Args,
     ): Action {
         val confirmationOption = definition.option(option)
             ?: return Action.Fail(
@@ -93,14 +99,14 @@ internal class ConfirmationMediator<
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
             )
 
-        return when (val action = definition.action(confirmationOption, parameters)) {
+        return when (val action = definition.action(confirmationOption, arguments)) {
             is ConfirmationDefinition.Action.Launch -> {
                 launcher?.let {
                     Action.Launch(
                         launch = {
                             persistedParameters = Parameters(
                                 confirmationOption = confirmationOption,
-                                confirmationParameters = parameters,
+                                confirmationArgs = arguments,
                                 deferredIntentConfirmationType = action.deferredIntentConfirmationType,
                             )
 
@@ -108,7 +114,7 @@ internal class ConfirmationMediator<
                                 launcher = it,
                                 arguments = action.launcherArguments,
                                 confirmationOption = confirmationOption,
-                                confirmationParameters = parameters,
+                                confirmationArgs = arguments,
                             )
                         },
                         receivesResultInProcess = action.receivesResultInProcess,
@@ -128,7 +134,6 @@ internal class ConfirmationMediator<
             is ConfirmationDefinition.Action.Complete -> {
                 Action.Complete(
                     intent = action.intent,
-                    confirmationOption = action.confirmationOption,
                     deferredIntentConfirmationType = action.deferredIntentConfirmationType,
                     completedFullPaymentFlow = action.completedFullPaymentFlow,
                 )
@@ -157,7 +162,6 @@ internal class ConfirmationMediator<
 
         data class Complete(
             val intent: StripeIntent,
-            val confirmationOption: ConfirmationHandler.Option,
             val deferredIntentConfirmationType: DeferredIntentConfirmationType? = null,
             val completedFullPaymentFlow: Boolean,
         ) : Action
@@ -166,11 +170,11 @@ internal class ConfirmationMediator<
     @Parcelize
     internal data class Parameters<TConfirmationOption : ConfirmationHandler.Option>(
         val confirmationOption: TConfirmationOption,
-        val confirmationParameters: ConfirmationDefinition.Parameters,
+        val confirmationArgs: ConfirmationHandler.Args,
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     ) : Parcelable
 
-    private companion object {
-        private const val PARAMETERS_POSTFIX_KEY = "Parameters"
+    companion object {
+        const val PARAMETERS_POSTFIX_KEY = "Parameters"
     }
 }

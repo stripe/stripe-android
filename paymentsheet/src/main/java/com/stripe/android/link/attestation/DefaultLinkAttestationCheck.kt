@@ -4,9 +4,10 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.account.LinkAuthResult
+import com.stripe.android.link.account.toLinkAuthResult
 import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.EmailSource
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.attestation.IntegrityRequestManager
@@ -16,7 +17,6 @@ import kotlin.coroutines.CoroutineContext
 
 internal class DefaultLinkAttestationCheck @Inject constructor(
     private val linkGate: LinkGate,
-    private val linkAuth: LinkAuth,
     private val integrityRequestManager: IntegrityRequestManager,
     private val linkAccountManager: LinkAccountManager,
     private val linkConfiguration: LinkConfiguration,
@@ -32,10 +32,11 @@ internal class DefaultLinkAttestationCheck @Inject constructor(
                     val email = linkAccountManager.linkAccountInfo.value.account?.email
                         ?: linkConfiguration.customerInfo.email
                     if (email == null) return@fold LinkAttestationCheck.Result.Successful
-                    val lookupResult = linkAuth.lookUp(
+                    val lookupResult = linkAccountManager.lookupByEmail(
                         email = email,
                         emailSource = EmailSource.CUSTOMER_OBJECT,
-                        startSession = false
+                        startSession = false,
+                        customerId = linkConfiguration.customerIdForEceDefaultValues
                     )
                     handleLookupResult(lookupResult)
                 },
@@ -50,21 +51,13 @@ internal class DefaultLinkAttestationCheck @Inject constructor(
         }
     }
 
-    private fun handleLookupResult(lookupResult: LinkAuthResult): LinkAttestationCheck.Result {
-        return when (lookupResult) {
-            is LinkAuthResult.AttestationFailed -> {
-                LinkAttestationCheck.Result.AttestationFailed(lookupResult.error)
-            }
-            is LinkAuthResult.Error -> {
-                LinkAttestationCheck.Result.Error(lookupResult.error)
-            }
-            is LinkAuthResult.AccountError -> {
-                LinkAttestationCheck.Result.AccountError(lookupResult.error)
-            }
-            LinkAuthResult.NoLinkAccountFound,
-            is LinkAuthResult.Success -> {
-                LinkAttestationCheck.Result.Successful
-            }
+    private fun handleLookupResult(lookupResult: Result<LinkAccount?>): LinkAttestationCheck.Result {
+        return when (val result = lookupResult.toLinkAuthResult()) {
+            is LinkAuthResult.Success -> LinkAttestationCheck.Result.Successful
+            is LinkAuthResult.NoLinkAccountFound -> LinkAttestationCheck.Result.Successful
+            is LinkAuthResult.AttestationFailed -> LinkAttestationCheck.Result.AttestationFailed(result.error)
+            is LinkAuthResult.AccountError -> LinkAttestationCheck.Result.AccountError(result.error)
+            is LinkAuthResult.Error -> LinkAttestationCheck.Result.Error(result.error)
         }
     }
 }

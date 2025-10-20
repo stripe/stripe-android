@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Gem mine oplysninger for hurtigere betaling med Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">Opret en konto med Link for gøre betaling hurtigere på hele internettet</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Kredit</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -37,14 +40,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_card_type_prepaid">%1$s Forudbetalt</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
   <string name="stripe_link_card_type_unknown">%1$s Kort</string>
+  <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
+  <string name="stripe_link_confirm_payment_title">Bekræft betalingsoplysninger</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Log på, eller tilmeld dig</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Acceptér og fortsæt</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Hurtig og sikker betaling med ét klik</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Hurtig og sikker betaling</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Gem dine betalingsoplysninger med Link, og betal sikkert med et enkelt klik på sider, der understøtter Link.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Betal hurtigere alle steder, hvor Link accepteres.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Ved at tilmelde dig Link accepterer du <terms>vilkårene</terms> og <privacy>privatlivspolitikken</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -79,6 +88,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_address_element_primary_button">Gem adresse</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Forsendelsesadresse</string>
+  <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
+  <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">Brug faktureringsadresse til forsendelse</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
   <string name="stripe_paymentsheet_bacs_email_mandate">En e-mail vil blive sendt til %s inden for tre arbejdsdage for at bekræfte opsætningen af denne debitinstruktion.</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
@@ -101,6 +112,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Kortoplysninger kan ikke ændres.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Ved at angive dine kortoplysninger tillader du %s at opkræve dit kort for denne betaling i overensstemmelse med dennes vilkår.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Ved at fortsætte accepterer du at gemme dine oplysninger til senere køb med %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Ved at fortsætte accepterer du at gemme dine oplysninger til senere køb med %s og <link>Link</link>Du accepterer også Links <terms>vilkår</terms> og <privacy>politik om beskyttelse af personlige oplysninger</privacy>.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Ved at fortsætte accepterer du at gemme dine oplysninger til senere køb med %s og <link>Link</link> (Se <terms>vilkår</terms> og <privacy>privatlivspolitik</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Ved at fortsætte accepterer du at gemme dine oplysninger til senere køb hos %s og <link>Link</link> ifølge Links <terms>vilkår</terms> og <privacy>privatlivspolitik</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kortet blev ikke opdateret. Prøv igen.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -160,6 +179,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_remove_card">Fjern kort</string>
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Vil du fjerne kortet?</string>
+  <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
+  <string name="stripe_paymentsheet_remove_partial_description">Denne betalingsmetode vil blive fjernet, men vil fortsat være tilgængelig for %s-abonnementer.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Fjern %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -190,6 +211,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">I alt: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Kortbrandet blev ikke opdateret. Prøv igen.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Bekræft betalingen i din bank- eller betalingsapp inden for %s for at gennemføre købet.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Angiv som standardbetalingsmetode</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -252,6 +275,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Vis mere</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Ved at fortsætte accepterer du at godkende betalinger i henhold til disse <terms>vilkår</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Ved at indsende din ordre til %1$s og %2$s accepterer du, at dine oplysninger gemmes hos %3$s til senere køb, og accepterer, at betalinger godkendes i henhold til <terms>disse vilkår</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Ved at indsende din ordre til %s accepterer du at autorisere betalinger i henhold til <terms>disse vilkår</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Betaling</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
@@ -265,6 +292,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Gennemgang</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Betal på en anden måde</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Debetkort vil højst sandsynligt blive accepteret.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Af hensyn til sikkerheden skal du indtaste dit korts sikkerhedskode igen.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

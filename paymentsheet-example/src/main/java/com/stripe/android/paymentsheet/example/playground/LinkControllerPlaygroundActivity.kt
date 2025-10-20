@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.example.playground
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -13,10 +12,8 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.stripe.android.link.LinkController
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 @Suppress("LongMethod")
@@ -28,29 +25,20 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
 
         @Suppress("DEPRECATION")
         val playgroundState = intent.getParcelableExtra<PlaygroundState.Payment?>(PLAYGROUND_STATE_KEY)!!
-        val linkControllerConfig = playgroundState.asPaymentState()?.linkControllerConfiguration()
+        val linkControllerConfig = playgroundState.asPaymentState()?.linkControllerConfiguration(this)
 
         if (linkControllerConfig == null) {
             finish()
             return
         }
 
-        setContent {
-            val linkController = remember {
-                LinkController.create(
-                    activity = this,
-                    presentPaymentMethodsCallback = viewModel::onLinkControllerPresentPaymentMethod,
-                    lookupConsumerCallback = viewModel::onLinkControllerLookupConsumer,
-                    createPaymentMethodCallback = viewModel::onLinkControllerCreatePaymentMethod,
-                    authenticationCallback = viewModel::onLinkControllerAuthentication,
-                )
-            }
-            LaunchedEffect(Unit) {
-                linkController.configure(linkControllerConfig)
-            }
+        viewModel.onCreateActivity(this)
+        viewModel.configureLinkController(linkControllerConfig)
 
-            val linkControllerPlaygroundState by viewModel.linkControllerState.collectAsState()
-            val linkControllerState by linkController.state.collectAsState()
+        setContent {
+            val linkControllerPlaygroundState by viewModel.state.collectAsState()
+            val linkControllerState = linkControllerPlaygroundState.controllerState
+                ?: return@setContent
 
             PaymentSheetExampleTheme {
                 Scaffold { paddingValues ->
@@ -58,23 +46,14 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                         modifier = Modifier.padding(paddingValues),
                         controllerState = linkControllerState,
                         playgroundState = linkControllerPlaygroundState,
-                        onEmailChange = { email ->
-                            if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                                linkController.lookupConsumer(email)
-                            }
-                        },
-                        onPaymentMethodButtonClick = { email ->
-                            linkController.presentPaymentMethods(email = email.takeIf { it.isNotBlank() })
-                        },
-                        onCreatePaymentMethodClick = linkController::createPaymentMethod,
-                        onAuthenticationClick = { email, existingOnly ->
-                            val cleanedEmail = email.takeIf { it.isNotBlank() } ?: ""
-                            if (existingOnly) {
-                                linkController.authenticateExistingConsumer(cleanedEmail)
-                            } else {
-                                linkController.authenticate(cleanedEmail)
-                            }
-                        },
+                        onPaymentMethodButtonClick = viewModel::onPaymentMethodClick,
+                        onCreatePaymentMethodClick = viewModel::onCreatePaymentMethodClick,
+                        onLookupClick = viewModel::onLookupClick,
+                        onAuthenticationClick = viewModel::onAuthenticateClick,
+                        onAuthorizeClick = viewModel::onAuthorizeClick,
+                        onRegisterConsumerClick = viewModel::onRegisterConsumerClick,
+                        onUpdatePhoneNumberClick = viewModel::onUpdatePhoneNumberClick,
+                        onLogOutClick = viewModel::onLogOutClick,
                         onErrorMessage = { viewModel.status.value = StatusMessage(it) },
                     )
                 }
@@ -89,6 +68,11 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                 viewModel.status.value = status?.copy(hasBeenDisplayed = true)
             }
         }
+    }
+
+    override fun onDestroy() {
+        viewModel.onDestroyActivity()
+        super.onDestroy()
     }
 
     companion object {

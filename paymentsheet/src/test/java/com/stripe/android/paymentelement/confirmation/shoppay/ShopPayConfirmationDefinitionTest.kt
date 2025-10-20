@@ -1,9 +1,11 @@
 package com.stripe.android.paymentelement.confirmation.shoppay
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
@@ -13,11 +15,9 @@ import com.stripe.android.paymentelement.confirmation.asFailed
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asSucceeded
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.shoppay.ShopPayActivityContract
 import com.stripe.android.shoppay.ShopPayActivityResult
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultLauncher
 import kotlinx.coroutines.test.runTest
@@ -79,7 +79,7 @@ internal class ShopPayConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
@@ -99,7 +99,7 @@ internal class ShopPayConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             launcher = launcher,
             arguments = Unit,
         )
@@ -109,7 +109,40 @@ internal class ShopPayConfirmationDefinitionTest {
         assertThat(launchCall.input.shopPayConfiguration).isEqualTo(SHOP_PAY_CONFIRMATION_OPTION.shopPayConfiguration)
         assertThat(launchCall.input.customerSessionClientSecret)
             .isEqualTo(SHOP_PAY_CONFIRMATION_OPTION.customerSessionClientSecret)
-        assertThat(launchCall.input.businessName).isEqualTo(SHOP_PAY_CONFIRMATION_OPTION.businessName)
+        assertThat(launchCall.input.businessName).isEqualTo(SHOP_PAY_CONFIRMATION_OPTION.merchantDisplayName)
+    }
+
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    @Test
+    fun `'launch' should launch properly with merchant name as seller`() = runTest {
+        val definition = createShopPayConfirmationDefinition()
+
+        val launcher = FakeActivityResultLauncher<ShopPayActivityContract.Args>()
+
+        definition.launch(
+            confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            amount = 5000,
+                            currency = "CAD",
+                        ),
+                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                            businessName = "My business, Inc.",
+                            networkId = "network_123",
+                            externalId = "external_123"
+                        )
+                    )
+                )
+            ),
+            launcher = launcher,
+            arguments = Unit,
+        )
+
+        val launchCall = launcher.calls.awaitItem()
+
+        assertThat(launchCall.input.businessName).isEqualTo("My business, Inc.")
     }
 
     @Test
@@ -118,7 +151,7 @@ internal class ShopPayConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = ShopPayActivityResult.Completed,
         )
@@ -139,7 +172,7 @@ internal class ShopPayConfirmationDefinitionTest {
         val exception = IllegalStateException("ShopPay failed!")
         val result = definition.toResult(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = ShopPayActivityResult.Failed(exception),
         )
@@ -159,7 +192,7 @@ internal class ShopPayConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = ShopPayActivityResult.Canceled,
         )
@@ -178,7 +211,7 @@ internal class ShopPayConfirmationDefinitionTest {
         val exception = Exception("oops")
         val result = definition.toResult(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
             result = ShopPayActivityResult.Failed(exception),
         )
@@ -201,21 +234,10 @@ internal class ShopPayConfirmationDefinitionTest {
     }
 
     private companion object {
-        private val PAYMENT_INTENT = PaymentIntentFactory.create()
-
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
-            shippingDetails = AddressDetails(),
-        )
-
         private val SHOP_PAY_CONFIRMATION_OPTION = ShopPayConfirmationOption(
             shopPayConfiguration = SHOP_PAY_CONFIGURATION,
             customerSessionClientSecret = "customer_secret",
-            businessName = "Example Inc.",
+            merchantDisplayName = "Example Inc.",
         )
     }
 }

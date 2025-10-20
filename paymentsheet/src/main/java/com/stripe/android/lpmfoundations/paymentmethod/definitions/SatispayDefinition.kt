@@ -21,7 +21,9 @@ internal object SatispayDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type.code)
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean {
+        return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
+    }
 
     override fun uiDefinitionFactory(): UiDefinitionFactory = SatispayUiDefinitionFactory
 }
@@ -34,7 +36,8 @@ private object SatispayUiDefinitionFactory : UiDefinitionFactory.RequiresSharedD
         paymentMethodDefinition = SatispayDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_satispay,
-        iconResource = R.drawable.stripe_ic_paymentsheet_pm_satispay,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_satispay_day,
+        iconResourceNight = R.drawable.stripe_ic_paymentsheet_pm_satispay_night,
     )
 
     override fun createFormElements(
@@ -49,7 +52,8 @@ private object SatispayUiDefinitionFactory : UiDefinitionFactory.RequiresSharedD
         }
         return transformSpecToElements.transform(
             metadata = metadata,
-            specs = sharedDataSpec.fields + localLayoutSpecs
+            specs = sharedDataSpec.fields + localLayoutSpecs,
+            termsDisplay = metadata.termsDisplayForType(SatispayDefinition.type),
         )
     }
 }

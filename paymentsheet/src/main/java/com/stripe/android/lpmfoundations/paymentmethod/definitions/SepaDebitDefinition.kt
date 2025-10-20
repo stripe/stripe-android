@@ -76,5 +76,6 @@ private object SepaDebitUiDefinitionFactory : UiDefinitionFactory.RequiresShared
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_sepa_debit,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
+        iconResourceNight = null,
     )
 }

@@ -7,14 +7,18 @@ import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 sealed class AddressInputMode : Parcelable {
-    abstract val phoneNumberState: PhoneNumberState
+    abstract val phoneNumberConfig: AddressFieldConfiguration
+    abstract val nameConfig: AddressFieldConfiguration
+    abstract val emailConfig: AddressFieldConfiguration
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     data class AutocompleteCondensed(
         override val googleApiKey: String?,
         override val autocompleteCountries: Set<String>?,
-        override val phoneNumberState: PhoneNumberState,
+        override val phoneNumberConfig: AddressFieldConfiguration,
+        override val nameConfig: AddressFieldConfiguration,
+        override val emailConfig: AddressFieldConfiguration,
         override val onNavigation: () -> Unit
     ) : AddressInputMode(), AutocompleteCapableInputMode
 
@@ -23,14 +27,20 @@ sealed class AddressInputMode : Parcelable {
     data class AutocompleteExpanded(
         override val googleApiKey: String?,
         override val autocompleteCountries: Set<String>?,
-        override val phoneNumberState: PhoneNumberState,
+        override val phoneNumberConfig: AddressFieldConfiguration,
+        override val nameConfig: AddressFieldConfiguration,
+        override val emailConfig: AddressFieldConfiguration,
         override val onNavigation: () -> Unit,
     ) : AddressInputMode(), AutocompleteCapableInputMode
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     data class NoAutocomplete(
-        override val phoneNumberState: PhoneNumberState =
-            PhoneNumberState.HIDDEN
+        override val phoneNumberConfig: AddressFieldConfiguration =
+            AddressFieldConfiguration.HIDDEN,
+        override val nameConfig: AddressFieldConfiguration =
+            AddressFieldConfiguration.HIDDEN,
+        override val emailConfig: AddressFieldConfiguration =
+            AddressFieldConfiguration.HIDDEN,
     ) : AddressInputMode()
 }

@@ -99,6 +99,8 @@
   <string name="stripe_paypal_mandate">Bằng cách xác nhận thanh toán của quý vị với PayPal, quý vị cho phép %s tính phí tài khoản PayPal của quý vị cho các khoản thanh toán trong tương lai theo các điều khoản của họ.</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Khi xác nhận khoản thanh toán với RevolutPay, bạn cho phép %s tính phí vào tài khoản RevolutPay của bạn cho các khoản thanh toán trong tương lai căn cứ theo các điều khoản của họ.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">Bằng việc tiếp tục, bạn cho phép %1$s tự động ghi nợ Số dư Satispay của bạn theo chu kỳ định kỳ dựa trên gói mua hoặc gói đăng ký của bạn.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Lưu để thanh toán %s sau này</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->

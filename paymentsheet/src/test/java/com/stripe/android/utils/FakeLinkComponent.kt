@@ -16,7 +16,7 @@ import com.stripe.android.paymentsheet.utils.LinkTestUtils.createLinkConfigurati
 import org.mockito.kotlin.mock
 
 internal class FakeLinkComponent(
-    override val configuration: LinkConfiguration = createLinkConfiguration(),
+    override var configuration: LinkConfiguration = createLinkConfiguration(),
     override val linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
     override val linkGate: LinkGate = FakeLinkGate(),
     override val linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
@@ -24,7 +24,20 @@ internal class FakeLinkComponent(
         LinkInlineSignupAssistedViewModelFactory {
         override fun create(
             signupMode: LinkSignupMode,
-            initialUserInput: UserInput?
+            initialUserInput: UserInput?,
+            previousLinkSignupCheckboxSelection: Boolean?
         ): InlineSignupViewModel = mock<InlineSignupViewModel>()
     }
-) : LinkComponent()
+) : LinkComponent() {
+
+    class Builder(private val instance: FakeLinkComponent) : LinkComponent.Builder {
+        override fun configuration(configuration: LinkConfiguration): LinkComponent.Builder {
+            instance.configuration = configuration
+            return this
+        }
+
+        override fun build(): LinkComponent {
+            return instance
+        }
+    }
+}

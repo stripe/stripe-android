@@ -212,7 +212,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
         assertThat(selectionHolder.selection.value).isEqualTo(null)
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isNull()
-        callbackHelper.callbackTurbine.expectNoEvents()
+        assertThat(callbackHelper.callbackTurbine.awaitItem())
+            .isInstanceOf<EmbeddedPaymentElement.Result.Canceled>()
     }
 
     @Test
@@ -226,6 +227,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
             val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
 
             callback.onActivityResult(result)
+            assertThat(callbackHelper.callbackTurbine.awaitItem())
+                .isInstanceOf<EmbeddedPaymentElement.Result.Canceled>()
         }
     }
 

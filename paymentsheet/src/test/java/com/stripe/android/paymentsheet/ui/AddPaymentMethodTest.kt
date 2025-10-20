@@ -296,6 +296,11 @@ internal class AddPaymentMethodTest {
     @Test
     fun `selecting a new payment method starts an OnPaymentMethodSelected ViewAction`() = runTest {
         runScenario {
+            viewActionRecorder.consume {
+                it is AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility &&
+                    it.initialVisibilityTrackerData.paymentMethodCodes == listOf("card", "klarna")
+            }
+
             assertThat(viewActionRecorder.viewActions).isEmpty()
 
             composeRule.onNodeWithTag("PaymentMethodsUITestTagcard", useUnmergedTree = true).performClick()
@@ -311,6 +316,11 @@ internal class AddPaymentMethodTest {
     @Test
     fun `interacting with a form field sends form events`() = runTest {
         runScenario {
+            viewActionRecorder.consume {
+                it is AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility &&
+                    it.initialVisibilityTrackerData.paymentMethodCodes == listOf("card", "klarna")
+            }
+
             assertThat(viewActionRecorder.viewActions).isEmpty()
 
             composeRule.onNodeWithTag(DEFAULT_CHECKBOX_TEST_TAG, useUnmergedTree = true).performClick()
@@ -452,7 +462,11 @@ internal class AddPaymentMethodTest {
 
         val metadataWithSepaDebit = metadata.copy(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("sepa_debit")
+                paymentMethodTypes = listOf("sepa_debit"),
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "sepa_debit",
+                    sfuValue = "off_session"
+                )
             )
         )
         val sepaDebitPaymentMethod = metadataWithSepaDebit.supportedPaymentMethodForCode("sepa_debit")!!
@@ -479,7 +493,11 @@ internal class AddPaymentMethodTest {
 
         val metadataWithSepaDebit = metadata.copy(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("sepa_debit")
+                paymentMethodTypes = listOf("sepa_debit"),
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "sepa_debit",
+                    sfuValue = "off_session"
+                )
             )
         )
         val sepaDebitPaymentMethod = metadataWithSepaDebit.supportedPaymentMethodForCode("sepa_debit")!!
@@ -490,7 +508,7 @@ internal class AddPaymentMethodTest {
 
         val options = sepaDebitPaymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.SepaDebit
         assertThat(sepaDebitPaymentSelection.customerRequestedSave).isEqualTo(customerRequestedSave)
-        assertThat(options?.setupFutureUsage).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.Blank)
+        assertThat(options?.setupFutureUsage).isNull()
     }
 
     @Test
@@ -505,7 +523,11 @@ internal class AddPaymentMethodTest {
 
         val metadataWithSepaDebit = metadata.copy(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("sepa_debit")
+                paymentMethodTypes = listOf("sepa_debit"),
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "sepa_debit",
+                    sfuValue = "off_session"
+                )
             )
         )
         val sepaDebitPaymentMethod = metadataWithSepaDebit.supportedPaymentMethodForCode("sepa_debit")!!
@@ -584,6 +606,7 @@ internal class AddPaymentMethodTest {
             ),
             paymentSelection = null,
             processing = false,
+            validating = false,
             usBankAccountFormArguments = mock(),
             incentive = null,
         )
@@ -593,7 +616,9 @@ internal class AddPaymentMethodTest {
         val addPaymentMethodInteractor = FakeAddPaymentMethodInteractor(initialState, viewActionRecorder)
 
         composeRule.setContent {
-            AddPaymentMethod(interactor = addPaymentMethodInteractor)
+            AddPaymentMethod(
+                interactor = addPaymentMethodInteractor,
+            )
         }
 
         viewActionRecorder.consume(

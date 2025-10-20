@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
@@ -18,6 +20,7 @@ internal fun NewPaymentMethodVerticalLayoutUI(
     isEnabled: Boolean,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
+    updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
     rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default
 ) {
     Column(
@@ -30,7 +33,10 @@ internal fun NewPaymentMethodVerticalLayoutUI(
                 isSelected = index == selectedIndex,
                 displayablePaymentMethod = item,
                 imageLoader = imageLoader,
-                appearance = Embedded.Builder().rowStyle(rowStyle).build()
+                appearance = Embedded.Builder().rowStyle(rowStyle).build(),
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    updatePaymentMethodVisibility(item.code, coordinates)
+                },
             )
         }
     }

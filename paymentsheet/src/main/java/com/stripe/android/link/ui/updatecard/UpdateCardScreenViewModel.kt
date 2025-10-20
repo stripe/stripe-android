@@ -28,9 +28,11 @@ import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Card.Networks
 import com.stripe.android.paymentsheet.CardUpdateParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.CardEditConfiguration
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
@@ -67,7 +69,9 @@ internal class UpdateCardScreenViewModel @Inject constructor(
 
     val state: StateFlow<UpdateCardScreenState> = _state.asStateFlow()
 
-    var interactor: EditCardDetailsInteractor? = null
+    private val _interactor = MutableStateFlow<EditCardDetailsInteractor?>(null)
+
+    val interactor: StateFlow<EditCardDetailsInteractor?> = _interactor.asStateFlow()
 
     init {
         runCatching {
@@ -81,7 +85,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                     isDefault = paymentDetails.isDefault
                 )
             }
-            interactor = initializeInteractor(paymentDetails)
+            _interactor.value = initializeInteractor(paymentDetails)
         }.onFailure {
             logger.error("Failed to render payment update screen", it)
             navigationManager.tryNavigateBack()
@@ -97,9 +101,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                     val paymentDetailsId = requireNotNull(state.value.paymentDetailsId)
                     val updateParams = ConsumerPaymentDetailsUpdateParams(
                         id = paymentDetailsId,
-                        // When updating a payment that is not the default and you send isDefault=false to the server,
-                        // you get "Can't unset payment details when it's not the default", so send nil instead of false
-                        isDefault = state.value.isDefault.takeIf { it == true },
+                        isDefault = state.value.isDefault,
                         cardPaymentMethodCreateParamsMap = paymentUpdateParams.toApiParams().toParamMap()
                     )
                     val result = linkAccountManager.updatePaymentDetails(
@@ -142,6 +144,10 @@ internal class UpdateCardScreenViewModel @Inject constructor(
         }
     }
 
+    fun onDisabledUpdateClicked() {
+        interactor.value?.handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)
+    }
+
     private fun CardUpdateParams.toApiParams(): PaymentMethodCreateParams = PaymentMethodCreateParams.create(
         card = PaymentMethodCreateParams.Card.Builder().apply {
             setExpiryMonth(this@toApiParams.expiryMonth)
@@ -174,6 +180,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
             )
         }
 
+        val defaultConfiguration = configuration.billingDetailsCollectionConfiguration
+
         return DefaultEditCardDetailsInteractor.Factory().create(
             coroutineScope = viewModelScope,
             cardEditConfiguration = cardEditConfiguration,
@@ -181,7 +189,37 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                 details = paymentDetails,
                 billingPhoneNumber = linkAccountManager.linkAccountInfo.value.account?.unredactedPhoneNumber
             ),
-            billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = defaultConfiguration.name,
+                email = defaultConfiguration.email,
+                // Cannot update phone number when not in the billing details update flow
+                phone = defaultConfiguration.phone.takeIf {
+                    state.value.isBillingDetailsUpdateFlow
+                } ?: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                // Should always allow updating ZIP/postal code at minimum
+                address = if (
+                    paymentDetails.type == PaymentMethod.Type.Card.code &&
+                    defaultConfiguration.address ==
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                ) {
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+                } else {
+                    defaultConfiguration.address
+                },
+                attachDefaultsToPaymentMethod = defaultConfiguration.attachDefaultsToPaymentMethod,
+                // Country filtering behavior depends on the update flow type:
+                // - Regular edit flow: Allow all countries. When updating your card, you can select any
+                //   country. You'll get back to the wallet and that card won't be selectable if the
+                //   country is not allowed, but users can still update existing cards.
+                // - Billing details update flow: Apply country filtering. This flow triggers when there's
+                //   missing billing details and directly confirms the payment there, so we don't want to
+                //   allow changing the country to an unallowed one.
+                allowedCountries = if (state.value.isBillingDetailsUpdateFlow) {
+                    defaultConfiguration.allowedBillingCountries
+                } else {
+                    emptySet()
+                },
+            ),
             onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
             onBrandChoiceChanged = ::onBrandChoiceChanged,
             // We prefill in the billing details update flow, so the form might

@@ -83,6 +83,7 @@ internal class FormHelperTest {
                     PaymentSelection.New.GenericPaymentMethod(
                         label = "Cash App".resolvableString,
                         iconResource = 0,
+                        iconResourceNight = null,
                         lightThemeIconUrl = null,
                         darkThemeIconUrl = null,
                         paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(
@@ -114,6 +115,7 @@ internal class FormHelperTest {
                     PaymentSelection.New.GenericPaymentMethod(
                         label = "Klarna".resolvableString,
                         iconResource = 0,
+                        iconResourceNight = null,
                         lightThemeIconUrl = null,
                         darkThemeIconUrl = null,
                         paymentMethodCreateParams = PaymentMethodCreateParams.createKlarna(
@@ -306,6 +308,7 @@ internal class FormHelperTest {
                 prefillEligibleFields = emptySet(),
                 userInput = userInput,
                 allowsDefaultOptIn = false,
+                linkSignUpOptInFeatureEnabled = false,
             ),
         ) {
             assertThat(expectMostRecentItem()).isEqualTo(
@@ -355,6 +358,7 @@ internal class FormHelperTest {
                 ),
                 isExpanded = false,
                 allowsDefaultOptIn = false,
+                linkSignUpOptInFeatureEnabled = false,
             )
         ) {
             assertThat(expectMostRecentItem()).isEqualTo(
@@ -408,6 +412,7 @@ internal class FormHelperTest {
                     consentAction = SignUpConsentAction.Checkbox,
                 ),
                 allowsDefaultOptIn = false,
+                linkSignUpOptInFeatureEnabled = false,
             )
         ) {
             assertThat(expectMostRecentItem()).isEqualTo(
@@ -421,6 +426,7 @@ internal class FormHelperTest {
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
                     label = resolvableString(R.string.stripe_paymentsheet_payment_method_bancontact),
                     iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
+                    iconResourceNight = null,
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
                 )
@@ -487,6 +493,7 @@ internal class FormHelperTest {
                     userInput = null,
                     isExpanded = true,
                     allowsDefaultOptIn = false,
+                    linkSignUpOptInFeatureEnabled = false,
                 )
             )
 
@@ -630,6 +637,7 @@ internal class FormHelperTest {
             eventReporter = eventReporter,
             savedStateHandle = SavedStateHandle(),
             autocompleteAddressInteractorFactory = null,
+            automaticallyLaunchedCardScanFormDataHelper = null,
         )
     }
 

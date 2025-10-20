@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 
 internal class RecordingConfirmationDefinition<
@@ -26,6 +27,7 @@ internal class RecordingConfirmationDefinition<
     private val unregisterCalls = Turbine<UnregisterCall<TLauncher>>()
     private val launchCalls = Turbine<LaunchCall<TConfirmationOption, TLauncher, TLauncherArgs>>()
     private val actionCalls = Turbine<ActionCall<TConfirmationOption>>()
+    private val bootstrapCalls = Turbine<BootstrapCall>()
 
     override val key: String = definition.key
 
@@ -37,16 +39,16 @@ internal class RecordingConfirmationDefinition<
 
     override fun canConfirm(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters
+        confirmationArgs: ConfirmationHandler.Args
     ): Boolean {
-        canConfirmCalls.add(CanConfirmCall(confirmationOption, confirmationParameters))
+        canConfirmCalls.add(CanConfirmCall(confirmationOption, confirmationArgs))
 
-        return definition.canConfirm(confirmationOption, confirmationParameters)
+        return definition.canConfirm(confirmationOption, confirmationArgs)
     }
 
     override fun toResult(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: TLauncherResult
     ): ConfirmationDefinition.Result {
@@ -54,7 +56,7 @@ internal class RecordingConfirmationDefinition<
             ToResultCall(
                 confirmationOption = confirmationOption,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
-                confirmationParameters = confirmationParameters,
+                confirmationArgs = confirmationArgs,
                 result = result
             )
         )
@@ -62,7 +64,7 @@ internal class RecordingConfirmationDefinition<
         return definition.toResult(
             confirmationOption = confirmationOption,
             deferredIntentConfirmationType = deferredIntentConfirmationType,
-            confirmationParameters = confirmationParameters,
+            confirmationArgs = confirmationArgs,
             result = result
         )
     }
@@ -84,20 +86,26 @@ internal class RecordingConfirmationDefinition<
         launcher: TLauncher,
         arguments: TLauncherArgs,
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ) {
-        launchCalls.add(LaunchCall(launcher, arguments, confirmationOption, confirmationParameters))
+        launchCalls.add(LaunchCall(launcher, arguments, confirmationOption, confirmationArgs))
 
-        definition.launch(launcher, arguments, confirmationOption, confirmationParameters)
+        definition.launch(launcher, arguments, confirmationOption, confirmationArgs)
     }
 
     override suspend fun action(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<TLauncherArgs> {
-        actionCalls.add(ActionCall(confirmationOption, confirmationParameters))
+        actionCalls.add(ActionCall(confirmationOption, confirmationArgs))
 
-        return definition.action(confirmationOption, confirmationParameters)
+        return definition.action(confirmationOption, confirmationArgs)
+    }
+
+    override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
+        bootstrapCalls.add(BootstrapCall(paymentMethodMetadata))
+
+        definition.bootstrap(paymentMethodMetadata)
     }
 
     class OptionCall(
@@ -106,12 +114,12 @@ internal class RecordingConfirmationDefinition<
 
     class CanConfirmCall(
         val option: ConfirmationHandler.Option,
-        val confirmationParameters: ConfirmationDefinition.Parameters,
+        val confirmationArgs: ConfirmationHandler.Args,
     )
 
     class ToResultCall<TConfirmationOption : ConfirmationHandler.Option, TLauncherResult>(
         val confirmationOption: TConfirmationOption,
-        val confirmationParameters: ConfirmationDefinition.Parameters,
+        val confirmationArgs: ConfirmationHandler.Args,
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         val result: TLauncherResult,
     )
@@ -129,12 +137,16 @@ internal class RecordingConfirmationDefinition<
         val launcher: TLauncher,
         val arguments: TLauncherArgs,
         val confirmationOption: TConfirmationOption,
-        val confirmationParameters: ConfirmationDefinition.Parameters,
+        val confirmationArgs: ConfirmationHandler.Args,
     )
 
     class ActionCall<TConfirmationOption : ConfirmationHandler.Option>(
         val confirmationOption: TConfirmationOption,
-        val confirmationParameters: ConfirmationDefinition.Parameters,
+        val confirmationArgs: ConfirmationHandler.Args,
+    )
+
+    class BootstrapCall(
+        val paymentMethodMetadata: PaymentMethodMetadata,
     )
 
     class Scenario<
@@ -151,6 +163,7 @@ internal class RecordingConfirmationDefinition<
         val unregisterCalls: ReceiveTurbine<UnregisterCall<TLauncher>>,
         val launchCalls: ReceiveTurbine<LaunchCall<TConfirmationOption, TLauncher, TLauncherArgs>>,
         val actionCalls: ReceiveTurbine<ActionCall<TConfirmationOption>>,
+        val bootstrapCalls: ReceiveTurbine<BootstrapCall>,
     )
 
     companion object {
@@ -175,6 +188,7 @@ internal class RecordingConfirmationDefinition<
                     unregisterCalls = recordingDefinition.unregisterCalls,
                     launchCalls = recordingDefinition.launchCalls,
                     actionCalls = recordingDefinition.actionCalls,
+                    bootstrapCalls = recordingDefinition.bootstrapCalls,
                 )
             )
 
@@ -185,6 +199,7 @@ internal class RecordingConfirmationDefinition<
             recordingDefinition.unregisterCalls.ensureAllEventsConsumed()
             recordingDefinition.launchCalls.ensureAllEventsConsumed()
             recordingDefinition.actionCalls.ensureAllEventsConsumed()
+            recordingDefinition.bootstrapCalls.ensureAllEventsConsumed()
         }
     }
 }

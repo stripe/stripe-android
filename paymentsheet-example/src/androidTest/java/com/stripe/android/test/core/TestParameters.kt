@@ -124,6 +124,13 @@ internal sealed interface AuthorizeAction {
         override val isConsideredDone: Boolean = true
     }
 
+    data object ShowQrCodeThenPoll : AuthorizeAction {
+        override fun text(isSetup: Boolean): String = "Show QR code then poll"
+
+        override val requiresBrowser: Boolean = false
+        override val isConsideredDone: Boolean = true
+    }
+
     data object DisplayQrCode : AuthorizeAction {
         override fun text(isSetup: Boolean): String = "Display QR code"
 

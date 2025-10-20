@@ -26,11 +26,13 @@ See the `stripecardscan-example` directory for an example application that you c
     }
     ```
 
-## Use TFLite in Google play to reduce binary size
+## Use TFLite in Google Play to reduce binary size and fix 16KB page size issues
 
-CardScan Android SDK uses a portable TFLite runtime to execute machine learning models, if your application is released through Google play, you could instead use the Google play runtime, this would reduce the SDK size by ~400kb.
+CardScan Android SDK uses a portable TFLite runtime to execute machine learning models. If your application is released through Google Play, you should use the Google Play runtime instead, which will:
+- Reduce the SDK size by ~400KB
+- **Fix 16KB page size compatibility issues** (required for devices with 16KB memory pages)
 
-To do so, configure your app's dependency on stripecardscan as follows.
+To do so, configure your app's dependency on stripecardscan as follows:
 ```
     implementation('com.stripe:stripecardscan:$stripeVersion') {
       exclude group: 'com.stripe', module: 'ml-core-cardscan' // exclude the cardscan-specific portable tflite runtime

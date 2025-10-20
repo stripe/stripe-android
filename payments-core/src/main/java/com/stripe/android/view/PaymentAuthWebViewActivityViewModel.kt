@@ -66,7 +66,7 @@ internal class PaymentAuthWebViewActivityViewModel(
                     flowOutcome = if (args.shouldCancelIntentOnUserNavigation) {
                         StripeIntentResult.Outcome.CANCELED
                     } else {
-                        StripeIntentResult.Outcome.SUCCEEDED
+                        StripeIntentResult.Outcome.UNKNOWN
                     },
                     canCancelSource = args.shouldCancelSource
                 ).toBundle()
