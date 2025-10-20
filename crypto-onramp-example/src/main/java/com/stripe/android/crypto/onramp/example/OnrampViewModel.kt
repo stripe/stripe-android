@@ -136,6 +136,7 @@ internal class OnrampViewModel(
                 if (response.success) {
                     _message.value = "Sign up successful!"
 
+                    // Also implement this for login
                     val hasLinkAccountResult = onrampCoordinator.hasLinkAccount(currentEmail)
 
                     when (hasLinkAccountResult) {
