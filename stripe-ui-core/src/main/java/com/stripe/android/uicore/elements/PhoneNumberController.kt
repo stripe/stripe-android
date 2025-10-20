@@ -34,11 +34,12 @@ class PhoneNumberController private constructor(
      */
     override val fieldValue: StateFlow<String> = _fieldValue.asStateFlow()
 
+    private val _validating = MutableStateFlow(false)
     private val _hasFocus = MutableStateFlow(false)
 
     private val countryConfig = CountryConfig(
         overrideCountryCodes,
-        tinyMode = true,
+        mode = DropdownConfig.Mode.Condensed,
         expandedLabelMapper = { country ->
             listOfNotNull(
                 CountryConfig.countryCodeToEmoji(country.code.value),
@@ -58,16 +59,23 @@ class PhoneNumberController private constructor(
         initiallySelectedCountryCode
     )
 
-    private val phoneNumberFormatter = countryDropdownController.selectedIndex.mapAsStateFlow {
+    internal val phoneNumberFormatter = countryDropdownController.selectedIndex.mapAsStateFlow {
         PhoneNumberFormatter.forCountry(
-            countryConfig.countries[it].code.value
+            countryConfig.countries[it ?: 0].code.value
         )
     }
 
     private val phoneNumberMinimumLength = countryDropdownController.selectedIndex.mapAsStateFlow {
         PhoneNumberFormatter.lengthForCountry(
-            countryConfig.countries[it].code.value
+            countryConfig.countries[it ?: 0].code.value
         )
+    }
+
+    private val fieldValueAndComplete = combineAsStateFlow(
+        fieldValue,
+        phoneNumberMinimumLength
+    ) { value, minLength ->
+        value to (value.length >= (minLength ?: 0) || acceptAnyInput)
     }
 
     /**
@@ -76,19 +84,20 @@ class PhoneNumberController private constructor(
     override val rawFieldValue = combineAsStateFlow(fieldValue, phoneNumberFormatter) { value, formatter ->
         formatter.toE164Format(value)
     }
-    override val isComplete = combineAsStateFlow(fieldValue, phoneNumberMinimumLength) { value, minLength ->
-        value.length >= (minLength ?: 0) || acceptAnyInput
-    }
+    override val isComplete = fieldValueAndComplete.mapAsStateFlow { (_, complete) -> complete }
     override val formFieldValue = combineAsStateFlow(rawFieldValue, isComplete) { rawFieldValue, isComplete ->
         FormFieldEntry(rawFieldValue, isComplete)
     }
 
     override val error: StateFlow<FieldError?> = combineAsStateFlow(
-        fieldValue,
-        isComplete,
-        _hasFocus
-    ) { value, complete, hasFocus ->
-        if (value.isNotBlank() && !complete && !hasFocus) {
+        fieldValueAndComplete,
+        _hasFocus,
+        _validating,
+    ) { (value, complete), hasFocus, validating ->
+        val canShowWhenValidating = validating && !complete
+        val canShowWhenNotValidating = value.isNotBlank() && !complete && !hasFocus
+
+        if (canShowWhenNotValidating || canShowWhenValidating) {
             FieldError(R.string.stripe_incomplete_phone_number)
         } else {
             null
@@ -123,6 +132,10 @@ class PhoneNumberController private constructor(
 
     fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
+    }
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        _validating.value = isValidating
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

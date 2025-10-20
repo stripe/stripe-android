@@ -5,6 +5,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.ui.core.elements.AddressSpec
+import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.FormItemSpec
@@ -14,7 +15,7 @@ import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec.PlaceholderField
 import com.stripe.android.ui.core.elements.SepaMandateTextSpec
-import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.AddressFieldsElement
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -31,6 +32,7 @@ internal object PlaceholderHelper {
         placeholderOverrideList: List<IdentifierSpec>,
         requiresMandate: Boolean,
         configuration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        termsDisplay: PaymentSheet.TermsDisplay,
     ): List<FormItemSpec> {
         val billingDetailsPlaceholders = mutableListOf(
             PlaceholderField.Name,
@@ -59,11 +61,20 @@ internal object PlaceholderHelper {
                 }
 
                 is PlaceholderSpec -> specForPlaceholderField(
-                    it.field,
-                    placeholderOverrideList,
-                    requiresMandate,
-                    configuration
+                    field = it.field,
+                    placeholderOverrideList = placeholderOverrideList,
+                    requiresMandate = requiresMandate,
+                    configuration = configuration,
+                    termsDisplay = termsDisplay,
                 )
+
+                is SepaMandateTextSpec -> it.takeUnless {
+                    termsDisplay == PaymentSheet.TermsDisplay.NEVER
+                }
+
+                is AuBecsDebitMandateTextSpec -> it.takeUnless {
+                    termsDisplay == PaymentSheet.TermsDisplay.NEVER
+                }
 
                 else -> it
             }
@@ -71,10 +82,11 @@ internal object PlaceholderHelper {
             // Add additional fields that don't have a placeholder, if necessary.
             billingDetailsPlaceholders.mapNotNull {
                 specForPlaceholderField(
-                    it,
-                    placeholderOverrideList,
-                    requiresMandate,
-                    configuration
+                    field = it,
+                    placeholderOverrideList = placeholderOverrideList,
+                    requiresMandate = requiresMandate,
+                    configuration = configuration,
+                    termsDisplay = termsDisplay,
                 )
             }
         )
@@ -120,6 +132,7 @@ internal object PlaceholderHelper {
         placeholderOverrideList: List<IdentifierSpec>,
         requiresMandate: Boolean,
         configuration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        termsDisplay: PaymentSheet.TermsDisplay,
     ) = when (field) {
         PlaceholderField.Name -> NameSpec().takeIf {
             configuration.name == CollectionMode.Always ||
@@ -145,7 +158,9 @@ internal object PlaceholderHelper {
                     )
         }
 
-        PlaceholderField.BillingAddress -> AddressSpec().takeIf {
+        PlaceholderField.BillingAddress -> AddressSpec(
+            allowedCountryCodes = configuration.allowedBillingCountries,
+        ).takeIf {
             configuration.address == AddressCollectionMode.Full ||
                 (
                     placeholderOverrideList.contains(it.apiPath) &&
@@ -154,7 +169,7 @@ internal object PlaceholderHelper {
         }
 
         PlaceholderField.BillingAddressWithoutCountry ->
-            AddressSpec(hideCountry = true).takeIf {
+            AddressSpec(allowedCountryCodes = configuration.allowedBillingCountries, hideCountry = true).takeIf {
                 configuration.address == AddressCollectionMode.Full ||
                     (
                         placeholderOverrideList.contains(it.apiPath) &&
@@ -163,7 +178,7 @@ internal object PlaceholderHelper {
             }
 
         PlaceholderField.SepaMandate -> SepaMandateTextSpec().takeIf {
-            requiresMandate
+            requiresMandate && termsDisplay != PaymentSheet.TermsDisplay.NEVER
         }
 
         else -> null
@@ -190,7 +205,7 @@ internal object PlaceholderHelper {
             countryElement = elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
-                .filterIsInstance<AddressElement>()
+                .filterIsInstance<AddressFieldsElement>()
                 .firstOrNull()
                 ?.countryElement
         }

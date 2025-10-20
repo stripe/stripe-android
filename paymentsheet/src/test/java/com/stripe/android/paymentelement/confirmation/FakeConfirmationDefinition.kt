@@ -29,7 +29,7 @@ internal abstract class FakeConfirmationDefinition<
     > {
     override suspend fun action(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<TLauncherArgs> {
         return action
     }
@@ -38,7 +38,7 @@ internal abstract class FakeConfirmationDefinition<
         launcher: TLauncher,
         arguments: TLauncherArgs,
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ) {
         // Do nothing
     }
@@ -52,7 +52,7 @@ internal abstract class FakeConfirmationDefinition<
 
     override fun toResult(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: TLauncherResult
     ): ConfirmationDefinition.Result {

@@ -77,7 +77,6 @@ class ChallengeActivity : AppCompatActivity() {
             challengeActionHandler,
             transactionTimer,
             errorReporter,
-            WORK_CONTEXT
         )
     }
 
@@ -108,7 +107,6 @@ class ChallengeActivity : AppCompatActivity() {
             challengeActionHandler = challengeActionHandler,
             intentData = viewArgs.intentData,
             initialUiType = viewArgs.cresData.uiType,
-            workContext = WORK_CONTEXT
         )
 
         super.onCreate(savedInstanceState)

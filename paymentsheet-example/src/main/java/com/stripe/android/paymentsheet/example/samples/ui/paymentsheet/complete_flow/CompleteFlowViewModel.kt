@@ -110,6 +110,6 @@ internal class CompleteFlowViewModel(
     }
 
     private companion object {
-        const val backendUrl = "https://stripe-mobile-payment-sheet.glitch.me"
+        const val backendUrl = "https://stripe-mobile-payment-sheet.stripedemos.com"
     }
 }

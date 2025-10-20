@@ -13,4 +13,7 @@ internal data class CustomerSheetSession(
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val permissions: CustomerPermissions,
     val defaultPaymentMethodId: String?,
+    val customerId: String,
+    val customerEphemeralKeySecret: String,
+    val customerSessionClientSecret: String?,
 )

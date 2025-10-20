@@ -23,7 +23,7 @@ data class PaymentMethodCreateParams
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     internal val code: PaymentMethodCode,
-    internal val requiresMandate: Boolean,
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val requiresMandate: Boolean,
     val card: Card? = null,
     private val ideal: Ideal? = null,
     private val fpx: Fpx? = null,
@@ -37,10 +37,13 @@ constructor(
     private val link: Link? = null,
     private val cashAppPay: CashAppPay? = null,
     private val swish: Swish? = null,
+    private val shopPay: ShopPay? = null,
     val billingDetails: PaymentMethod.BillingDetails? = null,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+    private val radarOptions: RadarOptions? = null,
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val clientAttributionMetadata: ClientAttributionMetadata? = null,
 
     /**
      * If provided, will be used as the representation of this object when calling the Stripe API,
@@ -70,10 +73,13 @@ constructor(
         link: Link? = null,
         cashAppPay: CashAppPay? = null,
         swish: Swish? = null,
+        shopPay: ShopPay? = null,
         billingDetails: PaymentMethod.BillingDetails? = null,
         allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        radarOptions: RadarOptions? = null,
         metadata: Map<String, String>? = null,
         productUsage: Set<String> = emptySet(),
+        clientAttributionMetadata: ClientAttributionMetadata? = null,
         overrideParamMap: Map<String, @RawValue Any>? = null
     ) : this(
         type.code,
@@ -91,10 +97,13 @@ constructor(
         link,
         cashAppPay,
         swish,
+        shopPay,
         billingDetails,
         allowRedisplay,
+        radarOptions,
         metadata,
         productUsage,
+        clientAttributionMetadata,
         overrideParamMap
     )
 
@@ -115,13 +124,15 @@ constructor(
         card: Card,
         allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails?,
-        metadata: Map<String, String>?
+        metadata: Map<String, String>?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ) : this(
         type = PaymentMethod.Type.Card,
         card = card,
         allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
-        metadata = metadata
+        metadata = metadata,
+        clientAttributionMetadata = clientAttributionMetadata,
     )
 
     private constructor(
@@ -232,13 +243,15 @@ constructor(
         usBankAccount: USBankAccount,
         allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails?,
-        metadata: Map<String, String>?
+        metadata: Map<String, String>?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ) : this(
         type = PaymentMethod.Type.USBankAccount,
         usBankAccount = usBankAccount,
         allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
-        metadata = metadata
+        metadata = metadata,
+        clientAttributionMetadata = clientAttributionMetadata,
     )
 
     private constructor(
@@ -267,6 +280,17 @@ constructor(
         metadata = metadata,
     )
 
+    private constructor(
+        shopPay: ShopPay,
+        billingDetails: PaymentMethod.BillingDetails?,
+        metadata: Map<String, String>?,
+    ) : this(
+        type = PaymentMethod.Type.ShopPay,
+        shopPay = shopPay,
+        billingDetails = billingDetails,
+        metadata = metadata,
+    )
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun requiresMandate(): Boolean {
         return requiresMandate
@@ -290,6 +314,14 @@ constructor(
             allowRedisplay?.let {
                 mapOf(PARAM_ALLOW_REDISPLAY to allowRedisplay.value)
             }.orEmpty()
+        ).plus(
+            radarOptions?.let {
+                mapOf(PARAM_RADAR_OPTIONS to it.toParamMap())
+            }.orEmpty()
+        ).plus(
+            clientAttributionMetadata?.let {
+                mapOf(PARAM_CLIENT_ATTRIBUTION_METADATA to it.toParamMap())
+            }.orEmpty()
         )
     }
 
@@ -307,6 +339,7 @@ constructor(
                 PaymentMethod.Type.Netbanking.code -> netbanking?.toParamMap()
                 PaymentMethod.Type.USBankAccount.code -> usBankAccount?.toParamMap()
                 PaymentMethod.Type.Link.code -> link?.toParamMap()
+                PaymentMethod.Type.ShopPay.code -> shopPay?.toParamMap()
                 else -> null
             }.takeUnless { it.isNullOrEmpty() }?.let {
                 mapOf(code to it)
@@ -692,11 +725,29 @@ constructor(
         }
     }
 
+    @Parcelize
+    data class ShopPay(
+        internal var externalSourceId: String
+    ) : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> {
+            return mapOf(
+                PARAM_EXTERNAL_SOURCE_ID to externalSourceId
+            )
+        }
+
+        private companion object {
+            private const val PARAM_EXTERNAL_SOURCE_ID = "external_source_id"
+        }
+    }
+
+    @Suppress("LargeClass")
     companion object {
         private const val PARAM_TYPE = "type"
         private const val PARAM_BILLING_DETAILS = "billing_details"
         private const val PARAM_ALLOW_REDISPLAY = "allow_redisplay"
         private const val PARAM_METADATA = "metadata"
+        private const val PARAM_RADAR_OPTIONS = "radar_options"
+        private const val PARAM_CLIENT_ATTRIBUTION_METADATA = "client_attribution_metadata"
 
         /**
          * @return params for creating a [PaymentMethod.Type.Card] payment method
@@ -738,7 +789,13 @@ constructor(
             metadata: Map<String, String>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(card, allowRedisplay, billingDetails, metadata)
+            return PaymentMethodCreateParams(
+                card,
+                allowRedisplay,
+                billingDetails,
+                metadata,
+                clientAttributionMetadata = null,
+            )
         }
 
         /**
@@ -844,7 +901,30 @@ constructor(
             metadata: Map<String, String>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(usBankAccount, allowRedisplay, billingDetails, metadata)
+            return PaymentMethodCreateParams(
+                usBankAccount = usBankAccount,
+                allowRedisplay = allowRedisplay,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                clientAttributionMetadata = null,
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun create(
+            usBankAccount: USBankAccount,
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+            clientAttributionMetadata: ClientAttributionMetadata? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                usBankAccount = usBankAccount,
+                allowRedisplay = allowRedisplay,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                clientAttributionMetadata = clientAttributionMetadata,
+            )
         }
 
         /**
@@ -1013,22 +1093,38 @@ constructor(
          */
         @Throws(JSONException::class)
         @JvmStatic
-        fun createFromGooglePay(googlePayPaymentData: JSONObject): PaymentMethodCreateParams {
+        fun createFromGooglePay(
+            googlePayPaymentData: JSONObject
+        ): PaymentMethodCreateParams {
+            return createFromGooglePay(
+                googlePayPaymentData = googlePayPaymentData,
+                clientAttributionMetadata = null,
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun createFromGooglePay(
+            googlePayPaymentData: JSONObject,
+            clientAttributionMetadata: ClientAttributionMetadata?,
+        ): PaymentMethodCreateParams {
             val googlePayResult = GooglePayResult.fromJson(googlePayPaymentData)
             val token = googlePayResult.token
             val tokenId = token?.id.orEmpty()
 
-            return create(
-                Card(
+            return PaymentMethodCreateParams(
+                card = Card(
                     token = tokenId,
                     attribution = setOfNotNull(token?.card?.tokenizationMethod?.toString())
                 ),
-                PaymentMethod.BillingDetails(
+                billingDetails = PaymentMethod.BillingDetails(
                     address = googlePayResult.address,
                     name = googlePayResult.name,
                     email = googlePayResult.email,
                     phone = googlePayResult.phoneNumber
-                )
+                ),
+                allowRedisplay = null,
+                metadata = null,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 
@@ -1307,6 +1403,7 @@ constructor(
         fun createLink(
             paymentDetailsId: String,
             consumerSessionClientSecret: String,
+            billingDetails: PaymentMethod.BillingDetails? = null,
             extraParams: Map<String, @RawValue Any>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
@@ -1318,6 +1415,7 @@ constructor(
                     extraParams = extraParams
                 ),
                 allowRedisplay = allowRedisplay,
+                billingDetails = billingDetails,
             )
         }
 
@@ -1326,6 +1424,7 @@ constructor(
             requiresMandate: Boolean,
             productUsage: Set<String>,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+            clientAttributionMetadata: ClientAttributionMetadata,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 code = PaymentMethod.Type.Link.code,
@@ -1333,6 +1432,19 @@ constructor(
                 overrideParamMap = emptyMap(),
                 allowRedisplay = allowRedisplay,
                 productUsage = productUsage,
+                clientAttributionMetadata = clientAttributionMetadata,
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+        fun createShopPay(
+            externalSourceId: String,
+            billingDetails: PaymentMethod.BillingDetails? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.ShopPay,
+                shopPay = ShopPay(externalSourceId),
+                billingDetails = billingDetails,
             )
         }
 
@@ -1344,6 +1456,7 @@ constructor(
             overrideParamMap: Map<String, @RawValue Any>?,
             productUsage: Set<String>,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+            clientAttributionMetadata: ClientAttributionMetadata,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 code = code,
@@ -1351,7 +1464,8 @@ constructor(
                 requiresMandate = requiresMandate,
                 allowRedisplay = allowRedisplay,
                 overrideParamMap = overrideParamMap,
-                productUsage = productUsage
+                productUsage = productUsage,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 

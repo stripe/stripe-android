@@ -1,12 +1,17 @@
 package com.stripe.android.customersheet.state
 
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.coroutines.Single
+import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.FakeCustomerAdapter
+import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerAdapterDataSource
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
 import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
@@ -17,6 +22,7 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
@@ -28,19 +34,23 @@ import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSd
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
+import com.stripe.android.ui.core.cardscan.CardScanEvent
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.CompletableSingle
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.mock
@@ -49,11 +59,15 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("LargeClass")
-class DefaultCustomerSheetLoaderTest {
+internal class DefaultCustomerSheetLoaderTest {
+    private val dispatcher = StandardTestDispatcher()
     private val lpmRepository = LpmRepository()
 
     private val readyGooglePayRepository = mock<GooglePayRepository>()
     private val unreadyGooglePayRepository = mock<GooglePayRepository>()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(dispatcher)
 
     @Before
     fun setup() {
@@ -95,13 +109,13 @@ class DefaultCustomerSheetLoaderTest {
         assertThat(state.config).isEqualTo(config)
         assertThat(state.paymentMethodMetadata.stripeIntent).isEqualTo(STRIPE_INTENT)
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
-        assertThat(state.paymentMethodMetadata.customerMetadata?.hasCustomerConfiguration).isTrue()
+        assertThat(state.paymentMethodMetadata.customerMetadata).isNotNull()
         assertThat(state.paymentMethodMetadata.isGooglePayReady).isTrue()
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             PaymentMethodFixtures.US_BANK_ACCOUNT,
         )
-        assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
+        assertThat(state.customerPermissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
         assertThat(state.customerPermissions.canRemoveLastPaymentMethod).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.paymentSelection).isEqualTo(
@@ -135,7 +149,7 @@ class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
         ).inOrder()
-        assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
+        assertThat(state.customerPermissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
         assertThat(state.customerPermissions.canRemoveLastPaymentMethod).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.paymentSelection).isEqualTo(
@@ -170,7 +184,7 @@ class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
         ).inOrder()
-        assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
+        assertThat(state.customerPermissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
         assertThat(state.customerPermissions.canRemoveLastPaymentMethod).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.paymentSelection).isNull()
@@ -411,6 +425,7 @@ class DefaultCustomerSheetLoaderTest {
             initializationDataSourceProvider = initDataSource,
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = { false },
+            eventReporter = FakeCustomerSheetEventReporter(),
             errorReporter = FakeErrorReporter(),
             workContext = coroutineContext,
         )
@@ -450,6 +465,7 @@ class DefaultCustomerSheetLoaderTest {
             googlePayRepositoryFactory = { readyGooglePayRepository },
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = { false },
+            eventReporter = FakeCustomerSheetEventReporter(),
             errorReporter = FakeErrorReporter(),
             workContext = coroutineContext,
         )
@@ -514,6 +530,105 @@ class DefaultCustomerSheetLoaderTest {
         )
     }
 
+    @Test
+    fun `test load success fires success event`() = runTest {
+        val eventReporter = FakeCustomerSheetEventReporter()
+
+        val loader = createCustomerSheetLoader(eventReporter = eventReporter)
+
+        val result = loader.load(
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                googlePayEnabled = true
+            )
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(eventReporter.onLoadSucceededCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `test load failure fires failure event`() = runTest {
+        val eventReporter = FakeCustomerSheetEventReporter()
+
+        val loader = createCustomerSheetLoader(
+            eventReporter = eventReporter,
+            initializationDataSource = FakeCustomerSheetInitializationDataSource(
+                onLoadCustomerSheetSession = {
+                    CustomerSheetDataResult.failure(
+                        cause = Throwable("oops"),
+                        displayMessage = null
+                    )
+                }
+            )
+        )
+
+        val result = loader.load(
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                googlePayEnabled = true
+            )
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(eventReporter.onLoadFailedCalls.awaitItem().message).isEqualTo("oops")
+    }
+
+    @Test
+    fun `Retains all payment method when 'allowedCountries' is empty`() = runTest {
+        val paymentMethods = createCardsWithDifferentBillingDetails()
+
+        val loader = createCustomerSheetLoader(
+            paymentMethods = paymentMethods,
+        )
+
+        val result = loader.load(
+            configuration = CustomerSheet.Configuration.builder(
+                merchantDisplayName = "Merchant, Inc."
+            )
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        allowedCountries = emptySet(),
+                    ),
+                )
+                .build(),
+        )
+
+        val customerPaymentMethods = result.getOrNull()?.customerPaymentMethods
+
+        assertThat(customerPaymentMethods).isNotNull()
+        assertThat(customerPaymentMethods).containsExactlyElementsIn(paymentMethods)
+    }
+
+    @Test
+    fun `Filters out countries not in 'allowedCountries' array`() = runTest {
+        val paymentMethods = createCardsWithDifferentBillingDetails()
+
+        val loader = createCustomerSheetLoader(
+            paymentMethods = paymentMethods,
+        )
+
+        val result = loader.load(
+            configuration = CustomerSheet.Configuration.builder(
+                merchantDisplayName = "Merchant, Inc."
+            )
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        allowedCountries = setOf("CA", "mx"),
+                    ),
+                )
+                .build(),
+        )
+
+        val customerPaymentMethods = result.getOrNull()?.customerPaymentMethods
+
+        assertThat(customerPaymentMethods).isNotNull()
+        assertThat(customerPaymentMethods).containsExactly(
+            paymentMethods[1],
+            paymentMethods[4],
+        )
+    }
+
     private fun createCustomerSheetLoader(
         isGooglePayReady: Boolean = true,
         isLiveModeProvider: () -> Boolean = { false },
@@ -538,17 +653,21 @@ class DefaultCustomerSheetLoaderTest {
                         savedSelection = savedSelection,
                         paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                         permissions = CustomerPermissions(
-                            canRemovePaymentMethods = true,
+                            removePaymentMethod = PaymentMethodRemovePermission.Full,
                             canRemoveLastPaymentMethod = true,
                             canUpdateFullPaymentMethodDetails = true,
                         ),
                         defaultPaymentMethodId = defaultPaymentMethodId,
+                        customerId = "unused_for_customer_adapter_data_source",
+                        customerEphemeralKeySecret = "unused_for_customer_adapter_data_source",
+                        customerSessionClientSecret = null,
                     )
                 )
             }
         ),
         lpmRepository: LpmRepository = this.lpmRepository,
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        eventReporter: CustomerSheetEventReporter = FakeCustomerSheetEventReporter(),
     ): CustomerSheetLoader {
         return createCustomerSheetLoader(
             initializationDataSourceProvider = CompletableSingle(initializationDataSource),
@@ -557,6 +676,7 @@ class DefaultCustomerSheetLoaderTest {
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             lpmRepository = lpmRepository,
             errorReporter = errorReporter,
+            eventReporter = eventReporter,
         )
     }
 
@@ -581,8 +701,10 @@ class DefaultCustomerSheetLoaderTest {
                     components = ElementsSession.Customer.Components(
                         mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
-                            isPaymentMethodRemoveEnabled = false,
-                            canRemoveLastPaymentMethod = true,
+                            paymentMethodRemove =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
+                            paymentMethodRemoveLast =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
                             isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
                         ),
                     )
@@ -596,7 +718,10 @@ class DefaultCustomerSheetLoaderTest {
             flags = emptyMap(),
             elementsSessionId = "session_1234",
             orderedPaymentMethodTypesAndWallets = intent.paymentMethodTypes,
-            experimentsData = null
+            experimentsData = null,
+            passiveCaptcha = null,
+            merchantLogoUrl = null,
+            elementsSessionConfigId = null,
         )
     }
 
@@ -608,6 +733,7 @@ class DefaultCustomerSheetLoaderTest {
             IsFinancialConnectionsSdkAvailable { false },
         lpmRepository: LpmRepository = this.lpmRepository,
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        eventReporter: CustomerSheetEventReporter = FakeCustomerSheetEventReporter(),
         workContext: CoroutineContext = UnconfinedTestDispatcher()
     ): CustomerSheetLoader {
         return DefaultCustomerSheetLoader(
@@ -618,10 +744,50 @@ class DefaultCustomerSheetLoaderTest {
             initializationDataSourceProvider = initializationDataSourceProvider,
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
+            eventReporter = eventReporter,
             errorReporter = errorReporter,
             workContext = workContext,
         )
     }
+
+    private fun createCardsWithDifferentBillingDetails(): List<PaymentMethod> = listOf(
+        PaymentMethodFactory.card(
+            last4 = "4242",
+            billingDetails = null,
+        ),
+        PaymentMethodFactory.card(
+            last4 = "4444",
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    country = "CA",
+                )
+            )
+        ),
+        PaymentMethodFactory.card(
+            last4 = "4444",
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    country = "US",
+                )
+            )
+        ),
+        PaymentMethodFactory.card(
+            last4 = "4444",
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    country = "US",
+                )
+            )
+        ),
+        PaymentMethodFactory.card(
+            last4 = "4444",
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    country = "MX",
+                )
+            )
+        ),
+    )
 
     private fun createCardBrandChoice(isCbcEligible: Boolean?): ElementsSession.CardBrandChoice? {
         return isCbcEligible?.let {
@@ -637,4 +803,79 @@ class DefaultCustomerSheetLoaderTest {
             paymentMethodTypes = listOf("card", "us_bank_account")
         )
     }
+}
+
+private class FakeCustomerSheetEventReporter : CustomerSheetEventReporter {
+    val onLoadSucceededCalls = Turbine<CustomerSheetSession>()
+    val onLoadFailedCalls = Turbine<Throwable>()
+
+    override fun onInit(
+        configuration: CustomerSheet.Configuration,
+        integrationType: CustomerSheetIntegration.Type,
+    ) = Unit
+
+    override fun onLoadSucceeded(customerSheetSession: CustomerSheetSession) {
+        onLoadSucceededCalls.add(customerSheetSession)
+    }
+
+    override fun onLoadFailed(error: Throwable) {
+        onLoadFailedCalls.add(error)
+    }
+
+    override fun onScreenPresented(screen: CustomerSheetEventReporter.Screen) = Unit
+
+    override fun onScreenHidden(screen: CustomerSheetEventReporter.Screen) = Unit
+
+    override fun onPaymentMethodSelected(code: String) = Unit
+
+    override fun onConfirmPaymentMethodSucceeded(
+        type: String,
+        syncDefaultEnabled: Boolean?,
+    ) = Unit
+
+    override fun onConfirmPaymentMethodFailed(
+        type: String,
+        syncDefaultEnabled: Boolean?,
+    ) = Unit
+
+    override fun onEditTapped() = Unit
+
+    override fun onEditCompleted() = Unit
+
+    override fun onRemovePaymentMethodSucceeded() = Unit
+
+    override fun onRemovePaymentMethodFailed() = Unit
+
+    override fun onAttachPaymentMethodSucceeded(style: CustomerSheetEventReporter.AddPaymentMethodStyle) = Unit
+
+    override fun onAttachPaymentMethodCanceled(style: CustomerSheetEventReporter.AddPaymentMethodStyle) = Unit
+
+    override fun onAttachPaymentMethodFailed(style: CustomerSheetEventReporter.AddPaymentMethodStyle) = Unit
+
+    override fun onShowPaymentOptionBrands(
+        source: CustomerSheetEventReporter.CardBrandChoiceEventSource,
+        selectedBrand: CardBrand,
+    ) = Unit
+
+    override fun onHidePaymentOptionBrands(
+        source: CustomerSheetEventReporter.CardBrandChoiceEventSource,
+        selectedBrand: CardBrand?,
+    ) = Unit
+
+    override fun onBrandChoiceSelected(
+        source: CustomerSheetEventReporter.CardBrandChoiceEventSource,
+        selectedBrand: CardBrand,
+    ) = Unit
+
+    override fun onUpdatePaymentMethodSucceeded(selectedBrand: CardBrand?) = Unit
+
+    override fun onUpdatePaymentMethodFailed(selectedBrand: CardBrand?, error: Throwable) = Unit
+
+    override fun onCardNumberCompleted() = Unit
+
+    override fun onDisallowedCardBrandEntered(brand: CardBrand) = Unit
+
+    override fun onAnalyticsEvent(event: AnalyticsEvent) = Unit
+
+    override fun onCardScanEvent(event: CardScanEvent) = Unit
 }

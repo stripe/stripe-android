@@ -5,9 +5,13 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.verification.NoOpLinkInlineInteractor
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
@@ -49,7 +53,7 @@ internal interface EmbeddedContentHelper {
 
     fun dataLoaded(
         paymentMethodMetadata: PaymentMethodMetadata,
-        rowStyle: Embedded.RowStyle,
+        appearance: Embedded,
         embeddedViewDisplaysMandateText: Boolean,
     )
 
@@ -60,6 +64,7 @@ internal interface EmbeddedContentHelper {
     fun clearSheetLauncher()
 }
 
+@OptIn(ExperimentalAnalyticEventCallbackApi::class)
 @Singleton
 internal class DefaultEmbeddedContentHelper @Inject constructor(
     @ViewModelScope private val coroutineScope: CoroutineScope,
@@ -73,11 +78,14 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val embeddedLinkHelper: EmbeddedLinkHelper,
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
+    private val analyticsCallbackProvider: Provider<AnalyticEventCallback?>,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
     private val customerStateHolder: CustomerStateHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
     private val confirmationHandler: ConfirmationHandler,
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
+    private val linkPaymentLauncher: LinkPaymentLauncher,
+    private val linkAccountHolder: LinkAccountHolder
 ) : EmbeddedContentHelper {
 
     private val state: StateFlow<State?> = savedStateHandle.getStateFlow(
@@ -99,15 +107,18 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                 _embeddedContent.value = if (state == null) {
                     null
                 } else {
+                    val isImmediateAction = internalRowSelectionCallback.get() != null
                     EmbeddedContent(
                         interactor = createInteractor(
                             coroutineScope = coroutineScope,
                             paymentMethodMetadata = state.paymentMethodMetadata,
                             walletsState = embeddedWalletsHelper.walletsState(state.paymentMethodMetadata),
+                            isImmediateAction = isImmediateAction,
+                            embeddedViewDisplaysMandateText = state.embeddedViewDisplaysMandateText,
                         ),
                         embeddedViewDisplaysMandateText = state.embeddedViewDisplaysMandateText,
-                        rowStyle = state.rowStyle,
-                        isImmediateAction = internalRowSelectionCallback.get() != null
+                        appearance = state.appearance,
+                        isImmediateAction = isImmediateAction,
                     )
                 }
             }
@@ -130,13 +141,13 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
 
     override fun dataLoaded(
         paymentMethodMetadata: PaymentMethodMetadata,
-        rowStyle: Embedded.RowStyle,
+        appearance: Embedded,
         embeddedViewDisplaysMandateText: Boolean,
     ) {
         eventReporter.onShowNewPaymentOptions()
         savedStateHandle[STATE_KEY_EMBEDDED_CONTENT] = State(
             paymentMethodMetadata = paymentMethodMetadata,
-            rowStyle = rowStyle,
+            appearance = appearance,
             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
         )
     }
@@ -162,7 +173,10 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             confirmationHandler = confirmationHandler,
             coroutineScope = coroutineScope,
             errorReporter = errorReporter,
-            linkInlineInteractor = NoOpLinkInlineInteractor()
+            linkPaymentLauncher = linkPaymentLauncher,
+            linkAccountHolder = linkAccountHolder,
+            linkInlineInteractor = NoOpLinkInlineInteractor(),
+            analyticsCallbackProvider = analyticsCallbackProvider,
         )
     }
 
@@ -170,6 +184,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         coroutineScope: CoroutineScope,
         paymentMethodMetadata: PaymentMethodMetadata,
         walletsState: StateFlow<WalletsState?>,
+        isImmediateAction: Boolean,
+        embeddedViewDisplaysMandateText: Boolean,
     ): PaymentMethodVerticalLayoutInteractor {
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
             incentive = paymentMethodMetadata.paymentMethodIncentive,
@@ -228,11 +244,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
             canRemove = customerStateHolder.canRemove,
             canUpdateFullPaymentMethodDetails = customerStateHolder.canUpdateFullPaymentMethodDetails,
-            onSelectSavedPaymentMethod = ::setSelection,
             walletsState = walletsState,
-            canShowWalletsInline = true,
-            canShowWalletButtons = false,
-            updateSelection = { updatedSelection ->
+            updateSelection = { updatedSelection, requiresConfirmation ->
                 setSelection(updatedSelection)
             },
             isCurrentScreen = stateFlowOf(true),
@@ -250,7 +263,15 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     true
                 }
             },
-            invokeRowSelectionCallback = ::invokeRowSelectionCallback
+            invokeRowSelectionCallback = ::invokeRowSelectionCallback,
+            displaysMandatesInFormScreen = isImmediateAction && embeddedViewDisplaysMandateText,
+            onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
+                eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+                    visiblePaymentMethods = visiblePaymentMethods,
+                    hiddenPaymentMethods = hiddenPaymentMethods,
+                    walletsState = walletsState.value,
+                )
+            },
         )
     }
 
@@ -294,7 +315,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     @Parcelize
     class State(
         val paymentMethodMetadata: PaymentMethodMetadata,
-        val rowStyle: Embedded.RowStyle,
+        val appearance: Embedded,
         val embeddedViewDisplaysMandateText: Boolean,
     ) : Parcelable
 

@@ -57,7 +57,7 @@ fun CheckoutScreen() {
     val embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)
 
     LaunchedEffect(embeddedPaymentElement) {
-        embeddedPaymentElement.configure(
+        val configureResult = embeddedPaymentElement.configure(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 1099,
@@ -67,6 +67,9 @@ fun CheckoutScreen() {
             ),
             configuration = EmbeddedPaymentElement.Configuration.Builder("Powdur").build()
         )
+        if (configureResult is EmbeddedPaymentElement.ConfigureResult.Failed) {
+            Toast.makeText(context, configureResult.error.message, Toast.LENGTH_LONG).show()
+        }
     }
 
     val scrollState = rememberScrollState()
@@ -96,7 +99,7 @@ private suspend fun checkout(context: Context): CreateIntentResult {
     )
     val requestBody = Json.encodeToString(ExampleCheckoutRequest.serializer(), request)
     val apiResult = Fuel
-        .post("https://stripe-mobile-payment-sheet.glitch.me/checkout")
+        .post("https://stripe-mobile-payment-sheet.stripedemos.com/checkout")
         .jsonBody(requestBody)
         .suspendable()
         .awaitModel(ExampleCheckoutResponse.serializer())

@@ -5,11 +5,19 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.EmptyFormElement
+import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.AutocompleteAddressElement
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionElement
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -126,9 +134,90 @@ class FormElementsBuilderTest {
         assertThat(formElements[0].identifier.v1).isEqualTo("element")
     }
 
+    @Test
+    fun `build should return AutocompleteAddressElement if factory is provided`() = runTest {
+        val arguments = arguments(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            ),
+            autocompleteAddressInteractorFactory = {
+                TestAutocompleteAddressInteractor.noOp()
+            }
+        )
+
+        val formElements = FormElementsBuilder(arguments).build()
+
+        assertThat(formElements).hasSize(1)
+        assertThat(formElements.firstOrNull()).isInstanceOf<SectionElement>()
+
+        val sectionElement = formElements.first() as SectionElement
+
+        assertThat(sectionElement.fields.size).isEqualTo(1)
+        assertThat(sectionElement.fields.firstOrNull()).isInstanceOf<AutocompleteAddressElement>()
+    }
+
+    @Test
+    fun `build contains all supported billing countries when allowed countries is empty`() {
+        val arguments = arguments(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                allowedCountries = emptySet()
+            )
+        )
+        val formElements = FormElementsBuilder(arguments).build()
+
+        assertThat(formElements).hasSize(1)
+        assertThat(formElements.firstOrNull()).isInstanceOf<SectionElement>()
+
+        val sectionElement = formElements.first() as SectionElement
+        val sectionFields = sectionElement.fields
+
+        assertThat(sectionFields.size).isEqualTo(1)
+        assertThat(sectionFields.firstOrNull()).isInstanceOf<AddressElement>()
+
+        val addressElement = sectionFields.first() as AddressElement
+
+        assertThat(addressElement.countryElement.controller.displayItems)
+            .hasSize(CountryUtils.supportedBillingCountries.size)
+    }
+
+    @Test
+    fun `build contains only countries provided through billing configuration`() {
+        val arguments = arguments(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                allowedCountries = setOf("US", "CA")
+            )
+        )
+        val formElements = FormElementsBuilder(arguments).build()
+
+        assertThat(formElements).hasSize(1)
+        assertThat(formElements.firstOrNull()).isInstanceOf<SectionElement>()
+
+        val sectionElement = formElements.first() as SectionElement
+        val sectionFields = sectionElement.fields
+
+        assertThat(sectionFields.size).isEqualTo(1)
+        assertThat(sectionFields.firstOrNull()).isInstanceOf<AddressElement>()
+
+        val addressElement = sectionFields.first() as AddressElement
+
+        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
+            "\uD83C\uDDFA\uD83C\uDDF8 United States",
+            "\uD83C\uDDE8\uD83C\uDDE6 Canada"
+        )
+    }
+
     private fun arguments(
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
+        autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
     ): UiDefinitionFactory.Arguments {
         val context = ApplicationProvider.getApplicationContext<Application>()
         return UiDefinitionFactory.Arguments(
@@ -145,6 +234,8 @@ class FormElementsBuilderTest {
             onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
             cardBrandFilter = DefaultCardBrandFilter,
             setAsDefaultMatchesSaveForFutureUse = false,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            linkInlineHandler = null,
         )
     }
 }

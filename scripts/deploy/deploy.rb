@@ -7,6 +7,7 @@ require_relative 'common'
 require_relative 'create_github_release'
 require_relative 'permissions_check'
 require_relative 'publish_to_sonatype'
+require_relative 'translations'
 require_relative 'update_dokka'
 require_relative 'update_pay_server_docs'
 require_relative 'update_version_numbers'
@@ -66,6 +67,7 @@ end.parse!
 steps = [
     # Prep for making changes
     method(:check_permissions),
+    method(:validate_translations_merged),
     method(:validate_version_number),
     method(:ensure_clean_repo),
     method(:pull_latest),

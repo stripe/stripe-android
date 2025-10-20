@@ -2,10 +2,13 @@ package com.stripe.android.paymentsheet.ui
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -64,6 +67,34 @@ internal class BillingDetailsFormTest {
         }
     }
 
+    @Test
+    fun testAllBillingCountriesUsed() = runScenario(
+        allowedCountries = emptySet()
+    ) {
+        assertThat(addressSectionElement.fields.size).isEqualTo(1)
+        assertThat(addressSectionElement.fields.firstOrNull()).isInstanceOf<CardBillingAddressElement>()
+
+        val cardBillingAddressElement = addressSectionElement.fields[0] as CardBillingAddressElement
+
+        assertThat(cardBillingAddressElement.countryElement.controller.displayItems)
+            .hasSize(CountryUtils.supportedBillingCountries.size)
+    }
+
+    @Test
+    fun testLimitedBillingCountriesUsed() = runScenario(
+        allowedCountries = setOf("US", "CA")
+    ) {
+        assertThat(addressSectionElement.fields.size).isEqualTo(1)
+        assertThat(addressSectionElement.fields.firstOrNull()).isInstanceOf<CardBillingAddressElement>()
+
+        val cardBillingAddressElement = addressSectionElement.fields[0] as CardBillingAddressElement
+
+        assertThat(cardBillingAddressElement.countryElement.controller.displayItems).containsExactly(
+            "\uD83C\uDDFA\uD83C\uDDF8 United States",
+            "\uD83C\uDDE8\uD83C\uDDE6 Canada"
+        )
+    }
+
     private fun FormFieldEntry?.isEqualTo(other: Any?) {
         assertThat(this?.value?.takeIf { it.isNotBlank() }).isEqualTo(other)
     }
@@ -75,11 +106,16 @@ internal class BillingDetailsFormTest {
     private fun runScenario(
         billingDetails: PaymentMethod.BillingDetails? = PaymentMethodFixtures.BILLING_DETAILS,
         addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Full,
+        allowedCountries: Set<String> = emptySet(),
         block: suspend BillingDetailsForm.() -> Unit
     ) = runTest(testDispatcher) {
         val form = BillingDetailsForm(
             billingDetails = billingDetails,
-            addressCollectionMode = addressCollectionMode
+            addressCollectionMode = addressCollectionMode,
+            nameCollection = NameCollection.Disabled,
+            collectEmail = false,
+            collectPhone = false,
+            allowedBillingCountries = allowedCountries,
         )
         block(form)
     }

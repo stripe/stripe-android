@@ -32,8 +32,9 @@ internal class PollingActivity : AppCompatActivity() {
             clientSecret = args.clientSecret,
             timeLimit = args.timeLimitInSeconds.seconds,
             initialDelay = args.initialDelayInSeconds.seconds,
-            maxAttempts = args.maxAttempts,
             ctaText = args.ctaText,
+            stripeAccountId = args.stripeAccountId,
+            qrCodeUrl = args.qrCodeUrl,
         )
     }
 
@@ -79,7 +80,16 @@ internal class PollingActivity : AppCompatActivity() {
                     state = state,
                     onDismissed = { /* Not applicable here */ },
                 ) {
-                    PollingScreen(viewModel)
+                    val qrCodeUrl = args.qrCodeUrl
+                    if (uiState.shouldShowQrCode && qrCodeUrl != null) {
+                        QrCodeWebView(
+                            url = qrCodeUrl,
+                            clientSecret = args.clientSecret,
+                            onClose = viewModel::hideQrCode,
+                        )
+                    } else {
+                        PollingScreen(viewModel)
+                    }
                 }
             }
         }

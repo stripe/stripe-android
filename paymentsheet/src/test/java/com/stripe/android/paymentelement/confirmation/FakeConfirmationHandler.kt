@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.Turbine
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import kotlinx.coroutines.flow.MutableStateFlow
 
 internal class FakeConfirmationHandler(
@@ -12,17 +13,19 @@ internal class FakeConfirmationHandler(
     val registerTurbine: Turbine<RegisterCall> = Turbine()
     val startTurbine: Turbine<ConfirmationHandler.Args> = Turbine()
     val awaitResultTurbine: Turbine<ConfirmationHandler.Result?> = Turbine(null)
+    val bootstrapTurbine: Turbine<BootstrapCall> = Turbine()
 
-    override fun register(
-        activityResultCaller: ActivityResultCaller,
-        lifecycleOwner: LifecycleOwner
-    ) {
+    override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
         registerTurbine.add(
             RegisterCall(
                 activityResultCaller = activityResultCaller,
-                lifecycleOwner = lifecycleOwner,
+                lifecycleOwner = lifecycleOwner
             )
         )
+    }
+
+    override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
+        bootstrapTurbine.add(BootstrapCall(paymentMethodMetadata))
     }
 
     override suspend fun start(arguments: ConfirmationHandler.Args) {
@@ -36,11 +39,53 @@ internal class FakeConfirmationHandler(
     fun validate() {
         registerTurbine.ensureAllEventsConsumed()
         startTurbine.ensureAllEventsConsumed()
+        bootstrapTurbine.ensureAllEventsConsumed()
         awaitResultTurbine.ensureAllEventsConsumed()
     }
 
     data class RegisterCall(
         val activityResultCaller: ActivityResultCaller,
-        val lifecycleOwner: LifecycleOwner,
+        val lifecycleOwner: LifecycleOwner
     )
+
+    data class BootstrapCall(
+        val paymentMethodMetadata: PaymentMethodMetadata,
+    )
+
+    class Scenario(
+        val handler: ConfirmationHandler,
+        val confirmationState: MutableStateFlow<ConfirmationHandler.State>,
+        val registerTurbine: Turbine<RegisterCall>,
+        val startTurbine: Turbine<ConfirmationHandler.Args>,
+        val awaitResultTurbine: Turbine<ConfirmationHandler.Result?>,
+        val bootstrapTurbine: Turbine<BootstrapCall>
+    )
+
+    companion object {
+        suspend fun test(
+            hasReloadedFromProcessDeath: Boolean = false,
+            initialState: ConfirmationHandler.State,
+            block: suspend Scenario.() -> Unit,
+        ) {
+            val state = MutableStateFlow(initialState)
+
+            val handler = FakeConfirmationHandler(
+                hasReloadedFromProcessDeath = hasReloadedFromProcessDeath,
+                state = state,
+            )
+
+            block(
+                Scenario(
+                    handler = handler,
+                    confirmationState = state,
+                    registerTurbine = handler.registerTurbine,
+                    startTurbine = handler.startTurbine,
+                    awaitResultTurbine = handler.awaitResultTurbine,
+                    bootstrapTurbine = handler.bootstrapTurbine
+                )
+            )
+
+            handler.validate()
+        }
+    }
 }

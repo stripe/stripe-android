@@ -34,5 +34,6 @@ private object AlipayUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_alipay,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_alipay,
+        iconResourceNight = null,
     )
 }

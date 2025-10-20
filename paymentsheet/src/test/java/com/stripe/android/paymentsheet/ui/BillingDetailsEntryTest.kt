@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.BILLING_DETAILS_FORM_DETAILS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.billingDetailsFormState
@@ -9,11 +10,24 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import org.junit.Test
 
 internal class BillingDetailsEntryTest {
+
+    private val fullAddressConfig = BillingDetailsCollectionConfiguration(
+        address = AddressCollectionMode.Full
+    )
+
+    private val automaticAddressConfig = BillingDetailsCollectionConfiguration(
+        address = AddressCollectionMode.Automatic
+    )
+
+    private val neverAddressConfig = BillingDetailsCollectionConfiguration(
+        address = AddressCollectionMode.Never
+    )
+
     @Test
     fun `isComplete() returns true when all required fields are complete in Full mode`() {
         val state = billingDetailsEntry()
 
-        assertThat(state.isComplete(AddressCollectionMode.Full)).isTrue()
+        assertThat(state.isComplete(fullAddressConfig)).isTrue()
     }
 
     @Test
@@ -24,7 +38,7 @@ internal class BillingDetailsEntryTest {
             )
         )
 
-        assertThat(state.isComplete(AddressCollectionMode.Full)).isFalse()
+        assertThat(state.isComplete(fullAddressConfig)).isFalse()
     }
 
     @Test
@@ -38,7 +52,7 @@ internal class BillingDetailsEntryTest {
             )
         )
 
-        assertThat(state.isComplete(AddressCollectionMode.Automatic)).isTrue()
+        assertThat(state.isComplete(automaticAddressConfig)).isTrue()
     }
 
     @Test
@@ -50,7 +64,7 @@ internal class BillingDetailsEntryTest {
             )
         )
 
-        assertThat(state.isComplete(AddressCollectionMode.Automatic)).isFalse()
+        assertThat(state.isComplete(automaticAddressConfig)).isFalse()
     }
 
     @Test
@@ -66,7 +80,7 @@ internal class BillingDetailsEntryTest {
             )
         )
 
-        assertThat(state.isComplete(AddressCollectionMode.Automatic)).isFalse()
+        assertThat(state.isComplete(automaticAddressConfig)).isFalse()
     }
 
     @Test
@@ -82,7 +96,7 @@ internal class BillingDetailsEntryTest {
             )
         )
 
-        assertThat(state.isComplete(AddressCollectionMode.Never)).isTrue()
+        assertThat(state.isComplete(neverAddressConfig)).isTrue()
     }
 
     @Test
@@ -101,7 +115,7 @@ internal class BillingDetailsEntryTest {
 
         val hasChanged = state.hasChanged(
             billingDetails = billingDetails,
-            addressCollectionMode = AddressCollectionMode.Automatic
+            billingDetailsCollectionConfiguration = automaticAddressConfig
         )
         assertThat(hasChanged).isTrue()
     }
@@ -122,7 +136,7 @@ internal class BillingDetailsEntryTest {
 
         val hasChanged = state.hasChanged(
             billingDetails = billingDetails,
-            addressCollectionMode = AddressCollectionMode.Automatic
+            billingDetailsCollectionConfiguration = automaticAddressConfig
         )
         assertThat(hasChanged).isTrue()
     }
@@ -145,7 +159,7 @@ internal class BillingDetailsEntryTest {
 
         val hasChanged = state.hasChanged(
             billingDetails = billingDetails,
-            addressCollectionMode = AddressCollectionMode.Automatic
+            billingDetailsCollectionConfiguration = automaticAddressConfig
         )
         assertThat(hasChanged).isFalse()
     }
@@ -178,7 +192,7 @@ internal class BillingDetailsEntryTest {
         addressFields.forEach { state ->
             val hasChanged = state.hasChanged(
                 billingDetails = BILLING_DETAILS_FORM_DETAILS,
-                addressCollectionMode = AddressCollectionMode.Full
+                billingDetailsCollectionConfiguration = fullAddressConfig
             )
             assertThat(hasChanged).isTrue()
         }
@@ -192,7 +206,7 @@ internal class BillingDetailsEntryTest {
 
         val hasChanged = state.hasChanged(
             billingDetails = BILLING_DETAILS_FORM_DETAILS,
-            addressCollectionMode = AddressCollectionMode.Full
+            billingDetailsCollectionConfiguration = fullAddressConfig
         )
         assertThat(hasChanged).isFalse()
     }
@@ -208,7 +222,7 @@ internal class BillingDetailsEntryTest {
 
         val hasChanged = state.hasChanged(
             billingDetails = BILLING_DETAILS_FORM_DETAILS,
-            addressCollectionMode = AddressCollectionMode.Never
+            billingDetailsCollectionConfiguration = neverAddressConfig
         )
         assertThat(hasChanged).isFalse()
     }
@@ -220,7 +234,7 @@ internal class BillingDetailsEntryTest {
         // Should detect changes when starting with null billing details
         val hasChanged = state.hasChanged(
             billingDetails = null,
-            addressCollectionMode = AddressCollectionMode.Full
+            billingDetailsCollectionConfiguration = fullAddressConfig
         )
         assertThat(hasChanged).isTrue()
     }
@@ -243,7 +257,7 @@ internal class BillingDetailsEntryTest {
 
         val hasChanged = state.hasChanged(
             billingDetails = billingDetails,
-            addressCollectionMode = AddressCollectionMode.Full
+            billingDetailsCollectionConfiguration = fullAddressConfig
         )
         assertThat(hasChanged).isFalse()
     }
@@ -261,9 +275,231 @@ internal class BillingDetailsEntryTest {
 
         val hasChanged = state.hasChanged(
             billingDetails = BILLING_DETAILS_FORM_DETAILS,
-            addressCollectionMode = AddressCollectionMode.Automatic
+            billingDetailsCollectionConfiguration = automaticAddressConfig
         )
         assertThat(hasChanged).isFalse()
+    }
+
+    @Test
+    fun `isComplete() returns true when name is collected and complete`() {
+        val configWithName = BillingDetailsCollectionConfiguration(
+            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = AddressCollectionMode.Never
+        )
+
+        val state = billingDetailsEntry(
+            billingDetailsFormState = billingDetailsFormState(
+                name = FormFieldEntry("John Doe", isComplete = true),
+                line1 = null,
+                line2 = null,
+                city = null,
+                state = null,
+                postalCode = null,
+                country = null,
+            )
+        )
+
+        assertThat(state.isComplete(configWithName)).isTrue()
+    }
+
+    @Test
+    fun `isComplete() returns false when name is collected but incomplete`() {
+        val configWithName = BillingDetailsCollectionConfiguration(
+            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = AddressCollectionMode.Never
+        )
+
+        val state = billingDetailsEntry(
+            billingDetailsFormState = billingDetailsFormState(
+                name = FormFieldEntry("", isComplete = false),
+                line1 = null,
+                line2 = null,
+                city = null,
+                state = null,
+                postalCode = null,
+                country = null,
+            )
+        )
+
+        assertThat(state.isComplete(configWithName)).isFalse()
+    }
+
+    @Test
+    fun `isComplete() returns true when email is collected and complete`() {
+        val configWithEmail = BillingDetailsCollectionConfiguration(
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = AddressCollectionMode.Never
+        )
+
+        val state = billingDetailsEntry(
+            billingDetailsFormState = billingDetailsFormState(
+                email = FormFieldEntry("john@example.com", isComplete = true),
+                line1 = null,
+                line2 = null,
+                city = null,
+                state = null,
+                postalCode = null,
+                country = null,
+            )
+        )
+
+        assertThat(state.isComplete(configWithEmail)).isTrue()
+    }
+
+    @Test
+    fun `isComplete() returns false when email is collected but incomplete`() {
+        val configWithEmail = BillingDetailsCollectionConfiguration(
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = AddressCollectionMode.Never
+        )
+
+        val state = billingDetailsEntry(
+            billingDetailsFormState = billingDetailsFormState(
+                email = FormFieldEntry("invalid-email", isComplete = false),
+                line1 = null,
+                line2 = null,
+                city = null,
+                state = null,
+                postalCode = null,
+                country = null,
+            )
+        )
+
+        assertThat(state.isComplete(configWithEmail)).isFalse()
+    }
+
+    @Test
+    fun `isComplete() returns true when phone is collected and complete`() {
+        val configWithPhone = BillingDetailsCollectionConfiguration(
+            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = AddressCollectionMode.Never
+        )
+
+        val state = billingDetailsEntry(
+            billingDetailsFormState = billingDetailsFormState(
+                phone = FormFieldEntry("+1234567890", isComplete = true),
+                line1 = null,
+                line2 = null,
+                city = null,
+                state = null,
+                postalCode = null,
+                country = null,
+            )
+        )
+
+        assertThat(state.isComplete(configWithPhone)).isTrue()
+    }
+
+    @Test
+    fun `isComplete() returns false when phone is collected but incomplete`() {
+        val configWithPhone = BillingDetailsCollectionConfiguration(
+            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = AddressCollectionMode.Never
+        )
+
+        val state = billingDetailsEntry(
+            billingDetailsFormState = billingDetailsFormState(
+                phone = FormFieldEntry("123", isComplete = false),
+                line1 = null,
+                line2 = null,
+                city = null,
+                state = null,
+                postalCode = null,
+                country = null,
+            )
+        )
+
+        assertThat(state.isComplete(configWithPhone)).isFalse()
+    }
+
+    @Test
+    fun `hasChanged() returns true when name changes`() {
+        val billingDetails = BILLING_DETAILS_FORM_DETAILS.copy(
+            name = "Original Name"
+        )
+
+        val configWithName = BillingDetailsCollectionConfiguration(
+            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = AddressCollectionMode.Never
+        )
+
+        val state = billingDetailsEntry(
+            billingDetailsFormState = billingDetailsFormState(
+                name = FormFieldEntry("New Name", isComplete = true),
+                line1 = null,
+                line2 = null,
+                city = null,
+                state = null,
+                postalCode = null,
+                country = null,
+            )
+        )
+
+        val hasChanged = state.hasChanged(
+            billingDetails = billingDetails,
+            billingDetailsCollectionConfiguration = configWithName
+        )
+        assertThat(hasChanged).isTrue()
+    }
+
+    @Test
+    fun `hasChanged() returns true when email changes`() {
+        val billingDetails = BILLING_DETAILS_FORM_DETAILS.copy(
+            email = "original@example.com"
+        )
+
+        val configWithEmail = BillingDetailsCollectionConfiguration(
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = AddressCollectionMode.Never
+        )
+
+        val state = billingDetailsEntry(
+            billingDetailsFormState = billingDetailsFormState(
+                email = FormFieldEntry("new@example.com", isComplete = true),
+                line1 = null,
+                line2 = null,
+                city = null,
+                state = null,
+                postalCode = null,
+                country = null,
+            )
+        )
+
+        val hasChanged = state.hasChanged(
+            billingDetails = billingDetails,
+            billingDetailsCollectionConfiguration = configWithEmail
+        )
+        assertThat(hasChanged).isTrue()
+    }
+
+    @Test
+    fun `hasChanged() returns true when phone changes`() {
+        val billingDetails = BILLING_DETAILS_FORM_DETAILS.copy(
+            phone = "+1234567890"
+        )
+
+        val configWithPhone = BillingDetailsCollectionConfiguration(
+            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = AddressCollectionMode.Never
+        )
+
+        val state = billingDetailsEntry(
+            billingDetailsFormState = billingDetailsFormState(
+                phone = FormFieldEntry("+0987654321", isComplete = true),
+                line1 = null,
+                line2 = null,
+                city = null,
+                state = null,
+                postalCode = null,
+                country = null,
+            )
+        )
+
+        val hasChanged = state.hasChanged(
+            billingDetails = billingDetails,
+            billingDetailsCollectionConfiguration = configWithPhone
+        )
+        assertThat(hasChanged).isTrue()
     }
 
     private fun billingDetailsEntry(

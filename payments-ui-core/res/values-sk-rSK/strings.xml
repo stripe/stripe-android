@@ -73,6 +73,8 @@
   <string name="stripe_pay_button_amount">Zaplatiť %s</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Banka</string>
+  <!-- Label shown in the payment type picker describing a card payment -->
+  <string name="stripe_payment_method_debit_or_credit_card">Debetná alebo kreditná karta</string>
   <!-- Label of a button displayed below a card entry form that saves the card details -->
   <string name="stripe_paymentsheet_add_card">Pridať kartu</string>
   <!-- Title shown above a view allowing the customer to save a card. -->
@@ -97,6 +99,8 @@
   <string name="stripe_paypal_mandate">Potvrdením platby prostredníctvom služby PayPal povolíte spoločnosti %s, aby z vášho účtu PayPal účtovala poplatky za budúce platby v súlade s podmienkami tejto spoločnosti.</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Potvrdením platby prostredníctvom služby RevolutPay povolíte spoločnosti %s, aby z vášho účtu RevolutPay účtovala poplatky za budúce platby v súlade s podmienkami tejto spoločnosti.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">Pokračovaním oprávňujete %1$s na automatické opakované odpísanie vášho zostatku Satispay v súlade s vaším nákupom alebo plánom predplatného.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Uložiť pre budúce platby spoločnosti %s</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->

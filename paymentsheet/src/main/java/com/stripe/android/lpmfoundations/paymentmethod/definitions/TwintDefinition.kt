@@ -34,5 +34,6 @@ private object TwintUiDefinitionFactory : UiDefinitionFactory.RequiresSharedData
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_twint,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_twint,
+        iconResourceNight = null,
     )
 }

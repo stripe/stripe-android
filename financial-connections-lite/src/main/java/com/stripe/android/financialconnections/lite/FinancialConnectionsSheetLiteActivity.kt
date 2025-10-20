@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.webkit.WebChromeClient
@@ -19,7 +20,11 @@ import androidx.annotation.RestrictTo
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.Companion.EXTRA_ARGS
@@ -47,6 +52,8 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
 
         webView = findViewById(R.id.webView)
         progressBar = findViewById(R.id.progressBar)
+
+        handleEdgeToEdge()
         setupProgressBar()
         setupWebView()
         setupBackButtonHandling()
@@ -58,6 +65,28 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
                     is FinishWithResult -> finishWithResult(viewEffect.result)
                     is OpenCustomTab -> openCustomTab(viewEffect.url)
                 }
+            }
+        }
+    }
+
+    private fun handleEdgeToEdge() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Enable edge-to-edge rendering for Android R and above (auto enabled starting Android 35)
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            // Handle window insets to adjust padding for system bars
+            val rootView = findViewById<View>(android.R.id.content)
+            ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
+                val systemBarsInsets = insets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+                )
+                view.updatePadding(
+                    left = systemBarsInsets.left,
+                    top = systemBarsInsets.top,
+                    right = systemBarsInsets.right,
+                    bottom = systemBarsInsets.bottom
+                )
+
+                insets
             }
         }
     }

@@ -3,7 +3,6 @@ package com.stripe.android.shoppay.bridge
 import android.os.Parcelable
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
-import org.json.JSONArray
 import org.json.JSONObject
 
 @Parcelize
@@ -98,34 +97,25 @@ internal data class ECEFullAddress(
 
 @Parcelize
 internal data class ECEPartialAddress(
-    val addressLine: List<String>?,
     val city: String?,
     val state: String?,
     val postalCode: String?,
     val country: String?,
-    val phone: String?,
-    val organization: String?
 ) : JsonSerializer, Parcelable {
     override fun toJson(): JSONObject {
         return JSONObject().apply {
-            addressLine?.let { put(FIELD_ADDRESS_LINE, JSONArray(it)) }
             city?.let { put(FIELD_CITY, it) }
             state?.let { put(FIELD_STATE, it) }
             postalCode?.let { put(FIELD_POSTAL_CODE, it) }
             country?.let { put(FIELD_COUNTRY, it) }
-            phone?.let { put(FIELD_PHONE, it) }
-            organization?.let { put(FIELD_ORGANIZATION, it) }
         }
     }
 
     private companion object {
-        private const val FIELD_ADDRESS_LINE = "addressLine"
         private const val FIELD_CITY = "city"
         private const val FIELD_STATE = "state"
-        private const val FIELD_POSTAL_CODE = "postalCode"
+        private const val FIELD_POSTAL_CODE = "postal_code"
         private const val FIELD_COUNTRY = "country"
-        private const val FIELD_PHONE = "phone"
-        private const val FIELD_ORGANIZATION = "organization"
     }
 }
 

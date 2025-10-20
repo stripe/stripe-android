@@ -50,6 +50,7 @@ internal class LinkContentScreenshotTest {
                             canNavigateBack = false,
                             showHeader = true,
                             title = null,
+                            isElevated = false,
                         ),
                         bottomSheetContent = null,
                         initialDestination = LinkScreen.Loading,

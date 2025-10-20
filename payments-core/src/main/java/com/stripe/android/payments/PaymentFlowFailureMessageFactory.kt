@@ -51,11 +51,8 @@ internal class PaymentFlowFailureMessageFactory(
                 ) -> {
             context.resources.getString(R.string.stripe_failure_reason_authentication)
         }
-        paymentIntent.lastPaymentError?.type == PaymentIntent.Error.Type.CardError -> {
-            paymentIntent.lastPaymentError.withLocalizedMessage(context).message
-        }
         else -> {
-            null
+            paymentIntent.lastPaymentError?.withLocalizedMessage(context)?.message
         }
     }
 
@@ -65,11 +62,8 @@ internal class PaymentFlowFailureMessageFactory(
         setupIntent.lastSetupError?.code == SetupIntent.Error.CODE_AUTHENTICATION_ERROR -> {
             context.resources.getString(R.string.stripe_failure_reason_authentication)
         }
-        setupIntent.lastSetupError?.type == SetupIntent.Error.Type.CardError -> {
-            setupIntent.lastSetupError.withLocalizedMessage(context).message
-        }
         else -> {
-            null
+            setupIntent.lastSetupError?.withLocalizedMessage(context)?.message
         }
     }
 

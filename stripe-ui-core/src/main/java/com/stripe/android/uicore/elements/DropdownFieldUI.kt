@@ -50,7 +50,6 @@ import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
-import com.stripe.android.uicore.utils.mapAsStateFlow
 
 @Preview
 @Composable
@@ -58,14 +57,14 @@ private fun DropDownPreview() {
     Column {
         DropDown(
             controller = DropdownFieldController(
-                CountryConfig(tinyMode = true)
+                CountryConfig(mode = DropdownConfig.Mode.Condensed)
             ),
             enabled = true
         )
         Spacer(modifier = Modifier.height(16.dp))
         DropDown(
             controller = DropdownFieldController(
-                CountryConfig(tinyMode = false)
+                CountryConfig(mode = DropdownConfig.Mode.Full())
             ),
             enabled = true
         )
@@ -102,9 +101,12 @@ fun DropDown(
     val shouldEnable = enabled && !shouldDisableDropdownWithSingleItem
 
     var expanded by remember { mutableStateOf(false) }
-    val selectedItemLabel by controller.selectedIndex.mapAsStateFlow {
+    val error by controller.error.collectAsState()
+    val selectedItemIndex by controller.selectedIndex.collectAsState()
+    val selectedItemLabel = remember(selectedItemIndex) {
         controller.getSelectedItemLabel(selectedIndex)
-    }.collectAsState()
+    }
+
     val currentTextColor = if (shouldEnable) {
         MaterialTheme.stripeColors.onComponent
     } else {
@@ -149,6 +151,7 @@ fun DropDown(
             } else {
                 LargeDropdownLabel(
                     label = label,
+                    isError = error != null,
                     selectedItemLabel = selectedItemLabel,
                     currentTextColor = currentTextColor,
                     shouldDisableDropdownWithSingleItem = shouldDisableDropdownWithSingleItem,
@@ -170,7 +173,7 @@ fun DropDown(
         ) {
             var height = 0
             items.forEachIndexed { index, displayValue ->
-                var hasUpdatedHeight: Boolean = index >= selectedIndex - 1
+                var hasUpdatedHeight: Boolean = index >= (selectedIndex ?: -1) - 1
                 if (index == selectedIndex) {
                     LaunchedEffect(expanded) {
                         scrollState.scrollTo(height)
@@ -199,7 +202,8 @@ fun DropDown(
 @Composable
 private fun LargeDropdownLabel(
     label: ResolvableString,
-    selectedItemLabel: String,
+    isError: Boolean,
+    selectedItemLabel: String?,
     currentTextColor: Color,
     shouldDisableDropdownWithSingleItem: Boolean,
     showChevron: Boolean,
@@ -207,10 +211,11 @@ private fun LargeDropdownLabel(
     val textFieldInsets = LocalTextFieldInsets.current
 
     CompatTextField(
-        value = TextFieldValue(selectedItemLabel),
+        value = TextFieldValue(selectedItemLabel ?: ""),
         enabled = false,
         onValueChange = {},
         errorMessage = null,
+        isError = isError,
         label = {
             FormLabel(label.resolve())
         },
@@ -228,6 +233,12 @@ private fun LargeDropdownLabel(
         },
         contentPadding = textFieldInsets.asPaddingValues(),
         colors = TextFieldColors(
+            shouldShowError = isError,
+            disabledIndicatorColor = if (isError) {
+                MaterialTheme.colors.error
+            } else {
+                Color.Transparent
+            },
             textColor = currentTextColor,
             disabledTextColor = currentTextColor,
         ),

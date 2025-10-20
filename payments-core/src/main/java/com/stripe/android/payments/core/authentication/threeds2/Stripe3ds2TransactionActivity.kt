@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.databinding.Stripe3ds2TransactionLayoutBinding
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.transaction.ChallengeContract
@@ -73,7 +74,7 @@ internal class Stripe3ds2TransactionActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
 
         args.statusBarColor?.let {
-            window.statusBarColor = it
+            StatusBarCompat.setColor(activity = this, color = it)
         }
 
         val viewModel by viewModels<Stripe3ds2TransactionViewModel> { viewModelFactory }

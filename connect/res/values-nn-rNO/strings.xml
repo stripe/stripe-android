@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<resources>
-  <string name="stripe_download_complete">Nedlasting fullført</string>
-  <string name="stripe_downloading_file">Lastar ned fil</string>
-  <string name="stripe_failed_to_open_url">Kunne ikkje opne URL: %s</string>
-  <string name="stripe_not_yet_built">Ikkje bygd enno ...</string>
-  <string name="stripe_unable_to_download_file">Kunne ikkje laste ned fil</string>
-</resources>

@@ -175,4 +175,25 @@ class PaymentIntentJsonParserTest {
         val paymentIntent = PaymentIntentFixtures.PI_WITH_COUNTRY_CODE
         assertThat(paymentIntent.countryCode).isEqualTo("US")
     }
+
+    @Test
+    fun `automaticPaymentMethodsEnabled=false when automatic payment methods field is not present`() {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_COUNTRY_CODE
+
+        assertThat(paymentIntent.automaticPaymentMethodsEnabled).isFalse()
+    }
+
+    @Test
+    fun `automaticPaymentMethodsEnabled=false when automatic payments field enabled=false`() {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_AUTOMATIC_PAYMENT_METHODS_NOT_ENABLED
+
+        assertThat(paymentIntent.automaticPaymentMethodsEnabled).isFalse()
+    }
+
+    @Test
+    fun `automaticPaymentMethodsEnabled=true when automatic payments field enabled=true`() {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_AUTOMATIC_PAYMENT_METHODS_ENABLED
+
+        assertThat(paymentIntent.automaticPaymentMethodsEnabled).isTrue()
+    }
 }

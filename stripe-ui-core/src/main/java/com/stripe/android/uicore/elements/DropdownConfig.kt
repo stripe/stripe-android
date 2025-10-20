@@ -18,8 +18,8 @@ interface DropdownConfig {
     val displayItems: List<String>
 
     /** Whether the dropdown menu should be shown in a small form when collapsed **/
-    val tinyMode: Boolean
-        get() = false
+    val mode: Mode
+        get() = Mode.Full()
 
     /** Whether the dropdown should be disabled when there is only one single item **/
     val disableDropdownWithSingleElement: Boolean
@@ -30,4 +30,13 @@ interface DropdownConfig {
 
     /** This will convert from a raw value used in the parameter map to a display value **/
     fun convertFromRaw(rawValue: String): String
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface Mode {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Condensed : Mode
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class Full(val selectsFirstOptionAsDefault: Boolean = true) : Mode
+    }
 }

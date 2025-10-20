@@ -7,7 +7,7 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_clearpay_subtitle">%1$d pagamenti ta\' %2$s bla imgħax</string>
   <!-- Amazon Pay mandate text -->
-  <string name="stripe_amazon_pay_mandate">Meta tikkonferma l-pagament tiegħek b\'AmazonPay, tkun qed tagħti permess lil %s biex jiċċarġjaw il-kont ta\' AmazonPay tiegħek għal pagamenti furuti skont it-termini tagħhom.</string>
+  <string name="stripe_amazon_pay_mandate">Meta tikkonferma l-pagament tiegħek b\'AmazonPay, tkun qed tagħti permess lil %s biex fil-ġejjieni tiġbor il-pagamenti mill-kont ta\' AmazonPay tiegħek skont ir-regoli tagħha.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Lura</string>
   <!-- Label for Bacs account number field -->
@@ -60,7 +60,7 @@
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Ixtri issa jew ħallas iktar tard bil-Klarna.</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Meta tkompli għal fuq Klarna, tkun qed tagħti permess lil %1$s biex jiċċarġjaw il-kont ta\' Klarna tiegħek għal pagamenti futuri skont it-termini tagħhom u ta\' Klarna. Dan tista\' tibdlu fi kwalunkwe ħin fl-app ta\' Klarna billi tikkuntattja lil %2$s.</string>
+  <string name="stripe_klarna_mandate">Meta tkompli għal Klarna, tkun qed tagħti permess lil %1$s biex fil-ġejjieni tiġbor il-pagamenti mill-kont Klarna tiegħek skont ir-regoli tagħha u ta\' Klarna. Tista\' tibdel dal-permess meta trid mill-app ta\' Klarna tiegħek jew billi tikkuntattja lil %2$s.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Ħlas aktar tard bil-Klarna.</string>
   <!-- Caption for Phone field on address form -->
@@ -73,12 +73,14 @@
   <string name="stripe_pay_button_amount">Ħallas %s</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Bank</string>
+  <!-- Label shown in the payment type picker describing a card payment -->
+  <string name="stripe_payment_method_debit_or_credit_card">Karta tad-debitu jew tal-kreditu</string>
   <!-- Label of a button displayed below a card entry form that saves the card details -->
-  <string name="stripe_paymentsheet_add_card">Żid kard</string>
+  <string name="stripe_paymentsheet_add_card">Żid karta</string>
   <!-- Title shown above a view allowing the customer to save a card. -->
   <string name="stripe_paymentsheet_add_new_card">Żid karta ġdida</string>
   <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">L-informazzjoni tal-kard</string>
+  <string name="stripe_paymentsheet_add_payment_method_card_information">L-informazzjoni tal-karta</string>
   <!-- Title shown above a view allowing the customer to save a US bank account. -->
   <string name="stripe_paymentsheet_add_us_bank_account">Żid kont tal-bank ibbażat ġewwa l-Istati Uniti tal-Amerka</string>
   <!-- Header text shown above a UPI ID text field -->
@@ -88,7 +90,7 @@
   <!-- Payment Method type brand name -->
   <string name="stripe_paymentsheet_payment_method_bacs_debit">Debitu Dirett BACS</string>
   <!-- Title for credit card number entry field -->
-  <string name="stripe_paymentsheet_payment_method_card">Kard</string>
+  <string name="stripe_paymentsheet_payment_method_card">Karta</string>
   <!-- Label for Konbini Payment Method -->
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
@@ -97,6 +99,8 @@
   <string name="stripe_paypal_mandate">Meta tikkonferma l-pagament tiegħek ma\' PayPal, tkun qed tagħti permess lil %s biex fil-ġejjieni tiġbor il-pagamenti mill-kont ta\' PayPal tiegħek skont ir-regoli tagħha.</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Meta tikkonferma l-pagament tiegħek b\'RevolutPay, tkun qed tħalli lil %s tiġbor il-flus mill-kont ta\' RevolutPay tiegħek għall-pagamenti tal-ġejjieni skont ir-regoli tagħha.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">Billi tkompli, tawtorizza lil %1$s biex awtomatikament tiddebita l-Bilanċ ta’ Satispay tiegħek fuq bażi rikorrenti skont il-pjan tax-xiri jew tal-abbonament tiegħek.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Issejvja għall-pagamenti futuri lil %s</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
@@ -104,7 +108,7 @@
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Skennja l-karta</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">Meta tagħti l-informazzjoni tal-pagament tiegħek u tikkonferma dan il-pagament, tkun qed tawtorizza lil (A) %s u lil Stripe, l-operatur tas-servizz tal-pagamenti tagħna, biex jibagħtu struzzjonijiet lill-bank tiegħek biex jieħu l-fondi mill-kont tiegħek u (B) lill-bank tiegħek biex jieħu l-fondi mill-kont tiegħek skont dawn l-istruzzjonijiet. Bħala parti mid-drittijiet tiegħek, inti għandek dritt għall-ħlas lura mill-bank tiegħek skont it-termini u l-kundizzjonijiet tal-ftehim tiegħek mal-bank tiegħek. Ħlas lura għandu jintalab fi żmien 8 ġimgħat, li jibdew jgħoddu mid-data li fiha l-fondi jittieħdu mill-kont tiegħek. Id-drittijiet tiegħek huma spjegati f\'dikjarazzjoni li tista\' tikseb mingħand il-bank tiegħek. Inti taqbel li, sa jumejn qabel, tirċievi notifika kull darba li l-fondi jkunu se jittieħdu mill-kont tiegħek.</string>
+  <string name="stripe_sepa_mandate">Meta tagħti l-informazzjoni tal-pagament tiegħek u tikkonferma dan il-pagament, tkun qed tawtorizza lil (A) %s u lil Stripe, l-operatur tas-servizz tal-pagamenti tagħna, biex jibagħtu struzzjonijiet lill-bank tiegħek biex jieħu l-fondi mill-kont tiegħek u (B) lill-bank tiegħek biex jieħu l-fondi mill-kont tiegħek skont dawn l-istruzzjonijiet. Bħala parti mid-drittijiet tiegħek, inti għandek dritt għall-ħlas lura mill-bank tiegħek skont ir-regoli u l-kundizzjonijiet tal-ftehim tiegħek mal-bank tiegħek. Ħlas lura għandu jintalab fi żmien 8 ġimgħat, li jibdew jgħoddu mid-data li fiha l-fondi jittieħdu mill-kont tiegħek. Il-jeddijiet tiegħek imfissra fi stqarrija li tista\' tikseb mingħand il-bank tiegħek. Int taqbel li, sa jumejn qabel, tikseb tagħrif kull darba li l-fondi jkunu se jittieħdu mill-kont tiegħek.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Qiegħed bħala l-metodu tal-pagament standard</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

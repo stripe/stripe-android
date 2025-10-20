@@ -10,7 +10,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 internal class AddressElementViewModel @Inject internal constructor(
-    val navigator: AddressElementNavigator,
+    val navigator: NavHostAddressElementNavigator,
     val inputAddressViewModelSubcomponentBuilderProvider: Provider<InputAddressViewModelSubcomponent.Builder>,
     val autoCompleteViewModelSubcomponentBuilderProvider: Provider<AutocompleteViewModelSubcomponent.Builder>,
 ) : ViewModel() {

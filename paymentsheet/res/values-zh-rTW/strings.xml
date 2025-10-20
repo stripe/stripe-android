@@ -79,6 +79,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_address_element_primary_button">儲存地址</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">收貨地址</string>
+  <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
+  <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">使用帳單地址作為送貨地址</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
   <string name="stripe_paymentsheet_bacs_email_mandate">我們將在三個工作日內向 %s 傳送一封郵件來確認這一扣款指令的設定情況。</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
@@ -160,6 +162,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_remove_card">解除綁定</string>
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">移除卡？</string>
+  <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
+  <string name="stripe_paymentsheet_remove_partial_description">此支付方式將被移除，但仍適用於 %s 項訂閱。</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">移除 %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -194,6 +198,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_pm_set_as_default">設定為預設支付方式</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">移除尾號為 %s 的銀行帳戶</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">Shop Pay 按鈕</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">顯示選單</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->

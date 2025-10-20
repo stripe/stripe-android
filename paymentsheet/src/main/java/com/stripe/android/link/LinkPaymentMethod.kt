@@ -1,25 +1,26 @@
 package com.stripe.android.link
 
 import android.os.Parcelable
-import com.stripe.android.model.ConsumerPaymentDetails
 import kotlinx.parcelize.Parcelize
+import com.stripe.android.model.ConsumerPaymentDetails as ConsumerPaymentDetailsModel
 
 /**
  * Link payment method payload needed to confirm the payment.
  */
 @Parcelize
 internal sealed class LinkPaymentMethod(
-    open val details: ConsumerPaymentDetails.PaymentDetails,
+    open val details: ConsumerPaymentDetailsModel.PaymentDetails,
     open val collectedCvc: String?,
+    open val billingPhone: String?
 ) : Parcelable {
 
     internal fun readyForConfirmation(): Boolean = when (val currentDetails = details) {
-        is ConsumerPaymentDetails.BankAccount -> true
-        is ConsumerPaymentDetails.Card -> {
+        is ConsumerPaymentDetailsModel.BankAccount -> true
+        is ConsumerPaymentDetailsModel.Card -> {
             val cvcReady = !currentDetails.cvcCheck.requiresRecollection || collectedCvc?.isNotEmpty() == true
             !currentDetails.isExpired && cvcReady
         }
-        is ConsumerPaymentDetails.Passthrough -> true
+        is ConsumerPaymentDetailsModel.Passthrough -> true
     }
 
     /**
@@ -30,9 +31,14 @@ internal sealed class LinkPaymentMethod(
      */
     @Parcelize
     internal data class ConsumerPaymentDetails(
-        override val details: ConsumerPaymentDetails.PaymentDetails,
-        override val collectedCvc: String?
-    ) : LinkPaymentMethod(details, collectedCvc)
+        override val details: ConsumerPaymentDetailsModel.PaymentDetails,
+        override val collectedCvc: String?,
+        override val billingPhone: String?
+    ) : LinkPaymentMethod(
+        details = details,
+        collectedCvc = collectedCvc,
+        billingPhone = billingPhone
+    )
 
     /**
      * The payment method selected by the user within their Link account, including the parameters
@@ -45,6 +51,11 @@ internal sealed class LinkPaymentMethod(
     @Parcelize
     internal data class LinkPaymentDetails(
         val linkPaymentDetails: com.stripe.android.link.LinkPaymentDetails,
-        override val collectedCvc: String?
-    ) : LinkPaymentMethod(linkPaymentDetails.paymentDetails, collectedCvc)
+        override val collectedCvc: String?,
+        override val billingPhone: String?
+    ) : LinkPaymentMethod(
+        details = linkPaymentDetails.paymentDetails,
+        collectedCvc = collectedCvc,
+        billingPhone = billingPhone
+    )
 }

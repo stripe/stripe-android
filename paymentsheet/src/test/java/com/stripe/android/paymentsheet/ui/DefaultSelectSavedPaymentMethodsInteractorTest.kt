@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
@@ -129,12 +131,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
 
     @Test
     fun handleViewAction_EditPaymentMethod_updatesPaymentMethod() {
-        var updatedPaymentMethod: DisplayableSavedPaymentMethod? = null
-        fun onUpdatePaymentMethod(paymentMethod: DisplayableSavedPaymentMethod) {
-            updatedPaymentMethod = paymentMethod
-        }
-
-        runScenario(onUpdatePaymentMethod = ::onUpdatePaymentMethod) {
+        runScenario {
             val paymentMethodToUpdate = PaymentMethodFixtures.displayableCard()
             interactor.handleViewAction(
                 SelectSavedPaymentMethodsInteractor.ViewAction.EditPaymentMethod(
@@ -142,23 +139,13 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
                 )
             )
 
-            assertThat(updatedPaymentMethod).isEqualTo(paymentMethodToUpdate)
+            assertThat(onUpdatePaymentMethodTurbine.awaitItem()).isEqualTo(paymentMethodToUpdate)
         }
     }
 
     @Test
     fun handleViewAction_SelectPaymentMethod_selectsPaymentMethod() {
-        var paymentSelection: PaymentSelection? = null
-        var isUserInputResult = false
-
-        fun onSelectPaymentMethod(selection: PaymentSelection?, isUserInput: Boolean) {
-            paymentSelection = selection
-            isUserInputResult = isUserInput
-        }
-
-        runScenario(
-            updateSelection = ::onSelectPaymentMethod,
-        ) {
+        runScenario {
             val newPaymentSelection = PaymentSelection.Saved(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
@@ -168,40 +155,32 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
                 )
             )
 
-            assertThat(paymentSelection).isEqualTo(newPaymentSelection)
-            assertThat(isUserInputResult).isTrue()
+            updateSelectionTurbine.awaitItem().run {
+                assertThat(first).isEqualTo(newPaymentSelection)
+                assertThat(second).isTrue()
+            }
         }
     }
 
     @Test
     fun handleViewAction_AddCardPressed_callsOnAddCardPressed() {
-        var addCardPressed = false
-        fun onAddCardPressed() {
-            addCardPressed = true
-        }
-
-        runScenario(
-            onAddCardPressed = ::onAddCardPressed
-        ) {
+        runScenario {
             interactor.handleViewAction(
                 SelectSavedPaymentMethodsInteractor.ViewAction.AddCardPressed
             )
 
-            assertThat(addCardPressed).isTrue()
+            assertThat(onAddCardPressedTurbine.awaitItem()).isNotNull()
         }
     }
 
     @Test
     fun handleViewAction_ToggleEdit_calls_toggleEdit() {
-        var hasCalledToggleEdit = false
-        runScenario(
-            toggleEdit = { hasCalledToggleEdit = true }
-        ) {
+        runScenario {
             interactor.handleViewAction(
                 SelectSavedPaymentMethodsInteractor.ViewAction.ToggleEdit
             )
 
-            assertThat(hasCalledToggleEdit).isTrue()
+            assertThat(toggleEditTurbine.awaitItem()).isNotNull()
         }
     }
 
@@ -464,30 +443,21 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     fun isCurrentScreenIsUpdatedToTrue_shouldCallUpdateSelection() {
         val isCurrentScreen = MutableStateFlow(false)
         val paymentMethods = PaymentMethodFixtures.createCards(2)
-        var paymentSelection: PaymentSelection? = null
         val currentSelectionFlow: MutableStateFlow<PaymentSelection?> = MutableStateFlow(
             PaymentSelection.Saved(paymentMethods[0])
         )
-        var isUserInputResult = false
-
-        fun onSelectPaymentMethod(selection: PaymentSelection?, isUserInput: Boolean) {
-            paymentSelection = selection
-            isUserInputResult = isUserInput
-        }
 
         runScenario(
             paymentOptionsItems = MutableStateFlow(createPaymentOptionsItems(paymentMethods = paymentMethods)),
             isCurrentScreen = isCurrentScreen,
-            updateSelection = ::onSelectPaymentMethod,
             currentSelection = currentSelectionFlow,
         ) {
-            assertThat(paymentSelection).isNull()
-            assertThat(isUserInputResult).isFalse()
-
             isCurrentScreen.value = true
 
-            assertThat(paymentSelection).isEqualTo(PaymentSelection.Saved(paymentMethods[0]))
-            assertThat(isUserInputResult).isFalse()
+            updateSelectionTurbine.awaitItem().run {
+                assertThat(first).isEqualTo(PaymentSelection.Saved(paymentMethods[0]))
+                assertThat(second).isFalse()
+            }
         }
     }
 
@@ -523,49 +493,72 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
         )
     }
 
-    private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
-
     private fun runScenario(
         paymentOptionsItems: StateFlow<List<PaymentOptionsItem>> = MutableStateFlow(emptyList()),
         editing: StateFlow<Boolean> = MutableStateFlow(false),
         canEdit: StateFlow<Boolean> = MutableStateFlow(true),
         canRemove: StateFlow<Boolean> = MutableStateFlow(true),
-        toggleEdit: () -> Unit = { notImplemented() },
         isProcessing: StateFlow<Boolean> = MutableStateFlow(false),
         isCurrentScreen: StateFlow<Boolean> = MutableStateFlow(false),
         currentSelection: StateFlow<PaymentSelection?> = MutableStateFlow(null),
         mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> = MutableStateFlow(null),
-        onAddCardPressed: () -> Unit = { notImplemented() },
-        onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
-        updateSelection: (PaymentSelection?, Boolean) -> Unit = { _, _ -> notImplemented() },
         testBlock: suspend TestParams.() -> Unit,
     ) {
+        val toggleEditTurbine = Turbine<Unit>()
+        val onAddCardPressedTurbine = Turbine<Unit>()
+        val onUpdatePaymentMethodTurbine = Turbine<DisplayableSavedPaymentMethod>()
+        val updateSelectionTurbine = Turbine<Pair<PaymentSelection?, Boolean>>()
+
         val interactor = DefaultSelectSavedPaymentMethodsInteractor(
             paymentOptionsItems = paymentOptionsItems,
             editing = editing,
             canEdit = canEdit,
             canRemove = canRemove,
-            toggleEdit = toggleEdit,
+            toggleEdit = {
+                toggleEditTurbine.add(Unit)
+            },
             isProcessing = isProcessing,
             isCurrentScreen = isCurrentScreen,
             currentSelection = currentSelection,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
-            onAddCardPressed = onAddCardPressed,
-            onUpdatePaymentMethod = onUpdatePaymentMethod,
-            updateSelection = updateSelection,
+            onAddCardPressed = {
+                onAddCardPressedTurbine.add(Unit)
+            },
+            onUpdatePaymentMethod = {
+                onUpdatePaymentMethodTurbine.add(it)
+            },
+            updateSelection = { selection: PaymentSelection?, isUserInput: Boolean ->
+                updateSelectionTurbine.add(Pair(selection, isUserInput))
+            },
             isLiveMode = true,
         )
 
         TestParams(
             interactor = interactor,
+            toggleEditTurbine = toggleEditTurbine,
+            onAddCardPressedTurbine = onAddCardPressedTurbine,
+            onUpdatePaymentMethodTurbine = onUpdatePaymentMethodTurbine,
+            updateSelectionTurbine = updateSelectionTurbine,
         ).apply {
             runTest {
                 testBlock()
             }
+            ensureAllEventsConsumed()
         }
     }
 
     private class TestParams(
         val interactor: SelectSavedPaymentMethodsInteractor,
-    )
+        val toggleEditTurbine: ReceiveTurbine<Unit>,
+        val onAddCardPressedTurbine: ReceiveTurbine<Unit>,
+        val onUpdatePaymentMethodTurbine: ReceiveTurbine<DisplayableSavedPaymentMethod>,
+        val updateSelectionTurbine: ReceiveTurbine<Pair<PaymentSelection?, Boolean>>,
+    ) {
+        fun ensureAllEventsConsumed() {
+            toggleEditTurbine.ensureAllEventsConsumed()
+            onAddCardPressedTurbine.ensureAllEventsConsumed()
+            onUpdatePaymentMethodTurbine.ensureAllEventsConsumed()
+            updateSelectionTurbine.ensureAllEventsConsumed()
+        }
+    }
 }

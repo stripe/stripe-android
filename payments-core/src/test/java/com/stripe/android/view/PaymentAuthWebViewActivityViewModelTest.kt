@@ -52,7 +52,7 @@ class PaymentAuthWebViewActivityViewModelTest {
         val intent = viewModel.cancellationResult
         val resultIntent = PaymentFlowResult.Unvalidated.fromIntent(intent)
         assertThat(resultIntent.flowOutcome)
-            .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
+            .isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
         assertThat(resultIntent.canCancelSource)
             .isTrue()
     }

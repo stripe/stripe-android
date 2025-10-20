@@ -114,6 +114,7 @@ internal class AddressElementActivity : ComponentActivity() {
                                 )
                             AutocompleteScreen(
                                 viewModel.autoCompleteViewModelSubcomponentBuilderProvider,
+                                viewModel.navigator,
                                 country
                             )
                         }

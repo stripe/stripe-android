@@ -3,9 +3,11 @@ package com.stripe.android.paymentelement.embedded.content
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -17,9 +19,11 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.AnalyticEventCallbackRule
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
@@ -37,11 +41,11 @@ internal class DefaultEmbeddedContentHelperTest {
         assertThat(savedStateHandle.get<PaymentMethodMetadata?>(STATE_KEY_EMBEDDED_CONTENT))
             .isNull()
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val rowStyle = Embedded.RowStyle.FlatWithRadio.default
-        embeddedContentHelper.dataLoaded(paymentMethodMetadata, rowStyle, embeddedViewDisplaysMandateText = true)
+        val appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default)
+        embeddedContentHelper.dataLoaded(paymentMethodMetadata, appearance, embeddedViewDisplaysMandateText = true)
         val state = savedStateHandle.get<DefaultEmbeddedContentHelper.State?>(STATE_KEY_EMBEDDED_CONTENT)
         assertThat(state?.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
-        assertThat(state?.rowStyle).isEqualTo(rowStyle)
+        assertThat(state?.appearance).isEqualTo(appearance)
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
     }
 
@@ -51,7 +55,7 @@ internal class DefaultEmbeddedContentHelperTest {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.default,
+                Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
             )
             assertThat(awaitItem()).isNotNull()
@@ -65,7 +69,7 @@ internal class DefaultEmbeddedContentHelperTest {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.default,
+                Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
             )
             assertThat(awaitItem()).isNotNull()
@@ -79,7 +83,7 @@ internal class DefaultEmbeddedContentHelperTest {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.default,
+                Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
             )
             assertThat(awaitItem()).isNotNull()
@@ -95,7 +99,7 @@ internal class DefaultEmbeddedContentHelperTest {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.default,
+                Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
             )
             assertThat(awaitItem()).isNotNull()
@@ -112,7 +116,7 @@ internal class DefaultEmbeddedContentHelperTest {
                 STATE_KEY_EMBEDDED_CONTENT,
                 DefaultEmbeddedContentHelper.State(
                     PaymentMethodMetadataFactory.create(),
-                    Embedded.RowStyle.FloatingButton.default,
+                    Embedded(Embedded.RowStyle.FloatingButton.default),
                     embeddedViewDisplaysMandateText = true,
                 )
             )
@@ -129,6 +133,7 @@ internal class DefaultEmbeddedContentHelperTest {
         val eventReporter: FakeEventReporter,
     )
 
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     private fun testScenario(
         setup: SavedStateHandle.() -> Unit = {},
         block: suspend Scenario.() -> Unit,
@@ -141,6 +146,7 @@ internal class DefaultEmbeddedContentHelperTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             embeddedSelectionHolder = selectionHolder,
             savedStateHandle = savedStateHandle,
+            selectedPaymentMethodCode = "",
         )
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()
@@ -178,7 +184,10 @@ internal class DefaultEmbeddedContentHelperTest {
             ),
             rowSelectionImmediateActionHandler = immediateActionHandler,
             errorReporter = errorReporter,
-            internalRowSelectionCallback = { null }
+            internalRowSelectionCallback = { null },
+            linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
+            analyticsCallbackProvider = { AnalyticEventCallbackRule() },
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,

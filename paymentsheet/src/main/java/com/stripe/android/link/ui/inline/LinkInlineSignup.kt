@@ -5,6 +5,7 @@ package com.stripe.android.link.ui.inline
 import androidx.annotation.RestrictTo
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,10 +13,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -34,10 +38,20 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -65,6 +79,7 @@ import kotlinx.coroutines.launch
 import com.stripe.android.uicore.R as StripeUiCoreR
 
 internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"
+private const val LINK_LOGO_SCALE = 0.95f
 
 @Composable
 internal fun LinkInlineSignup(
@@ -101,6 +116,7 @@ internal fun LinkInlineSignup(
         expanded = viewState.isExpanded,
         requiresNameCollection = viewModel.requiresNameCollection,
         allowsDefaultOptIn = viewState.allowsDefaultOptIn,
+        linkSignUpOptInFeatureEnabled = viewState.linkSignUpOptInFeatureEnabled,
         didAskToChangeSignupDetails = viewState.didAskToChangeSignupDetails,
         errorMessage = errorMessage?.resolve(),
         toggleExpanded = viewModel::toggleExpanded,
@@ -122,6 +138,7 @@ internal fun LinkInlineSignup(
     expanded: Boolean,
     requiresNameCollection: Boolean,
     allowsDefaultOptIn: Boolean,
+    linkSignUpOptInFeatureEnabled: Boolean,
     didAskToChangeSignupDetails: Boolean,
     errorMessage: String?,
     toggleExpanded: () -> Unit,
@@ -131,34 +148,17 @@ internal fun LinkInlineSignup(
     val scope = rememberCoroutineScope()
     val emailFocusRequester = remember { FocusRequester() }
     val bringFullSignUpIntoViewRequester = remember { BringIntoViewRequester() }
+    val simplifiedCheckbox = linkSignUpOptInFeatureEnabled || allowsDefaultOptIn
 
     LaunchedEffect(expanded) {
-        if (expanded && !allowsDefaultOptIn) {
+        if (expanded && !simplifiedCheckbox) {
             emailFocusRequester.requestFocus()
         }
     }
 
     val contentAlpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
-    val shape = if (allowsDefaultOptIn) {
-        // We render the content inline for default opt-in. A large corner radius would cut into the content.
-        RectangleShape
-    } else {
-        MaterialTheme.stripeShapes.roundedCornerShape
-    }
-
-    val boxModifier = if (allowsDefaultOptIn) {
-        modifier
-    } else {
-        modifier
-            .border(
-                border = MaterialTheme.getBorderStroke(isSelected = false),
-                shape = shape,
-            )
-            .background(
-                color = MaterialTheme.stripeColors.component,
-                shape = shape,
-            )
-    }
+    val shape = boxShape(simplifiedCheckbox)
+    val boxModifier = modifier.applyBorders(simplifiedCheckbox, shape)
 
     Box(
         modifier = boxModifier
@@ -182,27 +182,55 @@ internal fun LinkInlineSignup(
                 expanded = expanded,
                 enabled = enabled,
                 contentAlpha = contentAlpha,
-                defaultOptIn = allowsDefaultOptIn,
+                simplifiedCheckbox = simplifiedCheckbox,
+                useLinkLogoInCheckboxText = linkSignUpOptInFeatureEnabled,
                 toggleExpanded = toggleExpanded
             )
 
-            LinkFields(
-                expanded = expanded,
-                enabled = enabled,
-                signUpState = signUpState,
-                requiresNameCollection = requiresNameCollection,
-                allowsDefaultOptIn = allowsDefaultOptIn,
-                didAskToChangeSignupDetails = didAskToChangeSignupDetails,
-                errorMessage = errorMessage,
-                sectionController = sectionController,
-                emailController = emailController,
-                phoneNumberController = phoneNumberController,
-                nameController = nameController,
-                emailFocusRequester = emailFocusRequester,
-                changeSignupDetails = changeSignupDetails,
-            )
+            if (linkSignUpOptInFeatureEnabled.not()) {
+                LinkFields(
+                    expanded = expanded,
+                    enabled = enabled,
+                    signUpState = signUpState,
+                    requiresNameCollection = requiresNameCollection,
+                    allowsDefaultOptIn = allowsDefaultOptIn,
+                    didAskToChangeSignupDetails = didAskToChangeSignupDetails,
+                    errorMessage = errorMessage,
+                    sectionController = sectionController,
+                    emailController = emailController,
+                    phoneNumberController = phoneNumberController,
+                    nameController = nameController,
+                    emailFocusRequester = emailFocusRequester,
+                    changeSignupDetails = changeSignupDetails,
+                )
+            }
         }
     }
+}
+
+@Composable
+private fun Modifier.applyBorders(
+    simplifiedCheckbox: Boolean,
+    shape: Shape
+): Modifier = if (simplifiedCheckbox) {
+    this
+} else {
+    border(
+        border = MaterialTheme.getBorderStroke(isSelected = false),
+        shape = shape,
+    )
+        .background(
+            color = MaterialTheme.stripeColors.component,
+            shape = shape,
+        )
+}
+
+@Composable
+private fun boxShape(simplifiedCheckbox: Boolean): Shape = if (simplifiedCheckbox) {
+    // We render the content inline for default opt-in. A large corner radius would cut into the content.
+    RectangleShape
+} else {
+    MaterialTheme.stripeShapes.roundedCornerShape
 }
 
 @Composable
@@ -211,26 +239,23 @@ private fun LinkCheckbox(
     expanded: Boolean,
     enabled: Boolean,
     contentAlpha: Float,
-    defaultOptIn: Boolean,
+    simplifiedCheckbox: Boolean,
     toggleExpanded: () -> Unit,
+    useLinkLogoInCheckboxText: Boolean,
 ) {
-    val label = if (defaultOptIn) {
-        stringResource(id = R.string.stripe_inline_sign_up_header_default_opt_in)
-    } else {
-        stringResource(id = R.string.stripe_inline_sign_up_header)
-    }
+    val label = stringResource(id = R.string.stripe_inline_sign_up_header_default_opt_in)
 
-    val sublabel = if (!defaultOptIn) {
+    val sublabel = if (!simplifiedCheckbox) {
         stringResource(R.string.stripe_sign_up_message, merchantName)
     } else {
         null
     }
 
     Row(
-        verticalAlignment = if (defaultOptIn) Alignment.CenterVertically else Alignment.Top,
+        verticalAlignment = if (simplifiedCheckbox) Alignment.CenterVertically else Alignment.Top,
         modifier = Modifier
             .clickable(enabled = enabled) { toggleExpanded() }
-            .padding(if (defaultOptIn) 0.dp else 16.dp)
+            .padding(if (simplifiedCheckbox) 0.dp else 16.dp)
     ) {
         Checkbox(
             checked = expanded,
@@ -239,11 +264,18 @@ private fun LinkCheckbox(
             enabled = enabled
         )
         Column {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colors.onSurface.copy(alpha = contentAlpha)
-            )
+            if (useLinkLogoInCheckboxText) {
+                TextWithLinkLogo(
+                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Medium),
+                    color = MaterialTheme.colors.onSurface.copy(alpha = contentAlpha),
+                )
+            } else {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colors.onSurface.copy(alpha = contentAlpha)
+                )
+            }
             if (sublabel != null) {
                 Text(
                     text = sublabel,
@@ -255,6 +287,54 @@ private fun LinkCheckbox(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun TextWithLinkLogo(
+    style: TextStyle,
+    color: Color,
+) {
+    val label = stringResource(R.string.stripe_inline_sign_up_toggle)
+    val painter = painterResource(R.drawable.stripe_link_logo_knockout)
+    // Slightly smaller Link logo for better visual balance
+    val logoHeight = style.fontSize * LINK_LOGO_SCALE
+    val logoWidth = logoHeight * (painter.intrinsicSize.width / painter.intrinsicSize.height)
+    Text(
+        text = label.buildLinkLogoAnnotatedString(),
+        style = style,
+        color = color,
+        inlineContent = mapOf(
+            "link_logo" to InlineTextContent(
+                placeholder = Placeholder(
+                    width = logoWidth,
+                    height = logoHeight,
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.Center
+                )
+            ) {
+                Image(
+                    painter = painter,
+                    contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
+                    colorFilter = ColorFilter.tint(color, BlendMode.SrcIn),
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        )
+    )
+}
+
+@Composable
+private fun String.buildLinkLogoAnnotatedString(): AnnotatedString = buildAnnotatedString {
+    val parts = split("Link")
+    val preLinkText = parts.getOrNull(0)
+    val postLinkText = parts.getOrNull(1)
+    if (preLinkText == null || postLinkText == null) {
+        // "Link" not found, just show the label as-is
+        append(this@buildLinkLogoAnnotatedString)
+    } else {
+        append(preLinkText)
+        appendInlineContent(id = "link_logo")
+        append(postLinkText)
     }
 }
 
@@ -391,11 +471,62 @@ private fun Preview() {
                 expanded = true,
                 requiresNameCollection = true,
                 allowsDefaultOptIn = false,
+                linkSignUpOptInFeatureEnabled = false,
                 didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 toggleExpanded = {},
                 changeSignupDetails = {},
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewDOI() {
+    DefaultLinkTheme {
+        Surface {
+            LinkInlineSignup(
+                merchantName = "Example, Inc.",
+                sectionController = SectionController(null, emptyList()),
+                emailController = EmailConfig.createController(""),
+                phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
+                nameController = NameConfig.createController("My Name"),
+                signUpState = InputtingRemainingFields,
+                enabled = true,
+                expanded = true,
+                requiresNameCollection = true,
+                allowsDefaultOptIn = true,
+                linkSignUpOptInFeatureEnabled = false,
+                didAskToChangeSignupDetails = false,
+                errorMessage = null,
+                toggleExpanded = {},
+                changeSignupDetails = {},
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewSignInFeature() {
+    DefaultLinkTheme {
+        LinkInlineSignup(
+            merchantName = "Example, Inc.",
+            sectionController = SectionController(null, emptyList()),
+            emailController = EmailConfig.createController(""),
+            phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
+            nameController = NameConfig.createController("My Name"),
+            signUpState = InputtingRemainingFields,
+            enabled = true,
+            expanded = true,
+            requiresNameCollection = false,
+            allowsDefaultOptIn = false,
+            linkSignUpOptInFeatureEnabled = true,
+            didAskToChangeSignupDetails = false,
+            errorMessage = null,
+            toggleExpanded = {},
+            changeSignupDetails = {},
+        )
     }
 }

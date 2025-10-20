@@ -65,12 +65,13 @@ internal sealed class ErrorTextStyle {
 internal fun ErrorText(
     text: String,
     modifier: Modifier = Modifier,
-    style: ErrorTextStyle = ErrorTextStyle.Medium
+    style: ErrorTextStyle = ErrorTextStyle.Medium,
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.Center
 ) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = horizontalArrangement
     ) {
         Icon(
             painter = painterResource(id = R.drawable.stripe_ic_sail_warning_circle),

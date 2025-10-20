@@ -30,8 +30,9 @@ internal class PollingContract :
         @ColorInt val statusBarColor: Int?,
         val timeLimitInSeconds: Int,
         val initialDelayInSeconds: Int,
-        val maxAttempts: Int,
         @StringRes val ctaText: Int,
+        val stripeAccountId: String?,
+        val qrCodeUrl: String?,
     ) : Parcelable {
 
         internal companion object {

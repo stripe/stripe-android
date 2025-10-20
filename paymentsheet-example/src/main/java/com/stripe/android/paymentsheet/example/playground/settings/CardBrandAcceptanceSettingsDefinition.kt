@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.link.LinkController
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
@@ -41,6 +42,15 @@ internal object CardBrandAcceptanceSettingsDefinition :
         configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData
+    ) {
+        configurationBuilder.cardBrandAcceptance(value.cardBrandAcceptance)
+    }
+
+    override fun configure(
+        value: CardBrandAcceptanceType,
+        configurationBuilder: LinkController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.LinkControllerConfigurationData
     ) {
         configurationBuilder.cardBrandAcceptance(value.cardBrandAcceptance)
     }

@@ -1,14 +1,26 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.link.LinkController
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 
 internal interface PlaygroundSettingDefinition<T> {
     val defaultValue: T
+
+    fun configure(
+        value: T,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PaymentSheetConfigurationData,
+        settings: Settings,
+    ) {
+        configure(value, configurationBuilder, playgroundState, configurationData)
+    }
 
     fun configure(
         value: T,
@@ -23,6 +35,14 @@ internal interface PlaygroundSettingDefinition<T> {
         configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: EmbeddedConfigurationData,
+    ) {
+    }
+
+    fun configure(
+        value: T,
+        configurationBuilder: LinkController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: LinkControllerConfigurationData,
     ) {
     }
 
@@ -121,6 +141,25 @@ internal interface PlaygroundSettingDefinition<T> {
 
     data class CustomerSheetConfigurationData(
         private val configurationBuilder: CustomerSheet.Configuration.Builder,
+        private val billingDetailsCollectionConfigurationBuilder: BillingDetailsCollectionConfigurationBuilder =
+            BillingDetailsCollectionConfigurationBuilder()
+    ) {
+        // Billing details is a nested configuration, but we have individual settings for it in the
+        // UI, this helper keeps all of the configurations, rather than just the most recent.
+        fun updateBillingDetails(
+            block: BillingDetailsCollectionConfigurationBuilder.() -> Unit
+        ) {
+            billingDetailsCollectionConfigurationBuilder.apply {
+                block()
+            }
+            configurationBuilder.billingDetailsCollectionConfiguration(
+                billingDetailsCollectionConfigurationBuilder.build()
+            )
+        }
+    }
+
+    data class LinkControllerConfigurationData(
+        private val configurationBuilder: LinkController.Configuration.Builder,
         private val billingDetailsCollectionConfigurationBuilder: BillingDetailsCollectionConfigurationBuilder =
             BillingDetailsCollectionConfigurationBuilder()
     ) {

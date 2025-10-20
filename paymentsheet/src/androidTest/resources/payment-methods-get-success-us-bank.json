@@ -1,0 +1,44 @@
+{
+  "object": "list",
+  "data": [{
+    "id": "pm_6789",
+    "object": "payment_method",
+    "allow_redisplay": "unspecified",
+    "billing_details": {
+      "address": {
+        "city": "South San Francisco",
+        "country": "US",
+        "line1": "354 Oyster Point Blvd",
+        "line2": null,
+        "postal_code": "94080",
+        "state": "CA"
+      },
+      "email": "email@email.com",
+      "name": "Jenny Rosen",
+      "phone": "+18008675309",
+      "tax_id": null
+    },
+    "created": 1755020663,
+    "customer": "cus_1",
+    "livemode": false,
+    "type": "us_bank_account",
+    "us_bank_account": {
+      "account_holder_type": "individual",
+      "account_type": "checking",
+      "bank_name": "STRIPE TEST BANK",
+      "financial_connections_account": "fca_a",
+      "fingerprint": "a",
+      "last4": "6789",
+      "linked_account": "fca_a",
+      "networks": {
+        "preferred": "ach",
+        "supported": [
+          "ach"]
+      },
+      "routing_number": "110000000",
+      "status_details": null
+    }
+  }],
+  "has_more": false,
+  "url": "/v1/payment_methods"
+}

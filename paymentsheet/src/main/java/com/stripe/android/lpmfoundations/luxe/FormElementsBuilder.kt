@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.luxe
 
-import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.elements.AddressSpec
@@ -16,7 +15,8 @@ internal class FormElementsBuilder(
     private val requiredContactInformationCollectionModes: MutableSet<ContactInformationCollectionMode> = mutableSetOf()
 
     private var requireBillingAddressCollection: Boolean = false
-    private var availableCountries: Set<String> = CountryUtils.supportedBillingCountries
+    private var availableCountries: Set<String> =
+        arguments.billingDetailsCollectionConfiguration.allowedBillingCountries
 
     init {
         // Setup the required contact information fields based on the merchant billingDetailsCollectionConfiguration.
@@ -86,6 +86,7 @@ internal class FormElementsBuilder(
                 val elements = AddressSpec(allowedCountryCodes = availableCountries).transform(
                     initialValues = arguments.initialValues,
                     shippingValues = arguments.shippingValues,
+                    autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
                 )
 
                 addAll(elements)

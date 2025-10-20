@@ -33,6 +33,7 @@ import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -45,6 +46,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.ui.core.elements.CvcController
@@ -324,7 +326,7 @@ internal class WalletScreenTest {
         composeTestRule.waitForIdle()
 
         onWalletPayButton().assertIsNotEnabled()
-        onWalletFormError().assertIsDisplayed()
+        onWalletFormError().assertDoesNotExist()
         onWalletFormFields().assertIsDisplayed()
         onWalletPayButton().assertIsNotEnabled()
     }
@@ -352,7 +354,7 @@ internal class WalletScreenTest {
         composeTestRule.waitForIdle()
 
         onWalletPayButton().assertIsNotEnabled()
-        onWalletFormError().assertIsDisplayed()
+        onWalletFormError().assertDoesNotExist()
         onWalletFormFields().assertIsDisplayed()
         onWalletPayButton().assertIsNotEnabled()
     }
@@ -625,10 +627,11 @@ internal class WalletScreenTest {
     fun `pay method row is loading when card is being updated`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
             override suspend fun updatePaymentDetails(
-                updateParams: ConsumerPaymentDetailsUpdateParams
+                updateParams: ConsumerPaymentDetailsUpdateParams,
+                phone: String?
             ): Result<ConsumerPaymentDetails> {
                 delay(1.seconds)
-                return super.updatePaymentDetails(updateParams)
+                return super.updatePaymentDetails(updateParams, phone)
             }
         }
         val card1 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card1", isDefault = false)
@@ -751,20 +754,26 @@ internal class WalletScreenTest {
             state = WalletUiState(
                 paymentDetailsList = paymentDetails,
                 email = "email@email.com",
-                selectedItemId = paymentDetails.firstOrNull()?.id,
+                allowLogOut = true,
                 cardBrandFilter = DefaultCardBrandFilter,
+                selectedItemId = paymentDetails.firstOrNull()?.id,
                 isProcessing = false,
-                hasCompleted = false,
-                primaryButtonLabel = "Buy".resolvableString,
-                secondaryButtonLabel = "Pay another way".resolvableString,
-                addPaymentMethodOptions = addPaymentMethodOptions,
-                userSetIsExpanded = true,
                 isSettingUp = false,
                 merchantName = "Example Inc.",
+                sellerBusinessName = null,
+                primaryButtonLabel = "Buy".resolvableString,
+                secondaryButtonLabel = "Pay another way".resolvableString,
+                hasCompleted = false,
+                addPaymentMethodOptions = addPaymentMethodOptions,
+                userSetIsExpanded = true,
+                collectMissingBillingDetailsForExistingPaymentMethods = true,
+                signupToggleEnabled = false,
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             ),
             onItemSelected = {},
             onExpandedChanged = {},
             onPrimaryButtonClick = {},
+            onDisabledButtonClick = {},
             onPayAnotherWayClicked = {},
             onRemoveClicked = onRemoveClicked,
             onSetDefaultClicked = onSetDefaultClicked,
@@ -790,13 +799,23 @@ internal class WalletScreenTest {
             configuration = TestFactory.LINK_CONFIGURATION,
             linkAccount = TestFactory.LINK_ACCOUNT,
             linkAccountManager = linkAccountManager,
-            linkConfirmationHandler = linkConfirmationHandler,
             logger = FakeLogger(),
             navigateAndClearStack = {},
             dismissWithResult = {},
             navigationManager = navigationManager,
             linkLaunchMode = linkLaunchMode,
-            dismissalCoordinator = dismissalCoordinator
+            dismissalCoordinator = dismissalCoordinator,
+            completeLinkFlow = DefaultCompleteLinkFlow(
+                linkConfirmationHandler = linkConfirmationHandler,
+                linkAccountManager = linkAccountManager,
+                dismissalCoordinator = dismissalCoordinator,
+                linkLaunchMode = linkLaunchMode
+            ),
+            addPaymentMethodOptions = AddPaymentMethodOptions(
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                configuration = TestFactory.LINK_CONFIGURATION,
+                linkLaunchMode = linkLaunchMode
+            )
         )
     }
 

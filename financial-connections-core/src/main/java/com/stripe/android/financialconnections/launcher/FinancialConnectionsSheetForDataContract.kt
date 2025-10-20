@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.launcher
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
@@ -23,6 +24,9 @@ class FinancialConnectionsSheetForDataContract(
         resultCode: Int,
         intent: Intent?
     ): FinancialConnectionsSheetResult {
+        if (resultCode == Activity.RESULT_CANCELED) {
+            return FinancialConnectionsSheetResult.Canceled
+        }
         return intent
             ?.getParcelableExtra<FinancialConnectionsSheetActivityResult>(EXTRA_RESULT)
             ?.toExposedResult()

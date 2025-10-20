@@ -24,8 +24,8 @@ private const val FIELD_BILLING_EMAIL_ADDRESS = "billing_email_address"
 private const val FIELD_ADDRESS_COUNTRY_CODE = "country_code"
 private const val FIELD_ADDRESS_POSTAL_CODE = "postal_code"
 private const val FIELD_ADDRESS_NAME = "name"
-private const val FIELD_ADDRESS_LINE_1 = "line1"
-private const val FIELD_ADDRESS_LINE_2 = "line2"
+private const val FIELD_ADDRESS_LINE_1 = "line_1"
+private const val FIELD_ADDRESS_LINE_2 = "line_2"
 private const val FIELD_ADDRESS_LOCALITY = "locality"
 private const val FIELD_ADDRESS_ADMINISTRATIVE_AREA = "administrative_area"
 
@@ -94,6 +94,8 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
                         bankIconCode = optString(bankAccountDetails, FIELD_BANK_ACCOUNT_BANK_ICON_CODE),
                         isDefault = isDefault,
                         nickname = nickname,
+                        billingAddress = parseBillingAddress(json),
+                        billingEmailAddress = optString(json, FIELD_BILLING_EMAIL_ADDRESS)
                     )
                 }
                 else -> null

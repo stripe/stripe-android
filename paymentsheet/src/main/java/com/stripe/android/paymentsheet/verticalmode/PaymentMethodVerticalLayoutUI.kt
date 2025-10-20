@@ -12,10 +12,13 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -77,11 +80,25 @@ internal fun PaymentMethodVerticalLayoutUI(
             )
         },
         imageLoader = imageLoader,
+        updatePaymentMethodVisibility = { itemCode, coordinates ->
+            interactor.handleViewAction(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.UpdatePaymentMethodVisibility(
+                    itemCode,
+                    coordinates,
+                )
+            )
+        },
+        cancelPaymentMethodVisibilityTracking = {
+            interactor.handleViewAction(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.CancelPaymentMethodVisibilityTracking
+            )
+        },
         modifier = modifier
             .testTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT)
     )
 }
 
+@Suppress("LongMethod")
 @VisibleForTesting
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(
@@ -95,16 +112,25 @@ internal fun PaymentMethodVerticalLayoutUI(
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
+    updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
+    cancelPaymentMethodVisibilityTracking: () -> Unit = {},
 ) {
+    val paymentMethodCodes = remember(paymentMethods, displayedSavedPaymentMethod) {
+        val output = paymentMethods.map { it.code }
+        output.plus("saved_${displayedSavedPaymentMethod?.paymentMethod?.id}")
+            .takeIf { displayedSavedPaymentMethod != null } ?: output
+    }
+    DisposableEffect(paymentMethodCodes) { onDispose { cancelPaymentMethodVisibilityTracking.invoke() } }
+
     Column(modifier = modifier) {
         val textStyle = MaterialTheme.typography.subtitle1
         val textColor = MaterialTheme.stripeColors.onComponent
 
         val rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default.run {
-            PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton(
-                spacingDp = spacingDp,
-                additionalInsetsDp = StripeTheme.verticalModeRowPadding,
-            )
+            PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.Builder()
+                .spacingDp(spacingDp)
+                .additionalInsetsDp(StripeTheme.verticalModeRowPadding)
+                .build()
         }
 
         if (displayedSavedPaymentMethod != null) {
@@ -116,6 +142,9 @@ internal fun PaymentMethodVerticalLayoutUI(
             )
             Spacer(Modifier.size(16.dp))
             SavedPaymentMethodRowButton(
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    updatePaymentMethodVisibility.invoke("saved", coordinates)
+                },
                 displayableSavedPaymentMethod = displayedSavedPaymentMethod,
                 isEnabled = isEnabled,
                 isSelected = selection?.isSaved == true,
@@ -127,7 +156,7 @@ internal fun PaymentMethodVerticalLayoutUI(
                         onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
                     )
                 },
-                rowStyle = rowStyle,
+                appearance = PaymentSheet.Appearance.Embedded(rowStyle),
             )
             Spacer(Modifier.size(24.dp))
             Text(stringResource(id = R.string.stripe_paymentsheet_new_pm), style = textStyle, color = textColor)
@@ -149,6 +178,7 @@ internal fun PaymentMethodVerticalLayoutUI(
             isEnabled = isEnabled,
             imageLoader = imageLoader,
             rowStyle = rowStyle,
+            updatePaymentMethodVisibility = updatePaymentMethodVisibility,
         )
     }
 }

@@ -10,6 +10,8 @@ import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConfirmationToken
+import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -152,6 +154,12 @@ interface StripeRepository {
     ): Result<Token>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun createConfirmationToken(
+        confirmationTokenParams: ConfirmationTokenParams,
+        options: ApiRequest.Options
+    ): Result<ConfirmationToken>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun addCustomerSource(
         customerId: String,
         publishableKey: String,
@@ -282,6 +290,12 @@ interface StripeRepository {
     ): Result<RadarSessionWithHCaptcha>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun createSavedPaymentMethodRadarSession(
+        paymentMethodId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<RadarSessionWithHCaptcha>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun attachHCaptchaToRadarSession(
         radarSessionToken: String,
         hcaptchaToken: String,
@@ -297,7 +311,7 @@ interface StripeRepository {
         id: String,
         extraParams: Map<String, *>?,
         requestOptions: ApiRequest.Options
-    ): Result<String>
+    ): Result<PaymentMethod>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun logOut(
@@ -434,4 +448,10 @@ interface StripeRepository {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun buildPaymentUserAgent(attribution: Set<String> = emptySet()): String
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val DEFAULT_REQUEST_SURFACE = RequestSurface.PaymentElement
+    }
 }

@@ -153,6 +153,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                     phoneCountryCode = null,
                 ),
                 incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
+                allowRedisplay = null,
             )
         )
 
@@ -225,7 +226,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 type = eq(type),
                 connectionsMerchantName = anyOrNull(),
                 customEmailType = anyOrNull(),
-                requestOptions = eq(apiOptions)
+                requestOptions = eq(apiOptions),
+                isResendSmsCode = any()
             )
         ).thenReturn(consumerSession)
 
@@ -277,6 +279,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 verificationCode = eq(verificationCode),
                 requestSurface = eq("android_connections"),
                 type = eq(type),
+                consentGranted = eq(null),
                 requestOptions = eq(apiOptions)
             )
         ).thenReturn(consumerSession)
@@ -295,9 +298,10 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         verify(consumersApiService).confirmConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
             verificationCode = verificationCode,
-            "android_connections",
-            type,
-            apiOptions
+            requestSurface = "android_connections",
+            type = type,
+            consentGranted = null,
+            requestOptions = apiOptions
         )
 
         // ensures there's a cached consumer session after the confirm-verification call.

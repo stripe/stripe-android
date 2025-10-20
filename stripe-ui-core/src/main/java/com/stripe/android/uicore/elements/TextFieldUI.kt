@@ -394,6 +394,7 @@ fun TextFieldColors(
     textColor: Color = MaterialTheme.stripeColors.onComponent,
     disabledTextColor: Color = textColor.copy(ContentAlpha.disabled),
     backgroundColor: Color = MaterialTheme.stripeColors.component,
+    disabledIndicatorColor: Color = Color.Transparent,
 ) = TextFieldDefaults.textFieldColors(
     textColor = if (shouldShowError) {
         MaterialTheme.colors.error
@@ -406,7 +407,7 @@ fun TextFieldColors(
     placeholderColor = MaterialTheme.stripeColors.placeholderText,
     backgroundColor = backgroundColor,
     focusedIndicatorColor = Color.Transparent,
-    disabledIndicatorColor = Color.Transparent,
+    disabledIndicatorColor = disabledIndicatorColor,
     unfocusedIndicatorColor = Color.Transparent,
     cursorColor = MaterialTheme.stripeColors.textCursor
 )

@@ -20,7 +20,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 import com.stripe.android.uicore.StripeTheme
 
-private val ShopPayBackgroundColor = Color(0xFF5433EB)
+internal val ShopPayBackgroundColor = Color(0xFF5433EB)
 private val ShopPayButtonVerticalPadding = 10.dp
 private val ShopPayButtonHorizontalPadding = 25.dp
 

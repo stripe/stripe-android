@@ -17,7 +17,7 @@ class APIConnectionExceptionTest {
                 "(https://api.stripe.com/v1/payment_methods): Could not connect. " +
                 "Please check your internet connection and try again. " +
                 "If this problem persists, you should check Stripe's service " +
-                "status at https://twitter.com/stripestatus, " +
+                "status at https://status.stripe.com/, " +
                 "or let us know at support@stripe.com.",
             ex.message
         )
@@ -32,7 +32,7 @@ class APIConnectionExceptionTest {
             "IOException during API request to Stripe: Could not connect. " +
                 "Please check your internet connection and try again. " +
                 "If this problem persists, you should check Stripe's service " +
-                "status at https://twitter.com/stripestatus, " +
+                "status at https://status.stripe.com/, " +
                 "or let us know at support@stripe.com.",
             ex.message
         )

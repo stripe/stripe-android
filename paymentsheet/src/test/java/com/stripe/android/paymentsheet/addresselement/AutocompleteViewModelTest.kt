@@ -3,11 +3,13 @@ package com.stripe.android.paymentsheet.addresselement
 import android.app.Application
 import android.text.SpannableString
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
@@ -20,7 +22,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -31,16 +32,12 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class AutocompleteViewModelTest {
-    private val args = mock<AddressElementActivityContract.Args>()
-    private val navigator = mock<AddressElementNavigator>()
     private val application = ApplicationProvider.getApplicationContext<Application>()
     private val mockClient = mock<PlacesClientProxy>()
     private val mockEventReporter = mock<AddressLauncherEventReporter>()
 
     private fun createViewModel() =
         AutocompleteViewModel(
-            args,
-            navigator,
             mockClient,
             AutocompleteViewModel.Args(
                 "US"
@@ -53,47 +50,76 @@ class AutocompleteViewModelTest {
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun `selectPrediction emits successful result`() = runTest(UnconfinedTestDispatcher()) {
+    fun `selectPrediction emits go back event with selected prediction`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel()
         val fetchPlaceResponse = Result.success(
             FetchPlaceResponse(
                 Place(
-                    listOf()
-                )
-            )
-        )
-        val expectedResult = Result.success(
-            AddressDetails(
-                address = PaymentSheet.Address(
-                    city = null,
-                    country = null,
-                    line1 = "",
-                    line2 = null,
-                    postalCode = null,
-                    state = null
+                    listOf(
+                        AddressComponent(
+                            shortName = "123",
+                            longName = "123",
+                            types = listOf(Place.Type.STREET_NUMBER.value)
+                        ),
+                        AddressComponent(
+                            shortName = "King Street",
+                            longName = "King Street",
+                            types = listOf(Place.Type.ROUTE.value)
+                        ),
+                        AddressComponent(
+                            shortName = "South SF",
+                            longName = "South San Francisco",
+                            types = listOf(Place.Type.LOCALITY.value)
+                        ),
+                        AddressComponent(
+                            shortName = "CA",
+                            longName = "California",
+                            types = listOf(Place.Type.ADMINISTRATIVE_AREA_LEVEL_1.value)
+                        ),
+                        AddressComponent(
+                            shortName = "US",
+                            longName = "United States",
+                            types = listOf(Place.Type.COUNTRY.value)
+                        ),
+                        AddressComponent(
+                            shortName = "99999",
+                            longName = "99999",
+                            types = listOf(Place.Type.POSTAL_CODE.value)
+                        )
+                    )
                 )
             )
         )
         whenever(mockClient.fetchPlace(any())).thenReturn(fetchPlaceResponse)
 
-        viewModel.selectPrediction(
-            AutocompletePrediction(
-                SpannableString("primaryText"),
-                SpannableString("secondaryText"),
-                "placeId"
+        viewModel.event.test {
+            viewModel.selectPrediction(
+                AutocompletePrediction(
+                    SpannableString("primaryText"),
+                    SpannableString("secondaryText"),
+                    "placeId"
+                )
             )
-        )
 
-        assertThat(viewModel.loading.value).isEqualTo(false)
-        assertThat(viewModel.addressResult.value)
-            .isEqualTo(expectedResult)
+            assertThat(viewModel.loading.value).isEqualTo(false)
 
-        verify(navigator).setResult(anyOrNull(), eq(expectedResult.getOrNull()))
-        verify(navigator).onBack()
+            assertThat(awaitItem()).isEqualTo(
+                AutocompleteViewModel.Event.GoBack(
+                    address = PaymentSheet.Address(
+                        city = "South San Francisco",
+                        country = "US",
+                        line1 = "123 King Street",
+                        line2 = null,
+                        postalCode = "99999",
+                        state = "CA"
+                    )
+                )
+            )
+        }
     }
 
     @Test
-    fun `selectPrediction emits failure result`() = runTest(UnconfinedTestDispatcher()) {
+    fun `selectPrediction failure emits go back event with no address`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel()
         val exception = Exception("fake exception")
         val result = Result.failure<FetchPlaceResponse>(exception)
@@ -102,20 +128,19 @@ class AutocompleteViewModelTest {
             onBlocking { fetchPlace(any()) }.thenReturn(result)
         }
 
-        viewModel.selectPrediction(
-            AutocompletePrediction(
-                SpannableString("primaryText"),
-                SpannableString("secondaryText"),
-                "placeId"
+        viewModel.event.test {
+            viewModel.selectPrediction(
+                AutocompletePrediction(
+                    SpannableString("primaryText"),
+                    SpannableString("secondaryText"),
+                    "placeId"
+                )
             )
-        )
 
-        assertThat(viewModel.loading.value).isEqualTo(false)
-        assertThat(viewModel.addressResult.value)
-            .isEqualTo(Result.failure<FetchPlaceResponse>(exception))
+            assertThat(viewModel.loading.value).isEqualTo(false)
 
-        verify(navigator).setResult(anyOrNull(), eq(null))
-        verify(navigator).onBack()
+            assertThat(awaitItem()).isEqualTo(AutocompleteViewModel.Event.GoBack(address = null))
+        }
     }
 
     @Test
@@ -135,36 +160,34 @@ class AutocompleteViewModelTest {
         )
 
         val viewModel = createViewModel()
-        val expectedResult = Result.success(
-            AddressDetails(
-                address = PaymentSheet.Address(
-                    line1 = "Some query"
+
+        viewModel.event.test {
+            viewModel.textFieldController.onRawValueChange("Some query")
+            viewModel.onEnterAddressManually()
+
+            assertThat(awaitItem()).isEqualTo(
+                AutocompleteViewModel.Event.EnterManually(
+                    address = PaymentSheet.Address(
+                        line1 = "Some query"
+                    )
                 )
             )
-        )
-
-        viewModel.textFieldController.onRawValueChange("Some query")
-        viewModel.onEnterAddressManually()
-
-        verify(navigator).setResult(anyOrNull(), eq(expectedResult.getOrNull()))
-        verify(navigator).onBack()
+        }
     }
 
     @Test
-    fun `onEnterAddressManually navigates back with empty address`() = runTest(UnconfinedTestDispatcher()) {
+    fun `onEnterAddressManually navigates back with enter manually event`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel()
-        val expectedResult = Result.success(
-            AddressDetails(
-                address = PaymentSheet.Address(
-                    line1 = ""
+
+        viewModel.event.test {
+            viewModel.onEnterAddressManually()
+
+            assertThat(awaitItem()).isEqualTo(
+                AutocompleteViewModel.Event.EnterManually(
+                    address = null,
                 )
             )
-        )
-
-        viewModel.onEnterAddressManually()
-
-        verify(navigator).setResult(anyOrNull(), eq(expectedResult.getOrNull()))
-        verify(navigator).onBack()
+        }
     }
 
     @Test
@@ -175,6 +198,41 @@ class AutocompleteViewModelTest {
         (trailingIcon.value as? TextFieldIcon.Trailing)?.onClick?.invoke()
 
         assertThat(viewModel.textFieldController.rawFieldValue.value).isEqualTo("")
+    }
+
+    @Test
+    fun `query is valid when 2 characters are entered`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel()
+
+        viewModel.textFieldController.onRawValueChange("12")
+
+        whenever(mockClient.findAutocompletePredictions(any(), any(), any())).thenReturn(
+            Result.success(
+                FindAutocompletePredictionsResponse(
+                    listOf(
+                        AutocompletePrediction(
+                            SpannableString("primaryText"),
+                            SpannableString("secondaryText"),
+                            "placeId"
+                        )
+                    )
+                )
+            )
+        )
+
+        // Advance past search debounce delay
+        advanceTimeBy(AutocompleteViewModel.SEARCH_DEBOUNCE_MS + 1)
+
+        assertThat(viewModel.predictions.value?.size).isEqualTo(1)
+    }
+
+    @Test
+    fun `query is invalid when less than 2 characters are entered`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel()
+
+        viewModel.textFieldController.onRawValueChange("1")
+
+        verify(mockClient, never()).findAutocompletePredictions(any(), any(), any())
     }
 
     @Test
@@ -229,26 +287,31 @@ class AutocompleteViewModelTest {
     }
 
     @Test
-    fun `when query is not empty then return line1 on back`() = runTest(UnconfinedTestDispatcher()) {
+    fun `on back when query is not empty, should not return anything`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.textFieldController.onRawValueChange("a")
-        viewModel.onBackPressed()
+        viewModel.event.test {
+            viewModel.textFieldController.onRawValueChange("a")
+            viewModel.onBackPressed()
 
-        verify(viewModel.navigator).setResult(
-            eq(AddressDetails.KEY),
-            eq(AddressDetails(address = PaymentSheet.Address(line1 = "a")))
-        )
+            assertThat(awaitItem()).isEqualTo(
+                AutocompleteViewModel.Event.GoBack(address = null)
+            )
+        }
     }
 
     @Test
-    fun `when query is empty then do nothing on back`() = runTest(UnconfinedTestDispatcher()) {
+    fun `when query is empty then return null`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.textFieldController.onRawValueChange("")
-        viewModel.onBackPressed()
+        viewModel.event.test {
+            viewModel.textFieldController.onRawValueChange("")
+            viewModel.onBackPressed()
 
-        verify(viewModel.navigator, never()).setResult(any(), any())
+            assertThat(awaitItem()).isEqualTo(
+                AutocompleteViewModel.Event.GoBack(address = null)
+            )
+        }
     }
 
     @Test

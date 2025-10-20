@@ -105,9 +105,9 @@ internal class PaymentOptionsActivityTest {
             idleLooper()
 
             assertThat(
-                PaymentOptionResult.fromIntent(it.getResult().resultData)
+                PaymentOptionsActivityResult.fromIntent(it.getResult().resultData)
             ).isEqualTo(
-                PaymentOptionResult.Canceled(null, null, listOf(), LinkAccountUpdate.Value(null))
+                PaymentOptionsActivityResult.Canceled(null, null, listOf(), LinkAccountUpdate.Value(null))
             )
         }
     }
@@ -140,9 +140,15 @@ internal class PaymentOptionsActivityTest {
 
             composeTestRule.waitForIdle()
 
-            val result = PaymentOptionResult.fromIntent(it.getResult().resultData)
+            val result = PaymentOptionsActivityResult.fromIntent(it.getResult().resultData)
             assertThat(result).isEqualTo(
-                PaymentOptionResult.Canceled(null, initialSelection, paymentMethods, LinkAccountUpdate.Value(null))
+                PaymentOptionsActivityResult
+                    .Canceled(
+                        mostRecentError = null,
+                        paymentSelection = initialSelection,
+                        paymentMethods = paymentMethods,
+                        linkAccountInfo = LinkAccountUpdate.Value(null)
+                    )
             )
         }
     }
@@ -247,9 +253,9 @@ internal class PaymentOptionsActivityTest {
 
             composeTestRule.waitForIdle()
 
-            val result = PaymentOptionResult.fromIntent(scenario.getResult().resultData)
+            val result = PaymentOptionsActivityResult.fromIntent(scenario.getResult().resultData)
             assertThat(result).isEqualTo(
-                PaymentOptionResult.Succeeded(
+                PaymentOptionsActivityResult.Succeeded(
                     paymentSelection = PaymentSelection.GooglePay,
                     paymentMethods = emptyList(),
                     linkAccountInfo = LinkAccountUpdate.Value(null)
@@ -460,7 +466,7 @@ internal class PaymentOptionsActivityTest {
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                linkGateFactory = { FakeLinkGate() },
+                linkGateFactory = FakeLinkGate.Factory(),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 linkPaymentLauncher = mock(),

@@ -26,7 +26,6 @@ import com.stripe.android.stripe3ds2.transactions.ChallengeResponseData
 import com.stripe.android.stripe3ds2.transactions.ErrorData
 import com.stripe.android.stripe3ds2.transactions.UiType
 import com.stripe.android.stripe3ds2.utils.AnalyticsDelegate
-import kotlin.coroutines.CoroutineContext
 
 internal class ChallengeFragment(
     private val uiCustomization: StripeUiCustomization,
@@ -37,7 +36,6 @@ internal class ChallengeFragment(
     private val challengeActionHandler: ChallengeActionHandler,
     private val initialUiType: UiType?,
     private val intentData: IntentData,
-    private val workContext: CoroutineContext
 ) : Fragment(R.layout.stripe_challenge_fragment) {
 
     private lateinit var cresData: ChallengeResponseData
@@ -49,7 +47,6 @@ internal class ChallengeFragment(
             challengeActionHandler,
             transactionTimer,
             errorReporter,
-            workContext
         )
     }
 

@@ -10,11 +10,16 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.WebLinkAuthChannel
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -120,9 +125,9 @@ internal class VerificationScreenTest {
     @Test
     fun `title, email, otp and loader should be displayed when resending code`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
-            override suspend fun startVerification(): Result<LinkAccount> {
+            override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
                 delay(1500)
-                return super.startVerification()
+                return super.startVerification(isResendSmsCode)
             }
         }
 
@@ -152,9 +157,9 @@ internal class VerificationScreenTest {
     @Test
     fun `title, email, otp should be displayed when verification is in process`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
-            override suspend fun confirmVerification(code: String): Result<LinkAccount> {
+            override suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount> {
                 delay(5500)
-                return super.confirmVerification(code)
+                return super.confirmVerification(code, consentGranted)
             }
         }
 
@@ -197,6 +202,7 @@ internal class VerificationScreenTest {
                     onBack = viewModel::onBack,
                     onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
                     onResendCodeClick = viewModel::resendCode,
+                    onConsentShown = viewModel::onConsentShown,
                     onFocusRequested = viewModel::onFocusRequested,
                     didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
                 )
@@ -206,7 +212,7 @@ internal class VerificationScreenTest {
         onTitleField().assertIsDisplayed()
         onSubtitleTag().assertIsDisplayed()
         onOtpTag().assertIsDisplayed()
-        onEmailTag().assertDoesNotExist()
+        onEmailTag().assertIsDisplayed()
         onErrorTag().assertDoesNotExist()
         onLoaderTag().assertDoesNotExist()
         onResendCodeButtonTag()
@@ -238,6 +244,7 @@ internal class VerificationScreenTest {
                     onBack = viewModel::onBack,
                     onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
                     onResendCodeClick = viewModel::resendCode,
+                    onConsentShown = viewModel::onConsentShown,
                     onFocusRequested = viewModel::onFocusRequested,
                     didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
                 )
@@ -255,17 +262,23 @@ internal class VerificationScreenTest {
         linkEventsReporter: LinkEventsReporter = VerificationLinkEventsReporter(),
         logger: Logger = FakeLogger(),
         isDialog: Boolean = false,
-        onDismissClicked: () -> Unit = {}
+        onDismissClicked: () -> Unit = {},
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.PaymentMethodSelection(null),
+        dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): VerificationViewModel {
         return VerificationViewModel(
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
-            onDismissClicked = onDismissClicked,
-            onVerificationSucceeded = {},
+            linkLaunchMode = linkLaunchMode,
+            webLinkAuthChannel = WebLinkAuthChannel(),
+            isDialog = isDialog,
+            onVerificationSucceeded = { _ -> },
             onChangeEmailRequested = {},
-            linkAccount = TestFactory.LINK_ACCOUNT,
-            isDialog = isDialog
+            onDismissClicked = onDismissClicked,
+            dismissWithResult = dismissWithResult
         )
     }
 

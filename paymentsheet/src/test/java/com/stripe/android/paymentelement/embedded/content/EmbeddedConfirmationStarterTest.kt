@@ -7,7 +7,9 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
+import com.stripe.android.paymentelement.confirmation.assertCanceled
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
+import com.stripe.android.paymentelement.embedded.FakeEmbeddedConfirmationSaver
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
@@ -111,6 +113,31 @@ class EmbeddedConfirmationStarterTest {
             confirmationStarter.result.test {
                 expectNoEvents()
             }
+
+            assertThat(confirmationSaver.saveTurbine.awaitItem()).isEqualTo(intent)
+        }
+    }
+
+    @Test
+    fun `on complete state, but failed, should not emit save event`() {
+        test(
+            confirmationState = ConfirmationHandler.State.Complete(
+                result = ConfirmationHandler.Result.Canceled(
+                    action = ConfirmationHandler.Result.Canceled.Action.InformCancellation
+                ),
+            ),
+        ) {
+            confirmationStarter.result.test {
+                awaitItem().assertCanceled()
+            }
+
+            confirmationStarter.result.test {
+                expectNoEvents()
+            }
+
+            confirmationStarter.result.test {
+                expectNoEvents()
+            }
         }
     }
 
@@ -122,19 +149,25 @@ class EmbeddedConfirmationStarterTest {
             state = MutableStateFlow(confirmationState)
         )
 
+        val confirmationSaver = FakeEmbeddedConfirmationSaver()
+
         Scenario(
             confirmationStarter = EmbeddedConfirmationStarter(
                 confirmationHandler = confirmationHandler,
                 coroutineScope = backgroundScope,
+                confirmationSaver = confirmationSaver,
             ),
             confirmationHandler = confirmationHandler,
+            confirmationSaver = confirmationSaver,
         ).block()
 
         confirmationHandler.validate()
+        confirmationSaver.validate()
     }
 
     private class Scenario(
         val confirmationStarter: EmbeddedConfirmationStarter,
         val confirmationHandler: FakeConfirmationHandler,
+        val confirmationSaver: FakeEmbeddedConfirmationSaver,
     )
 }

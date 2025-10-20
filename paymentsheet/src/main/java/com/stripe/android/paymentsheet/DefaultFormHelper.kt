@@ -20,7 +20,9 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -39,13 +41,17 @@ internal class DefaultFormHelper(
     private val setAsDefaultMatchesSaveForFutureUse: Boolean,
     private val eventReporter: EventReporter,
     private val savedStateHandle: SavedStateHandle,
+    private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
+    private val isLinkUI: Boolean = false,
+    private val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
 ) : FormHelper {
     companion object {
         internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
-            linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create()
+            linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
+            shouldCreateAutomaticallyLaunchedCardScanFormDataHelper: Boolean = false,
         ): FormHelper {
             return DefaultFormHelper(
                 coroutineScope = viewModel.viewModelScope,
@@ -62,15 +68,32 @@ internal class DefaultFormHelper(
                 setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
                 eventReporter = viewModel.eventReporter,
                 savedStateHandle = viewModel.savedStateHandle,
+                autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
+                automaticallyLaunchedCardScanFormDataHelper =
+                if (shouldCreateAutomaticallyLaunchedCardScanFormDataHelper) {
+                    val hasSeenAutomaticCardScanLaunch =
+                        viewModel.newPaymentSelection?.paymentSelection is PaymentSelection.New.Card &&
+                            viewModel.newPaymentSelection?.getPaymentMethodCreateParams() != null
+
+                    AutomaticallyLaunchedCardScanFormDataHelper(
+                        openCardScanAutomaticallyConfig = paymentMethodMetadata.openCardScanAutomatically,
+                        savedStateHandle = viewModel.savedStateHandle,
+                        hasAutomaticallyLaunchedCardScanInitialValue = hasSeenAutomaticCardScanLaunch,
+                    )
+                } else {
+                    null
+                },
             )
         }
 
         fun create(
             coroutineScope: CoroutineScope,
             cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+            autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
             paymentMethodMetadata: PaymentMethodMetadata,
             eventReporter: EventReporter,
             savedStateHandle: SavedStateHandle,
+            isLinkUI: Boolean = false,
         ): FormHelper {
             return DefaultFormHelper(
                 coroutineScope = coroutineScope,
@@ -83,6 +106,9 @@ internal class DefaultFormHelper(
                 setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
                 eventReporter = eventReporter,
                 savedStateHandle = savedStateHandle,
+                autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                isLinkUI = isLinkUI,
+                automaticallyLaunchedCardScanFormDataHelper = null
             )
         }
     }
@@ -145,6 +171,7 @@ internal class DefaultFormHelper(
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                 cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
                 linkConfigurationCoordinator = linkConfigurationCoordinator,
+                linkInlineHandler = linkInlineHandler,
                 onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
                 paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
                 paymentMethodOptionsParams = currentSelection?.getPaymentMethodOptionParams(),
@@ -153,7 +180,15 @@ internal class DefaultFormHelper(
                     is PaymentSelection.New.LinkInline -> selection.input
                     else -> null
                 },
+                previousLinkSignupCheckboxSelection = when (currentSelection?.paymentSelection) {
+                    is PaymentSelection.New.LinkInline -> true // User entered a card and opted-in to Link
+                    is PaymentSelection.New.Card -> false // User entered a card and did not opt-in to Link
+                    else -> null // Not a card, so no previous choice
+                },
                 setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
+                autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                isLinkUI = isLinkUI,
+                automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
             ),
         ) ?: emptyList()
     }

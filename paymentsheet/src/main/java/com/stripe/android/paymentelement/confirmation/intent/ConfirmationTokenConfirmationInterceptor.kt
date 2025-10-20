@@ -1,0 +1,292 @@
+package com.stripe.android.paymentelement.confirmation.intent
+
+import android.content.Context
+import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmationToken
+import com.stripe.android.model.ConfirmationTokenClientContextParams
+import com.stripe.android.model.ConfirmationTokenParams
+import com.stripe.android.model.DeferredIntentParams
+import com.stripe.android.model.MandateDataParams
+import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.RadarOptions
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.setupFutureUsage
+import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
+import com.stripe.android.paymentelement.confirmation.utils.ConfirmActionHelper
+import com.stripe.android.paymentelement.confirmation.utils.toConfirmParamsSetupFutureUsage
+import com.stripe.android.payments.DefaultReturnUrl
+import com.stripe.android.paymentsheet.CreateIntentResult
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.toDeferredIntentParams
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+
+internal class ConfirmationTokenConfirmationInterceptor @AssistedInject constructor(
+    @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
+    @Assisted private val createIntentCallback: CreateIntentWithConfirmationTokenCallback,
+    @Assisted(CUSTOMER_ID) private val customerId: String?,
+    @Assisted(EPHEMERAL_KEY_SECRET) private val ephemeralKeySecret: String?,
+    private val context: Context,
+    private val stripeRepository: StripeRepository,
+    private val requestOptions: ApiRequest.Options,
+    private val userFacingLogger: UserFacingLogger,
+) : IntentConfirmationInterceptor {
+    private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptions.apiKeyIsLiveMode)
+
+    override suspend fun intercept(
+        intent: StripeIntent,
+        confirmationOption: PaymentMethodConfirmationOption.New,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?
+    ): ConfirmationDefinition.Action<Args> {
+        return stripeRepository.createConfirmationToken(
+            confirmationTokenParams = prepareConfirmationTokenParams(
+                confirmationOption,
+                shippingValues,
+            ),
+            options = requestOptions,
+        ).fold(
+            onSuccess = { confirmationToken ->
+                handleDeferredOnConfirmationTokenCreated(
+                    intent = intent,
+                    confirmationToken = confirmationToken,
+                    shippingValues = shippingValues,
+                    // For new PM, radar options is attached in paymentMethodData.radarOptions if provided.
+                    // hCaptchaToken = null here means we don't need to send a separate one when confirming the intent.
+                    hCaptchaToken = null,
+                )
+            },
+            onFailure = { error ->
+                ConfirmationDefinition.Action.Fail(
+                    cause = error,
+                    message = error.stripeErrorMessage(),
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                )
+            }
+        )
+    }
+
+    override suspend fun intercept(
+        intent: StripeIntent,
+        confirmationOption: PaymentMethodConfirmationOption.Saved,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?
+    ): ConfirmationDefinition.Action<Args> {
+        val paymentMethod = confirmationOption.paymentMethod
+        return stripeRepository.createConfirmationToken(
+            confirmationTokenParams = prepareConfirmationTokenParams(
+                confirmationOption,
+                shippingValues,
+            ),
+            options = if (paymentMethod.customerId != null) {
+                requestOptions.copy(
+                    apiKey = ephemeralKeySecret ?: "".also {
+                        userFacingLogger.logWarningWithoutPii(ERROR_MISSING_EPHEMERAL_KEY_SECRET)
+                    }
+                )
+            } else {
+                requestOptions
+            },
+        ).fold(
+            onSuccess = { confirmationToken ->
+                handleDeferredOnConfirmationTokenCreated(
+                    intent = intent,
+                    confirmationToken = confirmationToken,
+                    shippingValues = shippingValues,
+                    hCaptchaToken = confirmationOption.hCaptchaToken,
+                )
+            },
+            onFailure = { error ->
+                ConfirmationDefinition.Action.Fail(
+                    cause = error,
+                    message = error.stripeErrorMessage(),
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                )
+            }
+        )
+    }
+
+    private suspend fun handleDeferredOnConfirmationTokenCreated(
+        intent: StripeIntent,
+        confirmationToken: ConfirmationToken,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        hCaptchaToken: String?,
+    ): ConfirmationDefinition.Action<Args> {
+        val result = createIntentCallback.onCreateIntent(confirmationToken)
+
+        return when (result) {
+            is CreateIntentResult.Success -> {
+                if (result.clientSecret == IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT) {
+                    ConfirmationDefinition.Action.Complete(
+                        intent = intent,
+                        deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                        completedFullPaymentFlow = true,
+                    )
+                } else {
+                    handleDeferredIntentCreationSuccess(
+                        clientSecret = result.clientSecret,
+                        confirmationTokenId = confirmationToken.id,
+                        shippingValues = shippingValues,
+                        hCaptchaToken = hCaptchaToken,
+                    )
+                }
+            }
+
+            is CreateIntentResult.Failure -> {
+                val exception = CreateIntentWithConfirmationTokenCallbackFailureException(result.cause)
+                ConfirmationDefinition.Action.Fail(
+                    cause = exception,
+                    message = result.displayMessage?.resolvableString
+                        ?: exception.stripeErrorMessage(),
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                )
+            }
+        }
+    }
+
+    private suspend fun handleDeferredIntentCreationSuccess(
+        clientSecret: String,
+        confirmationTokenId: String,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        hCaptchaToken: String?,
+    ): ConfirmationDefinition.Action<Args> {
+        return stripeRepository.retrieveStripeIntent(
+            clientSecret = clientSecret,
+            options = requestOptions,
+        ).mapCatching { intent ->
+            if (intent.isConfirmed) {
+                ConfirmationDefinition.Action.Complete(
+                    intent = intent,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    completedFullPaymentFlow = true,
+                )
+            } else if (intent.requiresAction()) {
+                ConfirmationDefinition.Action.Launch<Args>(
+                    launcherArguments = Args.NextAction(clientSecret),
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    receivesResultInProcess = false,
+                )
+            } else {
+                confirmActionHelper.createConfirmAction(
+                    clientSecret,
+                    intent,
+                    shippingValues,
+                    isDeferred = true
+                ) {
+                    create(
+                        confirmationTokenId = confirmationTokenId,
+                        radarOptions = hCaptchaToken?.let { RadarOptions(it) },
+                    )
+                }
+            }
+        }.getOrElse { error ->
+            ConfirmationDefinition.Action.Fail(
+                cause = error,
+                message = error.stripeErrorMessage(),
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        }
+    }
+
+    private fun prepareConfirmationTokenParams(
+        confirmationOption: PaymentMethodConfirmationOption,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+    ): ConfirmationTokenParams {
+        val confirmationOption = confirmationOption.updatedForDeferredIntent(intentConfiguration)
+        return ConfirmationTokenParams(
+            returnUrl = DefaultReturnUrl.create(context).value,
+            paymentMethodId = (confirmationOption as? PaymentMethodConfirmationOption.Saved)?.paymentMethod?.id,
+            paymentMethodData = (confirmationOption as? PaymentMethodConfirmationOption.New)?.createParams,
+            setUpFutureUsage = resolveSetupFutureUsage(confirmationOption.optionsParams),
+            shipping = shippingValues,
+            mandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT).takeIf {
+                when (confirmationOption) {
+                    is PaymentMethodConfirmationOption.New -> {
+                        confirmationOption.createParams.requiresMandate
+                    }
+                    is PaymentMethodConfirmationOption.Saved -> {
+                        confirmationOption.paymentMethod.type?.requiresMandate == true
+                    }
+                }
+            },
+            setAsDefaultPaymentMethod = confirmationOption.shouldSaveAsDefault(),
+            cvc = if (intentConfiguration.requireCvcRecollection) {
+                (confirmationOption.optionsParams as? PaymentMethodOptionsParams.Card)?.cvc
+            } else {
+                null
+            },
+            clientContext =
+            if (requestOptions.apiKeyIsLiveMode) {
+                null
+            } else {
+                prepareConfirmationTokenClientContextParams(
+                    confirmationOption.optionsParams
+                )
+            }
+        )
+    }
+
+    private fun prepareConfirmationTokenClientContextParams(paymentMethodOptions: PaymentMethodOptionsParams?):
+        ConfirmationTokenClientContextParams {
+        return with(intentConfiguration.toDeferredIntentParams()) {
+            ConfirmationTokenClientContextParams(
+                mode = mode.code,
+                currency = mode.currency,
+                setupFutureUsage = resolveSetupFutureUsage(paymentMethodOptions),
+                captureMethod = (mode as? DeferredIntentParams.Mode.Payment)?.captureMethod?.code,
+                paymentMethodTypes = paymentMethodTypes,
+                onBehalfOf = onBehalfOf,
+                paymentMethodConfiguration = paymentMethodConfigurationId,
+                customer = customerId,
+                paymentMethodOptions = paymentMethodOptions,
+                requireCvcRecollection = intentConfiguration.requireCvcRecollection
+            )
+        }
+    }
+
+    /**
+     * Resolves the setup future usage value following this priority:
+     * 1. User checkbox (via paymentMethodOptions) - highest priority
+     * 2. Payment method options from IntentConfiguration
+     * 3. Intent configuration setupFutureUse - fallback
+     * 4. null - when nothing is set
+     */
+    private fun resolveSetupFutureUsage(
+        paymentMethodOptions: PaymentMethodOptionsParams?
+    ): ConfirmPaymentIntentParams.SetupFutureUsage? {
+        return paymentMethodOptions?.setupFutureUsage()
+            ?: intentConfiguration.mode.setupFutureUse?.toConfirmParamsSetupFutureUsage()
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            intentConfiguration: PaymentSheet.IntentConfiguration,
+            createIntentCallback: CreateIntentWithConfirmationTokenCallback,
+            @Assisted(CUSTOMER_ID) customerId: String?,
+            @Assisted(EPHEMERAL_KEY_SECRET) ephemeralKeySecret: String?,
+        ): ConfirmationTokenConfirmationInterceptor
+    }
+
+    companion object {
+        private const val CUSTOMER_ID = "customerId"
+        private const val EPHEMERAL_KEY_SECRET = "ephemeralKeySecret"
+        private const val ERROR_MISSING_EPHEMERAL_KEY_SECRET =
+            "Ephemeral key secret is required to confirm with saved payment method"
+    }
+}
+
+internal class CreateIntentWithConfirmationTokenCallbackFailureException(
+    override val cause: Throwable?
+) : StripeException() {
+    override fun analyticsValue(): String = "merchantReturnedCreateIntentWithConfirmationTokenCallbackFailure"
+}

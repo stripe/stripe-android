@@ -306,7 +306,9 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     internal data class UIState(
         val label: ResolvableString,
+        val canClickWhileDisabled: Boolean = false,
         val onClick: () -> Unit,
+        val onDisabledClick: () -> Unit = {},
         val enabled: Boolean,
         val lockVisible: Boolean,
     )

@@ -6,6 +6,8 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
+import com.stripe.android.core.utils.DefaultDurationProvider
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.core.authentication.DefaultPaymentNextActionHandlerRegistry
@@ -58,5 +60,11 @@ internal class PaymentLauncherModule {
     @Named(IS_INSTANT_APP)
     fun provideIsInstantApp(context: Context): Boolean {
         return InstantApps.isInstantApp(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDurationProvider(): DurationProvider {
+        return DefaultDurationProvider.instance
     }
 }

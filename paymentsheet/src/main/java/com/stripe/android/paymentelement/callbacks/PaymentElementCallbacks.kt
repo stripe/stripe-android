@@ -3,12 +3,14 @@ package com.stripe.android.paymentelement.callbacks
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.RowSelectionBehavior.Companion.getInternalRowSelectionCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -18,10 +20,12 @@ import com.stripe.android.paymentsheet.ShopPayHandlers
     ExperimentalCustomPaymentMethodsApi::class,
     ExperimentalAnalyticEventCallbackApi::class,
     ShopPayPreview::class,
-    SharedPaymentTokenSessionPreview::class
+    SharedPaymentTokenSessionPreview::class,
+    WalletButtonsPreview::class,
 )
 internal data class PaymentElementCallbacks private constructor(
     val createIntentCallback: CreateIntentCallback?,
+    val createIntentWithConfirmationTokenCallback: CreateIntentWithConfirmationTokenCallback?,
     val confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback?,
     val externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
     val analyticEventCallback: AnalyticEventCallback?,
@@ -31,6 +35,7 @@ internal data class PaymentElementCallbacks private constructor(
 ) {
     class Builder {
         private var createIntentCallback: CreateIntentCallback? = null
+        private var createIntentWithConfirmationTokenCallback: CreateIntentWithConfirmationTokenCallback? = null
         private var confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback? = null
         private var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
         private var analyticEventCallback: AnalyticEventCallback? = null
@@ -40,6 +45,12 @@ internal data class PaymentElementCallbacks private constructor(
 
         fun createIntentCallback(createIntentCallback: CreateIntentCallback?) = apply {
             this.createIntentCallback = createIntentCallback
+        }
+
+        fun createIntentCallback(
+            createIntentWithConfirmationTokenCallback: CreateIntentWithConfirmationTokenCallback?
+        ) = apply {
+            this.createIntentWithConfirmationTokenCallback = createIntentWithConfirmationTokenCallback
         }
 
         fun confirmCustomPaymentMethodCallback(
@@ -78,8 +89,27 @@ internal data class PaymentElementCallbacks private constructor(
         }
 
         fun build(): PaymentElementCallbacks {
+            var mutualExclusiveCallbackCount = 0
+            if (createIntentCallback != null) {
+                mutualExclusiveCallbackCount++
+            }
+            if (createIntentWithConfirmationTokenCallback != null) {
+                mutualExclusiveCallbackCount++
+            }
+            if (preparePaymentMethodHandler != null) {
+                mutualExclusiveCallbackCount++
+            }
+            if (mutualExclusiveCallbackCount > 1) {
+                throw IllegalArgumentException(
+                    "Only one of createIntentCallback, " +
+                        "createIntentWithConfirmationTokenCallback or " +
+                        "preparePaymentMethodHandler can be set"
+                )
+            }
+
             return PaymentElementCallbacks(
                 createIntentCallback = createIntentCallback,
+                createIntentWithConfirmationTokenCallback = createIntentWithConfirmationTokenCallback,
                 confirmCustomPaymentMethodCallback = confirmCustomPaymentMethodCallback,
                 externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
                 analyticEventCallback = analyticEventCallback,

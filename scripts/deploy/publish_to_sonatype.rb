@@ -14,7 +14,7 @@ def publish_to_sonatype
     set_gpg_location()
 
     begin
-        m2_settings = Nokogiri::XML(fetch_password("bindings/java-maven-api-token"))
+        m2_settings = Nokogiri::XML(fetch_password("bindings/sonatype-central-api-token"))
 
         # Required in order to use xpath sanely (the commands below would
         # otherwise come up with no results because the top level `<settings>`
@@ -25,7 +25,7 @@ def publish_to_sonatype
         # Currently hard-coded to the second <server> element in the array but
         # there's got to be a better way (I tried a few clever xpath tricks, but
         # Nokogiri didn't like them one bit)..
-        server_element = m2_settings.xpath("//settings/servers/server")[1]
+        server_element = m2_settings.xpath("//settings/servers/server")[0]
 
         nexus_user = server_element.xpath("//username").first.content
         nexus_pass = server_element.xpath("//password").first.content
@@ -61,7 +61,7 @@ def publish_to_sonatype
             puts "Release succeeded!"
 
             if (@is_dry_run)
-                rputs "At the open link, verify that a new release was added to the staging repo. You can log in to sonatype using your credentials found at `fetch-password bindings/java-maven-api-token`"
+                rputs "At the open link, verify that a new release was added to the staging repo. You can log in to sonatype using your credentials found at `fetch-password bindings/sonatype-central-api-token`"
                 open_url("https://oss.sonatype.org/#stagingRepositories")
                 wait_for_user
             end
@@ -81,7 +81,7 @@ private def set_gpg_location
 end
 
 private def reset_gradle_properties
-    execute_or_fail("git checkout origin/master gradle.properties")
+    execute_or_fail("git checkout origin/#{@deploy_branch} gradle.properties")
 end
 
 # Gets the contents of the PATH environment variable, but before it does

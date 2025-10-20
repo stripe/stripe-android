@@ -18,6 +18,8 @@
     <string name="under_construction_badge_label">This is currently under construction</string>
     <string name="playground_title">Playground</string>
     <string name="playground_subtitle">Testing playground for Stripe engineers</string>
+    <string name="onramp_title">Onramp Coordinator</string>
+    <string name="onramp_subtitle">Test the OnrampCoordinator functionality</string>
     <string name="action_settings">Settings</string>
     <string name="product_subtitle">1 x Regular %s</string>
     <string name="subtotal">Subtotal</string>

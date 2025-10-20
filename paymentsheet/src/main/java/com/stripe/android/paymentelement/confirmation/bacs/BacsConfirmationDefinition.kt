@@ -29,7 +29,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: BacsConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<BacsMandateData> {
         return BacsMandateData.fromConfirmationOption(confirmationOption)?.let { data ->
             ConfirmationDefinition.Action.Launch(
@@ -64,17 +64,17 @@ internal class BacsConfirmationDefinition @Inject constructor(
         launcher: BacsMandateConfirmationLauncher,
         arguments: BacsMandateData,
         confirmationOption: BacsConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ) {
         launcher.launch(
             data = arguments,
-            appearance = confirmationParameters.appearance
+            appearance = confirmationArgs.appearance
         )
     }
 
     override fun toResult(
         confirmationOption: BacsConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: BacsMandateConfirmationResult,
     ): ConfirmationDefinition.Result {
@@ -85,11 +85,12 @@ internal class BacsConfirmationDefinition @Inject constructor(
                     optionsParams = null,
                     extraParams = null,
                     shouldSave = false,
+                    passiveCaptchaParams = confirmationOption.passiveCaptchaParams,
                 )
 
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = nextConfirmationOption,
-                    parameters = confirmationParameters,
+                    arguments = confirmationArgs,
                 )
             }
             is BacsMandateConfirmationResult.ModifyDetails -> ConfirmationDefinition.Result.Canceled(

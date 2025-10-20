@@ -21,7 +21,9 @@ import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.AddressFieldsElement
 import com.stripe.android.uicore.elements.CountryElement
+import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberElement
@@ -242,7 +244,7 @@ internal class FormViewModelTest {
             IdentifierSpec.Generic("address"),
             allowedCountryCodes = setOf("US", "JP")
         )
-            .transform(emptyMap(), emptyMap())
+            .transform(emptyMap(), emptyMap(), null)
             .toTypedArray()
 
         val formViewModel = createViewModel(
@@ -289,7 +291,18 @@ internal class FormViewModelTest {
         val addressControllers = AddressControllers.create(formViewModel)
         addressControllers.controllers.forEachIndexed { index, textFieldController ->
             textFieldController.onValueChange("12345")
-            if (index == addressControllers.controllers.size - 1) {
+            assertThat(
+                formViewModel
+                    .completeFormValues
+                    .first()
+                    ?.fieldValuePairs
+                    ?.get(emailSection.apiPath)
+                    ?.value
+            ).isNull()
+        }
+        addressControllers.dropdownControllers.forEachIndexed { index, textFieldController ->
+            textFieldController.onValueChange(0)
+            if (index == addressControllers.dropdownControllers.size - 1) {
                 assertThat(
                     formViewModel
                         .completeFormValues
@@ -327,7 +340,7 @@ internal class FormViewModelTest {
             IdentifierSpec.Generic("address"),
             allowedCountryCodes = setOf("US", "JP")
         )
-            .transform(emptyMap(), emptyMap())
+            .transform(emptyMap(), emptyMap(), null)
             .toTypedArray()
 
         val formViewModel = createViewModel(
@@ -379,26 +392,38 @@ internal class FormViewModelTest {
             .forEachIndexed { index, textFieldController ->
                 textFieldController.onValueChange("12345")
 
-                if (index == populateAddressControllers.size - 1) {
-                    assertThat(
-                        formViewModel
-                            .completeFormValues
-                            .first()
-                            ?.fieldValuePairs
-                            ?.get(emailSection.apiPath)
-                            ?.value
-                    ).isNotNull()
-                } else {
-                    assertThat(
-                        formViewModel
-                            .completeFormValues
-                            .first()
-                            ?.fieldValuePairs
-                            ?.get(emailSection.apiPath)
-                            ?.value
-                    ).isNull()
-                }
+                assertThat(
+                    formViewModel
+                        .completeFormValues
+                        .first()
+                        ?.fieldValuePairs
+                        ?.get(emailSection.apiPath)
+                        ?.value
+                ).isNull()
             }
+
+        addressControllers.dropdownControllers.forEachIndexed { index, textFieldController ->
+            textFieldController.onValueChange(0)
+            if (index == addressControllers.dropdownControllers.size - 1) {
+                assertThat(
+                    formViewModel
+                        .completeFormValues
+                        .first()
+                        ?.fieldValuePairs
+                        ?.get(emailSection.apiPath)
+                        ?.value
+                ).isNotNull()
+            } else {
+                assertThat(
+                    formViewModel
+                        .completeFormValues
+                        .first()
+                        ?.fieldValuePairs
+                        ?.get(emailSection.apiPath)
+                        ?.value
+                ).isNull()
+            }
+        }
     }
 
     @Test
@@ -542,7 +567,7 @@ internal class FormViewModelTest {
             val countryElement = elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
-                .filterIsInstance<AddressElement>()
+                .filterIsInstance<AddressFieldsElement>()
                 .firstOrNull()
                 ?.countryElement
             val phoneElement = elements
@@ -583,6 +608,7 @@ internal class FormViewModelTest {
                 .transform(
                     initialValues = emptyMap(),
                     shippingValues = emptyMap(),
+                    autocompleteAddressInteractorFactory = null,
                 )
                 .toTypedArray()
             val formViewModel = createViewModel(
@@ -633,7 +659,8 @@ internal class FormViewModelTest {
             .firstOrNull { it.label.first() == resolvableString(label) }
 
     private data class AddressControllers(
-        val controllers: List<TextFieldController>
+        val controllers: List<TextFieldController>,
+        val dropdownControllers: List<DropdownFieldController>,
     ) {
         companion object {
             suspend fun create(formViewModel: FormViewModel) =
@@ -653,11 +680,13 @@ internal class FormViewModelTest {
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            CoreR.string.stripe_address_label_state
-                        ),
-                        getAddressSectionTextControllerWithLabel(
-                            formViewModel,
                             CoreR.string.stripe_address_label_zip_code
+                        )
+                    ),
+                    listOfNotNull(
+                        getAddressSectionDropdownControllerWithLabel(
+                            formViewModel,
+                            CoreR.string.stripe_address_label_state
                         )
                     )
                 )
@@ -686,6 +715,30 @@ internal class FormViewModelTest {
                     ?.map { it.fields }
                     ?.flatten()
                     ?.map { (it.controller as? SimpleTextFieldController) }
+                    ?.firstOrNull { it?.label?.first() == resolvableString(label) }
+        }
+
+        private suspend fun getAddressSectionDropdownControllerWithLabel(
+            formViewModel: FormViewModel,
+            @StringRes label: Int
+        ): DropdownFieldController? {
+            val addressElementFields = formViewModel.elements
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<AddressElement>()
+                .firstOrNull()
+                ?.fields
+                ?.first()
+            return addressElementFields
+                ?.filterIsInstance<SectionSingleFieldElement>()
+                ?.map { (it.controller as? DropdownFieldController) }
+                ?.firstOrNull { it?.label?.first() == resolvableString(label) }
+                ?: addressElementFields
+                    ?.asSequence()
+                    ?.filterIsInstance<RowElement>()
+                    ?.map { it.fields }
+                    ?.flatten()
+                    ?.map { (it.controller as? DropdownFieldController) }
                     ?.firstOrNull { it?.label?.first() == resolvableString(label) }
         }
     }

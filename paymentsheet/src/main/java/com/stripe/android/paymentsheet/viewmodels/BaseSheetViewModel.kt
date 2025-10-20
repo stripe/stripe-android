@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.viewmodels
 
+import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,6 +17,10 @@ import com.stripe.android.paymentsheet.MandateHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
+import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
+import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceContext
+import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
+import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -26,11 +32,13 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.drop
@@ -51,6 +59,10 @@ internal abstract class BaseSheetViewModel(
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     val isCompleteFlow: Boolean,
 ) : ViewModel() {
+    private val autocompleteLauncher = DefaultAutocompleteLauncher(
+        AutocompleteAppearanceContext.PaymentElement(config.appearance)
+    )
+
     private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
     internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata
 
@@ -60,6 +72,17 @@ internal abstract class BaseSheetViewModel(
     ) { poppedScreen ->
         analyticsListener.reportPaymentSheetHidden(poppedScreen)
     }
+
+    val autocompleteAddressInteractorFactory: PaymentElementAutocompleteAddressInteractor.Factory =
+        PaymentElementAutocompleteAddressInteractor.Factory(
+            launcher = autocompleteLauncher,
+            autocompleteConfig = AutocompleteAddressInteractor.Config(
+                googlePlacesApiKey = config.googlePlacesApiKey,
+                autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+            )
+        )
+
+    internal val validationRequested = MutableSharedFlow<Unit>()
 
     abstract val walletsState: StateFlow<WalletsState?>
     abstract val walletsProcessingState: StateFlow<WalletsProcessingState?>
@@ -129,6 +152,19 @@ internal abstract class BaseSheetViewModel(
             }
         }
     }
+
+    fun registerForActivityResult(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
+    ) {
+        autocompleteLauncher.register(activityResultCaller, lifecycleOwner)
+        registerFromActivity(activityResultCaller, lifecycleOwner)
+    }
+
+    protected abstract fun registerFromActivity(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
+    )
 
     protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
         _paymentMethodMetadata.value = paymentMethodMetadata

@@ -38,6 +38,13 @@ abstract class AnalyticEvent internal constructor() {
     class SelectedPaymentMethodType internal constructor(val paymentMethodType: String) : AnalyticEvent()
 
     /**
+     * User taps a button in the wallets button view
+     */
+    @WalletButtonsPreview
+    @Poko
+    class TapsButtonInWalletsButtonsView internal constructor(val walletType: String) : AnalyticEvent()
+
+    /**
      * User viewed a payment method form
      */
     @Poko

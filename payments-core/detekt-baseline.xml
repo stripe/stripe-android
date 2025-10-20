@@ -24,6 +24,7 @@
     <ID>LargeClass:CardNumberEditTextTest.kt$CardNumberEditTextTest</ID>
     <ID>LargeClass:ElementsSessionJsonParserTest.kt$ElementsSessionJsonParserTest</ID>
     <ID>LargeClass:PaymentIntentFixtures.kt$PaymentIntentFixtures</ID>
+    <ID>LargeClass:PaymentIntentFlowResultProcessorTest.kt$PaymentIntentFlowResultProcessorTest</ID>
     <ID>LargeClass:SetupIntentFixtures.kt$SetupIntentFixtures</ID>
     <ID>LargeClass:SourceParamsTest.kt$SourceParamsTest</ID>
     <ID>LargeClass:Stripe.kt$Stripe</ID>
@@ -142,11 +143,13 @@
     <ID>MaxLineLength:StripeKtxTest.kt$StripeKtxTest$assertFailsWith</ID>
     <ID>MaxLineLength:StripeKtxTest.kt$StripeKtxTest$private inline</ID>
     <ID>MaxLineLength:StripePaymentControllerTest.kt$StripePaymentControllerTest$"We are unable to authenticate your payment method. Please choose a different payment method and try again."</ID>
-    <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv"</ID>
-    <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW"</ID>
-    <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02"</ID>
-    <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://payments.stripe.com/oxxo/voucher/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb"</ID>
-    <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://pm-redirects.stripe.com/authorize/acct_1HvTI7Lu5o3P18Zp/pa_nonce_NC1mezV544wpYmFaXyJpnleeurKO3TZ"</ID>
+    <ID>MaxLineLength:WebIntentNextActionHandlerTest.kt$WebIntentNextActionHandlerTest$expectedUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv"</ID>
+    <ID>MaxLineLength:WebIntentNextActionHandlerTest.kt$WebIntentNextActionHandlerTest$expectedUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW"</ID>
+    <ID>MaxLineLength:WebIntentNextActionHandlerTest.kt$WebIntentNextActionHandlerTest$expectedUrl = "https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02"</ID>
+    <ID>MaxLineLength:WebIntentNextActionHandlerTest.kt$WebIntentNextActionHandlerTest$expectedUrl = "https://payments.stripe.com/oxxo/voucher/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb"</ID>
+    <ID>MaxLineLength:WebIntentNextActionHandlerTest.kt$WebIntentNextActionHandlerTest$expectedUrl = "https://pm-redirects.stripe.com/authorize/acct_1HvTI7Lu5o3P18Zp/pa_nonce_NC1mezV544wpYmFaXyJpnleeurKO3TZ"</ID>
+    <ID>MaxLineLength:WebIntentNextActionHandlerTest.kt$WebIntentNextActionHandlerTest$val afterRedirectUrl = "https://payments.klarna.com/na/opf/not-a-real-uuid/handover?opf_s[…]some_random_token&amp;l=en-US"</ID>
+    <ID>MaxLineLength:WebIntentNextActionHandlerTest.kt$WebIntentNextActionHandlerTest$val beforeRedirectUrl = "https://pm-redirects.stripe.com/authorize/acct_1234/sa_nonce_SmAXX?useWebAuthSession=true&amp;followRedirectsInSDK=true"</ID>
     <ID>MaximumLineLength:GooglePayPaymentMethodLauncherActivity.kt$GooglePayPaymentMethodLauncherActivity$ </ID>
     <ID>MaximumLineLength:PaymentRelayContract.kt$PaymentRelayContract$internal</ID>
     <ID>SwallowedException:ActivityUtils.kt$e: IllegalArgumentException</ID>

@@ -19,6 +19,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.SourceTypeModel
 import com.stripe.android.model.Token
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -221,8 +222,9 @@ internal class StripeEndToEndTest {
         publishableKey: String = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     ): Stripe {
         val stripeRepository = StripeApiRepository(
-            context,
-            { publishableKey },
+            context = context,
+            publishableKeyProvider = { publishableKey },
+            requestSurface = RequestSurface.PaymentElement,
             workContext = testDispatcher
         )
         return Stripe(

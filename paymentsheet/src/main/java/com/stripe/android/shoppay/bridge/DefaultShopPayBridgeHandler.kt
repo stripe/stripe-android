@@ -28,6 +28,12 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
     private val _confirmationState = MutableStateFlow<ShopPayConfirmationState>(ShopPayConfirmationState.Pending)
     override val confirmationState: StateFlow<ShopPayConfirmationState> = _confirmationState
 
+    private var onECEClickCallback: (() -> Unit)? = null
+
+    override fun setOnECEClickCallback(callback: () -> Unit) {
+        onECEClickCallback = callback
+    }
+
     @JavascriptInterface
     override fun consoleLog(level: String, message: String, origin: String, url: String) {
         val emoji = when (level.lowercase()) {
@@ -49,15 +55,19 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
 
         logMessage("Parsed handle click request: $handleClickRequest")
 
+        onECEClickCallback?.invoke()
+
         val shopPayConfiguration = shopPayArgs.shopPayConfiguration
         HandleClickResponse(
             lineItems = shopPayConfiguration.lineItems.map { it.toECELineItem() },
-            shippingRates = shopPayConfiguration.shippingRates.map { it.toECEShippingRate() },
+            shippingRates = shopPayConfiguration.shippingRates.takeIf {
+                shopPayConfiguration.shippingAddressRequired
+            }?.map { it.toECEShippingRate() },
             billingAddressRequired = shopPayConfiguration.billingAddressRequired,
             emailRequired = shopPayConfiguration.emailRequired,
             phoneNumberRequired = true, // Shop Pay always requires phone
             shippingAddressRequired = shopPayConfiguration.shippingAddressRequired,
-            allowedShippingCountries = listOf("US", "CA"),
+            allowedShippingCountries = shopPayConfiguration.allowedShippingCountries,
             businessName = shopPayArgs.businessName,
             shopId = shopPayConfiguration.shopId,
         )
@@ -76,6 +86,7 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
         return wrapInBridgeResponse(response)
     }
 
+    @JavascriptInterface
     override fun calculateShipping(message: String) = handleRequest(message) { jsonObject ->
         val calculateShippingRequest = shippingRateRequestJsonParser.parse(jsonObject)
             ?: throw IllegalArgumentException("Failed to parse shipping rate request")
@@ -141,7 +152,8 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
         _confirmationState.emit(
             value = ShopPayConfirmationState.Success(
                 externalSourceId = externalSourceId,
-                billingDetails = confirmationRequest.paymentDetails.billingDetails
+                billingDetails = confirmationRequest.paymentDetails.billingDetails,
+                shippingAddressData = confirmationRequest.paymentDetails.shippingAddress
             )
         )
         ConfirmationResponse(

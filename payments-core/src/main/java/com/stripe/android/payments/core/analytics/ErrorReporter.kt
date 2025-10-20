@@ -158,6 +158,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         FRAUD_DETECTION_API_FAILURE(
             eventName = "fraud_detection_data_repository.api_failure"
         ),
+        SAVED_PAYMENT_METHOD_RADAR_SESSION_FAILURE(
+            eventName = "stripe_android.saved_payment_method_radar_session_failure"
+        ),
         EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER_NULL(
             eventName = "paymentsheet.external_payment_method.confirm_handler_is_null"
         ),
@@ -172,6 +175,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         PREPARE_PAYMENT_METHOD_HANDLER_NULL(
             eventName = "paymentsheet.prepare_payment_method_handler.is_null"
+        ),
+        HCAPTCHA_FAILURE(
+            eventName = "elements.captcha.passive.expected_failure"
         ),
     }
 
@@ -261,6 +267,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM(
             partialEventName = "wallet_buttons.confirmation_arguments.null_on_confirm"
         ),
+        INTENT_CONFIRMATION_HANDLER_PASSIVE_CHALLENGE_PARAMS_NULL(
+            partialEventName = "intent_confirmation_handler.passive_challenge.params_null"
+        ),
+        HCAPTCHA_UNEXPECTED_FAILURE(
+            partialEventName = "elements.captcha.passive.unexpected_failure"
+        ),
         ;
 
         override val eventName: String
@@ -309,6 +321,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING(
             eventName = "paymentsheet.polling_for_create_intent_callback.found"
+        ),
+        FOUND_CREATE_INTENT_WITH_CONFIRMATION_TOKEN_CALLBACK_WHILE_POLLING(
+            eventName = "paymentsheet.polling_for_create_intent_with_confirmation_token_callback.found"
         ),
         FOUND_PREPARE_PAYMENT_METHOD_HANDLER_WHILE_POLLING(
             eventName = "paymentsheet.polling_for_prepare_payment_method_handler.found"

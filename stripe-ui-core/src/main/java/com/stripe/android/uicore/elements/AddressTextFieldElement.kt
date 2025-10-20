@@ -2,11 +2,13 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.strings.ResolvableString
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressTextFieldElement(
     override val identifier: IdentifierSpec,
-    config: TextFieldConfig,
+    label: ResolvableString,
     onNavigation: (() -> Unit)? = null
 ) : SectionSingleFieldElement(identifier) {
     override val allowsUserInteraction: Boolean = true
@@ -14,7 +16,11 @@ class AddressTextFieldElement(
 
     override val controller: AddressTextFieldController =
         AddressTextFieldController(
-            config,
-            onNavigation
+            label = label,
+            onNavigation = onNavigation
         )
+
+    override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> {
+        return MutableStateFlow(listOf(identifier))
+    }
 }

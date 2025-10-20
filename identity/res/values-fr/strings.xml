@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">Verso du permis de conduire</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">Le verso du permis de conduire est sélectionné</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">Verso de votre permis de conduire ou de toute autre pièce d\'identité officielle avec photo.</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Verso de la carte d\'identité</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">Prénom</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">Masque pour l\'animation de selfies</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">Retournez votre permis de conduire ou votre pièce d\'identité officielle avec photo de l\'autre côté</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">Retournez votre pièce d’identité officielle avec photo de l’autre côté</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">Recto du permis de conduire, passeport ou pièce d\'identité officielle avec photo</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">Recto du permis de conduire</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">Le recto du permis de conduire est sélectionné</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">Recto du permis de conduire ou de toute autre pièce d\'identité officielle avec photo.</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">Recto du permis de conduire ou du passeport</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Recto de la carte d\'identité</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Recto de la pièce d\'identité</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Le recto de la carte d’identité est sélectionné</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">Recto du passeport</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">Recto du passeport ou d\'une pièce d\'identité officielle avec photo</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">Retour</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">Numéro de téléphone</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">Aucun document détecté</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">Placez votre permis de conduire, passeport ou pièce d\'identité officielle avec photo au centre du cadre</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Retournez votre permis de conduire</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">Placez votre permis de conduire au centre du cadre</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">Placez votre permis de conduire ou votre pièce d\'identité officielle avec photo au centre du cadre</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">Placez votre permis de conduire ou passeport au centre du cadre</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">Retournez votre carte d\'identité</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">Placez votre carte d\'identité au centre du cadre</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">Placez votre passeport au centre du cadre</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">Placez votre passeport ou votre pièce d\'identité officielle avec photo au centre du cadre</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Placez votre visage au centre du cadre.</string>
   <!-- Instructional text when the document is too blurry -->
@@ -205,8 +229,6 @@
   <string name="stripe_test_model_title">Vous êtes actuellement en modetest</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Réessayer</string>
-  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="stripe_unexpected_error_try_again">Une erreur inattendue est survenue. Réessayez dans quelques secondes.</string>
   <!-- Description to upload a photo -->
   <string name="stripe_upload_a_photo">Charger une photo</string>
   <!-- Title of dialog to upload back of driver license -->

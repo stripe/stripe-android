@@ -5,8 +5,11 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -20,9 +23,11 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.AnalyticEventCallbackRule
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +40,7 @@ import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
+@OptIn(WalletButtonsPreview::class)
 internal class EmbeddedContentUiTest {
     @get:Rule
     val composeRule = createComposeRule()
@@ -48,13 +54,13 @@ internal class EmbeddedContentUiTest {
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
-    fun `rowStyle FlatWithChevron, dataLoaded emits embeddedContent event that passes validation`() =
+    fun `rowStyle FlatWithDisclosure, dataLoaded emits embeddedContent event that passes validation`() =
         runScenario(internalRowSelectionCallback = {}) {
             embeddedContentHelper.embeddedContent.test {
                 assertThat(awaitItem()).isNull()
                 embeddedContentHelper.dataLoaded(
                     PaymentMethodMetadataFactory.create(),
-                    Embedded.RowStyle.FlatWithRadio.default,
+                    Embedded(Embedded.RowStyle.FlatWithRadio.default),
                     embeddedViewDisplaysMandateText = true,
                 )
                 val content = awaitItem()
@@ -70,14 +76,14 @@ internal class EmbeddedContentUiTest {
         }
 
     @Test
-    fun `rowStyle not FlatWithChevron, dataLoaded emits embeddedContent event that passes validation`() = runScenario(
+    fun `rowStyle not FlatWithDisclosure, dataLoaded emits event that passes validation`() = runScenario(
         internalRowSelectionCallback = null
     ) {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.default,
+                Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
             )
             val content = awaitItem()
@@ -100,14 +106,14 @@ internal class EmbeddedContentUiTest {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithChevron.default,
+                Embedded(Embedded.RowStyle.FlatWithDisclosure.default),
                 embeddedViewDisplaysMandateText = true,
             )
             val content = awaitItem()
             assertThat(content).isNotNull()
             assertFailsWith<IllegalArgumentException>(
                 message = "EmbeddedPaymentElement.Builder.rowSelectionBehavior() must be set to " +
-                    "ImmediateAction when using FlatWithChevron RowStyle. " +
+                    "ImmediateAction when using FlatWithDisclosure RowStyle. " +
                     "Use a different style or enable ImmediateAction rowSelectionBehavior"
             ) {
                 composeRule.setContent {
@@ -121,6 +127,7 @@ internal class EmbeddedContentUiTest {
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
     )
 
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     private fun runScenario(
         internalRowSelectionCallback: InternalRowSelectionCallback? = null,
         block: suspend Scenario.() -> Unit,
@@ -132,6 +139,7 @@ internal class EmbeddedContentUiTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             embeddedSelectionHolder = selectionHolder,
             savedStateHandle = savedStateHandle,
+            selectedPaymentMethodCode = "",
         )
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()
@@ -171,7 +179,10 @@ internal class EmbeddedContentUiTest {
                 ),
                 rowSelectionImmediateActionHandler = immediateActionHandler,
                 errorReporter = errorReporter,
-                internalRowSelectionCallback = { internalRowSelectionCallback }
+                internalRowSelectionCallback = { internalRowSelectionCallback },
+                linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
+                analyticsCallbackProvider = { AnalyticEventCallbackRule() },
+                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,

@@ -8,7 +8,9 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 internal fun USBankAccountFormArguments.handleScreenStateChanged(
     screenState: BankFormScreenState,
     enabled: Boolean,
+    canClickWhileDisabled: Boolean,
     onPrimaryButtonClick: () -> Unit,
+    onDisabledClick: () -> Unit,
 ) {
     screenState.error?.let {
         onError(it)
@@ -18,6 +20,8 @@ internal fun USBankAccountFormArguments.handleScreenStateChanged(
         updatePrimaryButton(
             text = resolvableString(StripeUiCoreR.string.stripe_continue_button_label),
             onClick = onPrimaryButtonClick,
+            canClickWhileDisabled = canClickWhileDisabled,
+            onDisabledClick = onDisabledClick,
             enabled = enabled,
             shouldShowProcessingWhenClicked = isCompleteFlow,
         )
@@ -31,13 +35,16 @@ internal fun USBankAccountFormArguments.handleScreenStateChanged(
 
 private fun USBankAccountFormArguments.updatePrimaryButton(
     text: ResolvableString,
+    canClickWhileDisabled: Boolean,
     onClick: () -> Unit,
+    onDisabledClick: () -> Unit,
     shouldShowProcessingWhenClicked: Boolean,
     enabled: Boolean,
 ) {
     onUpdatePrimaryButtonUIState {
         PrimaryButton.UIState(
             label = text,
+            canClickWhileDisabled = canClickWhileDisabled,
             onClick = {
                 if (shouldShowProcessingWhenClicked) {
                     onUpdatePrimaryButtonState(PrimaryButton.State.StartProcessing)
@@ -47,6 +54,7 @@ private fun USBankAccountFormArguments.updatePrimaryButton(
                     button?.copy(enabled = false)
                 }
             },
+            onDisabledClick = onDisabledClick,
             enabled = enabled,
             lockVisible = isCompleteFlow,
         )

@@ -18,10 +18,14 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedConfirmationSaver
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
+import com.stripe.android.paymentelement.embedded.EmbeddedConfirmationSaver
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
+import com.stripe.android.paymentsheet.DefaultPrefsRepository
+import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.ui.core.di.CardScanModule
@@ -89,6 +93,12 @@ internal interface FormActivityViewModelModule {
     @Binds
     fun bindsFormActivityStateHelper(helper: DefaultFormActivityStateHelper): FormActivityStateHelper
 
+    @Binds
+    fun bindsPrefsRepositoryFactory(factory: DefaultPrefsRepository.Factory): PrefsRepository.Factory
+
+    @Binds
+    fun bindsConfirmationSaver(saver: DefaultEmbeddedConfirmationSaver): EmbeddedConfirmationSaver
+
     companion object {
         @Provides
         fun providesContext(application: Application): Context {
@@ -126,6 +136,14 @@ internal interface FormActivityViewModelModule {
         @Provides
         @Singleton
         fun provideOnClickOverrideDelegate(): OnClickOverrideDelegate = OnClickDelegateOverrideImpl()
+
+        @Provides
+        @Singleton
+        fun providesFormActivityConfirmationHandlerRegistrar(
+            confirmationHandler: ConfirmationHandler
+        ): FormActivityConfirmationHandlerRegistrar {
+            return DefaultFormActivityConfirmationHandlerRegistrar(confirmationHandler)
+        }
     }
 }
 

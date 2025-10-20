@@ -22,20 +22,22 @@ sealed interface ConfirmStripeIntentParams : StripeParamsModel, Parcelable {
         internal const val PARAM_RETURN_URL: String = "return_url"
         internal const val PARAM_PAYMENT_METHOD_ID: String = "payment_method"
         internal const val PARAM_PAYMENT_METHOD_DATA: String = "payment_method_data"
+        internal const val PARAM_CONFIRMATION_TOKEN: String = "confirmation_token"
         internal const val PARAM_USE_STRIPE_SDK: String = "use_stripe_sdk"
         internal const val PARAM_MANDATE_ID: String = "mandate"
         internal const val PARAM_MANDATE_DATA = "mandate_data"
         internal const val PARAM_SET_AS_DEFAULT_PAYMENT_METHOD = "set_as_default_payment_method"
+        internal const val PARAM_RADAR_OPTIONS = "radar_options"
+        internal const val PARAM_CLIENT_ATTRIBUTION_METADATA = "client_attribution_metadata"
     }
 }
 
-internal fun ConfirmStripeIntentParams.createParams(): PaymentMethodCreateParams? {
-    return when (this) {
+internal val ConfirmStripeIntentParams.paymentMethodCode: PaymentMethodCode?
+    get() = when (this) {
         is ConfirmPaymentIntentParams -> {
-            paymentMethodCreateParams
+            paymentMethodCode
         }
         is ConfirmSetupIntentParams -> {
-            paymentMethodCreateParams
+            paymentMethodCode
         }
     }
-}

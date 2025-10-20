@@ -44,8 +44,10 @@ internal fun USBankAccountEmitters(
     LaunchedEffect(screenState, hasRequiredFields) {
         usBankAccountFormArgs.handleScreenStateChanged(
             screenState = screenState,
+            canClickWhileDisabled = !screenState.isProcessing,
             enabled = hasRequiredFields && !screenState.isProcessing,
             onPrimaryButtonClick = viewModel::handlePrimaryButtonClick,
+            onDisabledClick = viewModel::validate
         )
     }
 

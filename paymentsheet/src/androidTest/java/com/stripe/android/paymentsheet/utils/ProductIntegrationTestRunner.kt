@@ -13,7 +13,7 @@ internal fun runProductIntegrationTest(
     integrationType: ProductIntegrationType,
     builder: ProductIntegrationBuilder.() -> Unit = {},
     resultCallback: PaymentSheetResultCallback,
-    block: (ProductIntegrationTestRunnerContext) -> Unit,
+    block: suspend (ProductIntegrationTestRunnerContext) -> Unit,
 ) {
     val integrationBuilder = ProductIntegrationBuilder().apply {
         builder()
@@ -98,6 +98,8 @@ internal sealed interface ProductIntegrationTestRunnerContext {
 
     fun markTestSucceeded()
 
+    suspend fun consumePaymentOptionEventForFlowController(paymentMethodType: String, label: String)
+
     class WithPaymentSheet(
         private val context: PaymentSheetTestRunnerContext
     ) : ProductIntegrationTestRunnerContext {
@@ -124,6 +126,9 @@ internal sealed interface ProductIntegrationTestRunnerContext {
 
         override fun markTestSucceeded() {
             context.markTestSucceeded()
+        }
+
+        override suspend fun consumePaymentOptionEventForFlowController(paymentMethodType: String, label: String) {
         }
     }
 
@@ -163,6 +168,12 @@ internal sealed interface ProductIntegrationTestRunnerContext {
 
         override fun markTestSucceeded() {
             context.markTestSucceeded()
+        }
+
+        override suspend fun consumePaymentOptionEventForFlowController(paymentMethodType: String, label: String) {
+            val paymentOption = context.configureCallbackTurbine.awaitItem()
+            assertThat(paymentOption?.label).endsWith(label)
+            assertThat(paymentOption?.paymentMethodType).isEqualTo(paymentMethodType)
         }
 
         fun confirm() {

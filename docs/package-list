@@ -24,6 +24,7 @@ com.stripe.android.financialconnections.features.linkaccountpicker
 com.stripe.android.financialconnections.model
 module:financial-connections-core
 com.stripe.android.financialconnections
+com.stripe.android.financialconnections.launcher
 com.stripe.android.financialconnections.model
 module:identity
 com.stripe.android.identity
@@ -36,6 +37,7 @@ com.stripe.android.googlepaylauncher
 com.stripe.android.model
 com.stripe.android.model.parsers
 com.stripe.android.model.wallets
+com.stripe.android.payments
 com.stripe.android.payments.bankaccount
 com.stripe.android.payments.bankaccount.navigation
 com.stripe.android.payments.core.injection

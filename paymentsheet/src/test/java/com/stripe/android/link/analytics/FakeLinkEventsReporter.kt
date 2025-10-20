@@ -30,6 +30,10 @@ internal open class FakeLinkEventsReporter : LinkEventsReporter {
         throw NotImplementedError()
     }
 
+    override fun onAccountRefreshFailure(error: Throwable) {
+        throw NotImplementedError()
+    }
+
     override fun on2FAStart() {
         throw NotImplementedError()
     }
@@ -49,6 +53,8 @@ internal open class FakeLinkEventsReporter : LinkEventsReporter {
     override fun on2FACancel() {
         throw NotImplementedError()
     }
+
+    override fun on2FAResendCode(verificationType: String) = Unit
 
     override fun onPopupShow() {
         throw NotImplementedError()

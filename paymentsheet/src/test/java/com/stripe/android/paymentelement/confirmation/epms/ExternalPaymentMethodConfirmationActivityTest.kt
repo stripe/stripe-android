@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Application
 import android.app.Instrumentation
 import android.content.Intent
-import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.intending
@@ -19,6 +18,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.assertCanceled
 import com.stripe.android.paymentelement.confirmation.assertComplete
@@ -26,6 +26,7 @@ import com.stripe.android.paymentelement.confirmation.assertConfirming
 import com.stripe.android.paymentelement.confirmation.assertFailed
 import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
+import com.stripe.android.paymentelement.confirmation.paymentElementConfirmationTest
 import com.stripe.android.paymentsheet.ExternalPaymentMethodResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -33,16 +34,11 @@ import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.PaymentElementCallbackTestRule
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @RunWith(RobolectricTestRunner::class)
 internal class ExternalPaymentMethodConfirmationActivityTest {
@@ -90,6 +86,7 @@ internal class ExternalPaymentMethodConfirmationActivityTest {
 
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
             assertThat(successResult.deferredIntentConfirmationType).isNull()
+            assertThat(successResult.completedFullPaymentFlow).isTrue()
         }
     }
 
@@ -161,23 +158,8 @@ internal class ExternalPaymentMethodConfirmationActivityTest {
     }
 
     private fun test(
-        test: suspend PaymentElementConfirmationTestActivity.() -> Unit
-    ) = runTest(StandardTestDispatcher()) {
-        val countDownLatch = CountDownLatch(1)
-
-        ActivityScenario.launch<PaymentElementConfirmationTestActivity>(
-            Intent(application, PaymentElementConfirmationTestActivity::class.java)
-        ).use { scenario ->
-            scenario.onActivity { activity ->
-                launch {
-                    test(activity)
-                    countDownLatch.countDown()
-                }
-            }
-
-            countDownLatch.await(10, TimeUnit.SECONDS)
-        }
-    }
+        test: suspend ConfirmationTestScenario.() -> Unit
+    ) = paymentElementConfirmationTest(application, test)
 
     private fun intendingEpmToBeLaunched(result: Instrumentation.ActivityResult) {
         intending(hasComponent(EPM_ACTIVITY_NAME)).respondWith(result)

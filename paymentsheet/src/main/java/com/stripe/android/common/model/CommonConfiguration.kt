@@ -1,10 +1,15 @@
 package com.stripe.android.common.model
 
 import android.os.Parcelable
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
+import com.stripe.android.link.LinkAppearance
+import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.parcelize.Parcelize
 
@@ -26,10 +31,17 @@ internal data class CommonConfiguration(
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
+    val googlePlacesApiKey: String?,
+    val linkAppearance: LinkAppearance? = null,
+    val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
+    val walletButtons: PaymentSheet.WalletButtonsConfiguration?,
+    val opensCardScannerAutomatically: Boolean,
+    val userOverrideCountry: String?,
 ) : Parcelable {
 
-    fun validate() {
+    fun validate(isLiveMode: Boolean) {
         customerAndMerchantValidate()
+        externalPaymentMethodsValidate(isLiveMode)
 
         customer?.accessType?.let { customerAccessType ->
             customerAccessTypeValidate(customerAccessType)
@@ -50,6 +62,21 @@ internal data class CommonConfiguration(
                 throw IllegalArgumentException(
                     "When a CustomerConfiguration is passed to PaymentSheet," +
                         " the Customer ID cannot be an empty string."
+                )
+            }
+        }
+    }
+
+    // These exception messages are not localized as they are not intended to be displayed to a user.
+    @Suppress("ThrowsCount")
+    private fun externalPaymentMethodsValidate(isLiveMode: Boolean) {
+        externalPaymentMethods.forEach { externalPaymentMethod ->
+            if (!externalPaymentMethod.startsWith("external_") && isLiveMode.not()) {
+                throw IllegalArgumentException(
+                    "External payment method '$externalPaymentMethod' does not start with 'external_'. " +
+                        "All external payment methods must use the 'external_' prefix. " +
+                        "See https://docs.stripe.com/payments/external-payment-methods?platform=android#available-" +
+                        "external-payment-methods"
                 )
             }
         }
@@ -137,7 +164,12 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = customPaymentMethods,
     link = link,
-    shopPayConfiguration = shopPayConfiguration
+    shopPayConfiguration = shopPayConfiguration,
+    googlePlacesApiKey = googlePlacesApiKey,
+    termsDisplay = termsDisplay,
+    walletButtons = walletButtons,
+    opensCardScannerAutomatically = opensCardScannerAutomatically,
+    userOverrideCountry = userOverrideCountry,
 )
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -156,7 +188,43 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = customPaymentMethods,
     link = link,
-    shopPayConfiguration = null
+    shopPayConfiguration = null,
+    googlePlacesApiKey = null,
+    termsDisplay = termsDisplay,
+    walletButtons = null,
+    opensCardScannerAutomatically = opensCardScannerAutomatically,
+    userOverrideCountry = userOverrideCountry,
+)
+
+internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
+    merchantDisplayName = merchantDisplayName,
+    customer = null,
+    googlePay = null,
+    defaultBillingDetails = defaultBillingDetails,
+    shippingDetails = null,
+    allowsDelayedPaymentMethods = ConfigurationDefaults.allowsDelayedPaymentMethods,
+    allowsPaymentMethodsRequiringShippingAddress = ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress,
+    billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+    preferredNetworks = ConfigurationDefaults.preferredNetworks,
+    allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
+    paymentMethodOrder = ConfigurationDefaults.paymentMethodOrder,
+    externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
+    cardBrandAcceptance = cardBrandAcceptance,
+    customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
+    link = PaymentSheet.LinkConfiguration(
+        display = PaymentSheet.LinkConfiguration.Display.Automatic,
+        collectMissingBillingDetailsForExistingPaymentMethods = true,
+        allowUserEmailEdits = allowUserEmailEdits,
+        allowLogOut = allowLogOut,
+        disallowFundingSourceCreation = emptySet(),
+    ),
+    shopPayConfiguration = null,
+    googlePlacesApiKey = null,
+    linkAppearance = linkAppearance,
+    termsDisplay = emptyMap(),
+    walletButtons = null,
+    opensCardScannerAutomatically = false,
+    userOverrideCountry = null,
 )
 
 private fun String.isEKClientSecretValid(): Boolean {

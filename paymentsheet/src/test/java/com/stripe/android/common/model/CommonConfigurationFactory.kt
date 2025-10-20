@@ -1,6 +1,7 @@
 package com.stripe.android.common.model
 
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 
@@ -22,7 +23,12 @@ internal object CommonConfigurationFactory {
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> = emptyList(),
         cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
         link: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
-        shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
+        shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null,
+        googlePlacesApiKey: String? = null,
+        termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
+        walletButtons: PaymentSheet.WalletButtonsConfiguration? = null,
+        opensCardScannerAutomatically: Boolean = false,
+        userOverrideCountry: String? = null,
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = merchantDisplayName,
         customer = customer,
@@ -40,5 +46,10 @@ internal object CommonConfigurationFactory {
         cardBrandAcceptance = cardBrandAcceptance,
         link = link,
         shopPayConfiguration = shopPayConfiguration,
+        googlePlacesApiKey = googlePlacesApiKey,
+        termsDisplay = termsDisplay,
+        walletButtons = walletButtons,
+        opensCardScannerAutomatically = opensCardScannerAutomatically,
+        userOverrideCountry = userOverrideCountry,
     )
 }

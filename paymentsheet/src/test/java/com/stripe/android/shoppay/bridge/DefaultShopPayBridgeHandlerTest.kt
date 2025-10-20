@@ -2,11 +2,13 @@ package com.stripe.android.shoppay.bridge
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
+import com.stripe.android.common.model.shopPayConfiguration
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ShopPayHandlers
 import com.stripe.android.shoppay.ShopPayArgs
+import com.stripe.android.shoppay.ShopPayTestFactory
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
@@ -24,7 +26,7 @@ internal class DefaultShopPayBridgeHandlerTest {
 
         val actualKey = handler.getStripePublishableKey()
 
-        assertThat(actualKey).isEqualTo(PUBLISHABLE_KEY)
+        assertThat(actualKey).isEqualTo(ShopPayTestFactory.SHOP_PAY_ARGS.publishableKey)
     }
 
     @Test
@@ -48,7 +50,52 @@ internal class DefaultShopPayBridgeHandlerTest {
         assertThat(data.getJSONObject("business").getString("name")).isEqualTo("Test Business")
         assertThat(data.getString("shopId")).isEqualTo(SHOP_PAY_CONFIGURATION.shopId)
         assertThat(data.getBoolean("phoneNumberRequired")).isTrue()
-        assertThat(data.getJSONArray("allowedShippingCountries").length()).isEqualTo(2)
+        assertThat(data.getBoolean("shippingAddressRequired")).isTrue()
+
+        val shippingRates = data.getJSONArray("shippingRates")
+        assertThat(shippingRates.length()).isEqualTo(1)
+        val shippingRate = shippingRates.getJSONObject(0)
+        assertThat(shippingRate.getString("id")).isEqualTo("1234")
+        assertThat(shippingRate.getString("displayName")).isEqualTo("Express")
+        assertThat(shippingRate.getInt("amount")).isEqualTo(50)
+
+        val allowedShippingCountries = data.getJSONArray("allowedShippingCountries")
+        for (i in 0 until allowedShippingCountries.length()) {
+            assertThat(allowedShippingCountries[i])
+                .isEqualTo(ShopPayTestFactory.SHOP_PAY_ARGS.shopPayConfiguration.allowedShippingCountries[i])
+        }
+    }
+
+    @Test
+    fun `handleECEClick returns null shippingRates when shippingAddressRequired is false`() {
+        val fakeParser = FakeHandleClickRequestParser(
+            returnValue = HandleClickRequest(
+                eventData = HandleClickRequest.EventData(
+                    expressPaymentType = "shopPay"
+                )
+            )
+        )
+
+        val shopPayConfigurationWithoutShipping = shopPayConfiguration(shippingAddressRequired = false)
+        val shopPayArgsWithoutShipping = ShopPayTestFactory.SHOP_PAY_ARGS.copy(
+            shopPayConfiguration = shopPayConfigurationWithoutShipping
+        )
+        val handler = createDefaultBridgeHandler(
+            handleClickRequestJsonParser = fakeParser,
+            shopPayArgs = shopPayArgsWithoutShipping
+        )
+        val message = """{"eventData": {"expressPaymentType": "shopPay"}}"""
+
+        val result = handler.handleECEClick(message)
+
+        val response = JSONObject(result)
+        assertThat(response.getString("type")).isEqualTo("data")
+
+        val data = response.getJSONObject("data")
+        assertThat(data.has("shippingRates")).isFalse()
+        assertThat(data.getBoolean("shippingAddressRequired")).isFalse()
+        assertThat(data.getString("shopId")).isEqualTo(shopPayConfigurationWithoutShipping.shopId)
+        assertThat(data.getBoolean("phoneNumberRequired")).isTrue()
     }
 
     @Test
@@ -83,13 +130,10 @@ internal class DefaultShopPayBridgeHandlerTest {
             shippingAddress = ShippingCalculationRequest.ShippingAddress(
                 name = "John Doe",
                 address = ECEPartialAddress(
-                    addressLine = listOf("123 Main St"),
                     city = "San Francisco",
                     state = "CA",
                     postalCode = "94105",
                     country = "US",
-                    phone = null,
-                    organization = null
                 )
             )
         )
@@ -131,13 +175,10 @@ internal class DefaultShopPayBridgeHandlerTest {
             shippingAddress = ShippingCalculationRequest.ShippingAddress(
                 name = null,
                 address = ECEPartialAddress(
-                    addressLine = null,
                     city = "San Francisco",
                     state = null,
                     postalCode = null,
                     country = "US",
-                    phone = null,
-                    organization = null
                 )
             )
         )
@@ -217,7 +258,7 @@ internal class DefaultShopPayBridgeHandlerTest {
     fun `confirmPayment returns success response when parsing succeeds`() = runTest {
         val confirmationRequest = ConfirmationRequest(
             paymentDetails = ConfirmationRequest.ConfirmEventData(
-                billingDetails = ECEBillingDetails(name = "John Doe", email = null, phone = null, address = null),
+                billingDetails = ShopPayTestFactory.MINIMAL_BILLING_DETAILS,
                 paymentMethodOptions = ECEPaymentMethodOptions(
                     shopPay = ECEPaymentMethodOptions.ShopPay(
                         externalSourceId = "src_123"
@@ -227,7 +268,7 @@ internal class DefaultShopPayBridgeHandlerTest {
         )
         val fakeParser = FakeConfirmationRequestParser(returnValue = confirmationRequest)
         val handler = createDefaultBridgeHandler(confirmationRequestJsonParser = fakeParser)
-        val message = """{"paymentDetails": {"billingDetails": {"name": "John Doe"}}}"""
+        val message = """{"paymentDetails": {"billingDetails": {"name": "Test User"}}}"""
 
         val result = handler.confirmPayment(message)
 
@@ -242,7 +283,46 @@ internal class DefaultShopPayBridgeHandlerTest {
         assertThat(confirmationState).isEqualTo(
             ShopPayConfirmationState.Success(
                 externalSourceId = "src_123",
-                billingDetails = confirmationRequest.paymentDetails.billingDetails
+                billingDetails = confirmationRequest.paymentDetails.billingDetails,
+                shippingAddressData = null
+            )
+        )
+    }
+
+    @Test
+    fun `confirmPayment includes shipping address data in confirmation state when provided`() = runTest {
+        val confirmationRequest = ConfirmationRequest(
+            paymentDetails = ConfirmationRequest.ConfirmEventData(
+                billingDetails = ShopPayTestFactory.MINIMAL_BILLING_DETAILS,
+                shippingAddress = ShopPayTestFactory.SHIPPING_ADDRESS_DATA,
+                paymentMethodOptions = ECEPaymentMethodOptions(
+                    shopPay = ECEPaymentMethodOptions.ShopPay(
+                        externalSourceId = "src_123"
+                    )
+                )
+            )
+        )
+        val fakeParser = FakeConfirmationRequestParser(returnValue = confirmationRequest)
+        val handler = createDefaultBridgeHandler(confirmationRequestJsonParser = fakeParser)
+        val message = """{"paymentDetails": {"billingDetails": {"name": "Test User"}, "shippingAddress":
+            | {"name": "Jane Smith"}}}
+        """.trimMargin()
+
+        val result = handler.confirmPayment(message)
+
+        val response = JSONObject(result)
+        assertThat(response.getString("type")).isEqualTo("data")
+
+        val data = response.getJSONObject("data")
+        assertThat(data.getString("status")).isEqualTo("success")
+        assertThat(data.getBoolean("requiresAction")).isFalse()
+
+        val confirmationState = handler.confirmationState.first()
+        assertThat(confirmationState).isEqualTo(
+            ShopPayConfirmationState.Success(
+                externalSourceId = "src_123",
+                billingDetails = confirmationRequest.paymentDetails.billingDetails,
+                shippingAddressData = ShopPayTestFactory.SHIPPING_ADDRESS_DATA
             )
         )
     }
@@ -270,13 +350,13 @@ internal class DefaultShopPayBridgeHandlerTest {
     fun `confirmPayment returns error response when externalSourceId is missing`() = runTest {
         val confirmationRequest = ConfirmationRequest(
             paymentDetails = ConfirmationRequest.ConfirmEventData(
-                billingDetails = ECEBillingDetails(name = "John Doe", email = null, phone = null, address = null),
+                billingDetails = ShopPayTestFactory.MINIMAL_BILLING_DETAILS,
                 paymentMethodOptions = null
             )
         )
         val fakeParser = FakeConfirmationRequestParser(returnValue = confirmationRequest)
         val handler = createDefaultBridgeHandler(confirmationRequestJsonParser = fakeParser)
-        val message = """{"paymentDetails": {"billingDetails": {"name": "John Doe"}}}"""
+        val message = """{"paymentDetails": {"billingDetails": {"name": "Test User"}}}"""
 
         val result = handler.confirmPayment(message)
 
@@ -298,16 +378,9 @@ internal class DefaultShopPayBridgeHandlerTest {
         shippingRateChangeRequestJsonParser: ModelJsonParser<ShippingRateChangeRequest> =
             FakeShippingRateChangeRequestParser(),
         confirmationRequestJsonParser: ModelJsonParser<ConfirmationRequest> = FakeConfirmationRequestParser(),
-        shopPayHandlers: ShopPayHandlers = createFakeShopPayHandlers()
+        shopPayHandlers: ShopPayHandlers = createFakeShopPayHandlers(),
+        shopPayArgs: ShopPayArgs = ShopPayTestFactory.SHOP_PAY_ARGS
     ): DefaultShopPayBridgeHandler {
-        val shopPayArgs = ShopPayArgs(
-            publishableKey = PUBLISHABLE_KEY,
-            shopPayConfiguration = SHOP_PAY_CONFIGURATION,
-            customerSessionClientSecret = "css_test_123",
-            businessName = "Test Business",
-            paymentElementCallbackIdentifier = "paymentElementCallbackIdentifier"
-        )
-
         return DefaultShopPayBridgeHandler(
             handleClickRequestJsonParser = handleClickRequestJsonParser,
             shopPayArgs = shopPayArgs,
@@ -405,9 +478,5 @@ internal class DefaultShopPayBridgeHandlerTest {
                 null
             }
         }
-    }
-
-    companion object {
-        const val PUBLISHABLE_KEY = "pk_test_123"
     }
 }

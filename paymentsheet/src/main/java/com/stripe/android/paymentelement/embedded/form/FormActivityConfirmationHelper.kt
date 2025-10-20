@@ -34,10 +34,16 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     lifecycleOwner: LifecycleOwner,
     activityResultCaller: ActivityResultCaller,
     @ViewModelScope private val coroutineScope: CoroutineScope,
+    formActivityConfirmationHandlerRegistrar: FormActivityConfirmationHandlerRegistrar
 ) : FormActivityConfirmationHelper {
 
     init {
-        confirmationHandler.register(activityResultCaller, lifecycleOwner)
+        formActivityConfirmationHandlerRegistrar.registerAndBootstrap(
+            activityResultCaller,
+            lifecycleOwner,
+            paymentMethodMetadata
+        )
+
         lifecycleOwner.lifecycleScope.launch {
             confirmationHandler.state.collectLatest {
                 stateHelper.updateConfirmationState(it)
@@ -49,7 +55,9 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
         if (onClickDelegate.onClickOverride != null) {
             onClickDelegate.onClickOverride?.invoke()
         } else {
-            eventReporter.onPressConfirmButton(selectionHolder.selection.value)
+            selectionHolder.selection.value?.let { paymentSelection ->
+                eventReporter.onPressConfirmButton(paymentSelection)
+            }
 
             when (configuration.formSheetAction) {
                 EmbeddedPaymentElement.FormSheetAction.Continue -> {
@@ -71,7 +79,9 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     private fun confirmationArgs(): ConfirmationHandler.Args? {
         val confirmationOption = selectionHolder.selection.value?.toConfirmationOption(
             configuration = configuration.asCommonConfiguration(),
-            linkConfiguration = paymentMethodMetadata.linkState?.configuration
+            linkConfiguration = paymentMethodMetadata.linkState?.configuration,
+            passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams,
+            clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
         ) ?: return null
         return ConfirmationHandler.Args(
             intent = paymentMethodMetadata.stripeIntent,

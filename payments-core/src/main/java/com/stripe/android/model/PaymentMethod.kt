@@ -5,7 +5,8 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.wallets.Wallet
-import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.MAX_RETRIES
+import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.MAX_POLLING_DURATION
+import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.REDUCED_POLLING_DURATION
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
@@ -148,6 +149,12 @@ constructor(
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val linkPaymentDetails: LinkPaymentDetails? = null,
 
     /**
+     * Indicates whether this payment method was created in Link passthrough mode.
+     * A payment method is in passthrough mode if it was created through Link but doesn't have link details.
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val isLinkPassthroughMode: Boolean = false,
+
+    /**
      * Indicates whether this payment method can be shown again to its customer in a checkout flow. Stripe products
      * such as Checkout and Elements use this field to determine whether a payment method can be shown as a saved
      * payment method in a checkout flow. The field defaults to "unspecified".
@@ -265,7 +272,7 @@ constructor(
             requiresMandate = false,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Refresh(),
+            afterRedirectAction = AfterRedirectAction.Refresh,
         ),
         P24(
             "p24",
@@ -278,7 +285,7 @@ constructor(
             // About 20% of the time, the intent is still in `requires_action` status
             // after redirecting following a successful payment.
             // This allows time for the intent to transition to its terminal state.
-            afterRedirectAction = AfterRedirectAction.Poll(),
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION),
         ),
         Bancontact(
             "bancontact",
@@ -367,7 +374,7 @@ constructor(
             requiresMandate = false,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Refresh(retryCount = MAX_RETRIES),
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = MAX_POLLING_DURATION),
         ),
         Klarna(
             "klarna",
@@ -376,6 +383,7 @@ constructor(
             requiresMandate = true,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
+            afterRedirectAction = AfterRedirectAction.Refresh,
         ),
         Affirm(
             "affirm",
@@ -392,7 +400,7 @@ constructor(
             requiresMandate = true,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Poll(),
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION),
         ),
         Sunbit(
             "sunbit",
@@ -433,7 +441,7 @@ constructor(
             requiresMandate = true,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Poll(),
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION),
         ),
         Alma(
             "alma",
@@ -482,7 +490,7 @@ constructor(
             requiresMandate = true,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Refresh(),
+            afterRedirectAction = AfterRedirectAction.Refresh,
         ),
         Boleto(
             code = "boleto",
@@ -511,7 +519,7 @@ constructor(
             // About 50% of the time, the intent is still in `requires_action` status
             // after redirecting following a successful payment.
             // This allows time for the intent to transition to its terminal state.
-            afterRedirectAction = AfterRedirectAction.Poll(),
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION),
         ),
         Twint(
             code = "twint",
@@ -524,7 +532,31 @@ constructor(
             // About 50% of the time, the intent is still in `requires_action` status
             // after redirecting following a successful payment.
             // This allows time for the intent to transition to its terminal state.
-            afterRedirectAction = AfterRedirectAction.Poll(),
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION),
+        ),
+        ShopPay(
+            code = "shop_pay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
+        PayNow(
+            "paynow",
+            isReusable = false,
+            isVoucher = true,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
+        ),
+        PromptPay(
+            "promptpay",
+            isReusable = false,
+            isVoucher = true,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
@@ -545,28 +577,32 @@ constructor(
     }
 
     internal sealed interface AfterRedirectAction : Parcelable {
-        val shouldRefresh: Boolean
-        val retryCount: Int
+        val shouldRefreshOrRetrieve: Boolean
+        val pollingDuration: Long
 
         @Parcelize
         data object None : AfterRedirectAction {
-            @IgnoredOnParcel
-            override val shouldRefresh: Boolean = false
 
             @IgnoredOnParcel
-            override val retryCount: Int = MAX_RETRIES
+            override val shouldRefreshOrRetrieve: Boolean = false
+
+            @IgnoredOnParcel
+            override val pollingDuration: Long = 15000L
         }
 
         @Parcelize
-        data class Poll(override val retryCount: Int = MAX_RETRIES) : AfterRedirectAction {
+        data class Poll(override val pollingDuration: Long) : AfterRedirectAction {
             @IgnoredOnParcel
-            override val shouldRefresh: Boolean = true
+            override val shouldRefreshOrRetrieve: Boolean = true
         }
 
         @Parcelize
-        data class Refresh(override val retryCount: Int = 1) : AfterRedirectAction {
+        data object Refresh : AfterRedirectAction {
             @IgnoredOnParcel
-            override val shouldRefresh: Boolean = true
+            override val shouldRefreshOrRetrieve: Boolean = true
+
+            @IgnoredOnParcel
+            override val pollingDuration: Long = 0L
         }
     }
 

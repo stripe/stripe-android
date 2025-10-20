@@ -13,6 +13,7 @@ import com.stripe.hcaptcha.config.HCaptchaSize
 import com.stripe.hcaptcha.task.OnFailureListener
 import com.stripe.hcaptcha.task.OnSuccessListener
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 /**
  * Proxy to access hcaptcha android sdk code safely
@@ -26,18 +27,23 @@ suspend fun performPassiveHCaptcha(
 ): String {
     // TODO(awush): in the future, we should convert the hCaptcha SDK to use a suspend interface instead of callbacks,
     //  then we can eliminate the {{suspendCancelableCoroutine}} here.
-    return suspendCancellableCoroutine { coroutine ->
-        val hcaptcha = HCaptcha.getClient(activity).apply {
+    val hCaptcha = HCaptcha.getClient()
+    val token = suspendCancellableCoroutine { continuation ->
+        hCaptcha.apply {
             addOnSuccessListener(object : OnSuccessListener<HCaptchaTokenResponse> {
                 override fun onSuccess(result: HCaptchaTokenResponse) {
-                    coroutine.resume(result.tokenResult) { _ -> }
+                    continuation.resume(result.tokenResult)
                 }
             })
             addOnFailureListener(object : OnFailureListener {
                 override fun onFailure(exception: HCaptchaException) {
-                    coroutine.resume(exception.hCaptchaError.name) { _ -> }
+                    continuation.resume(exception.hCaptchaError.name)
                 }
             })
+        }
+
+        continuation.invokeOnCancellation {
+            hCaptcha.reset()
         }
 
         val config = HCaptchaConfig(
@@ -50,6 +56,8 @@ suspend fun performPassiveHCaptcha(
             retryPredicate = { _, exception -> exception.hCaptchaError == HCaptchaError.SESSION_TIMEOUT }
         )
 
-        hcaptcha.setup(config).verifyWithHCaptcha()
+        hCaptcha.setup(activity, config).verifyWithHCaptcha(activity)
     }
+    hCaptcha.reset()
+    return token
 }

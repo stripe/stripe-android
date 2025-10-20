@@ -26,7 +26,8 @@ internal object WalletButtonsSettingsDefinition :
             PlaygroundConfigurationData.IntegrationType.FlowController,
             PlaygroundConfigurationData.IntegrationType.FlowControllerWithSpt -> true
             PlaygroundConfigurationData.IntegrationType.PaymentSheet,
-            PlaygroundConfigurationData.IntegrationType.CustomerSheet -> false
+            PlaygroundConfigurationData.IntegrationType.CustomerSheet,
+            PlaygroundConfigurationData.IntegrationType.LinkController -> false
         }
     }
 
@@ -53,35 +54,74 @@ internal object WalletButtonsSettingsDefinition :
         value: WalletButtonsPlaygroundType,
         configurationBuilder: PaymentSheet.Configuration.Builder,
     ) {
-        val configuration = when (value) {
-            WalletButtonsPlaygroundType.Disabled -> {
-                PaymentSheet.WalletButtonsConfiguration(
-                    willDisplayExternally = false
-                )
-            }
-            WalletButtonsPlaygroundType.Enabled -> {
-                PaymentSheet.WalletButtonsConfiguration(
-                    willDisplayExternally = true
-                )
-            }
-            WalletButtonsPlaygroundType.EnabledWithOnlyLink -> {
-                PaymentSheet.WalletButtonsConfiguration(
-                    willDisplayExternally = true,
-                    walletsToShow = listOf("link")
-                )
-            }
-        }
-
-        configurationBuilder.walletButtons(configuration)
+        configurationBuilder.walletButtons(value.configuration)
     }
 }
 
 enum class WalletButtonsPlaygroundType(
-    val displayName: String
+    val displayName: String,
+    val configuration: PaymentSheet.WalletButtonsConfiguration,
 ) : ValueEnum {
-    Disabled("Disabled"),
-    Enabled("Enabled"),
-    EnabledWithOnlyLink("Enabled w/ only Link");
+    Disabled(
+        displayName = "Disabled",
+        configuration = PaymentSheet.WalletButtonsConfiguration(
+            willDisplayExternally = false,
+        ),
+    ),
+    Automatic(
+        displayName = "Automatic",
+        configuration = PaymentSheet.WalletButtonsConfiguration(
+            willDisplayExternally = true,
+        ),
+    ),
+    Both(
+        displayName = "Always in MPE & Wallets",
+        configuration = PaymentSheet.WalletButtonsConfiguration(
+            willDisplayExternally = true,
+            visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                paymentElement = mapOf(
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
+                ),
+                walletButtonsView = mapOf(
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay to
+                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
+                ),
+            )
+        ),
+    ),
+    GPayAlwaysLinkAutoNeverShopPayAuto(
+        displayName = "Google Pay (Always), Link (Never in Wallets, Auto in MPE), Shop Pay (Automatic)",
+        configuration = PaymentSheet.WalletButtonsConfiguration(
+            willDisplayExternally = true,
+            visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                paymentElement = mapOf(
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+                ),
+                walletButtonsView = mapOf(
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay to
+                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
+                ),
+            )
+        ),
+    );
 
     override val value: String
         get() = name

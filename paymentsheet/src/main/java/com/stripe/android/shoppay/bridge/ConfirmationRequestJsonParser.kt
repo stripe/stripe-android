@@ -119,7 +119,7 @@ internal class ConfirmationRequestJsonParser @Inject constructor(
         private const val FIELD_ADDRESS_LINE2 = "line2"
         private const val FIELD_ADDRESS_CITY = "city"
         private const val FIELD_ADDRESS_STATE = "state"
-        private const val FIELD_ADDRESS_POSTAL_CODE = "postalCode"
+        private const val FIELD_ADDRESS_POSTAL_CODE = "postal_code"
         private const val FIELD_ADDRESS_COUNTRY = "country"
 
         // Shipping rate fields

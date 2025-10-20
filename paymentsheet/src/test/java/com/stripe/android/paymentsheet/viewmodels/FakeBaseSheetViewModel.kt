@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.viewmodels
 
+import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -91,6 +93,10 @@ internal class FakeBaseSheetViewModel private constructor(
     override val error: StateFlow<ResolvableString?> = errorSource.asStateFlow()
 
     override var newPaymentSelection: NewPaymentOptionSelection? = null
+
+    override fun registerFromActivity(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
+        throw AssertionError("Not expected.")
+    }
 
     override fun onError(error: ResolvableString?) {
         errorSource.value = error

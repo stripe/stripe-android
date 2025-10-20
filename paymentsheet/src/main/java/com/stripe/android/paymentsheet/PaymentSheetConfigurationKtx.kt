@@ -121,17 +121,15 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
     }
 }
 
-internal val PaymentSheet.WalletButtonsConfiguration.allowedWalletTypes: List<WalletType>
-    get() = if (walletsToShow.isEmpty()) {
-        WalletType.entries
-    } else {
-        WalletType.entries.filter { type ->
-            walletsToShow.contains(type.code)
-        }
+internal val WalletType.configType: PaymentSheet.WalletButtonsConfiguration.Wallet
+    get() = when (this) {
+        WalletType.Link -> PaymentSheet.WalletButtonsConfiguration.Wallet.Link
+        WalletType.GooglePay -> PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay
+        WalletType.ShopPay -> PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay
     }
 
 @OptIn(AppearanceAPIAdditionsPreview::class)
-private fun PaymentSheet.Typography.Font.toTextStyle(): TextStyle {
+internal fun PaymentSheet.Typography.Font.toTextStyle(): TextStyle {
     return TextStyle(
         fontSize = fontSizeSp?.sp ?: TextUnit.Unspecified,
         fontWeight = fontWeight?.let { FontWeight(it) },

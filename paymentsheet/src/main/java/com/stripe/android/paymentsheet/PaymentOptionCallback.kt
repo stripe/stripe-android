@@ -14,3 +14,8 @@ fun interface PaymentOptionCallback {
      */
     fun onPaymentOption(paymentOption: PaymentOption?)
 }
+
+internal fun PaymentOptionCallback.toResultCallback() =
+    PaymentOptionResultCallback { result ->
+        onPaymentOption(result.paymentOption)
+    }

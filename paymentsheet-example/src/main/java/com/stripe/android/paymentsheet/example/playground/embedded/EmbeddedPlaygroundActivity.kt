@@ -37,16 +37,15 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
-import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
-import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.ConfirmationTokenSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DropdownSetting
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedRowSelectionBehaviorSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedViewDisplaysMandateSettingDefinition
@@ -100,33 +99,34 @@ internal class EmbeddedPlaygroundActivity :
         this.playgroundState = initialPlaygroundState
         this.playgroundSettings = initialPlaygroundState.snapshot.playgroundSettings()
 
-        val embeddedBuilder = EmbeddedPaymentElement.Builder(
-            createIntentCallback = { _, _ ->
-                val playgroundState = playgroundState
-                PlaygroundRequester(playgroundState.snapshot, applicationContext).fetch().fold(
-                    onSuccess = { state ->
-                        val clientSecret = requireNotNull(state.asPaymentState()).clientSecret
-                        CreateIntentResult.Success(clientSecret)
+        val embeddedBuilder =
+            if (playgroundState.snapshot[ConfirmationTokenSettingsDefinition] == true) {
+                EmbeddedPaymentElement.Builder(
+                    createIntentCallback = { _ ->
+                        viewModel.handleCreateIntentCallback(playgroundState, applicationContext)
                     },
-                    onFailure = { exception ->
-                        CreateIntentResult.Failure(IllegalStateException(exception))
-                    },
+                    resultCallback = ::handleEmbeddedResult,
                 )
-            },
-            resultCallback = ::handleEmbeddedResult,
-        )
-            .confirmCustomPaymentMethodCallback(this)
-            .externalPaymentMethodConfirmHandler(this)
-            .analyticEventCallback(this)
-            .rowSelectionBehavior(
-                playgroundSettings[EmbeddedRowSelectionBehaviorSettingsDefinition].value.rowSelectionBehavior
-            )
+            } else {
+                EmbeddedPaymentElement.Builder(
+                    createIntentCallback = { _, _ ->
+                        viewModel.handleCreateIntentCallback(playgroundState, applicationContext)
+                    },
+                    resultCallback = ::handleEmbeddedResult,
+                )
+            }
+                .confirmCustomPaymentMethodCallback(this)
+                .externalPaymentMethodConfirmHandler(this)
+                .analyticEventCallback(this)
+                .rowSelectionBehavior(
+                    playgroundSettings[EmbeddedRowSelectionBehaviorSettingsDefinition].value.rowSelectionBehavior
+                )
         val embeddedViewDisplaysMandateText =
             initialPlaygroundState.snapshot[EmbeddedViewDisplaysMandateSettingDefinition]
         setContent {
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)
 
-            var loadingState by remember {
+            var loadingState: LoadingState by remember {
                 mutableStateOf(LoadingState.Loading)
             }
 
@@ -139,7 +139,9 @@ internal class EmbeddedPlaygroundActivity :
                     configuration = playgroundState.embeddedConfiguration(),
                 )
                 loadingState = when (result) {
-                    is EmbeddedPaymentElement.ConfigureResult.Failed -> LoadingState.Failed
+                    is EmbeddedPaymentElement.ConfigureResult.Failed -> {
+                        LoadingState.Failed(result.error.message ?: "Unknown error")
+                    }
                     is EmbeddedPaymentElement.ConfigureResult.Succeeded -> LoadingState.Complete
                 }
             }
@@ -331,8 +333,8 @@ internal class EmbeddedPlaygroundActivity :
         return this
     }
 
-    private enum class LoadingState {
-        Loading {
+    private sealed class LoadingState {
+        data object Loading : LoadingState() {
             @Composable
             override fun Content(
                 embeddedPaymentElement: EmbeddedPaymentElement,
@@ -348,8 +350,8 @@ internal class EmbeddedPlaygroundActivity :
                     )
                 }
             }
-        },
-        Complete {
+        }
+        data object Complete : LoadingState() {
             @OptIn(WalletButtonsPreview::class)
             @Composable
             override fun Content(
@@ -363,21 +365,24 @@ internal class EmbeddedPlaygroundActivity :
                     }
                 }
 
-                embeddedPaymentElement.Content()
+                Box(modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)) {
+                    embeddedPaymentElement.Content()
+                }
             }
-        },
-        Failed {
+        }
+        data class Failed(val message: String) : LoadingState() {
             @Composable
             override fun Content(
                 embeddedPaymentElement: EmbeddedPaymentElement,
                 showWalletButtons: Boolean,
                 retry: () -> Unit,
             ) {
+                Text(message)
                 Button(onClick = retry, Modifier.fillMaxWidth()) {
                     Text("Retry")
                 }
             }
-        };
+        }
 
         @Composable
         abstract fun Content(

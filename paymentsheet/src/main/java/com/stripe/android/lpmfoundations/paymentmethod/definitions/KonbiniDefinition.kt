@@ -41,6 +41,7 @@ private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple {
         paymentMethodDefinition = KonbiniDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_konbini,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_konbini,
+        iconResourceNight = null,
     )
 
     override fun createFormElements(
@@ -54,9 +55,9 @@ private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple {
                     label = resolvableString(R.string.stripe_konbini_confirmation_number_label),
                     capitalization = KeyboardCapitalization.None,
                     keyboard = KeyboardType.Phone,
+                    optional = true,
                 ),
                 initialValue = arguments.initialValues[IdentifierSpec.KonbiniConfirmationNumber],
-                showOptionalLabel = true,
             ),
         )
         return FormElementsBuilder(arguments)

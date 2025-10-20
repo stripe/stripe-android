@@ -9,12 +9,17 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentMethod
+import com.stripe.android.link.confirmation.createPaymentMethodCreateParams
+import com.stripe.android.link.utils.toConsumerBillingAddress
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
@@ -28,6 +33,7 @@ import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.VerificationType
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.repository.ConsumersApiService
@@ -43,6 +49,7 @@ import kotlin.coroutines.CoroutineContext
 @SuppressWarnings("TooManyFunctions")
 internal class LinkApiRepository @Inject constructor(
     application: Application,
+    private val requestSurface: RequestSurface,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
     private val stripeRepository: StripeRepository,
@@ -55,64 +62,105 @@ internal class LinkApiRepository @Inject constructor(
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
         DefaultFraudDetectionDataRepository(application, workContext)
 
+    private val apiRequestOptions: ApiRequest.Options
+        get() = buildRequestOptions()
+
     init {
         fraudDetectionDataRepository.refresh()
     }
 
     override suspend fun lookupConsumer(
-        email: String,
+        email: String?,
+        linkAuthIntentId: String?,
+        sessionId: String,
+        customerId: String?,
+        supportedVerificationTypes: List<String>?,
     ): Result<ConsumerSessionLookup> = withContext(workContext) {
         runCatching {
             requireNotNull(
                 consumersApiService.lookupConsumerSession(
                     email = email,
-                    requestSurface = REQUEST_SURFACE,
+                    linkAuthIntentId = linkAuthIntentId,
+                    requestSurface = requestSurface.value,
+                    sessionId = sessionId,
                     doNotLogConsumerFunnelEvent = false,
-                    requestOptions = buildRequestOptions(),
+                    requestOptions = apiRequestOptions,
+                    customerId = customerId,
+                    supportedVerificationTypes = supportedVerificationTypes
                 )
             )
         }
     }
 
     override suspend fun lookupConsumerWithoutBackendLoggingForExposure(
-        email: String
+        email: String,
+        sessionId: String,
     ): Result<ConsumerSessionLookup> = withContext(workContext) {
         runCatching {
             requireNotNull(
                 consumersApiService.lookupConsumerSession(
                     email = email,
-                    requestSurface = REQUEST_SURFACE,
+                    linkAuthIntentId = null,
+                    requestSurface = requestSurface.value,
+                    sessionId = sessionId,
                     doNotLogConsumerFunnelEvent = true,
-                    requestOptions = buildRequestOptions(),
+                    supportedVerificationTypes = null,
+                    requestOptions = apiRequestOptions,
+                    customerId = null
                 )
             )
         }
     }
 
     override suspend fun mobileLookupConsumer(
-        email: String,
-        emailSource: EmailSource,
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
         verificationToken: String,
         appId: String,
-        sessionId: String
+        sessionId: String,
+        customerId: String?,
+        supportedVerificationTypes: List<String>?,
+        linkAuthTokenClientSecret: String?,
     ): Result<ConsumerSessionLookup> = withContext(workContext) {
         runCatching {
             consumersApiService.mobileLookupConsumerSession(
                 email = email,
                 emailSource = emailSource,
-                requestSurface = REQUEST_SURFACE,
+                linkAuthIntentId = linkAuthIntentId,
+                requestSurface = requestSurface.value,
                 verificationToken = verificationToken,
                 appId = appId,
-                requestOptions = buildRequestOptions(),
-                sessionId = sessionId
+                requestOptions = apiRequestOptions,
+                sessionId = sessionId,
+                customerId = customerId,
+                supportedVerificationTypes = supportedVerificationTypes,
+                linkAuthTokenClientSecret = linkAuthTokenClientSecret,
+            )
+        }
+    }
+
+    override suspend fun refreshConsumer(
+        appId: String,
+        consumerSessionClientSecret: String,
+        supportedVerificationTypes: List<String>?,
+    ): Result<ConsumerSessionRefresh> = withContext(workContext) {
+        runCatching {
+            consumersApiService.refreshConsumerSession(
+                appId = appId,
+                consumerSessionClientSecret = consumerSessionClientSecret,
+                supportedVerificationTypes = supportedVerificationTypes,
+                requestSurface = requestSurface.value,
+                requestOptions = apiRequestOptions,
             )
         }
     }
 
     override suspend fun consumerSignUp(
         email: String,
-        phone: String,
-        country: String,
+        phone: String?,
+        country: String?,
+        countryInferringMethod: String,
         name: String?,
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSessionSignup> = withContext(workContext) {
@@ -121,23 +169,25 @@ internal class LinkApiRepository @Inject constructor(
                 email = email,
                 phoneNumber = phone,
                 country = country,
+                countryInferringMethod = countryInferringMethod,
                 name = name,
                 locale = locale,
                 amount = null,
                 currency = null,
                 incentiveEligibilitySession = null,
                 consentAction = consentAction,
-                requestSurface = REQUEST_SURFACE
+                requestSurface = requestSurface.value
             ),
-            requestOptions = buildRequestOptions(),
+            requestOptions = apiRequestOptions,
         )
     }
 
     override suspend fun mobileSignUp(
         name: String?,
         email: String,
-        phoneNumber: String,
-        country: String,
+        phoneNumber: String?,
+        country: String?,
+        countryInferringMethod: String,
         consentAction: ConsumerSignUpConsentAction,
         amount: Long?,
         currency: String?,
@@ -150,17 +200,18 @@ internal class LinkApiRepository @Inject constructor(
                 email = email,
                 phoneNumber = phoneNumber,
                 country = country,
+                countryInferringMethod = countryInferringMethod,
                 name = name,
                 locale = locale,
                 amount = amount,
                 currency = currency,
                 incentiveEligibilitySession = incentiveEligibilitySession,
                 consentAction = consentAction,
-                requestSurface = REQUEST_SURFACE,
+                requestSurface = requestSurface.value,
                 verificationToken = verificationToken,
                 appId = appId
             ),
-            requestOptions = buildRequestOptions(),
+            requestOptions = apiRequestOptions,
         )
     }
 
@@ -169,18 +220,15 @@ internal class LinkApiRepository @Inject constructor(
         userEmail: String,
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
-        active: Boolean,
     ): Result<LinkPaymentDetails.New> = withContext(workContext) {
         consumersApiService.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
                 cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap(),
                 email = userEmail,
-                active = active,
             ),
-            requestSurface = REQUEST_SURFACE,
-            requestOptions = buildRequestOptions(consumerPublishableKey),
+            requestSurface = requestSurface.value,
+            requestOptions = apiRequestOptions,
         ).mapCatching {
             val paymentDetails = it.paymentDetails.first()
             val extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
@@ -209,16 +257,18 @@ internal class LinkApiRepository @Inject constructor(
         bankAccountId: String,
         userEmail: String,
         consumerSessionClientSecret: String,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): Result<ConsumerPaymentDetails.PaymentDetails> = withContext(workContext) {
         consumersApiService.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.BankAccount(
                 bankAccountId = bankAccountId,
+                billingAddress = null,
                 billingEmailAddress = userEmail,
-                billingAddress = null
+                clientAttributionMetadata = clientAttributionMetadata.toParams(),
             ),
-            requestSurface = REQUEST_SURFACE,
-            requestOptions = buildRequestOptions(),
+            requestSurface = requestSurface.value,
+            requestOptions = apiRequestOptions,
         ).mapCatching {
             it.paymentDetails.first()
         }.onFailure {
@@ -232,31 +282,39 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun shareCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
-        last4: String,
         consumerSessionClientSecret: String,
-        allowRedisplay: PaymentMethod.AllowRedisplay?,
-    ): Result<LinkPaymentDetails> = withContext(workContext) {
-        val allowRedisplayParams = allowRedisplay?.let {
+        clientAttributionMetadata: ClientAttributionMetadata,
+    ): Result<LinkPaymentDetails.Saved> = withContext(workContext) {
+        val allowRedisplay = paymentMethodCreateParams.allowRedisplay?.let {
             mapOf(ALLOW_REDISPLAY_PARAM to it.value)
         } ?: emptyMap()
+        val billingPhone: Map<String, String> = paymentMethodCreateParams.billingDetails?.phone?.let {
+            mapOf("billing_phone" to it)
+        } ?: emptyMap()
+        val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
+        val clientAttributionMetadataParams = clientAttributionMetadata.toParams()
 
         stripeRepository.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             id = id,
             extraParams = mapOf(
                 "payment_method_options" to extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
-            ) + allowRedisplayParams,
-            requestOptions = buildRequestOptions(),
+            ) + allowRedisplay + billingPhone + paymentMethodParams + clientAttributionMetadataParams,
+            requestOptions = apiRequestOptions,
         ).onFailure {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
-        }.map { passthroughModePaymentMethodId ->
+        }.map { paymentMethod ->
+            val paymentMethodId = requireNotNull(paymentMethod.id)
             LinkPaymentDetails.Saved(
                 paymentDetails = ConsumerPaymentDetails.Passthrough(
-                    id = passthroughModePaymentMethodId,
-                    last4 = last4,
+                    id = id,
+                    last4 = paymentMethodCreateParams.cardLast4().orEmpty(),
+                    paymentMethodId = paymentMethodId,
+                    billingEmailAddress = paymentMethod.billingDetails?.email,
+                    billingAddress = paymentMethod.billingDetails?.toConsumerBillingAddress(),
                 ),
                 paymentMethodCreateParams = PaymentMethodCreateParams.createLink(
-                    paymentDetailsId = passthroughModePaymentMethodId,
+                    paymentDetailsId = paymentMethodId,
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
                 ),
@@ -268,22 +326,55 @@ internal class LinkApiRepository @Inject constructor(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
+        billingPhone: String?,
         cvc: String?,
+        allowRedisplay: String?,
+        apiKey: String?,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): Result<SharePaymentDetails> = withContext(workContext) {
         val fraudParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
         val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
         val optionsParams = cvc?.let {
             mapOf("payment_method_options" to mapOf("card" to mapOf("cvc" to it)))
         } ?: emptyMap()
+        val allowRedisplayParams = allowRedisplay?.let {
+            mapOf("allow_redisplay" to allowRedisplay)
+        } ?: emptyMap()
+        val clientAttributionMetadataParams = clientAttributionMetadata.toParams()
+        val extraParams = paymentMethodParams +
+            fraudParams +
+            optionsParams +
+            allowRedisplayParams +
+            clientAttributionMetadataParams
+
+        // Allow using a custom API key so that payment methods can be created under the
+        // merchant-of-record if necessary.
+        val requestOptions = buildRequestOptions(apiKey)
 
         consumersApiService.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsId = paymentDetailsId,
             expectedPaymentMethodType = expectedPaymentMethodType,
-            requestOptions = buildRequestOptions(),
-            requestSurface = REQUEST_SURFACE,
-            extraParams = paymentMethodParams + fraudParams + optionsParams,
-            billingPhone = null,
+            requestOptions = requestOptions,
+            requestSurface = requestSurface.value,
+            extraParams = extraParams,
+            billingPhone = billingPhone,
+        )
+    }
+
+    override suspend fun createPaymentMethod(
+        consumerSessionClientSecret: String,
+        paymentMethod: LinkPaymentMethod,
+    ): Result<PaymentMethod> = withContext(workContext) {
+        val params = createPaymentMethodCreateParams(
+            selectedPaymentDetails = paymentMethod.details,
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            cvc = paymentMethod.collectedCvc,
+            billingPhone = paymentMethod.billingPhone,
+        )
+        stripeRepository.createPaymentMethod(
+            paymentMethodCreateParams = params,
+            options = apiRequestOptions,
         )
     }
 
@@ -294,29 +385,25 @@ internal class LinkApiRepository @Inject constructor(
         stripeRepository.logOut(
             consumerSessionClientSecret = consumerSessionClientSecret,
             consumerAccountPublishableKey = consumerAccountPublishableKey,
-            requestOptions = buildRequestOptions(consumerAccountPublishableKey),
+            requestOptions = apiRequestOptions,
         )
     }
 
     override suspend fun startVerification(
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
+        isResendSmsCode: Boolean
     ): Result<ConsumerSession> {
         return runCatching {
             requireNotNull(
                 consumersApiService.startConsumerVerification(
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     locale = locale ?: Locale.US,
-                    requestSurface = REQUEST_SURFACE,
+                    requestSurface = requestSurface.value,
                     type = VerificationType.SMS,
                     customEmailType = null,
                     connectionsMerchantName = null,
-                    requestOptions = consumerPublishableKey?.let {
-                        ApiRequest.Options(it)
-                    } ?: ApiRequest.Options(
-                        apiKey = publishableKeyProvider(),
-                        stripeAccount = stripeAccountIdProvider()
-                    )
+                    requestOptions = apiRequestOptions,
+                    isResendSmsCode = isResendSmsCode
                 )
             )
         }
@@ -325,89 +412,73 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun confirmVerification(
         verificationCode: String,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
+        consentGranted: Boolean?
     ): Result<ConsumerSession> {
         return runCatching {
             requireNotNull(
                 consumersApiService.confirmConsumerVerification(
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     verificationCode = verificationCode,
-                    requestSurface = REQUEST_SURFACE,
+                    requestSurface = requestSurface.value,
                     type = VerificationType.SMS,
-                    requestOptions = consumerPublishableKey?.let {
-                        ApiRequest.Options(it)
-                    } ?: ApiRequest.Options(
-                        apiKey = publishableKeyProvider(),
-                        stripeAccount = stripeAccountIdProvider()
-                    )
+                    consentGranted = consentGranted,
+                    requestOptions = apiRequestOptions,
                 )
             )
         }
     }
 
+    override suspend fun postConsentUpdate(
+        consumerSessionClientSecret: String,
+        consentGranted: Boolean,
+    ): Result<Unit> = withContext(workContext) {
+        consumersApiService.postConsentUpdate(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            consentGranted = consentGranted,
+            requestSurface = requestSurface.value,
+            requestOptions = apiRequestOptions,
+        )
+    }
+
     override suspend fun listPaymentDetails(
         paymentMethodTypes: Set<String>,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails> {
         return stripeRepository.listPaymentDetails(
             clientSecret = consumerSessionClientSecret,
             paymentMethodTypes = paymentMethodTypes,
-            requestOptions = consumerPublishableKey?.let {
-                ApiRequest.Options(it)
-            } ?: ApiRequest.Options(
-                apiKey = publishableKeyProvider(),
-                stripeAccount = stripeAccountIdProvider()
-            )
+            requestOptions = apiRequestOptions,
         )
     }
 
     override suspend fun listShippingAddresses(
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
     ): Result<ConsumerShippingAddresses> {
         return stripeRepository.listShippingAddresses(
             clientSecret = consumerSessionClientSecret,
-            requestOptions = consumerPublishableKey?.let {
-                ApiRequest.Options(it)
-            } ?: ApiRequest.Options(
-                apiKey = publishableKeyProvider(),
-                stripeAccount = stripeAccountIdProvider()
-            )
+            requestOptions = apiRequestOptions,
         )
     }
 
     override suspend fun deletePaymentDetails(
         paymentDetailsId: String,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
     ): Result<Unit> {
         return stripeRepository.deletePaymentDetails(
             clientSecret = consumerSessionClientSecret,
             paymentDetailsId = paymentDetailsId,
-            requestOptions = consumerPublishableKey?.let {
-                ApiRequest.Options(it)
-            } ?: ApiRequest.Options(
-                apiKey = publishableKeyProvider(),
-                stripeAccount = stripeAccountIdProvider()
-            )
+            requestOptions = apiRequestOptions,
         )
     }
 
     override suspend fun updatePaymentDetails(
         updateParams: ConsumerPaymentDetailsUpdateParams,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails> {
         return stripeRepository.updatePaymentDetails(
             clientSecret = consumerSessionClientSecret,
             paymentDetailsUpdateParams = updateParams,
-            requestOptions = consumerPublishableKey?.let {
-                ApiRequest.Options(it)
-            } ?: ApiRequest.Options(
-                apiKey = publishableKeyProvider(),
-                stripeAccount = stripeAccountIdProvider()
-            )
+            requestOptions = apiRequestOptions,
         )
     }
 
@@ -415,33 +486,49 @@ internal class LinkApiRepository @Inject constructor(
         consumerSessionClientSecret: String,
         stripeIntent: StripeIntent,
         linkMode: LinkMode?,
-        consumerPublishableKey: String?
     ): Result<LinkAccountSession> {
         return consumersApiService.createLinkAccountSession(
             consumerSessionClientSecret = consumerSessionClientSecret,
             intentToken = stripeIntent.clientSecret,
             linkMode = linkMode,
-            requestSurface = REQUEST_SURFACE,
-            requestOptions = consumerPublishableKey?.let {
-                ApiRequest.Options(it)
-            } ?: ApiRequest.Options(
-                apiKey = publishableKeyProvider(),
-                stripeAccount = stripeAccountIdProvider()
-            )
+            requestSurface = requestSurface.value,
+            requestOptions = apiRequestOptions,
+        )
+    }
+
+    override suspend fun updatePhoneNumber(
+        consumerSessionClientSecret: String,
+        phoneNumber: String,
+    ): Result<ConsumerSession> = withContext(workContext) {
+        consumersApiService.updatePhoneNumber(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            phoneNumber = phoneNumber,
+            requestSurface = requestSurface.value,
+            requestOptions = apiRequestOptions,
         )
     }
 
     private fun buildRequestOptions(
-        consumerAccountPublishableKey: String? = null,
+        customApiKey: String? = null,
     ): ApiRequest.Options {
-        return ApiRequest.Options(
-            apiKey = consumerAccountPublishableKey ?: publishableKeyProvider(),
-            stripeAccount = stripeAccountIdProvider().takeUnless { consumerAccountPublishableKey != null },
-        )
+        return if (customApiKey != null) {
+            ApiRequest.Options(
+                apiKey = customApiKey,
+                stripeAccount = null,
+            )
+        } else {
+            ApiRequest.Options(
+                apiKey = publishableKeyProvider(),
+                stripeAccount = stripeAccountIdProvider(),
+            )
+        }
     }
 
+    private fun ClientAttributionMetadata.toParams(): Map<String, Map<String, Any>> =
+        mapOf(CLIENT_ATTRIBUTION_METADATA_PARAM to this.toParamMap())
+
     private companion object {
-        const val REQUEST_SURFACE = "android_payment_element"
         const val ALLOW_REDISPLAY_PARAM = "allow_redisplay"
+        const val CLIENT_ATTRIBUTION_METADATA_PARAM = "client_attribution_metadata"
     }
 }

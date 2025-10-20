@@ -120,6 +120,7 @@ class PaymentMethodsUIScreenshotTest {
                 code = "example_pm",
                 displayNameResource = R.string.stripe_paymentsheet_payment_method_affirm,
                 iconResource = 0,
+                iconResourceNight = null,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
                 iconRequiresTinting = false,

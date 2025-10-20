@@ -12,7 +12,11 @@ import kotlinx.coroutines.flow.StateFlow
 internal class NoOpLinkInlineInteractor : LinkInlineInteractor {
 
     override val state: StateFlow<LinkInlineState> = MutableStateFlow(
-        LinkInlineState(verificationState = VerificationState.RenderButton)
+        value = LinkInlineState(
+            verificationState = VerificationState.RenderButton,
+            passiveCaptchaParams = null,
+            attestOnIntentConfirmation = false,
+        )
     )
     override val otpElement: OTPElement = OTPSpec.transform()
 

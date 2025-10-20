@@ -5,6 +5,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.EmailRecognitionSource
 import com.stripe.android.common.model.asCommonConfiguration
@@ -15,9 +16,13 @@ import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.link.ui.LinkButtonState
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
+import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.LinkSignupDisabledReason
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
@@ -29,8 +34,10 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.IsStripeCardScanAvailable
@@ -680,7 +687,10 @@ class DefaultEventReporterTest {
                 ),
                 spmEnabled = true,
                 integrationShape = "embedded",
-                linkDisplayed = true
+                linkDisplayed = true,
+                elementsSessionId = "test_elements_session_id",
+                mobileSdkVersion = "test_sdk_version",
+                mobileSessionId = "test_mobile_session_id"
             )
             completeEventReporter.onExperimentExposure(experiment)
 
@@ -733,6 +743,7 @@ class DefaultEventReporterTest {
             PaymentSelection.New.GenericPaymentMethod(
                 label = "Cash App Pay".resolvableString,
                 iconResource = 0,
+                iconResourceNight = null,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
                 paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(),
@@ -911,6 +922,62 @@ class DefaultEventReporterTest {
         }
 
     @Test
+    fun `Don't send link_disabled_reasons nor link_signup_disabled_reasons when none`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            linkDisabledReasons = listOf(),
+            linkSignupDisabledReasons = listOf(),
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_load_succeeded" &&
+                    req.params["link_disabled_reasons"] == null &&
+                    req.params["link_sign_up_disabled_reasons"] == null
+            }
+        )
+    }
+
+    @Test
+    fun `Send link_disabled_reasons when present`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            linkDisabledReasons = listOf(
+                LinkDisabledReason.NotSupportedInElementsSession,
+                LinkDisabledReason.BillingDetailsCollection,
+            ),
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_load_succeeded" &&
+                    req.params["link_disabled_reasons"] ==
+                    "not_supported_in_elements_session,billing_details_collection"
+            }
+        )
+    }
+
+    @Test
+    fun `Send link_signup_disabled_reasons when present`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            linkSignupDisabledReasons = listOf(
+                LinkSignupDisabledReason.LinkCardNotSupported
+            )
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_load_succeeded" &&
+                    req.params["link_signup_disabled_reasons"] == "link_card_not_supported"
+            }
+        )
+    }
+
+    @Test
     fun `Send correct link_context when pressing confirm button for Instant Debits`() = runTest(testDispatcher) {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateInit()
@@ -1078,6 +1145,358 @@ class DefaultEventReporterTest {
         completeEventReporter.onShowNewPaymentOptions()
     }
 
+    @Test
+    fun `onShopPayWebViewLoadAttempt should fire analytics request with expected event`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onShopPayWebViewLoadAttempt()
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_shoppay_webview_load_attempt"
+            }
+        )
+    }
+
+    @Test
+    fun `onShopPayWebViewConfirmSuccess should fire analytics request with expected event`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onShopPayWebViewConfirmSuccess()
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_shoppay_webview_confirm_success"
+            }
+        )
+    }
+
+    @Test
+    fun `onShopPayWebViewCancelled should fire analytics request with expected event and params`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onShopPayWebViewCancelled(didReceiveECEClick = true)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_shoppay_webview_cancelled" &&
+                    req.params["did_receive_ece_click"] == true
+            }
+        )
+    }
+
+    @Test
+    fun `onShopPayWebViewCancelled should fire analytics request with false ECE click param`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onShopPayWebViewCancelled(didReceiveECEClick = false)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_shoppay_webview_cancelled" &&
+                    req.params["did_receive_ece_click"] == false
+            }
+        )
+    }
+
+    @Test
+    fun `is_spt is false for all requests after load succeeded event`() = isSptTest(
+        intentConfiguration = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 5000L,
+                currency = "CAD",
+            ),
+        ),
+        expectedIsSptValue = false,
+    )
+
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    @Test
+    fun `is_spt is true for all requests after load succeeded event`() = isSptTest(
+        intentConfiguration = PaymentSheet.IntentConfiguration(
+            sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 5000L,
+                currency = "CAD",
+            ),
+            sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                businessName = "My business, Inc.",
+                networkId = "network_id",
+                externalId = "external_id",
+            ),
+        ),
+        expectedIsSptValue = true,
+    )
+
+    private fun isSptTest(
+        intentConfiguration: PaymentSheet.IntentConfiguration,
+        expectedIsSptValue: Boolean,
+    ) {
+        analyticEventCallbackRule.setCallback(null)
+
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateSuccessfulSetup(
+                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                    intentConfiguration = intentConfiguration,
+                )
+            )
+        }
+
+        completeEventReporter.onShowNewPaymentOptions()
+        completeEventReporter.onCardNumberCompleted()
+        completeEventReporter.onPaymentMethodFormCompleted(code = "card")
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_complete_sheet_newpm_show" &&
+                    req.params["is_spt"] == expectedIsSptValue
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_card_number_completed" &&
+                    req.params["is_spt"] == expectedIsSptValue
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_form_completed" &&
+                    req.params["is_spt"] == expectedIsSptValue
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanStarted should fire analytics request with expected event value`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onCardScanStarted("google_pay")
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_scan_started" &&
+                    req.params["implementation"] == "google_pay"
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanSucceeded should fire analytics request with expected event value`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onCardScanSucceeded("google_pay")
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_success" &&
+                    req.params["implementation"] == "google_pay" &&
+                    (req.params["duration"] as Float) > 0
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanFailed should fire analytics request with expected event value`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        val testError = IllegalStateException("Card scan failed")
+        completeEventReporter.onCardScanFailed("google_pay", testError)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_failed" &&
+                    req.params["implementation"] == "google_pay" &&
+                    (req.params["duration"] as Float) > 0 &&
+                    req.params["error_message"] == "IllegalStateException"
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanFailed with null error should fire analytics request with null error_message`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onCardScanFailed("google_pay", null)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_failed" &&
+                    req.params["implementation"] == "google_pay" &&
+                    (req.params["duration"] as Float) > 0 &&
+                    req.params["error_message"] == null
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanCancelled should fire analytics request with expected event value`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onCardScanCancelled("google_pay")
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_cancel" &&
+                    (req.params["duration"] as Float) > 0 &&
+                    req.params["implementation"] == "google_pay"
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanApiCheckSucceeded should fire analytics request with expected event value`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onCardScanApiCheckSucceeded("google_pay")
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_api_check_succeeded" &&
+                    req.params["implementation"] == "google_pay"
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanApiCheckFailed should fire analytics request with expected event value`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onCardScanApiCheckFailed("google_pay", IllegalStateException("API not available"))
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_api_check_failed" &&
+                    req.params["implementation"] == "google_pay" &&
+                    req.params["error_message"] == "IllegalStateException"
+            }
+        )
+    }
+
+    @Test
+    fun `card scan events should work with different implementation names`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onCardScanStarted("bouncer")
+        completeEventReporter.onCardScanSucceeded("stripe")
+        completeEventReporter.onCardScanFailed("custom", null)
+        completeEventReporter.onCardScanCancelled("test")
+        completeEventReporter.onCardScanApiCheckSucceeded("ml_kit")
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_scan_started" &&
+                    req.params["implementation"] == "bouncer"
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_success" &&
+                    req.params["implementation"] == "stripe"
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_failed" &&
+                    req.params["implementation"] == "custom"
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_cancel" &&
+                    req.params["implementation"] == "test"
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_api_check_succeeded" &&
+                    req.params["implementation"] == "ml_kit"
+            }
+        )
+    }
+
+    @Test
+    fun `onInitiallyDisplayedPaymentMethodVisibilitySnapshot creates correct event`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+            visiblePaymentMethods = listOf("card", "klarna", "paypal"),
+            hiddenPaymentMethods = listOf("affirm", "afterpay"),
+            walletsState = null
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_initial_displayed_payment_methods" &&
+                    req.params["visible_payment_methods"] == "card,klarna,paypal" &&
+                    req.params["hidden_payment_methods"] == "affirm,afterpay"
+            }
+        )
+    }
+
+    @Test
+    fun `onInitiallyDisplayedPaymentMethodVisibilitySnapshot correctly adds visible wallets`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+            visiblePaymentMethods = listOf("google_pay", "card", "klarna", "paypal"),
+            hiddenPaymentMethods = listOf("affirm", "afterpay"),
+            walletsState = WalletsState(
+                link = WalletsState.Link(state = LinkButtonState.Default),
+                googlePay = WalletsState.GooglePay(
+                    buttonType = GooglePayButtonType.Pay,
+                    allowCreditCards = true,
+                    billingAddressParameters = null,
+                ),
+                buttonsEnabled = true,
+                dividerTextResource = 0,
+                onGooglePayPressed = {},
+                onLinkPressed = {},
+                walletsAllowedInHeader = listOf(WalletType.Link), // FlowController: Link in header, Google Pay inline
+            )
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_initial_displayed_payment_methods" &&
+                    req.params["visible_payment_methods"] == "link,google_pay,card,klarna,paypal" &&
+                    req.params["hidden_payment_methods"] == "affirm,afterpay"
+            }
+        )
+    }
+
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     private fun createEventReporter(
         mode: EventReporter.Mode,
@@ -1144,6 +1563,8 @@ class DefaultEventReporterTest {
         paymentSelection: PaymentSelection = PaymentSelection.GooglePay,
         linkEnabled: Boolean = true,
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
+        linkDisabledReasons: List<LinkDisabledReason>? = null,
+        linkSignupDisabledReasons: List<LinkSignupDisabledReason>? = null,
         googlePayReady: Boolean = true,
         currency: String? = "usd",
         initializationMode: PaymentElementLoader.InitializationMode =
@@ -1156,7 +1577,8 @@ class DefaultEventReporterTest {
         financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
         paymentMethodOptionsSetupFutureUsage: Boolean = false,
-        setupFutureUsage: StripeIntent.Usage? = null
+        setupFutureUsage: StripeIntent.Usage? = null,
+        openCardScanAutomatically: Boolean = false,
     ) {
         simulateInit()
         onLoadStarted(initializedViaCompose = false)
@@ -1165,6 +1587,8 @@ class DefaultEventReporterTest {
             googlePaySupported = googlePayReady,
             linkEnabled = linkEnabled,
             linkMode = linkMode,
+            linkDisabledReasons = linkDisabledReasons,
+            linkSignupDisabledReasons = linkSignupDisabledReasons,
             currency = currency,
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "klarna"),
@@ -1174,7 +1598,8 @@ class DefaultEventReporterTest {
             financialConnectionsAvailability = financialConnectionsAvailability,
             linkDisplay = linkDisplay,
             paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupFutureUsage,
-            setupFutureUsage = setupFutureUsage
+            setupFutureUsage = setupFutureUsage,
+            openCardScanAutomatically = openCardScanAutomatically,
         )
     }
 

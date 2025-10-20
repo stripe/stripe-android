@@ -8,9 +8,6 @@ internal fun createCustomerState(
     defaultPaymentMethodId: String? = null,
 ): CustomerState {
     return CustomerState(
-        id = "cus_1",
-        ephemeralKeySecret = "ek_1",
-        customerSessionClientSecret = "cuss_123",
         paymentMethods = paymentMethods,
         defaultPaymentMethodId = defaultPaymentMethodId,
     )

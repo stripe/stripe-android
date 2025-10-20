@@ -1,12 +1,15 @@
 package com.stripe.android.paymentsheet.example.playground
 
+import android.content.Context
 import android.os.Parcelable
 import androidx.compose.runtime.Stable
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.link.LinkController
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
@@ -16,6 +19,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CountrySettin
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionOnBehalfOfSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
@@ -96,12 +100,16 @@ internal sealed interface PlaygroundState : Parcelable {
             )
         }
 
-        fun paymentSheetConfiguration(): PaymentSheet.Configuration {
-            return snapshot.paymentSheetConfiguration(this)
+        fun paymentSheetConfiguration(settings: Settings): PaymentSheet.Configuration {
+            return snapshot.paymentSheetConfiguration(playgroundState = this, appSettings = settings)
         }
 
         fun embeddedConfiguration(): EmbeddedPaymentElement.Configuration {
             return snapshot.embeddedConfiguration(this)
+        }
+
+        fun linkControllerConfiguration(context: Context): LinkController.Configuration {
+            return snapshot.linkControllerConfiguration(context, this)
         }
 
         fun displaysShippingAddressButton(): Boolean {
@@ -141,6 +149,10 @@ internal sealed interface PlaygroundState : Parcelable {
                     value.isBlank()
                 }
 
+        val onBehalfOf: String
+            get() = snapshot[CustomerSessionOnBehalfOfSettingsDefinition]
+                .value
+
         fun customerSheetConfiguration(): CustomerSheet.Configuration {
             return snapshot.customerSheetConfiguration(this)
         }
@@ -176,7 +188,7 @@ internal sealed interface PlaygroundState : Parcelable {
         }
 
         @OptIn(SharedPaymentTokenSessionPreview::class)
-        fun intentConfiguration(): PaymentSheet.IntentConfiguration {
+        fun intentConfiguration(amount: Long): PaymentSheet.IntentConfiguration {
             return PaymentSheet.IntentConfiguration(
                 sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = amount,
@@ -184,9 +196,11 @@ internal sealed interface PlaygroundState : Parcelable {
                     captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Manual,
                 ),
                 sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                    businessName = "My business, Inc.",
                     networkId = "internal",
                     externalId = "stripe_test_merchant"
                 ),
+                paymentMethodTypes = listOf("card", "shop_pay")
             )
         }
     }

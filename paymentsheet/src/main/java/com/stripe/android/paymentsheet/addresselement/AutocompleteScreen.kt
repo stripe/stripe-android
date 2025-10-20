@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import android.app.Application
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
@@ -31,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
@@ -41,14 +39,17 @@ import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.TextField
+import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.annotatedStringResource
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Provider
 
 @VisibleForTesting
@@ -57,9 +58,9 @@ internal const val TEST_TAG_ATTRIBUTION_DRAWABLE = "AutocompleteAttributionDrawa
 @Composable
 internal fun AutocompleteScreen(
     autoCompleteViewModelSubcomponentBuilderProvider: Provider<AutocompleteViewModelSubcomponent.Builder>,
+    navigator: AddressElementNavigator,
     country: String?
 ) {
-    val application = LocalContext.current.applicationContext as Application
     val viewModel: AutocompleteViewModel =
         viewModel(
             factory = AutocompleteViewModel.Factory(
@@ -67,34 +68,147 @@ internal fun AutocompleteScreen(
                 args = AutocompleteViewModel.Args(
                     country = country
                 ),
-                applicationSupplier = { application }
             )
         )
 
-    AutocompleteScreenUI(viewModel = viewModel)
+    AutocompleteScreenUI(viewModel = viewModel, navigator = navigator)
 }
 
 @Composable
-internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
-    val predictions by viewModel.predictions.collectAsState()
-    val loading by viewModel.loading.collectAsState()
-    val query by viewModel.textFieldController.fieldValue.collectAsState()
-    val attributionDrawable =
+internal fun AutocompleteScreenUI(
+    viewModel: AutocompleteViewModel,
+    navigator: AddressElementNavigator,
+    attributionDrawable: Int? =
         PlacesClientProxy.getPlacesPoweredByGoogleDrawable(isSystemInDarkTheme())
-    val focusRequester = remember { FocusRequester() }
-
+) {
     LaunchedEffect(Unit) {
-        val handler = Handler(Looper.getMainLooper())
-        handler.post {
-            focusRequester.requestFocus()
+        viewModel.event.collectLatest { event ->
+            when (event) {
+                is AutocompleteViewModel.Event.GoBack -> {
+                    navigator.setResult(
+                        AddressElementNavigator.AutocompleteEvent.KEY,
+                        AddressElementNavigator.AutocompleteEvent.OnBack(event.address)
+                    )
+                }
+                is AutocompleteViewModel.Event.EnterManually -> {
+                    navigator.setResult(
+                        AddressElementNavigator.AutocompleteEvent.KEY,
+                        AddressElementNavigator.AutocompleteEvent.OnEnterManually(event.address)
+                    )
+                }
+            }
+
+            navigator.onBack()
         }
     }
 
+    AutocompleteScreenUI(
+        viewModel = viewModel,
+        attributionDrawable = attributionDrawable,
+        isRootScreen = false,
+        backgroundColor = MaterialTheme.colors.surface,
+        appBar = { isRoot, onBack ->
+            AddressOptionsAppBar(isRootScreen = isRoot) {
+                onBack()
+            }
+        },
+    )
+}
+
+@Composable
+internal fun AutocompleteScreenUI(
+    viewModel: AutocompleteViewModel,
+    appearanceContext: AutocompleteAppearanceContext,
+    attributionDrawable: Int?,
+    isRootScreen: Boolean,
+) {
+    val predictions by viewModel.predictions.collectAsState()
+    val loading by viewModel.loading.collectAsState()
+
+    AutocompleteScreenUI(
+        predictions = predictions,
+        loading = loading,
+        queryController = viewModel.textFieldController,
+        attributionDrawable = attributionDrawable,
+        appearanceContext = appearanceContext,
+        isRootScreen = isRootScreen,
+        onBackPressed = viewModel::onBackPressed,
+        onEnterManually = viewModel::onEnterAddressManually,
+        onSelectPrediction = viewModel::selectPrediction,
+    )
+}
+
+@Composable
+internal fun AutocompleteScreenUI(
+    viewModel: AutocompleteViewModel,
+    attributionDrawable: Int?,
+    isRootScreen: Boolean,
+    backgroundColor: Color,
+    appBar: @Composable (isRootScreen: Boolean, onBack: () -> Unit) -> Unit,
+) {
+    val predictions by viewModel.predictions.collectAsState()
+    val loading by viewModel.loading.collectAsState()
+
+    AutocompleteScreenUI(
+        predictions = predictions,
+        loading = loading,
+        queryController = viewModel.textFieldController,
+        attributionDrawable = attributionDrawable,
+        isRootScreen = isRootScreen,
+        backgroundColor = backgroundColor,
+        appBar = appBar,
+        onBackPressed = viewModel::onBackPressed,
+        onEnterManually = viewModel::onEnterAddressManually,
+        onSelectPrediction = viewModel::selectPrediction,
+    )
+}
+
+@Composable
+internal fun AutocompleteScreenUI(
+    predictions: List<AutocompletePrediction>?,
+    loading: Boolean,
+    queryController: TextFieldController,
+    attributionDrawable: Int?,
+    appearanceContext: AutocompleteAppearanceContext,
+    isRootScreen: Boolean,
+    onBackPressed: () -> Unit,
+    onEnterManually: () -> Unit,
+    onSelectPrediction: (AutocompletePrediction) -> Unit,
+) {
+    AutocompleteScreenUI(
+        predictions = predictions,
+        loading = loading,
+        queryController = queryController,
+        attributionDrawable = attributionDrawable,
+        isRootScreen = isRootScreen,
+        onBackPressed = onBackPressed,
+        onEnterManually = onEnterManually,
+        onSelectPrediction = onSelectPrediction,
+        backgroundColor = appearanceContext.backgroundColor,
+        appBar = { isRoot, onBack ->
+            appearanceContext.AppBar(isRoot, onBack)
+        }
+    )
+}
+
+@Composable
+internal fun AutocompleteScreenUI(
+    predictions: List<AutocompletePrediction>?,
+    loading: Boolean,
+    queryController: TextFieldController,
+    attributionDrawable: Int?,
+    backgroundColor: Color,
+    isRootScreen: Boolean,
+    appBar: @Composable (isRootScreen: Boolean, onBack: () -> Unit) -> Unit,
+    onBackPressed: () -> Unit,
+    onEnterManually: () -> Unit,
+    onSelectPrediction: (AutocompletePrediction) -> Unit,
+) {
+    val query by queryController.fieldValue.collectAsState()
+
     Scaffold(
         topBar = {
-            AddressOptionsAppBar(false) {
-                viewModel.onBackPressed()
-            }
+            appBar(isRootScreen, onBackPressed)
         },
         bottomBar = {
             val background = if (MaterialTheme.stripeColors.materialColors.surface.shouldUseDarkDynamicColor()) {
@@ -113,12 +227,21 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                     .padding(vertical = 8.dp)
             ) {
                 EnterManuallyText {
-                    viewModel.onEnterAddressManually()
+                    onEnterManually()
                 }
             }
         },
-        backgroundColor = MaterialTheme.colors.surface
+        backgroundColor = backgroundColor,
     ) { paddingValues ->
+        val focusRequester = remember { FocusRequester() }
+
+        LaunchedEffect(Unit) {
+            val handler = Handler(Looper.getMainLooper())
+            handler.post {
+                focusRequester.requestFocus()
+            }
+        }
+
         ScrollableColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -135,14 +258,14 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                         .padding(vertical = 8.dp)
                 ) {
                     TextFieldSection(
-                        textFieldController = viewModel.textFieldController,
+                        textFieldController = queryController,
                         modifier = Modifier.padding(StripeTheme.getOuterFormInsets())
                     ) {
                         TextField(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .focusRequester(focusRequester),
-                            textFieldController = viewModel.textFieldController,
+                            textFieldController = queryController,
                             imeAction = ImeAction.Done,
                             enabled = true,
                         )
@@ -168,7 +291,7 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clickable {
-                                                viewModel.selectPrediction(prediction)
+                                                onSelectPrediction(prediction)
                                             }
                                             .padding(
                                                 vertical = 8.dp

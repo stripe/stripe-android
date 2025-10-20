@@ -51,7 +51,12 @@ open class AnalyticsRequestFactory(
     private fun standardParams(): Map<String, Any> = mapOf(
         AnalyticsFields.ANALYTICS_UA to ANALYTICS_UA,
         AnalyticsFields.PUBLISHABLE_KEY to runCatching {
-            publishableKeyProvider.get()
+            val publishableKey = publishableKeyProvider.get()
+            if (publishableKey.startsWith("uk_")) {
+                "[REDACTED_LIVE_KEY]"
+            } else {
+                publishableKey
+            }
         }.getOrDefault(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY),
         AnalyticsFields.OS_NAME to Build.VERSION.CODENAME,
         AnalyticsFields.OS_RELEASE to Build.VERSION.RELEASE,
@@ -60,6 +65,7 @@ open class AnalyticsRequestFactory(
         AnalyticsFields.BINDINGS_VERSION to StripeSdkVersion.VERSION_NAME,
         AnalyticsFields.IS_DEVELOPMENT to BuildConfig.DEBUG,
         AnalyticsFields.SESSION_ID to sessionId,
+        AnalyticsFields.TIMESTAMP to System.currentTimeMillis() / MILLIS_TO_SECONDS,
         AnalyticsFields.LOCALE to Locale.getDefault().toString(),
     ) + networkType() + pluginType()
 
@@ -104,6 +110,7 @@ open class AnalyticsRequestFactory(
         private const val ANALYTICS_PREFIX = "analytics"
         private const val ANALYTICS_NAME = "stripe_android"
         private const val ANALYTICS_VERSION = "1.0"
+        private const val MILLIS_TO_SECONDS = 1000.0
 
         private val DEVICE_TYPE: String = "${Build.MANUFACTURER}_${Build.BRAND}_${Build.MODEL}"
 

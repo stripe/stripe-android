@@ -102,6 +102,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
                 code = "example_pm",
                 displayName = R.string.stripe_paymentsheet_payment_method_affirm.resolvableString,
                 iconResource = 0,
+                iconResourceNight = 0,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
                 iconRequiresTinting = false,

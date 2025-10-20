@@ -2,7 +2,9 @@ package com.stripe.android.paymentsheet
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
@@ -12,6 +14,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
@@ -19,12 +22,13 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -34,7 +38,9 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
+import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -44,6 +50,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
@@ -52,6 +59,7 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.Dispatchers
@@ -64,6 +72,7 @@ import org.junit.After
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -98,11 +107,11 @@ internal class PaymentOptionsViewModelTest {
     fun `onUserSelection() when selection has been made should set the view state to process result`() =
         runTest {
             val viewModel = createViewModel()
-            viewModel.paymentOptionResult.test {
+            viewModel.paymentOptionsActivityResult.test {
                 viewModel.updateSelection(SELECTION_SAVED_PAYMENT_METHOD)
                 viewModel.onUserSelection()
                 assertThat(awaitItem()).isEqualTo(
-                    PaymentOptionResult.Succeeded(
+                    PaymentOptionsActivityResult.Succeeded(
                         SELECTION_SAVED_PAYMENT_METHOD,
                         LinkAccountUpdate.Value(null),
                         listOf(),
@@ -121,12 +130,12 @@ internal class PaymentOptionsViewModelTest {
     fun `onUserSelection() when new card selection with no save should set the view state to process result`() =
         runTest {
             val viewModel = createViewModel()
-            viewModel.paymentOptionResult.test {
+            viewModel.paymentOptionsActivityResult.test {
                 viewModel.updateSelection(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
                 viewModel.onUserSelection()
                 assertThat(awaitItem())
                     .isEqualTo(
-                        PaymentOptionResult.Succeeded(
+                        PaymentOptionsActivityResult.Succeeded(
                             NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION,
                             LinkAccountUpdate.Value(null),
                             listOf()
@@ -145,12 +154,12 @@ internal class PaymentOptionsViewModelTest {
     fun `onUserSelection() when external payment method should set the view state to process result`() =
         runTest {
             val viewModel = createViewModel()
-            viewModel.paymentOptionResult.test {
+            viewModel.paymentOptionsActivityResult.test {
                 viewModel.updateSelection(EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION)
                 viewModel.onUserSelection()
                 assertThat(awaitItem())
                     .isEqualTo(
-                        PaymentOptionResult.Succeeded(
+                        PaymentOptionsActivityResult.Succeeded(
                             EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION,
                             LinkAccountUpdate.Value(null),
                             listOf()
@@ -169,12 +178,12 @@ internal class PaymentOptionsViewModelTest {
     fun `onUserSelection() when custom payment method should set the view state to process result`() =
         runTest {
             val viewModel = createViewModel()
-            viewModel.paymentOptionResult.test {
+            viewModel.paymentOptionsActivityResult.test {
                 viewModel.updateSelection(CUSTOM_PAYMENT_METHOD_SELECTION)
                 viewModel.onUserSelection()
                 assertThat(awaitItem())
                     .isEqualTo(
-                        PaymentOptionResult.Succeeded(
+                        PaymentOptionsActivityResult.Succeeded(
                             CUSTOM_PAYMENT_METHOD_SELECTION,
                             LinkAccountUpdate.Value(null),
                             listOf()
@@ -193,11 +202,11 @@ internal class PaymentOptionsViewModelTest {
     fun `onUserSelection() new card with save should complete with succeeded view state`() =
         runTest {
             val viewModel = createViewModel()
-            viewModel.paymentOptionResult.test {
+            viewModel.paymentOptionsActivityResult.test {
                 viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
                 viewModel.onUserSelection()
                 val paymentOptionResultSucceeded =
-                    awaitItem() as PaymentOptionResult.Succeeded
+                    awaitItem() as PaymentOptionsActivityResult.Succeeded
                 assertThat((paymentOptionResultSucceeded).paymentSelection)
                     .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
                 verify(eventReporter)
@@ -232,7 +241,9 @@ internal class PaymentOptionsViewModelTest {
             configuration = any(),
             linkAccountInfo = eq(LinkAccountUpdate.Value(unverifiedAccount)),
             launchMode = eq(LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)),
-            useLinkExpress = eq(true)
+            linkExpressMode = eq(LinkExpressMode.ENABLED),
+            passiveCaptchaParams = anyOrNull(),
+            attestOnIntentConfirmation = eq(false),
         )
     }
 
@@ -244,11 +255,11 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.updateSelection(PaymentSelection.Link())
-        viewModel.paymentOptionResult.test {
+        viewModel.paymentOptionsActivityResult.test {
             viewModel.onUserSelection()
             val result = awaitItem()
-            assertThat(result).isInstanceOf<PaymentOptionResult.Succeeded>()
-            val succeeded = result as PaymentOptionResult.Succeeded
+            assertThat(result).isInstanceOf<PaymentOptionsActivityResult.Succeeded>()
+            val succeeded = result as PaymentOptionsActivityResult.Succeeded
             assertThat(succeeded.paymentSelection).isInstanceOf<PaymentSelection.Link>()
             ensureAllEventsConsumed()
         }
@@ -270,7 +281,9 @@ internal class PaymentOptionsViewModelTest {
             configuration = any(),
             linkAccountInfo = any(),
             launchMode = any(),
-            useLinkExpress = any()
+            linkExpressMode = any(),
+            passiveCaptchaParams = any(),
+            attestOnIntentConfirmation = any(),
         )
     }
 
@@ -597,13 +610,13 @@ internal class PaymentOptionsViewModelTest {
 
             val viewModel = createViewModel().apply { updateSelection(PaymentSelection.Link()) }
 
-            viewModel.paymentOptionResult.test {
+            viewModel.paymentOptionsActivityResult.test {
                 viewModel.handlePaymentMethodSelected(selection)
                 expectNoEvents()
 
                 viewModel.handlePaymentMethodSelected(PaymentSelection.Link())
 
-                val result = awaitItem() as? PaymentOptionResult.Succeeded
+                val result = awaitItem() as? PaymentOptionsActivityResult.Succeeded
                 assertThat(result?.paymentSelection).isEqualTo(PaymentSelection.Link())
             }
         }
@@ -672,14 +685,14 @@ internal class PaymentOptionsViewModelTest {
 
         val viewModel = createViewModel(args)
 
-        viewModel.paymentOptionResult.test {
+        viewModel.paymentOptionsActivityResult.test {
             // Simulate user removing the selected payment method
             viewModel.savedPaymentMethodMutator.removePaymentMethod(selection.paymentMethod)
 
             viewModel.onUserCancel()
 
             assertThat(awaitItem()).isEqualTo(
-                PaymentOptionResult.Canceled(
+                PaymentOptionsActivityResult.Canceled(
                     mostRecentError = null,
                     paymentSelection = null,
                     paymentMethods = paymentMethods - selection.paymentMethod,
@@ -705,11 +718,12 @@ internal class PaymentOptionsViewModelTest {
 
         val viewModel = createViewModel(args)
 
-        viewModel.paymentOptionResult.test {
+        viewModel.paymentOptionsActivityResult.test {
             // Simulate user filling out a different payment method, but not confirming it
             viewModel.updateSelection(
                 PaymentSelection.New.GenericPaymentMethod(
                     iconResource = 0,
+                    iconResourceNight = null,
                     label = "".resolvableString,
                     paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
@@ -721,7 +735,7 @@ internal class PaymentOptionsViewModelTest {
             viewModel.onUserCancel()
 
             assertThat(awaitItem()).isEqualTo(
-                PaymentOptionResult.Canceled(
+                PaymentOptionsActivityResult.Canceled(
                     mostRecentError = null,
                     paymentSelection = selection,
                     linkAccountInfo = LinkAccountUpdate.Value(null),
@@ -849,8 +863,8 @@ internal class PaymentOptionsViewModelTest {
 
         viewModel.walletsState.test {
             val state = awaitItem()
-            assertThat(state?.link).isEqualTo(WalletsState.Link(email = null))
-            assertThat(state?.googlePay).isNull()
+            assertThat(state?.link(WalletLocation.HEADER)).isEqualTo(WalletsState.Link(state = LinkButtonState.Default))
+            assertThat(state?.googlePay(WalletLocation.HEADER)).isNull()
         }
     }
 
@@ -870,7 +884,7 @@ internal class PaymentOptionsViewModelTest {
     fun `onLinkActivityResult with Canceled does nothing`() = runTest {
         val viewModel = createViewModel()
         val linkAccountUpdate = LinkAccountUpdate.None
-        viewModel.paymentOptionResult.test {
+        viewModel.paymentOptionsActivityResult.test {
             viewModel.onLinkAuthenticationResult(LinkActivityResult.Canceled(linkAccountUpdate = linkAccountUpdate))
             expectNoEvents()
         }
@@ -901,9 +915,9 @@ internal class PaymentOptionsViewModelTest {
             selectedPayment = null
         )
         val viewModel = createViewModel()
-        viewModel.paymentOptionResult.test {
+        viewModel.paymentOptionsActivityResult.test {
             viewModel.onLinkAuthenticationResult(result)
-            val succeeded = awaitItem() as PaymentOptionResult.Succeeded
+            val succeeded = awaitItem() as PaymentOptionsActivityResult.Succeeded
             val paymentSelection = succeeded.paymentSelection
             assertThat(paymentSelection).isInstanceOf<PaymentSelection.Link>()
             assertThat(succeeded.linkAccountInfo.account).isEqualTo(linkAccountUpdate.account)
@@ -922,71 +936,242 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `Link but not Google Pay should be available if only Link allowed in wallets`() = runTest {
-        val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                linkState = LinkState(
-                    configuration = mock(),
-                    signupMode = null,
-                    loginState = LinkState.LoginState.NeedsVerification,
+    fun `Wallets should not be available if visible but not available`() =
+        testWalletVisibility(
+            linkState = null,
+            isGooglePayReady = false,
+            visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                paymentElement = mapOf(
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
                 ),
-                isGooglePayReady = true,
-            ).copy(
-                walletsToShow = listOf(WalletType.Link)
+            ),
+            walletButtonsRendered = true,
+        ) { walletsState ->
+            assertThat(walletsState?.googlePay(WalletLocation.HEADER)).isNull()
+            assertThat(walletsState?.link(WalletLocation.HEADER)).isNull()
+        }
+
+    @Test
+    fun `Link but not Google Pay should be available if only Link can be visible when buttons not rendered`() =
+        testWalletVisibility(
+            linkState = AVAILABLE_LINK_STATE,
+            isGooglePayReady = true,
+            visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                paymentElement = mapOf(
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Never,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+                ),
+            ),
+            walletButtonsRendered = false,
+        ) { walletsState ->
+            assertThat(walletsState?.googlePay(WalletLocation.HEADER)).isNull()
+            assertThat(walletsState?.link(WalletLocation.HEADER)).isNotNull()
+        }
+
+    @Test
+    fun `Google Pay but not Link should be available if only Google Pay can be visible when buttons not rendered`() =
+        testWalletVisibility(
+            linkState = AVAILABLE_LINK_STATE,
+            isGooglePayReady = true,
+            visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                paymentElement = mapOf(
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Never,
+                ),
+            ),
+            walletButtonsRendered = false,
+        ) { walletsState ->
+            assertThat(walletsState?.googlePay(WalletLocation.HEADER)).isNotNull()
+            assertThat(walletsState?.link(WalletLocation.HEADER)).isNull()
+        }
+
+    @Test
+    fun `All wallets should be available if wallet buttons not rendered & automatic`() = testWalletVisibility(
+        linkState = AVAILABLE_LINK_STATE,
+        isGooglePayReady = true,
+        visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+            paymentElement = mapOf(
+                PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+                PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+            ),
+        ),
+        walletButtonsRendered = false,
+    ) { walletsState ->
+        assertThat(walletsState?.googlePay(WalletLocation.HEADER)).isNotNull()
+        assertThat(walletsState?.link(WalletLocation.HEADER)).isNotNull()
+    }
+
+    @Test
+    fun `Wallets should not be available if wallet buttons not rendered & never`() = testWalletVisibility(
+        linkState = AVAILABLE_LINK_STATE,
+        isGooglePayReady = true,
+        visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+            paymentElement = mapOf(
+                PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Never,
+                PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Never,
+            ),
+        ),
+        walletButtonsRendered = false,
+    ) { walletsState ->
+        assertThat(walletsState?.googlePay(WalletLocation.HEADER)).isNull()
+        assertThat(walletsState?.link(WalletLocation.HEADER)).isNull()
+    }
+
+    @Test
+    fun `Wallets should not be available if wallet buttons rendered & automatic`() = testWalletVisibility(
+        linkState = AVAILABLE_LINK_STATE,
+        isGooglePayReady = true,
+        visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+            paymentElement = mapOf(
+                PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+                PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+            ),
+        ),
+        walletButtonsRendered = true,
+    ) { walletsState ->
+        assertThat(walletsState?.googlePay(WalletLocation.HEADER)).isNull()
+        assertThat(walletsState?.link(WalletLocation.HEADER)).isNull()
+    }
+
+    @Test
+    fun `Wallets should be available if wallet buttons rendered & always`() = testWalletVisibility(
+        linkState = AVAILABLE_LINK_STATE,
+        isGooglePayReady = true,
+        visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+            paymentElement = mapOf(
+                PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
+                PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
+            ),
+        ),
+        walletButtonsRendered = true,
+    ) { walletsState ->
+        assertThat(walletsState?.googlePay(WalletLocation.HEADER)).isNotNull()
+        assertThat(walletsState?.link(WalletLocation.HEADER)).isNotNull()
+    }
+
+    @Test
+    fun `Wallets should be available if wallet buttons rendered but visibility for wallets is set to never`() =
+        testWalletVisibility(
+            linkState = AVAILABLE_LINK_STATE,
+            isGooglePayReady = true,
+            visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                paymentElement = mapOf(
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+                ),
+                walletButtonsView = mapOf(
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
+                ),
+            ),
+            walletButtonsRendered = true,
+        ) { walletsState ->
+            assertThat(walletsState?.googlePay(WalletLocation.HEADER)).isNotNull()
+            assertThat(walletsState?.link(WalletLocation.HEADER)).isNotNull()
+        }
+
+    @Test
+    fun `On register for activity result, should register link launcher & autocomplete launcher`() = runTest {
+        DummyActivityResultCaller.test {
+            val lifecycleOwner = TestLifecycleOwner()
+
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    linkState = LinkState(
+                        configuration = mock(),
+                        signupMode = null,
+                        loginState = LinkState.LoginState.NeedsVerification,
+                    ),
+                    isGooglePayReady = true,
+                )
             )
-        )
 
-        viewModel.walletsState.test {
-            val item = awaitItem()
+            viewModel.registerForActivityResult(
+                activityResultCaller = activityResultCaller,
+                lifecycleOwner = lifecycleOwner,
+            )
 
-            assertThat(item?.googlePay).isNull()
-            assertThat(item?.link).isNotNull()
+            assertThat(awaitRegisterCall().contract).isInstanceOf<AutocompleteContract>()
+
+            val autocompleteLauncher = awaitNextRegisteredLauncher()
+
+            verify(linkPaymentLauncher).register(eq(activityResultCaller), any())
+
+            lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+
+            assertThat(awaitNextUnregisteredLauncher()).isEqualTo(autocompleteLauncher)
+            verify(linkPaymentLauncher).unregister()
         }
     }
 
     @Test
-    fun `Google Pay but not Link should be available if only Link allowed in wallets`() = runTest {
-        val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                linkState = LinkState(
-                    configuration = mock(),
-                    signupMode = null,
-                    loginState = LinkState.LoginState.NeedsVerification,
-                ),
-                isGooglePayReady = true,
-            ).copy(
-                walletsToShow = listOf(WalletType.GooglePay)
+    fun `On disabled click, should request validation`() =
+        runTest {
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    paymentSelection = null,
+                    paymentMethods = emptyList(),
+                    isGooglePayReady = false,
+                    linkState = null
+                )
             )
-        )
 
-        viewModel.walletsState.test {
-            val item = awaitItem()
+            val primaryButtonUiState = viewModel.primaryButtonUiState.value
 
-            assertThat(item?.googlePay).isNotNull()
-            assertThat(item?.link).isNull()
+            viewModel.validationRequested.test {
+                expectNoEvents()
+
+                primaryButtonUiState?.onDisabledClick?.invoke()
+
+                assertThat(awaitItem()).isNotNull()
+            }
         }
-    }
 
-    @Test
-    fun `All wallets should be available if allowed in wallets`() = runTest {
+    @OptIn(WalletButtonsPreview::class)
+    private fun testWalletVisibility(
+        linkState: LinkState?,
+        isGooglePayReady: Boolean,
+        walletButtonsRendered: Boolean,
+        visibility: PaymentSheet.WalletButtonsConfiguration.Visibility,
+        test: (WalletsState?) -> Unit
+    ) = runTest {
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                linkState = LinkState(
-                    configuration = mock(),
-                    signupMode = null,
-                    loginState = LinkState.LoginState.NeedsVerification,
-                ),
-                isGooglePayReady = true,
+                linkState = linkState,
+                isGooglePayReady = isGooglePayReady,
+                config = PAYMENT_OPTION_CONTRACT_ARGS.configuration.newBuilder()
+                    .walletButtons(
+                        PaymentSheet.WalletButtonsConfiguration(
+                            visibility = visibility,
+                        )
+                    )
+                    .build()
             ).copy(
-                walletsToShow = listOf(WalletType.GooglePay, WalletType.Link)
+                walletButtonsRendered = walletButtonsRendered
             )
         )
 
         viewModel.walletsState.test {
-            val item = awaitItem()
-
-            assertThat(item?.googlePay).isNotNull()
-            assertThat(item?.link).isNotNull()
+            test(awaitItem())
         }
     }
 
@@ -1007,7 +1192,7 @@ internal class PaymentOptionsViewModelTest {
 
         val viewModel = createViewModel(args)
 
-        viewModel.paymentOptionResult.test {
+        viewModel.paymentOptionsActivityResult.test {
             viewModel.transitionToAddPaymentScreen()
 
             preCancel(viewModel)
@@ -1015,7 +1200,7 @@ internal class PaymentOptionsViewModelTest {
             viewModel.onUserCancel()
 
             assertThat(awaitItem()).isEqualTo(
-                PaymentOptionResult.Canceled(
+                PaymentOptionsActivityResult.Canceled(
                     mostRecentError = null,
                     paymentSelection = expectedSelection,
                     linkAccountInfo = LinkAccountUpdate.Value(null),
@@ -1085,8 +1270,8 @@ internal class PaymentOptionsViewModelTest {
 
     private fun createLinkViewModel(): PaymentOptionsViewModel {
         val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
-            attachNewCardToAccountResult = Result.success(LinkTestUtils.LINK_NEW_PAYMENT_DETAILS),
-            accountStatus = AccountStatus.Verified,
+            attachNewCardToAccountResult = Result.success(LinkTestUtils.LINK_SAVED_PAYMENT_DETAILS),
+            accountStatus = AccountStatus.Verified(true, null),
         )
 
         return createViewModel(
@@ -1109,7 +1294,8 @@ internal class PaymentOptionsViewModelTest {
             args = args.copy(
                 state = args.state.copy(
                     paymentMethodMetadata = args.state.paymentMethodMetadata.copy(
-                        linkState = linkState
+                        linkStateResult = linkState,
+                        customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
                     )
                 )
             ),
@@ -1119,7 +1305,7 @@ internal class PaymentOptionsViewModelTest {
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-            linkGateFactory = { linkGate },
+            linkGateFactory = FakeLinkGate.Factory(linkGate),
             linkPaymentLauncher = linkPaymentLauncher,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         )
@@ -1172,7 +1358,12 @@ internal class PaymentOptionsViewModelTest {
                 account = null,
                 lastUpdateReason = null
             ),
-            walletsToShow = WalletType.entries,
+            walletButtonsRendered = false,
+        )
+        private val AVAILABLE_LINK_STATE = LinkState(
+            configuration = TestFactory.LINK_CONFIGURATION,
+            signupMode = null,
+            loginState = LinkState.LoginState.NeedsVerification,
         )
     }
 

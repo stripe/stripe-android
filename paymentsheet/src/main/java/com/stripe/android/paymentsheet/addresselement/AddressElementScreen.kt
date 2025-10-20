@@ -7,9 +7,9 @@ internal sealed class AddressElementScreen(
     open val route: String
 ) {
 
-    object InputAddress : AddressElementScreen("InputAddress")
+    data object InputAddress : AddressElementScreen("InputAddress")
 
-    class Autocomplete(
+    data class Autocomplete(
         val country: String
     ) : AddressElementScreen(
         "Autocomplete?$countryArg=$country"

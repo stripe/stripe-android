@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- Label for card number entry text field -->
-  <string name="stripe_acc_label_card_number">In-numru tal-kard</string>
-  <string name="stripe_acc_label_card_number_node">%s, In-numru tal-kard</string>
+  <string name="stripe_acc_label_card_number">In-numru tal-karta</string>
+  <string name="stripe_acc_label_card_number_node">%s, In-numru tal-karta</string>
   <string name="stripe_acc_label_cvc_node">%s, CVC</string>
   <string name="stripe_acc_label_expiry_date">Id-data tal-iskadenza</string>
   <string name="stripe_acc_label_expiry_date_node">%s, Data tal-iskadenza</string>
@@ -56,8 +56,6 @@
   <string name="stripe_address_name_required">Jekk jogħġbok daħħal ismek</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
   <string name="stripe_address_phone_number_required">Jekk jogħġbok daħħal in-numru tat-telefon tiegħek</string>
-  <!-- Error message for when postal code in form is invalid -->
-  <string name="stripe_address_postal_code_invalid">Il-kodiċi postali tiegħek mhux validu.</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
   <string name="stripe_address_postcode_invalid">Il-kodiċi postali tiegħek mhux validu</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->
@@ -109,7 +107,7 @@
   <!-- Title for a dropdown where the customer can select a card brand -->
   <string name="stripe_card_brand_choice_selection_header">Agħżel id-ditta tal-karta (mhux obbligatorja)</string>
   <!-- Error when the card was declined by the credit card networks -->
-  <string name="stripe_card_declined">Il-kard tiegħek ma ġietx aċċettata</string>
+  <string name="stripe_card_declined">Il-karta tiegħek m\'għaddietx</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="stripe_card_ending_in">%1$s li jispiċċa %2$s</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
@@ -130,7 +128,7 @@
   <!-- Button title to enter editing mode -->
   <string name="stripe_edit">Editja</string>
   <!-- Error when the card has already expired -->
-  <string name="stripe_expired_card">Il-kard tiegħek skadiet</string>
+  <string name="stripe_expired_card">Il-karta tiegħek skadiet</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_expiry_date_hint">XX/SS</string>
   <string name="stripe_expiry_label_short">Skadenza</string>
@@ -148,9 +146,9 @@
   <string name="stripe_internal_error">Seħħ żball intern.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="stripe_invalid_bank_account_iban">L-IBAN li daħħalt mhux tajjeb.</string>
-  <string name="stripe_invalid_card_number">In-numru tal-kard tiegħek mhux validu.</string>
+  <string name="stripe_invalid_card_number">In-numru tal-karta tiegħek mhux tajjeb.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
-  <string name="stripe_invalid_cvc">Il-kodiċi tas-sigurtà tal-kard tiegħek mhux validu.</string>
+  <string name="stripe_invalid_cvc">Il-kodiċi tas-sigurtà tal-karta tiegħek mhux tajjeb.</string>
   <!-- Error when customer's name is invalid -->
   <string name="stripe_invalid_owner_name">L-isem li daħħalt mhux tajjeb.</string>
   <!-- Shipping form error message -->
@@ -159,19 +157,19 @@
   <string name="stripe_invalid_zip">Il-kodiċi postali tiegħek mhux komplut.</string>
   <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
   <string name="stripe_link_simple_secure_payments">Pagamenti sempliċi u siguri b\'mossa waħda</string>
-  <string name="stripe_payment_method_add_new_card">Żid kard ġdida…</string>
+  <string name="stripe_payment_method_add_new_card">Żid karta ġdida…</string>
   <string name="stripe_payment_method_add_new_fpx">Agħżel Kont Bankarju (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="stripe_price_free">Bla ħlas</string>
   <!-- Error when there is a problem processing the credit card -->
-  <string name="stripe_processing_error">Kien hemm żball fl-ipproċessar tal-kard tiegħek -- erġa\' pprova wara ftit sekondi</string>
+  <string name="stripe_processing_error">Seħħ żball aħna u nipproċessaw il-karta tiegħek -- erġa\' pprova wara ftit sekondi</string>
   <!-- Button title for confirmation alert to remove a saved payment method
    Text for remove button -->
   <string name="stripe_remove">Neħħi</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="stripe_removed">Imneħħi %s</string>
   <string name="stripe_secure_checkout">Checkout Sigur</string>
-  <string name="stripe_title_add_a_card">Żid Kard</string>
+  <string name="stripe_title_add_a_card">Żid karta</string>
   <!-- Screen title telling users they should add an address -->
   <string name="stripe_title_add_an_address">Issettja l-Indirizz</string>
   <!-- Label for Bank Account selection or detail entry form -->

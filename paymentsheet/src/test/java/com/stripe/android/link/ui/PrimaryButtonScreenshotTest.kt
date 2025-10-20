@@ -1,9 +1,12 @@
 package com.stripe.android.link.ui
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.LinkAppearanceFixtures
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -39,6 +42,27 @@ internal class PrimaryButtonScreenshotTest {
     @Test
     fun testProcessingState() {
         snapshot(PrimaryButtonState.Processing)
+    }
+
+    @Test
+    fun testLinkAppearance() {
+        paparazziRule.snapshot {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(
+                    null,
+                    LinkAppearanceFixtures.DEFAULT,
+                    LinkAppearanceFixtures.ALWAYS_DARK,
+                ).forEach { appearance ->
+                    DefaultLinkTheme(appearance) {
+                        PrimaryButton(
+                            label = "Join Link",
+                            state = PrimaryButtonState.Enabled,
+                            onButtonClick = {}
+                        )
+                    }
+                }
+            }
+        }
     }
 
     private fun snapshot(state: PrimaryButtonState) {

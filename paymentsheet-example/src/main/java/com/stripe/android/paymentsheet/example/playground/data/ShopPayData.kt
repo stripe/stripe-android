@@ -45,7 +45,7 @@ internal object ShopPayData {
 
     internal fun shopPayConfiguration(): PaymentSheet.ShopPayConfiguration {
         return PaymentSheet.ShopPayConfiguration(
-            shopId = "shop_id_123",
+            shopId = "92917334038",
             billingAddressRequired = true,
             emailRequired = true,
             shippingAddressRequired = true,
@@ -67,7 +67,8 @@ internal object ShopPayData {
                     amount = shippingRates.first().amount
                 ),
             ),
-            shippingRates = shippingRates
+            shippingRates = shippingRates,
+            allowedShippingCountries = listOf("US", "CA")
         )
     }
 

@@ -101,16 +101,6 @@ android {
         kotlinOptions {
             freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
         }
-
-        managedDevices {
-            localDevices {
-                register("pixel2api33") {
-                    device = "Pixel 2"
-                    apiLevel = 33
-                    systemImageSource = "aosp"
-                }
-            }
-        }
     }
 
     kotlinOptions {

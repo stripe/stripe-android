@@ -39,6 +39,22 @@ internal class CustomPaymentMethodUiDefinitionFactoryTest {
     }
 
     @Test
+    fun testCustomPaymentMethodWithBillingDetailsCollectionConfigurationAndValidation() {
+        paparazziRule.snapshot {
+            CreateFormUi(
+                displayableCustomPaymentMethod = createCustomPaymentMethod(doesNotCollectBillingDetails = false),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                ),
+                isValidating = true,
+            )
+        }
+    }
+
+    @Test
     fun testCustomPaymentMethodWithIgnoredBillingDetailsRequirements() {
         paparazziRule.snapshot {
             CreateFormUi(
@@ -58,7 +74,8 @@ internal class CustomPaymentMethodUiDefinitionFactoryTest {
         displayableCustomPaymentMethod: DisplayableCustomPaymentMethod = createCustomPaymentMethod(),
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
-        createParams: PaymentMethodCreateParams? = null
+        createParams: PaymentMethodCreateParams? = null,
+        isValidating: Boolean = false,
     ) {
         FormUI(
             hiddenIdentifiers = emptySet(),
@@ -75,7 +92,9 @@ internal class CustomPaymentMethodUiDefinitionFactoryTest {
                     ),
                     requiresMandate = false
                 )
-            ),
+            ).onEach { element ->
+                element.onValidationStateChanged(isValidating)
+            },
             lastTextFieldIdentifier = null,
         )
     }

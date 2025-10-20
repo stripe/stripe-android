@@ -23,7 +23,7 @@ import com.stripe.android.core.R as CoreR
 class CountryConfig(
     val onlyShowCountryCodes: Set<String> = emptySet(),
     val locale: Locale = Locale.getDefault(),
-    override val tinyMode: Boolean = false,
+    override val mode: DropdownConfig.Mode = DropdownConfig.Mode.Full(),
     override val disableDropdownWithSingleElement: Boolean = false,
     private val collapsedLabelMapper: (Country) -> String = { country -> country.name },
     expandedLabelMapper: (Country) -> String = { country ->
