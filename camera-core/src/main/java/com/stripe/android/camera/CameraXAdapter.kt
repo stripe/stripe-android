@@ -190,8 +190,6 @@ class CameraXAdapter(
 
     // latest camera metadata from analyzer frames
     private var latestExposureIso: Float? = null
-    private var latestFocalLength: Float? = null
-    private var currentCameraId: String? = null
 
     private val cameraListeners = mutableListOf<(Camera) -> Unit>()
 
@@ -269,15 +267,11 @@ class CameraXAdapter(
 
     /** Return current focal length in mm if available. */
     fun getFocalLength(): Float? {
-        // Prefer cached value from characteristics if set
-        latestFocalLength?.let { return it }
         return runCatching {
-            val camId = currentCameraId ?: Camera2CameraInfo.from(requireNotNull(camera).cameraInfo).cameraId
+            val camId = Camera2CameraInfo.from(requireNotNull(camera).cameraInfo).cameraId
             val cm = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
             val chars = cm.getCameraCharacteristics(camId)
-            val focal = chars.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.firstOrNull()
-            latestFocalLength = focal
-            focal
+            chars.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.firstOrNull()
         }.getOrNull()
     }
 
@@ -378,7 +372,6 @@ class CameraXAdapter(
                         result: TotalCaptureResult
                     ) {
                         latestExposureIso = result.get(CaptureResult.SENSOR_SENSITIVITY)?.toFloat()
-                        latestFocalLength = result.get(CaptureResult.LENS_FOCAL_LENGTH)
                     }
                 }
             )
@@ -416,10 +409,6 @@ class CameraXAdapter(
                 preview,
                 imageAnalyzer
             )
-            // save camera id for characteristics lookup
-            runCatching {
-                currentCameraId = Camera2CameraInfo.from(newCamera.cameraInfo).cameraId
-            }
             notifyCameraListeners(newCamera)
             camera = newCamera
 
