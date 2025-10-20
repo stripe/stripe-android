@@ -409,6 +409,7 @@ class DefaultLinkAccountManagerTest {
                 userEmail: String,
                 stripeIntent: StripeIntent,
                 consumerSessionClientSecret: String,
+                clientAttributionMetadata: ClientAttributionMetadata,
             ): Result<LinkPaymentDetails.New> {
                 val details = result.first()
                 if (result.size > 1) {
