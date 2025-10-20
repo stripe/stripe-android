@@ -45,6 +45,7 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
+import okhttp3.mockwebserver.SocketPolicy
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
@@ -348,6 +349,34 @@ internal class FlowControllerTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+    }
+
+    @Test
+    fun testElementsSessionSocketError(
+        @TestParameter integrationType: IntegrationType,
+    ) = runFlowControllerTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertFailed,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.socketPolicy = SocketPolicy.DISCONNECT_AFTER_REQUEST
+        }
+
+        testContext.configureFlowController {
+            configureWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = defaultConfiguration,
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    presentPaymentOptions()
+                }
+            )
+        }
     }
 
     @Test
