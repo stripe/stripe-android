@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+
 internal object CustomerSessionOnBehalfOfSettingsDefinition :
     PlaygroundSettingDefinition<CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf>,
     PlaygroundSettingDefinition.Saveable<CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf>,
@@ -12,11 +14,17 @@ internal object CustomerSessionOnBehalfOfSettingsDefinition :
     override val defaultValue: OnBehalfOf = OnBehalfOf.NO_CONNECTED_ACCOUNT
 
     override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isCustomerFlow()
+        return configurationData.integrationType.isCustomerFlow() || configurationData.integrationType.isPaymentFlow()
     }
 
     override fun convertToString(value: OnBehalfOf): String {
         return value.value
+    }
+
+    override fun configure(value: OnBehalfOf, checkoutRequestBuilder: CheckoutRequest.Builder) {
+        if (value != OnBehalfOf.NO_CONNECTED_ACCOUNT) {
+            checkoutRequestBuilder.onBehalfOf(value.value)
+        }
     }
 
     override fun convertToValue(value: String): OnBehalfOf {
@@ -36,6 +44,10 @@ internal object CustomerSessionOnBehalfOfSettingsDefinition :
 
                 // Only the US platform account is configured with connected accounts
                 playgroundSettings[CountrySettingsDefinition] = Country.US
+                // You will not see CartesBancaires if the currency is not Euros
+                if (value == OnBehalfOf.FR_CONNECTED_ACCOUNT) {
+                    playgroundSettings[CurrencySettingsDefinition] = Currency.EUR
+                }
             }
             else -> {
                 // Do nothing
