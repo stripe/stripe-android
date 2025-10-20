@@ -1636,7 +1636,10 @@ internal class IdentityViewModel(
                                     highResImage = requireNotNull(front.uploadedStripeFile.id) {
                                         "front uploaded file id is null"
                                     },
-                                    uploadMethod = requireNotNull(front.uploadMethod)
+                                    uploadMethod = requireNotNull(front.uploadMethod),
+                                    cameraLensModel = currentCameraLensModel,
+                                    exposureIso = currentExposureIso,
+                                    focalLength = currentFocalLength
                                 )
                             ),
                             fromRoute = DocumentUploadDestination.ROUTE.route
@@ -1659,7 +1662,10 @@ internal class IdentityViewModel(
                                     highResImage = requireNotNull(back.uploadedStripeFile.id) {
                                         "back uploaded file id is null"
                                     },
-                                    uploadMethod = requireNotNull(back.uploadMethod)
+                                    uploadMethod = requireNotNull(back.uploadMethod),
+                                    cameraLensModel = currentCameraLensModel,
+                                    exposureIso = currentExposureIso,
+                                    focalLength = currentFocalLength
                                 )
                             ),
                             fromRoute = DocumentUploadDestination.ROUTE.route
