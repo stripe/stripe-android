@@ -45,6 +45,7 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
+import okhttp3.mockwebserver.SocketPolicy
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
@@ -355,6 +356,7 @@ internal class FlowControllerTest {
         lateinit var flowController: PaymentSheet.FlowController
         val scenario = ActivityScenario.launch(MainActivity::class.java)
 
+        scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
             @Suppress("Deprecation")
@@ -368,8 +370,16 @@ internal class FlowControllerTest {
                 },
             )
         }
+        scenario.moveToState(Lifecycle.State.RESUMED)
 
         val countDownLatch = CountDownLatch(1)
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.socketPolicy = SocketPolicy.DISCONNECT_AFTER_REQUEST
+        }
 
         scenario.onActivity {
             flowController.configureWithPaymentIntent(
