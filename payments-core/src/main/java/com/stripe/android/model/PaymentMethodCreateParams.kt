@@ -1403,6 +1403,7 @@ constructor(
         fun createLink(
             paymentDetailsId: String,
             consumerSessionClientSecret: String,
+            clientAttributionMetadata: ClientAttributionMetadata,
             billingDetails: PaymentMethod.BillingDetails? = null,
             extraParams: Map<String, @RawValue Any>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
@@ -1416,6 +1417,7 @@ constructor(
                 ),
                 allowRedisplay = allowRedisplay,
                 billingDetails = billingDetails,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 
