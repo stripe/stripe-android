@@ -26,6 +26,8 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import androidx.camera.camera2.interop.Camera2CameraInfo
+import android.hardware.camera2.CameraCharacteristics
 import com.stripe.android.camera.framework.exception.ImageTypeNotSupportedException
 import com.stripe.android.camera.framework.image.NV21Image
 import com.stripe.android.camera.framework.image.getRenderScript
@@ -244,16 +246,31 @@ class CameraXAdapter(
      */
     fun getCameraLensModel(): String? {
         return camera?.let {
-            // Determine lens facing
             val facing = when (lensFacing) {
                 CameraSelector.LENS_FACING_BACK -> "back"
                 CameraSelector.LENS_FACING_FRONT -> "front"
                 else -> "unknown"
             }
-            // Return device model with lens facing
-            // Format: "Manufacturer Model (facing)"
             "${Build.MANUFACTURER} ${Build.MODEL} ($facing)"
         }
+    }
+
+    /** Return current focal length in mm if available. */
+    fun getFocalLength(): Float? {
+        return camera?.cameraInfo?.let { info ->
+            runCatching {
+                val c2Info = Camera2CameraInfo.from(info)
+                val chars = c2Info.getCameraCharacteristics()
+                val focalLengths = chars.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)
+                focalLengths?.firstOrNull()
+            }.getOrNull()
+        }
+    }
+
+    /** Return current exposure ISO if available. Not always readable via CameraX; may return null. */
+    fun getExposureIso(): Float? {
+        // Not directly exposed by CameraX without custom capture callbacks; return null for now.
+        return null
     }
 
     override fun setFocus(point: PointF) {

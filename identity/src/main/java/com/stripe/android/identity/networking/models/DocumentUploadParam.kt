@@ -25,7 +25,12 @@ internal data class DocumentUploadParam(
     @SerialName("force_confirm")
     val forceConfirm: Boolean? = null,
     @SerialName("camera_lens_model")
-    val cameraLensModel: String? = null
+    val cameraLensModel: String? = null,
+    // New optional camera metadata
+    @SerialName("exposure_iso")
+    val exposureIso: Float? = null,
+    @SerialName("focal_length")
+    val focalLength: Float? = null
 ) : Parcelable {
     @Serializable
     internal enum class UploadMethod {

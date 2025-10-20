@@ -36,10 +36,10 @@ internal fun LiveCaptureLaunchedEffect(
             identityScanViewModel.stopScan(lifecycleOwner)
 
             val scanResult = scannerState.result
-            // Set camera lens model right before uploading
-            cameraManager?.getCameraLensModel()?.let { model ->
-                identityViewModel.setCameraLensModel(model)
-            }
+            // Set camera metadata right before uploading
+            cameraManager?.getCameraLensModel()?.let { identityViewModel.setCameraLensModel(it) }
+            cameraManager?.getExposureIso()?.let { identityViewModel.setCameraExposureIso(it) }
+            cameraManager?.getFocalLength()?.let { identityViewModel.setCameraFocalLength(it) }
             identityViewModel.uploadScanResult(
                 scanResult,
                 verificationPage

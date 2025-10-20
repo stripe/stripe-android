@@ -39,6 +39,20 @@ internal abstract class IdentityCameraManager {
     }
 
     /**
+     * Get current exposure ISO if available.
+     */
+    fun getExposureIso(): Float? {
+        return (cameraAdapter as? CameraXAdapter)?.getExposureIso()
+    }
+
+    /**
+     * Get current focal length (in mm) if available.
+     */
+    fun getFocalLength(): Float? {
+        return (cameraAdapter as? CameraXAdapter)?.getFocalLength()
+    }
+
+    /**
      * Initialize [cameraAdapter] when a new [CameraView] is created from compose.
      */
     protected abstract fun createCameraAdapter(cameraView: CameraView): CameraAdapter<CameraPreviewImage<Bitmap>>
