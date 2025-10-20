@@ -30,7 +30,12 @@ import com.stripe.android.camera.framework.exception.ImageTypeNotSupportedExcept
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import android.hardware.camera2.CameraCaptureSession
+import android.hardware.camera2.CaptureRequest
+import android.hardware.camera2.CaptureResult
+import android.hardware.camera2.TotalCaptureResult
 import android.content.Context
+import androidx.camera.camera2.interop.Camera2Interop
 import com.stripe.android.camera.framework.image.NV21Image
 import com.stripe.android.camera.framework.image.getRenderScript
 import com.stripe.android.camera.framework.util.mapArray
@@ -358,11 +363,27 @@ class CameraXAdapter(
             .setTargetResolution(previewView.size())
             .build()
 
-        imageAnalyzer = ImageAnalysis.Builder()
+        val analysisBuilder = ImageAnalysis.Builder()
             .setTargetRotation(displayRotation)
             .setTargetResolution(minimumResolution.resolutionToSize(displaySize))
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .setImageQueueDepth(1)
+        // Attach Camera2 session callback to read dynamic capture results (ISO/focal length)
+        runCatching {
+            Camera2Interop.Extender(analysisBuilder).setSessionCaptureCallback(
+                object : CameraCaptureSession.CaptureCallback() {
+                    override fun onCaptureCompleted(
+                        session: CameraCaptureSession,
+                        request: CaptureRequest,
+                        result: TotalCaptureResult
+                    ) {
+                        latestExposureIso = result.get(CaptureResult.SENSOR_SENSITIVITY)?.toFloat()
+                        latestFocalLength = result.get(CaptureResult.LENS_FOCAL_LENGTH)
+                    }
+                }
+            )
+        }
+        imageAnalyzer = analysisBuilder
             .build()
             .also { analysis ->
                 analysis.setAnalyzer(
