@@ -2,6 +2,7 @@ package com.stripe.android.customersheet
 
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.CardBrand
@@ -70,29 +71,7 @@ internal object CustomerSheetFixtures {
         isPaymentMethodSyncDefaultEnabled: Boolean = false,
         hasDefaultPaymentMethod: Boolean = false
     ): CustomerSheetSession {
-        val customer = if (hasCustomerSession) {
-            ElementsSession.Customer(
-                paymentMethods = listOf(),
-                session = ElementsSession.Customer.Session(
-                    id = "cuss_123",
-                    customerId = "cus_123",
-                    liveMode = false,
-                    apiKey = "123",
-                    apiKeyExpiry = 999999999,
-                    components = ElementsSession.Customer.Components(
-                        mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
-                        customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
-                            isPaymentMethodRemoveEnabled = false,
-                            canRemoveLastPaymentMethod = true,
-                            isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
-                        ),
-                    )
-                ),
-                defaultPaymentMethod = if (hasDefaultPaymentMethod) "pm_123" else null,
-            )
-        } else {
-            null
-        }
+        val customer = getCustomer(hasCustomerSession, isPaymentMethodSyncDefaultEnabled, hasDefaultPaymentMethod)
 
         val elementsSession = ElementsSession(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -107,7 +86,10 @@ internal object CustomerSheetFixtures {
             flags = emptyMap(),
             elementsSessionId = "session_1234",
             orderedPaymentMethodTypesAndWallets = listOf("card"),
-            experimentsData = null
+            experimentsData = null,
+            passiveCaptcha = null,
+            merchantLogoUrl = null,
+            elementsSessionConfigId = null,
         )
 
         return CustomerSheetSession(
@@ -116,11 +98,44 @@ internal object CustomerSheetFixtures {
             savedSelection = SavedSelection.None,
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             permissions = CustomerPermissions(
-                canRemovePaymentMethods = true,
+                removePaymentMethod = PaymentMethodRemovePermission.Full,
                 canRemoveLastPaymentMethod = true,
                 canUpdateFullPaymentMethodDetails = true,
             ),
             defaultPaymentMethodId = null,
+            customerId = customer?.session?.customerId ?: "unused_for_customer_adapter_data_source",
+            customerEphemeralKeySecret = customer?.session?.apiKey ?: "unused_for_customer_adapter_data_source",
+            customerSessionClientSecret = customer?.session?.id,
         )
+    }
+
+    private fun getCustomer(
+        hasCustomerSession: Boolean,
+        isPaymentMethodSyncDefaultEnabled: Boolean,
+        hasDefaultPaymentMethod: Boolean
+    ) = if (hasCustomerSession) {
+        ElementsSession.Customer(
+            paymentMethods = listOf(),
+            session = ElementsSession.Customer.Session(
+                id = "cuss_123",
+                customerId = "cus_123",
+                liveMode = false,
+                apiKey = "ek_123",
+                apiKeyExpiry = 999999999,
+                components = ElementsSession.Customer.Components(
+                    mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+                    customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
+                        paymentMethodRemove =
+                        ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
+                        paymentMethodRemoveLast =
+                        ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
+                        isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
+                    ),
+                )
+            ),
+            defaultPaymentMethod = if (hasDefaultPaymentMethod) "pm_123" else null,
+        )
+    } else {
+        null
     }
 }

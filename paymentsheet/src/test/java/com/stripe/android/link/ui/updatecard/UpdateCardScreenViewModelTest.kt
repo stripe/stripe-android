@@ -1,7 +1,10 @@
 package com.stripe.android.link.ui.updatecard
 
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
@@ -14,8 +17,12 @@ import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentsheet.CardUpdateParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
+import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.navigation.NavigationManager
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -127,6 +134,327 @@ class UpdateCardScreenViewModelTest {
         assertThat(state.paymentDetailsId).isEqualTo(card.id)
         assertThat(state.isBillingDetailsUpdateFlow).isFalse()
     }
+
+    @Test
+    fun `when updating outside of billing details update flow, should not be able to update phone`() =
+        runTest(dispatcher) {
+            val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
+
+            val viewModel = createViewModel(
+                linkAccountManager = FakeLinkAccountManager().apply {
+                    setConsumerPaymentDetails(ConsumerPaymentDetails(listOf(card)))
+                },
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    ),
+                ),
+                paymentDetailsId = card.id,
+                billingDetailsUpdateFlow = null,
+            )
+
+            viewModel.interactor.test {
+                val interactor = awaitItem()
+
+                assertThat(interactor).isNotNull()
+
+                requireNotNull(interactor).state.test {
+                    val billingElements = awaitItem().billingDetailsForm?.addressSectionElement?.fields
+
+                    assertThat(billingElements).isNotNull()
+
+                    val nonNullBillingElements = requireNotNull(billingElements)
+
+                    assertThat(nonNullBillingElements).hasSize(1)
+                    assertThat(nonNullBillingElements[0]).isInstanceOf<CardBillingAddressElement>()
+
+                    val cardBillingAddressElement = nonNullBillingElements[0] as CardBillingAddressElement
+
+                    val addressFields = cardBillingAddressElement.addressController.value.fieldsFlowable.value
+
+                    val doesNotHavePhoneElement = addressFields.none { element ->
+                        element.identifier == IdentifierSpec.Phone
+                    }
+
+                    assertThat(doesNotHavePhoneElement).isTrue()
+                }
+            }
+        }
+
+    @Test
+    fun `when updating using billing details update flow, should be able to update phone`() =
+        runTest(dispatcher) {
+            val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
+
+            val viewModel = createViewModel(
+                linkAccountManager = FakeLinkAccountManager().apply {
+                    setConsumerPaymentDetails(ConsumerPaymentDetails(listOf(card)))
+                },
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    ),
+                ),
+                paymentDetailsId = card.id,
+                billingDetailsUpdateFlow = BillingDetailsUpdateFlow(),
+            )
+
+            viewModel.interactor.test {
+                val interactor = awaitItem()
+
+                assertThat(interactor).isNotNull()
+
+                requireNotNull(interactor).state.test {
+                    val billingElements = awaitItem().billingDetailsForm?.addressSectionElement?.fields
+
+                    assertThat(billingElements).isNotNull()
+
+                    val nonNullBillingElements = requireNotNull(billingElements)
+
+                    assertThat(nonNullBillingElements).hasSize(1)
+                    assertThat(nonNullBillingElements[0]).isInstanceOf<CardBillingAddressElement>()
+
+                    val cardBillingAddressElement = nonNullBillingElements[0] as CardBillingAddressElement
+
+                    val addressFields = cardBillingAddressElement.addressController.value.fieldsFlowable.value
+
+                    val hasPhoneElement = addressFields.any { element ->
+                        element.identifier == IdentifierSpec.Phone
+                    }
+
+                    assertThat(hasPhoneElement).isTrue()
+                }
+            }
+        }
+
+    @Test
+    fun `when updating with cards, should always at minimum be automatic address collection`() =
+        runTest(dispatcher) {
+            val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
+
+            val viewModel = createViewModel(
+                linkAccountManager = FakeLinkAccountManager().apply {
+                    setConsumerPaymentDetails(ConsumerPaymentDetails(listOf(card)))
+                },
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                    ),
+                ),
+                paymentDetailsId = card.id,
+                billingDetailsUpdateFlow = BillingDetailsUpdateFlow(),
+            )
+
+            viewModel.interactor.test {
+                val interactor = awaitItem()
+
+                assertThat(interactor).isNotNull()
+
+                requireNotNull(interactor).state.test {
+                    val billingElements = awaitItem().billingDetailsForm?.addressSectionElement?.fields
+
+                    assertThat(billingElements).isNotNull()
+
+                    val nonNullBillingElements = requireNotNull(billingElements)
+
+                    assertThat(nonNullBillingElements).hasSize(1)
+                    assertThat(nonNullBillingElements[0]).isInstanceOf<CardBillingAddressElement>()
+
+                    val cardBillingAddressElement = nonNullBillingElements[0] as CardBillingAddressElement
+
+                    val addressFields = cardBillingAddressElement.addressController.value.fieldsFlowable.value
+
+                    val hasCountryElement = addressFields.any {
+                        it.identifier == IdentifierSpec.Country
+                    }
+
+                    val hasPostalCodeElement = addressFields.any {
+                        it is RowElement && it.fields.any {
+                            it.identifier == IdentifierSpec.PostalCode
+                        }
+                    }
+
+                    assertThat(hasPostalCodeElement).isTrue()
+                    assertThat(hasCountryElement).isTrue()
+                }
+            }
+        }
+
+    @Test
+    fun `when providing an empty set of allowed billing countries, should use all countries`() =
+        runTest(dispatcher) {
+            val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
+
+            val viewModel = createViewModel(
+                linkAccountManager = FakeLinkAccountManager().apply {
+                    setConsumerPaymentDetails(ConsumerPaymentDetails(listOf(card)))
+                },
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        allowedCountries = emptySet()
+                    ),
+                ),
+                paymentDetailsId = card.id,
+                billingDetailsUpdateFlow = BillingDetailsUpdateFlow(),
+            )
+
+            viewModel.interactor.test {
+                val interactor = awaitItem()
+
+                assertThat(interactor).isNotNull()
+
+                requireNotNull(interactor).state.test {
+                    val billingElements = awaitItem().billingDetailsForm?.addressSectionElement?.fields
+
+                    assertThat(billingElements).isNotNull()
+
+                    val nonNullBillingElements = requireNotNull(billingElements)
+
+                    assertThat(nonNullBillingElements).hasSize(1)
+                    assertThat(nonNullBillingElements[0]).isInstanceOf<CardBillingAddressElement>()
+
+                    val cardBillingAddressElement = nonNullBillingElements[0] as CardBillingAddressElement
+
+                    assertThat(cardBillingAddressElement.countryElement.controller.displayItems)
+                        .hasSize(CountryUtils.supportedBillingCountries.size)
+                }
+            }
+        }
+
+    @Test
+    fun `when in billing details update flow with limited countries, should use limited countries`() =
+        runTest(dispatcher) {
+            val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
+
+            val viewModel = createViewModel(
+                linkAccountManager = FakeLinkAccountManager().apply {
+                    setConsumerPaymentDetails(ConsumerPaymentDetails(listOf(card)))
+                },
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        allowedCountries = setOf("US", "CA")
+                    ),
+                ),
+                paymentDetailsId = card.id,
+                billingDetailsUpdateFlow = BillingDetailsUpdateFlow(),
+            )
+
+            viewModel.interactor.test {
+                val interactor = awaitItem()
+
+                assertThat(interactor).isNotNull()
+
+                requireNotNull(interactor).state.test {
+                    val billingElements = awaitItem().billingDetailsForm?.addressSectionElement?.fields
+
+                    assertThat(billingElements).isNotNull()
+
+                    val nonNullBillingElements = requireNotNull(billingElements)
+
+                    assertThat(nonNullBillingElements).hasSize(1)
+                    assertThat(nonNullBillingElements[0]).isInstanceOf<CardBillingAddressElement>()
+
+                    val cardBillingAddressElement = nonNullBillingElements[0] as CardBillingAddressElement
+
+                    // Billing details update flow should respect country filtering
+                    assertThat(cardBillingAddressElement.countryElement.controller.displayItems).containsExactly(
+                        "\uD83C\uDDFA\uD83C\uDDF8 United States",
+                        "\uD83C\uDDE8\uD83C\uDDE6 Canada"
+                    )
+                }
+            }
+        }
+
+    @Test
+    fun `when in regular edit flow with limited countries, should show all countries`() =
+        runTest(dispatcher) {
+            val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
+
+            val viewModel = createViewModel(
+                linkAccountManager = FakeLinkAccountManager().apply {
+                    setConsumerPaymentDetails(ConsumerPaymentDetails(listOf(card)))
+                },
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        allowedCountries = setOf("US", "CA")
+                    ),
+                ),
+                paymentDetailsId = card.id,
+                billingDetailsUpdateFlow = null, // Regular edit flow, not billing details update
+            )
+
+            viewModel.interactor.test {
+                val interactor = awaitItem()
+
+                assertThat(interactor).isNotNull()
+
+                requireNotNull(interactor).state.test {
+                    val billingElements = awaitItem().billingDetailsForm?.addressSectionElement?.fields
+
+                    assertThat(billingElements).isNotNull()
+
+                    val nonNullBillingElements = requireNotNull(billingElements)
+
+                    assertThat(nonNullBillingElements).hasSize(1)
+                    assertThat(nonNullBillingElements[0]).isInstanceOf<CardBillingAddressElement>()
+
+                    val cardBillingAddressElement = nonNullBillingElements[0] as CardBillingAddressElement
+
+                    // Regular edit flow should show all countries, ignoring filter
+                    assertThat(cardBillingAddressElement.countryElement.controller.displayItems)
+                        .hasSize(CountryUtils.supportedBillingCountries.size)
+                }
+            }
+        }
+
+    @Test
+    fun `on disabled button clicked, should display errors`() =
+        runTest(dispatcher) {
+            val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+                expiryYear = 2012,
+                expiryMonth = 12,
+                billingAddress = null,
+            )
+
+            val viewModel = createViewModel(
+                linkAccountManager = FakeLinkAccountManager().apply {
+                    setConsumerPaymentDetails(ConsumerPaymentDetails(listOf(card)))
+                },
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        allowedCountries = setOf("US", "CA")
+                    ),
+                ),
+                paymentDetailsId = card.id,
+                billingDetailsUpdateFlow = BillingDetailsUpdateFlow()
+            )
+
+            viewModel.interactor.test {
+                val nullableInteractor = awaitItem()
+
+                assertThat(nullableInteractor).isNotNull()
+
+                val interactor = requireNotNull(nullableInteractor)
+
+                viewModel.onDisabledUpdateClicked()
+
+                interactor.state.test {
+                    val state = awaitItem()
+
+                    assertThat(state.cardDetailsState?.expiryDateState).isNotNull()
+                    assertThat(state.billingDetailsForm).isNotNull()
+
+                    val expiryDateState = requireNotNull(state.cardDetailsState?.expiryDateState)
+
+                    assertThat(expiryDateState.shouldShowError()).isTrue()
+                    assertThat(expiryDateState.sectionError()).isNotNull()
+
+                    requireNotNull(state.billingDetailsForm).addressSectionElement.controller.error.test {
+                        assertThat(awaitItem()).isNotNull()
+                    }
+                }
+            }
+        }
 
     private fun createViewModel(
         linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),

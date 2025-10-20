@@ -2,6 +2,8 @@ package com.stripe.android.link
 
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -14,7 +16,9 @@ import kotlinx.parcelize.Parcelize
 internal data class LinkConfiguration(
     val stripeIntent: StripeIntent,
     val merchantName: String,
+    val sellerBusinessName: String?,
     val merchantCountryCode: String?,
+    val merchantLogoUrl: String?,
     val customerInfo: CustomerInfo,
     val shippingDetails: AddressDetails?,
     val passthroughModeEnabled: Boolean,
@@ -33,7 +37,29 @@ internal data class LinkConfiguration(
     val allowDefaultOptIn: Boolean,
     val googlePlacesApiKey: String? = null,
     val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
+    val allowUserEmailEdits: Boolean,
+    val allowLogOut: Boolean,
+    val enableDisplayableDefaultValuesInEce: Boolean,
+    val skipWalletInFlowController: Boolean,
+    val linkAppearance: LinkAppearance?,
+    val linkSignUpOptInFeatureEnabled: Boolean,
+    val linkSignUpOptInInitialValue: Boolean,
+    private val customerId: String?,
+    val saveConsentBehavior: PaymentMethodSaveConsentBehavior,
+    val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
+    val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
+    val clientAttributionMetadata: ClientAttributionMetadata,
 ) : Parcelable {
+
+    val customerIdForEceDefaultValues: String?
+        get() = if (enableDisplayableDefaultValuesInEce) customerId else null
+
+    val enableLinkPaymentSelectionHint: Boolean
+        get() = flags["link_show_prefer_debit_card_hint"] == true
+
+    val supportsInstantDebitsOnboarding: Boolean
+        get() = linkSupportedPaymentMethodsOnboardingEnabled.contains("INSTANT_DEBITS")
+
     @Parcelize
     data class CustomerInfo(
         val name: String?,

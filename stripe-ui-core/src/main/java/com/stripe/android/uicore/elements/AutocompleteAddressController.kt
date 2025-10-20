@@ -5,8 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
-import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -20,11 +20,12 @@ class AutocompleteAddressController(
         CountryConfig(countryCodes),
         initialValues[IdentifierSpec.Country]
     ),
-    private val phoneNumberState: PhoneNumberState,
+    private val phoneNumberConfig: AddressFieldConfiguration,
+    private val nameConfig: AddressFieldConfiguration,
+    private val emailConfig: AddressFieldConfiguration,
     private val sameAsShippingElement: SameAsShippingElement?,
     private val shippingValuesMap: Map<IdentifierSpec, String?>?,
     private val hideCountry: Boolean = false,
-    private val hideName: Boolean = true,
 ) : SectionFieldErrorController, SectionFieldComposable {
     private val interactor = interactorFactory.create()
 
@@ -32,16 +33,25 @@ class AutocompleteAddressController(
 
     private var expandForm = false
 
-    override val error: StateFlow<FieldError?> = stateFlowOf(null)
+    private val isValidating = MutableStateFlow(false)
 
     val countryElement = CountryElement(
         IdentifierSpec.Country,
         countryDropdownFieldController,
     )
 
-    val addressElementFlow = MutableStateFlow(
+    private val _addressElementFlow = MutableStateFlow(
         createAddressElement(initialValues, toAddressInputMode(expandForm, initialValues))
     )
+
+    val addressElementFlow = combineAsStateFlow(
+        _addressElementFlow,
+        isValidating,
+    ) { element, isValidating ->
+        element.apply {
+            onValidationStateChanged(isValidating)
+        }
+    }
 
     val formFieldValues = addressElementFlow.flatMapLatestAsStateFlow { addressElement ->
         addressElement.getFormFieldValueFlow()
@@ -55,10 +65,19 @@ class AutocompleteAddressController(
         it.addressController
     }
 
+    override val error: StateFlow<FieldError?> = addressController.flatMapLatestAsStateFlow {
+        it.error
+    }
+
     init {
         interactor.register { event ->
             val currentValues = getCurrentValues()
-            val newValues = event.values ?: currentValues
+
+            /*
+             * Merges the current and new values together. New value keys will override current
+             * value keys if provided.
+             */
+            val newValues = currentValues.plus(event.values ?: emptyMap())
 
             when (event) {
                 is AutocompleteAddressInteractor.Event.OnValues -> Unit
@@ -72,10 +91,14 @@ class AutocompleteAddressController(
                     countryDropdownFieldController.onRawValueChange(it)
                 }
 
-                addressElementFlow.value =
+                _addressElementFlow.value =
                     createAddressElement(newValues, toAddressInputMode(expandForm, newValues))
             }
         }
+    }
+
+    fun setRawValue(values: Map<IdentifierSpec, String?>) {
+        _addressElementFlow.value = createAddressElement(values, toAddressInputMode(expandForm, values))
     }
 
     private fun createAddressElement(
@@ -91,7 +114,6 @@ class AutocompleteAddressController(
             shippingValuesMap = shippingValuesMap,
             isPlacesAvailable = config.isPlacesAvailable,
             hideCountry = hideCountry,
-            hideName = hideName,
         )
     }
 
@@ -102,12 +124,18 @@ class AutocompleteAddressController(
         val googlePlacesApiKey = config.googlePlacesApiKey
 
         return if (googlePlacesApiKey == null) {
-            AddressInputMode.NoAutocomplete(phoneNumberState)
+            AddressInputMode.NoAutocomplete(
+                phoneNumberConfig = phoneNumberConfig,
+                nameConfig = nameConfig,
+                emailConfig = emailConfig,
+            )
         } else if (expandForm || values[IdentifierSpec.Line1] != null) {
             AddressInputMode.AutocompleteExpanded(
                 googleApiKey = googlePlacesApiKey,
                 autocompleteCountries = config.autocompleteCountries,
-                phoneNumberState = phoneNumberState,
+                phoneNumberConfig = phoneNumberConfig,
+                nameConfig = nameConfig,
+                emailConfig = emailConfig,
                 onNavigation = {
                     interactor.onAutocomplete(
                         country = countryDropdownFieldController.rawFieldValue.value ?: ""
@@ -118,7 +146,9 @@ class AutocompleteAddressController(
             AddressInputMode.AutocompleteCondensed(
                 googleApiKey = googlePlacesApiKey,
                 autocompleteCountries = config.autocompleteCountries,
-                phoneNumberState = phoneNumberState,
+                phoneNumberConfig = phoneNumberConfig,
+                nameConfig = nameConfig,
+                emailConfig = emailConfig,
                 onNavigation = {
                     interactor.onAutocomplete(
                         country = countryDropdownFieldController.rawFieldValue.value ?: ""
@@ -126,6 +156,10 @@ class AutocompleteAddressController(
                 },
             )
         }
+    }
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        this.isValidating.value = isValidating
     }
 
     private fun getCurrentValues() = formFieldValues.value.toMap().mapValues {

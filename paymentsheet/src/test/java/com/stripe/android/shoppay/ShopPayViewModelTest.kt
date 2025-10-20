@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
@@ -21,11 +22,13 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.ShopPayHandlers
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -36,6 +39,7 @@ import com.stripe.android.shoppay.bridge.ShopPayConfirmationState
 import com.stripe.android.shoppay.bridge.ShopPayConfirmationState.Pending
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -141,18 +145,78 @@ internal class ShopPayViewModelTest {
                 billingDetails = billingDetails,
                 shippingAddressData = null
             )
+            val errorReporter = FakeErrorReporter()
+            val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             val bridgeHandler = FakeShopPayBridgeHandler()
-            val stripeRepository = FakeStripeRepository(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+            val createSavedPaymentMethodRadarSessionCalls = Turbine<CreateSavedPaymentMethodRadarSessionCall>()
+            val stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(paymentMethod),
+                createSavedPaymentMethodRadarSessionCalls = createSavedPaymentMethodRadarSessionCalls,
+            )
 
             testPaymentResultWithConfirmationState(
                 bridgeHandler = bridgeHandler,
                 stripeRepository = stripeRepository,
                 confirmationState = confirmationState,
+                errorReporter = errorReporter,
                 expectedResult = { result ->
                     assertThat(result).isEqualTo(ShopPayActivityResult.Completed)
                 }
             )
+
+            val call = createSavedPaymentMethodRadarSessionCalls.awaitItem()
+
+            assertThat(call.paymentMethodId).isEqualTo(paymentMethod.id)
+            assertThat(call.requestOptions.apiKey).isEqualTo("pk_123")
+            assertThat(call.requestOptions.stripeAccount).isNull()
+
+            createSavedPaymentMethodRadarSessionCalls.ensureAllEventsConsumed()
+            errorReporter.ensureAllEventsConsumed()
         }
+
+    @Test
+    fun `paymentResult emits Completed even when radar session creation fails`() = runTest(dispatcher) {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+
+        val error = IllegalStateException("Failed to make radar session!")
+
+        val errorReporter = FakeErrorReporter()
+        val createSavedPaymentMethodRadarSessionCalls = Turbine<CreateSavedPaymentMethodRadarSessionCall>()
+        val stripeRepository = FakeStripeRepository(
+            createPaymentMethodResult = Result.success(paymentMethod),
+            createSavedPaymentMethodRadarSessionCalls = createSavedPaymentMethodRadarSessionCalls,
+            createSavedPaymentMethodRadarSessionResult = Result.failure(error),
+        )
+
+        testPaymentResultWithConfirmationState(
+            bridgeHandler = FakeShopPayBridgeHandler(),
+            stripeRepository = stripeRepository,
+            confirmationState = ShopPayConfirmationState.Success(
+                externalSourceId = "test_external_id",
+                billingDetails = createTestBillingDetails(),
+                shippingAddressData = null
+            ),
+            errorReporter = errorReporter,
+            expectedResult = { result ->
+                assertThat(result).isEqualTo(ShopPayActivityResult.Completed)
+            }
+        )
+
+        val call = createSavedPaymentMethodRadarSessionCalls.awaitItem()
+
+        assertThat(call.paymentMethodId).isEqualTo(paymentMethod.id)
+        assertThat(call.requestOptions.apiKey).isEqualTo("pk_123")
+        assertThat(call.requestOptions.stripeAccount).isNull()
+
+        val failedRadarEvent = errorReporter.awaitCall()
+
+        assertThat(failedRadarEvent.errorEvent)
+            .isEqualTo(ErrorReporter.ExpectedErrorEvent.SAVED_PAYMENT_METHOD_RADAR_SESSION_FAILURE)
+        assertThat(failedRadarEvent.stripeException?.cause).isEqualTo(error)
+
+        createSavedPaymentMethodRadarSessionCalls.ensureAllEventsConsumed()
+        errorReporter.ensureAllEventsConsumed()
+    }
 
     @Test
     fun `paymentResult emits Failed when confirmation state is Success but payment method creation fails`() =
@@ -455,7 +519,8 @@ internal class ShopPayViewModelTest {
         bridgeHandler: ShopPayBridgeHandler = createFakeBridgeHandler(),
         preparePaymentMethodHandler: PreparePaymentMethodHandler? = PreparePaymentMethodHandler { _, _ -> },
         stripeApiRepository: StripeRepository = FakeStripeRepository(),
-        eventReporter: EventReporter = mock()
+        eventReporter: EventReporter = mock(),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
     ): ShopPayViewModel {
         return ShopPayViewModel(
             bridgeHandler,
@@ -463,6 +528,7 @@ internal class ShopPayViewModelTest {
             requestOptions = ApiRequest.Options("pk_123"),
             preparePaymentMethodHandlerProvider = { preparePaymentMethodHandler },
             eventReporter = eventReporter,
+            errorReporter = errorReporter,
             workContext = dispatcher
         )
     }
@@ -480,6 +546,7 @@ internal class ShopPayViewModelTest {
     private suspend fun testPaymentResultWithConfirmationState(
         bridgeHandler: FakeShopPayBridgeHandler = FakeShopPayBridgeHandler(),
         stripeRepository: FakeStripeRepository = FakeStripeRepository(),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
         preparePaymentMethodHandler: PreparePaymentMethodHandler? = mock(),
         confirmationState: ShopPayConfirmationState.Success,
         expectedResult: (ShopPayActivityResult) -> Unit
@@ -487,7 +554,8 @@ internal class ShopPayViewModelTest {
         val viewModel = createViewModel(
             bridgeHandler = bridgeHandler,
             stripeApiRepository = stripeRepository,
-            preparePaymentMethodHandler = preparePaymentMethodHandler
+            preparePaymentMethodHandler = preparePaymentMethodHandler,
+            errorReporter = errorReporter,
         )
 
         viewModel.paymentResult.test {
@@ -523,15 +591,40 @@ internal class ShopPayViewModelTest {
     private class FakeStripeRepository(
         private val createPaymentMethodResult: Result<PaymentMethod> = Result.success(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        )
+        ),
+        private val createSavedPaymentMethodRadarSessionCalls: Turbine<CreateSavedPaymentMethodRadarSessionCall> =
+            Turbine(),
+        private val createSavedPaymentMethodRadarSessionResult: Result<RadarSessionWithHCaptcha> = Result.success(
+            RadarSessionWithHCaptcha(
+                id = "rse_123",
+                passiveCaptchaSiteKey = "1234",
+                passiveCaptchaRqdata = "123456789",
+            )
+        ),
     ) : AbsFakeStripeRepository() {
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options
         ): Result<PaymentMethod> = createPaymentMethodResult
+
+        override suspend fun createSavedPaymentMethodRadarSession(
+            paymentMethodId: String,
+            requestOptions: ApiRequest.Options
+        ): Result<RadarSessionWithHCaptcha> {
+            createSavedPaymentMethodRadarSessionCalls.add(
+                CreateSavedPaymentMethodRadarSessionCall(paymentMethodId, requestOptions)
+            )
+
+            return createSavedPaymentMethodRadarSessionResult
+        }
     }
 
     private fun createTestBillingDetails(): ECEBillingDetails {
         return ShopPayTestFactory.BILLING_DETAILS
     }
+
+    private data class CreateSavedPaymentMethodRadarSessionCall(
+        val paymentMethodId: String,
+        val requestOptions: ApiRequest.Options
+    )
 }

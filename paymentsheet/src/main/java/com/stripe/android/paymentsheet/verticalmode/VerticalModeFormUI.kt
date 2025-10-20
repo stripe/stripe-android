@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -23,7 +22,6 @@ import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.paymentsheet.ui.FormElement
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
-import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -54,7 +52,7 @@ internal fun VerticalModeFormUI(
         FormElement(
             enabled = enabled,
             selectedPaymentMethodCode = state.selectedPaymentMethodCode,
-            formElements = state.formElements,
+            formElements = state.formUiElements,
             formArguments = state.formArguments,
             usBankAccountFormArguments = state.usBankAccountFormArguments,
             horizontalPaddingValues = horizontalPadding,
@@ -82,11 +80,6 @@ internal fun VerticalModeFormHeaderUI(
     val imageLoader = remember {
         StripeImageLoader(context)
     }
-    val iconUrl = if (isSystemInDarkTheme() && formHeaderInformation.darkThemeIconUrl != null) {
-        formHeaderInformation.darkThemeIconUrl
-    } else {
-        formHeaderInformation.lightThemeIconUrl
-    }
 
     Row(
         modifier = Modifier
@@ -96,8 +89,8 @@ internal fun VerticalModeFormHeaderUI(
     ) {
         if (formHeaderInformation.shouldShowIcon) {
             PaymentMethodIcon(
-                iconRes = formHeaderInformation.icon(LocalIconStyle.current),
-                iconUrl = iconUrl,
+                iconRes = formHeaderInformation.icon(),
+                iconUrl = formHeaderInformation.iconUrl(),
                 imageLoader = imageLoader,
                 iconRequiresTinting = formHeaderInformation.iconRequiresTinting,
                 modifier = Modifier

@@ -13,6 +13,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Test
@@ -234,11 +235,29 @@ class PaymentSelectionTest {
         ).isEqualTo(
             USBankAccountTextBuilder.buildMandateText(
                 merchantName = metadata.merchantName,
+                sellerBusinessName = null,
+                forceSetupFutureUseBehavior = false,
                 isSaveForFutureUseSelected = false,
                 isInstantDebits = false,
                 isSetupFlow = true
             )
         )
+    }
+
+    @Test
+    fun `mandateTextFromPaymentMethodMetadata returns mandate for Saved SepaDebit`() {
+        val selection = PaymentSelection.Saved(PaymentMethodFactory.sepaDebit())
+        val metadata = PaymentMethodMetadataFactory.create()
+        assertThat(selection.mandateTextFromPaymentMethodMetadata(metadata)).isNotNull()
+    }
+
+    @Test
+    fun `mandateTextFromPaymentMethodMetadata returns correct mandate for Saved SepaDebit with TermsDisplay=NEVER`() {
+        val selection = PaymentSelection.Saved(PaymentMethodFactory.sepaDebit())
+        val metadata = PaymentMethodMetadataFactory.create(
+            termsDisplay = mapOf(PaymentMethod.Type.SepaDebit to PaymentSheet.TermsDisplay.NEVER)
+        )
+        assertThat(selection.mandateTextFromPaymentMethodMetadata(metadata)).isNull()
     }
 
     @Test

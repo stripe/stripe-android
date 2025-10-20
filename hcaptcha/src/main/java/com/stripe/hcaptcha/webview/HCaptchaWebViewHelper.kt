@@ -28,7 +28,7 @@ import com.stripe.hcaptcha.config.HCaptchaInternalConfig
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal class HCaptchaWebViewHelper(
     handler: Handler,
-    private val context: Context,
+    context: Context,
     internal val config: HCaptchaConfig,
     private val internalConfig: HCaptchaInternalConfig,
     private val captchaVerifier: IHCaptchaVerifier,
@@ -36,7 +36,7 @@ internal class HCaptchaWebViewHelper(
     internal val webView: WebView
 ) {
     init {
-        setupWebView(handler)
+        setupWebView(context, handler)
     }
 
     /**
@@ -45,7 +45,7 @@ internal class HCaptchaWebViewHelper(
      * * loads custom html page to display challenge and/or checkbox
      */
     @SuppressLint("SetJavaScriptEnabled", "AddJavascriptInterface")
-    private fun setupWebView(handler: Handler) {
+    private fun setupWebView(context: Context, handler: Handler) {
         val jsInterface = HCaptchaJSInterface(handler, config, captchaVerifier)
         val debugInfo = HCaptchaDebugInfo(context)
 

@@ -31,7 +31,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: LinkPassthroughConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters
+        confirmationArgs: ConfirmationHandler.Args
     ): ConfirmationDefinition.Action<LauncherArguments> {
         return createPaymentMethodConfirmationOption(confirmationOption).fold(
             onSuccess = { nextConfirmationOption ->
@@ -62,20 +62,20 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
         launcher: Launcher,
         arguments: LauncherArguments,
         confirmationOption: LinkPassthroughConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ) {
         launcher.onResult(Result(arguments.nextConfirmationOption))
     }
 
     override fun toResult(
         confirmationOption: LinkPassthroughConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: Result,
     ): ConfirmationDefinition.Result {
         return ConfirmationDefinition.Result.NextStep(
             confirmationOption = result.nextConfirmationOption,
-            parameters = confirmationParameters,
+            arguments = confirmationArgs,
         )
     }
 
@@ -87,6 +87,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
             expectedPaymentMethodType = confirmationOption.expectedPaymentMethodType,
             billingPhone = confirmationOption.billingPhone,
             cvc = confirmationOption.cvc,
+            allowRedisplay = confirmationOption.allowRedisplay?.value,
         ).mapCatching {
             requireNotNull(it.encodedPaymentMethod.parsePaymentMethod())
         }.map { paymentMethod ->
@@ -94,6 +95,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
                 originatedFromWallet = true,
+                passiveCaptchaParams = confirmationOption.passiveCaptchaParams,
             )
         }
     }

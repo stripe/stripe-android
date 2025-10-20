@@ -1,5 +1,6 @@
 package com.stripe.attestation
 
+import android.util.Log
 import androidx.annotation.RestrictTo
 import com.google.android.gms.tasks.Task
 import com.google.android.play.core.integrity.StandardIntegrityManager
@@ -41,9 +42,10 @@ class IntegrityStandardRequestManager(
 
     override suspend fun prepare(): Result<Unit> = runCatching {
         if (integrityTokenProvider != null) {
+            Log.d("Integrity", "Integrity token already prepared - instance: $standardIntegrityManager")
             return Result.success(Unit)
         }
-
+        Log.d("Integrity", "Preparing integrity token provider - instance: $standardIntegrityManager")
         val finishedTask: Task<StandardIntegrityTokenProvider> = standardIntegrityManager
             .prepareIntegrityToken(
                 PrepareIntegrityTokenRequest.builder()
@@ -68,9 +70,16 @@ class IntegrityStandardRequestManager(
     private suspend fun request(
         requestHash: String?,
     ): Result<String> = runCatching {
+        if (integrityTokenProvider == null) {
+            // If prepare() hasn't been called yet, perform it preemptively.
+            // This ensures callers of requestToken() don't need to explicitly prepare first.
+            // This is a convenience method, but it is recommended to call prepare() early as
+            // it can take a few seconds to complete.
+            prepare().getOrThrow()
+        }
         val finishedTask = requireNotNull(
             value = integrityTokenProvider,
-            lazyMessage = { "Integrity token provider is not initialized. Call prepare() first." }
+            lazyMessage = { "Integrity token provider is not initialized after prepare()" }
         ).request(
             StandardIntegrityTokenRequest.builder()
                 .setRequestHash(requestHash)

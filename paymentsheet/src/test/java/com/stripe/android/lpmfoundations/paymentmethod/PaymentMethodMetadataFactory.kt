@@ -3,15 +3,18 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
-import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.LinkStateResult
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
@@ -37,7 +40,7 @@ internal object PaymentMethodMetadataFactory {
         paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         linkConfiguration: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
-        linkState: LinkState? = null,
+        linkState: LinkStateResult? = null,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(),
         paymentMethodIncentive: PaymentMethodIncentive? = null,
@@ -46,7 +49,14 @@ internal object PaymentMethodMetadataFactory {
         financialConnectionsAvailability: FinancialConnectionsAvailability? = FinancialConnectionsAvailability.Lite,
         customerMetadataPermissions: CustomerMetadata.Permissions =
             PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
-        shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = SHOP_PAY_CONFIGURATION
+        customerSessionClientSecret: String? = null,
+        shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = SHOP_PAY_CONFIGURATION,
+        termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
+        forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
+        passiveCaptchaParams: PassiveCaptchaParams? = null,
+        openCardScanAutomatically: Boolean = false,
+        clientAttributionMetadata: ClientAttributionMetadata? = null,
+        attestOnIntentConfirmation: Boolean = false,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -58,13 +68,18 @@ internal object PaymentMethodMetadataFactory {
             paymentMethodOrder = paymentMethodOrder,
             cbcEligibility = cbcEligibility,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
+            sellerBusinessName = null,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
-            customerMetadata = CustomerMetadata(
-                hasCustomerConfiguration = hasCustomerConfiguration,
-                isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                permissions = customerMetadataPermissions
-            ),
+            customerMetadata = if (hasCustomerConfiguration) {
+                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
+                    isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                    permissions = customerMetadataPermissions,
+                    customerSessionClientSecret = customerSessionClientSecret,
+                )
+            } else {
+                null
+            },
             sharedDataSpecs = sharedDataSpecs,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
@@ -72,12 +87,19 @@ internal object PaymentMethodMetadataFactory {
             isGooglePayReady = isGooglePayReady,
             linkConfiguration = linkConfiguration,
             linkMode = linkMode,
-            linkState = linkState,
+            linkStateResult = linkState,
             cardBrandFilter = cardBrandFilter,
             paymentMethodIncentive = paymentMethodIncentive,
             elementsSessionId = elementsSessionId,
             financialConnectionsAvailability = financialConnectionsAvailability,
-            shopPayConfiguration = shopPayConfiguration
+            shopPayConfiguration = shopPayConfiguration,
+            termsDisplay = termsDisplay,
+            forceSetupFutureUseBehaviorAndNewMandate = forceSetupFutureUseBehaviorAndNewMandate,
+            passiveCaptchaParams = passiveCaptchaParams,
+            openCardScanAutomatically = openCardScanAutomatically,
+            clientAttributionMetadata =
+            clientAttributionMetadata ?: PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            attestOnIntentConfirmation = attestOnIntentConfirmation,
         )
     }
 

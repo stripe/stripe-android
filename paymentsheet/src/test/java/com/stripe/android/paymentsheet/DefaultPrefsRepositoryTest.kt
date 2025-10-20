@@ -77,7 +77,8 @@ internal class DefaultPrefsRepositoryTest {
             prefsRepository.getSavedSelection(isGooglePayReady, isLinkAvailable)
         ).isEqualTo(
             SavedSelection.PaymentMethod(
-                id = "pm_123456789"
+                id = "pm_123456789",
+                isLinkOrigin = false,
             )
         )
     }
@@ -93,7 +94,8 @@ internal class DefaultPrefsRepositoryTest {
             prefsRepository.getSavedSelection(isGooglePayReady, isLinkAvailable)
         ).isEqualTo(
             SavedSelection.PaymentMethod(
-                id = "pm_123456789"
+                id = "pm_123456789",
+                isLinkOrigin = false,
             )
         )
     }
@@ -109,7 +111,8 @@ internal class DefaultPrefsRepositoryTest {
             prefsRepository.getSavedSelection(isGooglePayReady, isLinkAvailable)
         ).isEqualTo(
             SavedSelection.PaymentMethod(
-                id = "pm_123456789"
+                id = "pm_123456789",
+                isLinkOrigin = false,
             )
         )
 
@@ -118,6 +121,25 @@ internal class DefaultPrefsRepositoryTest {
             prefsRepository.getSavedSelection(isGooglePayReady, isLinkAvailable)
         ).isEqualTo(
             SavedSelection.None
+        )
+    }
+
+    @Test
+    fun `setSavedSelection with a Link SPM should return isLinkOrigin=true`() = runTest {
+        prefsRepository.setSavedSelection(
+            PaymentSelection.Saved(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+                    isLinkPassthroughMode = true,
+                )
+            ).toSavedSelection()
+        )
+        assertThat(
+            prefsRepository.getSavedSelection(isGooglePayReady, isLinkAvailable)
+        ).isEqualTo(
+            SavedSelection.PaymentMethod(
+                id = "pm_123456789",
+                isLinkOrigin = true,
+            )
         )
     }
 }

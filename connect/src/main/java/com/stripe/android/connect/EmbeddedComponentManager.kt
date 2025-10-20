@@ -1,6 +1,7 @@
 package com.stripe.android.connect
 
 import android.content.Context
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.fragment.app.FragmentActivity
 import com.stripe.android.connect.appearance.Appearance
@@ -77,15 +78,40 @@ class EmbeddedComponentManager @JvmOverloads constructor(
      * @param listener Optional [PayoutsListener] to use for handling events from the view.
      * @param cacheKey Key to use for caching the internal WebView within an Activity across configuration changes.
      */
-    internal fun createPayoutsView(
+    @PreviewConnectSDK
+    fun createPayoutsView(
         context: Context,
         listener: PayoutsListener? = null,
         cacheKey: String? = null,
-    ): PayoutsView {
+    ): View {
         return PayoutsView(
             context = context,
             embeddedComponentManager = this,
             listener = listener,
+            cacheKey = cacheKey,
+        )
+    }
+
+    /**
+     * Create a new [PaymentsView] for inclusion in the view hierarchy.
+     *
+     * @param context The [Context] to use for creating the view.
+     * @param listener Optional [PaymentsListener] to use for handling events from the view.
+     * @param props Optional [PaymentsProps] to use for configuring the view.
+     * @param cacheKey Key to use for caching the internal WebView within an Activity across configuration changes.
+     */
+    @PreviewConnectSDK
+    fun createPaymentsView(
+        context: Context,
+        listener: PaymentsListener? = null,
+        props: PaymentsProps? = null,
+        cacheKey: String? = null,
+    ): View {
+        return PaymentsView(
+            context = context,
+            embeddedComponentManager = this,
+            listener = listener,
+            props = props,
             cacheKey = cacheKey,
         )
     }

@@ -3,6 +3,8 @@ package com.stripe.android.link.ui.signup
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.LinkMode
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -82,7 +84,9 @@ class SignUpScreenStateTest {
         return LinkConfiguration(
             stripeIntent = PaymentIntentFactory.create(),
             merchantName = "Merchant, Inc.",
+            sellerBusinessName = null,
             merchantCountryCode = "US",
+            merchantLogoUrl = null,
             customerInfo = customerInfo,
             shippingDetails = null,
             passthroughModeEnabled = true,
@@ -99,7 +103,19 @@ class SignUpScreenStateTest {
             disableRuxInFlowController = false,
             defaultBillingDetails = null,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
-            collectMissingBillingDetailsForExistingPaymentMethods = true
+            collectMissingBillingDetailsForExistingPaymentMethods = true,
+            allowUserEmailEdits = true,
+            allowLogOut = true,
+            enableDisplayableDefaultValuesInEce = false,
+            linkAppearance = null,
+            linkSignUpOptInFeatureEnabled = false,
+            linkSignUpOptInInitialValue = false,
+            skipWalletInFlowController = false,
+            customerId = null,
+            saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            forceSetupFutureUseBehaviorAndNewMandate = false,
+            linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
         )
     }
 

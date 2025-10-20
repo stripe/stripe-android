@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Link で支払い情報を保存して決済をスピードアップ</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">Link でアカウントを作成すると、ウェブ上で決済を迅速化できます</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s クレジット</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -37,14 +40,24 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_card_type_prepaid">%1$s プリペイド</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
   <string name="stripe_link_card_type_unknown">%1$s カード</string>
+  <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
+  <string name="stripe_link_confirm_payment_title">支払い詳細を確認</string>
+  <!-- Email suggestion prompt shown when we detect a typo. The %1$s is a placeholder for the suggested email address. -->
+  <string name="stripe_link_email_suggestion">%1$s のことですか？</string>
+  <!-- CTA text for accepting the suggested email correction -->
+  <string name="stripe_link_email_suggestion_update">はい、更新します</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">ログイン / 登録</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">同意して続行</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">スピーディーで安全なワンクリック決済</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">迅速で安全な決済</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">支払い情報を Link に保存すると、Link に対応したサイトで安全にワンクリックで決済することができます。</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Link に対応している店舗でスピーディーに支払うことができます。</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[続行すると、<terms>規約</terms>と<privacy>プライバシーポリシー</privacy>に同意したことになります。]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -79,6 +92,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_address_element_primary_button">住所を保存する</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">配送先住所</string>
+  <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
+  <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">配送に請求先住所を使用</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
   <string name="stripe_paymentsheet_bacs_email_mandate">この引き落とし指示の設定を確認するために、3 営業日以内に %s にメールが送信されます。</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
@@ -101,6 +116,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">カード詳細は変更できません。</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">カード情報を提供すると、%s がその規約に従って今後の支払いをお客様のカードに請求することを許可することになります。</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">続行することで、あなたは、%s での今後の購入のために情報を保存することに同意したことになります。</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[続行することで、今後の購入のために情報を保存することに同意したことになります <link>Link</link>.また、リンクの<terms>規約</terms>と<privacy>プライバシー</privacy>にも同意するものとします。]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[続行することで、今後の購入のために情報を保存することに同意したことになります <link>Link</link> (<terms>利用規約</terms>および<privacy>プライバシー</privacy>を参照)。]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[続行することで、今後の購入のために情報を保存することに同意したことになります <link>Link</link> リンク<terms>規約</terms>および<privacy>プライバシー</privacy>に従うことになります。]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">カードは更新されていません。もう一度お試しください。</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -160,6 +183,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_remove_card">カードを削除</string>
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">カードを削除しますか？</string>
+  <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
+  <string name="stripe_paymentsheet_remove_partial_description">この決済手段は削除されますが、%s のサブスクリプションでは引き続き使用できます。</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">%s を削除</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -190,6 +215,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">合計: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">カードブランドは更新されていません。もう一度お試しください。</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">%s 以内に銀行または決済アプリで支払いを確定し、購入を完了してください。</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">デフォルトの支払い方法として設定する</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -252,6 +279,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">さらに表示</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[続行すると、これらの<terms>規約</terms>に従って支払いをオーソリすることに同意したものとみなされます。]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[ご注文を %1$s および %2$s に送信することにより、お客様は今後の購入のためにお客様の情報を %3$s に保存することに同意し、<terms>本規約</terms>に従って支払いをオーソリすることに同意したものとみなされます。]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[%s に注文を送信することにより、<terms>これらの規約</terms> に従って決済を承認することに同意したものとみなされます。]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">決済</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
@@ -265,6 +296,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">パススルー</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">別の方法で支払う</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">受け付けられる可能性が最も高いのはデビットカードです。</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">セキュリティー保持のため、お客様のクレジットカードのセキュリティーコードをもう一度入力してください。</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

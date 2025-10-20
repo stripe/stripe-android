@@ -13,6 +13,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -63,6 +65,7 @@ import com.stripe.android.paymentsheet.databinding.StripeFragmentPrimaryButtonCo
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
@@ -415,7 +418,8 @@ internal fun Wallet(
     val padding = StripeTheme.getOuterFormInsets()
 
     Column(modifier = modifier.padding(padding)) {
-        state.googlePay?.let { googlePay ->
+        // Only show Google Pay if allowed in header
+        state.googlePay(WalletLocation.HEADER)?.let { googlePay ->
             GooglePayButton(
                 state = PrimaryButton.State.Ready,
                 allowCreditCards = googlePay.allowCreditCards,
@@ -427,13 +431,13 @@ internal fun Wallet(
             )
         }
 
-        state.link?.let {
-            if (state.googlePay != null) {
+        // Only show Link if allowed in header
+        state.link(WalletLocation.HEADER)?.let {
+            if (state.googlePay(WalletLocation.HEADER) != null) {
                 Spacer(modifier = Modifier.requiredHeight(8.dp))
             }
-
             LinkButton(
-                email = it.email,
+                state = it.state,
                 enabled = state.buttonsEnabled,
                 onClick = onLinkPressed,
             )
@@ -449,10 +453,12 @@ internal fun Wallet(
             else -> Unit
         }
 
-        Spacer(modifier = Modifier.requiredHeight(dividerSpacing))
+        if (state.walletsInHeader) {
+            Spacer(modifier = Modifier.requiredHeight(dividerSpacing))
 
-        val text = stringResource(state.dividerTextResource)
-        WalletsDivider(text)
+            val text = stringResource(state.dividerTextResource)
+            WalletsDivider(text)
+        }
     }
 }
 
@@ -477,28 +483,41 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
 
     val context = LocalContext.current
 
-    AndroidViewBinding(
-        factory = { inflater: LayoutInflater, parent: ViewGroup, attachToParent: Boolean ->
-            val binding = StripeFragmentPrimaryButtonContainerBinding.inflate(inflater, parent, attachToParent)
-            val primaryButton = binding.primaryButton
-            button = primaryButton
-            primaryButton.setAppearanceConfiguration(
-                StripeTheme.primaryButtonStyle,
-                tintList = ColorStateList.valueOf(
-                    if (context.isSystemDarkTheme()) {
-                        viewModel.config.appearance.primaryButton.colorsDark.background
-                    } else {
-                        viewModel.config.appearance.primaryButton.colorsLight.background
-                    } ?: StripeTheme.primaryButtonStyle.getBackgroundColor(context)
+    Box {
+        AndroidViewBinding(
+            factory = { inflater: LayoutInflater, parent: ViewGroup, attachToParent: Boolean ->
+                val binding = StripeFragmentPrimaryButtonContainerBinding.inflate(inflater, parent, attachToParent)
+                val primaryButton = binding.primaryButton
+                button = primaryButton
+                primaryButton.setAppearanceConfiguration(
+                    StripeTheme.primaryButtonStyle,
+                    tintList = ColorStateList.valueOf(
+                        if (context.isSystemDarkTheme()) {
+                            viewModel.config.appearance.primaryButton.colorsDark.background
+                        } else {
+                            viewModel.config.appearance.primaryButton.colorsLight.background
+                        } ?: StripeTheme.primaryButtonStyle.getBackgroundColor(context)
+                    )
                 )
+                binding
+            },
+            update = {
+                button?.updateUiState(uiState)
+            },
+            modifier = modifier,
+        )
+
+        if (uiState?.canClickWhileDisabled == true && uiState?.enabled != true) {
+            Box(
+                Modifier
+                    .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG)
+                    .matchParentSize()
+                    .pointerInput(Unit) {
+                        detectTapGestures { uiState?.onDisabledClick?.invoke() }
+                    }
             )
-            binding
-        },
-        update = {
-            button?.updateUiState(uiState)
-        },
-        modifier = modifier,
-    )
+        }
+    }
 
     LaunchedEffect(viewModel, button) {
         (viewModel as? PaymentSheetViewModel)?.buyButtonState?.collect { state ->
@@ -521,6 +540,7 @@ internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
     }
 }
 
+const val PAYMENT_SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG = "PRIMARY_BUTTON_DISABLED_OVERLAY"
 const val PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON"
 const val PAYMENT_SHEET_ERROR_TEXT_TEST_TAG = "PAYMENT_SHEET_ERROR"
 

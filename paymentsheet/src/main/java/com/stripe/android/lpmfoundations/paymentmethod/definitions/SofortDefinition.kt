@@ -37,6 +37,7 @@ private object SofortUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_sofort,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_klarna,
+        iconResourceNight = null,
     )
 
     override fun createFormElements(
@@ -51,7 +52,8 @@ private object SofortUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
                 listOf(IdentifierSpec.Name, IdentifierSpec.Email)
             } else {
                 emptyList()
-            }
+            },
+            termsDisplay = metadata.termsDisplayForType(SofortDefinition.type),
         )
     }
 }

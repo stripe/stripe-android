@@ -5,6 +5,8 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
@@ -18,17 +20,10 @@ import org.mockito.kotlin.mock
 
 internal object LinkTestUtils {
     val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
-        paymentDetails = ConsumerPaymentDetails.Card(
-            id = "pm_123",
+        paymentDetails = ConsumerPaymentDetails.Passthrough(
+            id = "csmrpd_123",
             last4 = "4242",
-            expiryYear = 2024,
-            expiryMonth = 4,
-            brand = CardBrand.DinersClub,
-            cvcCheck = CvcCheck.Fail,
-            isDefault = false,
-            networks = emptyList(),
-            funding = "CREDIT",
-            nickname = null,
+            paymentMethodId = "pm_123",
             billingAddress = ConsumerPaymentDetails.BillingAddress(
                 name = null,
                 line1 = null,
@@ -81,7 +76,9 @@ internal object LinkTestUtils {
             customerInfo = LinkConfiguration.CustomerInfo(null, null, null, null),
             flags = mapOf(),
             merchantName = "Test merchant inc.",
+            sellerBusinessName = null,
             merchantCountryCode = "US",
+            merchantLogoUrl = null,
             passthroughModeEnabled = false,
             cardBrandChoice = cardBrandChoice,
             cardBrandFilter = cardBrandFilter,
@@ -96,7 +93,19 @@ internal object LinkTestUtils {
             disableRuxInFlowController = false,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             defaultBillingDetails = null,
-            collectMissingBillingDetailsForExistingPaymentMethods = true
+            collectMissingBillingDetailsForExistingPaymentMethods = true,
+            allowUserEmailEdits = true,
+            allowLogOut = true,
+            enableDisplayableDefaultValuesInEce = false,
+            linkAppearance = null,
+            linkSignUpOptInFeatureEnabled = false,
+            linkSignUpOptInInitialValue = false,
+            skipWalletInFlowController = false,
+            customerId = null,
+            saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            forceSetupFutureUseBehaviorAndNewMandate = false,
+            linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
         )
     }
 }

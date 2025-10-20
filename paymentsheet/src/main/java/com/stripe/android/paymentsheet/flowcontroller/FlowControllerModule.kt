@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcompo
 import com.stripe.android.paymentsheet.ui.DefaultWalletButtonsInteractor
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
 import com.stripe.android.uicore.image.StripeImageLoader
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
@@ -29,6 +30,9 @@ import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(
+    includes = [
+        FlowControllerModule.Bindings::class,
+    ],
     subcomponents = [
         PaymentOptionsViewModelSubcomponent::class,
     ]
@@ -127,5 +131,14 @@ internal object FlowControllerModule {
     @Named(IS_LIVE_MODE)
     fun provideIsLiveMode(paymentConfiguration: Provider<PaymentConfiguration>): () -> Boolean {
         return { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
+    }
+
+    @Module
+    interface Bindings {
+        @Binds
+        @Singleton
+        fun bindsFlowControllerConfirmationHandler(
+            handler: DefaultFlowControllerConfirmationHandler
+        ): FlowControllerConfirmationHandler
     }
 }

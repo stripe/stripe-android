@@ -34,5 +34,6 @@ private object WeChatPayUiDefinitionFactory : UiDefinitionFactory.RequiresShared
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_wechat,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_wechat_pay,
+        iconResourceNight = null,
     )
 }

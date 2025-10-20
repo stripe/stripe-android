@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -81,8 +82,10 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
 
         setContent {
             var confirming by remember { mutableStateOf(false) }
+            var configuring by remember { mutableStateOf(false) }
             var screenContent by remember { mutableStateOf(ScreenContent.Loading) }
             var paymentOption by remember { mutableStateOf<PaymentOption?>(null) }
+            var amount by remember { mutableStateOf(9999L) }
 
             val requester = remember {
                 SharedPaymentTokenPlaygroundRequester(
@@ -105,13 +108,12 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
 
             val configure = remember(flowController) {
                 {
-                    screenContent = ScreenContent.Loading
-
                     flowController.configureWithIntentConfiguration(
-                        intentConfiguration = playgroundState.intentConfiguration(),
+                        intentConfiguration = playgroundState.intentConfiguration(amount),
                         configuration = playgroundState.paymentSheetConfiguration(),
                         callback = { success, error ->
                             paymentOption = flowController.getPaymentOption()
+                            configuring = false
 
                             Log.d("TEST", error?.message ?: "")
 
@@ -138,6 +140,12 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                         playgroundState.snapshot[WalletButtonsSettingsDefinition]
                             != WalletButtonsPlaygroundType.Disabled,
                         confirming = confirming,
+                        configuring = configuring,
+                        configure = {
+                            amount += 100L
+                            configuring = true
+                            configure()
+                        },
                         confirm = {
                             confirming = true
                             flowController.confirm()
@@ -232,7 +240,6 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                             }
                         }.onFailure {
                             onConfirmingChanged(false)
-
                             Toast.makeText(
                                 applicationContext,
                                 "Failed to create SPT: ${it.message}",
@@ -282,27 +289,41 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                     modifier = Modifier.padding(vertical = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    if (parameters.showWalletButtons) {
-                        Box(modifier = horizontalModifier) {
-                            flowController.WalletButtons()
+                    if (parameters.paymentOption == null) {
+                        if (parameters.showWalletButtons) {
+                            Box(modifier = horizontalModifier) {
+                                flowController.WalletButtons()
+                            }
                         }
-                    }
 
-                    PrimaryButton(
-                        label = "Pay another way",
-                        enabled = !parameters.confirming,
-                        modifier = horizontalModifier
-                    ) {
-                        flowController.presentPaymentOptions()
+                        PrimaryButton(
+                            label = "Pay another way",
+                            enabled = !parameters.confirming,
+                            modifier = horizontalModifier
+                        ) {
+                            flowController.presentPaymentOptions()
+                        }
+
+                        Divider()
                     }
 
                     parameters.paymentOption?.let {
-                        Divider()
-
                         Summary(
                             option = it,
-                            modifier = horizontalModifier
+                            modifier = horizontalModifier.clickable {
+                                flowController.presentPaymentOptions()
+                            },
                         )
+
+                        Divider()
+
+                        Button(
+                            onClick = parameters.configure,
+                            enabled = !parameters.configuring && !parameters.confirming,
+                            modifier = horizontalModifier,
+                        ) {
+                            Text(if (parameters.configuring) "Configuring…" else "Simulate re-configure")
+                        }
 
                         Divider()
 
@@ -417,9 +438,11 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
         @Immutable
         class Parameters(
             val confirming: Boolean,
+            val configuring: Boolean,
             val paymentOption: PaymentOption?,
             val flowController: PaymentSheet.FlowController,
             val showWalletButtons: Boolean,
+            val configure: () -> Unit,
             val confirm: () -> Unit,
             val retry: () -> Unit,
         )

@@ -47,11 +47,10 @@ internal class PopUpWebChromeClient(
     ): Boolean {
         if (resultMsg == null) return false
         val transport = (resultMsg.obj as? WebView.WebViewTransport) ?: return false
+
         val popupWebView = EceWebView(
             context = context,
-            bridgeHandler = bridgeHandler,
-            webViewClient = PopUpWebViewClient(
-                assetLoader = assetLoader,
+            webViewClient = EceWebViewClient(
                 onPageLoaded = onPageLoaded
             ),
             webChromeClient = PopUpWebChromeClient(

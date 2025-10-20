@@ -99,6 +99,8 @@
   <string name="stripe_paypal_mandate">Patvirtindami savo mokėjimą \"PayPal\" leidžiate \"%s\" nuskaityti mokestį nuo jūsų \"PayPal\" sąskaitos vėlesniems mokėjimams pagal jų sąlygas.</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Patvirtindami savo mokėjimą \"RevolutPay\" leidžiate %s nuskaityti mokestį nuo jūsų \"RevolutPay\" sąskaitos vėlesniems mokėjimams pagal jų sąlygas.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">Tęsdami jūs suteikiate leidimą %1$s automatiškai nurašyti lėšas nuo jūsų „Satispay Balance“ likučio periodiškai, pagal jūsų pirkimo arba prenumeratos planą.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Išsaugoti vėlesniems %s mokėjimams</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->

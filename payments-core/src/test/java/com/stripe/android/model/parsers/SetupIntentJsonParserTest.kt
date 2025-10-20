@@ -37,4 +37,37 @@ class SetupIntentJsonParserTest {
         )
         assertThat(setupIntent.countryCode).isEqualTo("CA")
     }
+
+    @Test
+    fun `automaticPaymentMethodsEnabled=false when automatic payment methods field is not present`() {
+        val setupIntent = requireNotNull(
+            SetupIntentJsonParser().parse(SetupIntentFixtures.SI_WITH_COUNTRY_CODE)
+        )
+
+        assertThat(setupIntent.automaticPaymentMethodsEnabled).isFalse()
+    }
+
+    @Test
+    fun `automaticPaymentMethodsEnabled=false when automatic payments field enabled=false`() {
+        val setupIntent =
+            requireNotNull(
+                SetupIntentJsonParser().parse(
+                    SetupIntentFixtures.SI_WITH_AUTOMATIC_PAYMENT_METHODS_NOT_ENABLED
+                )
+            )
+
+        assertThat(setupIntent.automaticPaymentMethodsEnabled).isFalse()
+    }
+
+    @Test
+    fun `automaticPaymentMethodsEnabled=true when automatic payments field enabled=true`() {
+        val setupIntent =
+            requireNotNull(
+                SetupIntentJsonParser().parse(
+                    SetupIntentFixtures.SI_WITH_AUTOMATIC_PAYMENT_METHODS_ENABLED
+                )
+            )
+
+        assertThat(setupIntent.automaticPaymentMethodsEnabled).isTrue()
+    }
 }

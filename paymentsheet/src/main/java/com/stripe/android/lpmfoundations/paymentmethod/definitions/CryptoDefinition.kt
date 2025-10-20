@@ -33,7 +33,8 @@ private object CryptoUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         paymentMethodDefinition = CryptoDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_crypto,
-        iconResource = R.drawable.stripe_ic_paymentsheet_pm_crypto,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_crypto_day,
+        iconResourceNight = R.drawable.stripe_ic_paymentsheet_pm_crypto_night,
         outlinedIconResource = R.drawable.stripe_ic_paymentsheet_pm_crypto_outlined,
         iconRequiresTinting = true,
     )

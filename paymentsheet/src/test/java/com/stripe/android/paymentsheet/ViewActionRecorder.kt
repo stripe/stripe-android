@@ -16,4 +16,12 @@ internal class ViewActionRecorder<VA> {
         assertThat(_viewActions[0]).isEqualTo(viewAction)
         _viewActions.removeAt(0)
     }
+
+    fun consume(
+        criteria: (VA) -> Boolean,
+    ) {
+        assertThat(_viewActions.size).isGreaterThan(0)
+        criteria(_viewActions[0])
+        _viewActions.removeAt(0)
+    }
 }

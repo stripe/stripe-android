@@ -62,6 +62,10 @@ public final class com/stripe/android/uicore/address/StateSchema$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class com/stripe/android/uicore/elements/AddressFieldConfiguration$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class com/stripe/android/uicore/elements/AddressInputMode$AutocompleteCondensed$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/uicore/elements/AddressInputMode$AutocompleteCondensed;
@@ -129,6 +133,7 @@ public final class com/stripe/android/uicore/elements/IdentifierSpec$Companion {
 	public final fun getName ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getOneLineAddress ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getPhone ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun getPhoneNumberCountry ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getPostalCode ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getPreferredCardBrand ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getSameAsShipping ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
@@ -165,66 +170,8 @@ public final class com/stripe/android/uicore/elements/ParameterDestination$Local
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/uicore/elements/PhoneNumberState$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
 public final class com/stripe/android/uicore/elements/SameAsShippingElementUIKt {
 	public static final field SAME_AS_SHIPPING_CHECKBOX_TEST_TAG Ljava/lang/String;
-}
-
-public abstract class com/stripe/android/uicore/elements/TextFieldStateConstants$Error : com/stripe/android/uicore/elements/TextFieldState {
-	public static final field $stable I
-	public synthetic fun <init> (I[Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (I[Ljava/lang/Object;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun getError ()Lcom/stripe/android/uicore/elements/FieldError;
-	protected fun getErrorMessageResId ()I
-	protected fun getFormatArgs ()[Ljava/lang/Object;
-	public fun isFull ()Z
-	public fun isValid ()Z
-}
-
-public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Error$Blank : com/stripe/android/uicore/elements/TextFieldStateConstants$Error {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/uicore/elements/TextFieldStateConstants$Error$Blank;
-	public fun isBlank ()Z
-	public fun shouldShowError (Z)Z
-}
-
-public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Error$Incomplete : com/stripe/android/uicore/elements/TextFieldStateConstants$Error {
-	public static final field $stable I
-	public fun <init> (I)V
-	public fun isBlank ()Z
-	public fun shouldShowError (Z)Z
-}
-
-public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Error$Invalid : com/stripe/android/uicore/elements/TextFieldStateConstants$Error {
-	public static final field $stable I
-	public fun <init> (I[Ljava/lang/Object;Z)V
-	public synthetic fun <init> (I[Ljava/lang/Object;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun isBlank ()Z
-	public fun isFull ()Z
-	public fun shouldShowError (Z)Z
-}
-
-public abstract class com/stripe/android/uicore/elements/TextFieldStateConstants$Valid : com/stripe/android/uicore/elements/TextFieldState {
-	public static final field $stable I
-	public fun getError ()Lcom/stripe/android/uicore/elements/FieldError;
-	public fun isBlank ()Z
-	public fun isValid ()Z
-	public fun shouldShowError (Z)Z
-}
-
-public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Valid$Full : com/stripe/android/uicore/elements/TextFieldStateConstants$Valid {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/uicore/elements/TextFieldStateConstants$Valid$Full;
-	public fun isFull ()Z
-}
-
-public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Valid$Limitless : com/stripe/android/uicore/elements/TextFieldStateConstants$Valid {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/uicore/elements/TextFieldStateConstants$Valid$Limitless;
-	public fun isFull ()Z
 }
 
 public final class com/stripe/android/uicore/elements/TextFieldUIKt {

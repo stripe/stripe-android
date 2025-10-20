@@ -41,13 +41,6 @@ internal class PaymentSheetBillingConfigurationTest {
     @Test
     fun testPayloadWithDefaultsAndOverrides() {
         networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.setResponseCode(500)
-        }
-
-        networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
@@ -193,13 +186,6 @@ internal class PaymentSheetBillingConfigurationTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.setResponseCode(500)
-        }
-
-        networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
@@ -233,6 +219,7 @@ internal class PaymentSheetBillingConfigurationTest {
             )
         }
 
+        page.assertIsOnFormPage()
         page.replaceText("123 Main Street", "123 Main Road")
         page.fillExpirationDate("12/34")
 
@@ -253,13 +240,6 @@ internal class PaymentSheetBillingConfigurationTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.setResponseCode(500)
-        }
-
         networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
@@ -320,5 +300,6 @@ internal class PaymentSheetBillingConfigurationTest {
         }
 
         page.clickPrimaryButton()
+        testContext.consumePaymentOptionEventForFlowController("cashapp", "Cash App Pay")
     }
 }

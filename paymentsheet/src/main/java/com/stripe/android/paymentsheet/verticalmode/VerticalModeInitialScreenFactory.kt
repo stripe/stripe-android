@@ -16,8 +16,13 @@ internal object VerticalModeInitialScreenFactory {
     ): List<PaymentSheetScreen> {
         val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
         val bankFormInteractor = BankFormInteractor.create(viewModel)
+        val formHelper = DefaultFormHelper.create(viewModel, paymentMethodMetadata)
 
-        if (supportedPaymentMethodTypes.size == 1 && customerStateHolder.paymentMethods.value.isEmpty()) {
+        if (
+            supportedPaymentMethodTypes.size == 1 &&
+            customerStateHolder.paymentMethods.value.isEmpty() &&
+            formHelper.formTypeForCode(supportedPaymentMethodTypes[0]) == FormHelper.FormType.UserInteractionRequired
+        ) {
             return listOf(
                 PaymentSheetScreen.VerticalModeForm(
                     interactor = DefaultVerticalModeFormInteractor.create(
@@ -44,8 +49,6 @@ internal object VerticalModeInitialScreenFactory {
 
             (viewModel.selection.value as? PaymentSelection.New?)?.let { newPaymentSelection ->
                 val paymentMethodCode = newPaymentSelection.paymentMethodCreateParams.typeCode
-
-                val formHelper = DefaultFormHelper.create(viewModel, paymentMethodMetadata)
 
                 if (formHelper.formTypeForCode(paymentMethodCode) == FormHelper.FormType.UserInteractionRequired) {
                     add(

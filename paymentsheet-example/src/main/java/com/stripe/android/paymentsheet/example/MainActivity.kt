@@ -140,6 +140,7 @@ private data class MenuItem(
         CustomerSheet,
         Embedded,
         AddressElement,
+        Onramp,
     }
 }
 
@@ -178,6 +179,11 @@ private fun MainScreen(items: List<MenuItem>) {
         Section(
             title = "Address Element",
             items = groupedItems.getOrElse(MenuItem.Section.AddressElement) { emptyList() }
+        )
+
+        Section(
+            title = "Onramp",
+            items = groupedItems.getOrElse(MenuItem.Section.Onramp) { emptyList() }
         )
 
         item {

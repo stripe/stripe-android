@@ -47,6 +47,7 @@ internal fun PaymentElement(
     usBankAccountFormArguments: USBankAccountFormArguments,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     modifier: Modifier = Modifier,
+    updatePaymentMethodVisibility: (AddPaymentMethodInitialVisibilityTrackerData) -> Unit = {},
     onInteractionEvent: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -73,6 +74,7 @@ internal fun PaymentElement(
                 onItemSelectedListener = onItemSelectedListener,
                 imageLoader = imageLoader,
                 modifier = Modifier.padding(bottom = 12.dp),
+                updatePaymentMethodVisibility = updatePaymentMethodVisibility,
             )
         }
 

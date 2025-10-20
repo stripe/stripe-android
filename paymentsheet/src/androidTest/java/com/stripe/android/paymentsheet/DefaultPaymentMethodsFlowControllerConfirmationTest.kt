@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.hasTestTag
 import androidx.test.espresso.intent.rule.IntentsRule
-import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_ACCOUNT_DETAILS
@@ -26,13 +25,12 @@ import org.junit.runner.RunWith
 @RunWith(TestParameterInjector::class)
 internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
     @get:Rule
-    val testRules: TestRules = TestRules.create()
+    val testRules: TestRules = TestRules.create {
+        around(IntentsRule())
+    }
 
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule
-
-    @get:Rule
-    val intentsRule = IntentsRule()
 
     @TestParameter(valuesProvider = ConfirmationTypeProvider::class)
     lateinit var confirmationType: ConfirmationType
@@ -150,9 +148,7 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
             page.clickPrimaryButton()
             composeTestRule.waitForIdle()
 
-            val paymentOption = testContext.configureCallbackTurbine.awaitItem()
-            assertThat(paymentOption?.label).endsWith(paymentMethodType.getLast4())
-            assertThat(paymentOption?.paymentMethodType).isEqualTo(paymentMethodType.type.code)
+            testContext.consumePaymentOptionEventForFlowController(paymentMethodType.type.code, paymentMethodType.getLast4())
 
             composeTestRule.waitForIdle()
 
@@ -162,6 +158,7 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
             secondLaunchBlock(page)
             composeTestRule.waitForIdle()
             page.clickPrimaryButton()
+            testContext.consumePaymentOptionEventForFlowController(paymentMethodType.type.code, paymentMethodType.getLast4())
 
             confirmationType.enqueuePaymentIntentConfirmWithExpectedSetAsDefault(
                 networkRule = networkRule,

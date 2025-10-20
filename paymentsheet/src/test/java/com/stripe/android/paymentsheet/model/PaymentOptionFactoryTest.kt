@@ -95,7 +95,7 @@ class PaymentOptionFactoryTest {
                 walletType = PaymentSelection.Saved.WalletType.Link
             )
         )
-        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_ref)
+        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_arrow)
         assertThat(paymentOption.label).isEqualTo("···· 4242")
         assertThat(paymentOption.paymentMethodType).isEqualTo("card")
         assertThat(paymentOption.billingDetails).isNull()
@@ -109,7 +109,7 @@ class PaymentOptionFactoryTest {
                 walletType = PaymentSelection.Saved.WalletType.Link
             )
         )
-        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_ref)
+        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_arrow)
         assertThat(paymentOption.label).isEqualTo("Link")
         assertThat(paymentOption.paymentMethodType).isEqualTo("card")
         assertThat(paymentOption.billingDetails).isNull()
@@ -201,6 +201,7 @@ class PaymentOptionFactoryTest {
         val paymentOption = factory.create(
             PaymentSelection.New.GenericPaymentMethod(
                 iconResource = R.drawable.stripe_ic_paymentsheet_card_unknown_ref,
+                iconResourceNight = null,
                 label = "Test Payment Method".resolvableString,
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.SOFORT.copy(
                     billingDetails = PAYMENT_METHOD_BILLING_DETAILS

@@ -1,27 +1,31 @@
 package com.stripe.android.link.injection
 
-import android.app.Activity
-import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.lifecycle.LifecycleOwner
+import android.app.Application
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.link.LinkController
+import com.stripe.android.networking.RequestSurface
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import dagger.BindsInstance
-import dagger.Subcomponent
+import dagger.Component
+import javax.inject.Singleton
 
-@LinkControllerScope
-@Subcomponent
+@Singleton
+@Component(
+    modules = [
+        LinkControllerModule::class,
+    ]
+)
 internal interface LinkControllerComponent {
-    val controller: LinkController
+    val linkController: LinkController
 
-    @Subcomponent.Factory
+    @Component.Factory
     interface Factory {
         fun build(
-            @BindsInstance activity: Activity,
-            @BindsInstance lifecycleOwner: LifecycleOwner,
-            @BindsInstance activityResultRegistryOwner: ActivityResultRegistryOwner,
-            @BindsInstance presentPaymentMethodsCallback: LinkController.PresentPaymentMethodsCallback,
-            @BindsInstance lookupConsumerCallback: LinkController.LookupConsumerCallback,
-            @BindsInstance createPaymentMethodCallback: LinkController.CreatePaymentMethodCallback,
-            @BindsInstance presentForAuthenticationCallback: LinkController.PresentForAuthenticationCallback,
+            @BindsInstance application: Application,
+            @BindsInstance savedStateHandle: SavedStateHandle,
+            @BindsInstance @PaymentElementCallbackIdentifier
+            paymentElementCallbackIdentifier: String,
+            @BindsInstance requestSurface: RequestSurface,
         ): LinkControllerComponent
     }
 }

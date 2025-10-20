@@ -48,18 +48,23 @@ interface IHCaptcha {
     /**
      * Constructs a new client which allows to display a challenge dialog
      *
+     * @param activity The FragmentActivity context required for starting the challenge
      * @param config Config to customize: size, theme, locale, endpoint, rqdata, etc.
      * @return new [HCaptcha] object
      */
-    fun setup(config: HCaptchaConfig): HCaptcha?
+    fun setup(
+        activity: FragmentActivity,
+        config: HCaptchaConfig
+    ): HCaptcha?
 
     /**
      * Presents a captcha challenge. Depending on the configuration passed in setup, this will be either a passive
      * challenge or a dialog to be completed by the user.
      *
+     * @param activity The FragmentActivity context required for starting the challenge
      * @return [HCaptcha]
      */
-    fun verifyWithHCaptcha(): HCaptcha?
+    fun verifyWithHCaptcha(activity: FragmentActivity): HCaptcha?
 
     /**
      * Force stop verification and release resources.
@@ -69,12 +74,11 @@ interface IHCaptcha {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class HCaptcha private constructor(
-    private val activity: FragmentActivity,
-    private val internalConfig: HCaptchaInternalConfig
+    private val internalConfig: HCaptchaInternalConfig,
 ) : Task<HCaptchaTokenResponse>(), IHCaptcha {
     private var captchaVerifier: IHCaptchaVerifier? = null
 
-    override fun setup(config: HCaptchaConfig): HCaptcha {
+    override fun setup(activity: FragmentActivity, config: HCaptchaConfig): HCaptcha {
         val listener = HCaptchaStateListener(
             onOpen = { captchaOpened() },
             onSuccess = { token ->
@@ -102,7 +106,7 @@ class HCaptcha private constructor(
         return this
     }
 
-    override fun verifyWithHCaptcha(): HCaptcha {
+    override fun verifyWithHCaptcha(activity: FragmentActivity): HCaptcha? {
         val captchaVerifier = captchaVerifier
             ?: // Cold start at verification time.
             throw IllegalStateException("verifyWithHCaptcha must not be called before setup.")
@@ -112,6 +116,7 @@ class HCaptcha private constructor(
     }
 
     override fun reset() {
+        removeAllListeners()
         captchaVerifier?.let {
             it.reset()
             captchaVerifier = null
@@ -123,14 +128,12 @@ class HCaptcha private constructor(
         /**
          * Constructs a new client which allows to display a challenge dialog
          *
-         * @param activity The current activity
          * @return new [HCaptcha] object
          */
         fun getClient(
-            activity: FragmentActivity,
             internalConfig: HCaptchaInternalConfig = HCaptchaInternalConfig()
         ): HCaptcha {
-            return HCaptcha(activity, internalConfig)
+            return HCaptcha(internalConfig)
         }
     }
 }

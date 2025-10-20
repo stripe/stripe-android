@@ -28,12 +28,13 @@ internal class EmbeddedPaymentElementTestRunnerContext(
     private val countDownLatch: CountDownLatch,
 ) {
     suspend fun configure(
+        intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD")
+        ),
         configurationMutator: EmbeddedPaymentElement.Configuration.Builder.() -> EmbeddedPaymentElement.Configuration.Builder = { this },
     ) {
         embeddedPaymentElement.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD")
-            ),
+            intentConfiguration = intentConfiguration,
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
                 .configurationMutator()
                 .build()
@@ -100,6 +101,15 @@ internal fun runEmbeddedPaymentElementTest(
                         countDownLatch.countDown()
                     },
                     createIntentCallback = builderInstance.deferredHandler.createIntentCallback,
+                )
+            }
+            is EmbeddedPaymentElement.Builder.DeferredHandler.ConfirmationToken -> {
+                EmbeddedPaymentElement.Builder(
+                    resultCallback = { result ->
+                        builderInstance.resultCallback.onResult(result)
+                        countDownLatch.countDown()
+                    },
+                    createIntentCallback = builderInstance.deferredHandler.createIntentWithConfirmationTokenCallback,
                 )
             }
             is EmbeddedPaymentElement.Builder.DeferredHandler.SharedPaymentToken -> {

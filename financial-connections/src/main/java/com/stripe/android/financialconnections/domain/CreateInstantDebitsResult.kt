@@ -47,7 +47,7 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = clientSecret,
                 expectedPaymentMethodType = linkMode.expectedPaymentMethodType,
-                billingPhone = elementsSessionContext.billingDetails?.phone,
+                billingPhone = elementsSessionContext?.billingDetails?.phone,
             )
 
             sharePaymentDetails.encodedPaymentMethod

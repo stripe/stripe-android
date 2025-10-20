@@ -57,9 +57,13 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.godaddy.android.colorpicker.ClassicColorPicker
@@ -985,11 +989,11 @@ private fun EmbeddedPicker(
     Divider()
 
     ColorItem(
-        label = "chevronColor",
-        currentColor = Color(embeddedAppearance.chevronColor),
+        label = "disclosureColor",
+        currentColor = Color(embeddedAppearance.disclosureColor),
         onColorPicked = {
             embeddedAppearance.copy(
-                chevronColor = it.toArgb()
+                disclosureColor = it.toArgb()
             )
         },
         updateAppearance = updateEmbedded,
@@ -1076,6 +1080,56 @@ private fun EmbeddedPicker(
         )
     }
     Divider()
+
+    IncrementDecrementItem(
+        "verticalIconMargin",
+        embeddedAppearance.verticalPaymentMethodIconMargin ?: 0f
+    ) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                verticalPaymentMethodIconMargin = it
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem(
+        "horizontalIconMargin",
+        embeddedAppearance.horizontalPaymentMethodIconMargin ?: 0f
+    ) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                horizontalPaymentMethodIconMargin = it
+            )
+        )
+    }
+    Divider()
+
+    EmbeddedFontDropDown(embeddedAppearance.titleFont, "titleFont") {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                titleFont = it
+            )
+        )
+    }
+    Divider()
+
+    EmbeddedFontDropDown(embeddedAppearance.subtitleFont, "subtitleFont") {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                subtitleFont = it
+            )
+        )
+    }
+    Divider()
+
+    IconDropDown(embeddedAppearance.disclosureIconRes) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                disclosureIconRes = it
+            )
+        )
+    }
 }
 
 @Composable
@@ -1376,6 +1430,71 @@ private fun FontDropDown(fontResId: Int?, fontSelectedCallback: (Int?) -> Unit) 
 }
 
 @Composable
+private fun EmbeddedFontDropDown(
+    currentFont: AppearanceStore.State.Typography.Font?,
+    displayText: String,
+    fontSelectedCallback: (AppearanceStore.State.Typography.Font?) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val items = mapOf(
+        AppearanceStore.State.Typography.Font(
+            fontSizeSp = 12f,
+            fontWeight = 200,
+            letterSpacingSp = 8f,
+        ) to "Small",
+        AppearanceStore.State.Typography.Font(
+            fontSizeSp = 16f,
+            fontWeight = 400,
+            letterSpacingSp = 8f,
+        ) to "Medium",
+        AppearanceStore.State.Typography.Font(
+            fontSizeSp = 24f,
+            fontWeight = 700,
+            letterSpacingSp = 8f,
+        ) to "Large",
+        null to "Default"
+    )
+
+    items[currentFont]?.let {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxSize().padding(all = BASE_PADDING).wrapContentSize(Alignment.TopStart)
+        ) {
+            Text(
+                text = "$displayText: $it",
+                fontSize = BASE_FONT_SIZE,
+                modifier = Modifier.fillMaxWidth().clickable(onClick = { expanded = true })
+            )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items.forEach { font ->
+                    val style = TextStyle(
+                        fontSize = font.key?.fontSizeSp?.sp ?: TextUnit.Unspecified,
+                        fontWeight = font.key?.fontWeight?.let { FontWeight(it) },
+                        fontFamily = font.key?.fontFamily?.let { FontFamily(Font(it)) },
+                        letterSpacing = font.key?.letterSpacingSp?.sp ?: TextUnit.Unspecified,
+                    )
+                    DropdownMenuItem(
+                        onClick = {
+                            expanded = false
+                            fontSelectedCallback(font.key)
+                        },
+                    ) {
+                        Text(
+                            text = font.value,
+                            style = style
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun FontDropDownMenuItem(label: String, fontResId: Int?, onClick: () -> Unit) {
     DropdownMenuItem(
         onClick = onClick,
@@ -1384,6 +1503,58 @@ private fun FontDropDownMenuItem(label: String, fontResId: Int?, onClick: () -> 
             text = label,
             fontFamily = getFontFromResource(fontResId)
         )
+    }
+}
+
+@Composable
+private fun IconDropDown(iconResId: Int?, iconSelectedCallback: (Int) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val items = mapOf(
+        com.stripe.android.R.drawable.stripe_ic_arrow_down to "Down",
+        com.stripe.android.R.drawable.stripe_ic_add_black_32dp to "Add",
+        com.stripe.android.paymentsheet.R.drawable.stripe_ic_chevron_right to "Default"
+    )
+
+    items[iconResId].let {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(all = BASE_PADDING)
+                .wrapContentSize(Alignment.TopStart)
+        ) {
+            Text(
+                text = "Icon Resource: $it",
+                fontSize = BASE_FONT_SIZE,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = { expanded = true })
+            )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items.forEach { icon ->
+                    DropdownMenuItem(
+                        onClick = {
+                            expanded = false
+                            iconSelectedCallback(icon.key)
+                        }
+                    ) {
+                        Text(
+                            text = icon.value
+                        )
+                        icon.key?.let { iconResId ->
+                            Icon(
+                                painter = painterResource(iconResId),
+                                contentDescription = null
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

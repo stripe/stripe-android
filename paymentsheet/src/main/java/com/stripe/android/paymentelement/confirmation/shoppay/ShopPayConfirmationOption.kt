@@ -8,5 +8,5 @@ import kotlinx.parcelize.Parcelize
 internal data class ShopPayConfirmationOption(
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration,
     val customerSessionClientSecret: String,
-    val businessName: String
+    val merchantDisplayName: String
 ) : ConfirmationHandler.Option

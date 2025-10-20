@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.testTag
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -33,7 +34,7 @@ internal fun AddPaymentMethod(
         supportedPaymentMethods = state.supportedPaymentMethods,
         selectedItemCode = state.selectedPaymentMethodCode,
         incentive = state.incentive,
-        formElements = state.formElements,
+        formElements = state.formUiElements,
         onItemSelectedListener = { selectedLpm ->
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(
@@ -59,6 +60,13 @@ internal fun AddPaymentMethod(
                 )
             )
         },
+        updatePaymentMethodVisibility = {
+            interactor.handleViewAction(
+                AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility(
+                    initialVisibilityTrackerData = it
+                )
+            )
+        },
     )
 }
 
@@ -71,15 +79,18 @@ internal fun FormFieldValues.transformToPaymentMethodCreateParams(
         code = paymentMethodCode,
         requiresMandate = paymentMethodMetadata.requiresMandate(paymentMethodCode),
         allowRedisplay = paymentMethodMetadata.allowRedisplay(userRequestedReuse, paymentMethodCode),
+        clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
     )
 }
 
 internal fun FormFieldValues.transformToPaymentMethodOptionsParams(
-    paymentMethodCode: PaymentMethodCode
+    paymentMethodCode: PaymentMethodCode,
+    setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
 ): PaymentMethodOptionsParams? {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodOptionsParams(
         fieldValuePairs = fieldValuePairs,
         code = paymentMethodCode,
+        setupFutureUsage = setupFutureUsage,
     )
 }
 
@@ -96,16 +107,15 @@ internal fun FormFieldValues.transformToPaymentSelection(
     paymentMethod: SupportedPaymentMethod,
     paymentMethodMetadata: PaymentMethodMetadata,
 ): PaymentSelection {
+    val setupFutureUsage = userRequestedReuse.getSetupFutureUseValue(
+        paymentMethodMetadata.hasIntentToSetup(paymentMethod.code)
+    )
     val params = transformToPaymentMethodCreateParams(paymentMethod.code, paymentMethodMetadata)
-    val options = transformToPaymentMethodOptionsParams(paymentMethod.code)
+    val options = transformToPaymentMethodOptionsParams(paymentMethod.code, setupFutureUsage)
     val extras = transformToExtraParams(paymentMethod.code)
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
         PaymentSelection.New.Card(
-            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
-                setupFutureUsage = userRequestedReuse.getSetupFutureUseValue(
-                    paymentMethodMetadata.hasIntentToSetup(PaymentMethod.Type.Card.code)
-                )
-            ),
+            paymentMethodOptionsParams = options,
             paymentMethodCreateParams = params,
             paymentMethodExtraParams = extras,
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
@@ -132,6 +142,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
         PaymentSelection.New.GenericPaymentMethod(
             label = paymentMethod.displayName,
             iconResource = paymentMethod.iconResource,
+            iconResourceNight = paymentMethod.iconResourceNight,
             lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
             paymentMethodCreateParams = params,

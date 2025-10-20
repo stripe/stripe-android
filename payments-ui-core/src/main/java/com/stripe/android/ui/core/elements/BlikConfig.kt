@@ -31,6 +31,7 @@ class BlikConfig : TextFieldConfig {
     override val visualTransformation: VisualTransformation? = null
     override val trailingIcon: StateFlow<TextFieldIcon?> = MutableStateFlow(value = null)
     override val loading: StateFlow<Boolean> = MutableStateFlow(value = false)
+    override val optional: Boolean = false
 
     override fun determineState(input: String): TextFieldState {
         val isValid = blikPattern.matches(input)

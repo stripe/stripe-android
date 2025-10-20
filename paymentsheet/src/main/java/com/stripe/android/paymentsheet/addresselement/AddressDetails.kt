@@ -48,14 +48,27 @@ internal fun AddressDetails.toIdentifierMap(
             IdentifierSpec.PostalCode to address?.postalCode,
             IdentifierSpec.Country to address?.country,
             IdentifierSpec.Phone to phoneNumber
-        ).plus(
-            mapOf(
-                IdentifierSpec.SameAsShipping to isCheckboxSelected?.toString()
-            ).takeIf { isCheckboxSelected != null } ?: emptyMap()
         )
+            .plus(billingDetails?.address?.toIdentifierMap() ?: emptyMap())
+            .plus(
+                mapOf(
+                    IdentifierSpec.SameAsShipping to isCheckboxSelected?.toString()
+                ).takeIf { isCheckboxSelected != null } ?: emptyMap()
+            )
     } else {
         emptyMap()
     }
+}
+
+internal fun PaymentSheet.Address.toIdentifierMap(): Map<IdentifierSpec, String?> {
+    return mapOf(
+        IdentifierSpec.Line1 to line1,
+        IdentifierSpec.Line2 to line2,
+        IdentifierSpec.City to city,
+        IdentifierSpec.State to state,
+        IdentifierSpec.PostalCode to postalCode,
+        IdentifierSpec.Country to country,
+    )
 }
 
 internal fun AddressDetails.toConfirmPaymentIntentShipping(): ConfirmPaymentIntentParams.Shipping {

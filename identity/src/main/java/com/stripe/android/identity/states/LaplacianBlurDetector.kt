@@ -10,6 +10,8 @@ import android.renderscript.ScriptIntrinsicBlur
 import android.renderscript.ScriptIntrinsicColorMatrix
 import android.renderscript.ScriptIntrinsicConvolve3x3
 import android.util.Log
+import androidx.core.graphics.createBitmap
+import com.stripe.android.camera.framework.image.orDefault
 import javax.inject.Inject
 
 /**
@@ -34,10 +36,10 @@ internal class LaplacianBlurDetector @Inject constructor(context: Context) {
     fun calculateBlurOutput(sourceBitmap: Bitmap): Float {
         try {
             // First apply a soft blur to smoothen out visual artifacts
-            val smootherBitmap = Bitmap.createBitmap(
+            val smootherBitmap = createBitmap(
                 sourceBitmap.width,
                 sourceBitmap.height,
-                sourceBitmap.config
+                sourceBitmap.config.orDefault()
             )
             val blurIntrinsic =
                 ScriptIntrinsicBlur.create(renderScript, Element.RGBA_8888(renderScript))
@@ -62,10 +64,10 @@ internal class LaplacianBlurDetector @Inject constructor(context: Context) {
 
             // Greyscale so we're only dealing with white <--> black pixels, this is so we only need to
             // detect pixel luminosity
-            val greyscaleBitmap = Bitmap.createBitmap(
+            val greyscaleBitmap = createBitmap(
                 sourceBitmap.width,
                 sourceBitmap.height,
-                sourceBitmap.config
+                sourceBitmap.config.orDefault()
             )
             val smootherInput = Allocation.createFromBitmap(
                 renderScript,
@@ -88,10 +90,10 @@ internal class LaplacianBlurDetector @Inject constructor(context: Context) {
 
             // Run edge detection algorithm using a laplacian matrix convolution
             // Apply 3x3 convolution to detect edges
-            val edgesBitmap = Bitmap.createBitmap(
+            val edgesBitmap = createBitmap(
                 sourceBitmap.width,
                 sourceBitmap.height,
-                sourceBitmap.config
+                sourceBitmap.config.orDefault()
             )
             val greyscaleInput = Allocation.createFromBitmap(
                 renderScript,

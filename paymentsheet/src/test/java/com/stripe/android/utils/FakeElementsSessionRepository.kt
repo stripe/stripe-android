@@ -1,6 +1,7 @@
 package com.stripe.android.utils
 
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -16,13 +17,16 @@ internal class FakeElementsSessionRepository(
     private val customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
     private val cardBrandChoice: ElementsSession.CardBrandChoice? = null,
     private val externalPaymentMethodData: String? = null,
+    private val passiveCaptchaParams: PassiveCaptchaParams? = null
 ) : ElementsSessionRepository {
     data class Params(
         val initializationMode: PaymentElementLoader.InitializationMode,
         val customer: PaymentSheet.CustomerConfiguration?,
         val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         val externalPaymentMethods: List<String>,
-        val savedPaymentMethodSelectionId: String?
+        val savedPaymentMethodSelectionId: String?,
+        val userOverrideCountry: String?,
+        val linkDisallowedFundingSourceCreation: Set<String>,
     )
 
     var lastParams: Params? = null
@@ -33,6 +37,8 @@ internal class FakeElementsSessionRepository(
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
+        userOverrideCountry: String?,
+        linkDisallowedFundingSourceCreation: Set<String>,
     ): Result<ElementsSession> {
         lastParams = Params(
             initializationMode = initializationMode,
@@ -40,6 +46,8 @@ internal class FakeElementsSessionRepository(
             externalPaymentMethods = externalPaymentMethods,
             customPaymentMethods = customPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
+            userOverrideCountry = userOverrideCountry,
+            linkDisallowedFundingSourceCreation = linkDisallowedFundingSourceCreation,
         )
         return if (error != null) {
             Result.failure(error)
@@ -56,12 +64,22 @@ internal class FakeElementsSessionRepository(
                     customer = sessionsCustomer,
                     cardBrandChoice = cardBrandChoice,
                     customPaymentMethods = this.customPaymentMethods,
-                    elementsSessionId = "session_1234",
-                    flags = emptyMap(),
+                    elementsSessionId = DEFAULT_ELEMENTS_SESSION_ID,
+                    flags = mapOf(
+                        ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true
+                    ),
                     orderedPaymentMethodTypesAndWallets = stripeIntent.paymentMethodTypes,
-                    experimentsData = null
+                    experimentsData = null,
+                    passiveCaptcha = passiveCaptchaParams,
+                    merchantLogoUrl = null,
+                    elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
                 )
             )
         }
+    }
+
+    companion object {
+        const val DEFAULT_ELEMENTS_SESSION_ID = "session_1234"
+        const val DEFAULT_ELEMENTS_SESSION_CONFIG_ID = "config_1234"
     }
 }

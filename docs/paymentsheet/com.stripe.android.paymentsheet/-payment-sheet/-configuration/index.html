@@ -1,22 +1,22 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>Configuration</title>
-<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../../";</script>
-    <script>document.documentElement.classList.replace("no-js","js");</script>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-    if (storage == null) {
+      if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    } else {
+      } else {
         const savedDarkMode = JSON.parse(storage)
-        if(savedDarkMode === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    }
+      }
     </script>
 <script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
 <script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
@@ -24,62 +24,94 @@
 <link href="../../../../styles/main.css" rel="Stylesheet">
 <link href="../../../../styles/prism.css" rel="Stylesheet">
 <link href="../../../../styles/logo-styles.css" rel="Stylesheet">
-<link href="../../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
-<script type="text/javascript" src="../../../../scripts/clipboard.js" async></script>
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
 <script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
 <script type="text/javascript" src="../../../../scripts/main.js" defer></script>
 <script type="text/javascript" src="../../../../scripts/prism.js" async></script>
-<script type="text/javascript" src="../../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
 <body>
-    <div class="root">
-<nav class="navigation" id="navigation-wrapper">
-    <div class="navigation--inner">
-        <div class="navigation-title">
-            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
-            <div class="library-name">
-<a class="library-name--link" href="../../../../index.html">
-                            stripe-android
-                    </a>            </div>
-            <div class="library-version">
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    stripe-android
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":paymentsheet/main">androidJvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":paymentsheet/main" data-filter=":paymentsheet/main">
+                                <span class="checkbox--icon"></span>
+                                androidJvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
             </div>
         </div>
-        <div class="filter-section" id="filter-section">
-                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":paymentsheet:dokkaHtmlPartial/release">androidJvm</button>
-        </div>
-    </div>
-    <div class="navigation-controls">
-        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
-        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
-    </div>
-</nav>
-        <div id="container">
-            <div class="sidebar" id="leftColumn">
-                <div class="sidebar--inner" id="sideMenu"></div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    stripe-android
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
             </div>
-            <div id="main">
-<div class="main-content" data-page-type="classlike" id="content" pageids="paymentsheet::com.stripe.android.paymentsheet/PaymentSheet.Configuration///PointingToDeclaration//2002900378">
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="paymentsheet::com.stripe.android.paymentsheet/PaymentSheet.Configuration///PointingToDeclaration//-1685933200">
   <div class="breadcrumbs"><a href="../../../index.html">paymentsheet</a><span class="delimiter">/</span><a href="../../index.html">com.stripe.android.paymentsheet</a><span class="delimiter">/</span><a href="../index.html">PaymentSheet</a><span class="delimiter">/</span><span class="current">Configuration</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Configuration</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">Configuration</a> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div><p class="paragraph">Configuration for <a href="../index.html">PaymentSheet</a></p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">Configuration</a> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div><p class="paragraph">Configuration for <a href="../index.html">PaymentSheet</a></p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
-        <h2 class="">Constructors</h2>
-        <div class="table"><a data-name="292667380%2FConstructors%2F2002900378" anchor-label="Configuration" id="292667380%2FConstructors%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="292667380%2FConstructors%2F-1685933200" anchor-label="Configuration" id="292667380%2FConstructors%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-configuration.html"><span><span>Configuration</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="292667380%2FConstructors%2F2002900378"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="292667380%2FConstructors%2F-1685933200"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation builtin">JvmOverloads</span></a></div></div><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">merchantDisplayName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">customer<span class="token operator">: </span><a href="../-customer-configuration/index.html">PaymentSheet.CustomerConfiguration</a><span class="token operator">?</span><span class="token operator"> = </span>ConfigurationDefaults.customer<span class="token punctuation">, </span></span><span class="parameter ">googlePay<span class="token operator">: </span><a href="../-google-pay-configuration/index.html">PaymentSheet.GooglePayConfiguration</a><span class="token operator">?</span><span class="token operator"> = </span>ConfigurationDefaults.googlePay<span class="token punctuation">, </span></span><span class="parameter ">primaryButtonColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/res/ColorStateList.html">ColorStateList</a><span class="token operator">?</span><span class="token operator"> = </span>ConfigurationDefaults.primaryButtonColor<span class="token punctuation">, </span></span><span class="parameter ">defaultBillingDetails<span class="token operator">: </span><a href="../-billing-details/index.html">PaymentSheet.BillingDetails</a><span class="token operator">?</span><span class="token operator"> = </span>ConfigurationDefaults.billingDetails<span class="token punctuation">, </span></span><span class="parameter ">shippingDetails<span class="token operator">: </span><a href="../../../com.stripe.android.paymentsheet.addresselement/-address-details/index.html">AddressDetails</a><span class="token operator">?</span><span class="token operator"> = </span>ConfigurationDefaults.shippingDetails<span class="token punctuation">, </span></span><span class="parameter ">allowsDelayedPaymentMethods<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span>ConfigurationDefaults.allowsDelayedPaymentMethods<span class="token punctuation">, </span></span><span class="parameter ">allowsPaymentMethodsRequiringShippingAddress<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span>ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress<span class="token punctuation">, </span></span><span class="parameter ">appearance<span class="token operator">: </span><a href="../-appearance/index.html">PaymentSheet.Appearance</a><span class="token operator"> = </span>ConfigurationDefaults.appearance<span class="token punctuation">, </span></span><span class="parameter ">primaryButtonLabel<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>ConfigurationDefaults.primaryButtonLabel<span class="token punctuation">, </span></span><span class="parameter ">billingDetailsCollectionConfiguration<span class="token operator">: </span><a href="../-billing-details-collection-configuration/index.html">PaymentSheet.BillingDetailsCollectionConfiguration</a><span class="token operator"> = </span>ConfigurationDefaults.billingDetailsCollectionConfiguration<span class="token punctuation">, </span></span><span class="parameter ">preferredNetworks<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../payments-model/com.stripe.android.model/-card-brand/index.html">CardBrand</a><span class="token operator">&gt;</span><span class="token operator"> = </span>ConfigurationDefaults.preferredNetworks</span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation builtin">JvmOverloads</span></a></div></div><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">merchantDisplayName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">customer<span class="token operator">: </span><a href="../-customer-configuration/index.html">PaymentSheet.CustomerConfiguration</a><span class="token operator">?</span><span class="token operator"> = </span>ConfigurationDefaults.customer<span class="token punctuation">, </span></span><span class="parameter ">googlePay<span class="token operator">: </span><a href="../-google-pay-configuration/index.html">PaymentSheet.GooglePayConfiguration</a><span class="token operator">?</span><span class="token operator"> = </span>ConfigurationDefaults.googlePay<span class="token punctuation">, </span></span><span class="parameter ">primaryButtonColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/res/ColorStateList.html">ColorStateList</a><span class="token operator">?</span><span class="token operator"> = </span>ConfigurationDefaults.primaryButtonColor<span class="token punctuation">, </span></span><span class="parameter ">defaultBillingDetails<span class="token operator">: </span><a href="../-billing-details/index.html">PaymentSheet.BillingDetails</a><span class="token operator">?</span><span class="token operator"> = </span>ConfigurationDefaults.billingDetails<span class="token punctuation">, </span></span><span class="parameter ">shippingDetails<span class="token operator">: </span><a href="../../../com.stripe.android.paymentsheet.addresselement/-address-details/index.html">AddressDetails</a><span class="token operator">?</span><span class="token operator"> = </span>ConfigurationDefaults.shippingDetails<span class="token punctuation">, </span></span><span class="parameter ">allowsDelayedPaymentMethods<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span>ConfigurationDefaults.allowsDelayedPaymentMethods<span class="token punctuation">, </span></span><span class="parameter ">allowsPaymentMethodsRequiringShippingAddress<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span>ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress<span class="token punctuation">, </span></span><span class="parameter ">appearance<span class="token operator">: </span><a href="../-appearance/index.html">PaymentSheet.Appearance</a><span class="token operator"> = </span>ConfigurationDefaults.appearance<span class="token punctuation">, </span></span><span class="parameter ">primaryButtonLabel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>ConfigurationDefaults.primaryButtonLabel<span class="token punctuation">, </span></span><span class="parameter ">billingDetailsCollectionConfiguration<span class="token operator">: </span><a href="../-billing-details-collection-configuration/index.html">PaymentSheet.BillingDetailsCollectionConfiguration</a><span class="token operator"> = </span>ConfigurationDefaults.billingDetailsCollectionConfiguration<span class="token punctuation">, </span></span><span class="parameter ">preferredNetworks<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../payments-model/com.stripe.android.model/-card-brand/index.html">CardBrand</a><span class="token operator">&gt;</span><span class="token operator"> = </span>ConfigurationDefaults.preferredNetworks</span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -87,18 +119,18 @@
         </div>
       </div>
       <div data-togglable="TYPE">
-        <h2 class="">Types</h2>
-        <div class="table"><a data-name="-363686560%2FClasslikes%2F2002900378" anchor-label="Builder" id="-363686560%2FClasslikes%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-363686560%2FClasslikes%2F-1685933200" anchor-label="Builder" id="-363686560%2FClasslikes%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-builder/index.html"><span><span>Builder</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-363686560%2FClasslikes%2F2002900378"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-363686560%2FClasslikes%2F-1685933200"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-builder/index.html">Builder</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">merchantDisplayName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph"><a href="index.html">Configuration</a> builder for cleaner object creation from Java.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-builder/index.html">Builder</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">merchantDisplayName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph"><a href="index.html">Configuration</a> builder for cleaner object creation from Java.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -106,183 +138,183 @@
         </div>
       </div>
       <div data-togglable="PROPERTY">
-        <h2 class="">Properties</h2>
-        <div class="table"><a data-name="529669732%2FProperties%2F2002900378" anchor-label="allowsDelayedPaymentMethods" id="529669732%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="529669732%2FProperties%2F-1685933200" anchor-label="allowsDelayedPaymentMethods" id="529669732%2FProperties%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="allows-delayed-payment-methods.html"><span>allows</span><wbr><span>Delayed</span><wbr><span>Payment</span><wbr><span><span>Methods</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="529669732%2FProperties%2F2002900378"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="529669732%2FProperties%2F-1685933200"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="allows-delayed-payment-methods.html">allowsDelayedPaymentMethods</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">If true, allows payment methods that do not move money at the end of the checkout. Defaults to false.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="allows-delayed-payment-methods.html">allowsDelayedPaymentMethods</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">If true, allows payment methods that do not move money at the end of the checkout. Defaults to false.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-185572712%2FProperties%2F2002900378" anchor-label="allowsPaymentMethodsRequiringShippingAddress" id="-185572712%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+<a data-name="-185572712%2FProperties%2F-1685933200" anchor-label="allowsPaymentMethodsRequiringShippingAddress" id="-185572712%2FProperties%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="allows-payment-methods-requiring-shipping-address.html"><span>allows</span><wbr><span>Payment</span><wbr><span>Methods</span><wbr><span>Requiring</span><wbr><span>Shipping</span><wbr><span><span>Address</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-185572712%2FProperties%2F2002900378"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-185572712%2FProperties%2F-1685933200"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="allows-payment-methods-requiring-shipping-address.html">allowsPaymentMethodsRequiringShippingAddress</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">If <code class="lang-kotlin">true</code>, allows payment methods that require a shipping address, like Afterpay and Affirm. Defaults to <code class="lang-kotlin">false</code>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="allows-payment-methods-requiring-shipping-address.html">allowsPaymentMethodsRequiringShippingAddress</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">If <code class="lang-kotlin">true</code>, allows payment methods that require a shipping address, like Afterpay and Affirm. Defaults to <code class="lang-kotlin">false</code>.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-431946322%2FProperties%2F2002900378" anchor-label="appearance" id="-431946322%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+<a data-name="-431946322%2FProperties%2F-1685933200" anchor-label="appearance" id="-431946322%2FProperties%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="appearance.html"><span><span>appearance</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-431946322%2FProperties%2F2002900378"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-431946322%2FProperties%2F-1685933200"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="appearance.html">appearance</a><span class="token operator">: </span><a href="../-appearance/index.html">PaymentSheet.Appearance</a></div><div class="brief "><p class="paragraph">Describes the appearance of Payment Sheet.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="appearance.html">appearance</a><span class="token operator">: </span><a href="../-appearance/index.html">PaymentSheet.Appearance</a></div><div class="brief "><p class="paragraph">Describes the appearance of Payment Sheet.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1495716407%2FProperties%2F2002900378" anchor-label="billingDetailsCollectionConfiguration" id="1495716407%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+<a data-name="1495716407%2FProperties%2F-1685933200" anchor-label="billingDetailsCollectionConfiguration" id="1495716407%2FProperties%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="billing-details-collection-configuration.html"><span>billing</span><wbr><span>Details</span><wbr><span>Collection</span><wbr><span><span>Configuration</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1495716407%2FProperties%2F2002900378"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1495716407%2FProperties%2F-1685933200"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="billing-details-collection-configuration.html">billingDetailsCollectionConfiguration</a><span class="token operator">: </span><a href="../-billing-details-collection-configuration/index.html">PaymentSheet.BillingDetailsCollectionConfiguration</a></div><div class="brief "><p class="paragraph">Describes how billing details should be collected. All values default to <code class="lang-kotlin">automatic</code>. If <code class="lang-kotlin">never</code> is used for a required field for the Payment Method used during checkout, you <strong>must</strong> provide an appropriate value as part of <a href="default-billing-details.html">defaultBillingDetails</a>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="billing-details-collection-configuration.html">billingDetailsCollectionConfiguration</a><span class="token operator">: </span><a href="../-billing-details-collection-configuration/index.html">PaymentSheet.BillingDetailsCollectionConfiguration</a></div><div class="brief "><p class="paragraph">Describes how billing details should be collected. All values default to <code class="lang-kotlin">automatic</code>. If <code class="lang-kotlin">never</code> is used for a required field for the Payment Method used during checkout, you <strong>must</strong> provide an appropriate value as part of <a href="../../../../paymentsheet/com.stripe.android.paymentsheet/-payment-sheet/-configuration/--root--.html">defaultBillingDetails</a>.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="964931764%2FProperties%2F2002900378" anchor-label="customer" id="964931764%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+<a data-name="964931764%2FProperties%2F-1685933200" anchor-label="customer" id="964931764%2FProperties%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="customer.html"><span><span>customer</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="964931764%2FProperties%2F2002900378"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="964931764%2FProperties%2F-1685933200"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="customer.html">customer</a><span class="token operator">: </span><a href="../-customer-configuration/index.html">PaymentSheet.CustomerConfiguration</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">If set, the customer can select a previously saved payment method within PaymentSheet.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="customer.html">customer</a><span class="token operator">: </span><a href="../-customer-configuration/index.html">PaymentSheet.CustomerConfiguration</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">If set, the customer can select a previously saved payment method within PaymentSheet.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1668077536%2FProperties%2F2002900378" anchor-label="defaultBillingDetails" id="1668077536%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+<a data-name="1668077536%2FProperties%2F-1685933200" anchor-label="defaultBillingDetails" id="1668077536%2FProperties%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="default-billing-details.html"><span>default</span><wbr><span>Billing</span><wbr><span><span>Details</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1668077536%2FProperties%2F2002900378"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1668077536%2FProperties%2F-1685933200"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="default-billing-details.html">defaultBillingDetails</a><span class="token operator">: </span><a href="../-billing-details/index.html">PaymentSheet.BillingDetails</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The billing information for the customer.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="default-billing-details.html">defaultBillingDetails</a><span class="token operator">: </span><a href="../-billing-details/index.html">PaymentSheet.BillingDetails</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The billing information for the customer.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1412832889%2FProperties%2F2002900378" anchor-label="googlePay" id="1412832889%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+<a data-name="1412832889%2FProperties%2F-1685933200" anchor-label="googlePay" id="1412832889%2FProperties%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="google-pay.html"><span>google</span><wbr><span><span>Pay</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1412832889%2FProperties%2F2002900378"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1412832889%2FProperties%2F-1685933200"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="google-pay.html">googlePay</a><span class="token operator">: </span><a href="../-google-pay-configuration/index.html">PaymentSheet.GooglePayConfiguration</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Configuration related to the Stripe Customer making a payment.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="google-pay.html">googlePay</a><span class="token operator">: </span><a href="../-google-pay-configuration/index.html">PaymentSheet.GooglePayConfiguration</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Configuration related to the Stripe Customer making a payment.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-191101533%2FProperties%2F2002900378" anchor-label="merchantDisplayName" id="-191101533%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+<a data-name="-191101533%2FProperties%2F-1685933200" anchor-label="merchantDisplayName" id="-191101533%2FProperties%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="merchant-display-name.html"><span>merchant</span><wbr><span>Display</span><wbr><span><span>Name</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-191101533%2FProperties%2F2002900378"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-191101533%2FProperties%2F-1685933200"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="merchant-display-name.html">merchantDisplayName</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Your customer-facing business name.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="merchant-display-name.html">merchantDisplayName</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Your customer-facing business name.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="2026909538%2FProperties%2F2002900378" anchor-label="preferredNetworks" id="2026909538%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+<a data-name="2026909538%2FProperties%2F-1685933200" anchor-label="preferredNetworks" id="2026909538%2FProperties%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="preferred-networks.html"><span>preferred</span><wbr><span><span>Networks</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2026909538%2FProperties%2F2002900378"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2026909538%2FProperties%2F-1685933200"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="preferred-networks.html">preferredNetworks</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../payments-model/com.stripe.android.model/-card-brand/index.html">CardBrand</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">A list of preferred networks that should be used to process payments made with a co-branded card if your user hasn't selected a network themselves.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="preferred-networks.html">preferredNetworks</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../payments-model/com.stripe.android.model/-card-brand/index.html">CardBrand</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">A list of preferred networks that should be used to process payments made with a co-branded card if your user hasn't selected a network themselves.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1703359363%2FProperties%2F2002900378" anchor-label="primaryButtonColor" id="1703359363%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+<a data-name="1703359363%2FProperties%2F-1685933200" anchor-label="primaryButtonColor" id="1703359363%2FProperties%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="primary-button-color.html"><span>primary</span><wbr><span>Button</span><wbr><span><span>Color</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1703359363%2FProperties%2F2002900378"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1703359363%2FProperties%2F-1685933200"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="primary-button-color.html"><strike>primaryButtonColor</strike></a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/res/ColorStateList.html">ColorStateList</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The color of the Pay or Add button. Keep in mind the text color is white.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="primary-button-color.html"><strike>primaryButtonColor</strike></a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/res/ColorStateList.html">ColorStateList</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The color of the Pay or Add button. Keep in mind the text color is white.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="2026756370%2FProperties%2F2002900378" anchor-label="primaryButtonLabel" id="2026756370%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+<a data-name="2026756370%2FProperties%2F-1685933200" anchor-label="primaryButtonLabel" id="2026756370%2FProperties%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="primary-button-label.html"><span>primary</span><wbr><span>Button</span><wbr><span><span>Label</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2026756370%2FProperties%2F2002900378"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2026756370%2FProperties%2F-1685933200"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="primary-button-label.html">primaryButtonLabel</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The label to use for the primary button.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="primary-button-label.html">primaryButtonLabel</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The label to use for the primary button.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="2071019732%2FProperties%2F2002900378" anchor-label="shippingDetails" id="2071019732%2FProperties%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+<a data-name="2071019732%2FProperties%2F-1685933200" anchor-label="shippingDetails" id="2071019732%2FProperties%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="shipping-details.html"><span>shipping</span><wbr><span><span>Details</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2071019732%2FProperties%2F2002900378"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2071019732%2FProperties%2F-1685933200"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="shipping-details.html">shippingDetails</a><span class="token operator">: </span><a href="../../../com.stripe.android.paymentsheet.addresselement/-address-details/index.html">AddressDetails</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The shipping information for the customer. If set, PaymentSheet will pre-populate the form fields with the values provided. This is used to display a "Billing address is same as shipping" checkbox if <code class="lang-kotlin">defaultBillingDetails</code> is not provided. If <code class="lang-kotlin">name</code> and <code class="lang-kotlin">line1</code> are populated, it's also <a href="https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping">attached to the PaymentIntent</a> during payment.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="shipping-details.html">shippingDetails</a><span class="token operator">: </span><a href="../../../com.stripe.android.paymentsheet.addresselement/-address-details/index.html">AddressDetails</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The shipping information for the customer. If set, PaymentSheet will pre-populate the form fields with the values provided. This is used to display a "Billing address is same as shipping" checkbox if <code class="lang-kotlin">defaultBillingDetails</code> is not provided. If <code class="lang-kotlin">name</code> and <code class="lang-kotlin">line1</code> are populated, it's also <a href="https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping">attached to the PaymentIntent</a> during payment.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -290,33 +322,33 @@
         </div>
       </div>
       <div data-togglable="FUNCTION">
-        <h2 class="">Functions</h2>
-        <div class="table"><a data-name="-1578325224%2FFunctions%2F2002900378" anchor-label="describeContents" id="-1578325224%2FFunctions%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-1578325224%2FFunctions%2F-1685933200" anchor-label="describeContents" id="-1578325224%2FFunctions%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="../../../com.stripe.android.paymentsheet.addresselement/-address-launcher-result/-canceled/index.html#-1578325224%2FFunctions%2F2002900378"><span>describe</span><wbr><span><span>Contents</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1578325224%2FFunctions%2F2002900378"></span>
+                  <div><a href="../../../com.stripe.android.paymentsheet.addresselement/-address-launcher-result/-canceled/index.html#-1578325224%2FFunctions%2F-1685933200"><span>describe</span><wbr><span><span>Contents</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1578325224%2FFunctions%2F-1685933200"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="../../../com.stripe.android.paymentsheet.addresselement/-address-launcher-result/-canceled/index.html#-1578325224%2FFunctions%2F2002900378"><span class="token function">describeContents</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="../../../com.stripe.android.paymentsheet.addresselement/-address-launcher-result/-canceled/index.html#-1578325224%2FFunctions%2F-1685933200"><span class="token function">describeContents</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1754457655%2FFunctions%2F2002900378" anchor-label="writeToParcel" id="-1754457655%2FFunctions%2F2002900378" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":paymentsheet:dokkaHtmlPartial/release" data-filterable-set=":paymentsheet:dokkaHtmlPartial/release">
+<a data-name="-1754457655%2FFunctions%2F-1685933200" anchor-label="writeToParcel" id="-1754457655%2FFunctions%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="../../../com.stripe.android.paymentsheet.addresselement/-address-launcher-result/-canceled/index.html#-1754457655%2FFunctions%2F2002900378"><span>write</span><wbr><span>To</span><wbr><span><span>Parcel</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1754457655%2FFunctions%2F2002900378"></span>
+                  <div><a href="../../../com.stripe.android.paymentsheet.addresselement/-address-launcher-result/-canceled/index.html#-1754457655%2FFunctions%2F-1685933200"><span>write</span><wbr><span>To</span><wbr><span><span>Parcel</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1754457655%2FFunctions%2F-1685933200"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="../../../com.stripe.android.paymentsheet.addresselement/-address-launcher-result/-canceled/index.html#-1754457655%2FFunctions%2F2002900378"><span class="token function">writeToParcel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Parcel.html">Parcel</a><span class="token punctuation">, </span></span><span class="parameter ">p1<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="../../../com.stripe.android.paymentsheet.addresselement/-address-launcher-result/-canceled/index.html#-1754457655%2FFunctions%2F-1685933200"><span class="token function">writeToParcel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Parcel.html">Parcel</a><span class="token punctuation">, </span></span><span class="parameter ">p1<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -326,12 +358,22 @@
     </div>
   </div>
 </div>
-      <div class="footer">
-        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
-      </div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2025 Copyright</div>
+                </div>
             </div>
         </div>
     </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
-

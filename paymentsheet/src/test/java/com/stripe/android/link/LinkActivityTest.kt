@@ -34,6 +34,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
@@ -76,7 +77,7 @@ internal class LinkActivityTest {
     fun `verification dialog is displayed when link screen state is VerificationDialog`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
-        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
+        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
 
         setupActivityController(
             use2faDialog = true,
@@ -95,7 +96,7 @@ internal class LinkActivityTest {
     fun `full screen content is displayed when link screen state is FullScreen`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
-        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
+        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
 
         setupActivityController(
             use2faDialog = false,
@@ -120,17 +121,18 @@ internal class LinkActivityTest {
         use2faDialog: Boolean = true,
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager()
     ): LinkActivity {
+        val linkExpressMode = if (use2faDialog) LinkExpressMode.ENABLED else LinkExpressMode.DISABLED
         val intent = LinkActivity.createIntent(
             context = context,
             args = TestFactory.NATIVE_LINK_ARGS.copy(
-                startWithVerificationDialog = use2faDialog
+                linkExpressMode = linkExpressMode,
             )
         )
 
         val activityController = Robolectric.buildActivity(LinkActivity::class.java, intent)
 
         activityController.get().viewModelFactory = linkViewModelFactory(
-            use2faDialog = use2faDialog,
+            linkExpressMode = linkExpressMode,
             linkAccountManager = linkAccountManager
         )
 
@@ -140,7 +142,7 @@ internal class LinkActivityTest {
     }
 
     private fun linkViewModelFactory(
-        use2faDialog: Boolean = true,
+        linkExpressMode: LinkExpressMode = LinkExpressMode.ENABLED,
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager()
     ): ViewModelProvider.Factory = viewModelFactory {
         initializer {
@@ -153,11 +155,12 @@ internal class LinkActivityTest {
                 linkAttestationCheck = FakeLinkAttestationCheck(),
                 savedStateHandle = SavedStateHandle(),
                 linkConfiguration = TestFactory.LINK_CONFIGURATION,
-                startWithVerificationDialog = use2faDialog,
+                linkExpressMode = linkExpressMode,
                 navigationManager = TestNavigationManager(),
                 linkLaunchMode = LinkLaunchMode.Full,
                 linkConfirmationHandlerFactory = { FakeLinkConfirmationHandler() },
                 autocompleteLauncher = TestAutocompleteLauncher.noOp(),
+                addPaymentMethodOptionsFactory = mock()
             )
         }
     }

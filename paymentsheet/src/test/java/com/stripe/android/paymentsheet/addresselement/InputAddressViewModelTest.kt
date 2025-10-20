@@ -60,7 +60,7 @@ class InputAddressViewModelTest {
 
     @Test
     fun `autocomplete address passed is collected to start`() = runTest(UnconfinedTestDispatcher()) {
-        val expectedAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
+        val expectedAddress = PaymentSheet.Address(country = "US")
         val flow = MutableStateFlow<AddressElementNavigator.AutocompleteEvent?>(
             AddressElementNavigator.AutocompleteEvent.OnBack(expectedAddress)
         )
@@ -71,12 +71,16 @@ class InputAddressViewModelTest {
         ).thenReturn(flow)
 
         val viewModel = createViewModel()
-        assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
+        assertThat(viewModel.collectedAddress.value).isEqualTo(
+            AddressDetails(
+                address = expectedAddress
+            )
+        )
     }
 
     @Test
     fun `takes only fields in new address`() = runTest(UnconfinedTestDispatcher()) {
-        val usAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
+        val usAddress = PaymentSheet.Address(country = "US")
         val flow = MutableStateFlow<AddressElementNavigator.AutocompleteEvent?>(
             AddressElementNavigator.AutocompleteEvent.OnBack(usAddress)
         )
@@ -87,14 +91,19 @@ class InputAddressViewModelTest {
         ).thenReturn(flow)
 
         val viewModel = createViewModel()
-        assertThat(viewModel.collectedAddress.value).isEqualTo(usAddress)
-
-        val expectedAddress = AddressDetails(
-            name = "skyler",
-            address = PaymentSheet.Address(country = "CAN", line1 = "foobar")
+        assertThat(viewModel.collectedAddress.value).isEqualTo(
+            AddressDetails(
+                address = usAddress,
+            )
         )
+
+        val expectedAddress = PaymentSheet.Address(country = "CAN", line1 = "foobar")
         flow.tryEmit(AddressElementNavigator.AutocompleteEvent.OnBack(expectedAddress))
-        assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
+        assertThat(viewModel.collectedAddress.value).isEqualTo(
+            AddressDetails(
+                address = expectedAddress,
+            )
+        )
     }
 
     @Test
@@ -175,45 +184,32 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `If 'showUseBillingAddressCheckbox' is false, state should be 'Hide'`() =
-        billingSameAsShippingInitialValueTest(
-            showUseBillingAddressCheckbox = false,
-            allowedCountries = setOf("US"),
-            address = AddressDetails(
-                name = "John Doe"
-            ),
-            expectedShippingSameAsBillingState = InputAddressViewModel.ShippingSameAsBillingState.Hide,
-        )
-
-    @Test
     fun `If default address country not in allowed countries, state should be 'Hide'`() =
         billingSameAsShippingInitialValueTest(
-            showUseBillingAddressCheckbox = true,
-            allowedCountries = setOf("US", "MX"),
-            address = AddressDetails(
+            billingAddress = PaymentSheet.BillingDetails(
                 name = "John Doe",
                 address = PaymentSheet.Address(
                     country = "CA"
                 )
             ),
+            allowedCountries = setOf("US", "MX"),
+            address = null,
             expectedShippingSameAsBillingState = InputAddressViewModel.ShippingSameAsBillingState.Hide,
         )
 
     @Test
-    fun `If default address is null, state should be 'Hide'`() =
+    fun `If billing address is null, state should be 'Hide'`() =
         billingSameAsShippingInitialValueTest(
-            showUseBillingAddressCheckbox = true,
+            billingAddress = null,
             allowedCountries = setOf("US"),
             address = null,
             expectedShippingSameAsBillingState = InputAddressViewModel.ShippingSameAsBillingState.Hide,
         )
 
     @Test
-    fun `If default address supported in allowed countries & checkbox enabled, state should be 'Show'`() =
+    fun `If default address supported in allowed countries & checkbox enabled, state should be 'Show' & checked`() =
         billingSameAsShippingInitialValueTest(
-            showUseBillingAddressCheckbox = true,
-            allowedCountries = setOf("US"),
-            address = AddressDetails(
+            billingAddress = PaymentSheet.BillingDetails(
                 name = "John Doe",
                 address = PaymentSheet.Address(
                     line1 = "123 Apple Street",
@@ -223,17 +219,17 @@ class InputAddressViewModelTest {
                     postalCode = "99999"
                 )
             ),
+            allowedCountries = setOf("US"),
+            address = null,
             expectedShippingSameAsBillingState = InputAddressViewModel.ShippingSameAsBillingState.Show(
-                isChecked = false,
+                isChecked = true,
             ),
         )
 
     @Test
-    fun `If default address has no country & checkbox enabled, state should be 'Show'`() =
+    fun `If default address has no country & checkbox enabled, state should be 'Show' & checked`() =
         billingSameAsShippingInitialValueTest(
-            showUseBillingAddressCheckbox = true,
-            allowedCountries = setOf("US"),
-            address = AddressDetails(
+            billingAddress = PaymentSheet.BillingDetails(
                 name = "John Doe",
                 address = PaymentSheet.Address(
                     line1 = "123 Apple Street",
@@ -241,22 +237,55 @@ class InputAddressViewModelTest {
                     postalCode = "99999"
                 )
             ),
+            allowedCountries = setOf("US"),
+            address = null,
             expectedShippingSameAsBillingState = InputAddressViewModel.ShippingSameAsBillingState.Show(
-                isChecked = false,
+                isChecked = true,
             ),
         )
 
     @Test
-    fun `If empty allowed countries & checkbox enabled, state should be 'Show' since default countries are used`() =
+    fun `If empty allowed countries, state should be 'Show' & checked since default countries are used`() =
         billingSameAsShippingInitialValueTest(
-            showUseBillingAddressCheckbox = true,
-            allowedCountries = emptySet(),
-            address = AddressDetails(
+            billingAddress = PaymentSheet.BillingDetails(
                 name = "John Doe",
                 address = PaymentSheet.Address(
                     line1 = "123 Apple Street",
                     city = "San Francisco",
+                    country = "US",
+                    state = "CA",
                     postalCode = "99999"
+                )
+            ),
+            allowedCountries = emptySet(),
+            address = null,
+            expectedShippingSameAsBillingState = InputAddressViewModel.ShippingSameAsBillingState.Show(
+                isChecked = true,
+            ),
+        )
+
+    @Test
+    fun `If shipping address provided with billing, state should be 'Show' but not checked`() =
+        billingSameAsShippingInitialValueTest(
+            billingAddress = PaymentSheet.BillingDetails(
+                name = "John Doe",
+                address = PaymentSheet.Address(
+                    line1 = "123 Apple Street",
+                    city = "San Francisco",
+                    country = "US",
+                    state = "CA",
+                    postalCode = "99999"
+                )
+            ),
+            allowedCountries = emptySet(),
+            address = AddressDetails(
+                name = "Jane Doe",
+                address = PaymentSheet.Address(
+                    line1 = "123 Pear Street",
+                    city = "San Jose",
+                    country = "US",
+                    state = "CA",
+                    postalCode = "88888"
                 )
             ),
             expectedShippingSameAsBillingState = InputAddressViewModel.ShippingSameAsBillingState.Show(
@@ -266,12 +295,12 @@ class InputAddressViewModelTest {
 
     @OptIn(AddressElementSameAsBillingPreview::class)
     @Test
-    fun `'Shipping same as billing' should work as expected`() = runTest {
+    fun `'Shipping same as billing' should work as expected when only billing provided`() = runTest {
         val viewModel = createViewModel(
             config = AddressLauncher.Configuration.Builder()
                 .allowedCountries(setOf("US"))
-                .address(
-                    AddressDetails(
+                .billingAddress(
+                    PaymentSheet.BillingDetails(
                         name = "John Doe",
                         address = PaymentSheet.Address(
                             line1 = "123 Apple Street",
@@ -280,12 +309,12 @@ class InputAddressViewModelTest {
                             state = "CA",
                             postalCode = "99999"
                         ),
-                        phoneNumber = "+11234567890"
+                        phone = "+11234567890"
                     )
                 )
                 .additionalFields(
                     AddressLauncher.AdditionalFieldsConfiguration(
-                        showUseBillingAddressCheckbox = true,
+                        phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
                     )
                 )
                 .build()
@@ -296,22 +325,6 @@ class InputAddressViewModelTest {
             val formValuesTurbine = viewModel.addressFormController.uncompletedFormValues.testIn(scope = this)
 
             // Should initially be empty
-            assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
-            assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
-                mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = "AL", isComplete = true),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false)
-                )
-            )
-
-            viewModel.clickBillingSameAsShipping(newValue = true)
-
-            // Should be checked and filled with default address
             assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = true))
             assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
                 mapOf(
@@ -325,47 +338,40 @@ class InputAddressViewModelTest {
                 )
             )
 
-            val elements = viewModel.addressFormController.elements
+            viewModel.clickBillingSameAsShipping(newValue = false)
 
-            assertThat(elements).hasSize(1)
-            assertThat(elements[0]).isInstanceOf<SectionElement>()
-
-            val sectionElement = elements[0] as SectionElement
-            val fields = sectionElement.fields
-
-            assertThat(fields).hasSize(1)
-            assertThat(fields[0]).isInstanceOf<AutocompleteAddressElement>()
-
-            val autocompleteElement = fields[0] as AutocompleteAddressElement
-
-            val addressFields = autocompleteElement.sectionFieldErrorController()
-                .addressElementFlow
-                .value
-                .addressController
-                .value
-                .fieldsFlowable
-                .value
-
-            addressFields.forEach {
-                it.setRawValue(
-                    mapOf(
-                        IdentifierSpec.Name to "Jane Doe",
-                        IdentifierSpec.Line1 to "123 Pear Street",
-                        IdentifierSpec.PostalCode to "88888",
-                    )
+            // Should be checked and filled with default address
+            assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
+            assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false)
                 )
-            }
+            )
+
+            viewModel.setRawValues(
+                mapOf(
+                    IdentifierSpec.Name to "Jane Doe",
+                    IdentifierSpec.Line1 to "123 Pear Street",
+                    IdentifierSpec.PostalCode to "88888",
+                )
+            )
 
             // Should be unchecked and use input
-            assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
+            shippingSameAsBillingStateTurbine.expectNoEvents()
             assertThat(formValuesTurbine.expectMostRecentItem()).containsExactlyEntriesIn(
                 mapOf(
                     IdentifierSpec.Name to FormFieldEntry(value = "Jane Doe", isComplete = true),
                     IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
                     IdentifierSpec.Line1 to FormFieldEntry(value = "123 Pear Street", isComplete = true),
                     IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
                     IdentifierSpec.PostalCode to FormFieldEntry(value = "88888", isComplete = true)
                 )
             )
@@ -388,17 +394,472 @@ class InputAddressViewModelTest {
 
             viewModel.clickBillingSameAsShipping(newValue = false)
 
-            // Should be checked and filled with previous user input
+            // Should be unchecked and filled with previous user input
+            assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
+            assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry(value = "Jane Doe", isComplete = true),
+                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Pear Street", isComplete = true),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "88888", isComplete = true)
+                )
+            )
+
+            viewModel.clickBillingSameAsShipping(newValue = true)
+
+            // Should be checked and filled with provided billing details
+            assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = true))
+            assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry(value = "John Doe", isComplete = true),
+                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
+                )
+            )
+
+            viewModel.setRawValues(
+                mapOf(
+                    IdentifierSpec.Name to "Jane Doe",
+                    IdentifierSpec.Line1 to "123 Coffee Street",
+                    IdentifierSpec.PostalCode to "77777",
+                )
+            )
+
+            // Should be unchecked and filled with new user input
+            assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
+            assertThat(formValuesTurbine.expectMostRecentItem()).containsExactlyEntriesIn(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry(value = "Jane Doe", isComplete = true),
+                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Coffee Street", isComplete = true),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "77777", isComplete = true)
+                )
+            )
+
+            shippingSameAsBillingStateTurbine.cancel()
+            formValuesTurbine.cancel()
+        }
+    }
+
+    @OptIn(AddressElementSameAsBillingPreview::class)
+    @Test
+    fun `'Shipping same as billing' should work as expected with both billing & shipping`() = runTest {
+        val viewModel = createViewModel(
+            config = AddressLauncher.Configuration.Builder()
+                .allowedCountries(setOf("US"))
+                .address(
+                    AddressDetails(
+                        name = "Jane Doe",
+                        address = PaymentSheet.Address(
+                            line1 = "123 Coffee Street",
+                            city = "San Jose",
+                            country = "US",
+                            state = "CA",
+                            postalCode = "77777"
+                        ),
+                    )
+                )
+                .billingAddress(
+                    PaymentSheet.BillingDetails(
+                        name = "John Doe",
+                        address = PaymentSheet.Address(
+                            line1 = "123 Apple Street",
+                            city = "San Francisco",
+                            country = "US",
+                            state = "CA",
+                            postalCode = "99999"
+                        ),
+                    )
+                )
+                .additionalFields(
+                    AddressLauncher.AdditionalFieldsConfiguration(
+                        phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+                    )
+                )
+                .build()
+        )
+
+        turbineScope {
+            val shippingSameAsBillingStateTurbine = viewModel.shippingSameAsBillingState.testIn(scope = this)
+            val formValuesTurbine = viewModel.addressFormController.uncompletedFormValues.testIn(scope = this)
+
+            // Should be unchecked and use initial shipping address
             assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
             assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
                 mapOf(
                     IdentifierSpec.Name to FormFieldEntry(value = "Jane Doe", isComplete = true),
                     IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
                     IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
-                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Pear Street", isComplete = true),
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Coffee Street", isComplete = true),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "San Jose", isComplete = true),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "77777", isComplete = true)
+                )
+            )
+
+            viewModel.clickBillingSameAsShipping(newValue = true)
+
+            // Should be checked and filled with billing address
+            assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = true))
+            assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry(value = "John Doe", isComplete = true),
+                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
                     IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
                     IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
-                    IdentifierSpec.PostalCode to FormFieldEntry(value = "88888", isComplete = true)
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
+                )
+            )
+
+            viewModel.clickBillingSameAsShipping(newValue = false)
+
+            // Should re-use shipping address since no previous input
+            assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
+            assertThat(formValuesTurbine.expectMostRecentItem()).containsExactlyEntriesIn(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry(value = "Jane Doe", isComplete = true),
+                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Coffee Street", isComplete = true),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "San Jose", isComplete = true),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "77777", isComplete = true)
+                )
+            )
+
+            shippingSameAsBillingStateTurbine.cancel()
+            formValuesTurbine.cancel()
+        }
+    }
+
+    @OptIn(AddressElementSameAsBillingPreview::class)
+    @Test
+    fun `'Shipping same as billing' should work as expected with same billing & shipping`() = runTest {
+        val viewModel = createViewModel(
+            config = AddressLauncher.Configuration.Builder()
+                .allowedCountries(setOf("US"))
+                .address(
+                    AddressDetails(
+                        name = "John Doe",
+                        address = PaymentSheet.Address(
+                            line1 = "123 Apple Street",
+                            city = "San Francisco",
+                            country = "US",
+                            state = "CA",
+                            postalCode = "99999"
+                        ),
+                    )
+                )
+                .billingAddress(
+                    PaymentSheet.BillingDetails(
+                        name = "John Doe",
+                        address = PaymentSheet.Address(
+                            line1 = "123 Apple Street",
+                            city = "San Francisco",
+                            country = "US",
+                            state = "CA",
+                            postalCode = "99999"
+                        ),
+                    )
+                )
+                .additionalFields(
+                    AddressLauncher.AdditionalFieldsConfiguration(
+                        phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+                    )
+                )
+                .build()
+        )
+
+        turbineScope {
+            val shippingSameAsBillingStateTurbine = viewModel.shippingSameAsBillingState.testIn(scope = this)
+            val formValuesTurbine = viewModel.addressFormController.uncompletedFormValues.testIn(scope = this)
+
+            // Should be checked
+            assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = true))
+            assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry(value = "John Doe", isComplete = true),
+                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
+                )
+            )
+
+            viewModel.clickBillingSameAsShipping(newValue = false)
+
+            // Should be unchecked and empty
+            assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
+            assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false)
+                )
+            )
+
+            shippingSameAsBillingStateTurbine.cancel()
+            formValuesTurbine.cancel()
+        }
+    }
+
+    @OptIn(AddressElementSameAsBillingPreview::class)
+    @Test
+    fun `'Shipping same as billing' should work as expected with same billing & shipping & empty values`() = runTest {
+        val viewModel = createViewModel(
+            config = AddressLauncher.Configuration.Builder()
+                .allowedCountries(setOf("US"))
+                .address(
+                    AddressDetails(
+                        name = "John Doe",
+                        address = PaymentSheet.Address(
+                            line1 = "123 Apple Street",
+                            line2 = "",
+                            city = "San Francisco",
+                            country = "US",
+                            state = "CA",
+                            postalCode = "99999"
+                        ),
+                    )
+                )
+                .billingAddress(
+                    PaymentSheet.BillingDetails(
+                        name = "John Doe",
+                        address = PaymentSheet.Address(
+                            line1 = "123 Apple Street",
+                            line2 = null,
+                            city = "San Francisco",
+                            country = "US",
+                            state = "CA",
+                            postalCode = "99999"
+                        ),
+                    )
+                )
+                .additionalFields(
+                    AddressLauncher.AdditionalFieldsConfiguration(
+                        phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+                    )
+                )
+                .build()
+        )
+
+        turbineScope {
+            val shippingSameAsBillingStateTurbine = viewModel.shippingSameAsBillingState.testIn(scope = this)
+            val formValuesTurbine = viewModel.addressFormController.uncompletedFormValues.testIn(scope = this)
+
+            // Should be checked
+            assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = true))
+            assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry(value = "John Doe", isComplete = true),
+                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
+                )
+            )
+
+            viewModel.clickBillingSameAsShipping(newValue = false)
+
+            // Should be unchecked and empty
+            assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
+            assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false)
+                )
+            )
+
+            shippingSameAsBillingStateTurbine.cancel()
+            formValuesTurbine.cancel()
+        }
+    }
+
+    @Test
+    fun `Does not use initial shipping address if not allowed`() = doesNotUseAddressTest(
+        config = AddressLauncher.Configuration.Builder()
+            .allowedCountries(setOf("CA"))
+            .address(
+                AddressDetails(
+                    name = "John Doe",
+                    address = PaymentSheet.Address(
+                        line1 = "123 Apple Street",
+                        line2 = "",
+                        city = "San Francisco",
+                        country = "US",
+                        state = "CA",
+                        postalCode = "99999"
+                    ),
+                )
+            )
+            .additionalFields(
+                AddressLauncher.AdditionalFieldsConfiguration(
+                    phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+                )
+            )
+            .build()
+    )
+
+    @OptIn(AddressElementSameAsBillingPreview::class)
+    @Test
+    fun `Does not use initial billing address if not allowed`() = doesNotUseAddressTest(
+        config = AddressLauncher.Configuration.Builder()
+            .allowedCountries(setOf("CA"))
+            .billingAddress(
+                PaymentSheet.BillingDetails(
+                    name = "John Doe",
+                    address = PaymentSheet.Address(
+                        line1 = "123 Apple Street",
+                        line2 = "",
+                        city = "San Francisco",
+                        country = "US",
+                        state = "CA",
+                        postalCode = "99999"
+                    ),
+                )
+            )
+            .additionalFields(
+                AddressLauncher.AdditionalFieldsConfiguration(
+                    phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+                )
+            )
+            .build()
+    )
+
+    @OptIn(AddressElementSameAsBillingPreview::class)
+    @Test
+    fun `Does not use initial shipping or billing address if not allowed`() = doesNotUseAddressTest(
+        config = AddressLauncher.Configuration.Builder()
+            .allowedCountries(setOf("CA"))
+            .address(
+                AddressDetails(
+                    name = "Jane Doe",
+                    address = PaymentSheet.Address(
+                        line1 = "123 Coffee Street",
+                        city = "San Jose",
+                        country = "US",
+                        state = "CA",
+                        postalCode = "77777"
+                    ),
+                )
+            )
+            .billingAddress(
+                PaymentSheet.BillingDetails(
+                    name = "John Doe",
+                    address = PaymentSheet.Address(
+                        line1 = "123 Apple Street",
+                        line2 = "",
+                        city = "San Francisco",
+                        country = "US",
+                        state = "CA",
+                        postalCode = "99999"
+                    ),
+                )
+            )
+            .additionalFields(
+                AddressLauncher.AdditionalFieldsConfiguration(
+                    phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+                )
+            )
+            .build()
+    )
+
+    @OptIn(AddressElementSameAsBillingPreview::class)
+    @Test
+    fun `Billing same as shipping box is checked even if initial inputs have slightly different formatting`() =
+        runTest {
+            val viewModel = createViewModel(
+                config = AddressLauncher.Configuration.Builder()
+                    .allowedCountries(setOf("US"))
+                    .address(
+                        AddressDetails(
+                            name = "John Doe",
+                            address = PaymentSheet.Address(
+                                line1 = "123 Apple Street",
+                                line2 = "",
+                                city = "San Francisco",
+                                country = "US",
+                                state = "CA",
+                                postalCode = "99999 "
+                            ),
+                            phoneNumber = "+12347682350"
+                        )
+                    )
+                    .billingAddress(
+                        PaymentSheet.BillingDetails(
+                            name = "John Doe",
+                            address = PaymentSheet.Address(
+                                line1 = "123 Apple Street",
+                                line2 = null,
+                                city = "San Francisco",
+                                country = "US",
+                                state = "CA",
+                                postalCode = "99999"
+                            ),
+                            phone = "(234) 768-2350"
+                        )
+                    )
+                    .additionalFields(
+                        AddressLauncher.AdditionalFieldsConfiguration(
+                            phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.REQUIRED,
+                        )
+                    )
+                    .build()
+            )
+
+            viewModel.shippingSameAsBillingState.test {
+                // Should be checked
+                assertThat(awaitItem()).isEqualTo(createShowState(isChecked = true))
+            }
+        }
+
+    private fun doesNotUseAddressTest(
+        config: AddressLauncher.Configuration,
+    ) = runTest {
+        val viewModel = createViewModel(
+            config = config,
+        )
+
+        turbineScope {
+            val shippingSameAsBillingStateTurbine = viewModel.shippingSameAsBillingState.testIn(scope = this)
+            val formValuesTurbine = viewModel.addressFormController.uncompletedFormValues.testIn(scope = this)
+
+            assertThat(shippingSameAsBillingStateTurbine.awaitItem())
+                .isEqualTo(InputAddressViewModel.ShippingSameAsBillingState.Hide)
+            assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.Country to FormFieldEntry(value = "CA", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false)
                 )
             )
 
@@ -411,23 +872,48 @@ class InputAddressViewModelTest {
     private fun billingSameAsShippingInitialValueTest(
         address: AddressDetails?,
         allowedCountries: Set<String>,
-        showUseBillingAddressCheckbox: Boolean,
+        billingAddress: PaymentSheet.BillingDetails?,
         expectedShippingSameAsBillingState: InputAddressViewModel.ShippingSameAsBillingState,
     ) = runTest {
         val viewModel = createViewModel(
             config = AddressLauncher.Configuration.Builder()
                 .allowedCountries(allowedCountries)
                 .address(address)
-                .additionalFields(
-                    AddressLauncher.AdditionalFieldsConfiguration(
-                        showUseBillingAddressCheckbox = showUseBillingAddressCheckbox,
-                    )
-                )
+                .billingAddress(billingAddress)
                 .build()
         )
 
         viewModel.shippingSameAsBillingState.test {
             assertThat(awaitItem()).isEqualTo(expectedShippingSameAsBillingState)
+        }
+    }
+
+    private fun InputAddressViewModel.setRawValues(
+        values: Map<IdentifierSpec, String?>
+    ) {
+        val elements = addressFormController.elements
+
+        assertThat(elements).hasSize(1)
+        assertThat(elements[0]).isInstanceOf<SectionElement>()
+
+        val sectionElement = elements[0] as SectionElement
+        val fields = sectionElement.fields
+
+        assertThat(fields).hasSize(1)
+        assertThat(fields[0]).isInstanceOf<AutocompleteAddressElement>()
+
+        val autocompleteElement = fields[0] as AutocompleteAddressElement
+
+        val addressFields = autocompleteElement.sectionFieldErrorController()
+            .addressElementFlow
+            .value
+            .addressController
+            .value
+            .fieldsFlowable
+            .value
+
+        addressFields.forEach {
+            it.setRawValue(values)
         }
     }
 

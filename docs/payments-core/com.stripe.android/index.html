@@ -1,22 +1,22 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>com.stripe.android</title>
-<link href="../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../";</script>
-    <script>document.documentElement.classList.replace("no-js","js");</script>
+<link href="../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-    if (storage == null) {
+      if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    } else {
+      } else {
         const savedDarkMode = JSON.parse(storage)
-        if(savedDarkMode === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    }
+      }
     </script>
 <script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
 <script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async></script>
@@ -24,41 +24,73 @@
 <link href="../../styles/main.css" rel="Stylesheet">
 <link href="../../styles/prism.css" rel="Stylesheet">
 <link href="../../styles/logo-styles.css" rel="Stylesheet">
-<link href="../../styles/font-jb-sans-auto.css" rel="Stylesheet">
-<script type="text/javascript" src="../../scripts/clipboard.js" async></script>
+<link href="../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../scripts/safe-local-storage_blocking.js"></script>
 <script type="text/javascript" src="../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../scripts/platform-content-handler.js" async></script>
 <script type="text/javascript" src="../../scripts/main.js" defer></script>
 <script type="text/javascript" src="../../scripts/prism.js" async></script>
-<script type="text/javascript" src="../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<script type="text/javascript" src="../../ui-kit/ui-kit.min.js" defer></script></head>
 <body>
-    <div class="root">
-<nav class="navigation" id="navigation-wrapper">
-    <div class="navigation--inner">
-        <div class="navigation-title">
-            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
-            <div class="library-name">
-<a class="library-name--link" href="../../index.html">
-                            stripe-android
-                    </a>            </div>
-            <div class="library-version">
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../index.html" tabindex="1">
+                    stripe-android
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":payments-core/main">androidJvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":payments-core/main" data-filter=":payments-core/main">
+                                <span class="checkbox--icon"></span>
+                                androidJvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
             </div>
         </div>
-        <div class="filter-section" id="filter-section">
-                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":payments-core:dokkaHtmlPartial/release">androidJvm</button>
-        </div>
-    </div>
-    <div class="navigation-controls">
-        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
-        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
-    </div>
-</nav>
-        <div id="container">
-            <div class="sidebar" id="leftColumn">
-                <div class="sidebar--inner" id="sideMenu"></div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    stripe-android
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
             </div>
-            <div id="main">
-<div class="main-content" data-page-type="package" id="content" pageids="payments-core::com.stripe.android////PointingToDeclaration//-1622557690">
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="payments-core::com.stripe.android////PointingToDeclaration//1599408092">
   <div class="breadcrumbs"><a href="../index.html">payments-core</a><span class="delimiter">/</span><span class="current">com.stripe.android</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
@@ -67,258 +99,288 @@
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button></div>
     <div class="tabs-section-body">
       <div data-togglable="TYPE">
-        <h2 class="">Types</h2>
-        <div class="table"><a data-name="1158802140%2FClasslikes%2F-1622557690" anchor-label="AlipayAuthenticator" id="1158802140%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="1158802140%2FClasslikes%2F1599408092" anchor-label="AlipayAuthenticator" id="1158802140%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-alipay-authenticator/index.html"><span>Alipay</span><wbr><span><span>Authenticator</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1158802140%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1158802140%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-alipay-authenticator/index.html">AlipayAuthenticator</a></div><div class="brief "><p class="paragraph">Interface for handling <a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> authentication with the Alipay SDK</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-alipay-authenticator/index.html">AlipayAuthenticator</a></div><div class="brief "><p class="paragraph">Interface for handling <a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> authentication with the Alipay SDK</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-720319927%2FClasslikes%2F-1622557690" anchor-label="ApiResultCallback" id="-720319927%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-720319927%2FClasslikes%2F1599408092" anchor-label="ApiResultCallback" id="-720319927%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-api-result-callback/index.html"><span>Api</span><wbr><span>Result</span><wbr><span><span>Callback</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-720319927%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-720319927%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-api-result-callback/index.html">ApiResultCallback</a><span class="token operator">&lt;</span><span class="token keyword">in </span><a href="-api-result-callback/index.html">ResultType</a><span class="token operator"> : </span><span data-unresolved-link="com.stripe.android.core.model/StripeModel///PointingToDeclaration/">StripeModel</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Generic interface for an API operation callback that either returns a result, <a href="-api-result-callback/index.html">ResultType</a>, or an <a href="https://developer.android.com/reference/kotlin/java/lang/Exception.html">Exception</a></p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-api-result-callback/index.html">ApiResultCallback</a><span class="token operator">&lt;</span><span class="token keyword">in </span><a href="-api-result-callback/index.html">ResultType</a><span class="token operator"> : </span><span data-unresolved-link="com.stripe.android.core.model/StripeModel///PointingToDeclaration/">StripeModel</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Generic interface for an API operation callback that either returns a result, <a href="-api-result-callback/index.html">ResultType</a>, or an <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-exception/index.html">Exception</a></p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1474626459%2FClasslikes%2F-1622557690" anchor-label="EphemeralKey" id="1474626459%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="807980346%2FClasslikes%2F1599408092" anchor-label="CollectMissingLinkBillingDetailsPreview" id="807980346%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-collect-missing-link-billing-details-preview/index.html"><span>Collect</span><wbr><span>Missing</span><wbr><span>Link</span><wbr><span>Billing</span><wbr><span>Details</span><wbr><span><span>Preview</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="807980346%2FClasslikes%2F1599408092"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">annotation class </span><a href="-collect-missing-link-billing-details-preview/index.html">CollectMissingLinkBillingDetailsPreview</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1474626459%2FClasslikes%2F1599408092" anchor-label="EphemeralKey" id="1474626459%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-ephemeral-key/index.html"><span>Ephemeral</span><wbr><span><span>Key</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1474626459%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1474626459%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-ephemeral-key/index.html">EphemeralKey</a> : <span data-unresolved-link="com.stripe.android.core.model/StripeModel///PointingToDeclaration/">StripeModel</span></div><div class="brief "><p class="paragraph">Represents an Ephemeral Key that can be used temporarily for API operations that typically require a secret key.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-ephemeral-key/index.html">EphemeralKey</a> : <span data-unresolved-link="com.stripe.android.core.model/StripeModel///PointingToDeclaration/">StripeModel</span></div><div class="brief "><p class="paragraph">Represents an Ephemeral Key that can be used temporarily for API operations that typically require a secret key.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="769217706%2FClasslikes%2F-1622557690" anchor-label="EphemeralKeyProvider" id="769217706%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="769217706%2FClasslikes%2F1599408092" anchor-label="EphemeralKeyProvider" id="769217706%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-ephemeral-key-provider/index.html"><span>Ephemeral</span><wbr><span>Key</span><wbr><span><span>Provider</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="769217706%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="769217706%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-ephemeral-key-provider/index.html">EphemeralKeyProvider</a></div><div class="brief "><p class="paragraph">Represents an object that can call to a server and create <a href="-ephemeral-key/index.html">EphemeralKeys</a>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-ephemeral-key-provider/index.html">EphemeralKeyProvider</a></div><div class="brief "><p class="paragraph">Represents an object that can call to a server and create <a href="-ephemeral-key/index.html">EphemeralKeys</a>.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1182544898%2FClasslikes%2F-1622557690" anchor-label="EphemeralKeyUpdateListener" id="-1182544898%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-1182544898%2FClasslikes%2F1599408092" anchor-label="EphemeralKeyUpdateListener" id="-1182544898%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-ephemeral-key-update-listener/index.html"><span>Ephemeral</span><wbr><span>Key</span><wbr><span>Update</span><wbr><span><span>Listener</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1182544898%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1182544898%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-ephemeral-key-update-listener/index.html">EphemeralKeyUpdateListener</a></div><div class="brief "><p class="paragraph">Represents a listener for Ephemeral Key Update events.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-ephemeral-key-update-listener/index.html">EphemeralKeyUpdateListener</a></div><div class="brief "><p class="paragraph">Represents a listener for Ephemeral Key Update events.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1152357036%2FClasslikes%2F-1622557690" anchor-label="GooglePayConfig" id="-1152357036%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-1152357036%2FClasslikes%2F1599408092" anchor-label="GooglePayConfig" id="-1152357036%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-google-pay-config/index.html"><span>Google</span><wbr><span>Pay</span><wbr><span><span>Config</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1152357036%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1152357036%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-google-pay-config/index.html">GooglePayConfig</a>&nbsp;<span><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation builtin">JvmOverloads</span></a>&nbsp;</span><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">publishableKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">connectedAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Configuration settings for Google Pay's <code class="lang-kotlin">TokenizationSpecification</code>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-google-pay-config/index.html">GooglePayConfig</a>&nbsp;<span><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation builtin">JvmOverloads</span></a>&nbsp;</span><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">publishableKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">connectedAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Configuration settings for Google Pay's <code class="lang-kotlin">TokenizationSpecification</code>.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1211115414%2FClasslikes%2F-1622557690" anchor-label="GooglePayJsonFactory" id="-1211115414%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-1211115414%2FClasslikes%2F1599408092" anchor-label="GooglePayJsonFactory" id="-1211115414%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-google-pay-json-factory/index.html"><span>Google</span><wbr><span>Pay</span><wbr><span>Json</span><wbr><span><span>Factory</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1211115414%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1211115414%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="javax.inject/Singleton///PointingToDeclaration/"><span class="token annotation builtin">Singleton</span></span></div></div><span class="token keyword">class </span><a href="-google-pay-json-factory/index.html">GooglePayJsonFactory</a></div><div class="brief "><p class="paragraph">A factory for generating <a href="https://developers.google.com/pay/api/android/reference/request-objects">Google Pay JSON request objects</a> for Google Pay API version 2.0.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="javax.inject/Singleton///PointingToDeclaration/"><span class="token annotation builtin">Singleton</span></span></div></div><span class="token keyword">class </span><a href="-google-pay-json-factory/index.html">GooglePayJsonFactory</a></div><div class="brief "><p class="paragraph">A factory for generating <a href="https://developers.google.com/pay/api/android/reference/request-objects">Google Pay JSON request objects</a> for Google Pay API version 2.0.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1350629439%2FClasslikes%2F-1622557690" anchor-label="IssuingCardPinService" id="1350629439%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="1350629439%2FClasslikes%2F1599408092" anchor-label="IssuingCardPinService" id="1350629439%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-issuing-card-pin-service/index.html"><span>Issuing</span><wbr><span>Card</span><wbr><span>Pin</span><wbr><span><span>Service</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1350629439%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1350629439%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-issuing-card-pin-service/index.html"><strike>IssuingCardPinService</strike></a></div><div class="brief "><p class="paragraph">Methods for retrieval / update of a Stripe Issuing card</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-issuing-card-pin-service/index.html"><strike>IssuingCardPinService</strike></a></div><div class="brief "><p class="paragraph">Methods for retrieval / update of a Stripe Issuing card</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="947279701%2FClasslikes%2F-1622557690" anchor-label="PaymentAuthConfig" id="947279701%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="1752102423%2FClasslikes%2F1599408092" anchor-label="LinkDisallowFundingSourceCreationPreview" id="1752102423%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-link-disallow-funding-source-creation-preview/index.html"><span>Link</span><wbr><span>Disallow</span><wbr><span>Funding</span><wbr><span>Source</span><wbr><span>Creation</span><wbr><span><span>Preview</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1752102423%2FClasslikes%2F1599408092"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">annotation class </span><a href="-link-disallow-funding-source-creation-preview/index.html">LinkDisallowFundingSourceCreationPreview</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="947279701%2FClasslikes%2F1599408092" anchor-label="PaymentAuthConfig" id="947279701%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-payment-auth-config/index.html"><span>Payment</span><wbr><span>Auth</span><wbr><span><span>Config</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="947279701%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="947279701%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-payment-auth-config/index.html">PaymentAuthConfig</a></div><div class="brief "><p class="paragraph">Configuration for authentication mechanisms via <span data-unresolved-link="com.stripe.android/StripePaymentController///PointingToDeclaration/">StripePaymentController</span></p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-payment-auth-config/index.html">PaymentAuthConfig</a></div><div class="brief "><p class="paragraph">Configuration for authentication mechanisms via <span data-unresolved-link="com.stripe.android/StripePaymentController///PointingToDeclaration/">StripePaymentController</span></p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="755901005%2FClasslikes%2F-1622557690" anchor-label="PaymentConfiguration" id="755901005%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="755901005%2FClasslikes%2F1599408092" anchor-label="PaymentConfiguration" id="755901005%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-payment-configuration/index.html"><span>Payment</span><wbr><span><span>Configuration</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="755901005%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="755901005%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-payment-configuration/index.html">PaymentConfiguration</a> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-payment-configuration/index.html">PaymentConfiguration</a> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-857426970%2FClasslikes%2F-1622557690" anchor-label="PaymentIntentResult" id="-857426970%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-857426970%2FClasslikes%2F1599408092" anchor-label="PaymentIntentResult" id="-857426970%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-payment-intent-result/index.html"><span>Payment</span><wbr><span>Intent</span><wbr><span><span>Result</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-857426970%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-857426970%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-payment-intent-result/index.html">PaymentIntentResult</a> : <a href="-stripe-intent-result/index.html">StripeIntentResult</a><span class="token operator">&lt;</span><a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">A model representing the result of a <a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> confirmation via <a href="-stripe/confirm-payment.html">Stripe.confirmPayment</a> or handling of next actions via <a href="-stripe/handle-next-action-for-payment.html">Stripe.handleNextActionForPayment</a>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-payment-intent-result/index.html">PaymentIntentResult</a> : <a href="-stripe-intent-result/index.html">StripeIntentResult</a><span class="token operator">&lt;</span><a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">A model representing the result of a <a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> confirmation via <a href="-stripe/confirm-payment.html">Stripe.confirmPayment</a> or handling of next actions via <a href="-stripe/handle-next-action-for-payment.html">Stripe.handleNextActionForPayment</a>.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-995395693%2FClasslikes%2F-1622557690" anchor-label="PayWithGoogleUtils" id="-995395693%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-995395693%2FClasslikes%2F1599408092" anchor-label="PayWithGoogleUtils" id="-995395693%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-pay-with-google-utils/index.html"><span>Pay</span><wbr><span>With</span><wbr><span>Google</span><wbr><span><span>Utils</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-995395693%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-995395693%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">object </span><a href="-pay-with-google-utils/index.html">PayWithGoogleUtils</a></div><div class="brief "><p class="paragraph">Public utility class for common Pay with Google-related tasks.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">object </span><a href="-pay-with-google-utils/index.html">PayWithGoogleUtils</a></div><div class="brief "><p class="paragraph">Public utility class for common Pay with Google-related tasks.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1350607153%2FClasslikes%2F-1622557690" anchor-label="SetupIntentResult" id="-1350607153%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-1350607153%2FClasslikes%2F1599408092" anchor-label="SetupIntentResult" id="-1350607153%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-setup-intent-result/index.html"><span>Setup</span><wbr><span>Intent</span><wbr><span><span>Result</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1350607153%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1350607153%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-setup-intent-result/index.html">SetupIntentResult</a> : <a href="-stripe-intent-result/index.html">StripeIntentResult</a><span class="token operator">&lt;</span><a href="../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">A model representing the result of a <a href="../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a> confirmation via <a href="-stripe/confirm-setup-intent.html">Stripe.confirmSetupIntent</a> or handling of next actions via <a href="-stripe/handle-next-action-for-setup-intent.html">Stripe.handleNextActionForSetupIntent</a>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-setup-intent-result/index.html">SetupIntentResult</a> : <a href="-stripe-intent-result/index.html">StripeIntentResult</a><span class="token operator">&lt;</span><a href="../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">A model representing the result of a <a href="../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a> confirmation via <a href="-stripe/confirm-setup-intent.html">Stripe.confirmSetupIntent</a> or handling of next actions via <a href="-stripe/handle-next-action-for-setup-intent.html">Stripe.handleNextActionForSetupIntent</a>.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1126242541%2FClasslikes%2F-1622557690" anchor-label="SharedPaymentTokenSessionPreview" id="-1126242541%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-1126242541%2FClasslikes%2F1599408092" anchor-label="SharedPaymentTokenSessionPreview" id="-1126242541%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-shared-payment-token-session-preview/index.html"><span>Shared</span><wbr><span>Payment</span><wbr><span>Token</span><wbr><span>Session</span><wbr><span><span>Preview</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1126242541%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1126242541%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">annotation class </span><a href="-shared-payment-token-session-preview/index.html">SharedPaymentTokenSessionPreview</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">annotation class </span><a href="-shared-payment-token-session-preview/index.html">SharedPaymentTokenSessionPreview</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="249481776%2FClasslikes%2F-1622557690" anchor-label="Stripe" id="249481776%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="249481776%2FClasslikes%2F1599408092" anchor-label="Stripe" id="249481776%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-stripe/index.html"><span><span>Stripe</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="249481776%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="249481776%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-stripe/index.html">Stripe</a></div><div class="brief "><p class="paragraph">Entry-point to the Stripe SDK.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-stripe/index.html">Stripe</a></div><div class="brief "><p class="paragraph">Entry-point to the Stripe SDK.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1862707832%2FClasslikes%2F-1622557690" anchor-label="StripeApiBeta" id="-1862707832%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-1862707832%2FClasslikes%2F1599408092" anchor-label="StripeApiBeta" id="-1862707832%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-stripe-api-beta/index.html"><span>Stripe</span><wbr><span>Api</span><wbr><span><span>Beta</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1862707832%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1862707832%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-stripe-api-beta/index.html">StripeApiBeta</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-stripe-api-beta/index.html">StripeApiBeta</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Enums of beta headers allowed to be override when initializing <a href="-stripe/index.html">Stripe</a>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-stripe-api-beta/index.html">StripeApiBeta</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-stripe-api-beta/index.html">StripeApiBeta</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Enums of beta headers allowed to be override when initializing <a href="-stripe/index.html">Stripe</a>.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1500177367%2FClasslikes%2F-1622557690" anchor-label="StripeIntentResult" id="1500177367%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="1500177367%2FClasslikes%2F1599408092" anchor-label="StripeIntentResult" id="1500177367%2FClasslikes%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-stripe-intent-result/index.html"><span>Stripe</span><wbr><span>Intent</span><wbr><span><span>Result</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1500177367%2FClasslikes%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1500177367%2FClasslikes%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="-stripe-intent-result/index.html">StripeIntentResult</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="-stripe-intent-result/index.html">T</a><span class="token operator"> : </span><a href="../com.stripe.android.model/-stripe-intent/index.html">StripeIntent</a><span class="token operator">&gt;</span> : <span data-unresolved-link="com.stripe.android.core.model/StripeModel///PointingToDeclaration/">StripeModel</span></div><div class="brief "><p class="paragraph">A model representing the result of a <a href="../com.stripe.android.model/-stripe-intent/index.html">StripeIntent</a> confirmation or authentication attempt via <a href="-stripe/confirm-payment.html">Stripe.confirmPayment</a> or <a href="-stripe/handle-next-action-for-payment.html">Stripe.handleNextActionForPayment</a></p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="-stripe-intent-result/index.html">StripeIntentResult</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="-stripe-intent-result/index.html">T</a><span class="token operator"> : </span><a href="../com.stripe.android.model/-stripe-intent/index.html">StripeIntent</a><span class="token operator">&gt;</span> : <span data-unresolved-link="com.stripe.android.core.model/StripeModel///PointingToDeclaration/">StripeModel</span></div><div class="brief "><p class="paragraph">A model representing the result of a <a href="../com.stripe.android.model/-stripe-intent/index.html">StripeIntent</a> confirmation or authentication attempt via <a href="-stripe/confirm-payment.html">Stripe.confirmPayment</a> or <a href="-stripe/handle-next-action-for-payment.html">Stripe.handleNextActionForPayment</a></p></div></div></div>
                 </div>
               </div>
             </div>
@@ -326,363 +388,363 @@
         </div>
       </div>
       <div data-togglable="EXTENSION_FUNCTION">
-        <h2 class="">Functions</h2>
-        <div class="table"><a data-name="-1268102847%2FFunctions%2F-1622557690" anchor-label="confirmAlipayPayment" id="-1268102847%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-1268102847%2FFunctions%2F1599408092" anchor-label="confirmAlipayPayment" id="-1268102847%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="confirm-alipay-payment.html"><span>confirm</span><wbr><span>Alipay</span><wbr><span><span>Payment</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1268102847%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1268102847%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="confirm-alipay-payment.html"><span class="token function">confirmAlipayPayment</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">confirmPaymentIntentParams<span class="token operator">: </span><a href="../com.stripe.android.model/-confirm-payment-intent-params/index.html">ConfirmPaymentIntentParams</a><span class="token punctuation">, </span></span><span class="parameter ">authenticator<span class="token operator">: </span><a href="-alipay-authenticator/index.html">AlipayAuthenticator</a><span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-payment-intent-result/index.html">PaymentIntentResult</a></div><div class="brief "><p class="paragraph">Confirm and authenticate a <a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> using the Alipay SDK</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="confirm-alipay-payment.html"><span class="token function">confirmAlipayPayment</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">confirmPaymentIntentParams<span class="token operator">: </span><a href="../com.stripe.android.model/-confirm-payment-intent-params/index.html">ConfirmPaymentIntentParams</a><span class="token punctuation">, </span></span><span class="parameter ">authenticator<span class="token operator">: </span><a href="-alipay-authenticator/index.html">AlipayAuthenticator</a><span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-payment-intent-result/index.html">PaymentIntentResult</a></div><div class="brief "><p class="paragraph">Confirm and authenticate a <a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> using the Alipay SDK</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1120183960%2FFunctions%2F-1622557690" anchor-label="confirmPaymentIntent" id="1120183960%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="1120183960%2FFunctions%2F1599408092" anchor-label="confirmPaymentIntent" id="1120183960%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="confirm-payment-intent.html"><span>confirm</span><wbr><span>Payment</span><wbr><span><span>Intent</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1120183960%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1120183960%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="confirm-payment-intent.html"><span class="token function">confirmPaymentIntent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">confirmPaymentIntentParams<span class="token operator">: </span><a href="../com.stripe.android.model/-confirm-payment-intent-params/index.html">ConfirmPaymentIntentParams</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a></div><div class="brief "><p class="paragraph">Suspend function to confirm a <a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> object.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="confirm-payment-intent.html"><span class="token function">confirmPaymentIntent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">confirmPaymentIntentParams<span class="token operator">: </span><a href="../com.stripe.android.model/-confirm-payment-intent-params/index.html">ConfirmPaymentIntentParams</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a></div><div class="brief "><p class="paragraph">Suspend function to confirm a <a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> object.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="2032182787%2FFunctions%2F-1622557690" anchor-label="confirmSetupIntent" id="2032182787%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="2032182787%2FFunctions%2F1599408092" anchor-label="confirmSetupIntent" id="2032182787%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="confirm-setup-intent.html"><span>confirm</span><wbr><span>Setup</span><wbr><span><span>Intent</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2032182787%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2032182787%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="confirm-setup-intent.html"><span class="token function">confirmSetupIntent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">confirmSetupIntentParams<span class="token operator">: </span><a href="../com.stripe.android.model/-confirm-setup-intent-params/index.html">ConfirmSetupIntentParams</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">expand<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a></div><div class="brief "><p class="paragraph">Suspend function to confirm a <a href="../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a> object.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="confirm-setup-intent.html"><span class="token function">confirmSetupIntent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">confirmSetupIntentParams<span class="token operator">: </span><a href="../com.stripe.android.model/-confirm-setup-intent-params/index.html">ConfirmSetupIntentParams</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">expand<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a></div><div class="brief "><p class="paragraph">Suspend function to confirm a <a href="../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a> object.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-2075049628%2FFunctions%2F-1622557690" anchor-label="confirmWeChatPayPayment" id="-2075049628%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-2075049628%2FFunctions%2F1599408092" anchor-label="confirmWeChatPayPayment" id="-2075049628%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="confirm-we-chat-pay-payment.html"><span>confirm</span><wbr><span>We</span><wbr><span>Chat</span><wbr><span>Pay</span><wbr><span><span>Payment</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2075049628%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2075049628%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="confirm-we-chat-pay-payment.html"><span class="token function">confirmWeChatPayPayment</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">confirmPaymentIntentParams<span class="token operator">: </span><a href="../com.stripe.android.model/-confirm-payment-intent-params/index.html">ConfirmPaymentIntentParams</a><span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-we-chat-pay-next-action/index.html">WeChatPayNextAction</a></div><div class="brief "><p class="paragraph">Suspend function to confirm a <a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> for WeChat Pay. Extract params from <a href="../com.stripe.android.model/-we-chat-pay-next-action/index.html">WeChatPayNextAction</a> to pass to WeChat Pay SDK.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="confirm-we-chat-pay-payment.html"><span class="token function">confirmWeChatPayPayment</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">confirmPaymentIntentParams<span class="token operator">: </span><a href="../com.stripe.android.model/-confirm-payment-intent-params/index.html">ConfirmPaymentIntentParams</a><span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-we-chat-pay-next-action/index.html">WeChatPayNextAction</a></div><div class="brief "><p class="paragraph">Suspend function to confirm a <a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> for WeChat Pay. Extract params from <a href="../com.stripe.android.model/-we-chat-pay-next-action/index.html">WeChatPayNextAction</a> to pass to WeChat Pay SDK.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1698724857%2FFunctions%2F-1622557690" anchor-label="createAccountToken" id="-1698724857%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-1698724857%2FFunctions%2F1599408092" anchor-label="createAccountToken" id="-1698724857%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="create-account-token.html"><span>create</span><wbr><span>Account</span><wbr><span><span>Token</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1698724857%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1698724857%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-account-token.html"><span class="token function">createAccountToken</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">accountParams<span class="token operator">: </span><a href="../com.stripe.android.model/-account-params/index.html">AccountParams</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../payments-model/com.stripe.android.model/-token/index.html">Token</a></div><div class="brief "><p class="paragraph">Create a <a href="../../payments-model/com.stripe.android.model/-token/index.html">Token</a> from a coroutine.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-account-token.html"><span class="token function">createAccountToken</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">accountParams<span class="token operator">: </span><a href="../com.stripe.android.model/-account-params/index.html">AccountParams</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../payments-model/com.stripe.android.model/-token/index.html">Token</a></div><div class="brief "><p class="paragraph">Create a <a href="../../payments-model/com.stripe.android.model/-token/index.html">Token</a> from a coroutine.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1107017826%2FFunctions%2F-1622557690" anchor-label="createBankAccountToken" id="-1107017826%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-1107017826%2FFunctions%2F1599408092" anchor-label="createBankAccountToken" id="-1107017826%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="create-bank-account-token.html"><span>create</span><wbr><span>Bank</span><wbr><span>Account</span><wbr><span><span>Token</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1107017826%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1107017826%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-bank-account-token.html"><span class="token function">createBankAccountToken</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bankAccountTokenParams<span class="token operator">: </span><a href="../com.stripe.android.model/-bank-account-token-params/index.html">BankAccountTokenParams</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../payments-model/com.stripe.android.model/-token/index.html">Token</a></div><div class="brief "><p class="paragraph">Create a bank account token from a coroutine.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-bank-account-token.html"><span class="token function">createBankAccountToken</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bankAccountTokenParams<span class="token operator">: </span><a href="../com.stripe.android.model/-bank-account-token-params/index.html">BankAccountTokenParams</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../payments-model/com.stripe.android.model/-token/index.html">Token</a></div><div class="brief "><p class="paragraph">Create a bank account token from a coroutine.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="282969219%2FFunctions%2F-1622557690" anchor-label="createCardToken" id="282969219%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="282969219%2FFunctions%2F1599408092" anchor-label="createCardToken" id="282969219%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="create-card-token.html"><span>create</span><wbr><span>Card</span><wbr><span><span>Token</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="282969219%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="282969219%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-card-token.html"><span class="token function">createCardToken</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cardParams<span class="token operator">: </span><a href="../com.stripe.android.model/-card-params/index.html">CardParams</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../payments-model/com.stripe.android.model/-token/index.html">Token</a></div><div class="brief "><p class="paragraph">Create a Card token from a coroutine.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-card-token.html"><span class="token function">createCardToken</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cardParams<span class="token operator">: </span><a href="../com.stripe.android.model/-card-params/index.html">CardParams</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../payments-model/com.stripe.android.model/-token/index.html">Token</a></div><div class="brief "><p class="paragraph">Create a Card token from a coroutine.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="539827278%2FFunctions%2F-1622557690" anchor-label="createCvcUpdateToken" id="539827278%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="539827278%2FFunctions%2F1599408092" anchor-label="createCvcUpdateToken" id="539827278%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="create-cvc-update-token.html"><span>create</span><wbr><span>Cvc</span><wbr><span>Update</span><wbr><span><span>Token</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="539827278%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="539827278%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-cvc-update-token.html"><span class="token function">createCvcUpdateToken</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/Size.html"><span class="token annotation builtin">Size</span></a><span class="token punctuation">(</span><span>min<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">3</span></span><span class="token punctuation">, </span></span><wbr><span>max<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">4</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>cvc<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../payments-model/com.stripe.android.model/-token/index.html">Token</a></div><div class="brief "><p class="paragraph">Create a CVC update token from a coroutine.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-cvc-update-token.html"><span class="token function">createCvcUpdateToken</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/Size.html"><span class="token annotation builtin">Size</span></a><span class="token punctuation">(</span><span>min<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">3</span></span><span class="token punctuation">, </span></span><wbr><span>max<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">4</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>cvc<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../payments-model/com.stripe.android.model/-token/index.html">Token</a></div><div class="brief "><p class="paragraph">Create a CVC update token from a coroutine.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-323524094%2FFunctions%2F-1622557690" anchor-label="createFile" id="-323524094%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-323524094%2FFunctions%2F1599408092" anchor-label="createFile" id="-323524094%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="create-file.html"><span>create</span><wbr><span><span>File</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-323524094%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-323524094%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-file.html"><span class="token function">createFile</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fileParams<span class="token operator">: </span><span data-unresolved-link="com.stripe.android.core.model/StripeFileParams///PointingToDeclaration/">StripeFileParams</span><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.stripe.android.core.model/StripeFile///PointingToDeclaration/">StripeFile</span></div><div class="brief "><p class="paragraph">Create a <span data-unresolved-link="com.stripe.android.core.model/StripeFile///PointingToDeclaration/">StripeFile</span> from a coroutine.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-file.html"><span class="token function">createFile</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fileParams<span class="token operator">: </span><span data-unresolved-link="com.stripe.android.core.model/StripeFileParams///PointingToDeclaration/">StripeFileParams</span><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.stripe.android.core.model/StripeFile///PointingToDeclaration/">StripeFile</span></div><div class="brief "><p class="paragraph">Create a <span data-unresolved-link="com.stripe.android.core.model/StripeFile///PointingToDeclaration/">StripeFile</span> from a coroutine.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1848704062%2FFunctions%2F-1622557690" anchor-label="createPaymentMethod" id="1848704062%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="1848704062%2FFunctions%2F1599408092" anchor-label="createPaymentMethod" id="1848704062%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="create-payment-method.html"><span>create</span><wbr><span>Payment</span><wbr><span><span>Method</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1848704062%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1848704062%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-payment-method.html"><span class="token function">createPaymentMethod</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">paymentMethodCreateParams<span class="token operator">: </span><a href="../com.stripe.android.model/-payment-method-create-params/index.html">PaymentMethodCreateParams</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-payment-method/index.html">PaymentMethod</a></div><div class="brief "><p class="paragraph">Create a <a href="../com.stripe.android.model/-payment-method/index.html">PaymentMethod</a> from a coroutine.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-payment-method.html"><span class="token function">createPaymentMethod</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">paymentMethodCreateParams<span class="token operator">: </span><a href="../com.stripe.android.model/-payment-method-create-params/index.html">PaymentMethodCreateParams</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-payment-method/index.html">PaymentMethod</a></div><div class="brief "><p class="paragraph">Create a <a href="../com.stripe.android.model/-payment-method/index.html">PaymentMethod</a> from a coroutine.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1736149370%2FFunctions%2F-1622557690" anchor-label="createPersonToken" id="1736149370%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="1736149370%2FFunctions%2F1599408092" anchor-label="createPersonToken" id="1736149370%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="create-person-token.html"><span>create</span><wbr><span>Person</span><wbr><span><span>Token</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1736149370%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1736149370%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-person-token.html"><span class="token function">createPersonToken</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../com.stripe.android.model/-person-token-params/index.html">PersonTokenParams</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../payments-model/com.stripe.android.model/-token/index.html">Token</a></div><div class="brief "><p class="paragraph">Creates a single-use token that represents the details for a person. Use this when creating or updating persons associated with a Connect account. See <a href="https://stripe.com/docs/connect/account-tokens">the documentation</a> to learn more.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-person-token.html"><span class="token function">createPersonToken</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../com.stripe.android.model/-person-token-params/index.html">PersonTokenParams</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../payments-model/com.stripe.android.model/-token/index.html">Token</a></div><div class="brief "><p class="paragraph">Creates a single-use token that represents the details for a person. Use this when creating or updating persons associated with a Connect account. See <a href="https://stripe.com/docs/connect/account-tokens">the documentation</a> to learn more.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1880481701%2FFunctions%2F-1622557690" anchor-label="createPiiToken" id="1880481701%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="1880481701%2FFunctions%2F1599408092" anchor-label="createPiiToken" id="1880481701%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="create-pii-token.html"><span>create</span><wbr><span>Pii</span><wbr><span><span>Token</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1880481701%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1880481701%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-pii-token.html"><span class="token function">createPiiToken</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">personalId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../payments-model/com.stripe.android.model/-token/index.html">Token</a></div><div class="brief "><p class="paragraph">Create a PII token from a coroutine.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-pii-token.html"><span class="token function">createPiiToken</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">personalId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../payments-model/com.stripe.android.model/-token/index.html">Token</a></div><div class="brief "><p class="paragraph">Create a PII token from a coroutine.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1854806174%2FFunctions%2F-1622557690" anchor-label="createRadarSession" id="-1854806174%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-1854806174%2FFunctions%2F1599408092" anchor-label="createRadarSession" id="-1854806174%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="create-radar-session.html"><span>create</span><wbr><span>Radar</span><wbr><span><span>Session</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1854806174%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1854806174%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation builtin">JvmOverloads</span></a></div></div><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-radar-session.html"><span class="token function">createRadarSession</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">activity<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/fragment/app/FragmentActivity.html">FragmentActivity</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-radar-session/index.html">RadarSession</a></div><div class="brief "><p class="paragraph">Create a Radar Session.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation builtin">JvmOverloads</span></a></div></div><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-radar-session.html"><span class="token function">createRadarSession</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">activity<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/fragment/app/FragmentActivity.html">FragmentActivity</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-radar-session/index.html">RadarSession</a></div><div class="brief "><p class="paragraph">Create a Radar Session.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1959138632%2FFunctions%2F-1622557690" anchor-label="createSource" id="-1959138632%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-1959138632%2FFunctions%2F1599408092" anchor-label="createSource" id="-1959138632%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="create-source.html"><span>create</span><wbr><span><span>Source</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1959138632%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1959138632%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-source.html"><span class="token function">createSource</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceParams<span class="token operator">: </span><a href="../com.stripe.android.model/-source-params/index.html">SourceParams</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-source/index.html">Source</a></div><div class="brief "><p class="paragraph">Create a <a href="../com.stripe.android.model/-source/index.html">Source</a> from a coroutine.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="create-source.html"><span class="token function">createSource</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceParams<span class="token operator">: </span><a href="../com.stripe.android.model/-source-params/index.html">SourceParams</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-source/index.html">Source</a></div><div class="brief "><p class="paragraph">Create a <a href="../com.stripe.android.model/-source/index.html">Source</a> from a coroutine.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="802374410%2FFunctions%2F-1622557690" anchor-label="getAuthenticateSourceResult" id="802374410%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="802374410%2FFunctions%2F1599408092" anchor-label="getAuthenticateSourceResult" id="802374410%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="get-authenticate-source-result.html"><span>get</span><wbr><span>Authenticate</span><wbr><span>Source</span><wbr><span><span>Result</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="802374410%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="802374410%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="get-authenticate-source-result.html"><span class="token function">getAuthenticateSourceResult</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requestCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">data<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Intent.html">Intent</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-source/index.html">Source</a></div><div class="brief "><p class="paragraph">Get the <a href="../com.stripe.android.model/-source/index.html">Source</a> from <a href="https://developer.android.com/reference/kotlin/android/content/Intent.html">Intent</a> returned via Activity#onActivityResult(int, int, Intent)}} for <a href="../com.stripe.android.model/-source/index.html">Source</a> authentication. (see <a href="-stripe/authenticate-source.html">Stripe.authenticateSource</a>)</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="get-authenticate-source-result.html"><span class="token function">getAuthenticateSourceResult</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requestCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">data<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Intent.html">Intent</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-source/index.html">Source</a></div><div class="brief "><p class="paragraph">Get the <a href="../com.stripe.android.model/-source/index.html">Source</a> from <a href="https://developer.android.com/reference/kotlin/android/content/Intent.html">Intent</a> returned via Activity#onActivityResult(int, int, Intent)}} for <a href="../com.stripe.android.model/-source/index.html">Source</a> authentication. (see <a href="-stripe/authenticate-source.html">Stripe.authenticateSource</a>)</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1799353902%2FFunctions%2F-1622557690" anchor-label="getPaymentIntentResult" id="1799353902%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="1799353902%2FFunctions%2F1599408092" anchor-label="getPaymentIntentResult" id="1799353902%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="get-payment-intent-result.html"><span>get</span><wbr><span>Payment</span><wbr><span>Intent</span><wbr><span><span>Result</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1799353902%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1799353902%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="get-payment-intent-result.html"><span class="token function">getPaymentIntentResult</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requestCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">data<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Intent.html">Intent</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-payment-intent-result/index.html">PaymentIntentResult</a></div><div class="brief "><p class="paragraph">Get the <a href="-payment-intent-result/index.html">PaymentIntentResult</a> from <a href="https://developer.android.com/reference/kotlin/android/content/Intent.html">Intent</a> returned via Activity#onActivityResult(int, int, Intent)}} for PaymentIntent automatic confirmation (see <a href="-stripe/confirm-payment.html">Stripe.confirmPayment</a>) or manual confirmation (see <a href="-stripe/handle-next-action-for-payment.html">Stripe.handleNextActionForPayment</a>})</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="get-payment-intent-result.html"><span class="token function">getPaymentIntentResult</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requestCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">data<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Intent.html">Intent</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-payment-intent-result/index.html">PaymentIntentResult</a></div><div class="brief "><p class="paragraph">Get the <a href="-payment-intent-result/index.html">PaymentIntentResult</a> from <a href="https://developer.android.com/reference/kotlin/android/content/Intent.html">Intent</a> returned via Activity#onActivityResult(int, int, Intent)}} for PaymentIntent automatic confirmation (see <a href="-stripe/confirm-payment.html">Stripe.confirmPayment</a>) or manual confirmation (see <a href="-stripe/handle-next-action-for-payment.html">Stripe.handleNextActionForPayment</a>})</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1411723671%2FFunctions%2F-1622557690" anchor-label="getSetupIntentResult" id="1411723671%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="1411723671%2FFunctions%2F1599408092" anchor-label="getSetupIntentResult" id="1411723671%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="get-setup-intent-result.html"><span>get</span><wbr><span>Setup</span><wbr><span>Intent</span><wbr><span><span>Result</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1411723671%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1411723671%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="get-setup-intent-result.html"><span class="token function">getSetupIntentResult</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requestCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">data<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Intent.html">Intent</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-setup-intent-result/index.html">SetupIntentResult</a></div><div class="brief "><p class="paragraph">Get the <a href="-setup-intent-result/index.html">SetupIntentResult</a> from <a href="https://developer.android.com/reference/kotlin/android/content/Intent.html">Intent</a> returned via Activity#onActivityResult(int, int, Intent)}} for SetupIntentResult confirmation. (see <a href="confirm-setup-intent.html">confirmSetupIntent</a>)</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="get-setup-intent-result.html"><span class="token function">getSetupIntentResult</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requestCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">data<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Intent.html">Intent</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-setup-intent-result/index.html">SetupIntentResult</a></div><div class="brief "><p class="paragraph">Get the <a href="-setup-intent-result/index.html">SetupIntentResult</a> from <a href="https://developer.android.com/reference/kotlin/android/content/Intent.html">Intent</a> returned via Activity#onActivityResult(int, int, Intent)}} for SetupIntentResult confirmation. (see <a href="confirm-setup-intent.html">confirmSetupIntent</a>)</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1998624197%2FFunctions%2F-1622557690" anchor-label="retrievePaymentIntent" id="1998624197%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="1998624197%2FFunctions%2F1599408092" anchor-label="retrievePaymentIntent" id="1998624197%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="retrieve-payment-intent.html"><span>retrieve</span><wbr><span>Payment</span><wbr><span><span>Intent</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1998624197%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1998624197%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="retrieve-payment-intent.html"><span class="token function">retrievePaymentIntent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">clientSecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId<span class="token punctuation">, </span></span><span class="parameter ">expand<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a></div><div class="brief "><p class="paragraph">Retrieve a <a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> from a coroutine.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="retrieve-payment-intent.html"><span class="token function">retrievePaymentIntent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">clientSecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId<span class="token punctuation">, </span></span><span class="parameter ">expand<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a></div><div class="brief "><p class="paragraph">Retrieve a <a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> from a coroutine.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1796469743%2FFunctions%2F-1622557690" anchor-label="retrievePossibleBrands" id="-1796469743%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-1796469743%2FFunctions%2F1599408092" anchor-label="retrievePossibleBrands" id="-1796469743%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="retrieve-possible-brands.html"><span>retrieve</span><wbr><span>Possible</span><wbr><span><span>Brands</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1796469743%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1796469743%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="retrieve-possible-brands.html"><span class="token function">retrievePossibleBrands</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cardNumber<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-possible-brands/index.html">PossibleBrands</a></div><div class="brief "><p class="paragraph">Retrieve a list of possible brands for the given card number. Returns an error if the cardNumber length is less than 6 characters.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="retrieve-possible-brands.html"><span class="token function">retrievePossibleBrands</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cardNumber<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-possible-brands/index.html">PossibleBrands</a></div><div class="brief "><p class="paragraph">Retrieve a list of possible brands for the given card number. Returns an error if the cardNumber length is less than 6 characters.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1485605038%2FFunctions%2F-1622557690" anchor-label="retrieveSetupIntent" id="1485605038%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="1485605038%2FFunctions%2F1599408092" anchor-label="retrieveSetupIntent" id="1485605038%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="retrieve-setup-intent.html"><span>retrieve</span><wbr><span>Setup</span><wbr><span><span>Intent</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1485605038%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1485605038%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="retrieve-setup-intent.html"><span class="token function">retrieveSetupIntent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">clientSecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId<span class="token punctuation">, </span></span><span class="parameter ">expand<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a></div><div class="brief "><p class="paragraph">Retrieve a <a href="../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a> asynchronously.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="retrieve-setup-intent.html"><span class="token function">retrieveSetupIntent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">clientSecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId<span class="token punctuation">, </span></span><span class="parameter ">expand<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a></div><div class="brief "><p class="paragraph">Retrieve a <a href="../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a> asynchronously.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1388193754%2FFunctions%2F-1622557690" anchor-label="retrieveSource" id="-1388193754%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-1388193754%2FFunctions%2F1599408092" anchor-label="retrieveSource" id="-1388193754%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="retrieve-source.html"><span>retrieve</span><wbr><span><span>Source</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1388193754%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1388193754%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="retrieve-source.html"><span class="token function">retrieveSource</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/Size.html"><span class="token annotation builtin">Size</span></a><span class="token punctuation">(</span><span>min<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">1</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>sourceId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/Size.html"><span class="token annotation builtin">Size</span></a><span class="token punctuation">(</span><span>min<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">1</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>clientSecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-source/index.html">Source</a></div><div class="brief "><p class="paragraph">Retrieve a <a href="../com.stripe.android.model/-source/index.html">Source</a> from a coroutine.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="retrieve-source.html"><span class="token function">retrieveSource</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/Size.html"><span class="token annotation builtin">Size</span></a><span class="token punctuation">(</span><span>min<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">1</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>sourceId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/Size.html"><span class="token annotation builtin">Size</span></a><span class="token punctuation">(</span><span>min<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">1</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>clientSecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-source/index.html">Source</a></div><div class="brief "><p class="paragraph">Retrieve a <a href="../com.stripe.android.model/-source/index.html">Source</a> from a coroutine.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1721360708%2FFunctions%2F-1622557690" anchor-label="updatePaymentMethod" id="1721360708%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="1721360708%2FFunctions%2F1599408092" anchor-label="updatePaymentMethod" id="1721360708%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="update-payment-method.html"><span>update</span><wbr><span>Payment</span><wbr><span><span>Method</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1721360708%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1721360708%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="update-payment-method.html"><span class="token function">updatePaymentMethod</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">paymentMethodId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">paymentMethodUpdateParams<span class="token operator">: </span><a href="../com.stripe.android.model/-payment-method-update-params/index.html">PaymentMethodUpdateParams</a><span class="token punctuation">, </span></span><span class="parameter ">ephemeralKeySecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-payment-method/index.html">PaymentMethod</a></div><div class="brief "><p class="paragraph">Update a <a href="../com.stripe.android.model/-payment-method/index.html">PaymentMethod</a> from a coroutine.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="update-payment-method.html"><span class="token function">updatePaymentMethod</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">paymentMethodId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">paymentMethodUpdateParams<span class="token operator">: </span><a href="../com.stripe.android.model/-payment-method-update-params/index.html">PaymentMethodUpdateParams</a><span class="token punctuation">, </span></span><span class="parameter ">ephemeralKeySecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">idempotencyKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">stripeAccountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>this.stripeAccountId</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-payment-method/index.html">PaymentMethod</a></div><div class="brief "><p class="paragraph">Update a <a href="../com.stripe.android.model/-payment-method/index.html">PaymentMethod</a> from a coroutine.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1770853359%2FFunctions%2F-1622557690" anchor-label="verifyPaymentIntentWithMicrodeposits" id="-1770853359%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-1770853359%2FFunctions%2F1599408092" anchor-label="verifyPaymentIntentWithMicrodeposits" id="-1770853359%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="verify-payment-intent-with-microdeposits.html"><span>verify</span><wbr><span>Payment</span><wbr><span>Intent</span><wbr><span>With</span><wbr><span><span>Microdeposits</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1770853359%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1770853359%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="verify-payment-intent-with-microdeposits.html"><span class="token function">verifyPaymentIntentWithMicrodeposits</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">clientSecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">descriptorCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="verify-payment-intent-with-microdeposits.html"><span class="token function">verifyPaymentIntentWithMicrodeposits</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">clientSecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">firstAmount<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">secondAmount<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a></div><div class="brief "><p class="paragraph">Suspend function to verify a customer's bank account with micro-deposits</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="verify-payment-intent-with-microdeposits.html"><span class="token function">verifyPaymentIntentWithMicrodeposits</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">clientSecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">descriptorCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="verify-payment-intent-with-microdeposits.html"><span class="token function">verifyPaymentIntentWithMicrodeposits</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">clientSecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">firstAmount<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">secondAmount<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a></div><div class="brief "><p class="paragraph">Suspend function to verify a customer's bank account with micro-deposits</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1980772239%2FFunctions%2F-1622557690" anchor-label="verifySetupIntentWithMicrodeposits" id="-1980772239%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
+<a data-name="-1980772239%2FFunctions%2F1599408092" anchor-label="verifySetupIntentWithMicrodeposits" id="-1980772239%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="verify-setup-intent-with-microdeposits.html"><span>verify</span><wbr><span>Setup</span><wbr><span>Intent</span><wbr><span>With</span><wbr><span><span>Microdeposits</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1980772239%2FFunctions%2F-1622557690"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1980772239%2FFunctions%2F1599408092"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="verify-setup-intent-with-microdeposits.html"><span class="token function">verifySetupIntentWithMicrodeposits</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">clientSecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">descriptorCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="verify-setup-intent-with-microdeposits.html"><span class="token function">verifySetupIntentWithMicrodeposits</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">clientSecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">firstAmount<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">secondAmount<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a></div><div class="brief "><p class="paragraph">Suspend function to verify a customer's bank account with micro-deposits</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="verify-setup-intent-with-microdeposits.html"><span class="token function">verifySetupIntentWithMicrodeposits</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">clientSecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">descriptorCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-stripe/index.html">Stripe</a><span class="token punctuation">.</span><a href="verify-setup-intent-with-microdeposits.html"><span class="token function">verifySetupIntentWithMicrodeposits</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">clientSecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">firstAmount<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">secondAmount<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a></div><div class="brief "><p class="paragraph">Suspend function to verify a customer's bank account with micro-deposits</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -692,12 +754,22 @@
     </div>
   </div>
 </div>
-      <div class="footer">
-        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
-      </div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2025 Copyright</div>
+                </div>
             </div>
         </div>
     </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
-

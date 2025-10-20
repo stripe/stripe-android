@@ -3,13 +3,11 @@ package com.stripe.android.link.ui.updatecard
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.DefaultCardBrandFilter
@@ -22,6 +20,8 @@ import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkLoadingScreen
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
+import com.stripe.android.link.ui.wallet.LinkHintMessageView
+import com.stripe.android.link.ui.wallet.LinkHintStyle
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
@@ -38,12 +38,14 @@ import com.stripe.android.uicore.utils.collectAsState
 @Composable
 internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
     val state by viewModel.state.collectAsState()
-    when (val interactor = viewModel.interactor) {
+    val interactor by viewModel.interactor.collectAsState()
+    when (val currentInteractor = interactor) {
         null -> LinkLoadingScreen()
         else -> UpdateCardScreenBody(
-            interactor = interactor,
+            interactor = currentInteractor,
             state = state,
             onUpdateClicked = viewModel::onUpdateClicked,
+            onDisabledButtonClicked = viewModel::onDisabledUpdateClicked,
         )
     }
 }
@@ -53,6 +55,7 @@ internal fun UpdateCardScreenBody(
     interactor: EditCardDetailsInteractor,
     state: UpdateCardScreenState,
     onUpdateClicked: () -> Unit,
+    onDisabledButtonClicked: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -60,15 +63,15 @@ internal fun UpdateCardScreenBody(
         StripeThemeForLink {
             CardDetailsEditUI(
                 editCardDetailsInteractor = interactor,
+                spacing = 16.dp,
             )
         }
 
-        if (state.shouldShowDefaultTag) {
-            Text(
-                modifier = Modifier.padding(top = 8.dp),
-                text = stringResource(R.string.stripe_link_update_card_default_card),
-                style = LinkTheme.typography.bodyEmphasized,
-                color = LinkTheme.colors.textSecondary,
+        state.thisIsYourDefaultHint?.let { hint ->
+            LinkHintMessageView(
+                modifier = Modifier.padding(top = 16.dp),
+                hint = hint,
+                style = LinkHintStyle.Outlined,
             )
         }
 
@@ -85,9 +88,13 @@ internal fun UpdateCardScreenBody(
             modifier = Modifier.padding(vertical = 16.dp),
             label = state.primaryButtonLabel.resolve(),
             state = state.primaryButtonState,
+            allowedDisabledClicks = true,
             onButtonClick = {
                 focusManager.clearFocus()
                 onUpdateClicked()
+            },
+            onDisabledButtonClick = {
+                onDisabledButtonClicked()
             }
         )
     }
@@ -96,7 +103,7 @@ internal fun UpdateCardScreenBody(
 @Preview
 @Composable
 internal fun UpdateCardScreenBodyPreview() {
-    DefaultLinkTheme(darkTheme = false) {
+    DefaultLinkTheme {
         Surface(
             color = LinkTheme.colors.surfacePrimary
         ) {
@@ -148,6 +155,7 @@ internal fun UpdateCardScreenBodyPreview() {
                     processing = false,
                 ),
                 onUpdateClicked = {},
+                onDisabledButtonClicked = {},
             )
         }
     }

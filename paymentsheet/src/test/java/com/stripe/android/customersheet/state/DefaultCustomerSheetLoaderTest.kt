@@ -3,6 +3,7 @@ package com.stripe.android.customersheet.state
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.coroutines.Single
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
@@ -21,6 +22,7 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
@@ -36,6 +38,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
+import com.stripe.android.ui.core.cardscan.CardScanEvent
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.CompletableSingle
 import com.stripe.android.utils.FakeElementsSessionRepository
@@ -106,13 +109,13 @@ internal class DefaultCustomerSheetLoaderTest {
         assertThat(state.config).isEqualTo(config)
         assertThat(state.paymentMethodMetadata.stripeIntent).isEqualTo(STRIPE_INTENT)
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
-        assertThat(state.paymentMethodMetadata.customerMetadata?.hasCustomerConfiguration).isTrue()
+        assertThat(state.paymentMethodMetadata.customerMetadata).isNotNull()
         assertThat(state.paymentMethodMetadata.isGooglePayReady).isTrue()
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             PaymentMethodFixtures.US_BANK_ACCOUNT,
         )
-        assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
+        assertThat(state.customerPermissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
         assertThat(state.customerPermissions.canRemoveLastPaymentMethod).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.paymentSelection).isEqualTo(
@@ -146,7 +149,7 @@ internal class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
         ).inOrder()
-        assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
+        assertThat(state.customerPermissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
         assertThat(state.customerPermissions.canRemoveLastPaymentMethod).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.paymentSelection).isEqualTo(
@@ -181,7 +184,7 @@ internal class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
         ).inOrder()
-        assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
+        assertThat(state.customerPermissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
         assertThat(state.customerPermissions.canRemoveLastPaymentMethod).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.paymentSelection).isNull()
@@ -571,6 +574,61 @@ internal class DefaultCustomerSheetLoaderTest {
         assertThat(eventReporter.onLoadFailedCalls.awaitItem().message).isEqualTo("oops")
     }
 
+    @Test
+    fun `Retains all payment method when 'allowedCountries' is empty`() = runTest {
+        val paymentMethods = createCardsWithDifferentBillingDetails()
+
+        val loader = createCustomerSheetLoader(
+            paymentMethods = paymentMethods,
+        )
+
+        val result = loader.load(
+            configuration = CustomerSheet.Configuration.builder(
+                merchantDisplayName = "Merchant, Inc."
+            )
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        allowedCountries = emptySet(),
+                    ),
+                )
+                .build(),
+        )
+
+        val customerPaymentMethods = result.getOrNull()?.customerPaymentMethods
+
+        assertThat(customerPaymentMethods).isNotNull()
+        assertThat(customerPaymentMethods).containsExactlyElementsIn(paymentMethods)
+    }
+
+    @Test
+    fun `Filters out countries not in 'allowedCountries' array`() = runTest {
+        val paymentMethods = createCardsWithDifferentBillingDetails()
+
+        val loader = createCustomerSheetLoader(
+            paymentMethods = paymentMethods,
+        )
+
+        val result = loader.load(
+            configuration = CustomerSheet.Configuration.builder(
+                merchantDisplayName = "Merchant, Inc."
+            )
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        allowedCountries = setOf("CA", "mx"),
+                    ),
+                )
+                .build(),
+        )
+
+        val customerPaymentMethods = result.getOrNull()?.customerPaymentMethods
+
+        assertThat(customerPaymentMethods).isNotNull()
+        assertThat(customerPaymentMethods).containsExactly(
+            paymentMethods[1],
+            paymentMethods[4],
+        )
+    }
+
     private fun createCustomerSheetLoader(
         isGooglePayReady: Boolean = true,
         isLiveModeProvider: () -> Boolean = { false },
@@ -595,11 +653,14 @@ internal class DefaultCustomerSheetLoaderTest {
                         savedSelection = savedSelection,
                         paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                         permissions = CustomerPermissions(
-                            canRemovePaymentMethods = true,
+                            removePaymentMethod = PaymentMethodRemovePermission.Full,
                             canRemoveLastPaymentMethod = true,
                             canUpdateFullPaymentMethodDetails = true,
                         ),
                         defaultPaymentMethodId = defaultPaymentMethodId,
+                        customerId = "unused_for_customer_adapter_data_source",
+                        customerEphemeralKeySecret = "unused_for_customer_adapter_data_source",
+                        customerSessionClientSecret = null,
                     )
                 )
             }
@@ -640,8 +701,10 @@ internal class DefaultCustomerSheetLoaderTest {
                     components = ElementsSession.Customer.Components(
                         mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
-                            isPaymentMethodRemoveEnabled = false,
-                            canRemoveLastPaymentMethod = true,
+                            paymentMethodRemove =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
+                            paymentMethodRemoveLast =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
                             isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
                         ),
                     )
@@ -655,7 +718,10 @@ internal class DefaultCustomerSheetLoaderTest {
             flags = emptyMap(),
             elementsSessionId = "session_1234",
             orderedPaymentMethodTypesAndWallets = intent.paymentMethodTypes,
-            experimentsData = null
+            experimentsData = null,
+            passiveCaptcha = null,
+            merchantLogoUrl = null,
+            elementsSessionConfigId = null,
         )
     }
 
@@ -683,6 +749,45 @@ internal class DefaultCustomerSheetLoaderTest {
             workContext = workContext,
         )
     }
+
+    private fun createCardsWithDifferentBillingDetails(): List<PaymentMethod> = listOf(
+        PaymentMethodFactory.card(
+            last4 = "4242",
+            billingDetails = null,
+        ),
+        PaymentMethodFactory.card(
+            last4 = "4444",
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    country = "CA",
+                )
+            )
+        ),
+        PaymentMethodFactory.card(
+            last4 = "4444",
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    country = "US",
+                )
+            )
+        ),
+        PaymentMethodFactory.card(
+            last4 = "4444",
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    country = "US",
+                )
+            )
+        ),
+        PaymentMethodFactory.card(
+            last4 = "4444",
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    country = "MX",
+                )
+            )
+        ),
+    )
 
     private fun createCardBrandChoice(isCbcEligible: Boolean?): ElementsSession.CardBrandChoice? {
         return isCbcEligible?.let {
@@ -771,4 +876,6 @@ private class FakeCustomerSheetEventReporter : CustomerSheetEventReporter {
     override fun onDisallowedCardBrandEntered(brand: CardBrand) = Unit
 
     override fun onAnalyticsEvent(event: AnalyticsEvent) = Unit
+
+    override fun onCardScanEvent(event: CardScanEvent) = Unit
 }

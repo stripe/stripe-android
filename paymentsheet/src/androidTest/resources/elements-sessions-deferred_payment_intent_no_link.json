@@ -33,9 +33,10 @@
     "client_id": null,
     "paypal_merchant_id": null
   },
-  "session_id": "elements_session_1BnAKVw0pn9",
+  "session_id": "elements_session_123",
   "shipping_address_settings": {
     "autocomplete_allowed": true
   },
-  "unactivated_payment_method_types": []
+  "unactivated_payment_method_types": [],
+  "config_id": "e961790f-43ed-4fcc-a534-74eeca28d042"
 }

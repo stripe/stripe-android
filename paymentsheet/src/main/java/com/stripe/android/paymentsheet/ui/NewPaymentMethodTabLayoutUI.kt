@@ -4,7 +4,6 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.lazy.LazyListState
@@ -15,14 +14,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
-import com.stripe.android.uicore.IconStyle
-import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -44,13 +43,13 @@ internal fun NewPaymentMethodTabLayoutUI(
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
+    updatePaymentMethodVisibility: (AddPaymentMethodInitialVisibilityTrackerData) -> Unit = {},
     state: LazyListState = rememberLazyListState(),
 ) {
     // This is to fix an issue in tests involving this composable
     // where the test would succeed when run in isolation, but would
     // fail when run as part of test suite.
     val inspectionMode = LocalInspectionMode.current
-
     LaunchedEffect(selectedIndex) {
         if (inspectionMode) {
             state.scrollToItem(selectedIndex)
@@ -58,39 +57,39 @@ internal fun NewPaymentMethodTabLayoutUI(
             state.animateScrollToItem(selectedIndex)
         }
     }
-
+    val paymentMethodCodes = remember(paymentMethods) { paymentMethods.map { it.code } }
     BoxWithConstraints(
         modifier = modifier.testTag(TEST_TAG_LIST + "1")
     ) {
-        val viewWidth = rememberViewWidth(
-            this.maxWidth,
-            paymentMethods.size
-        )
+        val viewWidth = rememberViewWidth(maxWidth = this.maxWidth, numberOfPaymentMethods = paymentMethods.size)
+        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+        val innerPadding = PaymentMethodsUISpacing.carouselInnerPadding
+        LaunchedEffect(paymentMethodCodes) {
+            updatePaymentMethodVisibility(
+                AddPaymentMethodInitialVisibilityTrackerData(
+                    paymentMethodCodes = paymentMethodCodes,
+                    tabWidth = viewWidth,
+                    screenWidth = screenWidth,
+                    innerPadding = innerPadding
+                )
+            )
+        }
 
         LazyRow(
             state = state,
             contentPadding = StripeTheme.getOuterFormInsets(),
-            horizontalArrangement = Arrangement.spacedBy(PaymentMethodsUISpacing.carouselInnerPadding),
+            horizontalArrangement = Arrangement.spacedBy(innerPadding),
             userScrollEnabled = isEnabled,
             modifier = Modifier.testTag(TEST_TAG_LIST)
         ) {
             itemsIndexed(items = paymentMethods) { index, item ->
-                val iconUrl = if (isSystemInDarkTheme() && item.darkThemeIconUrl != null) {
-                    item.darkThemeIconUrl
-                } else {
-                    item.lightThemeIconUrl
-                }
                 NewPaymentMethodTab(
                     modifier = Modifier.testTag(
                         TEST_TAG_LIST + item.code
                     ),
                     minViewWidth = viewWidth,
-                    iconRes = if (LocalIconStyle.current == IconStyle.Filled) {
-                        item.iconResource
-                    } else {
-                        item.outlinedIconResource ?: item.iconResource
-                    },
-                    iconUrl = iconUrl,
+                    iconRes = item.icon(),
+                    iconUrl = item.iconUrl(),
                     imageLoader = imageLoader,
                     title = item.displayName.resolve(),
                     isSelected = index == selectedIndex,

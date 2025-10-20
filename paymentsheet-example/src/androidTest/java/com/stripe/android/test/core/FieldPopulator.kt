@@ -94,6 +94,7 @@ internal class FieldPopulator(
         val state: String = "California",
         val phoneNumber: String = "4021234567",
         val cardNumber: String = "4242424242424242",
+        val cbcCardNumber: String = "4000002500001001",
         val cardExpiration: String = "1230",
         val cardCvc: String = "321",
         val auBecsBsbNumber: String = "000000",
@@ -171,6 +172,26 @@ internal class FieldPopulator(
             .performTextInput(values.cardExpiration)
         selectors.getCardCvc().apply {
             performTextInput(values.cardCvc)
+        }
+
+        if (!defaultBillingAddress) {
+            populateZip()
+        }
+    }
+
+    fun populateCardBrandChoiceCardDetails(cardBrandDisplayName: String?) {
+        selectors.getCardNumber().performTextInput(values.cbcCardNumber)
+        selectors.composeTestRule.waitForIdle()
+        selectors.getCardExpiration()
+            .performTextInput(values.cardExpiration)
+        selectors.getCardCvc().apply {
+            performTextInput(values.cardCvc)
+        }
+
+        selectors.assertCardBrandDropdownExists()
+
+        cardBrandDisplayName?.let {
+            selectCardBrand(displayName = cardBrandDisplayName)
         }
 
         if (!defaultBillingAddress) {

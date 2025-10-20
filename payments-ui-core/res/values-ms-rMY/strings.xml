@@ -99,6 +99,8 @@
   <string name="stripe_paypal_mandate">Dengan mengesahkan pembayaran anda dengan PayPal, anda membenarkan %s mengecaj akaun PayPal anda bagi pembayaran masa hadapan menurut terma mereka.</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Dengan mengesahkan pembayaran anda menggunakan RevolutPay, anda membenarkan %s mengecaj akaun RevolutPay anda bagi pembayaran masa hadapan menurut terma mereka.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">Dengan meneruskan, anda membenarkan %1$s untuk mendebitkan Baki Satispay anda secara automatik dan berulang mengikut pembelian atau pelan langganan anda.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Simpan untuk pembayaran %s masa hadapan</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->

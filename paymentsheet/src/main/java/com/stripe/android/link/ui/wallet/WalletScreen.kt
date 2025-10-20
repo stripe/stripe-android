@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,8 +19,10 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
@@ -36,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -121,6 +125,7 @@ internal fun WalletScreen(
         onItemSelected = viewModel::onItemSelected,
         onExpandedChanged = viewModel::onExpandedChanged,
         onPrimaryButtonClick = viewModel::onPrimaryButtonClicked,
+        onDisabledButtonClick = viewModel::handleDisabledButtonClick,
         onPayAnotherWayClicked = viewModel::onPayAnotherWayClicked,
         onRemoveClicked = viewModel::onRemoveClicked,
         onUpdateClicked = viewModel::onUpdateClicked,
@@ -142,6 +147,7 @@ internal fun WalletBody(
     onExpandedChanged: (Boolean) -> Unit,
     onAddPaymentMethodOptionClicked: (AddPaymentMethodOption) -> Unit,
     onPrimaryButtonClick: () -> Unit,
+    onDisabledButtonClick: () -> Unit,
     onPayAnotherWayClicked: () -> Unit,
     onDismissAlert: () -> Unit,
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
@@ -153,7 +159,7 @@ internal fun WalletBody(
 ) {
     val coroutineScope = rememberCoroutineScope()
     AnimatedContent(
-        targetState = state.paymentDetailsList.isEmpty(),
+        targetState = state.shouldShowLoadingState,
         transitionSpec = { LinkScreenTransition },
     ) { isLoading ->
         if (isLoading) {
@@ -214,6 +220,7 @@ internal fun WalletBody(
                 ActionSection(
                     state = state,
                     onPrimaryButtonClick = onPrimaryButtonClick,
+                    onDisabledButtonClick = onDisabledButtonClick,
                     onPayAnotherWayClicked = onPayAnotherWayClicked
                 )
             }
@@ -254,6 +261,13 @@ private fun PaymentDetailsSection(
             hideBottomSheetContent = hideBottomSheetContent,
             onLogoutClicked = onLogoutClicked,
         )
+        if (state.paymentSelectionHint != null) {
+            LinkHintMessageView(
+                modifier = Modifier.padding(top = 12.dp),
+                hint = state.paymentSelectionHint,
+                style = LinkHintStyle.Filled,
+            )
+        }
 
         AnimatedVisibility(visible = state.mandate != null) {
             state.mandate?.let { mandate ->
@@ -271,11 +285,88 @@ private fun PaymentDetailsSection(
                         paymentDetails = selectedCard,
                         expiryDateController = expiryDateController,
                         cvcController = cvcController,
-                        isCardExpired = selectedCard.isExpired
+                        isCardExpired = selectedCard.isExpired,
+                        isValidating = state.isValidating,
                     )
                 }
             }
         }
+    }
+}
+
+internal enum class LinkHintStyle {
+    Filled,
+    Outlined;
+
+    val textColor: Color
+        @Composable
+        get() = when (this) {
+            Filled -> LinkTheme.colors.textTertiary
+            Outlined -> LinkTheme.colors.textSecondary
+        }
+
+    val backgroundColor: Color
+        @Composable
+        get() = when (this) {
+            Filled -> LinkTheme.colors.surfaceSecondary
+            Outlined -> LinkTheme.colors.surfacePrimary
+        }
+
+    val horizontalInset: Dp
+        get() = when (this) {
+            Filled -> 20.dp
+            Outlined -> 16.dp
+        }
+}
+
+@Composable
+internal fun LinkHintMessageView(
+    hint: ResolvableString,
+    style: LinkHintStyle,
+    modifier: Modifier = Modifier,
+) {
+    val baseModifier = modifier
+        .fillMaxWidth()
+        .background(
+            color = style.backgroundColor,
+            shape = RoundedCornerShape(12.dp),
+        )
+
+    val borderColor = LinkTheme.colors.hintMessageBorder
+
+    val finalModifier = remember(style) {
+        when (style) {
+            LinkHintStyle.Filled -> {
+                baseModifier
+            }
+            LinkHintStyle.Outlined -> {
+                baseModifier.border(
+                    width = 1.dp,
+                    color = borderColor,
+                    shape = RoundedCornerShape(12.dp),
+                )
+            }
+        }
+    }
+
+    Row(
+        modifier = finalModifier
+            .padding(horizontal = style.horizontalInset, vertical = 12.dp),
+    ) {
+        Icon(
+            modifier = Modifier
+                .padding(top = 2.dp)
+                .size(16.dp),
+            painter = painterResource(PaymentsUiCoreR.drawable.stripe_ic_info_outlined),
+            tint = LinkTheme.colors.iconTertiary,
+            contentDescription = null,
+        )
+        Text(
+            modifier = Modifier.padding(start = 8.dp),
+            text = hint.resolve(),
+            style = LinkTheme.typography.detail,
+            color = LinkTheme.colors.textTertiary,
+        )
     }
 }
 
@@ -300,6 +391,7 @@ private fun ErrorSection(errorMessage: ResolvableString?) {
 private fun ActionSection(
     state: WalletUiState,
     onPrimaryButtonClick: () -> Unit,
+    onDisabledButtonClick: () -> Unit,
     onPayAnotherWayClicked: () -> Unit
 ) {
     Column {
@@ -310,16 +402,18 @@ private fun ActionSection(
             label = state.primaryButtonLabel.resolve(),
             state = state.primaryButtonState,
             onButtonClick = onPrimaryButtonClick,
-            iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
+            allowedDisabledClicks = true,
+            onDisabledButtonClick = onDisabledButtonClick,
         )
-
-        SecondaryButton(
-            modifier = Modifier
-                .testTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON),
-            enabled = !state.primaryButtonState.isBlocking,
-            label = state.secondaryButtonLabel.resolve(),
-            onClick = onPayAnotherWayClicked
-        )
+        state.secondaryButtonLabel?.let { secondaryButtonLabel ->
+            SecondaryButton(
+                modifier = Modifier
+                    .testTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON),
+                enabled = !state.primaryButtonState.isBlocking,
+                label = secondaryButtonLabel.resolve(),
+                onClick = onPayAnotherWayClicked
+            )
+        }
     }
 }
 
@@ -349,6 +443,7 @@ private fun PaymentMethodSection(
         expanded = isExpanded,
         selectedItem = state.selectedItem,
         emailLabel = emailLabel,
+        showAccountMenu = state.allowLogOut,
         labelMaxWidth = labelMaxWidthDp,
         onAccountMenuClicked = {
             showBottomSheetContent {
@@ -425,6 +520,7 @@ private fun computeMaxLabelWidth(vararg labels: String): Dp {
 private fun PaymentMethodPicker(
     email: String,
     emailLabel: String,
+    showAccountMenu: Boolean,
     labelMaxWidth: Dp,
     expanded: Boolean,
     selectedItem: ConsumerPaymentDetails.PaymentDetails?,
@@ -446,6 +542,7 @@ private fun PaymentMethodPicker(
             email = email,
             label = emailLabel,
             labelMaxWidth = labelMaxWidth,
+            showMenu = showAccountMenu,
             onMenuClicked = onAccountMenuClicked,
         )
 
@@ -523,6 +620,7 @@ private fun EmailDetails(
     email: String,
     label: String,
     labelMaxWidth: Dp,
+    showMenu: Boolean,
     onMenuClicked: () -> Unit,
 ) {
     Row(
@@ -553,15 +651,17 @@ private fun EmailDetails(
             modifier = Modifier.weight(1f),
         )
 
-        Icon(
-            imageVector = Icons.Default.MoreVert,
-            contentDescription = stringResource(R.string.stripe_show_menu),
-            tint = LinkTheme.colors.iconSecondary,
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable(onClick = onMenuClicked)
-                .padding(4.dp),
-        )
+        if (showMenu) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = stringResource(R.string.stripe_show_menu),
+                tint = LinkTheme.colors.iconSecondary,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable(onClick = onMenuClicked)
+                    .padding(4.dp),
+            )
+        }
     }
 }
 
@@ -690,9 +790,9 @@ internal fun CardDetailsRecollectionForm(
     expiryDateController: TextFieldController,
     cvcController: CvcController,
     isCardExpired: Boolean,
+    isValidating: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val rowElement = remember(paymentDetails) {
         val rowFields = buildList {
             if (isCardExpired) {
@@ -719,31 +819,24 @@ internal fun CardDetailsRecollectionForm(
         )
     }
 
-    val errorTextRes = if (isCardExpired) {
-        R.string.stripe_wallet_update_expired_card_error
-    } else {
-        R.string.stripe_wallet_recollect_cvc_error
-    }.resolvableString
-
-    Column(modifier) {
-        ErrorText(
-            text = errorTextRes.resolve(context),
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(WALLET_SCREEN_RECOLLECTION_FORM_ERROR)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        SectionElementUI(
-            modifier = Modifier
-                .testTag(WALLET_SCREEN_RECOLLECTION_FORM_FIELDS),
-            enabled = true,
-            element = SectionElement.wrap(rowElement),
-            hiddenIdentifiers = emptySet(),
-            lastTextFieldIdentifier = rowElement.fields.last().identifier
-        )
+    val sectionElement = remember(rowElement) {
+        SectionElement.wrap(rowElement)
     }
+
+    LaunchedEffect(isValidating) {
+        sectionElement.fields.forEach {
+            it.onValidationStateChanged(isValidating)
+        }
+    }
+
+    SectionElementUI(
+        modifier = modifier
+            .testTag(WALLET_SCREEN_RECOLLECTION_FORM_FIELDS),
+        enabled = true,
+        element = sectionElement,
+        hiddenIdentifiers = emptySet(),
+        lastTextFieldIdentifier = rowElement.fields.last().identifier
+    )
 }
 
 @Composable

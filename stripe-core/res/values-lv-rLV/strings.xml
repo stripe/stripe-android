@@ -24,4 +24,6 @@
   <string name="stripe_address_label_state">Novads/štats</string>
   <!-- Label for input requesting zip code, used for US based addreses -->
   <string name="stripe_address_label_zip_code">Pasta indekss</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="stripe_unexpected_error_try_again">Radusies negaidīta kļūda — mēģiniet vēlreiz pēc dažām sekundēm</string>
 </resources>

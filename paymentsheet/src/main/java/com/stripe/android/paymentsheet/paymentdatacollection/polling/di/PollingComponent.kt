@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.polling.di
 import android.app.Application
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.polling.IntentStatusPoller
 import dagger.BindsInstance
@@ -16,6 +17,7 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         PollingViewModelModule::class,
         StripeRepositoryModule::class,
+        PaymentElementRequestSurfaceModule::class,
         CoreCommonModule::class
     ]
 )

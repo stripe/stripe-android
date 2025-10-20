@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.core.utils.StatusBarCompat
 
 /**
  * A representation of an Android component (i.e. [ComponentActivity] or [Fragment]) that can start
@@ -35,14 +36,14 @@ interface AuthActivityStarterHost {
             val activity = fragment.requireActivity()
             return FragmentHost(
                 fragment = fragment,
-                statusBarColor = activity.window?.statusBarColor
+                statusBarColor = StatusBarCompat.color(activity)
             )
         }
 
         @JvmSynthetic
         fun create(
             activity: ComponentActivity,
-            statusBarColor: Int? = activity.window?.statusBarColor,
+            statusBarColor: Int? = StatusBarCompat.color(activity),
         ): AuthActivityStarterHost {
             return ActivityHost(
                 activity = activity,

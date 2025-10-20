@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
+import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcelable {
@@ -18,18 +19,21 @@ sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcela
     data class Card(
         private val cardPaymentMethodCreateParamsMap: Map<String, @RawValue Any>,
         private val email: String,
-        private val active: Boolean,
     ) : ConsumerPaymentDetailsCreateParams {
 
         override fun toParamMap(): Map<String, Any> {
             val params = mutableMapOf<String, Any>(
                 "type" to "card",
-                "active" to active,
+                "active" to true,
                 LINK_PARAM_BILLING_EMAIL_ADDRESS to email,
             )
 
             getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams(cardPaymentMethodCreateParamsMap)?.let {
                 params += it
+            }
+
+            cardPaymentMethodCreateParamsMap[PARAM_CLIENT_ATTRIBUTION_METADATA]?.let {
+                params += mapOf(PARAM_CLIENT_ATTRIBUTION_METADATA to it)
             }
 
             // only card number, exp_month and exp_year are included
@@ -62,6 +66,8 @@ sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcela
             private const val LINK_PARAM_BILLING_EMAIL_ADDRESS = "billing_email_address"
             private const val LINK_PARAM_PREFERRED_NETWORK = "preferred_network"
 
+            private const val PARAM_CLIENT_ATTRIBUTION_METADATA = "client_attribution_metadata"
+
             /**
              * A map containing additional parameters that must be sent during payment confirmation.
              * CVC is not passed during creation, and must be included when confirming the payment.
@@ -79,6 +85,7 @@ sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcela
         private val bankAccountId: String,
         private val billingAddress: Map<String, @RawValue Any>?,
         private val billingEmailAddress: String?,
+        private val clientAttributionMetadata: Map<String, @RawValue Any>,
     ) : ConsumerPaymentDetailsCreateParams {
 
         override fun toParamMap(): Map<String, Any> {
@@ -97,7 +104,7 @@ sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcela
                 ),
             )
 
-            return accountParams + billingParams
+            return accountParams + billingParams + clientAttributionMetadata
         }
     }
 }
@@ -112,16 +119,21 @@ fun getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams(
 ): Pair<String, Any>? {
     val billingDetails = cardPaymentMethodCreateParams["billing_details"] as? Map<*, *>
     val address = billingDetails?.get("address") as? Map<*, *>
+
     // The param naming for consumers API is different so we need to map them.
-    return address?.let {
+    return if (address != null) {
         "billing_address" to mapOf(
-            "country_code" to it["country"],
-            "postal_code" to it["postal_code"],
-            "line_1" to it["line1"],
-            "line_2" to it["line2"],
-            "locality" to it["city"],
-            "administrative_area" to it["state"],
+            "country_code" to address["country"],
+            "postal_code" to address["postal_code"],
+            "line_1" to address["line1"],
+            "line_2" to address["line2"],
+            "locality" to address["city"],
+            "administrative_area" to address["state"],
             "name" to billingDetails["name"]
         ).filterValues { it != null && it.toString().isNotEmpty() }
+    } else {
+        "billing_address" to mapOf(
+            "country_code" to Locale.getDefault().country,
+        )
     }
 }

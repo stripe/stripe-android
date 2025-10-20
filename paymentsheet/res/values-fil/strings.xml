@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">I-save ang aking impormasyon para sa mas mabilis na checkout gamit ang Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">Gumawa ng account na may Link para sa mas mabilis na pag-checkout sa web</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Credit</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -37,14 +40,24 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_card_type_prepaid">%1$s Prepaid</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
   <string name="stripe_link_card_type_unknown">%1$s Card</string>
+  <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
+  <string name="stripe_link_confirm_payment_title">Kumpirmahin ang mga detalye ng pagbabayad</string>
+  <!-- Email suggestion prompt shown when we detect a typo. The %1$s is a placeholder for the suggested email address. -->
+  <string name="stripe_link_email_suggestion">Ang ibig mong sabihin ay %1$s?</string>
+  <!-- CTA text for accepting the suggested email correction -->
+  <string name="stripe_link_email_suggestion_update">Oo, update</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Mag-log in o mag-sign up</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Sumang-ayon at magpatuloy</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Mabilis, ligtas, 1⁠-⁠click checkout</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Mabilis at ligtas na pag-checkout</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">I-save ang iyong impormasyon ng pagbabayad sa Link, at ligtas na mag-check out nang 1-click sa mga site na suportado ng Link.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Magbayad nang mas mabilis kahit saan tinatanggap ang Link.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Sa pagpapatuloy, sumasang-ayon ka sa <terms>Mga Tuntunin</terms> at <privacy>Patakaran sa Pagkapribado</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -79,6 +92,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_address_element_primary_button">I-save ang address</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Adres ng Nagpadala</string>
+  <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
+  <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">Gamitin ang billing address para sa pagpapadala</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
   <string name="stripe_paymentsheet_bacs_email_mandate">Isang email ang ipapadala sa %s sa loob ng tatlong araw ng negosyo upang kumpirmahin ang pag-setup ng tagubilin sa debit na ito.</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
@@ -101,6 +116,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Hindi puwedeng baguhin ang mga detalye ng kard.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Sa pagbibigay ng impormasyon ng iyong kard, pinahihintulutan mo ang %s na singilin ang iyong kard para sa mga pagbabayad sa hinaharap alinsunod sa kanilang mga tuntunin.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Sa pagpapatuloy, sumasang-ayon kang i-save ang iyong impormasyon para sa mga pagbili sa hinaharap sa %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Sa pagpapatuloy, sumasang-ayon kang i-save ang iyong impormasyon para sa mga pagbili sa hinaharap sa %s at <link>Link</link>. Sumasang-ayon ka rin sa <terms>Mga Tuntunin</terms> at <privacy>Privacy</privacy> ng Link.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Sa pagpapatuloy, sumasang-ayon kang i-save ang iyong impormasyon para sa mga pagbili sa hinaharap sa %s at <link>Link</link> (tingnan ang <terms>Mga Tuntunin</terms> at <privacy>Privacy</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Sa pagpapatuloy, sumasang-ayon kang i-save ang iyong impormasyon para sa mga pagbili sa hinaharap gamit ang %s at <link>Link</link> Ayon sa Link <terms>mga tuntunin</terms> at <privacy>privacy</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Hindi na-update ang kard. Pakisubukan muli.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -160,6 +183,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_remove_card">Alisin ang kard</string>
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Alisin ang kard?</string>
+  <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
+  <string name="stripe_paymentsheet_remove_partial_description">Tatanggalin ang paraan ng pagbabayad na ito pero mananatiling available para sa %s (na) subskripsiyon.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Alisin ang %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -190,6 +215,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Kabuuan: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Hindi na-update ang brand ng kard. Pakisubukan muli.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Kumpirmahin ang pagbabayad sa iyong bangko o payment app sa loob ng %s para makumpleto ang pagbili.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Itakda bilang default na paraan ng pagbabayad</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -252,6 +279,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Tingnan ang higit pa</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Sa pagpapatuloy, sumasang-ayon ka na pahintulutan ang mga pagbabayad alinsunod sa <terms>mga tuntunin</terms> na ito.]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Sa pagsusumite ng iyong order sa %1$s at %2$s, sumasang-ayon kang i-save ang iyong impormasyon sa %3$s para sa mga pagbili sa hinaharap, at sumasang-ayon kang pahintulutan ang mga pagbabayad alinsunod sa <terms> mga tuntuning ito</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Sa pagsusumite ng iyong order sa %s, sumasang-ayon kang pahintulutan ang mga pagbabayad alinsunod sa <terms> mga tuntuning ito</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Pagbabayad</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
@@ -265,6 +296,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Passthrough</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Magbayad sa ibang paraan</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Malamang na tanggapin ang mga debit card.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Para sa seguridad, pakilagay muli ang security code ng iyong kard.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

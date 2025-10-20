@@ -16,6 +16,5 @@ interface IntentStatusPoller {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Config(
         val clientSecret: String,
-        val maxAttempts: Int,
     )
 }

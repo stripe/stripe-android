@@ -45,6 +45,7 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
+import okhttp3.mockwebserver.SocketPolicy
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
@@ -109,6 +110,8 @@ internal class FlowControllerTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -151,6 +154,8 @@ internal class FlowControllerTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -188,10 +193,7 @@ internal class FlowControllerTest {
             page.fillOutCardDetails()
 
             page.clickPrimaryButton()
-            val paymentOption = testContext.configureCallbackTurbine.awaitItem()
-            assertThat(paymentOption?.label).endsWith("4242")
-            assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
-            composeTestRule.waitForIdle()
+            testContext.consumePaymentOptionEventForFlowController("card", "4242")
 
             testContext.flowController.presentPaymentOptions()
 
@@ -236,18 +238,13 @@ internal class FlowControllerTest {
             page.assertLpmSelected("cashapp")
 
             page.clickPrimaryButton()
-            val paymentOption1 = testContext.configureCallbackTurbine.awaitItem()
-            assertThat(paymentOption1?.label).endsWith("Cash App Pay")
-            assertThat(paymentOption1?.paymentMethodType).isEqualTo("cashapp")
-            composeTestRule.waitForIdle()
+            testContext.consumePaymentOptionEventForFlowController("cashapp", "Cash App Pay")
 
             testContext.flowController.presentPaymentOptions()
 
             page.assertLpmSelected("cashapp")
             page.clickPrimaryButton()
-            val paymentOption2 = testContext.configureCallbackTurbine.awaitItem()
-            assertThat(paymentOption2?.label).endsWith("Cash App Pay")
-            assertThat(paymentOption2?.paymentMethodType).isEqualTo("cashapp")
+            testContext.consumePaymentOptionEventForFlowController("cashapp", "Cash App Pay")
 
             testContext.markTestSucceeded()
         }
@@ -318,7 +315,7 @@ internal class FlowControllerTest {
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
-            response.setResponseCode(400)
+            response.setResponseCode(500)
         }
 
         networkRule.enqueue(
@@ -350,6 +347,53 @@ internal class FlowControllerTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
+    }
+
+    @Test
+    fun testElementsSessionSocketError() {
+        lateinit var flowController: PaymentSheet.FlowController
+        val scenario = ActivityScenario.launch(MainActivity::class.java)
+
+        scenario.moveToState(Lifecycle.State.CREATED)
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            @Suppress("Deprecation")
+            flowController = PaymentSheet.FlowController.create(
+                activity = it,
+                paymentOptionCallback = {
+                    throw AssertionError("Not expected")
+                },
+                paymentResultCallback = {
+                    throw AssertionError("Not expected")
+                },
+            )
+        }
+        scenario.moveToState(Lifecycle.State.RESUMED)
+
+        val countDownLatch = CountDownLatch(1)
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.socketPolicy = SocketPolicy.DISCONNECT_AFTER_REQUEST
+        }
+
+        scenario.onActivity {
+            flowController.configureWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = defaultConfiguration,
+                callback = { success, error ->
+                    assertThat(success).isFalse()
+                    assertThat(error).isNotNull()
+                    countDownLatch.countDown()
+                }
+            )
+        }
+
+        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
     @Test
@@ -390,6 +434,8 @@ internal class FlowControllerTest {
             }
 
             page.clickPrimaryButton()
+
+            testContext.consumePaymentOptionEventForFlowController("card", "4242")
         }
     }
 
@@ -599,6 +645,8 @@ internal class FlowControllerTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -659,6 +707,8 @@ internal class FlowControllerTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -719,6 +769,8 @@ internal class FlowControllerTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @OptIn(DelicatePaymentSheetApi::class)
@@ -773,6 +825,8 @@ internal class FlowControllerTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -841,6 +895,8 @@ internal class FlowControllerTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -973,9 +1029,7 @@ internal class FlowControllerTest {
 
         testContext.configureCallbackTurbine.expectNoEvents()
         page.clickPrimaryButton()
-        val paymentOption = testContext.configureCallbackTurbine.awaitItem()
-        assertThat(paymentOption?.label).endsWith("4242")
-        assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
         testContext.markTestSucceeded()
     }
 
@@ -1004,7 +1058,7 @@ internal class FlowControllerTest {
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
-            response.setResponseCode(400)
+            response.setResponseCode(500)
         }
 
         networkRule.enqueue(
@@ -1191,7 +1245,14 @@ internal class FlowControllerTest {
                     .walletButtons(
                         PaymentSheet.WalletButtonsConfiguration(
                             willDisplayExternally = true,
-                            walletsToShow = listOf("link"),
+                            visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                                walletButtonsView = mapOf(
+                                    PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
+                                    PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
+                                ),
+                            )
                         )
                     )
                     .build(),
@@ -1212,6 +1273,50 @@ internal class FlowControllerTest {
         composeTestRule.waitForIdle()
         page.assertGooglePayIsDisplayed()
 
+        testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testFlowControllerConfigurationBuilderWithTermsDisplayNever(
+        @TestParameter integrationType: IntegrationType,
+    ) = runFlowControllerTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.configureFlowController {
+            configureWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 5000,
+                        currency = "USD",
+                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                    )
+                ),
+                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                    .termsDisplay(
+                        mapOf(
+                            com.stripe.android.model.PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER
+                        )
+                    )
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .build(),
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    presentPaymentOptions()
+                }
+            )
+        }
+
+        page.assertMandateIsMissing()
         testContext.markTestSucceeded()
     }
 }

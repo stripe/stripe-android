@@ -3,6 +3,8 @@ package com.stripe.android.ui.core
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.Address
+import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -26,6 +28,7 @@ class FieldValuesToParamsMapConverter {
             code: PaymentMethodCode,
             requiresMandate: Boolean,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+            clientAttributionMetadata: ClientAttributionMetadata,
         ): PaymentMethodCreateParams {
             val fieldValuePairsForCreateParams = fieldValuePairs.filter { entry ->
                 entry.key.destination == ParameterDestination.Api.Params
@@ -46,6 +49,7 @@ class FieldValuesToParamsMapConverter {
                         overrideParamMap = this,
                         productUsage = emptySet(),
                         allowRedisplay = allowRedisplay,
+                        clientAttributionMetadata = clientAttributionMetadata,
                     )
                 }
         }
@@ -91,11 +95,17 @@ class FieldValuesToParamsMapConverter {
         fun transformToPaymentMethodOptionsParams(
             fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
             code: PaymentMethodCode,
+            setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null
         ): PaymentMethodOptionsParams? {
             val fieldValuePairsForOptions = fieldValuePairs.filter { entry ->
                 entry.key.destination == ParameterDestination.Api.Options
             }
             return when (code) {
+                PaymentMethod.Type.Card.code -> {
+                    PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = setupFutureUsage,
+                    )
+                }
                 PaymentMethod.Type.Blik.code -> {
                     val blikCode = fieldValuePairsForOptions[IdentifierSpec.BlikCode]?.value
                     blikCode?.let {
@@ -109,7 +119,12 @@ class FieldValuesToParamsMapConverter {
                     }
                 }
                 PaymentMethod.Type.WeChatPay.code -> {
-                    PaymentMethodOptionsParams.WeChatPayH5
+                    PaymentMethodOptionsParams.WeChatPayH5()
+                }
+                PaymentMethod.Type.SepaDebit.code -> {
+                    PaymentMethodOptionsParams.SepaDebit(
+                        setupFutureUsage = setupFutureUsage,
+                    )
                 }
                 else -> {
                     null
@@ -131,7 +146,8 @@ class FieldValuesToParamsMapConverter {
                 )
                 PaymentMethod.Type.Card.code -> PaymentMethodExtraParams.Card(
                     setAsDefault =
-                    fieldValuePairsForExtras[IdentifierSpec.SetAsDefaultPaymentMethod]?.value?.toBoolean()
+                    fieldValuePairsForExtras[IdentifierSpec.SetAsDefaultPaymentMethod]?.value?.toBoolean(),
+                    phoneNumberCountry = fieldValuePairsForExtras[IdentifierSpec.PhoneNumberCountry]?.value,
                 )
                 PaymentMethod.Type.Link.code -> PaymentMethodExtraParams.Link(
                     setAsDefault =
@@ -141,7 +157,10 @@ class FieldValuesToParamsMapConverter {
                     setAsDefault =
                     fieldValuePairsForExtras[IdentifierSpec.SetAsDefaultPaymentMethod]?.value?.toBoolean()
                 )
-
+                PaymentMethod.Type.SepaDebit.code -> PaymentMethodExtraParams.SepaDebit(
+                    setAsDefault =
+                    fieldValuePairsForExtras[IdentifierSpec.SetAsDefaultPaymentMethod]?.value?.toBoolean()
+                )
                 else -> null
             }
         }

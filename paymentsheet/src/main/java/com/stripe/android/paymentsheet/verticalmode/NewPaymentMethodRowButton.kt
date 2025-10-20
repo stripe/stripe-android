@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -13,7 +12,6 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
-import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 
@@ -28,18 +26,13 @@ internal fun NewPaymentMethodRowButton(
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
-    rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default
+    appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default)
 ) {
-    val iconUrl = if (isSystemInDarkTheme() && displayablePaymentMethod.darkThemeIconUrl != null) {
-        displayablePaymentMethod.darkThemeIconUrl
-    } else {
-        displayablePaymentMethod.lightThemeIconUrl
-    }
     NewPaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
-        iconRes = displayablePaymentMethod.icon(LocalIconStyle.current),
-        iconUrl = iconUrl,
+        iconRes = displayablePaymentMethod.icon(),
+        iconUrl = displayablePaymentMethod.iconUrl(),
         imageLoader = imageLoader,
         title = displayablePaymentMethod.displayName.resolve(),
         subtitle = displayablePaymentMethod.subtitle?.resolve(),
@@ -49,7 +42,7 @@ internal fun NewPaymentMethodRowButton(
             displayablePaymentMethod.onClick()
         },
         modifier = modifier.testTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_${displayablePaymentMethod.code}"),
-        rowStyle = rowStyle,
+        appearance = appearance,
         trailingContent = trailingContent,
     )
 }
@@ -68,7 +61,7 @@ internal fun NewPaymentMethodRowButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
-    rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default
+    appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default)
 ) {
     PaymentMethodRowButton(
         isEnabled = isEnabled,
@@ -80,7 +73,7 @@ internal fun NewPaymentMethodRowButton(
                 iconUrl = iconUrl,
                 imageLoader = imageLoader,
                 iconRequiresTinting = iconRequiresTinting,
-                modifier = modifier.height(iconHeight).width(iconWidth),
+                modifier = Modifier.height(iconHeight).width(iconWidth),
                 contentAlignment = Alignment.Center,
             )
         },
@@ -89,7 +82,7 @@ internal fun NewPaymentMethodRowButton(
         promoText = promoText,
         onClick = onClick,
         modifier = modifier,
-        style = rowStyle,
+        appearance = appearance,
         trailingContent = trailingContent,
     )
 }

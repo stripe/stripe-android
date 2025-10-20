@@ -182,6 +182,7 @@ class FinancialConnectionsSheetViewModelTest {
                                 phoneCountryCode = null,
                             ),
                             incentiveEligibilitySession = null,
+                            allowRedisplay = null,
                         ),
                     )
                 )
@@ -218,6 +219,7 @@ class FinancialConnectionsSheetViewModelTest {
                                 phoneCountryCode = null,
                             ),
                             incentiveEligibilitySession = null,
+                            allowRedisplay = null,
                         ),
                     )
                 )
@@ -253,6 +255,7 @@ class FinancialConnectionsSheetViewModelTest {
                             phoneCountryCode = null,
                         ),
                         incentiveEligibilitySession = null,
+                        allowRedisplay = null,
                     ),
                 )
             )
@@ -288,6 +291,7 @@ class FinancialConnectionsSheetViewModelTest {
                             phoneCountryCode = null,
                         ),
                         incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
+                        allowRedisplay = null,
                     ),
                 )
             )
@@ -324,6 +328,7 @@ class FinancialConnectionsSheetViewModelTest {
                             phoneCountryCode = null,
                         ),
                         incentiveEligibilitySession = null,
+                        allowRedisplay = null,
                     ),
                 )
             )
@@ -360,6 +365,7 @@ class FinancialConnectionsSheetViewModelTest {
                             phoneCountryCode = "US",
                         ),
                         incentiveEligibilitySession = null,
+                        allowRedisplay = null,
                     ),
                 )
             )
@@ -409,6 +415,7 @@ class FinancialConnectionsSheetViewModelTest {
                             phoneCountryCode = null,
                         ),
                         incentiveEligibilitySession = null,
+                        allowRedisplay = null,
                     ),
                 )
             )
@@ -448,6 +455,184 @@ class FinancialConnectionsSheetViewModelTest {
             assertThat(viewEffect.url).isEqualTo("${syncResponse.manifest.hostedAuthUrl}&launched_by=android_sdk")
         }
     }
+
+    @Test
+    fun `init - hosted auth url contains allow_redisplay=unspecified for instant debits`() = runTest {
+        // Given
+        whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+        whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
+        whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
+
+        // When
+        val viewModel = createViewModel(
+            defaultInitialState.copy(
+                initialArgs = ForInstantDebits(
+                    configuration = configuration,
+                    elementsSessionContext = ElementsSessionContext(
+                        amount = 123,
+                        currency = "usd",
+                        linkMode = null,
+                        billingDetails = null,
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = null,
+                            phone = null,
+                            phoneCountryCode = null,
+                        ),
+                        incentiveEligibilitySession = null,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
+                    ),
+                )
+            )
+        )
+
+        // Then
+        withState(viewModel) {
+            val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+            assertThat(viewEffect.url).contains("allow_redisplay=unspecified")
+        }
+    }
+
+    @Test
+    fun `init - hosted auth url contains allow_redisplay=limited for instant debits`() = runTest {
+        // Given
+        whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+        whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
+        whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
+
+        // When
+        val viewModel = createViewModel(
+            defaultInitialState.copy(
+                initialArgs = ForInstantDebits(
+                    configuration = configuration,
+                    elementsSessionContext = ElementsSessionContext(
+                        amount = 123,
+                        currency = "usd",
+                        linkMode = null,
+                        billingDetails = null,
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = null,
+                            phone = null,
+                            phoneCountryCode = null,
+                        ),
+                        incentiveEligibilitySession = null,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Limited,
+                    ),
+                )
+            )
+        )
+
+        // Then
+        withState(viewModel) {
+            val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+            assertThat(viewEffect.url).contains("allow_redisplay=limited")
+        }
+    }
+
+    @Test
+    fun `init - hosted auth url contains allow_redisplay=always for instant debits`() = runTest {
+        // Given
+        whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+        whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
+        whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
+
+        // When
+        val viewModel = createViewModel(
+            defaultInitialState.copy(
+                initialArgs = ForInstantDebits(
+                    configuration = configuration,
+                    elementsSessionContext = ElementsSessionContext(
+                        amount = 123,
+                        currency = "usd",
+                        linkMode = null,
+                        billingDetails = null,
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = null,
+                            phone = null,
+                            phoneCountryCode = null,
+                        ),
+                        incentiveEligibilitySession = null,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Always,
+                    ),
+                )
+            )
+        )
+
+        // Then
+        withState(viewModel) {
+            val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+            assertThat(viewEffect.url).contains("allow_redisplay=always")
+        }
+    }
+
+    @Test
+    fun `init - hosted auth url does not contain allow_redisplay for instant debits`() = runTest {
+        // Given
+        whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+        whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
+        whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
+
+        // When
+        val viewModel = createViewModel(
+            defaultInitialState.copy(
+                initialArgs = ForInstantDebits(
+                    configuration = configuration,
+                    elementsSessionContext = ElementsSessionContext(
+                        amount = 123,
+                        currency = "usd",
+                        linkMode = null,
+                        billingDetails = null,
+                        prefillDetails = ElementsSessionContext.PrefillDetails(
+                            email = null,
+                            phone = null,
+                            phoneCountryCode = null,
+                        ),
+                        incentiveEligibilitySession = null,
+                        allowRedisplay = null,
+                    ),
+                )
+            )
+        )
+
+        // Then
+        withState(viewModel) {
+            val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+            assertThat(viewEffect.url).doesNotContain("allow_redisplay")
+        }
+    }
+
+    @Test
+    fun `init - hosted auth url does not have allow_redisplay for data flow even when allowRedisplay is provided`() =
+        runTest {
+            whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
+            whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(false)
+
+            val viewModel = createViewModel(
+                defaultInitialState.copy(
+                    initialArgs = ForData(
+                        configuration = configuration,
+                        elementsSessionContext = ElementsSessionContext(
+                            amount = 123,
+                            currency = "usd",
+                            linkMode = null,
+                            billingDetails = null,
+                            prefillDetails = ElementsSessionContext.PrefillDetails(
+                                email = null,
+                                phone = null,
+                                phoneCountryCode = null,
+                            ),
+                            incentiveEligibilitySession = null,
+                            allowRedisplay = ElementsSessionContext.AllowRedisplay.Always,
+                        ),
+                    )
+                )
+            )
+
+            withState(viewModel) {
+                val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+                assertThat(viewEffect.url).doesNotContain("allow_redisplay")
+            }
+        }
 
     @Test
     fun `handleOnNewIntent - wrong intent should fire analytics event and set fail result`() = runTest {

@@ -25,6 +25,7 @@ internal fun VerificationScreen(
         onResendCodeClick = viewModel::resendCode,
         onFocusRequested = viewModel::onFocusRequested,
         didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
+        onConsentShown = viewModel::onConsentShown
     )
 }
 
@@ -42,7 +43,9 @@ fun VerificationPreview() {
                     requestFocus = false,
                     redactedPhoneNumber = "(...)",
                     email = "email@email.com",
-                    isDialog = false
+                    defaultPayment = null,
+                    isDialog = false,
+                    allowLogout = true,
                 ),
                 otpElement = OTPSpec.transform(),
                 onBack = {},
@@ -50,6 +53,7 @@ fun VerificationPreview() {
                 onResendCodeClick = {},
                 onFocusRequested = {},
                 didShowCodeSentNotification = {},
+                onConsentShown = {},
             )
         }
     }

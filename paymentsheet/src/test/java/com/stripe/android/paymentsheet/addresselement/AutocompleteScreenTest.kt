@@ -19,19 +19,19 @@ import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePr
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 
 @ExperimentalAnimationApi
 @RunWith(AndroidJUnit4::class)
 class AutocompleteScreenTest {
-    @get:Rule
     val composeTestRule = createComposeRule()
 
     @get:Rule
-    val composeCleanupRule = createComposeCleanupRule()
-
-    @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
+    val rules: RuleChain = RuleChain.emptyRuleChain()
+        .around(createComposeCleanupRule())
+        .around(composeTestRule)
+        .around(CoroutineTestRule())
 
     @Test
     fun `On enter manually, should set result to null and force expand key to true then go back`() = runTest {
@@ -49,7 +49,7 @@ class AutocompleteScreenTest {
 
             assertThat(setResultCall.key).isEqualTo(AddressElementNavigator.AutocompleteEvent.KEY)
             assertThat(setResultCall.value).isEqualTo(
-                AddressElementNavigator.AutocompleteEvent.OnEnterManually(addressDetails = null)
+                AddressElementNavigator.AutocompleteEvent.OnEnterManually(address = null)
             )
 
             assertThat(onBackCalls.awaitItem()).isNotNull()
@@ -72,7 +72,7 @@ class AutocompleteScreenTest {
 
             assertThat(setResultCall.key).isEqualTo(AddressElementNavigator.AutocompleteEvent.KEY)
             assertThat(setResultCall.value).isEqualTo(
-                AddressElementNavigator.AutocompleteEvent.OnBack(addressDetails = null)
+                AddressElementNavigator.AutocompleteEvent.OnBack(address = null)
             )
 
             assertThat(onBackCalls.awaitItem()).isNotNull()
@@ -96,7 +96,7 @@ class AutocompleteScreenTest {
 
             assertThat(setResultCall.key).isEqualTo(AddressElementNavigator.AutocompleteEvent.KEY)
             assertThat(setResultCall.value).isEqualTo(
-                AddressElementNavigator.AutocompleteEvent.OnBack(addressDetails = null)
+                AddressElementNavigator.AutocompleteEvent.OnBack(address = null)
             )
 
             assertThat(onBackCalls.awaitItem()).isNotNull()

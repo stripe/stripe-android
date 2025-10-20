@@ -137,8 +137,8 @@ internal class Selectors(
         "com.google.android.gms"
     )
 
-    val googlePayContinueButton = UiAutomatorText(
-        "Continue",
+    val googlePayCheckoutButton = UiAutomatorText(
+        "Pay",
         className = "android.widget.Button",
         device = device
     )
@@ -359,6 +359,11 @@ internal class Selectors(
     fun getCvcRecollectionScreenConfirm() = composeTestRule.onNode(
         hasTestTag(CVC_RECOLLECTION_SCREEN_CONFIRM)
     )
+
+    fun assertCardBrandDropdownExists() {
+        composeTestRule.onNode(hasTestTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG))
+            .assertExists()
+    }
 
     fun selectCardBrand(displayName: String) {
         composeTestRule.onNode(hasTestTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG))

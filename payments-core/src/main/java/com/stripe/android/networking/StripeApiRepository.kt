@@ -52,6 +52,8 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmationToken
+import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -80,6 +82,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
+import com.stripe.android.model.parsers.ConfirmationTokenJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsShareJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
@@ -121,6 +124,7 @@ import kotlin.coroutines.CoroutineContext
 class StripeApiRepository @JvmOverloads internal constructor(
     private val context: Context,
     private val publishableKeyProvider: () -> String,
+    private val requestSurface: RequestSurface,
     private val appInfo: AppInfo? = Stripe.appInfo,
     private val logger: Logger = Logger.noop(),
     private val workContext: CoroutineContext = Dispatchers.IO,
@@ -134,7 +138,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
         DefaultFraudDetectionDataRepository(context, workContext),
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory =
-        DefaultCardAccountRangeRepositoryFactory(context, productUsageTokens, analyticsRequestExecutor),
+        DefaultCardAccountRangeRepositoryFactory(context, productUsageTokens, requestSurface, analyticsRequestExecutor),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
@@ -147,6 +151,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     constructor(
         appContext: Context,
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        requestSurface: RequestSurface,
         @IOContext workContext: CoroutineContext,
         @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
@@ -155,6 +160,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ) : this(
         context = appContext,
         publishableKeyProvider = publishableKeyProvider,
+        requestSurface = requestSurface,
         logger = logger,
         workContext = workContext,
         productUsageTokens = productUsageTokens,
@@ -410,6 +416,20 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): Result<SetupIntent> {
+        return confirmSetupIntentParams.maybeForDashboard(options).mapResult {
+            confirmSetupIntentInternal(
+                confirmSetupIntentParams = it,
+                options = options,
+                expandFields = expandFields
+            )
+        }
+    }
+
+    private suspend fun confirmSetupIntentInternal(
+        confirmSetupIntentParams: ConfirmSetupIntentParams,
+        options: ApiRequest.Options,
+        expandFields: List<String>
+    ): Result<SetupIntent> {
         val setupIntentId = runCatching {
             SetupIntent.ClientSecret(confirmSetupIntentParams.clientSecret).setupIntentId
         }.getOrElse {
@@ -425,7 +445,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 fraudDetectionDataParamsUtils.addFraudDetectionData(
                     // Add payment_user_agent if the Payment Method is being created on this call
                     maybeAddPaymentUserAgent(
-                        confirmSetupIntentParams.toParamMap(),
+                        confirmSetupIntentParams.toParamMap()
+                            // Omit client_secret with user key auth.
+                            .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it },
                         confirmSetupIntentParams.paymentMethodCreateParams
                     ).plus(createExpandParam(expandFields)),
                     fraudDetectionData
@@ -459,6 +481,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }.getOrElse {
             return Result.failure(it)
         }
+        val params: Map<String, Any?> =
+            if (options.apiKeyIsUserKey) {
+                createExpandParam(expandFields)
+            } else {
+                createClientSecretParam(clientSecret, expandFields)
+            }
 
         fireFraudDetectionDataRequest()
 
@@ -466,7 +494,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequest = apiRequestFactory.createGet(
                 url = getRetrieveSetupIntentUrl(setupIntentId),
                 options = options,
-                params = createClientSecretParam(clientSecret, expandFields),
+                params = params,
             ),
             jsonParser = SetupIntentJsonParser(),
         ) {
@@ -653,6 +681,33 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 paymentAnalyticsRequestFactory.createTokenCreation(
                     productUsageTokens = tokenParams.attribution,
                     tokenType = tokenParams.tokenType
+                )
+            )
+        }
+    }
+
+    /**
+     * Analytics event: [PaymentAnalyticsEvent.ConfirmationTokenCreate]
+     */
+    override suspend fun createConfirmationToken(
+        confirmationTokenParams: ConfirmationTokenParams,
+        options: ApiRequest.Options
+    ): Result<ConfirmationToken> {
+        return fetchStripeModelResult(
+            apiRequestFactory.createPost(
+                confirmationTokensUrl,
+                options,
+                maybeAddPaymentUserAgent(
+                    confirmationTokenParams.toParamMap(),
+                    confirmationTokenParams.paymentMethodData
+                )
+            ),
+            ConfirmationTokenJsonParser()
+        ) {
+            fireAnalyticsRequest(
+                paymentAnalyticsRequestFactory.createRequest(
+                    PaymentAnalyticsEvent.ConfirmationTokenCreate,
+                    productUsageTokens = confirmationTokenParams.paymentMethodData?.attribution ?: emptySet(),
                 )
             )
         }
@@ -1091,6 +1146,46 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    /**
+     * Get the latest [FraudDetectionData] from [FraudDetectionDataRepository] and send in POST request
+     * to `/v1/radar/saved_payment_method_session`.
+     */
+    override suspend fun createSavedPaymentMethodRadarSession(
+        paymentMethodId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<RadarSessionWithHCaptcha> {
+        val validation = runCatching {
+            require(Stripe.advancedFraudSignalsEnabled) {
+                "Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session."
+            }
+
+            requireNotNull(fraudDetectionDataRepository.getLatest()) {
+                "Could not obtain fraud data required to create a Radar Session."
+            }
+        }
+
+        return validation.mapCatching { fraudData ->
+            val params = fraudData.params + buildPaymentUserAgentPair() + mapOf(
+                "payment_method" to paymentMethodId,
+            )
+
+            fetchStripeModelResult(
+                apiRequest = apiRequestFactory.createPost(
+                    url = getApiUrl("radar/saved_payment_method_session"),
+                    options = requestOptions,
+                    params = params,
+                ),
+                jsonParser = RadarSessionWithHCaptchaJsonParser(),
+            ) {
+                fireAnalyticsRequest(
+                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.RadarSessionCreate)
+                )
+            }
+        }.getOrElse {
+            Result.failure(StripeException.create(it))
+        }
+    }
+
     override suspend fun attachHCaptchaToRadarSession(
         radarSessionToken: String,
         hcaptchaToken: String,
@@ -1120,13 +1215,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
         id: String,
         extraParams: Map<String, *>?,
         requestOptions: ApiRequest.Options
-    ): Result<String> {
+    ): Result<PaymentMethod> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = sharePaymentDetailsUrl,
                 options = requestOptions,
                 params = mapOf(
-                    "request_surface" to "android_payment_element",
+                    "request_surface" to requestSurface.value,
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
@@ -1135,7 +1230,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 ).plus(extraParams ?: emptyMap())
             ),
             jsonParser = ConsumerPaymentDetailsShareJsonParser,
-        ).map { it.id }
+        ).map { it.paymentMethod }
     }
 
     override suspend fun logOut(
@@ -1148,7 +1243,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = logoutConsumerUrl,
                 options = requestOptions,
                 params = mapOf(
-                    "request_surface" to "android_payment_element",
+                    "request_surface" to requestSurface.value,
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
@@ -1503,7 +1598,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 listConsumerPaymentDetailsUrl,
                 requestOptions,
                 mapOf(
-                    "request_surface" to "android_payment_element",
+                    "request_surface" to requestSurface.value,
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to clientSecret
                     ),
@@ -1523,7 +1618,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 listShippingAddresses,
                 requestOptions,
                 mapOf(
-                    "request_surface" to "android_payment_element",
+                    "request_surface" to requestSurface.value,
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to clientSecret
                     ),
@@ -1544,7 +1639,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     getConsumerPaymentDetailsUrl(paymentDetailsId),
                     requestOptions,
                     mapOf(
-                        "request_surface" to "android_payment_element",
+                        "request_surface" to requestSurface.value,
                         "credentials" to mapOf(
                             "consumer_session_client_secret" to clientSecret
                         )
@@ -1565,7 +1660,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 getConsumerPaymentDetailsUrl(paymentDetailsUpdateParams.id),
                 requestOptions,
                 mapOf(
-                    "request_surface" to "android_payment_element",
+                    "request_surface" to requestSurface.value,
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to clientSecret
                     )
@@ -1606,6 +1701,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             params.mobileSessionId?.takeIf { it.isNotEmpty() }?.let { this["mobile_session_id"] = it }
             params.savedPaymentMethodSelectionId?.let { this["client_default_payment_method"] = it }
             params.sellerDetails?.let { this.putAll(it.toQueryParams()) }
+            putAll(params.link.toQueryParams())
+            params.countryOverride?.let { this["country_override"] = it }
             (params as? ElementsSessionParams.DeferredIntentType)?.let { type ->
                 this.putAll(type.deferredIntentParams.toQueryParams())
             }
@@ -1850,6 +1947,28 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    private suspend fun ConfirmSetupIntentParams.maybeForDashboard(
+        options: ApiRequest.Options
+    ): Result<ConfirmSetupIntentParams> {
+        if (!options.apiKeyIsUserKey || paymentMethodCreateParams == null) {
+            return Result.success(this)
+        }
+
+        // For user key auth, we must create the PM first.
+        val paymentMethodResult = createPaymentMethod(
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            options = options,
+        )
+
+        return paymentMethodResult.mapCatching { paymentMethod ->
+            ConfirmSetupIntentParams.createForDashboard(
+                clientSecret = clientSecret,
+                paymentMethodId = paymentMethod.id!!,
+                paymentMethodOptions = paymentMethodOptions,
+            )
+        }
+    }
+
     private val Result<StripeResponse<String>>.errorMessage: String?
         get() {
             val response = getOrNull()
@@ -1899,6 +2018,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
             get() = getApiUrl("tokens")
 
         /**
+         * @return `https://api.stripe.com/v1/confirmation_tokens`
+         */
+        internal val confirmationTokensUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("confirmation_tokens")
+
+        /**
          * @return `https://api.stripe.com/v1/sources`
          */
         internal val sourcesUrl: String
@@ -1918,13 +2044,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val logoutConsumerUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/sessions/log_out")
-
-        /**
-         * @return `https://api.stripe.com/v1/consumers/payment_details`
-         */
-        internal val consumerPaymentDetailsUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("consumers/payment_details")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details/list`

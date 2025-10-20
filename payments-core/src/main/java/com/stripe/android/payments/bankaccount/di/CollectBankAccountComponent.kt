@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewModel
@@ -19,6 +20,7 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         CollectBankAccountModule::class,
         StripeRepositoryModule::class,
+        PaymentElementRequestSurfaceModule::class,
         CoreCommonModule::class
     ]
 )

@@ -44,7 +44,8 @@ sealed class PaymentMethodExtraParams(
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Card(
-        val setAsDefault: Boolean? = null
+        val setAsDefault: Boolean? = null,
+        val phoneNumberCountry: String? = null,
     ) : PaymentMethodExtraParams(PaymentMethod.Type.Card) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
@@ -58,6 +59,18 @@ sealed class PaymentMethodExtraParams(
     data class Link(
         val setAsDefault: Boolean? = null
     ) : PaymentMethodExtraParams(PaymentMethod.Type.Link) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_SET_AS_DEFAULT_PAYMENT_METHOD to setAsDefault?.toString()
+            )
+        }
+    }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class SepaDebit(
+        val setAsDefault: Boolean? = null
+    ) : PaymentMethodExtraParams(PaymentMethod.Type.SepaDebit) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
                 PARAM_SET_AS_DEFAULT_PAYMENT_METHOD to setAsDefault?.toString()

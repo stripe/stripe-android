@@ -109,6 +109,9 @@ constructor(
     override val nextActionData: StripeIntent.NextActionData?,
 
     private val paymentMethodOptionsJsonString: String? = null,
+
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    override val automaticPaymentMethodsEnabled: Boolean = false,
 ) : StripeIntent {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -147,6 +150,8 @@ constructor(
             is StripeIntent.NextActionData.WeChatPayRedirect,
             is StripeIntent.NextActionData.UpiAwaitNotification,
             is StripeIntent.NextActionData.SwishRedirect,
+            is StripeIntent.NextActionData.DisplayPayNowDetails,
+            is StripeIntent.NextActionData.DisplayPromptPayDetails,
             null -> {
                 null
             }

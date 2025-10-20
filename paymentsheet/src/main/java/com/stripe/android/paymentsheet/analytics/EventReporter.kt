@@ -5,7 +5,9 @@ import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.LinkSignupDisabledReason
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
@@ -14,8 +16,11 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
 
-internal interface EventReporter {
+@Suppress("TooManyFunctions")
+internal interface EventReporter : CardScanEventsReporter {
 
     /**
      * PaymentSheet has been instantiated or FlowController has finished its configuration.
@@ -41,6 +46,8 @@ internal interface EventReporter {
         paymentSelection: PaymentSelection?,
         linkEnabled: Boolean,
         linkMode: LinkMode?,
+        linkDisabledReasons: List<LinkDisabledReason>?,
+        linkSignupDisabledReasons: List<LinkSignupDisabledReason>?,
         googlePaySupported: Boolean,
         linkDisplay: PaymentSheet.LinkConfiguration.Display,
         currency: String?,
@@ -51,7 +58,8 @@ internal interface EventReporter {
         hasDefaultPaymentMethod: Boolean?,
         setAsDefaultEnabled: Boolean?,
         paymentMethodOptionsSetupFutureUsage: Boolean,
-        setupFutureUsage: StripeIntent.Usage?
+        setupFutureUsage: StripeIntent.Usage?,
+        openCardScanAutomatically: Boolean,
     )
 
     /**
@@ -234,6 +242,15 @@ internal interface EventReporter {
 
     fun onUsBankAccountFormEvent(
         event: USBankAccountFormViewModel.AnalyticsEvent
+    )
+
+    /**
+     * Captures a snapshot of payment method visibility states when the UI has settled.
+     */
+    fun onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+        visiblePaymentMethods: List<String>,
+        hiddenPaymentMethods: List<String>,
+        walletsState: WalletsState?,
     )
 
     /**

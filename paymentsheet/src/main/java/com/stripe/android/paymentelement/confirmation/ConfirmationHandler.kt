@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -36,6 +37,8 @@ internal interface ConfirmationHandler {
      * @param lifecycleOwner The owner of an observable lifecycle to attach the handlers to
      */
     fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner)
+
+    fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata)
 
     /**
      * Starts the confirmation process. Results can be received through [state] or through [awaitResult].
@@ -87,7 +90,7 @@ internal interface ConfirmationHandler {
         /**
          * The shipping details of the customer that can be attached during the confirmation flow
          */
-        val shippingDetails: AddressDetails?
+        val shippingDetails: AddressDetails?,
     ) : Parcelable
 
     /**
@@ -155,6 +158,7 @@ internal interface ConfirmationHandler {
         data class Succeeded(
             val intent: StripeIntent,
             val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+            val completedFullPaymentFlow: Boolean = true,
         ) : Result
 
         /**

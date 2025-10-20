@@ -1,5 +1,15 @@
 # Migration Guide
 
+## Migrating from versions < 21.24.0
+- The `stripecardscan` module has been deprecated and will be removed in a future release:
+    * `CardScanSheet` class and its methods (`create()`, `present()`, `attachCardScanFragment()`, `removeCardScanFragment()`) have been deprecated
+    * `CardScanSheetResult` and its implementations (`Completed`, `Canceled`, `Failed`) have been deprecated
+    * `CardScanSheet.CardScanResultCallback` has been deprecated
+    * `ScannedCard` has been deprecated
+    * `CancellationReason` and its implementations (`Closed`, `Back`, `UserCannotScan`, `CameraPermissionDenied`) have been deprecated
+    * - If your app uses `CardScanSheet` functionality, we recommend migrating to [CardScan in our PaymentSheet](https://docs.corp.stripe.com/payments/mobile/accept-payment?platform=android&type=payment#card-scanning) for better long-term support. 
+    * - Also, if you don't use `PaymentSheet`, you can use a product like [Google Payment Card Recognition API](https://developers.google.com/pay/payment-card-recognition/debit-credit-card-recognition)
+
 ## Migrating from versions < 21.18.0
 - Changes to `PaymentSheet`:
   * The constructors have been deprecated and will be removed in a future release. Use `PaymentSheet.Builder` instead.

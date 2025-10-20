@@ -88,6 +88,8 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest {
 
         paymentSheetPage.clickPrimaryButton()
 
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
+
         integrationType.assertDefaultPaymentMethodsDeferredSSCErrorShown(
             composeTestRule = composeTestRule,
             testContext = testContext,
@@ -142,6 +144,8 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest {
         }
 
         paymentSheetPage.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
 
         integrationType.assertDefaultPaymentMethodsDeferredSSCErrorShown(
             composeTestRule = composeTestRule,

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -37,18 +38,18 @@ internal object AutocompleteContract :
 
     sealed class Result : ActivityStarter.Result {
         abstract val id: String
-        abstract val addressDetails: AddressDetails?
+        abstract val address: PaymentSheet.Address?
 
         @Parcelize
         data class EnterManually(
             override val id: String,
-            override val addressDetails: AddressDetails?,
+            override val address: PaymentSheet.Address?,
         ) : Result()
 
         @Parcelize
         data class Address(
             override val id: String,
-            override val addressDetails: AddressDetails?,
+            override val address: PaymentSheet.Address?,
         ) : Result()
 
         override fun toBundle(): Bundle {

@@ -33,6 +33,7 @@ private object BillieUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         paymentMethodDefinition = BillieDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_billie,
-        iconResource = R.drawable.stripe_ic_paymentsheet_pm_billie,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_billie_day,
+        iconResourceNight = R.drawable.stripe_ic_paymentsheet_pm_billie_night,
     )
 }

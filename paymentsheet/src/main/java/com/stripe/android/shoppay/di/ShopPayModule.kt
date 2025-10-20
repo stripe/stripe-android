@@ -4,16 +4,22 @@ import com.stripe.android.BuildConfig
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.ShopPayHandlers
@@ -40,6 +46,7 @@ import javax.inject.Named
 @Module(
     includes = [
         StripeRepositoryModule::class,
+        PaymentElementRequestSurfaceModule::class,
     ]
 )
 internal interface ShopPayModule {
@@ -77,6 +84,11 @@ internal interface ShopPayModule {
         parser: ECEShippingRateJsonParser
     ): ModelJsonParser<ECEShippingRate>
 
+    @Binds
+    fun bindsAnalyticsRequestFactory(
+        paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
+    ): AnalyticsRequestFactory
+
     companion object {
         @OptIn(ShopPayPreview::class)
         @Provides
@@ -110,6 +122,15 @@ internal interface ShopPayModule {
 
         @Provides
         fun provideDurationProvider(): DurationProvider = DefaultDurationProvider.instance
+
+        @Provides
+        internal fun providesErrorReporter(
+            analyticsRequestFactory: AnalyticsRequestFactory,
+            analyticsRequestExecutor: AnalyticsRequestExecutor
+        ): ErrorReporter = RealErrorReporter(
+            analyticsRequestFactory = analyticsRequestFactory,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+        )
 
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)
         @Provides

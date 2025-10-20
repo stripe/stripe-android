@@ -35,10 +35,12 @@ import javax.inject.Singleton
         ApplicationIdModule::class,
         MobileSessionIdModule::class,
         CardScanModule::class,
-        LinkHoldbackExposureModule::class
+        LinkHoldbackExposureModule::class,
+        PaymentsIntegrityModule::class,
     ],
     subcomponents = [
-        LinkControllerComponent::class
+        LinkControllerPresenterComponent::class,
+        LinkComponent::class,
     ]
 )
 internal interface LinkControllerModule {

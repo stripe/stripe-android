@@ -7,7 +7,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
-import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.BILLING_DETAILS
 import com.stripe.android.model.StripeIntent
@@ -92,10 +91,10 @@ internal object PaymentSheetFixtures {
         )
     )
 
-    const val DEFAULT_EPHEMERAL_KEY = "ek_6bpdbs8volf6ods1y6tf8oy9p9g64ehr"
+    const val DEFAULT_EPHEMERAL_KEY = "ek_123"
 
     private val defaultCustomerConfig = PaymentSheet.CustomerConfiguration(
-        id = "customer_id",
+        id = "cus_123",
         ephemeralKeySecret = DEFAULT_EPHEMERAL_KEY
     )
 
@@ -106,9 +105,6 @@ internal object PaymentSheetFixtures {
     )
 
     internal val EMPTY_CUSTOMER_STATE = CustomerState(
-        id = defaultCustomerConfig.id,
-        ephemeralKeySecret = defaultCustomerConfig.ephemeralKeySecret,
-        customerSessionClientSecret = null,
         paymentMethods = listOf(),
         defaultPaymentMethodId = null,
     )
@@ -173,7 +169,7 @@ internal object PaymentSheetFixtures {
         productUsage = mock(),
         paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
         linkAccountInfo = LinkAccountUpdate.Value(null),
-        walletsToShow = WalletType.entries,
+        walletButtonsRendered = false,
     )
 
     internal fun PaymentOptionContract.Args.updateState(
@@ -187,9 +183,6 @@ internal object PaymentSheetFixtures {
         return copy(
             state = state.copy(
                 customer = CustomerState(
-                    id = config.customer?.id ?: "cus_1",
-                    ephemeralKeySecret = config.customer?.ephemeralKeySecret ?: "client_secret",
-                    customerSessionClientSecret = null,
                     paymentMethods = paymentMethods,
                     defaultPaymentMethodId = null,
                 ),

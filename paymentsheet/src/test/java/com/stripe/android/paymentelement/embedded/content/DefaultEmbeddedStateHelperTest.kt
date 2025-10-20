@@ -8,7 +8,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -31,7 +33,7 @@ import kotlin.test.assertFailsWith
 
 internal class DefaultEmbeddedStateHelperTest {
     @Test
-    fun `setting state correctly sets row style`() = testScenario {
+    fun `setting state correctly sets appearance`() = testScenario {
         setState {
             appearance(
                 PaymentSheet.Appearance(
@@ -42,8 +44,8 @@ internal class DefaultEmbeddedStateHelperTest {
             )
         }
 
-        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem().rowStyle)
-            .isEqualTo(Embedded.RowStyle.FlatWithRadio.default)
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem().appearance)
+            .isEqualTo(Embedded(Embedded.RowStyle.FlatWithRadio.default))
     }
 
     @Test
@@ -83,6 +85,7 @@ internal class DefaultEmbeddedStateHelperTest {
             selection = PaymentSelection.GooglePay,
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
         )
+        selectionHolder.previousNewSelections.putParcelable("card", PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
         assertThat(stateHelper.state).isNotNull()
         assertThat(confirmationStateHolder.state).isNotNull()
@@ -96,6 +99,7 @@ internal class DefaultEmbeddedStateHelperTest {
         assertThat(confirmationStateHolder.state).isNull()
         assertThat(customerStateHolder.customer.value).isNull()
         assertThat(selectionHolder.selection.value).isNull()
+        assertThat(selectionHolder.previousNewSelections.isEmpty).isTrue()
         assertThat(embeddedContentHelper.clearEmbeddedContentTurbine.awaitItem()).isEqualTo(Unit)
     }
 
@@ -106,6 +110,7 @@ internal class DefaultEmbeddedStateHelperTest {
         setState {
             googlePay(null)
             customer(null)
+            embeddedViewDisplaysMandateText(false)
             formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
         }
 
@@ -143,6 +148,7 @@ internal class DefaultEmbeddedStateHelperTest {
             )
             customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
             formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+            embeddedViewDisplaysMandateText(false)
         }
 
         assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
@@ -209,7 +215,8 @@ internal class DefaultEmbeddedStateHelperTest {
             customerStateHolder = customerStateHolder,
             confirmationStateHolder = confirmationStateHolder,
             embeddedContentHelper = embeddedContentHelper,
-            internalRowSelectionCallback = { rowSelectionCallback }
+            internalRowSelectionCallback = { rowSelectionCallback },
+            confirmationHandler = FakeConfirmationHandler(),
         )
 
         Scenario(

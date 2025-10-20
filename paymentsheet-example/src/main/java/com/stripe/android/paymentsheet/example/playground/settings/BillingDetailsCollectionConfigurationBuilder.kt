@@ -10,6 +10,7 @@ internal class BillingDetailsCollectionConfigurationBuilder(
     var email: CollectionMode = CollectionMode.Automatic,
     var address: AddressCollectionMode = AddressCollectionMode.Automatic,
     var attachDefaultsToPaymentMethod: Boolean = false,
+    var allowedCountries: Set<String> = emptySet()
 ) {
     fun build(): PaymentSheet.BillingDetailsCollectionConfiguration {
         return PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -18,6 +19,7 @@ internal class BillingDetailsCollectionConfigurationBuilder(
             email = email,
             address = address,
             attachDefaultsToPaymentMethod = attachDefaultsToPaymentMethod,
+            allowedCountries = allowedCountries,
         )
     }
 }

@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">Hrbtna stran vozniškega dovoljenja</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">Izbrana je zadnja stran vozniškega dovoljenja</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">Hrbtna stran vozniškega dovoljenja ali osebnega dokumenta s fotografijo, ki ga je izdal državni organ</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Hrbtna stran osebne izkaznice</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">Ime</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">Maska za animacijo selfija</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">Obrnite vozniško dovoljenje ali osebni dokument s fotografijo, ki ga je izdal državni organ, na drugo stran</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">Obrnite osebni dokument s fotografijo na drugo stran.</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">Sprednja stran vozniškega dovoljenja, potnega lista ali osebnega dokumenta s fotografijo, ki ga je izdal državni organ</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">Sprednja stran vozniškega dovoljenja</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">Izbrana je sprednja stran vozniškega dovoljenja</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">Sprednja stran vozniškega dovoljenja ali osebnega dokumenta s fotografijo, ki ga je izdal državni organ</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">Sprednja stran vozniškega dovoljenja ali potnega lista</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Sprednja stran osebne izkaznice</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Sprednja stran osebnega dokumenta</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Izbrana je sprednja stran osebnega dokumenta</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">Sprednja stran potnega lista</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">Sprednja stran potnega lista ali osebnega dokumenta s fotografijo, ki ga je izdal državni organ</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">Nazaj</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">Telefonska številka</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">Noben dokument ni bil zaznan</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">Namestite vozniško dovoljenje, potni list ali osebni dokument s fotografijo, ki ga je izdal državni organ, v sredino okvirja</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Obrnite vozniško dovoljenje na drugo stran</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">Zagotovite, da je vozniško dovoljenje na sredini okvirja</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">Namestite vozniško dovoljenje ali osebni dokument s fotografijo, ki ga je izdal državni organ, v sredino okvirja</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">Namestite vozniško dovoljenje ali potni list v sredino okvirja</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">Obrnite osebno izkaznico na drugo stran</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">Zagotovite, da je osebna izkaznica na sredini okvirja</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">Zagotovite, da je potni list na sredini okvirja</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">Namestite potni list ali osebni dokument s fotografijo, ki ga je izdal državni organ, v sredino okvirja</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Zagotovite, da je vaš obraz na sredini okvira.</string>
   <!-- Instructional text when the document is too blurry -->
@@ -205,8 +229,6 @@
   <string name="stripe_test_model_title">Trenutno ste v načinu preskusne uporabe</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Poskusi znova</string>
-  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="stripe_unexpected_error_try_again">Prišlo je do nepričakovane napake. Poskusite znova čez nekaj sekund.</string>
   <!-- Description to upload a photo -->
   <string name="stripe_upload_a_photo">Naložite fotografijo</string>
   <!-- Title of dialog to upload back of driver license -->

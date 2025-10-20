@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">In-naħa ta\' wara tal-liċenzja tas-sewqan</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">Għażilt in-naħa ta\' wara tal-liċenzja tas-sewqan</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">In-naħa ta’ wara tal-liċenzja tas-sewqan jew dokument ta’ identifikazzjoni bir-ritratt maħruġ mill-gvern</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">In-naħa ta\' wara tal-karta tal-identità</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">Ismek</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">Maskra għall-animazzjoni tal-istessi</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">Aqleb il-liċenzja tas-sewqan tiegħek jew l-ID bir-ritratt maħruġa mill-gvern fuq in-naħa l-oħra</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">Aqleb l-ID tar-ritratt maħruġ mill-gvern tiegħek fuq in-naħa l-oħra</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">In-naħa ta’ quddiem il-liċenzja tas-sewqan, passaport, jew dokument ta’ identifikazzjoni bir-ritratt maħruġ mill-gvern</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">In-naħa ta\' quddiem tal-liċenzja tas-sewqan</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">Għażilt in-naħa ta\' quddiem tal-liċenzja tas-sewqan</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">In-naħa ta’ quddiem il-liċenzja tas-sewqan jew dokument ta’ identifikazzjoni bir-ritratt maħruġ mill-gvern</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">In-naħa ta’ quddiem il-liċenzja tas-sewqan jew il-passaport</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">In-naħa ta\' quddiem tal-karta tal-identità</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">In-naħa ta\' quddiem tad-dokument tal-identità</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Għażilt in-naħa ta\' quddiem tal-karta tal-identità</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">In-naħa ta’ quddiem il-passaport</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">In-naħa ta’ quddiem il-passaport jew dokument ta\' identifikazzjoni bir-ritratt maħruġ mill-gvern</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">Mur Lura</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">Numru tal-Mowbajl</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">Ma nstab l-ebda dokument</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">Poġġi l-liċenzja tas-sewqan, il-passaport, jew l-ID bir-ritratt maħruġa mill-gvern tiegħek fiċ-ċentru tal-frame</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Dawwar il-liċenzja tas-sewqan tiegħek</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">Qiegħed il-liċenzja tas-sewqan tiegħek f\'nofs il-gwarniċ</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">Poġġi l-liċenzja tas-sewqan tiegħek jew l-ID bir-ritratt maħruġa mill-gvern fiċ-ċentru tal-frame</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">Poġġi l-liċenzja tas-sewqan tiegħek jew il-passaport fiċ-ċentru tal-frame</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">Dawwar il-karta tal-identità tiegħek</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">Qiegħed il-karta tal-identità tiegħek f\'nofs il-gwarniċ</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">Qiegħed il-passaport tiegħek f\'nofs il-gwarniċ</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">Poġġi l-passaport tiegħek jew l-ID bir-ritratt maħruġa mill-gvern fiċ-ċentru tal-frame</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Qiegħed wiċċek f\'nofs il-gwarniċ.</string>
   <!-- Instructional text when the document is too blurry -->
@@ -205,8 +229,6 @@
   <string name="stripe_test_model_title">Bħalissa qed tuża l-modalità ta\' prova</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Erġa\' Pprova</string>
-  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="stripe_unexpected_error_try_again">Kien hemm żball mhux mistenni -- erġa\' pprova wara ftit sekondi</string>
   <!-- Description to upload a photo -->
   <string name="stripe_upload_a_photo">Tella\' ritratt</string>
   <!-- Title of dialog to upload back of driver license -->
