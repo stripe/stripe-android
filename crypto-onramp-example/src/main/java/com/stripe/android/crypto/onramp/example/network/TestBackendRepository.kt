@@ -30,24 +30,6 @@ class TestBackendRepository {
         ignoreUnknownKeys = true
     }
 
-    suspend fun createAuthIntent(
-        email: String,
-        oauthScopes: String,
-    ): ApiResult<CreateAuthIntentResponse, FuelError> {
-        return withContext(Dispatchers.IO) {
-            val request = CreateAuthIntentRequest(
-                email = email,
-                oauthScopes = oauthScopes,
-            )
-            val requestBody = json.encodeToString(CreateAuthIntentRequest.serializer(), request)
-
-            manager.post("$baseUrl/auth_intent/create")
-                .jsonBody(requestBody)
-                .suspendable()
-                .awaitModel(CreateAuthIntentResponse.serializer(), json)
-        }
-    }
-
     suspend fun createOnrampSession(
         paymentToken: String,
         walletAddress: String,

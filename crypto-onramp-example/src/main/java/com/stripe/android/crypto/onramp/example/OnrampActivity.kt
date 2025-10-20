@@ -138,10 +138,6 @@ internal class OnrampActivity : ComponentActivity() {
                                 }
                             }
                         },
-                        onAuthorize = { linkAuthIntentId ->
-                            viewModel.onAuthorize(linkAuthIntentId)
-                            onrampPresenter.authorize(linkAuthIntentId)
-                        },
                         onRegisterWalletAddress = { address, network ->
                             viewModel.registerWalletAddress(address, network)
                         },
@@ -211,7 +207,6 @@ internal fun OnrampScreen(
     viewModel: OnrampViewModel,
     modifier: Modifier = Modifier,
     onAuthenticateUser: (oauthScopes: String?) -> Unit,
-    onAuthorize: (linkAuthIntentId: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
@@ -860,33 +855,6 @@ private fun StartVerificationScreen(
                 .padding(bottom = 24.dp)
         ) {
             Text("Start Identity Verification")
-        }
-    }
-}
-
-@Composable
-private fun AuthorizeSection(
-    onAuthorize: (String) -> Unit
-) {
-    var linkAuthIntentId by remember { mutableStateOf("") }
-
-    Column {
-        OutlinedTextField(
-            value = linkAuthIntentId,
-            onValueChange = { linkAuthIntentId = it },
-            label = { Text("LinkAuthIntent ID") },
-            placeholder = { Text("lai_...") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        )
-
-        Button(
-            onClick = { onAuthorize(linkAuthIntentId) },
-            enabled = linkAuthIntentId.isNotBlank(),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Authorize")
         }
     }
 }

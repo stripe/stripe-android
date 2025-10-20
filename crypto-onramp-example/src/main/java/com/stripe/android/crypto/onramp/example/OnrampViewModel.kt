@@ -569,22 +569,28 @@ internal class OnrampViewModel(
     }
 
     suspend fun createLinkAuthIntent(oauthScopes: String): String? {
-        val currentState = _uiState.value
-        val email = currentState.email
         return createAuthIntentForUser(
-            email = email,
             oauthScopes = oauthScopes
         )
     }
 
-    private suspend fun createAuthIntentForUser(email: String, oauthScopes: String): String? {
-        val result = testBackendRepository.createAuthIntent(email = email, oauthScopes = oauthScopes)
+    private suspend fun createAuthIntentForUser(oauthScopes: String): String? {
+        val tokenWithoutLAI = _uiState.value.authToken
+        if (tokenWithoutLAI == null) {
+            return null
+        }
+
+        val result = testBackendRepository.create(
+            oauthScopes,
+            tokenWithoutLAI = tokenWithoutLAI
+        )
+
         when (result) {
             is Result.Success -> {
                 val response = result.value
                 _uiState.update { it.copy(authToken = response.token) }
                 _message.value = "Auth intent created successfully"
-                return response.data.id
+                return response.authIntentId
             }
             is Result.Failure -> {
                 _message.value = "Failed to create auth intent: ${result.error.message}"
