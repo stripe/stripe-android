@@ -2721,7 +2721,7 @@ internal class PaymentSheetViewModelTest {
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
                 passiveCaptchaParams = null,
-                clientAttributionMetadata = null
+                clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             )
         )
 
@@ -2766,7 +2766,7 @@ internal class PaymentSheetViewModelTest {
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
                 passiveCaptchaParams = null,
-                clientAttributionMetadata = null
+                clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             )
         )
 
