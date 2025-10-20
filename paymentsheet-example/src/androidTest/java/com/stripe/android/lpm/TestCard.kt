@@ -15,14 +15,21 @@ import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSe
 import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Currency
+import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionOnBehalfOfSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.test.core.FieldPopulator
@@ -408,6 +415,46 @@ internal class TestCard : BasePlaygroundTest() {
                         .and(hasText("4242", substring = true)),
                     timeoutMillis = 5000L
                 )
+            },
+        )
+    }
+
+    @Test
+    fun testCardWithOBO_UseCartesBancaires_Payment() {
+        testCardWithObo("Cartes Bancaires", CheckoutMode.PAYMENT)
+    }
+
+    @Test
+    fun testCardWithOBO_UseCartesBancaires_SFU() {
+        testCardWithObo("Cartes Bancaires", CheckoutMode.PAYMENT_WITH_SETUP)
+    }
+
+    @Test
+    fun testCardWithOBO_UseCartesBancaires_Setup() {
+        testCardWithObo("Cartes Bancaires", CheckoutMode.SETUP)
+    }
+
+    @Test
+    fun testCardWithOBO_UseVisa() {
+        testCardWithObo("Visa", CheckoutMode.PAYMENT)
+    }
+
+    private fun testCardWithObo(cardBrandDisplayName: String, checkoutMode: CheckoutMode) {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[GooglePaySettingsDefinition] = false
+                settings[CountrySettingsDefinition] = Country.US
+                settings[CustomerSessionOnBehalfOfSettingsDefinition] =
+                    CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT
+                settings[CustomerSessionSettingsDefinition] = true
+                settings[CurrencySettingsDefinition] = Currency.EUR
+
+                settings[SupportedPaymentMethodsSettingsDefinition] = "card"
+
+                settings[CheckoutModeSettingsDefinition] = checkoutMode
+            },
+            populateCustomLpmFields = {
+                populateCardBrandChoiceCardDetails(cardBrandDisplayName)
             },
         )
     }
