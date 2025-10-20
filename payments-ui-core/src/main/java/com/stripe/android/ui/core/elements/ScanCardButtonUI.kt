@@ -19,11 +19,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityOptionsCompat
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher
-import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher.Companion.rememberCardScanGoogleLauncher
-import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.utils.collectAsState
@@ -31,29 +28,12 @@ import com.stripe.android.uicore.utils.collectAsState
 @Composable
 internal fun ScanCardButtonUI(
     enabled: Boolean,
-    launchOptions: ActivityOptionsCompat? = null,
-    controller: CardDetailsSectionController
+    cardScanGoogleLauncher: CardScanGoogleLauncher?,
 ) {
-    val context = LocalContext.current
-    val eventsReporter = LocalCardScanEventsReporter.current
-    val cardScanGoogleLauncher = rememberCardScanGoogleLauncher(
-        context,
-        eventsReporter,
-        options = launchOptions,
-        controller.cardDetailsElement.controller.onCardScanResult
-    )
+    if (cardScanGoogleLauncher == null) {
+        return
+    }
 
-    ScanCardButtonContent(
-        enabled = enabled,
-        cardScanGoogleLauncher = cardScanGoogleLauncher,
-    )
-}
-
-@Composable
-private fun ScanCardButtonContent(
-    enabled: Boolean,
-    cardScanGoogleLauncher: CardScanGoogleLauncher
-) {
     val context = LocalContext.current
     val isCardScanGoogleAvailable by cardScanGoogleLauncher.isAvailable.collectAsState()
 

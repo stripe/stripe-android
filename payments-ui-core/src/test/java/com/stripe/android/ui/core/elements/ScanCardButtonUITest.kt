@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -16,6 +17,7 @@ import app.cash.turbine.Turbine
 import com.google.android.gms.wallet.CreditCardExpirationDate
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher.Companion.rememberCardScanGoogleLauncher
 import com.stripe.android.ui.core.cardscan.FakeCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.FakePaymentCardRecognitionClient
 import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
@@ -25,7 +27,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
@@ -47,23 +48,6 @@ internal class ScanCardButtonUITest {
         isFetchClientSucceed = false,
     ) {
         composeTestRule.onNodeWithText("Scan card").assertDoesNotExist()
-    }
-
-    // Create mock controller for visibility tests
-    private fun createMockController(
-        cardScanCall: Turbine<String>
-    ): CardDetailsSectionController {
-        val controller = mock<CardDetailsSectionController>()
-        val mockCardDetailsElement = mock<CardDetailsElement>()
-        val mockCardDetailsController = mock<CardDetailsController>()
-
-        whenever(controller.cardDetailsElement).thenReturn(mockCardDetailsElement)
-        whenever(mockCardDetailsElement.controller).thenReturn(mockCardDetailsController)
-
-        // Mock the onCardScanResult function that Google launcher needs
-        whenever(mockCardDetailsController.onCardScanResult).thenReturn { cardScanCall.add("google_pay") }
-
-        return controller
     }
 
     private fun createMockPaymentCardRecognitionResultIntent(): Intent {
@@ -119,11 +103,16 @@ internal class ScanCardButtonUITest {
                 LocalCardScanEventsReporter provides FakeCardScanEventsReporter(),
                 LocalPaymentCardRecognitionClient provides FakePaymentCardRecognitionClient(isFetchClientSucceed)
             ) {
+                val context = LocalContext.current
+                val eventsReporter = LocalCardScanEventsReporter.current
+                val cardScanLauncher = rememberCardScanGoogleLauncher(
+                    context = context,
+                    eventsReporter = eventsReporter,
+                ) { cardScanCall.add("google_pay") }
+
                 ScanCardButtonUI(
                     enabled = true,
-                    controller = createMockController(
-                        cardScanCall = cardScanCall
-                    )
+                    cardScanGoogleLauncher = cardScanLauncher
                 )
             }
         }
