@@ -71,7 +71,7 @@ internal class USBankAccountFormArguments(
     val termsDisplay: PaymentSheet.TermsDisplay,
     val sellerBusinessName: String?,
     val forceSetupFutureUseBehavior: Boolean,
-    val clientAttributionMetadata: ClientAttributionMetadata?,
+    val clientAttributionMetadata: ClientAttributionMetadata,
 ) {
     companion object {
         fun create(

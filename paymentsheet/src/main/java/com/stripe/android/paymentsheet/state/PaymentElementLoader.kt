@@ -331,7 +331,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         linkStateResult: LinkStateResult,
         isGooglePayReady: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode,
-        clientAttributionMetadata: ClientAttributionMetadata?,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): PaymentMethodMetadata {
         val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
             stripeIntent = elementsSession.stripeIntent,

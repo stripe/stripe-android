@@ -20,6 +20,7 @@ import com.stripe.android.link.repositories.FakeLinkRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -462,7 +463,7 @@ class DefaultLinkAccountManagerTest {
                 paymentMethodCreateParams: PaymentMethodCreateParams,
                 id: String,
                 consumerSessionClientSecret: String,
-                clientAttributionMetadata: ClientAttributionMetadata?,
+                clientAttributionMetadata: ClientAttributionMetadata,
             ): Result<LinkPaymentDetails.Saved> {
                 val paymentDetailsMatch = paymentMethodCreateParams == newPaymentDetails.originalParams &&
                     id == newPaymentDetails.paymentDetails.id
@@ -473,7 +474,7 @@ class DefaultLinkAccountManagerTest {
                     paymentMethodCreateParams = paymentMethodCreateParams,
                     id = id,
                     consumerSessionClientSecret = consumerSessionClientSecret,
-                    clientAttributionMetadata = null,
+                    clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                 )
             }
         }

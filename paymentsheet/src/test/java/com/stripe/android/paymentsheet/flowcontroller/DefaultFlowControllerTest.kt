@@ -354,7 +354,7 @@ internal class DefaultFlowControllerTest {
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
                 passiveCaptchaParams = null,
-                clientAttributionMetadata = null,
+                clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             )
         )
 
@@ -1351,7 +1351,7 @@ internal class DefaultFlowControllerTest {
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
                 passiveCaptchaParams = null,
-                clientAttributionMetadata = null,
+                clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             )
         )
     }
@@ -2019,7 +2019,7 @@ internal class DefaultFlowControllerTest {
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
                 passiveCaptchaParams = null,
-                clientAttributionMetadata = null,
+                clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             )
         )
     }

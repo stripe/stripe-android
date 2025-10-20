@@ -28,7 +28,7 @@ class FieldValuesToParamsMapConverter {
             code: PaymentMethodCode,
             requiresMandate: Boolean,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
-            clientAttributionMetadata: ClientAttributionMetadata?,
+            clientAttributionMetadata: ClientAttributionMetadata,
         ): PaymentMethodCreateParams {
             val fieldValuePairsForCreateParams = fieldValuePairs.filter { entry ->
                 entry.key.destination == ParameterDestination.Api.Params
