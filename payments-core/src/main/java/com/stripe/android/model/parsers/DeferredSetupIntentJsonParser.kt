@@ -44,6 +44,7 @@ class DeferredSetupIntentJsonParser(
             created = timeProvider(),
             status = null,
             usage = setupMode.setupFutureUsage,
+            automaticPaymentMethodsEnabled = paymentMethodTypes.isEmpty(),
         )
     }
 

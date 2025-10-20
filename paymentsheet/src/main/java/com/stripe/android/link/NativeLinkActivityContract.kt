@@ -6,6 +6,7 @@ import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import javax.inject.Inject
 
@@ -14,6 +15,7 @@ import javax.inject.Inject
  */
 internal class NativeLinkActivityContract @Inject constructor(
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    private val requestSurface: RequestSurface,
 ) :
     ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
     override fun createIntent(context: Context, input: LinkActivityContract.Args): Intent {
@@ -22,12 +24,15 @@ internal class NativeLinkActivityContract @Inject constructor(
             context = context,
             args = NativeLinkArgs(
                 configuration = input.configuration,
+                requestSurface = requestSurface,
                 stripeAccountId = paymentConfiguration.stripeAccountId,
                 publishableKey = paymentConfiguration.publishableKey,
-                startWithVerificationDialog = input.startWithVerificationDialog,
+                linkExpressMode = input.linkExpressMode,
                 launchMode = input.launchMode,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 linkAccountInfo = input.linkAccountInfo,
+                passiveCaptchaParams = input.passiveCaptchaParams,
+                attestOnIntentConfirmation = input.attestOnIntentConfirmation,
             )
         )
     }

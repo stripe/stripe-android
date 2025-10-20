@@ -236,6 +236,19 @@ class PaymentMethodCreateParamsTest {
     fun `createLink correctly set parameters`() {
         val paymentDetailsId = "payment_details_123"
         val consumerSessionClientSecret = "client_secret_123"
+        val billingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                line1 = "123 Main Street",
+                line2 = null,
+                postalCode = "12345",
+                city = "Smalltown",
+                state = "CA",
+                country = "US",
+            ),
+            email = "john@doe.com",
+            name = "John Doe",
+            phone = "+15555555555",
+        )
         val extraParams = mapOf(
             "card" to mapOf(
                 "cvc" to "123"
@@ -246,6 +259,7 @@ class PaymentMethodCreateParamsTest {
             PaymentMethodCreateParams.createLink(
                 paymentDetailsId,
                 consumerSessionClientSecret,
+                billingDetails,
                 extraParams
             ).toParamMap()
         ).isEqualTo(
@@ -258,8 +272,20 @@ class PaymentMethodCreateParamsTest {
                     ),
                     "card" to mapOf(
                         "cvc" to "123"
-                    )
-                )
+                    ),
+                ),
+                "billing_details" to mapOf(
+                    "address" to mapOf(
+                        "line1" to "123 Main Street",
+                        "postal_code" to "12345",
+                        "city" to "Smalltown",
+                        "state" to "CA",
+                        "country" to "US",
+                    ),
+                    "name" to "John Doe",
+                    "email" to "john@doe.com",
+                    "phone" to "+15555555555",
+                ),
             )
         )
     }
@@ -293,7 +319,8 @@ class PaymentMethodCreateParamsTest {
             ),
             productUsage = setOf(),
             billingDetails = null,
-            requiresMandate = false
+            requiresMandate = false,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
 
         assertThat(
@@ -328,7 +355,8 @@ class PaymentMethodCreateParamsTest {
             ),
             productUsage = setOf(),
             billingDetails = null,
-            requiresMandate = false
+            requiresMandate = false,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
 
         assertThat(
@@ -358,7 +386,8 @@ class PaymentMethodCreateParamsTest {
             ),
             productUsage = setOf(),
             billingDetails = null,
-            requiresMandate = false
+            requiresMandate = false,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
 
         assertThat(
@@ -447,6 +476,38 @@ class PaymentMethodCreateParamsTest {
             ).toParamMap()
         ).containsEntry("allow_redisplay", "always")
     }
+
+    @Test
+    fun `toParamMap() includes ClientAttributionMetadata if not null`() {
+        val clientAttributionMetadata = ClientAttributionMetadata(
+            elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+        )
+        val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
+            code = "card",
+            overrideParamMap = mapOf(
+                "billing_details" to mapOf(
+                    "email" to "johndoe@email.com"
+                )
+            ),
+            productUsage = setOf(),
+            billingDetails = null,
+            requiresMandate = false,
+            clientAttributionMetadata = clientAttributionMetadata,
+        )
+
+        assertThat(paymentMethodCreateParams.toParamMap()).containsEntry(
+            "client_attribution_metadata",
+            clientAttributionMetadata.toParamMap(),
+        )
+    }
+
+    private val clientAttributionMetadata = ClientAttributionMetadata(
+        elementsSessionConfigId = "elements_session_123",
+        paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+        paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+    )
 
     private fun createFpx(): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(

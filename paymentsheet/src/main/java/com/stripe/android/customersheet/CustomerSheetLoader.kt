@@ -2,9 +2,11 @@ package com.stripe.android.customersheet
 
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.coroutines.awaitWithTimeout
+import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
+import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.customersheet.util.CustomerSheetHacks
@@ -41,6 +43,7 @@ internal class DefaultCustomerSheetLoader(
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
     private val lpmRepository: LpmRepository,
     private val initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>,
+    private val eventReporter: CustomerSheetEventReporter,
     private val errorReporter: ErrorReporter,
     private val workContext: CoroutineContext
 ) : CustomerSheetLoader {
@@ -50,6 +53,7 @@ internal class DefaultCustomerSheetLoader(
         googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
         lpmRepository: LpmRepository,
+        eventReporter: CustomerSheetEventReporter,
         errorReporter: ErrorReporter,
         @IOContext workContext: CoroutineContext
     ) : this(
@@ -58,41 +62,57 @@ internal class DefaultCustomerSheetLoader(
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         lpmRepository = lpmRepository,
         initializationDataSourceProvider = CustomerSheetHacks.initializationDataSource,
+        eventReporter = eventReporter,
         errorReporter = errorReporter,
         workContext = workContext,
     )
 
     override suspend fun load(
         configuration: CustomerSheet.Configuration
-    ): Result<CustomerSheetState.Full> = workContext.runCatching {
-        val initializationDataSource = retrieveInitializationDataSource().getOrThrow()
-        var customerSheetSession = initializationDataSource
-            .loadCustomerSheetSession(configuration)
-            .toResult()
-            .getOrThrow()
+    ): Result<CustomerSheetState.Full> {
+        val result = workContext.runCatching {
+            val initializationDataSource = retrieveInitializationDataSource().getOrThrow()
+            var customerSheetSession = initializationDataSource
+                .loadCustomerSheetSession(configuration)
+                .toResult()
+                .getOrThrow()
 
-        val isPaymentMethodSyncDefaultEnabled = getDefaultPaymentMethodsEnabledForCustomerSheet(
-            customerSheetSession.elementsSession
-        )
+            val isPaymentMethodSyncDefaultEnabled = getDefaultPaymentMethodsEnabledForCustomerSheet(
+                customerSheetSession.elementsSession
+            )
 
-        val filteredPaymentMethods = customerSheetSession.paymentMethods.filter { paymentMethod ->
-            PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(paymentMethod)
-        }.filterToSupportedPaymentMethods(isPaymentMethodSyncDefaultEnabled)
+            val filteredPaymentMethods = customerSheetSession.paymentMethods.filter { paymentMethod ->
+                PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(paymentMethod) &&
+                    paymentMethod.isSupportedWithBillingConfig(configuration.billingDetailsCollectionConfiguration)
+            }.filterToSupportedPaymentMethods(isPaymentMethodSyncDefaultEnabled)
 
-        customerSheetSession = customerSheetSession.copy(
-            paymentMethods = filteredPaymentMethods
-        )
+            customerSheetSession = customerSheetSession.copy(
+                paymentMethods = filteredPaymentMethods
+            )
 
-        val metadata = createPaymentMethodMetadata(
-            configuration = configuration,
-            customerSheetSession = customerSheetSession,
-            isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
-        )
+            val metadata = createPaymentMethodMetadata(
+                configuration = configuration,
+                customerSheetSession = customerSheetSession,
+                isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
+            )
 
-        createCustomerSheetState(
-            customerSheetSession = customerSheetSession,
-            metadata = metadata,
-            configuration = configuration,
+            val state = createCustomerSheetState(
+                customerSheetSession = customerSheetSession,
+                metadata = metadata,
+                configuration = configuration,
+            )
+            state to customerSheetSession
+        }
+
+        return result.fold(
+            onSuccess = { (state, session) ->
+                eventReporter.onLoadSucceeded(session)
+                Result.success(state)
+            },
+            onFailure = { error ->
+                eventReporter.onLoadFailed(error)
+                Result.failure(error)
+            }
         )
     }
 
@@ -127,7 +147,9 @@ internal class DefaultCustomerSheetLoader(
         ).isReady().first()
 
         val customerMetadata = CustomerMetadata(
-            hasCustomerConfiguration = true,
+            id = customerSheetSession.customerId,
+            ephemeralKeySecret = customerSheetSession.customerEphemeralKeySecret,
+            customerSessionClientSecret = customerSheetSession.customerSessionClientSecret,
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
             permissions = CustomerMetadata.Permissions.createForCustomerSheet(
                 configuration = configuration,

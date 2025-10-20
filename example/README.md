@@ -10,17 +10,18 @@
 ### Install
 1. Clone the `stripe-android` repository.
 2. Open the project in Android Studio.
-3. After [remixing the Glitch project](#remix-the-example-project-on-glitch) and [configuring the app](#configure-the-app), build and run the project.
+3. After [forking the CodeSandbox project](#fork-the-example-project-on-codesandbox) and [configuring the app](#configure-the-app), build and run the project.
 
-<img width="215" height="108" src="https://raw.githubusercontent.com/stripe/stripe-android/master/example/images/run.png" />
-
-### Remix the example project on Glitch
-We provide an example backend hosted on Glitch, allowing you to easily test an integration end-to-end.
-1. [Open the Glitch project](https://glitch.com/edit/#!/stripe-example-mobile-backend).
-2. Click on "Remix", on the top right.
+### Fork the example project on CodeSandbox
+We provide an example backend hosted on CodeSandbox, allowing you to easily test an integration end-to-end.
+1. [Open the CodeSandbox project](https://codesandbox.io/p/devbox/stripe-example-mobile-backend-forked-xvwgtz).
+2. Click on "Fork", on the top right.
 3. In your newly created project, open the `.env` file in the left sidebar.
 4. Set your [Stripe testmode secret key](https://dashboard.stripe.com/test/apikeys) as the `STRIPE_TEST_SECRET_KEY` field.
 5. Your backend implementation should now be running. You can see the logs by clicking on "Logs" in the bottom bar.
+
+### Use a pre-existing example backend
+We also provide same backend code pre-deployed at [StripeDemos.com](https://https://stripe-example-mobile-backend.stripedemos.com/)
 
 ### Configure the app
 1. If it doesn't exist, create a `gradle.properties` in a location defined in the
@@ -30,7 +31,7 @@ We provide an example backend hosted on Glitch, allowing you to easily test an i
 
 ```
 # Set to example backend project in Glitch
-STRIPE_EXAMPLE_BACKEND_URL=https://stripe-example-mobile-backend.glitch.me/
+STRIPE_EXAMPLE_BACKEND_URL=https://stripe-example-mobile-backend.stripedemos.com/
 
 # Set to a test publishable key from https://dashboard.stripe.com/test/apikeys
 STRIPE_EXAMPLE_PUBLISHABLE_KEY=pk_test_mykey

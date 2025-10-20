@@ -4,33 +4,38 @@ import android.app.Application
 import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.di.MobileSessionIdModule
-import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedConfirmationSaver
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
+import com.stripe.android.paymentelement.embedded.EmbeddedConfirmationSaver
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
+import com.stripe.android.paymentsheet.state.CreateLinkState
+import com.stripe.android.paymentsheet.state.DefaultCreateLinkState
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
 import com.stripe.android.paymentsheet.state.DefaultRetrieveCustomerEmail
@@ -49,8 +54,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
 @Singleton
 @Component(
@@ -63,6 +68,7 @@ import kotlin.coroutines.CoroutineContext
         MobileSessionIdModule::class,
         CardScanModule::class,
         EmbeddedLinkExtrasModule::class,
+        PaymentsIntegrityModule::class,
         LinkHoldbackExposureModule::class,
     ],
 )
@@ -127,6 +133,11 @@ internal interface EmbeddedPaymentElementViewModelModule {
     fun bindPaymentElementLoader(loader: DefaultPaymentElementLoader): PaymentElementLoader
 
     @Binds
+    fun bindsCreateLinkState(
+        impl: DefaultCreateLinkState,
+    ): CreateLinkState
+
+    @Binds
     fun bindRetrieveCustomerEmail(
         retrieveCustomerEmail: DefaultRetrieveCustomerEmail
     ): RetrieveCustomerEmail
@@ -150,6 +161,15 @@ internal interface EmbeddedPaymentElementViewModelModule {
         handler: DefaultEmbeddedRowSelectionImmediateActionHandler
     ): EmbeddedRowSelectionImmediateActionHandler
 
+    @Binds
+    fun bindsPrefsRepositoryFactory(
+        factory: DefaultPrefsRepository.Factory
+    ): PrefsRepository.Factory
+
+    @Binds
+    fun bindsConfirmationSaver(saver: DefaultEmbeddedConfirmationSaver): EmbeddedConfirmationSaver
+
+    @Suppress("TooManyFunctions")
     companion object {
         @Provides
         fun providesContext(application: Application): Context {
@@ -157,21 +177,27 @@ internal interface EmbeddedPaymentElementViewModelModule {
         }
 
         @Provides
-        @Singleton
-        fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
-            return LinkAccountHolder(savedStateHandle)
+        fun providesPaymentMethodMetadata(stateHolder: EmbeddedConfirmationStateHolder): PaymentMethodMetadata? {
+            return stateHolder.state?.paymentMethodMetadata
         }
 
         @Provides
-        fun providePrefsRepositoryFactory(
-            appContext: Context,
-            @IOContext workContext: CoroutineContext
-        ): (PaymentSheet.CustomerConfiguration?) -> PrefsRepository = { customerConfig ->
-            DefaultPrefsRepository(
-                appContext,
-                customerConfig?.id,
-                workContext
-            )
+        fun providesInitializationMode(
+            stateHolder: EmbeddedConfirmationStateHolder
+        ): PaymentElementLoader.InitializationMode? {
+            return stateHolder.state?.initializationMode
+        }
+
+        @Provides
+        @Named(IS_LIVE_MODE)
+        fun providesIsLiveMode(
+            paymentConfiguration: Provider<PaymentConfiguration>
+        ): () -> Boolean = { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
+
+        @Provides
+        @Singleton
+        fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
+            return LinkAccountHolder(savedStateHandle)
         }
 
         @Provides
@@ -222,6 +248,13 @@ internal interface EmbeddedPaymentElementViewModelModule {
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): InternalRowSelectionCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.rowSelectionCallback
+        }
+
+        // SelectedPaymentMethodCode is used in FormActivity to determine if cardScan should be automatically launched
+        // Outside of FormActivity it is not relevant, but is still required for dependency injection
+        @Provides
+        fun providesSelectedPaymentMethodCode(): String {
+            return ""
         }
     }
 }

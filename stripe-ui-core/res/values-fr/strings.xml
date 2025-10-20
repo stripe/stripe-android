@@ -40,10 +40,18 @@
   <string name="stripe_address_label_suburb">Banlieue</string>
   <!-- Used to describe an address field. -->
   <string name="stripe_address_label_village_township">Village ou commune</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="stripe_address_postal_code_incomplete">Votre code postal est incomplet.</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">Votre code postal n\'est pas valide.</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
   <string name="stripe_address_search_content_description">Rechercher</string>
+  <!-- Error message for when ZIP code in form is incomplete (US only) -->
+  <string name="stripe_address_zip_incomplete">Votre code postal est incomplet.</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="stripe_address_zip_invalid">Votre code postal n’est pas valide.</string>
+  <!-- Error text indicating the zip/postal code is invalid, used for addresses of unknown country -->
+  <string name="stripe_address_zip_or_postal_invalid">Votre code postal n\'est pas valide.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="stripe_address_zip_postal_invalid">Votre code postal n’est pas valide</string>
   <!-- Label for a checkbox that makes customers billing address same as their shipping address -->

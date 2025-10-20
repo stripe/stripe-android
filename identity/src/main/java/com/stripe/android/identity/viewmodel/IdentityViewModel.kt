@@ -859,6 +859,13 @@ internal class IdentityViewModel(
                     _missingRequirements.updateStateAndSave {
                         verificationPage.requirements.missing.toSet()
                     }
+
+                    val missingSet = verificationPage.requirements.missing.toSet()
+                    if (missingSet.contains(Requirement.IDDOCUMENTFRONT)) {
+                        _collectedData.updateStateAndSave { it.clearData(Requirement.IDDOCUMENTFRONT) }
+                        _documentFrontUploadedState.updateStateAndSave { SingleSideDocumentUploadState() }
+                    }
+
                     if (shouldRetrieveModel) {
                         downloadModelAndPost(
                             verificationPage.documentCapture.models.idDetectorUrl,
@@ -987,7 +994,13 @@ internal class IdentityViewModel(
                  * Only navigates to success when both submitted and closed are true.
                  */
                 submittedVerificationPageData.submittedAndClosed() -> {
-                    navController.navigateTo(ConfirmationDestination)
+                    val skipSuccessPage = _verificationPage.value?.data?.skipSuccessPage ?: false
+                    if (skipSuccessPage) {
+                        sendSucceededAnalyticsRequestForNative()
+                        finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Completed)
+                    } else {
+                        navController.navigateTo(ConfirmationDestination)
+                    }
                 }
 
                 else -> {

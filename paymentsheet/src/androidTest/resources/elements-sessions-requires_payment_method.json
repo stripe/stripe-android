@@ -9,7 +9,6 @@
   },
   "flags": {
     "elements_disable_paypal_express": true,
-    "elements_enable_blik": true,
     "elements_enable_br_card_installments": false,
     "elements_enable_deferred_intent": false,
     "elements_enable_demo_pay": false,
@@ -265,5 +264,7 @@
   "shipping_address_settings": {
     "autocomplete_allowed": true
   },
-  "unactivated_payment_method_types": []
+  "unactivated_payment_method_types": [],
+  "session_id": "elements_session_123",
+  "config_id": "e961790f-43ed-4fcc-a534-74eeca28d042"
 }

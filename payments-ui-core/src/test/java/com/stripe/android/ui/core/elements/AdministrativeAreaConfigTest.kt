@@ -3,10 +3,20 @@ package com.stripe.android.ui.core.elements
 import com.google.common.truth.Truth
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.elements.AdministrativeAreaConfig
+import com.stripe.android.uicore.elements.DropdownConfig
 import org.junit.Test
 import com.stripe.android.core.R as CoreR
 
 class AdministrativeAreaConfigTest {
+    @Test
+    fun `uses full dropdown mode with first option not selected`() {
+        val config = AdministrativeAreaConfig(
+            AdministrativeAreaConfig.Country.US()
+        )
+        Truth.assertThat(config.mode)
+            .isEqualTo(DropdownConfig.Mode.Full(selectsFirstOptionAsDefault = false))
+    }
+
     @Test
     fun `display values are full names of the state`() {
         val config = AdministrativeAreaConfig(

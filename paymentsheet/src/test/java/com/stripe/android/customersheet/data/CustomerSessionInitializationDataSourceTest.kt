@@ -2,6 +2,7 @@ package com.stripe.android.customersheet.data
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetFixtures
 import com.stripe.android.isInstanceOf
@@ -27,8 +28,10 @@ class CustomerSessionInitializationDataSourceTest {
                 intent = intent,
                 paymentMethods = paymentMethods,
                 customerSheetComponent = createEnabledCustomerSheetComponent(
-                    isPaymentMethodRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = true,
+                    paymentMethodRemoveFeature =
+                    ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
+                    paymentMethodRemoveLastFeature =
+                    ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
                     isPaymentMethodSyncDefaultEnabled = false,
                 ),
             ),
@@ -53,7 +56,7 @@ class CustomerSessionInitializationDataSourceTest {
                 overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
             )
         )
-        assertThat(customerSheetSession.permissions.canRemovePaymentMethods).isTrue()
+        assertThat(customerSheetSession.permissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
         assertThat(customerSheetSession.permissions.canRemoveLastPaymentMethod).isTrue()
         assertThat(customerSheetSession.defaultPaymentMethodId).isNull()
     }
@@ -63,8 +66,10 @@ class CustomerSessionInitializationDataSourceTest {
         val dataSource = createInitializationDataSource(
             elementsSessionManager = FakeCustomerSessionElementsSessionManager(
                 customerSheetComponent = createEnabledCustomerSheetComponent(
-                    isPaymentMethodRemoveEnabled = false,
-                    canRemoveLastPaymentMethod = false,
+                    paymentMethodRemoveFeature =
+                    ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
+                    paymentMethodRemoveLastFeature =
+                    ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
                 ),
             ),
         )
@@ -75,7 +80,7 @@ class CustomerSessionInitializationDataSourceTest {
 
         val customerSheetSession = result.asSuccess().value
 
-        assertThat(customerSheetSession.permissions.canRemovePaymentMethods).isFalse()
+        assertThat(customerSheetSession.permissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.None)
         assertThat(customerSheetSession.permissions.canRemoveLastPaymentMethod).isFalse()
     }
 
@@ -93,7 +98,29 @@ class CustomerSessionInitializationDataSourceTest {
 
         val customerSheetSession = result.asSuccess().value
 
-        assertThat(customerSheetSession.permissions.canRemovePaymentMethods).isFalse()
+        assertThat(customerSheetSession.permissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.None)
+    }
+
+    @Test
+    fun `on load, should have partial remove permissions if component has partial remove permissions`() = runTest {
+        val dataSource = createInitializationDataSource(
+            elementsSessionManager = FakeCustomerSessionElementsSessionManager(
+                customerSheetComponent = createEnabledCustomerSheetComponent(
+                    paymentMethodRemoveFeature =
+                    ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Partial,
+                ),
+            ),
+        )
+
+        val result = dataSource.loadCustomerSheetSession(createConfiguration())
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<CustomerSheetSession>>()
+
+        val customerSheetSession = result.asSuccess().value
+
+        assertThat(customerSheetSession.permissions.removePaymentMethod)
+            .isEqualTo(PaymentMethodRemovePermission.Partial)
+        assertThat(customerSheetSession.permissions.canRemovePaymentMethods).isTrue()
     }
 
     @Test
@@ -174,7 +201,8 @@ class CustomerSessionInitializationDataSourceTest {
     fun `When config value is false & server value is false, remove last PM permissions should be false`() =
         runRemoveLastPaymentMethodPermissionsTest(
             allowsRemovalOfLastSavedPaymentMethod = false,
-            canRemoveLastPaymentMethod = false,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
             customerSheetComponentIsDisabled = false,
             expected = false,
         )
@@ -183,7 +211,8 @@ class CustomerSessionInitializationDataSourceTest {
     fun `When config value is false & server component is disabled, remove last PM permissions should be false`() =
         runRemoveLastPaymentMethodPermissionsTest(
             allowsRemovalOfLastSavedPaymentMethod = false,
-            canRemoveLastPaymentMethod = false,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
             customerSheetComponentIsDisabled = true,
             expected = false,
         )
@@ -192,7 +221,8 @@ class CustomerSessionInitializationDataSourceTest {
     fun `When config value is false & server value is true, remove last PM permissions should be false`() =
         runRemoveLastPaymentMethodPermissionsTest(
             allowsRemovalOfLastSavedPaymentMethod = false,
-            canRemoveLastPaymentMethod = true,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
             customerSheetComponentIsDisabled = false,
             expected = false,
         )
@@ -201,7 +231,8 @@ class CustomerSessionInitializationDataSourceTest {
     fun `When config value is true & server value is false, remove last PM permissions should be false`() =
         runRemoveLastPaymentMethodPermissionsTest(
             allowsRemovalOfLastSavedPaymentMethod = true,
-            canRemoveLastPaymentMethod = false,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
             customerSheetComponentIsDisabled = false,
             expected = false,
         )
@@ -210,7 +241,8 @@ class CustomerSessionInitializationDataSourceTest {
     fun `When config value is true & server component is disabled, remove last PM permissions should be false`() =
         runRemoveLastPaymentMethodPermissionsTest(
             allowsRemovalOfLastSavedPaymentMethod = true,
-            canRemoveLastPaymentMethod = false,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
             customerSheetComponentIsDisabled = true,
             expected = false,
         )
@@ -219,7 +251,18 @@ class CustomerSessionInitializationDataSourceTest {
     fun `When config value is true & server value is true, remove last PM permissions should be true`() =
         runRemoveLastPaymentMethodPermissionsTest(
             allowsRemovalOfLastSavedPaymentMethod = true,
-            canRemoveLastPaymentMethod = true,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
+            customerSheetComponentIsDisabled = false,
+            expected = true,
+        )
+
+    @Test
+    fun `When config value is true & server value is not provided, remove last PM permissions should be true`() =
+        runRemoveLastPaymentMethodPermissionsTest(
+            allowsRemovalOfLastSavedPaymentMethod = true,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
             customerSheetComponentIsDisabled = false,
             expected = true,
         )
@@ -227,7 +270,7 @@ class CustomerSessionInitializationDataSourceTest {
     private fun runRemoveLastPaymentMethodPermissionsTest(
         allowsRemovalOfLastSavedPaymentMethod: Boolean,
         customerSheetComponentIsDisabled: Boolean,
-        canRemoveLastPaymentMethod: Boolean,
+        paymentMethodRemoveLastFeature: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature,
         expected: Boolean,
     ) = runTest {
         val dataSource = createInitializationDataSource(
@@ -236,8 +279,9 @@ class CustomerSessionInitializationDataSourceTest {
                     ElementsSession.Customer.Components.CustomerSheet.Disabled
                 } else {
                     createEnabledCustomerSheetComponent(
-                        isPaymentMethodRemoveEnabled = true,
-                        canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                        paymentMethodRemoveFeature =
+                        ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
+                        paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeature,
                     )
                 },
             ),
@@ -277,13 +321,15 @@ class CustomerSessionInitializationDataSourceTest {
     }
 
     private fun createEnabledCustomerSheetComponent(
-        isPaymentMethodRemoveEnabled: Boolean = true,
-        canRemoveLastPaymentMethod: Boolean = true,
+        paymentMethodRemoveFeature: ElementsSession.Customer.Components.PaymentMethodRemoveFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
+        paymentMethodRemoveLastFeature: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
         isPaymentMethodSyncDefaultEnabled: Boolean = false,
     ): ElementsSession.Customer.Components.CustomerSheet.Enabled {
         return ElementsSession.Customer.Components.CustomerSheet.Enabled(
-            isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
-            canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+            paymentMethodRemove = paymentMethodRemoveFeature,
+            paymentMethodRemoveLast = paymentMethodRemoveLastFeature,
             isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
         )
     }

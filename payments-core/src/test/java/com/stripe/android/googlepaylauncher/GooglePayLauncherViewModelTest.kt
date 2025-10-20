@@ -22,6 +22,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.networking.StripeRepository
@@ -31,6 +32,7 @@ import com.stripe.android.testing.AbsPaymentController
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
@@ -61,6 +63,29 @@ class GooglePayLauncherViewModelTest {
         whenever(it.loadPaymentData(any()))
             .thenReturn(task)
     }
+
+    private val googlePayCreateParams = PaymentMethodCreateParams.createFromGooglePay(
+        JSONObject(
+            """
+                {
+                  "apiVersion": 2,
+                  "apiVersionMinor": 0,
+                  "paymentMethodData": {
+                    "description": "US Credit: Visa ••••4242",
+                    "info": {
+                      "cardDetails": "4242",
+                      "cardNetwork": "VISA"
+                    },
+                    "tokenizationData": {
+                      "token": "{\n  \"id\": \"tok_1Riee9Lu5o3P18ZprvDzgOhE\",\n  \"object\": \"token\",\n  \"card\": {\n    \"id\": \"card_1Riee9Lu5o3P18ZpRaGgv2JV\",\n    \"object\": \"card\",\n    \"address_city\": \"Mountain View\",\n    \"address_country\": \"US\",\n    \"address_line1\": \"1600 Amphitheatre Parkway\",\n    \"address_line1_check\": \"unchecked\",\n    \"address_line2\": null,\n    \"address_state\": \"CA\",\n    \"address_zip\": \"94043\",\n    \"address_zip_check\": \"unchecked\",\n    \"brand\": \"Visa\",\n    \"country\": \"US\",\n    \"cvc_check\": null,\n    \"dynamic_last4\": \"4242\",\n    \"exp_month\": 12,\n    \"exp_year\": 2027,\n    \"funding\": \"credit\",\n    \"last4\": \"4242\",\n    \"metadata\": {},\n    \"name\": null,\n    \"networks\": {\n      \"preferred\": null\n    },\n    \"regulated_status\": \"unregulated\",\n    \"tokenization_method\": \"android_pay\",\n    \"wallet\": null\n  },\n  \"client_ip\": \"1.1.1.1\",\n  \"created\": 1751993133,\n  \"livemode\": false,\n  \"type\": \"card\",\n  \"used\": false\n}",
+                      "type": "PAYMENT_GATEWAY"
+                    },
+                    "type": "CARD"
+                  }
+                }
+            """.trimIndent()
+        )
+    )
 
     @Test
     fun `isReadyToPay() should return expected value`() = runTest {
@@ -204,7 +229,7 @@ class GooglePayLauncherViewModelTest {
         runTest {
             val mockPaymentController: PaymentController = mock()
             createViewModel(paymentController = mockPaymentController)
-                .confirmStripeIntent(mock(), mock())
+                .confirmStripeIntent(mock(), googlePayCreateParams)
 
             val argumentCaptor: KArgumentCaptor<ConfirmStripeIntentParams> = argumentCaptor()
             verify(mockPaymentController)
@@ -224,7 +249,7 @@ class GooglePayLauncherViewModelTest {
                     "USD"
                 ),
                 paymentController = mockPaymentController
-            ).confirmStripeIntent(mock(), mock())
+            ).confirmStripeIntent(mock(), googlePayCreateParams)
 
             val argumentCaptor: KArgumentCaptor<ConfirmStripeIntentParams> = argumentCaptor()
             verify(mockPaymentController)

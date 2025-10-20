@@ -10,7 +10,9 @@ import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -27,6 +29,7 @@ internal interface UpdatePaymentMethodInteractor {
     val topBarState: PaymentSheetTopBarState
     val canRemove: Boolean
     val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
+    val removeMessage: ResolvableString?
     val screenTitle: ResolvableString?
     val cardBrandFilter: CardBrandFilter
     val isExpiredCard: Boolean
@@ -37,6 +40,7 @@ internal interface UpdatePaymentMethodInteractor {
     val shouldShowSaveButton: Boolean
     val canUpdateFullPaymentMethodDetails: Boolean
     val addressCollectionMode: AddressCollectionMode
+    val allowedBillingCountries: Set<String>
     val editCardDetailsInteractor: EditCardDetailsInteractor
 
     val state: StateFlow<State>
@@ -59,6 +63,7 @@ internal interface UpdatePaymentMethodInteractor {
     sealed class ViewAction {
         data object RemovePaymentMethod : ViewAction()
         data object SaveButtonPressed : ViewAction()
+        data object DisabledSaveButtonPressed : ViewAction()
         data class SetAsDefaultCheckboxChanged(val isChecked: Boolean) : ViewAction()
         data class CardUpdateParamsChanged(val cardUpdateParams: CardUpdateParams?) : ViewAction()
     }
@@ -104,9 +109,11 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val cardBrandFilter: CardBrandFilter,
     override val addressCollectionMode: AddressCollectionMode,
+    override val allowedBillingCountries: Set<String>,
     override val canUpdateFullPaymentMethodDetails: Boolean,
+    override val removeMessage: ResolvableString?,
     val isDefaultPaymentMethod: Boolean,
-    shouldShowSetAsDefaultCheckbox: Boolean,
+    override val shouldShowSetAsDefaultCheckbox: Boolean,
     private val removeExecutor: PaymentMethodRemoveOperation,
     private val updatePaymentMethodExecutor: UpdateCardPaymentMethodOperation,
     private val setDefaultPaymentMethodExecutor: PaymentMethodSetAsDefaultOperation,
@@ -121,12 +128,6 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val initialSetAsDefaultCheckedValue = isDefaultPaymentMethod
     private val setAsDefaultCheckboxChecked = MutableStateFlow(initialSetAsDefaultCheckedValue)
     private val cardUpdateParams = MutableStateFlow<CardUpdateParams?>(null)
-
-    // We don't yet support setting SEPA payment methods as defaults, so we hide the checkbox for now.
-    override val shouldShowSetAsDefaultCheckbox = (
-        shouldShowSetAsDefaultCheckbox &&
-            displayableSavedPaymentMethod.savedPaymentMethod !is SavedPaymentMethod.SepaDebit
-        )
 
     override val hasValidBrandChoices = hasValidBrandChoices()
     override val isExpiredCard = paymentMethodIsExpiredCard()
@@ -171,17 +172,28 @@ internal class DefaultUpdatePaymentMethodInteractor(
     ): EditCardDetailsInteractor {
         val isModifiable = displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails)
         val payload = EditCardPayload.create(savedPaymentMethodCard.card, savedPaymentMethodCard.billingDetails)
+        val cardEditConfiguration = CardEditConfiguration(
+            cardBrandFilter = cardBrandFilter,
+            isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
+            areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails,
+        )
         return editCardDetailsInteractorFactory.create(
             payload = payload,
+            cardEditConfiguration = cardEditConfiguration,
             onCardUpdateParamsChanged = { cardUpdateParams ->
                 onCardUpdateParamsChanged(cardUpdateParams)
             },
             coroutineScope = coroutineScope,
-            isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
-            cardBrandFilter = cardBrandFilter,
             onBrandChoiceChanged = onBrandChoiceSelected,
-            areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails,
-            addressCollectionMode = addressCollectionMode,
+            // name, email, and phone are purposefully omitted (not collected) here.
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                address = addressCollectionMode,
+                email = CollectionMode.Never,
+                phone = CollectionMode.Never,
+                name = CollectionMode.Never,
+                allowedCountries = allowedBillingCountries,
+            ),
+            requiresModification = true
         )
     }
 
@@ -189,17 +201,27 @@ internal class DefaultUpdatePaymentMethodInteractor(
         savedPaymentMethodCard: LinkPaymentDetails.Card,
     ): EditCardDetailsInteractor {
         val payload = EditCardPayload.create(savedPaymentMethodCard)
+        val cardEditConfiguration = CardEditConfiguration(
+            cardBrandFilter = cardBrandFilter,
+            isCbcModifiable = false,
+            areExpiryDateAndAddressModificationSupported = false,
+        )
         return editCardDetailsInteractorFactory.create(
             payload = payload,
+            cardEditConfiguration = cardEditConfiguration,
             onCardUpdateParamsChanged = { cardUpdateParams ->
                 onCardUpdateParamsChanged(cardUpdateParams)
             },
             coroutineScope = coroutineScope,
-            isCbcModifiable = false,
-            cardBrandFilter = cardBrandFilter,
             onBrandChoiceChanged = onBrandChoiceSelected,
-            areExpiryDateAndAddressModificationSupported = false,
-            addressCollectionMode = AddressCollectionMode.Never,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                address = AddressCollectionMode.Never,
+                email = CollectionMode.Never,
+                phone = CollectionMode.Never,
+                name = CollectionMode.Never,
+                allowedCountries = allowedBillingCountries,
+            ),
+            requiresModification = true
         )
     }
 
@@ -234,6 +256,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
         when (viewAction) {
             UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod -> removePaymentMethod()
             UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed -> savePaymentMethod()
+            UpdatePaymentMethodInteractor.ViewAction.DisabledSaveButtonPressed -> validate()
             is UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged -> onSetAsDefaultCheckboxChanged(
                 isChecked = viewAction.isChecked
             )
@@ -276,6 +299,10 @@ internal class DefaultUpdatePaymentMethodInteractor(
 
             status.emit(UpdatePaymentMethodInteractor.Status.Idle)
         }
+    }
+
+    private fun validate() {
+        editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)
     }
 
     private suspend fun maybeUpdateCard(): Result<PaymentMethod>? {

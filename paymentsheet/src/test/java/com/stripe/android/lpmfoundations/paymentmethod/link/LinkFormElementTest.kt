@@ -25,9 +25,13 @@ import com.stripe.android.link.ui.inline.LINK_INLINE_SIGNUP_REMAINING_FIELDS_TES
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.createComposeCleanupRule
@@ -120,6 +124,7 @@ class LinkFormElementTest {
             initialLinkUserInput = initialLinkUserInput,
             linkConfigurationCoordinator = createLinkConfigurationCoordinator(),
             onLinkInlineSignupStateChanged = {},
+            previousLinkSignupCheckboxSelection = null,
         )
     }
 
@@ -127,7 +132,9 @@ class LinkFormElementTest {
         return LinkConfiguration(
             stripeIntent = PaymentIntentFactory.create(),
             merchantName = "Merchant, Inc.",
+            sellerBusinessName = null,
             merchantCountryCode = "CA",
+            merchantLogoUrl = null,
             customerInfo = LinkConfiguration.CustomerInfo(
                 name = "John Doe",
                 email = null,
@@ -138,6 +145,7 @@ class LinkFormElementTest {
             passthroughModeEnabled = false,
             cardBrandChoice = null,
             cardBrandFilter = DefaultCardBrandFilter,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             flags = mapOf(),
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,
@@ -148,6 +156,21 @@ class LinkFormElementTest {
             linkMode = LinkMode.LinkPaymentMethod,
             allowDefaultOptIn = false,
             disableRuxInFlowController = false,
+            defaultBillingDetails = null,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            collectMissingBillingDetailsForExistingPaymentMethods = true,
+            allowUserEmailEdits = true,
+            allowLogOut = true,
+            enableDisplayableDefaultValuesInEce = false,
+            skipWalletInFlowController = false,
+            linkAppearance = null,
+            linkSignUpOptInFeatureEnabled = false,
+            linkSignUpOptInInitialValue = false,
+            customerId = null,
+            saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            forceSetupFutureUseBehaviorAndNewMandate = false,
+            linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
         )
     }
 
@@ -208,7 +231,11 @@ class LinkFormElementTest {
         private val linkAccountManager: LinkAccountManager,
         private val configuration: LinkConfiguration,
     ) : LinkInlineSignupAssistedViewModelFactory {
-        override fun create(signupMode: LinkSignupMode, initialUserInput: UserInput?): InlineSignupViewModel {
+        override fun create(
+            signupMode: LinkSignupMode,
+            initialUserInput: UserInput?,
+            previousLinkSignupCheckboxSelection: Boolean?
+        ): InlineSignupViewModel {
             return InlineSignupViewModel(
                 signupMode = signupMode,
                 config = configuration,
@@ -217,6 +244,7 @@ class LinkFormElementTest {
                 linkEventsReporter = FakeLinkInlineSignupEventsReporter,
                 logger = Logger.noop(),
                 lookupDelay = 0L,
+                previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection,
             )
         }
     }

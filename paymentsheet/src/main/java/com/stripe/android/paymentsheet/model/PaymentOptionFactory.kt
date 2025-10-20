@@ -10,17 +10,23 @@ internal class PaymentOptionFactory @Inject constructor(
     private val context: Context,
 ) {
     fun create(selection: PaymentSelection): PaymentOption {
+        val drawableResourceId = selection.drawableResourceId
+        val lightThemeIconUrl = selection.lightThemeIconUrl
+        val darkThemeIconUrl = selection.darkThemeIconUrl
+
         return PaymentOption(
-            drawableResourceId = selection.drawableResourceId,
+            drawableResourceId = drawableResourceId,
             label = selection.label.resolve(context),
             paymentMethodType = selection.paymentMethodType,
             _labels = PaymentOptionLabelsFactory.create(context, selection),
+            billingDetails = selection.billingDetails?.toPaymentSheetBillingDetails(),
             _shippingDetails = selection.shippingDetails,
             imageLoader = {
                 iconLoader.load(
-                    drawableResourceId = selection.drawableResourceId,
-                    lightThemeIconUrl = selection.lightThemeIconUrl,
-                    darkThemeIconUrl = selection.darkThemeIconUrl,
+                    drawableResourceId = drawableResourceId,
+                    drawableResourceIdNight = drawableResourceId,
+                    lightThemeIconUrl = lightThemeIconUrl,
+                    darkThemeIconUrl = darkThemeIconUrl,
                 )
             },
         )

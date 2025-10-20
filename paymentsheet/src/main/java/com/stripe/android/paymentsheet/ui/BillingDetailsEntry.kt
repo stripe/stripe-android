@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.uicore.forms.FormFieldEntry
 
@@ -9,9 +10,14 @@ internal data class BillingDetailsEntry(
 ) {
     fun hasChanged(
         billingDetails: PaymentMethod.BillingDetails?,
-        addressCollectionMode: AddressCollectionMode,
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     ): Boolean {
-        return when (addressCollectionMode) {
+        val contactInfoChanged = contactInformationChanged(
+            configuration = billingDetailsCollectionConfiguration,
+            billingDetails = billingDetails
+        )
+
+        val addressChanged = when (billingDetailsCollectionConfiguration.address) {
             AddressCollectionMode.Automatic -> {
                 billingDetails?.address?.postalCode nullableNeq billingDetailsFormState.postalCode ||
                     billingDetails?.address?.country nullableNeq billingDetailsFormState.country
@@ -26,10 +32,38 @@ internal data class BillingDetailsEntry(
                     billingDetails?.address?.state nullableNeq billingDetailsFormState.state
             }
         }
+
+        return contactInfoChanged || addressChanged
     }
 
-    fun isComplete(addressCollectionMode: AddressCollectionMode): Boolean {
-        return when (addressCollectionMode) {
+    private fun contactInformationChanged(
+        configuration: BillingDetailsCollectionConfiguration,
+        billingDetails: PaymentMethod.BillingDetails?
+    ): Boolean {
+        val nameChanged = if (configuration.collectsName) {
+            billingDetails?.name nullableNeq billingDetailsFormState.name
+        } else {
+            false
+        }
+
+        val emailChanged = if (configuration.collectsEmail) {
+            billingDetails?.email nullableNeq billingDetailsFormState.email
+        } else {
+            false
+        }
+
+        val phoneChanged = if (configuration.collectsPhone) {
+            billingDetails?.phone nullableNeq billingDetailsFormState.phone
+        } else {
+            false
+        }
+        return nameChanged || emailChanged || phoneChanged
+    }
+
+    fun isComplete(configuration: BillingDetailsCollectionConfiguration): Boolean {
+        val contactInfoComplete = contactInfoComplete(configuration)
+
+        val addressComplete = when (configuration.address) {
             AddressCollectionMode.Automatic -> {
                 billingDetailsFormState.country.isValid && billingDetailsFormState.postalCode.isValid
             }
@@ -42,6 +76,29 @@ internal data class BillingDetailsEntry(
                     billingDetailsFormState.city.isValid
             }
         }
+
+        return contactInfoComplete && addressComplete
+    }
+
+    private fun contactInfoComplete(configuration: BillingDetailsCollectionConfiguration): Boolean {
+        val nameComplete = if (configuration.collectsName) {
+            billingDetailsFormState.name.isValid
+        } else {
+            true
+        }
+
+        val emailComplete = if (configuration.collectsEmail) {
+            billingDetailsFormState.email.isValid
+        } else {
+            true
+        }
+
+        val phoneComplete = if (configuration.collectsPhone) {
+            billingDetailsFormState.phone.isValid
+        } else {
+            true
+        }
+        return nameComplete && emailComplete && phoneComplete
     }
 
     private val FormFieldEntry?.isValid

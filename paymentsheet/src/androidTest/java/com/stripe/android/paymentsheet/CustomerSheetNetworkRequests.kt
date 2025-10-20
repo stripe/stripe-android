@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -86,5 +88,31 @@ internal fun confirmSetupIntentParams(): RequestMatcher {
     return RequestMatchers.composite(
         bodyPart("payment_method", "pm_12345"),
         bodyPart("client_secret", "seti_12345_secret_12345"),
+        clientAttributionMetadataParams(),
+    )
+}
+
+internal fun clientAttributionMetadataParams(): RequestMatcher {
+    return RequestMatchers.composite(
+        bodyPart(
+            urlEncode("client_attribution_metadata[elements_session_config_id]"),
+            urlEncode("e961790f-43ed-4fcc-a534-74eeca28d042")
+        ),
+        bodyPart(
+            urlEncode("client_attribution_metadata[merchant_integration_source]"),
+            urlEncode("elements")
+        ),
+        bodyPart(
+            urlEncode("client_attribution_metadata[merchant_integration_subtype]"),
+            urlEncode("mobile")
+        ),
+        bodyPart(
+            urlEncode("client_attribution_metadata[merchant_integration_version]"),
+            urlEncode("stripe-android/${StripeSdkVersion.VERSION_NAME}")
+        ),
+        bodyPart(
+            urlEncode("client_attribution_metadata[client_session_id]"),
+            urlEncode(AnalyticsRequestFactory.sessionId.toString())
+        ),
     )
 }

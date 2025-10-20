@@ -31,6 +31,7 @@ class TestRules private constructor(
         fun create(
             disableAnimations: Boolean = true,
             retryCount: Int = 3,
+            block: RuleChain.() -> RuleChain = { this }
         ): TestRules {
             val composeTestRule = createEmptyComposeRule()
 
@@ -51,6 +52,7 @@ class TestRules private constructor(
                     }
                 }.around(Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS))
                 .around(CleanupChromeRule)
+                .block()
 
             return TestRules(chain, composeTestRule)
         }

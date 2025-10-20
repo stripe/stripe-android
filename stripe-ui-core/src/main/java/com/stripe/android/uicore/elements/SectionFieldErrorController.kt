@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface SectionFieldErrorController : Controller {
     val error: StateFlow<FieldError?>
+
+    fun onValidationStateChanged(isValidating: Boolean) {}
 }
 
 /**

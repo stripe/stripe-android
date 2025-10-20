@@ -29,6 +29,7 @@ dependencies {
     implementation libs.androidx.lifecycleCompose
     implementation libs.androidx.savedState
     implementation libs.androidx.viewModel
+    implementation libs.androidx.webkit
 
     // DI
     implementation libs.dagger
@@ -142,16 +143,6 @@ android {
 
         kotlinOptions {
             freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
-        }
-
-        managedDevices {
-            localDevices {
-                register("pixel2api33") {
-                    device = "Pixel 2"
-                    apiLevel = 33
-                    systemImageSource = "aosp"
-                }
-            }
         }
     }
 

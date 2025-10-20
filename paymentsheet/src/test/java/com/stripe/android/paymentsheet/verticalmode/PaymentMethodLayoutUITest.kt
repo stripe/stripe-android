@@ -251,6 +251,19 @@ internal class PaymentMethodLayoutUITest(
             }
         }
 
+        initialState.displayedSavedPaymentMethod?.let {
+            viewActionRecorder.consume {
+                it is PaymentMethodVerticalLayoutInteractor.ViewAction.UpdatePaymentMethodVisibility &&
+                    it.itemCode == "saved"
+            }
+        }
+        initialState.displayablePaymentMethods.forEach { paymentMethod ->
+            viewActionRecorder.consume {
+                it is PaymentMethodVerticalLayoutInteractor.ViewAction.UpdatePaymentMethodVisibility &&
+                    it.itemCode == paymentMethod.code
+            }
+        }
+
         Scenario(viewActionRecorder).apply(block)
     }
 
@@ -277,7 +290,7 @@ internal class PaymentMethodLayoutUITest(
                         interactor = interactor,
                         embeddedViewDisplaysMandateText = true,
                         modifier = modifier,
-                        rowStyle = Embedded.RowStyle.FloatingButton.default,
+                        appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
                     )
                 }
             )

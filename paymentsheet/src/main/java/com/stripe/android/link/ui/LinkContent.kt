@@ -14,12 +14,16 @@ import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.LinkScreen.Companion.EXTRA_PAYMENT_DETAILS
+import com.stripe.android.link.LinkScreen.Companion.billingDetailsUpdateFlow
+import com.stripe.android.link.LinkScreen.UpdateCard.BillingDetailsUpdateFlow
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.NoPaymentDetailsFoundException
 import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.ui.oauth.OAuthConsentScreen
+import com.stripe.android.link.ui.oauth.OAuthConsentViewModel
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpScreen
@@ -46,7 +50,7 @@ internal fun LinkContent(
     dismissWithResult: (LinkActivityResult) -> Unit,
     getLinkAccount: () -> LinkAccount?,
     onBackPressed: () -> Unit,
-    moveToWeb: () -> Unit,
+    moveToWeb: (Throwable) -> Unit,
     goBack: () -> Unit,
     changeEmail: () -> Unit,
     initialDestination: LinkScreen
@@ -99,6 +103,7 @@ internal fun LinkContent(
     }
 }
 
+@SuppressWarnings("LongMethod")
 @Composable
 private fun Screens(
     navController: NavHostController,
@@ -108,7 +113,7 @@ private fun Screens(
     dismissWithResult: (LinkActivityResult) -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: suspend () -> Unit,
-    moveToWeb: () -> Unit,
+    moveToWeb: (Throwable) -> Unit,
     changeEmail: () -> Unit,
     initialDestination: LinkScreen,
     onLogoutClicked: () -> Unit,
@@ -127,39 +132,40 @@ private fun Screens(
             MinScreenHeightBox(screenHeightPercentage = 1f) {
                 SignUpRoute(
                     navigateAndClearStack = navigateAndClearStack,
-                    moveToWeb = moveToWeb
+                    moveToWeb = moveToWeb,
+                    dismissWithResult = dismissWithResult
                 )
             }
         }
 
-        composable(
-            LinkScreen.UpdateCard.route
-        ) { backStackEntry ->
-            val paymentDetailsId = backStackEntry.arguments?.getString(EXTRA_PAYMENT_DETAILS)
+        composable(LinkScreen.UpdateCard.route) { backStackEntry ->
+            val paymentDetailsId = backStackEntry
+                .arguments?.getString(EXTRA_PAYMENT_DETAILS)
                 ?: return@composable dismissWithResult(noPaymentDetailsResult())
             UpdateCardRoute(
-                paymentDetailsId = paymentDetailsId
+                paymentDetailsId = paymentDetailsId,
+                billingDetailsUpdateFlow = backStackEntry.billingDetailsUpdateFlow(),
+                dismissWithResult = dismissWithResult
             )
         }
 
         composable(LinkScreen.Verification.route) {
             // Keep height fixed to reduce animations caused by IME toggling on both
             // this screen and SignUp screen.
+            val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
             MinScreenHeightBox(screenHeightPercentage = if (initialDestination == LinkScreen.SignUp) 1f else 0f) {
-                val linkAccount = getLinkAccount()
-                    ?: return@MinScreenHeightBox dismissWithResult(noLinkAccountResult())
                 VerificationRoute(
                     linkAccount = linkAccount,
                     changeEmail = changeEmail,
-                    navigateAndClearStack = navigateAndClearStack,
-                    goBack = goBack
+                    goBack = goBack,
+                    dismissWithResult = dismissWithResult
                 )
             }
         }
 
         composable(LinkScreen.Wallet.route) {
-            val linkAccount = getLinkAccount()
-                ?: return@composable dismissWithResult(noLinkAccountResult())
+            val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
+
             WalletRoute(
                 linkAccount = linkAccount,
                 navigateAndClearStack = navigateAndClearStack,
@@ -171,9 +177,16 @@ private fun Screens(
         }
 
         composable(LinkScreen.PaymentMethod.route) {
-            val linkAccount = getLinkAccount()
-                ?: return@composable dismissWithResult(noLinkAccountResult())
+            val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
             PaymentMethodRoute(
+                linkAccount = linkAccount,
+                dismissWithResult = dismissWithResult,
+            )
+        }
+
+        composable(LinkScreen.OAuthConsent.route) {
+            val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
+            OAuthConsentRoute(
                 linkAccount = linkAccount,
                 dismissWithResult = dismissWithResult,
             )
@@ -184,13 +197,15 @@ private fun Screens(
 @Composable
 private fun SignUpRoute(
     navigateAndClearStack: (route: LinkScreen) -> Unit,
-    moveToWeb: () -> Unit
+    moveToWeb: (Throwable) -> Unit,
+    dismissWithResult: (LinkActivityResult) -> Unit
 ) {
     val viewModel: SignUpViewModel = linkViewModel { parentComponent ->
         SignUpViewModel.factory(
             parentComponent = parentComponent,
             navigateAndClearStack = navigateAndClearStack,
-            moveToWeb = moveToWeb
+            moveToWeb = moveToWeb,
+            dismissWithResult = dismissWithResult
         )
     }
     SignUpScreen(
@@ -201,9 +216,9 @@ private fun SignUpRoute(
 @Composable
 private fun VerificationRoute(
     linkAccount: LinkAccount,
-    navigateAndClearStack: (route: LinkScreen) -> Unit,
     changeEmail: () -> Unit,
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    dismissWithResult: (LinkActivityResult) -> Unit
 ) {
     val viewModel: VerificationViewModel = linkViewModel { parentComponent ->
         VerificationViewModel.factory(
@@ -211,21 +226,25 @@ private fun VerificationRoute(
             onDismissClicked = goBack,
             linkAccount = linkAccount,
             isDialog = false,
-            onVerificationSucceeded = {
-                navigateAndClearStack(LinkScreen.Wallet)
-            },
-            onChangeEmailClicked = changeEmail
+            onChangeEmailClicked = changeEmail,
+            dismissWithResult = dismissWithResult
         )
     }
     VerificationScreen(viewModel)
 }
 
 @Composable
-private fun UpdateCardRoute(paymentDetailsId: String) {
+private fun UpdateCardRoute(
+    paymentDetailsId: String,
+    billingDetailsUpdateFlow: BillingDetailsUpdateFlow?,
+    dismissWithResult: (LinkActivityResult) -> Unit
+) {
     val viewModel: UpdateCardScreenViewModel = linkViewModel { parentComponent ->
         UpdateCardScreenViewModel.factory(
             parentComponent = parentComponent,
             paymentDetailsId = paymentDetailsId,
+            billingDetailsUpdateFlow = billingDetailsUpdateFlow,
+            dismissWithResult = dismissWithResult
         )
     }
     UpdateCardScreen(
@@ -272,6 +291,23 @@ private fun WalletRoute(
         showBottomSheetContent = showBottomSheetContent,
         hideBottomSheetContent = hideBottomSheetContent,
         onLogoutClicked = onLogoutClicked,
+    )
+}
+
+@Composable
+private fun OAuthConsentRoute(
+    linkAccount: LinkAccount,
+    dismissWithResult: (LinkActivityResult) -> Unit,
+) {
+    val viewModel: OAuthConsentViewModel = linkViewModel { parentComponent ->
+        OAuthConsentViewModel.factory(
+            parentComponent = parentComponent,
+            linkAccount = linkAccount,
+            dismissWithResult = dismissWithResult,
+        )
+    }
+    OAuthConsentScreen(
+        viewModel = viewModel,
     )
 }
 

@@ -14,11 +14,12 @@ import com.stripe.android.R as StripeR
 @Composable
 internal fun RemovePaymentMethodDialogUI(
     paymentMethod: DisplayableSavedPaymentMethod,
+    removeMessage: String?,
     onConfirmListener: () -> Unit,
     onDismissListener: () -> Unit,
 ) {
     val removeTitle = paymentMethod.getRemoveDialogTitle().resolve()
-    val messageText = paymentMethod.getRemoveDialogDescription().resolve()
+    val messageText = removeMessage ?: paymentMethod.getRemoveDialogDescription().resolve()
 
     SimpleDialogElementUI(
         titleText = removeTitle,

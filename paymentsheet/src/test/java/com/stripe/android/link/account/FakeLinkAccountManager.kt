@@ -2,8 +2,10 @@ package com.stripe.android.link.account
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
+import com.stripe.android.link.ConsumerState
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_SHIPPING_ADDRESSES
 import com.stripe.android.link.model.AccountStatus
@@ -13,50 +15,99 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.EmailSource
+import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SharePaymentDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.yield
 
 internal open class FakeLinkAccountManager(
     val linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
     accountStatusOverride: Flow<AccountStatus>? = null
 ) : LinkAccountManager {
+
+    var lookupResult: Result<LinkAccount?> = Result.success(null)
+    var refreshConsumerResult: Result<ConsumerSessionRefresh> = Result.success(
+        ConsumerSessionRefresh(
+            consumerSession = TestFactory.CONSUMER_SESSION,
+            linkAuthIntent = null
+        )
+    )
+    var signupResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
+
+    data class SignUpCall(
+        val email: String,
+        val phoneNumber: String?,
+        val country: String?,
+        val countryInferringMethod: String,
+        val name: String?,
+        val consentAction: SignUpConsentAction
+    )
+
+    data class LookupCall(
+        val email: String,
+        val emailSource: EmailSource,
+        val startSession: Boolean,
+        val customerId: String?
+    )
+
+    val signUpCalls = mutableListOf<SignUpCall>()
+    val lookupCalls = mutableListOf<LookupCall>()
+
     override val linkAccountInfo: StateFlow<LinkAccountUpdate.Value> = linkAccountHolder.linkAccountInfo
 
-    private val _accountStatus = MutableStateFlow(AccountStatus.SignedOut)
+    private val _accountStatus = MutableStateFlow<AccountStatus>(AccountStatus.SignedOut)
     override val accountStatus: Flow<AccountStatus> = accountStatusOverride ?: _accountStatus
 
-    private val _consumerPaymentDetails =
-        MutableStateFlow<ConsumerPaymentDetails?>(TestFactory.CONSUMER_PAYMENT_DETAILS)
-    override val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?> = _consumerPaymentDetails.asStateFlow()
+    private val _consumerState =
+        MutableStateFlow<ConsumerState?>(
+            ConsumerState(paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS.toLinkPaymentMethod())
+        )
+
+    override val consumerState: StateFlow<ConsumerState?> =
+        _consumerState.asStateFlow()
 
     override var cachedShippingAddresses: ConsumerShippingAddresses? = null
 
-    var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
-    var mobileLookupConsumerResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
-    var startVerificationResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
-    var confirmVerificationResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
-    var signUpResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
-    var mobileSignUpResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
-    var signInWithUserInputResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
+    var lookupConsumerByAuthIntentResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
+    var lookupConsumerByLinkAuthTokenResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
+    var startVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
+    var confirmVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
+    var postConsentUpdateResult: Result<Unit> = Result.success(Unit)
+    var signInWithUserInputResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var logOutResult: Result<ConsumerSession> = Result.success(ConsumerSession("", "", "", ""))
-    var createCardPaymentDetailsResult: Result<LinkPaymentDetails> = Result.success(
+    var createCardPaymentDetailsResult: Result<LinkPaymentDetails.New> = Result.success(
         value = TestFactory.LINK_NEW_PAYMENT_DETAILS
+    )
+    var shareCardPaymentDetailsResult: Result<LinkPaymentDetails.Saved> = Result.success(
+        value = TestFactory.LINK_SAVED_PAYMENT_DETAILS
+    )
+    var createBankAccountPaymentDetailsResult: Result<ConsumerPaymentDetails.BankAccount> = Result.success(
+        value = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
+    )
+    var createLinkAccountSessionResult: Result<LinkAccountSession> = Result.success(
+        value = TestFactory.LINK_ACCOUNT_SESSION
+    )
+    var createPaymentMethodResult: Result<com.stripe.android.model.PaymentMethod> = Result.success(
+        value = PaymentMethodFixtures.CARD_PAYMENT_METHOD
     )
     var sharePaymentDetails: Result<SharePaymentDetails> = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+    var updatePhoneNumberResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var deletePaymentDetailsResult: Result<Unit> = Result.success(Unit)
-    var linkAccountFromLookupResult: LinkAccount? = null
     var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
         set(value) {
             field = value
-            _consumerPaymentDetails.value = value.getOrNull()
+            _consumerState.value = value.getOrNull()?.toLinkPaymentMethod()?.let {
+                ConsumerState(paymentDetails = it)
+            }
         }
     var listShippingAddressesResult: Result<ConsumerShippingAddresses> = Result.success(CONSUMER_SHIPPING_ADDRESSES)
         set(value) {
@@ -64,22 +115,20 @@ internal open class FakeLinkAccountManager(
             cachedShippingAddresses = value.getOrNull()
         }
 
-    private val lookupTurbine = Turbine<LookupCall>()
-    private val mobileLookupTurbine = Turbine<MobileLookupCall>()
+    private val lookupByAuthIntentTurbine = Turbine<LookupCallByAuthIntent>()
+    private val lookupByLinkAuthTokenTurbine = Turbine<LookupCallByLinkAuthToken>()
 
-    private val signupTurbine = Turbine<SignUpCall>()
-    private val mobileSignUpTurbine = Turbine<MobileSignUpCall>()
     private val updateCardDetailsTurbine = Turbine<ConsumerPaymentDetailsUpdateParams>()
-    private val startVerificationTurbine = Turbine<Unit>()
+    private val startVerificationTurbine = Turbine<Boolean>()
 
     val confirmVerificationTurbine = Turbine<String>()
 
     private val logoutCall = Turbine<Unit>()
 
-    override var consumerPublishableKey: String? = null
-
     fun setConsumerPaymentDetails(consumerPaymentDetails: ConsumerPaymentDetails?) {
-        _consumerPaymentDetails.value = consumerPaymentDetails
+        _consumerState.value = consumerPaymentDetails?.toLinkPaymentMethod()?.let {
+            ConsumerState(paymentDetails = it)
+        }
     }
 
     fun setLinkAccount(account: LinkAccountUpdate.Value) {
@@ -90,75 +139,53 @@ internal open class FakeLinkAccountManager(
         _accountStatus.value = status
     }
 
-    override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
-        lookupTurbine.add(
-            item = LookupCall(
-                email = email,
-                startSession = startSession
-            )
-        )
-        return lookupConsumerResult
-    }
-
-    override suspend fun mobileLookupConsumer(
+    // Unified API methods
+    override suspend fun lookupByEmail(
         email: String,
         emailSource: EmailSource,
-        verificationToken: String,
-        appId: String,
-        startSession: Boolean
+        startSession: Boolean,
+        customerId: String?
     ): Result<LinkAccount?> {
-        mobileLookupTurbine.add(
-            item = MobileLookupCall(
-                email = email,
-                emailSource = emailSource,
-                verificationToken = verificationToken,
-                appId = appId,
-                startSession = startSession
-            )
-        )
-        return mobileLookupConsumerResult
+        lookupCalls.add(LookupCall(email, emailSource, startSession, customerId))
+        return lookupResult
     }
 
     override suspend fun signUp(
         email: String,
-        phone: String,
-        country: String,
+        phoneNumber: String?,
+        country: String?,
+        countryInferringMethod: String,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> {
-        signupTurbine.add(
-            item = SignUpCall(
-                email = email,
-                phone = phone,
-                country = country,
-                name = name,
-                consentAction = consentAction
-            )
-        )
-        return signUpResult
+        signUpCalls.add(SignUpCall(email, phoneNumber, country, countryInferringMethod, name, consentAction))
+        return signupResult
     }
 
-    override suspend fun mobileSignUp(
-        email: String,
-        phone: String,
-        country: String,
-        name: String?,
-        verificationToken: String,
-        appId: String,
-        consentAction: SignUpConsentAction
-    ): Result<LinkAccount> {
-        mobileSignUpTurbine.add(
-            item = MobileSignUpCall(
-                email = email,
-                phone = phone,
-                country = country,
-                name = name,
-                verificationToken = verificationToken,
-                appId = appId,
-                consentAction = consentAction
+    override suspend fun lookupByLinkAuthIntent(
+        linkAuthIntentId: String?,
+        customerId: String?
+    ): Result<LinkAccount?> {
+        lookupByAuthIntentTurbine.add(
+            item = LookupCallByAuthIntent(
+                linkAuthIntentId = linkAuthIntentId
             )
         )
-        return mobileSignUpResult
+        return lookupConsumerByAuthIntentResult
+    }
+
+    override suspend fun lookupByLinkAuthTokenClientSecret(linkAuthTokenClientSecret: String): Result<LinkAccount?> {
+        lookupByLinkAuthTokenTurbine.add(
+            item = LookupCallByLinkAuthToken(
+                linkAuthTokenClientSecret = linkAuthTokenClientSecret
+            )
+        )
+
+        return lookupConsumerByLinkAuthTokenResult
+    }
+
+    override suspend fun refreshConsumer(): Result<ConsumerSessionRefresh> {
+        return refreshConsumerResult
     }
 
     override suspend fun signInWithUserInput(userInput: UserInput): Result<LinkAccount> {
@@ -172,33 +199,57 @@ internal open class FakeLinkAccountManager(
 
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails> {
+    ): Result<LinkPaymentDetails.New> {
         return createCardPaymentDetailsResult
+    }
+
+    override suspend fun shareCardPaymentDetails(
+        cardPaymentDetails: LinkPaymentDetails.New
+    ): Result<LinkPaymentDetails.Saved> {
+        return shareCardPaymentDetailsResult
+    }
+
+    override suspend fun createBankAccountPaymentDetails(
+        bankAccountId: String
+    ): Result<ConsumerPaymentDetails.PaymentDetails> {
+        yield()
+        return createBankAccountPaymentDetailsResult
     }
 
     override suspend fun sharePaymentDetails(
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
-        cvc: String?
+        billingPhone: String?,
+        cvc: String?,
+        allowRedisplay: String?,
+        apiKey: String?
     ): Result<SharePaymentDetails> {
         return sharePaymentDetails
     }
 
-    override suspend fun setLinkAccountFromLookupResult(
-        lookup: ConsumerSessionLookup,
-        startSession: Boolean,
-    ): LinkAccount? {
-        return linkAccountFromLookupResult
+    override suspend fun createLinkAccountSession(): Result<LinkAccountSession> {
+        yield()
+        return createLinkAccountSessionResult
     }
 
-    override suspend fun startVerification(): Result<LinkAccount> {
-        startVerificationTurbine.add(Unit)
+    override suspend fun createPaymentMethod(
+        linkPaymentMethod: LinkPaymentMethod
+    ): Result<com.stripe.android.model.PaymentMethod> {
+        return createPaymentMethodResult
+    }
+
+    override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
+        startVerificationTurbine.add(isResendSmsCode)
         return startVerificationResult
     }
 
-    override suspend fun confirmVerification(code: String): Result<LinkAccount> {
+    override suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount> {
         confirmVerificationTurbine.add(code)
         return confirmVerificationResult
+    }
+
+    override suspend fun postConsentUpdate(consentGranted: Boolean): Result<Unit> {
+        return postConsentUpdateResult
     }
 
     override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
@@ -210,8 +261,10 @@ internal open class FakeLinkAccountManager(
     }
 
     override suspend fun deletePaymentDetails(paymentDetailsId: String) = deletePaymentDetailsResult
+
     override suspend fun updatePaymentDetails(
-        updateParams: ConsumerPaymentDetailsUpdateParams
+        updateParams: ConsumerPaymentDetailsUpdateParams,
+        billingPhone: String?
     ): Result<ConsumerPaymentDetails> {
         updateCardDetailsTurbine.add(
             updateParams
@@ -219,27 +272,19 @@ internal open class FakeLinkAccountManager(
         return updatePaymentDetailsResult
     }
 
-    suspend fun awaitMobileSignUpCall(): MobileSignUpCall {
-        return mobileSignUpTurbine.awaitItem()
+    override suspend fun updatePhoneNumber(phoneNumber: String): Result<LinkAccount> {
+        return updatePhoneNumberResult
     }
 
     suspend fun awaitUpdateCardDetailsCall(): ConsumerPaymentDetailsUpdateParams {
         return updateCardDetailsTurbine.awaitItem()
     }
 
-    suspend fun awaitSignUpCall(): SignUpCall {
-        return signupTurbine.awaitItem()
+    suspend fun awaitLookupByAuthIntentCall(): LookupCallByAuthIntent {
+        return lookupByAuthIntentTurbine.awaitItem()
     }
 
-    suspend fun awaitMobileLookupCall(): MobileLookupCall {
-        return mobileLookupTurbine.awaitItem()
-    }
-
-    suspend fun awaitLookupCall(): LookupCall {
-        return lookupTurbine.awaitItem()
-    }
-
-    suspend fun awaitStartVerificationCall() {
+    suspend fun awaitStartVerificationCall(): Boolean {
         return startVerificationTurbine.awaitItem()
     }
 
@@ -252,40 +297,23 @@ internal open class FakeLinkAccountManager(
     }
 
     fun ensureAllEventsConsumed() {
-        lookupTurbine.ensureAllEventsConsumed()
-        mobileLookupTurbine.ensureAllEventsConsumed()
-        signupTurbine.ensureAllEventsConsumed()
-        mobileSignUpTurbine.ensureAllEventsConsumed()
+        lookupByAuthIntentTurbine.ensureAllEventsConsumed()
     }
 
-    data class LookupCall(
-        val email: String,
-        val startSession: Boolean
+    private fun ConsumerPaymentDetails.toLinkPaymentMethod(): List<LinkPaymentMethod.ConsumerPaymentDetails> =
+        paymentDetails.map {
+            LinkPaymentMethod.ConsumerPaymentDetails(
+                it,
+                collectedCvc = null,
+                billingPhone = null
+            )
+        }
+
+    data class LookupCallByAuthIntent(
+        val linkAuthIntentId: String?,
     )
 
-    data class MobileLookupCall(
-        val email: String,
-        val emailSource: EmailSource,
-        val verificationToken: String,
-        val appId: String,
-        val startSession: Boolean
-    )
-
-    data class SignUpCall(
-        val email: String,
-        val phone: String,
-        val country: String,
-        val name: String?,
-        val consentAction: SignUpConsentAction
-    )
-
-    data class MobileSignUpCall(
-        val email: String,
-        val phone: String,
-        val country: String,
-        val name: String?,
-        val verificationToken: String,
-        val appId: String,
-        val consentAction: SignUpConsentAction
+    data class LookupCallByLinkAuthToken(
+        val linkAuthTokenClientSecret: String?
     )
 }

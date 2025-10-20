@@ -187,6 +187,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             email = email,
             phoneNumber = phoneNumber,
             country = country,
+            countryInferringMethod = "PHONE_NUMBER",
             name = null,
             locale = locale,
             amount = elementsSessionContext?.amount,
@@ -233,6 +234,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             verificationCode = verificationCode,
             type = type,
             requestSurface = requestSurface,
+            consentGranted = null,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
         ).also { session ->
             updateCachedConsumerSession("confirmConsumerVerification", session)
@@ -262,6 +264,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
                 bankAccountId = bankAccountId,
                 billingAddress = billingDetails?.toConsumerBillingAddressParams(),
                 billingEmailAddress = billingDetails?.email,
+                clientAttributionMetadata = emptyMap(),
             ),
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = true),
@@ -322,11 +325,15 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     ): ConsumerSessionLookup = consumersApiService.mobileLookupConsumerSession(
         email = email,
         emailSource = emailSource,
+        linkAuthIntentId = null,
         requestSurface = requestSurface,
         verificationToken = verificationToken,
         appId = appId,
         sessionId = sessionId,
         requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
+        customerId = null,
+        supportedVerificationTypes = null,
+        linkAuthTokenClientSecret = null,
     ).also {
         updateCachedConsumerSessionFromLookup(it)
     }

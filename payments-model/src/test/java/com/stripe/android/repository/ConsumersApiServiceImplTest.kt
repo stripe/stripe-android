@@ -66,6 +66,7 @@ class ConsumersApiServiceImplTest {
                 email = email,
                 phoneNumber = "+15555555568",
                 country = "US",
+                countryInferringMethod = "PHONE_NUMBER",
                 name = null,
                 locale = Locale.US,
                 amount = 1234,
@@ -96,15 +97,20 @@ class ConsumersApiServiceImplTest {
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart("email_address", "email%40example.com"),
             bodyPart("request_surface", requestSurface),
+            bodyPart("session_id", DEFAULT_SESSION_ID),
         ) { response ->
             response.setBody(ConsumerFixtures.EXISTING_CONSUMER_JSON.toString())
         }
 
         val lookup = consumersApiService.lookupConsumerSession(
             email = email,
+            linkAuthIntentId = null,
             requestSurface = requestSurface,
+            sessionId = DEFAULT_SESSION_ID,
             requestOptions = DEFAULT_OPTIONS,
             doNotLogConsumerFunnelEvent = false,
+            supportedVerificationTypes = null,
+            customerId = null
         )
 
         assertThat(lookup.exists).isTrue()
@@ -132,9 +138,13 @@ class ConsumersApiServiceImplTest {
         assertFailsWith<APIException> {
             consumersApiService.lookupConsumerSession(
                 email = email,
+                linkAuthIntentId = null,
                 requestSurface = requestSurface,
+                sessionId = DEFAULT_SESSION_ID,
                 doNotLogConsumerFunnelEvent = false,
-                requestOptions = DEFAULT_OPTIONS
+                supportedVerificationTypes = null,
+                requestOptions = DEFAULT_OPTIONS,
+                customerId = null
             )
         }
     }
@@ -177,6 +187,65 @@ class ConsumersApiServiceImplTest {
     }
 
     @Test
+    fun `startConsumerVerification() includes is_resend_sms_code when true`() = runTest {
+        val clientSecret = "secret"
+        val locale = Locale.US
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/start_verification"),
+            header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
+            bodyPart("request_surface", "android_payment_element"),
+            bodyPart(urlEncode("credentials[consumer_session_client_secret]"), clientSecret),
+            bodyPart("type", "SMS"),
+            bodyPart("locale", locale.toLanguageTag()),
+            bodyPart("is_resend_sms_code", "true"),
+        ) { response ->
+            response.setBody(ConsumerFixtures.CONSUMER_VERIFICATION_STARTED_JSON.toString())
+        }
+
+        consumersApiService.startConsumerVerification(
+            consumerSessionClientSecret = clientSecret,
+            locale = locale,
+            requestSurface = "android_payment_element",
+            type = VerificationType.SMS,
+            customEmailType = null,
+            connectionsMerchantName = null,
+            requestOptions = DEFAULT_OPTIONS,
+            isResendSmsCode = true
+        )
+    }
+
+    @Test
+    fun `startConsumerVerification() excludes is_resend_sms_code when false`() = runTest {
+        val clientSecret = "secret"
+        val locale = Locale.US
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/start_verification"),
+            header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
+            bodyPart("request_surface", "android_payment_element"),
+            bodyPart(urlEncode("credentials[consumer_session_client_secret]"), clientSecret),
+            bodyPart("type", "SMS"),
+            bodyPart("locale", locale.toLanguageTag()),
+        ) { response ->
+            response.setBody(ConsumerFixtures.CONSUMER_VERIFICATION_STARTED_JSON.toString())
+        }
+
+        consumersApiService.startConsumerVerification(
+            consumerSessionClientSecret = clientSecret,
+            locale = locale,
+            requestSurface = "android_payment_element",
+            type = VerificationType.SMS,
+            customEmailType = null,
+            connectionsMerchantName = null,
+            requestOptions = DEFAULT_OPTIONS,
+            isResendSmsCode = false
+        )
+    }
+
+    @Test
     fun `confirmConsumerVerification() sends all parameters`() = runTest {
         val clientSecret = "secret"
         val verificationCode = "1234"
@@ -199,6 +268,7 @@ class ConsumersApiServiceImplTest {
             verificationCode = verificationCode,
             requestSurface = "android_payment_element",
             type = VerificationType.SMS,
+            consentGranted = null,
             requestOptions = DEFAULT_OPTIONS
         )
 
@@ -223,7 +293,7 @@ class ConsumersApiServiceImplTest {
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart(urlEncode("credentials[consumer_session_client_secret]"), "secret"),
             bodyPart("type", "card"),
-            bodyPart("active", "false"),
+            bodyPart("active", "true"),
             bodyPart("billing_email_address", urlEncode(email)),
             bodyPart(urlEncode("card[number]"), "4242424242424242"),
             bodyPart(urlEncode("card[exp_month]"), "12"),
@@ -255,7 +325,6 @@ class ConsumersApiServiceImplTest {
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
                 cardPaymentMethodCreateParamsMap = paymentMethodCreateParams,
                 email = email,
-                active = false,
             ),
             requestSurface = requestSurface,
             requestOptions = DEFAULT_OPTIONS,
@@ -277,7 +346,7 @@ class ConsumersApiServiceImplTest {
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart(urlEncode("credentials[consumer_session_client_secret]"), "secret"),
             bodyPart("type", "card"),
-            bodyPart("active", "false"),
+            bodyPart("active", "true"),
             bodyPart("billing_email_address", urlEncode(email)),
             bodyPart(urlEncode("card[number]"), "4242424242424242"),
             bodyPart(urlEncode("card[exp_month]"), "12"),
@@ -313,7 +382,6 @@ class ConsumersApiServiceImplTest {
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
                 cardPaymentMethodCreateParamsMap = paymentMethodCreateParams,
                 email = email,
-                active = false,
             ),
             requestSurface = requestSurface,
             requestOptions = DEFAULT_OPTIONS,
@@ -343,5 +411,6 @@ class ConsumersApiServiceImplTest {
 
     private companion object {
         private val DEFAULT_OPTIONS = ApiRequest.Options("pk_test_vOo1umqsYxSrP5UXfOeL3ecm")
+        private const val DEFAULT_SESSION_ID = "sess_123"
     }
 }

@@ -5,18 +5,23 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationCoordinator
@@ -30,6 +35,7 @@ import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDa
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
@@ -85,7 +91,12 @@ class EmbeddedPaymentElement @Inject internal constructor(
     @Composable
     fun WalletButtons() {
         val walletButtonsContent by contentHelper.walletButtonsContent.collectAsState()
-        walletButtonsContent?.Content()
+
+        val walletButtonsViewClickHandler = remember {
+            WalletButtonsViewClickHandler { false }
+        }
+
+        walletButtonsContent?.Content(walletButtonsViewClickHandler)
     }
 
     /**
@@ -120,16 +131,55 @@ class EmbeddedPaymentElement @Inject internal constructor(
      *
      * Creation can be completed with [rememberEmbeddedPaymentElement].
      */
-    class Builder(
-        /**
-         * Called when the customer confirms the payment or setup.
-         */
-        internal val createIntentCallback: CreateIntentCallback,
-        /**
-         * Called with the result of the payment.
-         */
+    class Builder internal constructor(
+        internal val deferredHandler: DeferredHandler,
         internal val resultCallback: ResultCallback,
     ) {
+        constructor(
+            /**
+             * Called when the customer confirms the payment or setup.
+             */
+            createIntentCallback: CreateIntentCallback,
+            /**
+             * Called with the result of the payment.
+             */
+            resultCallback: ResultCallback,
+        ) : this(
+            deferredHandler = DeferredHandler.Intent(createIntentCallback),
+            resultCallback = resultCallback,
+        )
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        constructor(
+            /**
+             * Called with the ConfirmationToken when the customer confirms the payment or setup.
+             */
+            createIntentCallback: CreateIntentWithConfirmationTokenCallback,
+            /**
+             * Called with the result of the payment.
+             */
+            resultCallback: ResultCallback,
+        ) : this(
+            deferredHandler = DeferredHandler.ConfirmationToken(createIntentCallback),
+            resultCallback = resultCallback,
+        )
+
+        @SharedPaymentTokenSessionPreview
+        constructor(
+            /**
+             * Called when a user calls confirm and their payment method
+             * is being handed off to an external provider to handle payment/setup.
+             */
+            preparePaymentMethodHandler: PreparePaymentMethodHandler,
+            /**
+             * Called with the result of the payment.
+             */
+            resultCallback: ResultCallback,
+        ) : this(
+            deferredHandler = DeferredHandler.SharedPaymentToken(preparePaymentMethodHandler),
+            resultCallback = resultCallback,
+        )
+
         internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
             private set
 
@@ -175,6 +225,19 @@ class EmbeddedPaymentElement @Inject internal constructor(
         fun rowSelectionBehavior(rowSelectionBehavior: RowSelectionBehavior) = apply {
             this.rowSelectionBehavior = rowSelectionBehavior
         }
+
+        @OptIn(SharedPaymentTokenSessionPreview::class)
+        internal sealed interface DeferredHandler {
+            class Intent(val createIntentCallback: CreateIntentCallback) : DeferredHandler
+
+            class ConfirmationToken(
+                val createIntentWithConfirmationTokenCallback: CreateIntentWithConfirmationTokenCallback
+            ) : DeferredHandler
+
+            class SharedPaymentToken constructor(
+                val preparePaymentMethodHandler: PreparePaymentMethodHandler
+            ) : DeferredHandler
+        }
     }
 
     /** Configuration for [EmbeddedPaymentElement] **/
@@ -200,6 +263,9 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val embeddedViewDisplaysMandateText: Boolean,
         internal val link: PaymentSheet.LinkConfiguration,
         internal val formSheetAction: FormSheetAction,
+        internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
+        internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
+        internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         class Builder(
@@ -231,6 +297,10 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 ConfigurationDefaults.customPaymentMethods
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
             private var formSheetAction: FormSheetAction = FormSheetAction.Continue
+            private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
+            private var opensCardScannerAutomatically: Boolean =
+                ConfigurationDefaults.opensCardScannerAutomatically
+            private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -429,6 +499,30 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 this.formSheetAction = formSheetAction
             }
 
+            /**
+             * A map for specifying when legal agreements are displayed for each payment method type.
+             * If the payment method is not specified in the list, the TermsDisplay value will default to automatic.
+             */
+            fun termsDisplay(termsDisplay: Map<PaymentMethod.Type, TermsDisplay>) = apply {
+                this.termsDisplay = termsDisplay
+            }
+
+            /**
+             * By default, the embedded payment element offers a card scan button within the new card entry form.
+             * When opensCardScannerAutomatically is set to true,
+             * the card entry form will initialize with the card scanner already open.
+             * **Note**: The stripecardscan dependency must be added to set `opensCardScannerAutomatically` to true
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun opensCardScannerAutomatically(opensCardScannerAutomatically: Boolean) = apply {
+                this.opensCardScannerAutomatically = opensCardScannerAutomatically
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun userOverrideCountry(userOverrideCountry: String?) = apply {
+                this.userOverrideCountry = userOverrideCountry
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -449,6 +543,9 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
                 link = link,
                 formSheetAction = formSheetAction,
+                termsDisplay = termsDisplay,
+                opensCardScannerAutomatically = opensCardScannerAutomatically,
+                userOverrideCountry = userOverrideCountry,
             )
         }
     }
@@ -492,7 +589,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
 
     @Poko
     class PaymentOptionDisplayData internal constructor(
-        private val imageLoader: suspend () -> Drawable,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val imageLoader: suspend () -> Drawable,
 
         /**
          * A user facing string representing the payment method; e.g. "Google Pay" or "···· 4242" for a card.
@@ -602,7 +700,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * You can implement this method to immediately perform an action e.g. go back to the checkout screen
              * or confirm the payment.
              *
-             * Note that certain payment options like Apple Pay and saved payment methods are disabled in this mode if
+             * Note that certain payment options like Google Pay and saved payment methods are disabled in this mode if
              * you set [EmbeddedPaymentElement.Configuration.formSheetAction] to [FormSheetAction.Confirm].
              */
             fun immediateAction(didSelectPaymentOption: (EmbeddedPaymentElement) -> Unit): RowSelectionBehavior {
@@ -646,7 +744,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 owner = viewModelStoreOwner,
                 factory = EmbeddedPaymentElementViewModel.Factory(
                     paymentElementCallbackIdentifier,
-                    activity.window?.statusBarColor,
+                    StatusBarCompat.color(activity),
                 )
             ).get(
                 key = "EmbeddedPaymentElementViewModel(instance = $paymentElementCallbackIdentifier)",

@@ -7,6 +7,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.embedded.EmbeddedConfirmationSaver
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.amount
@@ -52,6 +53,7 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     private val onClickDelegate: OnClickOverrideDelegate,
     private val eventReporter: EventReporter,
     @ViewModelScope coroutineScope: CoroutineScope,
+    private val confirmationSaver: EmbeddedConfirmationSaver,
 ) : FormActivityStateHelper {
     private val _state = MutableStateFlow(
         FormActivityStateHelper.State(
@@ -130,10 +132,13 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
             is ConfirmationHandler.State.Complete -> {
                 eventReporter.reportPaymentResult(state.result, selectionHolder.selection.value)
                 when (state.result) {
-                    is ConfirmationHandler.Result.Succeeded -> copy(
-                        processingState = PrimaryButtonProcessingState.Completed,
-                        isEnabled = false
-                    )
+                    is ConfirmationHandler.Result.Succeeded -> {
+                        confirmationSaver.save(state.result.intent)
+                        copy(
+                            processingState = PrimaryButtonProcessingState.Completed,
+                            isEnabled = false
+                        )
+                    }
                     is ConfirmationHandler.Result.Failed -> copy(
                         processingState = PrimaryButtonProcessingState.Idle(null),
                         isEnabled = selectionHolder.selection.value != null,

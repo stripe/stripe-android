@@ -65,10 +65,11 @@ class DefaultFormActivityConfirmationHelperTest {
     }
 
     @Test
-    fun `confirm invokes eventReporter but does not start confirmation with null selection`() = testScenario {
+    fun `confirm does not invoke eventReporter when selection is null`() = testScenario {
         assertThat(confirmationHelper.confirm()).isNull()
 
-        assertThat(eventReporter.pressConfirmButtonCalls.awaitItem()).isNull()
+        // Should not report button press when there's no selection
+        eventReporter.pressConfirmButtonCalls.ensureAllEventsConsumed()
     }
 
     @Test
@@ -95,6 +96,7 @@ class DefaultFormActivityConfirmationHelperTest {
         },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
+        val formActivityConfirmationHandlerRegistrar = FakeFormActivityConfirmationHandlerRegistrar()
         val confirmationHandler = FakeConfirmationHandler()
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
@@ -106,6 +108,7 @@ class DefaultFormActivityConfirmationHelperTest {
         val stateHelper = FakeFormActivityStateHelper()
         val onClickDelegate = OnClickDelegateOverrideImpl()
         val eventReporter = FakeEventReporter()
+        val testLifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined)
         val confirmationHelper = DefaultFormActivityConfirmationHelper(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -119,12 +122,16 @@ class DefaultFormActivityConfirmationHelperTest {
             stateHelper = stateHelper,
             onClickDelegate = onClickDelegate,
             eventReporter = eventReporter,
-            lifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined),
+            lifecycleOwner = testLifecycleOwner,
             activityResultCaller = mock(),
             coroutineScope = this,
+            formActivityConfirmationHandlerRegistrar = formActivityConfirmationHandlerRegistrar,
         )
-        assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
+
+        assertThat(formActivityConfirmationHandlerRegistrar.registerAndBootstrapTurbine.awaitItem()).isNotNull()
         assertThat(stateHelper.updateTurbine.awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
+        // Bootstrap is no longer called during DefaultFormActivityConfirmationHelper initialization
+        // It's now called in FormActivityViewModel.inject()
         Scenario(
             confirmationHelper = confirmationHelper,
             confirmationHandler = confirmationHandler,

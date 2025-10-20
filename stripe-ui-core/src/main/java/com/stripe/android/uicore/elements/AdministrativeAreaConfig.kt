@@ -11,7 +11,7 @@ class AdministrativeAreaConfig(
     private val shortAdministrativeAreaNames = country.administrativeAreas.map { it.first }
     private val fullAdministrativeAreaNames = country.administrativeAreas.map { it.second }
 
-    override val tinyMode: Boolean = false
+    override val mode = DropdownConfig.Mode.Full(selectsFirstOptionAsDefault = false)
     override val debugLabel = "administrativeArea"
 
     override val label = resolvableString(country.label)

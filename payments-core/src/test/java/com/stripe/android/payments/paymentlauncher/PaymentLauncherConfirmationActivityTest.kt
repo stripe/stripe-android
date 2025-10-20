@@ -2,11 +2,13 @@ package com.stripe.android.payments.paymentlauncher
 
 import android.content.Intent
 import android.graphics.Color
+import android.util.Base64
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.R
+import com.stripe.android.core.exception.GenericStripeException
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils
@@ -199,6 +201,89 @@ class PaymentLauncherConfirmationActivityTest {
         }
     }
 
+    @Test
+    fun `start with non-Base64 hashed value should fail`() = testHashedValueFailure(
+        hashedValue = "random_value===",
+        analyticsValue = "invalidHashedValueNotBase64",
+    )
+
+    @Test
+    fun `start with invalid formatted hashed value should fail`() = testHashedValueFailure(
+        hashedValue = "random_value",
+        analyticsValue = "invalidHashedValueIncorrectFormat",
+    )
+
+    @Test
+    fun `start with valid formatted hashed value should call expected function`() {
+        val args = PaymentLauncherContract.Args.HashedPaymentIntentNextActionArgs(
+            hashedValue = Base64.encodeToString("$PUBLISHABLE_KEY:$CLIENT_SECRET".toByteArray(), 0),
+            stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+            enableLogging = false,
+            productUsage = PRODUCT_USAGE,
+            includePaymentSheetNextHandlers = false,
+            statusBarColor = Color.RED,
+        )
+
+        mockViewModelActivityScenario().launchForResult(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                PaymentLauncherConfirmationActivity::class.java
+            ).putExtras(args.toBundle())
+        ).use { activityScenario ->
+            assertThat(args.publishableKey).isEqualTo(PUBLISHABLE_KEY)
+            assertThat(args.paymentIntentClientSecret).isEqualTo(CLIENT_SECRET)
+
+            activityScenario.onActivity {
+                runTest {
+                    verify(viewModel).handleNextActionForStripeIntent(eq(CLIENT_SECRET), any())
+                    verify(viewModel).register(any(), any())
+                }
+            }
+        }
+    }
+
+    private fun testHashedValueFailure(
+        hashedValue: String,
+        analyticsValue: String,
+    ) {
+        val args = PaymentLauncherContract.Args.HashedPaymentIntentNextActionArgs(
+            hashedValue = hashedValue,
+            stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+            enableLogging = false,
+            productUsage = PRODUCT_USAGE,
+            includePaymentSheetNextHandlers = false,
+            statusBarColor = Color.RED,
+        )
+
+        mockViewModelActivityScenario().launchForResult(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                PaymentLauncherConfirmationActivity::class.java
+            ).putExtras(args.toBundle())
+        ).use { activityScenario ->
+            assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+
+            val result = InternalPaymentResult.fromIntent(activityScenario.getResult().resultData)
+
+            assertThat(result).isInstanceOf(InternalPaymentResult.Failed::class.java)
+
+            val failedResult = result as InternalPaymentResult.Failed
+            val throwable = failedResult.throwable
+
+            assertThat(throwable).isInstanceOf(GenericStripeException::class.java)
+
+            val stripeException = throwable as GenericStripeException
+
+            assertThat(stripeException.analyticsValue()).isEqualTo(analyticsValue)
+            assertThat(stripeException.message).isEqualTo(
+                "Invalid hashed value! Please provided a hashed payment intent in the correct format!"
+            )
+
+            assertThat(args.paymentIntentClientSecret).isEqualTo("UNKNOWN")
+            assertThat(args.publishableKey).isEqualTo("UNKNOWN")
+        }
+    }
+
     private fun mockViewModelActivityScenario(): InjectableActivityScenario<PaymentLauncherConfirmationActivity> {
         return injectableActivityScenario {
             injectActivity {
@@ -208,6 +293,7 @@ class PaymentLauncherConfirmationActivityTest {
     }
 
     private companion object {
+        const val PUBLISHABLE_KEY = "publishableKey"
         const val CLIENT_SECRET = "clientSecret"
         const val TEST_STRIPE_ACCOUNT_ID = "accountId"
         val PRODUCT_USAGE = setOf("TestProductUsage")

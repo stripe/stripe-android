@@ -4,6 +4,8 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.networking.QueryStringFactory
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetFlowType
+import com.stripe.android.financialconnections.launcher.flowType
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 
@@ -17,11 +19,12 @@ object HostedAuthUrlBuilder {
     ): String? {
         return create(
             hostedAuthUrl = hostedAuthUrl,
-            isInstantDebits = args is FinancialConnectionsSheetActivityArgs.ForInstantDebits,
+            isInstantDebits = args.flowType == FinancialConnectionsSheetFlowType.ForInstantDebits,
             linkMode = args.elementsSessionContext?.linkMode,
             billingDetails = args.elementsSessionContext?.billingDetails,
             prefillDetails = prefillDetails,
             incentiveEligibilitySession = args.elementsSessionContext?.incentiveEligibilitySession,
+            allowRedisplay = args.elementsSessionContext?.allowRedisplay
         )
     }
 
@@ -32,6 +35,7 @@ object HostedAuthUrlBuilder {
         billingDetails: ElementsSessionContext.BillingDetails?,
         prefillDetails: ElementsSessionContext.PrefillDetails?,
         incentiveEligibilitySession: IncentiveEligibilitySession?,
+        allowRedisplay: ElementsSessionContext.AllowRedisplay?,
     ): String? {
         if (hostedAuthUrl == null) {
             return null
@@ -47,6 +51,7 @@ object HostedAuthUrlBuilder {
             linkMode?.let { queryParams.add("link_mode=${it.value}") }
             billingDetails?.let { queryParams.add(makeBillingDetailsQueryParams(it)) }
             incentiveEligibilitySession?.let { queryParams.add("incentiveEligibilitySession=${it.id}") }
+            allowRedisplay?.let { queryParams.add("allow_redisplay=${it.value}") }
         }
 
         prefillDetails?.run {

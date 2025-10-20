@@ -223,13 +223,14 @@ data class ExampleCreateSetupIntentResponse(
  * Awaits the [ApiResult] and deserializes it into the desired type [T].
  */
 suspend fun <T : Any> Request.awaitModel(
-    serializer: DeserializationStrategy<T>
+    serializer: DeserializationStrategy<T>,
+    json: Json = Json,
 ): ApiResult<T, FuelError> {
     val deserializer = object : Deserializable<T> {
 
         override fun deserialize(response: Response): T {
             val body = response.body().asString("application/json")
-            return Json.decodeFromString(serializer, body)
+            return json.decodeFromString(serializer, body)
         }
     }
 

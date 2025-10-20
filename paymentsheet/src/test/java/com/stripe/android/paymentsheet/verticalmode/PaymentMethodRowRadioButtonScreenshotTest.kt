@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
@@ -87,31 +88,35 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
 
     @Test
     fun testStyleAppearance() {
-        val style = FlatWithRadio(
-            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-            additionalVerticalInsetsDp = 40f,
-            horizontalInsetsDp = 40f,
-            colorsLight = FlatWithRadio.Colors(
-                separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                selectedColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb(),
-                unselectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb()
-            ),
-            colorsDark = FlatWithRadio.Colors(
-                separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                selectedColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb(),
-                unselectedColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb()
+        val style = FlatWithRadio.Builder()
+            .separatorThicknessDp(StripeThemeDefaults.flat.separatorThickness)
+            .startSeparatorInsetDp(StripeThemeDefaults.flat.separatorInsets)
+            .endSeparatorInsetDp(StripeThemeDefaults.flat.separatorInsets)
+            .topSeparatorEnabled(StripeThemeDefaults.flat.topSeparatorEnabled)
+            .bottomSeparatorEnabled(StripeThemeDefaults.flat.bottomSeparatorEnabled)
+            .additionalVerticalInsetsDp(40f)
+            .horizontalInsetsDp(40f)
+            .colorsLight(
+                FlatWithRadio.Colors(
+                    separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                    selectedColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb(),
+                    unselectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb()
+                )
             )
-        )
+            .colorsDark(
+                FlatWithRadio.Colors(
+                    separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                    selectedColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb(),
+                    unselectedColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb()
+                )
+            )
+            .build()
 
         testPaymentMethodRowButton_RadioButton(
             trailingContent = {
                 TrailingContent()
             },
-            rowStyle = style,
+            appearance = PaymentSheet.Appearance.Embedded(style),
         )
     }
 
@@ -139,6 +144,46 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
         )
     }
 
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    @Test
+    fun testIconMargins() {
+        testPaymentMethodRowButton_RadioButton(
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(FlatWithRadio.default)
+                .paymentMethodIconMargins(
+                    PaymentSheet.Insets(10f, 10f, 10f, 10f)
+                )
+                .build()
+        )
+    }
+
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    @Test
+    fun testFonts() {
+        testPaymentMethodRowButton_RadioButton(
+            subtitle = "this is a subtitle",
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(FlatWithRadio.default)
+                .titleFont(
+                    PaymentSheet.Typography.Font(
+                        fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
+                        fontSizeSp = 20f,
+                        fontWeight = 500,
+                        letterSpacingSp = 10f
+                    )
+                )
+                .subtitleFont(
+                    PaymentSheet.Typography.Font(
+                        fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
+                        fontSizeSp = 12f,
+                        fontWeight = 200,
+                        letterSpacingSp = 5f
+                    )
+                )
+                .build()
+        )
+    }
+
     @Composable
     private fun TrailingContent() {
         Row(
@@ -163,7 +208,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
         isEnabled: Boolean = true,
         isSelected: Boolean = false,
         iconContent: @Composable RowScope.() -> Unit = { DefaultPaymentMethodRowIcon() },
-        rowStyle: PaymentSheet.Appearance.Embedded.RowStyle = FlatWithRadio.default,
+        appearance: PaymentSheet.Appearance.Embedded = PaymentSheet.Appearance.Embedded(FlatWithRadio.default),
         trailingContent: @Composable RowScope.() -> Unit = {},
         title: String = "**** 4242",
         subtitle: String? = null,
@@ -179,7 +224,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
             promoText = promoText,
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
-            rowStyle = rowStyle,
+            appearance = appearance,
             paparazziRule = paparazziRule,
         )
     }

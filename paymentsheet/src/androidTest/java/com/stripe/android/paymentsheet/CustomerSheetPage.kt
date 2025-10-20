@@ -160,7 +160,7 @@ internal class CustomerSheetPage(
         composeTestRule.waitUntil(5_000) {
             composeTestRule
                 .onAllNodes(matcher.and(isEnabled()))
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
     }
 

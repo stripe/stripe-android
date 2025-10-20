@@ -81,6 +81,16 @@ class ConsumerPaymentDetailsJsonParserTest {
                         bankIconCode = null,
                         isDefault = true,
                         nickname = null,
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            name = null,
+                            line1 = "123 Fake St",
+                            line2 = null,
+                            locality = null,
+                            administrativeArea = null,
+                            countryCode = CountryCode.US,
+                            postalCode = "94103"
+                        ),
+                        billingEmailAddress = null,
                     )
                 )
             ),
@@ -101,6 +111,16 @@ class ConsumerPaymentDetailsJsonParserTest {
                         bankIconCode = null,
                         isDefault = false,
                         nickname = null,
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            name = null,
+                            line1 = null,
+                            line2 = null,
+                            locality = null,
+                            administrativeArea = null,
+                            countryCode = null,
+                            postalCode = null
+                        ),
+                        billingEmailAddress = null,
                     )
                 )
             ),
@@ -110,6 +130,7 @@ class ConsumerPaymentDetailsJsonParserTest {
     }
 
     @Test
+    @Suppress("LongMethod")
     fun `parse multiple payment details`() {
         assertEquals(
             ConsumerPaymentDetails(
@@ -163,6 +184,16 @@ class ConsumerPaymentDetailsJsonParserTest {
                         bankIconCode = null,
                         isDefault = false,
                         nickname = null,
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            name = null,
+                            line1 = null,
+                            line2 = null,
+                            locality = null,
+                            administrativeArea = null,
+                            countryCode = null,
+                            postalCode = null
+                        ),
+                        billingEmailAddress = null,
                     )
                 )
             ),

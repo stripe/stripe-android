@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -143,7 +142,7 @@ internal class SavedPaymentMethodMutator(
 
     private suspend fun removePaymentMethodInternal(paymentMethodId: String): Result<PaymentMethod> {
         // TODO(samer-stripe): Send 'unexpected_error' here
-        val currentCustomer = customerStateHolder.customer.value ?: return Result.failure(
+        val customerMetadata = paymentMethodMetadataFlow.value?.customerMetadata ?: return Result.failure(
             IllegalStateException(
                 "Could not remove payment method because CustomerConfiguration was not found! Make sure it is " +
                     "provided as part of PaymentSheet.Configuration"
@@ -164,9 +163,9 @@ internal class SavedPaymentMethodMutator(
 
         return customerRepository.detachPaymentMethod(
             customerInfo = CustomerRepository.CustomerInfo(
-                id = currentCustomer.id,
-                ephemeralKeySecret = currentCustomer.ephemeralKeySecret,
-                customerSessionClientSecret = currentCustomer.customerSessionClientSecret,
+                id = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
             ),
             paymentMethodId = paymentMethodId,
             canRemoveDuplicates = canRemoveDuplicates,
@@ -213,7 +212,7 @@ internal class SavedPaymentMethodMutator(
     }
 
     internal suspend fun setDefaultPaymentMethod(paymentMethod: PaymentMethod): Result<Unit> {
-        val customer = customerStateHolder.customer.value
+        val customer = paymentMethodMetadataFlow.value?.customerMetadata
             ?: return Result.failure(
                 IllegalStateException("Unable to set default payment method when customer is null.")
             )
@@ -262,7 +261,7 @@ internal class SavedPaymentMethodMutator(
         onSuccess: (PaymentMethod) -> Unit = {},
     ): Result<PaymentMethod> {
         // TODO(samer-stripe): Send 'unexpected_error' here
-        val currentCustomer = customerStateHolder.customer.value ?: return Result.failure(
+        val customerMetadata = paymentMethodMetadataFlow.value?.customerMetadata ?: return Result.failure(
             IllegalStateException(
                 "Could not update payment method because CustomerConfiguration was not found! Make sure it is " +
                     "provided as part of PaymentSheet.Configuration"
@@ -271,9 +270,9 @@ internal class SavedPaymentMethodMutator(
 
         return customerRepository.updatePaymentMethod(
             customerInfo = CustomerRepository.CustomerInfo(
-                id = currentCustomer.id,
-                ephemeralKeySecret = currentCustomer.ephemeralKeySecret,
-                customerSessionClientSecret = currentCustomer.customerSessionClientSecret,
+                id = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
             ),
             paymentMethodId = paymentMethod.id!!,
             params = PaymentMethodUpdateParams.createCard(
@@ -287,11 +286,15 @@ internal class SavedPaymentMethodMutator(
                 expiryYear = cardUpdateParams.expiryYear,
                 productUsageTokens = setOf("PaymentSheet"),
             )
-        ).onSuccess { updatedMethod ->
+        ).map { updatedMethod ->
+            updatedMethod.withUpdatedLocalFields(original = paymentMethod)
+        }.onSuccess { updatedMethod ->
             withContext(uiContext) {
                 customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(updatedMethod)
+
+                val currentCustomer = customerStateHolder.customer.value
                 customerStateHolder.setCustomerState(
-                    currentCustomer.copy(
+                    currentCustomer?.copy(
                         paymentMethods = currentCustomer.paymentMethods.map { savedMethod ->
                             val savedId = savedMethod.id
                             val updatedId = updatedMethod.id
@@ -377,6 +380,7 @@ internal class SavedPaymentMethodMutator(
         ) {
             if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
                 val isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
+                val paymentMethodMetadata = viewModel.paymentMethodMetadata.value
                 viewModel.navigationHandler.transitionTo(
                     PaymentSheetScreen.UpdatePaymentMethod(
                         DefaultUpdatePaymentMethodInteractor(
@@ -386,8 +390,9 @@ internal class SavedPaymentMethodMutator(
                                 .canUpdateFullPaymentMethodDetails.value,
                             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
-                            addressCollectionMode = viewModel.config.asCommonConfiguration()
-                                .billingDetailsCollectionConfiguration.address,
+                            addressCollectionMode = viewModel.config.billingDetailsCollectionConfiguration.address,
+                            allowedBillingCountries =
+                            viewModel.config.billingDetailsCollectionConfiguration.allowedBillingCountries,
                             removeExecutor = { method ->
                                 performRemove()
                             },
@@ -402,9 +407,7 @@ internal class SavedPaymentMethodMutator(
                                 )
                             },
                             shouldShowSetAsDefaultCheckbox = (
-                                viewModel
-                                    .paymentMethodMetadata
-                                    .value?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
+                                paymentMethodMetadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
                                 ),
                             isDefaultPaymentMethod = (
                                 displayableSavedPaymentMethod.isDefaultPaymentMethod(
@@ -412,6 +415,8 @@ internal class SavedPaymentMethodMutator(
                                     viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
                                 )
                                 ),
+                            removeMessage = paymentMethodMetadata?.customerMetadata?.permissions?.removePaymentMethod
+                                ?.removeMessage(paymentMethodMetadata.merchantName),
                             onUpdateSuccess = viewModel.navigationHandler::pop,
                         )
                     )
@@ -469,4 +474,12 @@ internal class SavedPaymentMethodMutator(
             }
         }
     }
+}
+
+private fun PaymentMethod.withUpdatedLocalFields(original: PaymentMethod): PaymentMethod {
+    // We don't receive the following fields as part of the update response, so we need to copy them over
+    return copy(
+        linkPaymentDetails = original.linkPaymentDetails,
+        isLinkPassthroughMode = original.isLinkPassthroughMode,
+    )
 }

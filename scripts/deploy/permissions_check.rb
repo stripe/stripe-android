@@ -20,9 +20,9 @@ require_relative 'common'
         "error_actions" => -> { get_password_from_coworker() }
     },
     {
-        "password_key" => "bindings/java-maven-api-token",
+        "password_key" => "bindings/sonatype-central-api-token",
         "error_actions" => -> {
-            request_membership_at_link("https://ldapmanager.corp.stripe.com/request?group=password-bindings-java-maven-api-token")
+            request_membership_at_link("https://ldapmanager.corp.stripe.com/request?group=password-bindings-sonatype-central-api-token")
         }
     },
     {
@@ -39,13 +39,6 @@ require_relative 'common'
             wait_for_user
             puts "Enter your access token from github to add it to the vault"
             execute("add-password -n \"$USER\" bindings/gh-tokens/$USER")
-        }
-    },
-    {
-        "password_key" => "nexus-sonatype-login",
-        "error_actions" => -> {
-            rputs "Follow the prompts:"
-            execute("fetch-password nexus-sonatype-login")
         }
     },
 ]

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.model.PassiveCaptchaParams
 import javax.inject.Inject
 
 /**
@@ -37,9 +38,11 @@ internal class LinkActivityContract @Inject internal constructor(
 
     data class Args internal constructor(
         internal val configuration: LinkConfiguration,
-        internal val startWithVerificationDialog: Boolean,
+        internal val linkExpressMode: LinkExpressMode,
         internal val linkAccountInfo: LinkAccountUpdate.Value,
-        internal val launchMode: LinkLaunchMode
+        internal val launchMode: LinkLaunchMode,
+        internal val passiveCaptchaParams: PassiveCaptchaParams?,
+        internal val attestOnIntentConfirmation: Boolean,
     )
 
     data class Result(

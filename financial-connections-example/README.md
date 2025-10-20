@@ -62,13 +62,13 @@ To run the Financial Connections Example app:
 2. Open the project in Android Studio.
 3. Build and run the `financial-connections-example` project.
 
-#### Remix the example project on Glitch
+#### Fork the example project on CodeSandbox
 
-We provide an example backend hosted on Glitch, allowing you to easily test an integration
+We provide an example backend hosted on CodeSandbox, allowing you to easily test an integration
 end-to-end.
 
-1. [Open the Glitch project](https://glitch.com/edit/#!/stripe-mobile-connections-example).
-2. Click on "Remix", on the top right.
+1. [Open the CodeSandbox project](https://codesandbox.io/p/devbox/android-financial-connections-playground-km2chh).
+2. Click on "Fork", on the top right.
 3. In your newly created project, open the `.env` file in the left sidebar.
 4. Set your [Stripe testmode public and secret keys](https://dashboard.stripe.com/test/apikeys) as
    the `STRIPE_TEST_PUBLIC_KEY` and `STRIPE_TEST_SECRET_KEY` fields.
@@ -84,8 +84,8 @@ end-to-end.
 2. Append the following entries to `gradle.properties`.
 
 ```
-# Set to the remixed example backend project in Glitch
-STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=https://stripe-mobile-connections-example.glitch.me/
+# Set to the forked example backend project in CodeSandbox
+STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=<CodeSandbox preview URL>
 ```
 
 

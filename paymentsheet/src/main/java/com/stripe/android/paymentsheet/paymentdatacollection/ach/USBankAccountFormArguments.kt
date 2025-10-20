@@ -4,6 +4,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -18,6 +19,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.flow.update
 
 /**
@@ -55,6 +57,7 @@ internal class USBankAccountFormArguments(
     val hostedSurface: String,
     val shippingDetails: AddressDetails?,
     val draftPaymentSelection: PaymentSelection?,
+    val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     val onAnalyticsEvent: (USBankAccountFormViewModel.AnalyticsEvent) -> Unit,
     val onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
     val onLinkedBankAccountChanged: (PaymentSelection.New.USBankAccount?) -> Unit,
@@ -65,6 +68,10 @@ internal class USBankAccountFormArguments(
     val setAsDefaultPaymentMethodEnabled: Boolean,
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val setAsDefaultMatchesSaveForFutureUse: Boolean,
+    val termsDisplay: PaymentSheet.TermsDisplay,
+    val sellerBusinessName: String?,
+    val forceSetupFutureUseBehavior: Boolean,
+    val clientAttributionMetadata: ClientAttributionMetadata,
 ) {
     companion object {
         fun create(
@@ -78,7 +85,7 @@ internal class USBankAccountFormArguments(
                 code = selectedPaymentMethodCode,
                 intent = paymentMethodMetadata.stripeIntent,
                 paymentMethodSaveConsentBehavior = paymentMethodMetadata.paymentMethodSaveConsentBehavior,
-                hasCustomerConfiguration = paymentMethodMetadata.customerMetadata?.hasCustomerConfiguration ?: false,
+                hasCustomerConfiguration = paymentMethodMetadata.customerMetadata != null,
             )
             val instantDebits = selectedPaymentMethodCode == PaymentMethod.Type.Link.code
             val initializationMode = (viewModel as? PaymentSheetViewModel)
@@ -101,6 +108,7 @@ internal class USBankAccountFormArguments(
                 stripeIntentId = stripeIntent.id,
                 clientSecret = stripeIntent.clientSecret,
                 shippingDetails = viewModel.config.shippingDetails,
+                autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
                 onAnalyticsEvent = { viewModel.eventReporter.onUsBankAccountFormEvent(it) },
                 draftPaymentSelection = viewModel.newPaymentSelection?.paymentSelection,
                 onMandateTextChanged = viewModel.mandateHandler::updateMandateText,
@@ -117,6 +125,10 @@ internal class USBankAccountFormArguments(
                     ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
                 financialConnectionsAvailability = paymentMethodMetadata.financialConnectionsAvailability,
                 setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
+                termsDisplay = paymentMethodMetadata.termsDisplayForCode(selectedPaymentMethodCode),
+                sellerBusinessName = paymentMethodMetadata.sellerBusinessName,
+                forceSetupFutureUseBehavior = paymentMethodMetadata.forceSetupFutureUseBehaviorAndNewMandate,
+                clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
             )
         }
 
@@ -136,7 +148,7 @@ internal class USBankAccountFormArguments(
                 code = selectedPaymentMethodCode,
                 intent = paymentMethodMetadata.stripeIntent,
                 paymentMethodSaveConsentBehavior = paymentMethodMetadata.paymentMethodSaveConsentBehavior,
-                hasCustomerConfiguration = paymentMethodMetadata.customerMetadata?.hasCustomerConfiguration ?: false,
+                hasCustomerConfiguration = paymentMethodMetadata.customerMetadata != null,
             )
             val instantDebits = selectedPaymentMethodCode == PaymentMethod.Type.Link.code
             val bankFormInteractor = BankFormInteractor(
@@ -158,6 +170,7 @@ internal class USBankAccountFormArguments(
                 shippingDetails = paymentMethodMetadata.shippingDetails,
                 draftPaymentSelection = null,
                 onMandateTextChanged = onMandateTextChanged,
+                autocompleteAddressInteractorFactory = null,
                 onAnalyticsEvent = onAnalyticsEvent,
                 onLinkedBankAccountChanged = bankFormInteractor::handleLinkedBankAccountChanged,
                 onUpdatePrimaryButtonUIState = onUpdatePrimaryButtonUIState,
@@ -172,6 +185,10 @@ internal class USBankAccountFormArguments(
                 financialConnectionsAvailability = paymentMethodMetadata.financialConnectionsAvailability,
                 // If no saved payment methods, then first saved payment method is automatically set as default
                 setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
+                termsDisplay = paymentMethodMetadata.termsDisplayForType(PaymentMethod.Type.USBankAccount),
+                sellerBusinessName = paymentMethodMetadata.sellerBusinessName,
+                forceSetupFutureUseBehavior = paymentMethodMetadata.forceSetupFutureUseBehaviorAndNewMandate,
+                clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
             )
         }
     }

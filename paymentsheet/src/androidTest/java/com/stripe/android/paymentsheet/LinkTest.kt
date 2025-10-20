@@ -24,7 +24,6 @@ import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(TestParameterInjector::class)
@@ -97,10 +96,7 @@ internal class LinkTest {
              * 2-digit shorthand (should send "2034", not "34")
              */
             bodyPart(urlEncode("card[exp_year]"), "2034"),
-            /*
-             * Should use the consumer's publishable key when creating payment details
-             */
-            header("Authorization", "Bearer pk_545454676767898989"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
@@ -108,7 +104,8 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            linkInformation()
+            linkInformation(),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -121,6 +118,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -205,6 +204,7 @@ internal class LinkTest {
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/consumers/payment_details"),
+                topLevelClientAttributionMetadataParams(),
             ) { response ->
                 response.testBodyFromFile("consumer-payment-details-success.json")
             }
@@ -213,6 +213,7 @@ internal class LinkTest {
                 method("POST"),
                 path("/v1/payment_intents/pi_example/confirm"),
                 bodyPart(urlEncode("payment_method_options[link][setup_future_usage]"), "off_session"),
+                topLevelClientAttributionMetadataParams(),
             ) { response ->
                 response.testBodyFromFile("payment-intent-confirm.json")
             }
@@ -225,6 +226,8 @@ internal class LinkTest {
             }
 
             page.clickPrimaryButton()
+
+            testContext.consumePaymentOptionEventForFlowController("card", "4242")
         }
 
     @Test
@@ -286,10 +289,7 @@ internal class LinkTest {
              * Ensures card brand choice is passed properly.
              */
             bodyPart(urlEncode("card[preferred_network]"), "cartes_bancaires"),
-            /*
-             * Should use the consumer's publishable key when creating payment details
-             */
-            header("Authorization", "Bearer pk_545454676767898989"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
@@ -297,7 +297,8 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            linkInformation()
+            linkInformation(),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -310,6 +311,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "1001")
     }
 
     @Test
@@ -374,6 +377,7 @@ internal class LinkTest {
              * In passthrough mode, should use the publishable key from base configuration
              */
             header("Authorization", "Bearer pk_test_123"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
@@ -381,6 +385,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details/share"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-share-success.json")
         }
@@ -389,7 +394,8 @@ internal class LinkTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart("payment_method", "pm_1234"),
-            not(linkInformation())
+            not(linkInformation()),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -402,6 +408,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -486,6 +494,7 @@ internal class LinkTest {
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/consumers/payment_details"),
+                topLevelClientAttributionMetadataParams(),
             ) { response ->
                 response.testBodyFromFile("consumer-payment-details-success.json")
             }
@@ -493,6 +502,7 @@ internal class LinkTest {
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/consumers/payment_details/share"),
+                topLevelClientAttributionMetadataParams(),
             ) { response ->
                 response.testBodyFromFile("consumer-payment-details-share-success.json")
             }
@@ -501,6 +511,7 @@ internal class LinkTest {
                 method("POST"),
                 path("/v1/payment_intents/pi_example/confirm"),
                 bodyPart(urlEncode("payment_method_options[card][setup_future_usage]"), "off_session"),
+                topLevelClientAttributionMetadataParams(),
             ) { response ->
                 response.testBodyFromFile("payment-intent-confirm.json")
             }
@@ -513,6 +524,8 @@ internal class LinkTest {
             }
 
             page.clickPrimaryButton()
+
+            testContext.consumePaymentOptionEventForFlowController("card", "4242")
         }
 
     @Test
@@ -582,6 +595,7 @@ internal class LinkTest {
              * In passthrough mode, should use the publishable key from base configuration
              */
             header("Authorization", "Bearer pk_test_123"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
@@ -589,6 +603,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details/share"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-share-success.json")
         }
@@ -597,7 +612,8 @@ internal class LinkTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart("payment_method", "pm_1234"),
-            not(linkInformation())
+            not(linkInformation()),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -610,6 +626,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "1001")
     }
 
     @Test
@@ -653,6 +671,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.setResponseCode(500)
         }
@@ -660,7 +679,8 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            not(linkInformation())
+            not(linkInformation()),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -673,6 +693,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -716,6 +738,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.setResponseCode(500)
         }
@@ -724,6 +747,7 @@ internal class LinkTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             not(bodyPart("payment_method", "pm_1234")),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -736,6 +760,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -779,6 +805,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
@@ -786,6 +813,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details/share"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.setResponseCode(500)
         }
@@ -794,6 +822,7 @@ internal class LinkTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             not(bodyPart("payment_method", "pm_1234")),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -806,6 +835,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -848,7 +879,8 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            not(linkInformation())
+            not(linkInformation()),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -861,6 +893,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -886,12 +920,15 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            not(linkInformation())
+            not(linkInformation()),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -908,39 +945,27 @@ internal class LinkTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        repeat(2) {
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
-            }
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
         }
 
         val configuration = PaymentSheet.Configuration(
             merchantDisplayName = "Merchant, Inc.",
-            defaultBillingDetails = PaymentSheet.BillingDetails(
-                email = "test-${UUID.randomUUID()}@email.com",
-                phone = "+15555555555",
-            ),
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
         testContext.launch(configuration)
 
         page.fillOutCardDetails()
-        page.fillOutLink()
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+        page.fillOutLinkPhone()
 
         closeSoftKeyboard()
-
-        repeat(2) {
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
-            }
-        }
 
         networkRule.enqueue(
             method("POST"),
@@ -952,6 +977,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
@@ -959,7 +985,8 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            linkInformation()
+            linkInformation(),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -972,6 +999,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -1024,6 +1053,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
@@ -1032,6 +1062,7 @@ internal class LinkTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             linkInformation(),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -1044,6 +1075,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
@@ -1120,6 +1153,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/payment_details"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
@@ -1128,6 +1162,7 @@ internal class LinkTest {
             method("POST"),
             path("/v1/consumers/payment_details/share"),
             bodyPart("allow_redisplay", "always"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-share-success.json")
         }
@@ -1136,6 +1171,7 @@ internal class LinkTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart(urlEncode("payment_method_options[card][setup_future_usage]"), "off_session"),
+            topLevelClientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -1148,6 +1184,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     private fun linkInformation(): RequestMatcher {

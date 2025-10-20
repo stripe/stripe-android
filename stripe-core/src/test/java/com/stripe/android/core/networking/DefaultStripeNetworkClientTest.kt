@@ -118,7 +118,7 @@ internal class DefaultStripeNetworkClientTest {
                         "($TEST_HOST): Could not connect to Stripe API. Please check " +
                         "your internet connection and try again. If this problem persists, you " +
                         "should check Stripe's service status at " +
-                        "https://twitter.com/stripestatus, or let us know at support@stripe.com."
+                        "https://status.stripe.com/, or let us know at support@stripe.com."
                 )
         }
 

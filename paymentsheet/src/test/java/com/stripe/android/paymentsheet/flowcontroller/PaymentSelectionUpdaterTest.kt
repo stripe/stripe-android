@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -13,6 +14,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -37,7 +39,7 @@ class PaymentSelectionUpdaterTest {
         val newState = mockPaymentSheetStateWithPaymentIntent(paymentSelection = PaymentSelection.GooglePay)
         val updater = createUpdater()
         val result = updater(
-            currentSelection = null,
+            selection = null,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -51,6 +53,7 @@ class PaymentSelectionUpdaterTest {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "Sofort".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_klarna,
+            iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.SOFORT,
@@ -69,7 +72,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existingSelection,
+            selection = existingSelection,
             previousConfig = PaymentSheet.Configuration(
                 merchantDisplayName = "Example, Inc.",
                 allowsDelayedPaymentMethods = true,
@@ -93,7 +96,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existingSelection,
+            selection = existingSelection,
             previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -109,7 +112,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existing,
+            selection = existing,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -127,7 +130,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existing,
+            selection = existing,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -148,7 +151,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existingSelection,
+            selection = existingSelection,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -168,7 +171,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = paymentSelection,
+            selection = paymentSelection,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -188,7 +191,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = paymentSelection,
+            selection = paymentSelection,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -208,7 +211,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = paymentSelection,
+            selection = paymentSelection,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -228,7 +231,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = paymentSelection,
+            selection = paymentSelection,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -242,6 +245,7 @@ class PaymentSelectionUpdaterTest {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "paypal".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
+            iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.P24,
@@ -257,7 +261,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existingSelection,
+            selection = existingSelection,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -272,6 +276,7 @@ class PaymentSelectionUpdaterTest {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "paypal".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
+            iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL.copy(
@@ -289,7 +294,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existingSelection,
+            selection = existingSelection,
             previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -304,6 +309,7 @@ class PaymentSelectionUpdaterTest {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "paypal".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
+            iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL.copy(
@@ -321,7 +327,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existingSelection,
+            selection = existingSelection,
             previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -335,21 +341,25 @@ class PaymentSelectionUpdaterTest {
     fun `PaymentSelection is preserved when config changes are not volatile`() {
         val existingSelection = PaymentSelection.GooglePay
 
-        val newConfig = defaultPaymentSheetConfiguration.copy(
-            merchantDisplayName = "Some other change",
-            googlePay = PaymentSheet.GooglePayConfiguration(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                countryCode = CountryCode.US.value,
-                amount = 5099,
-                currencyCode = "USD",
-                label = "Some product",
-                buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
-            ),
-            primaryButtonColor = ColorStateList.valueOf(Color.BLACK),
-            appearance = PaymentSheet.Appearance(
-                colorsLight = PaymentSheet.Colors.defaultDark
+        @Suppress("DEPRECATION")
+        val newConfig = defaultPaymentSheetConfiguration.newBuilder()
+            .merchantDisplayName("Some other change")
+            .googlePay(
+                PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = CountryCode.US.value,
+                    amount = 5099,
+                    currencyCode = "USD",
+                    label = "Some product",
+                    buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
+                )
+            ).primaryButtonColor(ColorStateList.valueOf(Color.BLACK))
+            .appearance(
+                PaymentSheet.Appearance(
+                    colorsLight = PaymentSheet.Colors.defaultDark
+                )
             )
-        )
+            .build()
         val newState = mockPaymentSheetStateWithPaymentIntent(
             config = newConfig
         )
@@ -357,17 +367,18 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existingSelection,
-            previousConfig = defaultPaymentSheetConfiguration.copy(
-                googlePay = PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = CountryCode.US.value,
-                    amount = 5099,
-                    currencyCode = "USD",
-                    label = "A product",
-                    buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Plain,
-                )
-            ),
+            selection = existingSelection,
+            previousConfig = defaultPaymentSheetConfiguration.newBuilder()
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = CountryCode.US.value,
+                        amount = 5099,
+                        currencyCode = "USD",
+                        label = "A product",
+                        buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Plain,
+                    )
+                ).build(),
             newState = newState,
             newConfig = newConfig,
             walletButtonsAlreadyShown = false,
@@ -380,9 +391,9 @@ class PaymentSelectionUpdaterTest {
     fun `PaymentSelection is not preserved when config changes are volatile`() {
         val existingSelection = PaymentSelection.GooglePay
 
-        val newConfig = defaultPaymentSheetConfiguration.copy(
-            defaultBillingDetails = PaymentSheet.BillingDetails(email = "hi-jay@example.com")
-        )
+        val newConfig = defaultPaymentSheetConfiguration.newBuilder()
+            .defaultBillingDetails(PaymentSheet.BillingDetails(email = "hi-jay@example.com"))
+            .build()
         val newState = mockPaymentSheetStateWithPaymentIntent(
             config = newConfig
         )
@@ -390,7 +401,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existingSelection,
+            selection = existingSelection,
             previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
             newConfig = newConfig,
@@ -400,112 +411,91 @@ class PaymentSelectionUpdaterTest {
         assertThat(result).isEqualTo(null)
     }
 
+    @OptIn(WalletButtonsPreview::class)
     @Test
-    fun `If wallet buttons are already shown and existing selection is Google Pay, should be null`() {
+    fun `If using wallet buttons config option with only GPay visible and selection is Link, should be Link`() {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = PaymentSelection.GooglePay,
+            selection = PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED),
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
-            newConfig = defaultPaymentSheetConfiguration,
-            walletButtonsAlreadyShown = true,
-        )
-
-        assertThat(result).isNull()
-    }
-
-    @Test
-    fun `If wallet buttons are already shown and existing selection is Link, should be null`() {
-        val updater = createUpdater()
-
-        val result = updater(
-            currentSelection = PaymentSelection.Link(useLinkExpress = false),
-            previousConfig = null,
-            newState = mockPaymentSheetStateWithPaymentIntent(),
-            newConfig = defaultPaymentSheetConfiguration,
-            walletButtonsAlreadyShown = true,
-        )
-
-        assertThat(result).isNull()
-    }
-
-    @Test
-    fun `If using wallet buttons config option and existing selection is Google Pay, should be null`() {
-        val updater = createUpdater()
-
-        val result = updater(
-            currentSelection = PaymentSelection.GooglePay,
-            previousConfig = null,
-            newState = mockPaymentSheetStateWithPaymentIntent(),
-            newConfig = defaultPaymentSheetConfiguration.copy(
-                walletButtons = PaymentSheet.WalletButtonsConfiguration(
-                    willDisplayExternally = true,
-                ),
-            ),
+            newConfig = defaultPaymentSheetConfiguration.newBuilder()
+                .walletButtons(
+                    PaymentSheet.WalletButtonsConfiguration(
+                        willDisplayExternally = true,
+                        visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                            walletButtonsView = mapOf(
+                                PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                                    PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
+                                PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                                    PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
+                            ),
+                        ),
+                    ),
+                ).build(),
             walletButtonsAlreadyShown = false,
         )
 
-        assertThat(result).isNull()
+        assertThat(result).isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED))
     }
 
+    @OptIn(WalletButtonsPreview::class)
     @Test
-    fun `If using wallet buttons config option and existing selection is Link, should be null`() {
+    fun `If using wallet buttons config option with only Link visible and selection is GPay, should be GPay`() {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = PaymentSelection.Link(useLinkExpress = false),
+            selection = PaymentSelection.GooglePay,
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
-            newConfig = defaultPaymentSheetConfiguration.copy(
-                walletButtons = PaymentSheet.WalletButtonsConfiguration(
-                    willDisplayExternally = true,
-                ),
-            ),
-            walletButtonsAlreadyShown = false,
-        )
-
-        assertThat(result).isNull()
-    }
-
-    @Test
-    fun `If using wallet buttons config option with only GPay allowed and selection is Link, should be Link`() {
-        val updater = createUpdater()
-
-        val result = updater(
-            currentSelection = PaymentSelection.Link(useLinkExpress = false),
-            previousConfig = null,
-            newState = mockPaymentSheetStateWithPaymentIntent(),
-            newConfig = defaultPaymentSheetConfiguration.copy(
-                walletButtons = PaymentSheet.WalletButtonsConfiguration(
-                    willDisplayExternally = true,
-                    walletsToShow = listOf("google_pay"),
-                ),
-            ),
-            walletButtonsAlreadyShown = false,
-        )
-
-        assertThat(result).isEqualTo(PaymentSelection.Link(useLinkExpress = false))
-    }
-
-    @Test
-    fun `If using wallet buttons config option with only Link allowed and selection is GPay, should be GPay`() {
-        val updater = createUpdater()
-
-        val result = updater(
-            currentSelection = PaymentSelection.GooglePay,
-            previousConfig = null,
-            newState = mockPaymentSheetStateWithPaymentIntent(),
-            newConfig = defaultPaymentSheetConfiguration.copy(
-                walletButtons = PaymentSheet.WalletButtonsConfiguration(
-                    willDisplayExternally = true,
-                    walletsToShow = listOf("link"),
-                ),
-            ),
+            newConfig = defaultPaymentSheetConfiguration.newBuilder()
+                .walletButtons(
+                    PaymentSheet.WalletButtonsConfiguration(
+                        willDisplayExternally = true,
+                        visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                            walletButtonsView = mapOf(
+                                PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                                    PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
+                                PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                                    PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
+                            ),
+                        ),
+                    ),
+                ).build(),
             walletButtonsAlreadyShown = false,
         )
 
         assertThat(result).isEqualTo(PaymentSelection.GooglePay)
+    }
+
+    @OptIn(WalletButtonsPreview::class)
+    @Test
+    fun `If using wallet buttons config with specific wallet and existing selection matches, should preserve it`() {
+        val updater = createUpdater()
+
+        val result = updater(
+            selection = PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED),
+            previousConfig = null,
+            newState = mockPaymentSheetStateWithPaymentIntent(),
+            newConfig = defaultPaymentSheetConfiguration.newBuilder()
+                .walletButtons(
+                    PaymentSheet.WalletButtonsConfiguration(
+                        willDisplayExternally = true,
+                        visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                            walletButtonsView = mapOf(
+                                PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                                    PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
+                                PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                                    PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
+                            ),
+                        ),
+                    ),
+                ).build(),
+            walletButtonsAlreadyShown = false,
+        )
+
+        assertThat(result).isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED))
     }
 
     private fun mockPaymentSheetStateWithPaymentIntent(

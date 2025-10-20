@@ -35,6 +35,7 @@ class RemovePaymentMethodDialogUITest {
         composeRule.setContent {
             RemovePaymentMethodDialogUI(
                 paymentMethod = paymentMethod,
+                removeMessage = null,
                 onConfirmListener = {},
                 onDismissListener = {}
             )
@@ -42,6 +43,27 @@ class RemovePaymentMethodDialogUITest {
 
         composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).onChildren().assertAny(
             hasText("Cartes Bancaires ····4242")
+        )
+    }
+
+    @Test
+    fun removeDescription_usesMessageIfAvailable() {
+        val removeMessage = "This payment method will be removed but will remain " +
+            "available for Merchant, Inc. subscriptions."
+
+        composeRule.setContent {
+            RemovePaymentMethodDialogUI(
+                paymentMethod = PaymentMethodFixtures
+                    .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                    .toDisplayableSavedPaymentMethod(),
+                removeMessage = removeMessage,
+                onConfirmListener = {},
+                onDismissListener = {}
+            )
+        }
+
+        composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).onChildren().assertAny(
+            hasText(removeMessage)
         )
     }
 }

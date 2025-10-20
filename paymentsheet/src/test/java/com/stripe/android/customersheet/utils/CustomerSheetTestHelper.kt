@@ -7,6 +7,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.Logger
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
@@ -27,9 +28,11 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -39,6 +42,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.CompletableSingle
@@ -61,7 +65,7 @@ internal object CustomerSheetTestHelper {
         isGooglePayAvailable: Boolean = true,
         customerPaymentMethods: List<PaymentMethod> = listOf(CARD_PAYMENT_METHOD),
         customerPermissions: CustomerPermissions = CustomerPermissions(
-            canRemovePaymentMethods = true,
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
             canRemoveLastPaymentMethod = true,
             canUpdateFullPaymentMethodDetails = true,
         ),
@@ -78,12 +82,22 @@ internal object CustomerSheetTestHelper {
         ),
         configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
             merchantDisplayName = "Example",
-            googlePayEnabled = isGooglePayAvailable
+            googlePayEnabled = isGooglePayAvailable,
         ),
         eventReporter: CustomerSheetEventReporter = mock(),
-        intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueCompleteStep(true)
-        },
+        intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory =
+            object : IntentConfirmationInterceptor.Factory {
+                override suspend fun create(
+                    initializationMode: PaymentElementLoader.InitializationMode,
+                    customerId: String?,
+                    ephemeralKeySecret: String?,
+                    clientAttributionMetadata: ClientAttributionMetadata?,
+                ): IntentConfirmationInterceptor {
+                    return FakeIntentConfirmationInterceptor().apply {
+                        enqueueCompleteStep(true)
+                    }
+                }
+            },
         paymentMethodDataSource: CustomerSheetPaymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
             paymentMethods = CustomerSheetDataResult.success(customerPaymentMethods)
         ),
@@ -98,7 +112,9 @@ internal object CustomerSheetTestHelper {
             permissions = customerPermissions,
         ),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
     ): CustomerSheetViewModel {
+        val savedStateHandle = SavedStateHandle()
         return CustomerSheetViewModel(
             application = application,
             workContext = workContext,
@@ -113,9 +129,9 @@ internal object CustomerSheetTestHelper {
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
             productUsage = emptySet(),
-            confirmationHandlerFactory = createTestConfirmationHandlerFactory(
+            confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(
                 paymentElementCallbackIdentifier = "CustomerSheetTestIdentifier",
-                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
                 paymentConfiguration = paymentConfiguration,
                 bacsMandateConfirmationLauncherFactory = {
                     FakeBacsMandateConfirmationLauncher()
@@ -142,15 +158,16 @@ internal object CustomerSheetTestHelper {
                     ): GooglePayPaymentMethodLauncher = mock()
                 },
                 statusBarColor = null,
-                savedStateHandle = SavedStateHandle(),
+                savedStateHandle = savedStateHandle,
                 errorReporter = FakeErrorReporter(),
                 linkLauncher = RecordingLinkPaymentLauncher.noOp(),
                 linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-                cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp(),
+                cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp()
             ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
             errorReporter = errorReporter,
+            savedStateHandle = savedStateHandle,
         ).apply {
             registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
         }

@@ -37,6 +37,7 @@ private object IdealUiDefinitionFactory : UiDefinitionFactory.RequiresSharedData
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_ideal,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_ideal,
+        iconResourceNight = null,
     )
 
     override fun createFormElements(
@@ -52,6 +53,7 @@ private object IdealUiDefinitionFactory : UiDefinitionFactory.RequiresSharedData
             } else {
                 emptyList()
             },
+            termsDisplay = metadata.termsDisplayForType(IdealDefinition.type),
         )
     }
 }

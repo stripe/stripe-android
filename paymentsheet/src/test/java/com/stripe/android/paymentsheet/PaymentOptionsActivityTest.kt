@@ -105,9 +105,9 @@ internal class PaymentOptionsActivityTest {
             idleLooper()
 
             assertThat(
-                PaymentOptionResult.fromIntent(it.getResult().resultData)
+                PaymentOptionsActivityResult.fromIntent(it.getResult().resultData)
             ).isEqualTo(
-                PaymentOptionResult.Canceled(null, null, listOf(), LinkAccountUpdate.Value(null))
+                PaymentOptionsActivityResult.Canceled(null, null, listOf(), LinkAccountUpdate.Value(null))
             )
         }
     }
@@ -140,9 +140,15 @@ internal class PaymentOptionsActivityTest {
 
             composeTestRule.waitForIdle()
 
-            val result = PaymentOptionResult.fromIntent(it.getResult().resultData)
+            val result = PaymentOptionsActivityResult.fromIntent(it.getResult().resultData)
             assertThat(result).isEqualTo(
-                PaymentOptionResult.Canceled(null, initialSelection, paymentMethods, LinkAccountUpdate.Value(null))
+                PaymentOptionsActivityResult
+                    .Canceled(
+                        mostRecentError = null,
+                        paymentSelection = initialSelection,
+                        paymentMethods = paymentMethods,
+                        linkAccountInfo = LinkAccountUpdate.Value(null)
+                    )
             )
         }
     }
@@ -247,9 +253,9 @@ internal class PaymentOptionsActivityTest {
 
             composeTestRule.waitForIdle()
 
-            val result = PaymentOptionResult.fromIntent(scenario.getResult().resultData)
+            val result = PaymentOptionsActivityResult.fromIntent(scenario.getResult().resultData)
             assertThat(result).isEqualTo(
-                PaymentOptionResult.Succeeded(
+                PaymentOptionsActivityResult.Succeeded(
                     paymentSelection = PaymentSelection.GooglePay,
                     paymentMethods = emptyList(),
                     linkAccountInfo = LinkAccountUpdate.Value(null)
@@ -295,19 +301,20 @@ internal class PaymentOptionsActivityTest {
     fun `primary button appearance is set`() {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
-            config = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
-                appearance = PaymentSheet.Appearance(
-                    primaryButton = PaymentSheet.PrimaryButton(
-                        colorsLight = PaymentSheet.PrimaryButtonColors(
-                            background = Color.Magenta,
-                            onBackground = Color.Magenta,
-                            border = Color.Magenta
-                        ),
-                        shape = PaymentSheet.PrimaryButtonShape(),
-                        typography = PaymentSheet.PrimaryButtonTypography()
+            config = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
+                .appearance(
+                    PaymentSheet.Appearance(
+                        primaryButton = PaymentSheet.PrimaryButton(
+                            colorsLight = PaymentSheet.PrimaryButtonColors(
+                                background = Color.Magenta,
+                                onBackground = Color.Magenta,
+                                border = Color.Magenta
+                            ),
+                            shape = PaymentSheet.PrimaryButtonShape(),
+                            typography = PaymentSheet.PrimaryButtonTypography()
+                        )
                     )
-                )
-            ),
+                ).build(),
         )
 
         runActivityScenario(args) {
@@ -412,9 +419,9 @@ internal class PaymentOptionsActivityTest {
     fun `mandate text is shown above primary button when in vertical mode`() {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            config = PAYMENT_OPTIONS_CONTRACT_ARGS.configuration.copy(
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-            ),
+            config = PAYMENT_OPTIONS_CONTRACT_ARGS.configuration.newBuilder()
+                .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                .build(),
         )
         runActivityScenario(args) { scenario ->
             scenario.onActivity { activity ->
@@ -459,7 +466,7 @@ internal class PaymentOptionsActivityTest {
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                linkGateFactory = { FakeLinkGate() },
+                linkGateFactory = FakeLinkGate.Factory(),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 linkPaymentLauncher = mock(),

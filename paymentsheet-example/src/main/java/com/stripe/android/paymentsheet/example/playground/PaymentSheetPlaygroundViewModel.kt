@@ -19,6 +19,7 @@ import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
+import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -31,13 +32,14 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.Settings
-import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
+import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequestParams
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyResponse
 import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
+import com.stripe.android.paymentsheet.example.playground.network.SharedPaymentTokenPlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
@@ -64,7 +66,7 @@ internal class PaymentSheetPlaygroundViewModel(
     launchUri: Uri?,
 ) : AndroidViewModel(application) {
 
-    private val settings by lazy {
+    val settings by lazy {
         Settings(application)
     }
 
@@ -97,8 +99,12 @@ internal class PaymentSheetPlaygroundViewModel(
         flowControllerState.value = null
         customerSheetState.value = null
 
-        if (playgroundSettings.configurationData.value.integrationType.isPaymentFlow()) {
+        if (
+            playgroundSettings.configurationData.value.integrationType.isPaymentFlow()
+        ) {
             prepareCheckout(playgroundSettings)
+        } else if (playgroundSettings.configurationData.value.integrationType.isSptFlow()) {
+            prepareSharedPaymentToken(playgroundSettings)
         } else {
             prepareCustomer(playgroundSettings)
         }
@@ -127,6 +133,31 @@ internal class PaymentSheetPlaygroundViewModel(
                 onFailure = { exception ->
                     status.value = StatusMessage(
                         "Preparing checkout failed:\n${exception.message}"
+                    )
+                },
+            )
+        }
+    }
+
+    private fun prepareSharedPaymentToken(
+        playgroundSettings: PlaygroundSettings,
+    ) {
+        viewModelScope.launch {
+            // Snapshot before making the network request to not rely on UI staying in sync.
+            val playgroundSettingsSnapshot = playgroundSettings.snapshot()
+
+            withContext(Dispatchers.IO) {
+                playgroundSettingsSnapshot.saveToSharedPreferences(getApplication())
+            }
+
+            SharedPaymentTokenPlaygroundRequester(playgroundSettingsSnapshot, getApplication()).session().fold(
+                onSuccess = { state ->
+                    playgroundSettingsFlow.value = state.snapshot.playgroundSettings()
+                    setPlaygroundState(state)
+                },
+                onFailure = { exception ->
+                    status.value = StatusMessage(
+                        "Preparing SPT session failed:\n${exception.message}"
                     )
                 },
             )
@@ -181,6 +212,11 @@ internal class PaymentSheetPlaygroundViewModel(
                 return kotlin.Result.success(
                     CustomerSheet.IntentConfiguration.Builder()
                         .paymentMethodTypes(playgroundState.supportedPaymentMethodTypes)
+                        .apply {
+                            if (playgroundState.onBehalfOf.isNotBlank()) {
+                                this.onBehalfOf(playgroundState.onBehalfOf)
+                            }
+                        }
                         .build()
                 )
             }
@@ -241,6 +277,7 @@ internal class PaymentSheetPlaygroundViewModel(
                 val request = CreateSetupIntentRequest(
                     customerId = customerId,
                     merchantCountryCode = playgroundState.countryCode.value,
+                    onBehalfOf = playgroundState.onBehalfOf.takeIf { it.isNotBlank() }
                 )
 
                 val apiResponse = Fuel.post(baseUrl + "create_setup_intent")
@@ -397,7 +434,7 @@ internal class PaymentSheetPlaygroundViewModel(
         status.value = StatusMessage(statusMessage)
     }
 
-    fun onEmbeddedResult(success: Boolean) {
+    fun onResult(success: Boolean) {
         if (success) {
             setPlaygroundState(null)
             status.value = StatusMessage(SUCCESS_RESULT)
@@ -482,8 +519,25 @@ internal class PaymentSheetPlaygroundViewModel(
             displayMessage = "No payment playground state"
         )
         return createAndConfirmIntent(
-            paymentMethodId = paymentMethod.id!!,
-            shouldSavePaymentMethod = shouldSavePaymentMethod,
+            confirmationParams = ConfirmationParams.PaymentMethod(
+                id = paymentMethod.id!!,
+                shouldSavePaymentMethod = shouldSavePaymentMethod,
+            ),
+            playgroundState = playgroundState,
+        )
+    }
+
+    suspend fun createIntentWithConfirmationTokenCallback(
+        confirmationToken: ConfirmationToken
+    ): CreateIntentResult {
+        val playgroundState = state.value?.asPaymentState() ?: return CreateIntentResult.Failure(
+            cause = IllegalStateException("No payment playground state"),
+            displayMessage = "No payment playground state"
+        )
+        return createAndConfirmIntent(
+            confirmationParams = ConfirmationParams.ConfirmationToken(
+                id = confirmationToken.id,
+            ),
             playgroundState = playgroundState,
         )
     }
@@ -495,8 +549,7 @@ internal class PaymentSheetPlaygroundViewModel(
 
     @OptIn(DelicatePaymentSheetApi::class)
     private suspend fun createAndConfirmIntent(
-        paymentMethodId: String,
-        shouldSavePaymentMethod: Boolean,
+        confirmationParams: ConfirmationParams,
         playgroundState: PlaygroundState.Payment,
     ): CreateIntentResult {
         return when (playgroundState.initializationType) {
@@ -511,8 +564,7 @@ internal class PaymentSheetPlaygroundViewModel(
             InitializationType.DeferredServerSideConfirmation,
             InitializationType.DeferredManualConfirmation -> {
                 createAndConfirmIntentInternal(
-                    paymentMethodId = paymentMethodId,
-                    shouldSavePaymentMethod = shouldSavePaymentMethod,
+                    confirmationParams = confirmationParams,
                     playgroundState = playgroundState,
                 )
             }
@@ -524,24 +576,37 @@ internal class PaymentSheetPlaygroundViewModel(
     }
 
     private suspend fun createAndConfirmIntentInternal(
-        paymentMethodId: String,
-        shouldSavePaymentMethod: Boolean,
+        confirmationParams: ConfirmationParams,
         playgroundState: PlaygroundState.Payment,
     ): CreateIntentResult {
         // Note: This is not how you'd do this in a real application. You wouldn't have a client
         // secret available at this point, but you'd call your backend to create (and optionally
         // confirm) a payment or setup intent.
-        val request = ConfirmIntentRequest(
-            clientSecret = playgroundState.clientSecret,
-            paymentMethodId = paymentMethodId,
-            shouldSavePaymentMethod = shouldSavePaymentMethod,
-            merchantCountryCode = playgroundState.countryCode.value,
-            mode = playgroundState.checkoutMode.value,
-            returnUrl = RETURN_URL,
-        )
+        val request: ConfirmIntentRequestParams
+        when (confirmationParams) {
+            is ConfirmationParams.PaymentMethod -> {
+                request = ConfirmIntentRequestParams.PaymentMethod(
+                    clientSecret = playgroundState.clientSecret,
+                    paymentMethodId = confirmationParams.id,
+                    shouldSavePaymentMethod = confirmationParams.shouldSavePaymentMethod,
+                    merchantCountryCode = playgroundState.countryCode.value,
+                    mode = playgroundState.checkoutMode.value,
+                    returnUrl = RETURN_URL,
+                )
+            }
+
+            is ConfirmationParams.ConfirmationToken -> {
+                request = ConfirmIntentRequestParams.ConfirmationToken(
+                    clientSecret = playgroundState.clientSecret,
+                    confirmationTokenId = confirmationParams.id,
+                    merchantCountryCode = playgroundState.countryCode.value,
+                    mode = playgroundState.checkoutMode.value,
+                )
+            }
+        }
 
         val result = Fuel.post(baseUrl + "confirm_intent")
-            .jsonBody(Json.encodeToString(ConfirmIntentRequest.serializer(), request))
+            .jsonBody(Json.encodeToString(ConfirmIntentRequestParams.serializer(), request))
             .suspendable()
             .awaitModel(ConfirmIntentResponse.serializer())
         val createIntentResult = when (result) {
@@ -600,6 +665,7 @@ internal class PaymentSheetPlaygroundViewModel(
                     when (state) {
                         is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
                         is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                        is PlaygroundState.SharedPaymentToken -> state.copy(snapshot = updatedSnapshot)
                     }
                 }
             )
@@ -616,6 +682,8 @@ internal class PaymentSheetPlaygroundViewModel(
                     when (state) {
                         is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
                         is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                        // Does not support custom URLs
+                        is PlaygroundState.SharedPaymentToken -> state
                     }
                 }
             )
@@ -634,6 +702,7 @@ internal class PaymentSheetPlaygroundViewModel(
                     when (state) {
                         is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
                         is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                        is PlaygroundState.SharedPaymentToken -> state.copy(snapshot = updatedSnapshot)
                     }
                 }
             )
@@ -685,3 +754,14 @@ data class StatusMessage(
     val message: String?,
     val hasBeenDisplayed: Boolean = false
 )
+
+sealed class ConfirmationParams {
+    data class PaymentMethod(
+        val id: String,
+        val shouldSavePaymentMethod: Boolean,
+    ) : ConfirmationParams()
+
+    data class ConfirmationToken(
+        val id: String,
+    ) : ConfirmationParams()
+}

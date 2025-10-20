@@ -8,6 +8,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -266,8 +267,9 @@ internal class PaymentMethodEndToEndTest {
     @Test
     fun createPaymentMethod_withGrabPay_shouldCreateObject() = runTest {
         val repository = StripeApiRepository(
-            context,
-            { ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY },
+            context = context,
+            publishableKeyProvider = { ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY },
+            requestSurface = RequestSurface.PaymentElement,
             workContext = testDispatcher
         )
 
@@ -283,8 +285,9 @@ internal class PaymentMethodEndToEndTest {
     @Test
     fun `createPaymentMethod() with PayPal PaymentMethod should create expected object`() = runTest {
         val paymentMethod = StripeApiRepository(
-            context,
-            { ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY },
+            context = context,
+            publishableKeyProvider = { ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY },
+            requestSurface = RequestSurface.PaymentElement,
             workContext = testDispatcher
         ).createPaymentMethod(
             PaymentMethodCreateParams.createPayPal(),

@@ -1,11 +1,12 @@
 package com.stripe.android.utils.screenshots
 
-import android.graphics.Color
+import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.PaparazziConfigOption
+import com.stripe.android.uicore.StripeThemeDefaults
 
 enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : PaparazziConfigOption {
 
@@ -13,14 +14,11 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
 
     CustomAppearance(
         appearance = PaymentSheet.Appearance(
-            colorsLight = PaymentSheet.Colors.defaultLight.copy(
-                primary = Color.RED,
-            ),
-            colorsDark = PaymentSheet.Colors.defaultDark.copy(
-                primary = Color.RED,
-            ),
-            shapes = PaymentSheet.Shapes.default.copy(
+            colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = Color.Red),
+            colorsDark = PaymentSheet.Colors.configureDefaultDark(primary = Color.Red),
+            shapes = PaymentSheet.Shapes(
                 cornerRadiusDp = 8f,
+                borderStrokeWidthDp = StripeThemeDefaults.shapes.borderStrokeWidth
             ),
             typography = PaymentSheet.Typography(
                 fontResId = R.font.cursive,
@@ -33,30 +31,30 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
     CrazyAppearance(
         appearance = PaymentSheet.Appearance(
             colorsLight = PaymentSheet.Colors(
-                primary = Color.MAGENTA,
-                surface = Color.CYAN,
-                component = Color.YELLOW,
-                componentBorder = Color.RED,
-                componentDivider = Color.BLACK,
-                onComponent = Color.BLUE,
-                onSurface = Color.GRAY,
-                subtitle = Color.WHITE,
-                placeholderText = Color.DKGRAY,
-                appBarIcon = Color.GREEN,
-                error = Color.GREEN,
+                primary = Color.Magenta,
+                surface = Color.Cyan,
+                component = Color.Yellow,
+                componentBorder = Color.Red,
+                componentDivider = Color.Black,
+                onComponent = Color.Blue,
+                onSurface = Color.Gray,
+                subtitle = Color.White,
+                placeholderText = Color.DarkGray,
+                appBarIcon = Color.Green,
+                error = Color.Green,
             ),
             colorsDark = PaymentSheet.Colors(
-                primary = Color.MAGENTA,
-                surface = Color.CYAN,
-                component = Color.YELLOW,
-                componentBorder = Color.RED,
-                componentDivider = Color.BLACK,
-                onComponent = Color.BLUE,
-                onSurface = Color.GRAY,
-                subtitle = Color.WHITE,
-                placeholderText = Color.DKGRAY,
-                appBarIcon = Color.GREEN,
-                error = Color.GREEN,
+                primary = Color.Magenta,
+                surface = Color.Cyan,
+                component = Color.Yellow,
+                componentBorder = Color.Red,
+                componentDivider = Color.Black,
+                onComponent = Color.Blue,
+                onSurface = Color.Gray,
+                subtitle = Color.White,
+                placeholderText = Color.DarkGray,
+                appBarIcon = Color.Green,
+                error = Color.Green,
             ),
             shapes = PaymentSheet.Shapes(
                 cornerRadiusDp = 0.0f,

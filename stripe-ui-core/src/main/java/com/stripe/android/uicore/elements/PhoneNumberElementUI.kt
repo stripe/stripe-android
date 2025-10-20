@@ -167,6 +167,7 @@ fun PhoneNumberElementUI(
                 }
                 .testTag(PHONE_NUMBER_TEXT_FIELD_TAG),
             enabled = enabled,
+            isError = shouldShowError != null,
             label = {
                 FormLabel(
                     text = if (controller.showOptionalLabel) {

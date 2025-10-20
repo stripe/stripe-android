@@ -3,7 +3,10 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.core.os.LocaleListCompat
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
@@ -12,10 +15,12 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentelement.SharedPaymentTokenSessionPreview
+import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.paymentmethodoptions.setupfutureusage.toJsonObjectString
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -62,6 +67,7 @@ internal class ElementsSessionRepositoryTest {
                 externalPaymentMethods = emptyList(),
                 customPaymentMethods = emptyList(),
                 savedPaymentMethodSelectionId = null,
+                countryOverride = null,
             ).getOrThrow()
         }
 
@@ -80,7 +86,7 @@ internal class ElementsSessionRepositoryTest {
         runTest {
             whenever(
                 stripeRepository.retrieveElementsSession(any(), any())
-            ).thenReturn(Result.failure(APIException()))
+            ).thenReturn(Result.failure(APIException(statusCode = 500)))
 
             whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
                 .thenReturn(Result.success(PaymentIntentFixtures.PI_WITH_SHIPPING))
@@ -94,6 +100,7 @@ internal class ElementsSessionRepositoryTest {
                     externalPaymentMethods = emptyList(),
                     customPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = null,
+                    countryOverride = null,
                 ).getOrThrow()
             }
 
@@ -107,7 +114,7 @@ internal class ElementsSessionRepositoryTest {
         runTest {
             whenever(
                 stripeRepository.retrieveElementsSession(any(), any())
-            ).thenReturn(Result.failure(RuntimeException()))
+            ).thenReturn(Result.failure(APIException(statusCode = 500)))
 
             whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
                 .thenReturn(Result.success(PaymentIntentFixtures.PI_WITH_SHIPPING))
@@ -121,6 +128,7 @@ internal class ElementsSessionRepositoryTest {
                     externalPaymentMethods = emptyList(),
                     customPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = null,
+                    countryOverride = null,
                 ).getOrThrow()
             }
 
@@ -156,6 +164,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = emptyList(),
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
+            countryOverride = null,
         ).getOrThrow()
 
         val argumentCaptor: KArgumentCaptor<ElementsSessionParams> = argumentCaptor()
@@ -171,7 +180,7 @@ internal class ElementsSessionRepositoryTest {
 
     @Test
     fun `Handles deferred intent elements session lookup failure gracefully`() = runTest {
-        val endpointException = APIException(message = "this didn't work")
+        val endpointException = APIException(message = "this didn't work", statusCode = 500)
         whenever(
             stripeRepository.retrieveElementsSession(any(), any())
         ).thenReturn(
@@ -197,6 +206,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = emptyList(),
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
+            countryOverride = null,
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -204,8 +214,50 @@ internal class ElementsSessionRepositoryTest {
     }
 
     @Test
+    fun `Does not create fallback for exception caused by client error`() = runTest {
+        whenever(
+            stripeRepository.retrieveElementsSession(any(), any())
+        ).thenReturn(Result.failure(APIException(statusCode = 401)))
+
+        val session = createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+        )
+
+        verify(stripeRepository).retrieveElementsSession(any(), any())
+        assertThat(session.isFailure).isTrue()
+    }
+
+    @Test
+    fun `Does not create fallback for exception when no response`() = runTest {
+        whenever(
+            stripeRepository.retrieveElementsSession(any(), any())
+        ).thenReturn(Result.failure(APIConnectionException()))
+
+        val session = createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+        )
+
+        verify(stripeRepository).retrieveElementsSession(any(), any())
+        assertThat(session.isFailure).isTrue()
+    }
+
+    @Test
     fun `Deferred intent elements session failure uses payment method types if specified`() = runTest {
-        val endpointException = APIException(message = "this didn't work")
+        val endpointException = APIException(message = "this didn't work", statusCode = 500)
         whenever(
             stripeRepository.retrieveElementsSession(any(), any())
         ).thenReturn(
@@ -233,6 +285,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = emptyList(),
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
+            countryOverride = null,
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -272,6 +325,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = emptyList(),
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
+            countryOverride = null,
         )
 
         verify(stripeRepository).retrieveElementsSession(
@@ -284,6 +338,7 @@ internal class ElementsSessionRepositoryTest {
                     savedPaymentMethodSelectionId = null,
                     appId = APP_ID,
                     mobileSessionId = MOBILE_SESSION_ID,
+                    link = ElementsSessionParams.Link(disallowFundingSourceCreation = emptySet()),
                 )
             ),
             options = any()
@@ -323,6 +378,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = emptyList(),
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
+            countryOverride = null,
         )
 
         val captor = argumentCaptor<ElementsSessionParams.PaymentIntentType>()
@@ -364,6 +420,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = emptyList(),
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = "pm_123",
+            countryOverride = null,
         )
 
         verify(stripeRepository).retrieveElementsSession(
@@ -375,6 +432,7 @@ internal class ElementsSessionRepositoryTest {
                     savedPaymentMethodSelectionId = "pm_123",
                     appId = APP_ID,
                     mobileSessionId = MOBILE_SESSION_ID,
+                    link = ElementsSessionParams.Link(disallowFundingSourceCreation = emptySet()),
                 )
             ),
             options = any()
@@ -426,6 +484,7 @@ internal class ElementsSessionRepositoryTest {
                 ),
             ),
             savedPaymentMethodSelectionId = "pm_123",
+            countryOverride = null,
         )
 
         verify(stripeRepository).retrieveElementsSession(
@@ -437,6 +496,7 @@ internal class ElementsSessionRepositoryTest {
                     savedPaymentMethodSelectionId = "pm_123",
                     appId = APP_ID,
                     mobileSessionId = MOBILE_SESSION_ID,
+                    link = ElementsSessionParams.Link(disallowFundingSourceCreation = emptySet()),
                 )
             ),
             options = any()
@@ -466,6 +526,7 @@ internal class ElementsSessionRepositoryTest {
                     sharedPaymentTokenSessionWithMode =
                     PaymentSheet.IntentConfiguration.Mode.Payment(amount = 1234, currency = "cad"),
                     sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                        businessName = "My business, Inc.",
                         networkId = "network_123",
                         externalId = "external_123",
                     ),
@@ -475,6 +536,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = emptyList(),
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
+            countryOverride = null,
         )
 
         verify(stripeRepository).retrieveElementsSession(
@@ -500,7 +562,8 @@ internal class ElementsSessionRepositoryTest {
                     sellerDetails = ElementsSessionParams.SellerDetails(
                         networkId = "network_123",
                         externalId = "external_123",
-                    )
+                    ),
+                    link = ElementsSessionParams.Link(disallowFundingSourceCreation = emptySet()),
                 )
             ),
             options = any()
@@ -554,6 +617,7 @@ internal class ElementsSessionRepositoryTest {
                 ),
             ),
             savedPaymentMethodSelectionId = "pm_123",
+            countryOverride = null,
         )
 
         verify(stripeRepository).retrieveElementsSession(
@@ -564,11 +628,107 @@ internal class ElementsSessionRepositoryTest {
                     customPaymentMethods = listOf("cpmt_123", "cpmt_456", "cpmt_789"),
                     savedPaymentMethodSelectionId = "pm_123",
                     mobileSessionId = MOBILE_SESSION_ID,
-                    appId = APP_ID
+                    appId = APP_ID,
+                    link = ElementsSessionParams.Link(disallowFundingSourceCreation = emptySet()),
                 )
             ),
             options = any()
         )
+    }
+
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    @Test
+    fun `Verify PMO SFU params are passed to 'StripeRepository'`() = runTest {
+        whenever(stripeRepository.retrieveElementsSession(any(), any())).thenReturn(
+            Result.success(
+                ElementsSession.createFromFallback(
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                    sessionsError = null,
+                )
+            )
+        )
+
+        val paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
+            setupFutureUsageValues = mapOf(
+                PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
+                PaymentMethod.Type.Affirm to PaymentSheet.IntentConfiguration.SetupFutureUse.None,
+                PaymentMethod.Type.AmazonPay
+                    to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+            )
+        )
+
+        createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1000,
+                        currency = "usd",
+                        setupFutureUse = null,
+                        paymentMethodOptions = paymentMethodOptions
+                    ),
+                )
+            ),
+            customer = null,
+            customPaymentMethods = listOf(),
+            externalPaymentMethods = listOf(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+        )
+
+        verify(stripeRepository).retrieveElementsSession(
+            params = eq(
+                ElementsSessionParams.DeferredIntentType(
+                    deferredIntentParams = DeferredIntentParams(
+                        mode = DeferredIntentParams.Mode.Payment(
+                            amount = 1000,
+                            currency = "usd",
+                            setupFutureUsage = null,
+                            captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                            paymentMethodOptionsJsonString = paymentMethodOptions.toJsonObjectString()
+                        ),
+                        paymentMethodTypes = listOf(),
+                        paymentMethodConfigurationId = null,
+                        onBehalfOf = null
+                    ),
+                    externalPaymentMethods = emptyList(),
+                    customPaymentMethods = listOf(),
+                    savedPaymentMethodSelectionId = null,
+                    mobileSessionId = MOBILE_SESSION_ID,
+                    appId = APP_ID,
+                    link = ElementsSessionParams.Link(disallowFundingSourceCreation = emptySet()),
+                )
+            ),
+            options = any()
+        )
+    }
+
+    @OptIn(LinkDisallowFundingSourceCreationPreview::class)
+    @Test
+    fun `Link disallowedFundingSourceCreation is passed through correctly`() = runTest {
+        whenever(stripeRepository.retrieveElementsSession(any(), any())).thenReturn(
+            Result.success(
+                ElementsSession.createFromFallback(
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                    sessionsError = null,
+                )
+            )
+        )
+
+        createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            ),
+            customer = null,
+            customPaymentMethods = emptyList(),
+            externalPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+            linkDisallowedFundingSourceCreation = setOf("somethingThatsNotAllowed"),
+        )
+
+        val argCaptor = argumentCaptor<ElementsSessionParams>()
+        verify(stripeRepository).retrieveElementsSession(argCaptor.capture(), any())
+        assertThat(argCaptor.firstValue.link.disallowFundingSourceCreation).containsExactly("somethingThatsNotAllowed")
     }
 
     private fun createRepository() = RealElementsSessionRepository(

@@ -28,6 +28,7 @@ internal class FakeVerticalModeFormInteractor private constructor(
             paymentMethodCode: PaymentMethodCode,
             metadata: PaymentMethodMetadata,
             isProcessing: Boolean = false,
+            isValidating: Boolean = false,
         ): VerticalModeFormInteractor {
             val formArguments = FormArgumentsFactory.create(
                 paymentMethodCode = paymentMethodCode,
@@ -36,7 +37,9 @@ internal class FakeVerticalModeFormInteractor private constructor(
             val uiDefinitionArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 linkConfigurationCoordinator = null,
+                linkInlineHandler = null,
                 onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },
+                autocompleteAddressInteractorFactory = null,
             )
 
             return FakeVerticalModeFormInteractor(
@@ -49,6 +52,7 @@ internal class FakeVerticalModeFormInteractor private constructor(
                         code = paymentMethodCode,
                         uiDefinitionFactoryArgumentsFactory = uiDefinitionArgumentsFactory,
                     )!!,
+                    isValidating = isValidating,
                     headerInformation = metadata.formHeaderInformationForCode(
                         code = paymentMethodCode,
                         customerHasSavedPaymentMethods = false,

@@ -9,11 +9,14 @@ import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSe
 import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionOnBehalfOfSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.FieldPopulator
@@ -30,6 +33,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
     ).copyPlaygroundSettings { settings ->
         settings[CustomerSettingsDefinition] = CustomerType.NEW
         settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.CreateAndAttach
+        settings[GooglePaySettingsDefinition] = false
     }
 
     @Test
@@ -66,6 +70,62 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
             },
             populateCustomLpmFields = {
                 populateCardDetails()
+            },
+        )
+    }
+
+    @Test
+    fun testCardWithOBO_DoNotSelectCardBrand() {
+        testDriver.savePaymentMethodInCustomerSheet(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+                settings[CountrySettingsDefinition] = Country.US
+                settings[CustomerSessionSettingsDefinition] = true
+                settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
+                settings[CustomerSessionOnBehalfOfSettingsDefinition] =
+                    CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT
+                settings[GooglePaySettingsDefinition] = false
+            },
+
+            populateCustomLpmFields = {
+                populateCardBrandChoiceCardDetails(null)
+            },
+        )
+    }
+
+    @Test
+    fun testCardWithOBO_UseCartesBancaires() {
+        testDriver.savePaymentMethodInCustomerSheet(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[GooglePaySettingsDefinition] = false
+                settings[CountrySettingsDefinition] = Country.US
+                settings[CustomerSessionOnBehalfOfSettingsDefinition] =
+                    CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT
+                settings[CustomerSessionSettingsDefinition] = true
+                settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
+            },
+
+            populateCustomLpmFields = {
+                populateCardBrandChoiceCardDetails("Cartes Bancaires")
+            },
+        )
+    }
+
+    @Test
+    fun testCardWithOBO_UseVisa() {
+        testDriver.savePaymentMethodInCustomerSheet(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+                settings[CountrySettingsDefinition] = Country.US
+                settings[CustomerSessionSettingsDefinition] = true
+                settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
+                settings[CustomerSessionOnBehalfOfSettingsDefinition] =
+                    CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT
+                settings[GooglePaySettingsDefinition] = false
+            },
+
+            populateCustomLpmFields = {
+                populateCardBrandChoiceCardDetails("Visa")
             },
         )
     }

@@ -158,9 +158,6 @@ class PaymentOptionsItemsMapperTest {
         paymentMethods: List<PaymentMethod> = emptyList(),
     ): CustomerState {
         return CustomerState(
-            id = "pi_123",
-            ephemeralKeySecret = "ek_123",
-            customerSessionClientSecret = null,
             paymentMethods = paymentMethods,
             defaultPaymentMethodId = defaultPaymentMethodId,
         )

@@ -2,11 +2,15 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage
+import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_ATTRIBUTION_METADATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CONFIRMATION_TOKEN
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RADAR_OPTIONS
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_SET_AS_DEFAULT_PAYMENT_METHOD
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
@@ -28,6 +32,7 @@ constructor(
      * See [payment_method](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-payment_method).
      */
     val paymentMethodId: String? = null,
+
     val sourceParams: SourceParams? = null,
     val sourceId: String? = null,
 
@@ -125,6 +130,21 @@ constructor(
      */
     internal val setAsDefaultPaymentMethod: Boolean? = null,
 
+    internal val paymentMethodCode: PaymentMethodCode? = paymentMethodCreateParams?.code,
+
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null,
+
+    private val clientAttributionMetadata: ClientAttributionMetadata? = null,
+
+    /**
+     * ID of the ConfirmationToken used to confirm this PaymentIntent.
+     *
+     * If the provided ConfirmationToken contains properties that are also being provided in this
+     * request, such as payment_method, then the values in this request will take precedence.
+     *
+     * See [confirmation_token](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-confirmation_token).
+     */
+    private val confirmationTokenId: String? = null,
 ) : ConfirmStripeIntentParams {
     fun shouldSavePaymentMethod(): Boolean {
         return savePaymentMethod == true
@@ -174,10 +194,18 @@ constructor(
                 mapOf(PARAM_SHIPPING to it.toParamMap())
             }.orEmpty()
         ).plus(
+            radarOptions?.let {
+                mapOf(PARAM_RADAR_OPTIONS to it.toParamMap())
+            }.orEmpty()
+        ).plus(
             paymentMethodParamMap
         ).plus(
             receiptEmail?.let {
                 mapOf(PARAM_RECEIPT_EMAIL to it)
+            }.orEmpty()
+        ).plus(
+            clientAttributionMetadata?.let {
+                mapOf(PARAM_CLIENT_ATTRIBUTION_METADATA to it.toParamMap())
             }.orEmpty()
         )
     }
@@ -190,6 +218,9 @@ constructor(
                 }
                 paymentMethodId != null -> {
                     mapOf(PARAM_PAYMENT_METHOD_ID to paymentMethodId)
+                }
+                confirmationTokenId != null -> {
+                    mapOf(PARAM_CONFIRMATION_TOKEN to confirmationTokenId)
                 }
                 sourceParams != null -> {
                     mapOf(PARAM_SOURCE_DATA to sourceParams.toParamMap())
@@ -253,7 +284,13 @@ constructor(
          * Use `` if you want to clear reusable from the payment intent.  Note: this
          * only works if the PaymentIntent was created with no setup_future_usage.
          */
-        Blank("")
+        Blank(""),
+
+        /**
+         * Use `none` to override top level setup_future_usage in payment_method_options.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        None("none")
     }
 
     /**
@@ -300,6 +337,15 @@ constructor(
          */
         internal val trackingNumber: String? = null
     ) : StripeParamsModel, Parcelable {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun getPhone() = phone
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun getName() = name
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun getAddress() = address
+
         override fun toParamMap(): Map<String, Any> {
             return listOf(
                 PARAM_ADDRESS to address.toParamMap(),
@@ -350,7 +396,8 @@ constructor(
                 clientSecret = clientSecret,
                 // infers default [MandateDataParams] based on the attached [paymentMethodType]
                 mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
-                    .takeIf { paymentMethodType.requiresMandate }
+                    .takeIf { paymentMethodType.requiresMandate },
+                paymentMethodCode = paymentMethodType.code,
             )
         }
 
@@ -454,6 +501,8 @@ constructor(
                 shipping = shipping,
                 paymentMethodOptions = paymentMethodOptions,
                 setAsDefaultPaymentMethod = null,
+                radarOptions = null,
+                clientAttributionMetadata = null,
             )
         }
 
@@ -537,7 +586,8 @@ constructor(
                 paymentMethodCreateParams = PaymentMethodCreateParams.createAlipay(),
                 // return_url is no longer used by is still required by the backend
                 // TODO(smaskell): remove this when no longer required
-                returnUrl = "stripe://return_url"
+                returnUrl = "stripe://return_url",
+                paymentMethodCode = PaymentMethod.Type.Alipay.code,
             )
         }
 
@@ -551,6 +601,8 @@ constructor(
             shipping: Shipping? = null,
             paymentMethodOptions: PaymentMethodOptionsParams? = null,
             setAsDefaultPaymentMethod: Boolean?,
+            radarOptions: RadarOptions?,
+            clientAttributionMetadata: ClientAttributionMetadata?
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
@@ -562,6 +614,9 @@ constructor(
                 shipping = shipping,
                 paymentMethodOptions = paymentMethodOptions,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
+                paymentMethodCode = paymentMethodCreateParams.code,
+                radarOptions = radarOptions,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 
@@ -575,6 +630,9 @@ constructor(
             shipping: Shipping? = null,
             paymentMethodOptions: PaymentMethodOptionsParams? = null,
             setAsDefaultPaymentMethod: Boolean? = null,
+            paymentMethodCode: PaymentMethodCode,
+            radarOptions: RadarOptions?,
+            clientAttributionMetadata: ClientAttributionMetadata?
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 paymentMethodId = paymentMethodId,
@@ -586,6 +644,9 @@ constructor(
                 shipping = shipping,
                 paymentMethodOptions = paymentMethodOptions,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
+                paymentMethodCode = paymentMethodCode,
+                radarOptions = radarOptions,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 
@@ -604,7 +665,8 @@ constructor(
                     (paymentMethodOptions as? PaymentMethodOptionsParams.Card)?.setupFutureUsage
                 ),
                 savePaymentMethod = false,
-                useStripeSdk = true
+                useStripeSdk = true,
+                paymentMethodCode = PaymentMethod.Type.Card.code,
             )
         }
     }

@@ -21,6 +21,8 @@ sealed interface ElementsSessionParams : Parcelable {
     val externalPaymentMethods: List<String>
     val appId: String
     val sellerDetails: SellerDetails?
+    val link: Link
+    val countryOverride: String?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
@@ -34,6 +36,8 @@ sealed interface ElementsSessionParams : Parcelable {
         override val customPaymentMethods: List<String>,
         override val externalPaymentMethods: List<String>,
         override val appId: String,
+        override val link: Link = Link(),
+        override val countryOverride: String? = null,
     ) : ElementsSessionParams {
 
         override val type: String
@@ -58,6 +62,8 @@ sealed interface ElementsSessionParams : Parcelable {
         override val customPaymentMethods: List<String>,
         override val externalPaymentMethods: List<String>,
         override val appId: String,
+        override val link: Link = Link(),
+        override val countryOverride: String? = null,
     ) : ElementsSessionParams {
 
         override val type: String
@@ -83,6 +89,8 @@ sealed interface ElementsSessionParams : Parcelable {
         override val mobileSessionId: String? = null,
         override val appId: String,
         override val sellerDetails: SellerDetails? = null,
+        override val link: Link = Link(),
+        override val countryOverride: String? = null,
     ) : ElementsSessionParams {
 
         override val clientSecret: String?
@@ -106,6 +114,18 @@ sealed interface ElementsSessionParams : Parcelable {
                 "seller_details[network_id]" to networkId,
                 "seller_details[external_id]" to externalId,
             )
+        }
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class Link(
+        val disallowFundingSourceCreation: Set<String> = emptySet(),
+    ) : Parcelable {
+        fun toQueryParams(): Map<String, Any?> {
+            return disallowFundingSourceCreation.withIndex().associate { (index, fundingSource) ->
+                "link[disallow_funding_source_creation][$index]" to fundingSource
+            }
         }
     }
 }

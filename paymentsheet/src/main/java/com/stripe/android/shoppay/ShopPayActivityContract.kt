@@ -4,14 +4,29 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentsheet.PaymentSheet
 import javax.inject.Inject
 
-internal class ShopPayActivityContract @Inject constructor() :
+internal class ShopPayActivityContract @Inject constructor(
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+) :
     ActivityResultContract<ShopPayActivityContract.Args, ShopPayActivityResult>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
-        return ShopPayActivity.createIntent(context, ShopPayArgs(input.shopPayConfiguration))
+        val configuration = PaymentConfiguration.getInstance(context)
+        return ShopPayActivity.createIntent(
+            context,
+            ShopPayArgs(
+                shopPayConfiguration = input.shopPayConfiguration,
+                publishableKey = configuration.publishableKey,
+                stripeAccountId = configuration.stripeAccountId,
+                paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+                customerSessionClientSecret = input.customerSessionClientSecret,
+                businessName = input.businessName
+            )
+        )
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): ShopPayActivityResult {
@@ -23,6 +38,8 @@ internal class ShopPayActivityContract @Inject constructor() :
 
     data class Args(
         val shopPayConfiguration: PaymentSheet.ShopPayConfiguration,
+        val customerSessionClientSecret: String,
+        val businessName: String
     )
 
     companion object {

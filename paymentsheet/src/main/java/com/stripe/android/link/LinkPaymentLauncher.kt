@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultRegistry
 import com.stripe.android.link.LinkActivityResult.PaymentMethodObtained
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,7 +19,7 @@ internal class LinkPaymentLauncher @Inject internal constructor(
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val linkActivityContract: LinkActivityContract,
-    private val linkStore: LinkStore,
+    private val linkStore: LinkStore
 ) {
     private val analyticsHelper = linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
 
@@ -77,13 +78,17 @@ internal class LinkPaymentLauncher @Inject internal constructor(
         configuration: LinkConfiguration,
         linkAccountInfo: LinkAccountUpdate.Value,
         launchMode: LinkLaunchMode,
-        useLinkExpress: Boolean
+        linkExpressMode: LinkExpressMode,
+        passiveCaptchaParams: PassiveCaptchaParams?,
+        attestOnIntentConfirmation: Boolean,
     ) {
         val args = LinkActivityContract.Args(
             configuration = configuration,
+            linkExpressMode = linkExpressMode,
             linkAccountInfo = linkAccountInfo,
             launchMode = launchMode,
-            startWithVerificationDialog = useLinkExpress
+            passiveCaptchaParams = passiveCaptchaParams,
+            attestOnIntentConfirmation = attestOnIntentConfirmation
         )
         linkActivityResultLauncher?.launch(args)
         analyticsHelper.onLinkLaunched()

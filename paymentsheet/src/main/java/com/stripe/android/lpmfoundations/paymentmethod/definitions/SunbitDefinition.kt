@@ -33,6 +33,7 @@ private object SunbitUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         paymentMethodDefinition = SunbitDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_sunbit,
-        iconResource = R.drawable.stripe_ic_paymentsheet_pm_sunbit,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_sunbit_day,
+        iconResourceNight = R.drawable.stripe_ic_paymentsheet_pm_sunbit_night,
     )
 }

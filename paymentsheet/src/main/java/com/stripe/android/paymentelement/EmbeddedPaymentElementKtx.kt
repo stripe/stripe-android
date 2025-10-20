@@ -8,6 +8,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.common.ui.UpdateCallbacks
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -57,9 +58,27 @@ fun rememberEmbeddedPaymentElement(
     }
 
     val callbacks = remember(builder) {
-        @OptIn(ExperimentalCustomPaymentMethodsApi::class, ExperimentalAnalyticEventCallbackApi::class)
+        @OptIn(
+            ExperimentalCustomPaymentMethodsApi::class,
+            ExperimentalAnalyticEventCallbackApi::class,
+            SharedPaymentTokenSessionPreview::class
+        )
         PaymentElementCallbacks.Builder()
-            .createIntentCallback(builder.createIntentCallback)
+            .apply {
+                when (val deferredHandler = builder.deferredHandler) {
+                    is EmbeddedPaymentElement.Builder.DeferredHandler.Intent -> {
+                        createIntentCallback(deferredHandler.createIntentCallback)
+                    }
+                    is EmbeddedPaymentElement.Builder.DeferredHandler.ConfirmationToken -> {
+                        createIntentCallback(
+                            deferredHandler.createIntentWithConfirmationTokenCallback
+                        )
+                    }
+                    is EmbeddedPaymentElement.Builder.DeferredHandler.SharedPaymentToken -> {
+                        preparePaymentMethodHandler(deferredHandler.preparePaymentMethodHandler)
+                    }
+                }
+            }
             .confirmCustomPaymentMethodCallback(builder.confirmCustomPaymentMethodCallback)
             .externalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
             .analyticEventCallback(builder.analyticEventCallback)

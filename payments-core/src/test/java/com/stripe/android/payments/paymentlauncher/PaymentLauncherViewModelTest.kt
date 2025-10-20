@@ -15,12 +15,14 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
+import com.stripe.android.analytics.FakeDurationProvider
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -41,6 +43,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -76,14 +79,17 @@ class PaymentLauncherViewModelTest {
     private val activityResultCaller = mock<ActivityResultCaller>()
     private val lifecycleOwner = TestLifecycleOwner()
     private val savedStateHandle = mock<SavedStateHandle>()
+    private val durationProvider = FakeDurationProvider()
 
     private val confirmPaymentIntentParams = ConfirmPaymentIntentParams(
         clientSecret = CLIENT_SECRET,
-        paymentMethodId = PM_ID
+        paymentMethodId = PM_ID,
+        paymentMethodCode = "card",
     )
     private val confirmSetupIntentParams = ConfirmSetupIntentParams(
         clientSecret = CLIENT_SECRET,
-        paymentMethodId = PM_ID
+        paymentMethodId = PM_ID,
+        paymentMethodCode = "card",
     )
     private val paymentIntent = mock<PaymentIntent>()
     private val piAuthenticator = mock<PaymentNextActionHandler<PaymentIntent>>()
@@ -106,7 +112,8 @@ class PaymentLauncherViewModelTest {
 
     private fun createViewModel(
         isPaymentIntent: Boolean = true,
-        isInstantApp: Boolean = false
+        isInstantApp: Boolean = false,
+        savedStateHandle: SavedStateHandle = this.savedStateHandle,
     ) =
         PaymentLauncherViewModel(
             isPaymentIntent,
@@ -121,7 +128,8 @@ class PaymentLauncherViewModelTest {
             analyticsRequestFactory,
             uiContext,
             savedStateHandle,
-            isInstantApp
+            isInstantApp,
+            durationProvider,
         ).apply {
             register(activityResultCaller, lifecycleOwner)
         }
@@ -457,6 +465,36 @@ class PaymentLauncherViewModelTest {
         }
 
     @Test
+    fun `verify redacted intent is properly handled when handling next action`() =
+        runTest {
+            val redactedIntent = PaymentIntent.fromJson(PaymentIntentFixtures.REDACTED_PAYMENT_INTENT_JSON)!!
+
+            whenever(
+                stripeApiRepository.retrieveStripeIntent(
+                    eq(CLIENT_SECRET),
+                    eq(apiRequestOptions),
+                    any()
+                )
+            ).thenReturn(Result.success(redactedIntent))
+
+            val unredactedIntent = redactedIntent.withUnredactedClientSecret(CLIENT_SECRET)
+
+            whenever(nextActionHandlerRegistry.getNextActionHandler<StripeIntent>(eq(unredactedIntent)))
+                .thenReturn(stripeIntentAuthenticator)
+
+            val viewModel = createViewModel(isPaymentIntent = true)
+
+            viewModel.handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
+
+            verify(savedStateHandle)[PaymentLauncherViewModel.KEY_HAS_STARTED] = true
+            verify(stripeIntentAuthenticator).performNextAction(
+                eq(authHost),
+                eq(unredactedIntent),
+                eq(apiRequestOptions)
+            )
+        }
+
+    @Test
     fun `verify timedOut paymentIntentFlowResult is processed correctly`() =
         runTest {
             val viewModel = createViewModel()
@@ -519,6 +557,107 @@ class PaymentLauncherViewModelTest {
                 )
             )
         }
+    }
+
+    @Test
+    fun `verify confirm finished analytics includes duration parameter`() = runTest {
+        whenever(paymentIntent.requiresAction()).thenReturn(false)
+
+        val viewModel = createViewModel()
+        viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted),
+            additionalParams = any(),
+        )
+
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished),
+            additionalParams = argThat { params ->
+                params.containsKey("duration") && params["duration"] == 1L
+            }
+        )
+    }
+
+    @Test
+    fun `verify confirm finished analytics includes succeeded status for completed result`() = runTest {
+        verifyConfirmFinishedAnalyticsStatus(
+            expectedStatus = "succeeded",
+            setup = { whenever(paymentIntent.requiresAction()).thenReturn(false) },
+            action = { viewModel, _ ->
+                viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
+            }
+        )
+    }
+
+    @Test
+    fun `verify confirm finished analytics includes failed status for failed result`() = runTest {
+        verifyConfirmFinishedAnalyticsStatus(
+            expectedStatus = "failed",
+            setup = {
+                whenever(stripeApiRepository.confirmPaymentIntent(any(), any(), any()))
+                    .thenReturn(Result.failure(APIConnectionException()))
+            },
+            action = { viewModel, _ ->
+                viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
+            }
+        )
+    }
+
+    @Test
+    fun `verify confirm finished analytics includes canceled status for canceled result`() = runTest {
+        verifyConfirmFinishedAnalyticsStatus(
+            expectedStatus = "canceled",
+            setup = {
+                val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
+                whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
+                    .thenReturn(Result.success(canceledPaymentResult))
+                paymentFlowResult
+            },
+            action = { viewModel, paymentFlowResult ->
+                viewModel.onPaymentFlowResult(paymentFlowResult)
+            }
+        )
+    }
+
+    private suspend fun <T> verifyConfirmFinishedAnalyticsStatus(
+        expectedStatus: String,
+        setup: suspend () -> T,
+        action: suspend (PaymentLauncherViewModel, T) -> Unit
+    ) {
+        val setupResult = setup()
+        val viewModel = createViewModel()
+        action(viewModel, setupResult)
+
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished),
+            additionalParams = argThat { params ->
+                params["status"] == expectedStatus
+            }
+        )
+    }
+
+    @Test
+    fun `verify next action finished analytics includes duration parameter`() = runTest {
+        val savedStateHandle = SavedStateHandle()
+        val viewModel = createViewModel(savedStateHandle = savedStateHandle)
+
+        viewModel.handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherNextActionStarted),
+            additionalParams = any(),
+        )
+
+        val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
+        whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
+            .thenReturn(Result.success(succeededPaymentResult))
+        viewModel.onPaymentFlowResult(paymentFlowResult)
+
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherNextActionFinished),
+            additionalParams = argThat { params ->
+                params.containsKey("duration") && params["duration"] == 1L
+            }
+        )
     }
 
     companion object {

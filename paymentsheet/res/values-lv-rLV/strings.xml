@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Saglabāt manu informāciju, lai varētu norēķināties ar Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">Izveidojiet kontu Link, lai varētu ātrāk veikt apmaksu visā tīmeklī</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Kredīta</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -37,14 +40,24 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_card_type_prepaid">%1$s Priekšapmaksas</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
   <string name="stripe_link_card_type_unknown">%1$s Karte</string>
+  <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
+  <string name="stripe_link_confirm_payment_title">Apstiprināt maksājuma informāciju</string>
+  <!-- Email suggestion prompt shown when we detect a typo. The %1$s is a placeholder for the suggested email address. -->
+  <string name="stripe_link_email_suggestion">Vai jūs domājāt %1$s?</string>
+  <!-- CTA text for accepting the suggested email correction -->
+  <string name="stripe_link_email_suggestion_update">Jā, atjaunināt</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Pieteikties vai reģistrēties</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Piekrist un turpināt</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Ātra, droša 1 klikšķa norēķināšanās</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Ātra un droša norēķināšanās</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Saglabājiet savu maksājuma informāciju ar Link un droši norēķinieties ar 1 klikšķi Link atbalstītās lapas.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Maksājiet ātrāk visur, kur tiek pieņemta saite.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Turpinot, jūs piekrītat <terms>noteikumiem</terms> un <privacy>konfidencialitātes politikai</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -79,6 +92,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_address_element_primary_button">saglabāt adresi</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Piegādes adrese</string>
+  <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
+  <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">Piegādei izmantot norēķinu adresi</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
   <string name="stripe_paymentsheet_bacs_email_mandate">Trīs darba dienu laikā uz adresi %s tiks nosūtīts e-pasta ziņojums, lai apstiprinātu šī debitēšanas rīkojuma izveidi.</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
@@ -101,6 +116,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Kartes informāciju nevar mainīt.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Norādot savas kartes informāciju, jūs atļaujat uzņēmumam %s saskaņā ar viņu noteikumiem iekasēt no jūsu kartes turpmākus maksājumus.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Turpinot jūs piekrītat saglabāt savu informāciju turpmākiem pirkumiem ar %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Turpinot, jūs piekrītat saglabāt savu informāciju turpmākiem pirkumiem ar %s un <link>Saite</link>. Jūs arī piekrītat saites <terms>Noteikumiem</terms> un <privacy>Konfidencialitātei</privacy>.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Turpinot jūs piekrītat saglabāt savu informāciju turpmākiem pirkumiem ar %s un <link>Saite</link> (skatīt <terms>Noteikumi</terms> un <privacy>konfidencialitāte</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Turpinot jūs piekrītat saglabāt savu informāciju turpmākiem pirkumiem ar %s un <link>Saite</link> saskaņā ar saites <terms>noteikumiem</terms> un <privacy>privātumu</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Karte netika atjaunināta. Lūdzu, mēģiniet vēlreiz.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -160,6 +183,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_remove_card">Noņemt karti</string>
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Noņemt karti?</string>
+  <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
+  <string name="stripe_paymentsheet_remove_partial_description">Šis maksājuma veids tiks noņemts, bet joprojām būs pieejams %s abonementiem.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Noņemt%s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -190,10 +215,16 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Kopā: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Kartes zīmols netika atjaunināts. Lūdzu, mēģiniet vēlreiz.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Apstipriniet maksājumu savā bankā vai maksājumu programmā %s laikā, lai pabeigtu pirkumu.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Iestatīt kā noklusējuma maksājuma veidu</string>
+  <!-- Text for alert message when user needs to confirm payment in their payment app -->
+  <string name="stripe_qrcode_lpm_confirm_payment">Apstipriniet maksājumu savā bankā vai maksājumu programmā %s laikā, lai pabeigtu pirkumu.</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Noņemt bankas kontu, kas beidzas ar %s</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">Shop Pay poga</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Rādīt izvēlni</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -250,6 +281,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Skatīt vairāk</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Turpinot, jūs piekrītat autorizēt maksājumus saskaņā ar šiem<terms>noteikumiem</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Iesniedzot pasūtījumu %1$s un %2$s, jūs piekrītat saglabāt savu informāciju %3$s nākamajiem pirkumiem un piekrītat autorizēt maksājumus saskaņā ar <terms>šiem noteikumiem</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Iesniedzot savu pasūtījumu %s, jūs piekrītat autorizēt maksājumus saskaņā ar <terms>šiem noteikumiem</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Maksājums</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
@@ -263,6 +298,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Caurlaide</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Maksāt citā veidā</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Visticamāk, tiks pieņemtas debetkartes.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Drošības nolūkos atkārtoti ievadiet kartes drošības kodu.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

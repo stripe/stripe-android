@@ -90,6 +90,11 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_load_succeeded")
         testContext.validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        testContext.validateAnalyticsRequest(
+            eventName = "mc_initial_displayed_payment_methods",
+            query("hidden_payment_methods", Uri.encode("cashapp,alipay")),
+            query("visible_payment_methods", Uri.encode("link,card,afterpay_clearpay,klarna")),
+        )
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
@@ -164,6 +169,11 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_load_succeeded")
         testContext.validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        testContext.validateAnalyticsRequest(
+            eventName = "mc_initial_displayed_payment_methods",
+            query("hidden_payment_methods", Uri.encode("cashapp,alipay")),
+            query("visible_payment_methods", Uri.encode("card,afterpay_clearpay,klarna")),
+        )
 
         testContext.configureFlowController {
             configureWithPaymentIntent(
@@ -217,6 +227,7 @@ internal class PaymentSheetAnalyticsTest {
         )
 
         page.clickPrimaryButton()
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
     }
 
@@ -372,6 +383,7 @@ internal class PaymentSheetAnalyticsTest {
         )
 
         page.clickPrimaryButton()
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
     }
 
@@ -401,12 +413,14 @@ internal class PaymentSheetAnalyticsTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = horizontalModeConfiguration.copy(
-                    customer = PaymentSheet.CustomerConfiguration(
-                        id = "cus_1",
-                        ephemeralKeySecret = "ek_123",
-                    ),
-                )
+                configuration = horizontalModeConfiguration.newBuilder()
+                    .customer(
+                        PaymentSheet.CustomerConfiguration(
+                            id = "cus_1",
+                            ephemeralKeySecret = "ek_123",
+                        )
+                    )
+                    .build()
             )
         }
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
@@ -458,12 +472,13 @@ internal class PaymentSheetAnalyticsTest {
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = horizontalModeConfiguration.copy(
-                    customer = PaymentSheet.CustomerConfiguration(
-                        id = "cus_1",
-                        ephemeralKeySecret = "ek_123",
-                    ),
-                ),
+                configuration = horizontalModeConfiguration.newBuilder()
+                    .customer(
+                        PaymentSheet.CustomerConfiguration(
+                            id = "cus_1",
+                            ephemeralKeySecret = "ek_123",
+                        )
+                    ).build(),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()

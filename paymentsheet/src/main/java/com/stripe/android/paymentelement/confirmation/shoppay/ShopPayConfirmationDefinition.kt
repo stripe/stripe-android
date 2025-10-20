@@ -6,11 +6,14 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.shoppay.ShopPayActivityContract
 import com.stripe.android.shoppay.ShopPayActivityResult
 import javax.inject.Inject
 
-internal class ShopPayConfirmationDefinition @Inject constructor() : ConfirmationDefinition<
+internal class ShopPayConfirmationDefinition @Inject constructor(
+    private val shopPayActivityContract: ShopPayActivityContract
+) : ConfirmationDefinition<
     ShopPayConfirmationOption,
     ActivityResultLauncher<ShopPayActivityContract.Args>,
     Unit,
@@ -24,16 +27,32 @@ internal class ShopPayConfirmationDefinition @Inject constructor() : Confirmatio
 
     override fun toResult(
         confirmationOption: ShopPayConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: ShopPayActivityResult
     ): ConfirmationDefinition.Result {
-        val error = Throwable("ShopPay is not supported yet")
-        return ConfirmationDefinition.Result.Failed(
-            cause = error,
-            message = error.message.orEmpty().resolvableString,
-            type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-        )
+        return when (result) {
+            ShopPayActivityResult.Canceled -> {
+                ConfirmationDefinition.Result.Canceled(
+                    action = ConfirmationHandler.Result.Canceled.Action.None
+                )
+            }
+            is ShopPayActivityResult.Completed -> {
+                ConfirmationDefinition.Result.Succeeded(
+                    intent = confirmationArgs.intent,
+                    deferredIntentConfirmationType = deferredIntentConfirmationType,
+                    // Shop Pay is handed off for `preparePaymentMethod` purposes
+                    completedFullPaymentFlow = false,
+                )
+            }
+            is ShopPayActivityResult.Failed -> {
+                ConfirmationDefinition.Result.Failed(
+                    cause = result.error,
+                    message = result.error.message.orEmpty().resolvableString,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                )
+            }
+        }
     }
 
     override fun createLauncher(
@@ -41,7 +60,7 @@ internal class ShopPayConfirmationDefinition @Inject constructor() : Confirmatio
         onResult: (ShopPayActivityResult) -> Unit
     ): ActivityResultLauncher<ShopPayActivityContract.Args> {
         return activityResultCaller.registerForActivityResult(
-            ShopPayActivityContract(),
+            shopPayActivityContract,
             onResult
         )
     }
@@ -50,16 +69,21 @@ internal class ShopPayConfirmationDefinition @Inject constructor() : Confirmatio
         launcher: ActivityResultLauncher<ShopPayActivityContract.Args>,
         arguments: Unit,
         confirmationOption: ShopPayConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters
+        confirmationArgs: ConfirmationHandler.Args
     ) {
         launcher.launch(
-            ShopPayActivityContract.Args(confirmationOption.shopPayConfiguration)
+            ShopPayActivityContract.Args(
+                shopPayConfiguration = confirmationOption.shopPayConfiguration,
+                customerSessionClientSecret = confirmationOption.customerSessionClientSecret,
+                businessName = confirmationArgs.initializationMode.sellerBusinessName
+                    ?: confirmationOption.merchantDisplayName
+            )
         )
     }
 
     override suspend fun action(
         confirmationOption: ShopPayConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters
+        confirmationArgs: ConfirmationHandler.Args
     ): ConfirmationDefinition.Action<Unit> {
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = Unit,

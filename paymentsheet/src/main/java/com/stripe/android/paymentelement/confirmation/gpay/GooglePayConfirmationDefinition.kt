@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -40,11 +41,11 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: GooglePayConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<Unit> {
         if (
             confirmationOption.config.merchantCurrencyCode == null &&
-            !confirmationParameters.initializationMode.isProcessingPayment
+            !confirmationArgs.initializationMode.isProcessingPayment
         ) {
             val message = "GooglePayConfig.currencyCode is required in order to use " +
                 "Google Pay when processing a Setup Intent"
@@ -79,14 +80,15 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         launcher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         arguments: Unit,
         confirmationOption: GooglePayConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ) {
         val config = confirmationOption.config
-        val intent = confirmationParameters.intent
+        val intent = confirmationArgs.intent
         val googlePayLauncher = createGooglePayLauncher(
             factory = googlePayPaymentMethodLauncherFactory,
             activityLauncher = launcher,
             config = confirmationOption.config,
+            confirmationArgs = confirmationArgs,
         )
 
         googlePayLauncher.present(
@@ -98,12 +100,13 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             },
             transactionId = intent.id,
             label = config.customLabel,
+            clientAttributionMetadata = confirmationOption.clientAttributionMetadata,
         )
     }
 
     override fun toResult(
         confirmationOption: GooglePayConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: GooglePayPaymentMethodLauncher.Result,
     ): ConfirmationDefinition.Result {
@@ -113,11 +116,12 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                     paymentMethod = result.paymentMethod,
                     optionsParams = null,
                     originatedFromWallet = true,
+                    passiveCaptchaParams = confirmationOption.passiveCaptchaParams,
                 )
 
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = nextConfirmationOption,
-                    parameters = confirmationParameters,
+                    arguments = confirmationArgs,
                 )
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
@@ -143,6 +147,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         factory: GooglePayPaymentMethodLauncherFactory,
         activityLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         config: GooglePayConfirmationOption.Config,
+        confirmationArgs: ConfirmationHandler.Args,
     ): GooglePayPaymentMethodLauncher {
         return factory.create(
             lifecycleScope = CoroutineScope(Dispatchers.Default),
@@ -152,7 +157,8 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                     else -> GooglePayEnvironment.Test
                 },
                 merchantCountryCode = config.merchantCountryCode,
-                merchantName = config.merchantName,
+                merchantName = confirmationArgs.initializationMode.sellerBusinessName
+                    ?: config.merchantName,
                 isEmailRequired = config.billingDetailsCollectionConfiguration.collectsEmail,
                 billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
             ),

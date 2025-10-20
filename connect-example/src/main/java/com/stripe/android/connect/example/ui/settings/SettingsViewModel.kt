@@ -2,11 +2,13 @@ package com.stripe.android.connect.example.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.connect.PreviewConnectSDK
 import com.stripe.android.connect.example.core.Async
 import com.stripe.android.connect.example.core.Uninitialized
 import com.stripe.android.connect.example.data.EmbeddedComponentService
 import com.stripe.android.connect.example.data.Merchant
 import com.stripe.android.connect.example.data.OnboardingSettings
+import com.stripe.android.connect.example.data.PaymentsSettings
 import com.stripe.android.connect.example.data.PresentationSettings
 import com.stripe.android.connect.example.data.SettingsService
 import com.stripe.android.connect.example.ui.settings.SettingsViewModel.SettingsState.DemoMerchant
@@ -73,6 +75,15 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun onPaymentsSettingsConfirmed(paymentsSettings: PaymentsSettings) {
+        viewModelScope.launch {
+            settingsService.setPaymentsSettings(paymentsSettings)
+            logger.info("($loggingTag) Payments settings saved")
+
+            _state.update { it.copy(paymentsSettings = paymentsSettings) }
+        }
+    }
+
     fun onServerUrlChanged(url: String) {
         _state.update { it.copy(serverUrl = url) }
     }
@@ -105,6 +116,7 @@ class SettingsViewModel @Inject constructor(
                 serverUrl = embeddedComponentService.serverBaseUrl,
                 onboardingSettings = settingsService.getOnboardingSettings(),
                 presentationSettings = settingsService.getPresentationSettings(),
+                paymentsSettings = settingsService.getPaymentsSettings(),
             )
         }
     }
@@ -148,6 +160,7 @@ class SettingsViewModel @Inject constructor(
                 listOf(
                     it.presentationSettings,
                     it.onboardingSettings,
+                    it.paymentsSettings,
                     it.accounts,
                     it.selectedAccount,
                     it.serverUrl,
@@ -161,6 +174,7 @@ class SettingsViewModel @Inject constructor(
 
     // State
 
+    @OptIn(PreviewConnectSDK::class)
     data class SettingsState(
         val serverUrl: String,
         val saveEnabled: Boolean = false,
@@ -168,7 +182,8 @@ class SettingsViewModel @Inject constructor(
         val selectedAccountId: String? = null,
         val otherAccountInput: String? = "",
         val onboardingSettings: OnboardingSettings = OnboardingSettings(),
-        val presentationSettings: PresentationSettings = PresentationSettings()
+        val presentationSettings: PresentationSettings = PresentationSettings(),
+        val paymentsSettings: PaymentsSettings = PaymentsSettings()
     ) {
         val serverUrlResetEnabled: Boolean
             get() = serverUrl != EmbeddedComponentService.DEFAULT_SERVER_BASE_URL

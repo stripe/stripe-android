@@ -20,10 +20,13 @@ import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.GooglePayFixtures
+import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.fakeCreationExtras
 import kotlinx.coroutines.test.runTest
@@ -82,6 +85,17 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
             )
+    }
+
+    @Test
+    fun `createPaymentMethod() sets clientAttributionMetadata`() = runTest {
+        viewModel.createPaymentMethod(
+            PaymentData.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS.toString()
+            )
+        )
+
+        assertThat(stripeRepository.getCreateParams()?.toParamMap()).containsKey("client_attribution_metadata")
     }
 
     @Test
@@ -207,12 +221,17 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
+        private var createParams: PaymentMethodCreateParams? = null
+
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options,
         ): Result<PaymentMethod> {
+            createParams = paymentMethodCreateParams
             return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
+
+        fun getCreateParams(): PaymentMethodCreateParams? = createParams
     }
 
     internal class TestFragment : Fragment() {
@@ -231,7 +250,12 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                 merchantName = "Widget, Inc."
             ),
             currencyCode = "usd",
-            amount = 1000
+            amount = 1000,
+            clientAttributionMetadata = ClientAttributionMetadata(
+                elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
+                paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+                paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+            )
         )
         val REQUEST_OPTIONS = ApiRequest.Options(
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

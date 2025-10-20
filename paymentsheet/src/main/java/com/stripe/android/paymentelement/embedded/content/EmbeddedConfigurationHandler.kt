@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.coroutines.CoalescingOrchestrator
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -16,6 +17,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Provider
 
 internal interface EmbeddedConfigurationHandler {
@@ -30,7 +32,8 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val sheetStateHolder: SheetStateHolder,
     private val eventReporter: EventReporter,
-    private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>
+    private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
+    @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean
 ) : EmbeddedConfigurationHandler {
 
     private var cache: ConfigurationCache?
@@ -48,21 +51,6 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ): Result<PaymentElementLoader.State> {
-        val isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null
-        val hasGooglePayOrCustomerConfig = configuration.googlePay != null || configuration.customer != null
-        if (isRowSelectionImmediateAction &&
-            configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm &&
-            hasGooglePayOrCustomerConfig
-        ) {
-            return Result.failure(
-                IllegalArgumentException(
-                    "Using RowSelectionBehavior.ImmediateAction with FormSheetAction.Confirm is not supported " +
-                        "when Google Pay or a customer configuration is provided. " +
-                        "Use RowSelectionBehavior.Default or disable Apple Pay and saved payment methods."
-                )
-            )
-        }
-
         val targetConfiguration = configuration.asCommonConfiguration()
         eventReporter.onInit(
             commonConfiguration = targetConfiguration,
@@ -71,14 +59,14 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
             primaryButtonColor = null,
             configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(
                 configuration = configuration,
-                isRowSelectionImmediateAction = isRowSelectionImmediateAction
+                isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null
             ),
         )
 
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
         try {
             initializationMode.validate()
-            targetConfiguration.validate()
+            targetConfiguration.validate(isLiveModeProvider())
         } catch (e: IllegalArgumentException) {
             return Result.failure(e)
         }

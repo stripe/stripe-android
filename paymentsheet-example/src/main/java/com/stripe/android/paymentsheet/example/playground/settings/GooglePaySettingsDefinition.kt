@@ -29,6 +29,23 @@ internal object GooglePaySettingsDefinition : BooleanSettingsDefinition(
 
     override fun configure(
         value: Boolean,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+    ) {
+        if (value) {
+            configurationBuilder.googlePay(
+                PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = playgroundState.countryCode.value,
+                    currencyCode = playgroundState.currencyCode.value,
+                )
+            )
+        }
+    }
+
+    override fun configure(
+        value: Boolean,
         configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData

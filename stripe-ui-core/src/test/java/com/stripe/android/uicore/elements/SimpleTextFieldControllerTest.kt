@@ -7,6 +7,7 @@ import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Invalid
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid.Full
@@ -50,7 +51,7 @@ internal class SimpleTextFieldControllerTest {
             assertThat(awaitItem()).isNull()
             controller.onValueChange("showWhenNoFocus")
             shadowOf(getMainLooper()).idle()
-            assertThat(awaitItem()).isEqualTo(ShowWhenNoFocus.getError())
+            assertThat(expectMostRecentItem()).isEqualTo(ShowWhenNoFocus.getError())
         }
     }
 
@@ -105,7 +106,7 @@ internal class SimpleTextFieldControllerTest {
 
     @Test
     fun `Verify is blank optional fields are considered complete`() = runTest {
-        val controller = createControllerWithState(showOptionalLabel = true)
+        val controller = createControllerWithState(isOptional = true)
         controller.onValueChange("invalid")
 
         controller.isComplete.test {
@@ -154,7 +155,7 @@ internal class SimpleTextFieldControllerTest {
             shadowOf(getMainLooper()).idle()
 
             assertThat(visibleErrors.awaitItem()).isEqualTo(false)
-            assertThat(errors.awaitItem()).isNull()
+            assertThat(errors.expectMostRecentItem()).isNull()
         }
     }
 
@@ -207,13 +208,115 @@ internal class SimpleTextFieldControllerTest {
         assertThat(controller.placeHolder.value).isNotNull()
     }
 
+    @Test
+    fun `Verify 'showOptionalLabel' is true when 'optional' is true in config`() {
+        val controller = createControllerWithState(isOptional = true)
+        assertThat(controller.showOptionalLabel).isTrue()
+    }
+
+    @Test
+    fun `Verify 'showOptionalLabel' is false when 'optional' is false in config`() {
+        val controller = createControllerWithState(isOptional = false)
+        assertThat(controller.showOptionalLabel).isFalse()
+    }
+
+    @Test
+    fun `Verify initial state is 'Limitless' when 'optional' is true in config`() = runTest {
+        val controller = createControllerWithState(isOptional = true)
+
+        controller.fieldState.test {
+            assertThat(awaitItem()).isEqualTo(Limitless)
+        }
+    }
+
+    @Test
+    fun `Verify initial state is 'Blank' when 'optional' is false in config`() = runTest {
+        val controller = createControllerWithState(isOptional = false)
+
+        controller.fieldState.test {
+            assertThat(awaitItem()).isEqualTo(Blank)
+        }
+    }
+
+    @Test
+    fun `Verify 'onValidationStateChanged' has visible error`() = runTest {
+        val controller = createControllerWithState(
+            isOptional = false
+        )
+
+        turbineScope {
+            val visibleErrorTurbine = controller.visibleError.testIn(this)
+            val errorTurbine = controller.error.testIn(this)
+
+            assertThat(visibleErrorTurbine.awaitItem()).isFalse()
+            assertThat(errorTurbine.awaitItem()).isNull()
+
+            controller.onValidationStateChanged(true)
+
+            assertThat(visibleErrorTurbine.awaitItem()).isTrue()
+            assertThat(errorTurbine.awaitItem()?.errorMessage).isEqualTo(R.string.stripe_blank_and_required)
+
+            visibleErrorTurbine.cancelAndIgnoreRemainingEvents()
+            errorTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `Verify 'onValidationStateChanged' has no visible error when optional`() = runTest {
+        val controller = createControllerWithState(
+            isOptional = true
+        )
+
+        turbineScope {
+            val visibleErrorTurbine = controller.visibleError.testIn(this)
+            val errorTurbine = controller.error.testIn(this)
+
+            assertThat(visibleErrorTurbine.awaitItem()).isFalse()
+            assertThat(errorTurbine.awaitItem()).isNull()
+
+            controller.onValidationStateChanged(true)
+
+            visibleErrorTurbine.expectNoEvents()
+            errorTurbine.expectNoEvents()
+
+            visibleErrorTurbine.cancelAndIgnoreRemainingEvents()
+            errorTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `Verify 'onValidationStateChanged' has no visible error when complete`() = runTest {
+        val controller = createControllerWithState(
+            isOptional = false
+        )
+
+        turbineScope {
+            val visibleErrorTurbine = controller.visibleError.testIn(this)
+            val errorTurbine = controller.error.testIn(this)
+
+            assertThat(visibleErrorTurbine.awaitItem()).isFalse()
+            assertThat(errorTurbine.awaitItem()).isNull()
+
+            controller.onValueChange("limitless")
+            controller.onValidationStateChanged(true)
+
+            visibleErrorTurbine.expectNoEvents()
+            errorTurbine.expectNoEvents()
+
+            visibleErrorTurbine.cancelAndIgnoreRemainingEvents()
+            errorTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     private fun createControllerWithState(
-        showOptionalLabel: Boolean = false,
-        nullPlaceHolder: Boolean = true
+        isOptional: Boolean = false,
+        nullPlaceHolder: Boolean = true,
     ): SimpleTextFieldController {
         val config: TextFieldConfig = mock {
             on { determineState("full") } doReturn Full
             on { filter("full") } doReturn "full"
+
+            on { optional } doReturn isOptional
 
             on { determineState("limitless") } doReturn Limitless
             on { filter("limitless") } doReturn "limitless"
@@ -238,7 +341,7 @@ internal class SimpleTextFieldControllerTest {
             }
         }
 
-        return SimpleTextFieldController(config, showOptionalLabel)
+        return SimpleTextFieldController(config)
     }
 
     companion object {
@@ -249,7 +352,7 @@ internal class SimpleTextFieldControllerTest {
             override fun isFull(): Boolean = false
             override fun isBlank(): Boolean = false
 
-            override fun shouldShowError(hasFocus: Boolean): Boolean = !hasFocus
+            override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean): Boolean = !hasFocus || isValidating
             override fun getError() = fieldError
         }
     }

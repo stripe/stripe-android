@@ -66,6 +66,16 @@
             android:name=".payments.bankaccount.ui.CollectBankAccountActivity"
             android:theme="@style/StripeTransparentTheme"
             android:exported="false" />
+
+        <activity
+            android:name=".challenge.PassiveChallengeActivity"
+            android:theme="@style/StripeTransparentTheme"
+            android:exported="false" />
+
+        <activity
+            android:name=".challenge.warmer.activity.PassiveChallengeWarmerActivity"
+            android:theme="@style/StripeTransparentTheme"
+            android:exported="false" />
     </application>
 
     <!--

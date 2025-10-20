@@ -73,9 +73,10 @@ internal class SignUpScreenshotTest(
                                     merchantName = "Example Inc.",
                                     signUpEnabled = signUpEnabled,
                                     requiresNameCollection = requiresNameCollection,
+                                    canEditEmail = true,
                                     signUpState = signUpState,
-                                    errorMessage = errorMessage,
                                     isSubmitting = isSubmitting,
+                                    errorMessage = errorMessage,
                                 )
                             )
                         }

@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
 import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
@@ -11,7 +10,6 @@ import kotlinx.parcelize.Parcelize
 /**
  * Handler blocks for Shop Pay.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @ShopPayPreview
 class ShopPayHandlers(
     val shippingMethodUpdateHandler: ShippingMethodHandler,
@@ -20,7 +18,6 @@ class ShopPayHandlers(
     /**
      * Describes shipping rate updates Shop Pay should within its UI
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Poko
     @Parcelize
     class ShippingRateUpdate(
@@ -31,7 +28,6 @@ class ShopPayHandlers(
     /**
      * Describes shipping contact updates Shop Pay should make within its UI
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Poko
     @Parcelize
     class ShippingContactUpdate(
@@ -42,7 +38,6 @@ class ShopPayHandlers(
     /**
      * Describes the address selected by the customer.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Poko
     @Parcelize
     class SelectedAddress(
@@ -55,7 +50,6 @@ class ShopPayHandlers(
     /**
      * The shipping rate selected by the customer.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Poko
     @Parcelize
     class SelectedShippingRate(
@@ -69,7 +63,6 @@ class ShopPayHandlers(
      *
      * @see onRateSelected
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface ShippingMethodHandler {
         /**
          * @param selectedRate The [SelectedShippingRate] that was selected by the user.
@@ -89,7 +82,6 @@ class ShopPayHandlers(
      *
      * @see onAddressSelected
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface ShippingContactHandler {
         /**
          * @param address The [SelectedAddress] that was selected by the user.

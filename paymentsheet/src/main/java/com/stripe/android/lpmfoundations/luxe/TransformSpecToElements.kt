@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.luxe
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specsForConfiguration
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.ui.core.elements.AddressSpec
@@ -47,12 +48,14 @@ internal class TransformSpecToElements(
         metadata: PaymentMethodMetadata?,
         specs: List<FormItemSpec>,
         placeholderOverrideList: List<IdentifierSpec> = emptyList(),
+        termsDisplay: PaymentSheet.TermsDisplay,
     ): List<FormElement> {
         return specsForConfiguration(
             configuration = arguments.billingDetailsCollectionConfiguration,
             placeholderOverrideList = placeholderOverrideList,
             requiresMandate = arguments.requiresMandate,
             specs = specs,
+            termsDisplay = termsDisplay,
         ).flatMap { spec ->
             when (spec) {
                 is StaticTextSpec -> listOf(spec.transform())
@@ -74,7 +77,11 @@ internal class TransformSpecToElements(
                 is KlarnaHeaderStaticTextSpec -> listOf(spec.transform())
                 is DropdownSpec -> listOf(spec.transform(arguments.initialValues))
                 is CountrySpec -> listOf(spec.transform(arguments.initialValues))
-                is AddressSpec -> spec.transform(arguments.initialValues, arguments.shippingValues)
+                is AddressSpec -> spec.transform(
+                    arguments.initialValues,
+                    arguments.shippingValues,
+                    arguments.autocompleteAddressInteractorFactory,
+                )
                 is SepaMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
                 is PlaceholderSpec -> listOf() // Placeholders should be processed before calling transform.
                 is CashAppPayMandateTextSpec -> listOf(spec.transform(arguments.merchantName))

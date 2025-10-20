@@ -1,6 +1,7 @@
 package com.stripe.android.link.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -29,7 +30,12 @@ private val Critical600 = Color(0xFFC0123C)
 private val Critical500 = Color(0xFFE61947)
 private val Critical400 = Color(0xFFFA4A67)
 
+// ECE Link Theme Colors
+internal val EceLinkWhiteTextPrimary = Neutral900
+internal val EceLinkWhiteBackground = Neutral0
+
 internal data class LinkColors(
+    val isDark: Boolean,
     val surfacePrimary: Color,
     val surfaceSecondary: Color,
     val surfaceTertiary: Color,
@@ -47,13 +53,29 @@ internal data class LinkColors(
     val textWhite: Color,
     val textBrand: Color,
     val textCritical: Color,
+    val onButtonPrimary: Color,
+    val onButtonBrand: Color,
     val iconPrimary: Color,
     val iconSecondary: Color,
     val iconTertiary: Color,
     val iconWhite: Color,
     val iconBrand: Color,
     val iconCritical: Color,
-)
+    val outline: Color,
+) {
+    val buttonLinkBrand: Color get() = Brand200
+    val onButtonLinkBrand: Color get() = Neutral900
+
+    val hintMessageBorder: Color
+        @Composable
+        get() = if (isSystemInDarkTheme()) {
+            // This color isn't semantically correct, but borderDefault is the same as the background
+            // in dark mode and we want to make the border stand out.
+            surfaceTertiary
+        } else {
+            borderDefault
+        }
+}
 
 internal object LinkThemeConfig {
     fun colors(isDark: Boolean): LinkColors {
@@ -61,6 +83,7 @@ internal object LinkThemeConfig {
     }
 
     private val colorsLight = LinkColors(
+        isDark = false,
         surfacePrimary = Neutral0,
         surfaceSecondary = Neutral100,
         surfaceTertiary = Neutral200,
@@ -77,16 +100,20 @@ internal object LinkThemeConfig {
         textTertiary = Neutral500,
         textWhite = Neutral0,
         textBrand = Brand600,
+        onButtonPrimary = Neutral0,
+        onButtonBrand = Neutral900,
         textCritical = Critical600,
         iconPrimary = Neutral900,
         iconSecondary = Neutral700,
         iconTertiary = Neutral500,
         iconWhite = Neutral0,
         iconBrand = Brand200,
-        iconCritical = Critical500
+        iconCritical = Critical500,
+        outline = Color(0f, 0f, 0f, .2f),
     )
 
     private val colorsDark = LinkColors(
+        isDark = true,
         surfacePrimary = Neutral900,
         surfaceSecondary = Neutral800,
         surfaceTertiary = Neutral700,
@@ -94,7 +121,7 @@ internal object LinkThemeConfig {
         borderDefault = Neutral900,
         borderSelected = Brand200,
         borderCritical = Critical500,
-        buttonPrimary = Neutral200,
+        buttonPrimary = Neutral0,
         buttonTertiary = Neutral800,
         buttonBrand = Brand200,
         buttonCritical = Critical600,
@@ -104,12 +131,15 @@ internal object LinkThemeConfig {
         textWhite = Neutral0,
         textBrand = Brand200,
         textCritical = Critical400,
+        onButtonPrimary = Neutral900,
+        onButtonBrand = Neutral900,
         iconPrimary = Neutral100,
         iconSecondary = Neutral500,
         iconTertiary = Neutral500,
         iconWhite = Neutral0,
         iconBrand = Brand200,
-        iconCritical = Critical500
+        iconCritical = Critical500,
+        outline = Color(1f, 1f, 1f, .2f),
     )
 
     /**
@@ -134,10 +164,14 @@ internal object LinkThemeConfig {
      */
     internal val LinkColors.radioButtonColors
         @Composable
-        get() = RadioButtonDefaults.colors(
-            selectedColor = LinkTheme.colors.buttonBrand,
-            unselectedColor = if (isSystemInDarkTheme()) Neutral700 else LinkTheme.colors.borderDefault
-        )
+        get() = run {
+            val unselectedColor = if (isDark) Neutral700 else LinkTheme.colors.borderDefault
+            RadioButtonDefaults.colors(
+                selectedColor = LinkTheme.colors.buttonBrand,
+                unselectedColor = unselectedColor,
+                disabledColor = unselectedColor.copy(alpha = ContentAlpha.disabled)
+            )
+        }
 }
 
 @Composable
@@ -145,7 +179,7 @@ internal fun StripeThemeForLink(
     sectionStyle: SectionStyle = SectionStyle.Borderless,
     content: @Composable () -> Unit
 ) {
-    val stripeDefaultColors = StripeThemeDefaults.colors(isSystemInDarkTheme())
+    val stripeDefaultColors = StripeThemeDefaults.colors(isDark = LinkTheme.colors.isDark)
 
     StripeTheme(
         colors = stripeDefaultColors.copy(
@@ -160,7 +194,8 @@ internal fun StripeThemeForLink(
             )
         ),
         shapes = StripeThemeDefaults.shapes.copy(
-            cornerRadius = 12f
+            cornerRadius = 12f,
+            bottomSheetCornerRadius = 24f,
         ),
         typography = StripeThemeDefaults.typography,
         sectionSpacing = StripeThemeDefaults.sectionSpacing,

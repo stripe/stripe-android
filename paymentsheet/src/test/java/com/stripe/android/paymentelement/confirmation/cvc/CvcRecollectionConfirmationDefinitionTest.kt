@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.cvc
 import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -22,8 +23,6 @@ import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionL
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -55,7 +54,7 @@ class CvcRecollectionConfirmationDefinitionTest {
         assertThat(
             definition.canConfirm(
                 confirmationOption = createSavedConfirmationOption(),
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
             )
         ).isTrue()
     }
@@ -71,7 +70,7 @@ class CvcRecollectionConfirmationDefinitionTest {
                 confirmationOption = createSavedConfirmationOption(
                     originatedFromWallet = true,
                 ),
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
             )
         ).isFalse()
     }
@@ -85,7 +84,7 @@ class CvcRecollectionConfirmationDefinitionTest {
         assertThat(
             definition.canConfirm(
                 confirmationOption = createSavedConfirmationOption(),
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
             )
         ).isFalse()
     }
@@ -101,7 +100,7 @@ class CvcRecollectionConfirmationDefinitionTest {
                 confirmationOption = createSavedConfirmationOption(
                     optionsParams = PaymentMethodOptionsParams.Card(cvc = "444")
                 ),
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
             )
         ).isFalse()
     }
@@ -138,7 +137,7 @@ class CvcRecollectionConfirmationDefinitionTest {
     fun `'action' should return launch action`() = test {
         val action = definition.action(
             confirmationOption = createSavedConfirmationOption(),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
@@ -158,7 +157,7 @@ class CvcRecollectionConfirmationDefinitionTest {
             launcher = launcherScenario.launcher,
             arguments = Unit,
             confirmationOption = option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val launchCall = launcherScenario.awaitLaunchCall()
@@ -175,7 +174,7 @@ class CvcRecollectionConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             result = CvcRecollectionResult.Confirmed(
                 cvc = "444",
             ),
@@ -209,7 +208,7 @@ class CvcRecollectionConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             result = CvcRecollectionResult.Confirmed(
                 cvc = "555",
             ),
@@ -240,7 +239,7 @@ class CvcRecollectionConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             result = CvcRecollectionResult.Cancelled,
             deferredIntentConfirmationType = null,
         )
@@ -296,6 +295,7 @@ class CvcRecollectionConfirmationDefinitionTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = optionsParams,
             originatedFromWallet = originatedFromWallet,
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
         )
     }
 
@@ -310,15 +310,11 @@ class CvcRecollectionConfirmationDefinitionTest {
     }
 
     companion object {
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            intent = PaymentIntentFactory.create(),
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            appearance = PaymentSheet.Appearance.Builder()
-                .colorsDark(PaymentSheet.Colors.defaultLight)
-                .build(),
-            shippingDetails = null,
-        )
+        private val CONFIRMATION_PARAMETERS =
+            com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS.copy(
+                appearance = PaymentSheet.Appearance.Builder()
+                    .colorsDark(PaymentSheet.Colors.defaultLight)
+                    .build(),
+            )
     }
 }

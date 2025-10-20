@@ -18,6 +18,7 @@ import com.stripe.android.identity.networking.models.VerificationPageData.Compan
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingSelfie
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.core.R as stripeCoreR
 
 /**
  * Navigate to the final error screen with [requirementError], clicking the action button would
@@ -43,7 +44,7 @@ internal fun NavController.navigateToErrorScreenWithRequirementError(
         ErrorDestination(
             errorTitle = requirementError.title ?: context.getString(R.string.stripe_error),
             errorContent = requirementError.body
-                ?: context.getString(R.string.stripe_unexpected_error_try_again),
+                ?: context.getString(stripeCoreR.string.stripe_unexpected_error_try_again),
             continueButtonText =
             if (shouldShowContinueButton && requirementError.continueButtonText != null) {
                 requirementError.continueButtonText
@@ -72,7 +73,7 @@ internal fun NavController.navigateToErrorScreenWithDefaultValues(context: Conte
     navigateTo(
         ErrorDestination(
             errorTitle = context.getString(R.string.stripe_error),
-            errorContent = context.getString(R.string.stripe_unexpected_error_try_again),
+            errorContent = context.getString(stripeCoreR.string.stripe_unexpected_error_try_again),
             backButtonDestination = ConsentDestination.ROUTE.route,
             backButtonText = context.getString(R.string.stripe_go_back),
             shouldFail = false

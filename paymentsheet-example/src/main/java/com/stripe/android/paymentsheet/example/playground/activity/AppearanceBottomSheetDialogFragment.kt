@@ -57,9 +57,13 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.godaddy.android.colorpicker.ClassicColorPicker
@@ -67,6 +71,7 @@ import com.godaddy.android.colorpicker.HsvColor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.example.R
+import kotlin.math.roundToInt
 
 private val BASE_FONT_SIZE = 20.sp
 private val BASE_PADDING = 8.dp
@@ -154,6 +159,17 @@ private fun AppearancePicker(
                     },
                 )
             }
+            CustomizationCard("Text Field Insets") {
+                Insets(
+                    currentInsets = currentAppearance.textFieldInsets,
+                    defaultCustomInsets = AppearanceStore.State.Insets.defaultTextInsets,
+                    updateInsets = {
+                        updateAppearance(
+                            currentAppearance.copy(textFieldInsets = it)
+                        )
+                    },
+                )
+            }
             CustomizationCard("Section Spacing") {
                 SectionSpacing(
                     currentAppearance = currentAppearance,
@@ -168,6 +184,12 @@ private fun AppearancePicker(
             }
             CustomizationCard("PrimaryButton") {
                 PrimaryButton(
+                    currentAppearance = currentAppearance,
+                    updateAppearance = updateAppearance,
+                )
+            }
+            CustomizationCard("Vertical Mode") {
+                VerticalMode(
                     currentAppearance = currentAppearance,
                     updateAppearance = updateAppearance,
                 )
@@ -423,6 +445,7 @@ private fun Colors(
     )
 }
 
+@OptIn(AppearanceAPIAdditionsPreview::class)
 @Composable
 private fun Shapes(
     currentAppearance: AppearanceStore.State,
@@ -431,8 +454,10 @@ private fun Shapes(
     IncrementDecrementItem("cornerRadiusDp", currentAppearance.shapes.cornerRadiusDp) {
         updateAppearance(
             currentAppearance.copy(
-                shapes = currentAppearance.shapes.copy(
-                    cornerRadiusDp = it
+                shapes = AppearanceStore.State.Shapes(
+                    cornerRadiusDp = it,
+                    borderStrokeWidthDp = currentAppearance.shapes.borderStrokeWidthDp,
+                    bottomSheetCornerRadiusDp = currentAppearance.shapes.bottomSheetCornerRadiusDp
                 )
             )
         )
@@ -441,8 +466,10 @@ private fun Shapes(
     IncrementDecrementItem("borderStrokeWidthDp", currentAppearance.shapes.borderStrokeWidthDp) {
         updateAppearance(
             currentAppearance.copy(
-                shapes = currentAppearance.shapes.copy(
-                    borderStrokeWidthDp = it
+                shapes = AppearanceStore.State.Shapes(
+                    cornerRadiusDp = currentAppearance.shapes.cornerRadiusDp,
+                    borderStrokeWidthDp = it,
+                    bottomSheetCornerRadiusDp = currentAppearance.shapes.bottomSheetCornerRadiusDp
                 )
             )
         )
@@ -451,8 +478,10 @@ private fun Shapes(
     IncrementDecrementItem("bottomSheetCornerRadiusDp", currentAppearance.shapes.bottomSheetCornerRadiusDp) {
         updateAppearance(
             currentAppearance.copy(
-                shapes = currentAppearance.shapes.copy(
-                    bottomSheetCornerRadiusDp = it
+                shapes = AppearanceStore.State.Shapes(
+                    cornerRadiusDp = currentAppearance.shapes.cornerRadiusDp,
+                    borderStrokeWidthDp = currentAppearance.shapes.borderStrokeWidthDp,
+                    bottomSheetCornerRadiusDp = it,
                 )
             )
         )
@@ -551,8 +580,10 @@ private fun Typography(
     FontScaleSlider(currentAppearance.typography.sizeScaleFactor) {
         updateAppearance(
             currentAppearance.copy(
-                typography = currentAppearance.typography.copy(
-                    sizeScaleFactor = it
+                typography = AppearanceStore.State.Typography(
+                    sizeScaleFactor = it,
+                    fontResId = currentAppearance.typography.fontResId,
+                    custom = currentAppearance.typography.custom,
                 )
             )
         )
@@ -561,11 +592,128 @@ private fun Typography(
     FontDropDown(currentAppearance.typography.fontResId) {
         updateAppearance(
             currentAppearance.copy(
-                typography = currentAppearance.typography.copy(
-                    fontResId = it
+                typography = AppearanceStore.State.Typography(
+                    sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                    fontResId = it,
+                    custom = currentAppearance.typography.custom,
                 )
             )
         )
+    }
+    Divider()
+
+    val h1 = currentAppearance.typography.custom.h1
+
+    AppearanceToggle("customH1", h1 != null) {
+        updateAppearance(
+            currentAppearance.copy(
+                typography = AppearanceStore.State.Typography(
+                    sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                    fontResId = currentAppearance.typography.fontResId,
+                    custom = AppearanceStore.State.Typography.Custom(
+                        h1 = if (it) {
+                            AppearanceStore.State.Typography.Font(
+                                fontSizeSp = 20f,
+                                fontWeight = 400,
+                                letterSpacingSp = 0.13f
+                            )
+                        } else {
+                            null
+                        }
+                    )
+                )
+            )
+        )
+    }
+
+    h1?.run {
+        Divider()
+        FontDropDown(fontFamily) {
+            updateAppearance(
+                currentAppearance.copy(
+                    typography = AppearanceStore.State.Typography(
+                        sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                        fontResId = currentAppearance.typography.fontResId,
+                        custom = AppearanceStore.State.Typography.Custom(
+                            h1 = AppearanceStore.State.Typography.Font(
+                                fontFamily = it,
+                                fontWeight = fontWeight,
+                                fontSizeSp = fontSizeSp,
+                                letterSpacingSp = letterSpacingSp,
+                            )
+                        )
+                    )
+                )
+            )
+        }
+        Divider()
+        IncrementDecrementItem(
+            label = "fontSizeSp",
+            value = fontSizeSp ?: AppearanceStore.State.defaultCustomH1LetterSpacingSp,
+        ) {
+            updateAppearance(
+                currentAppearance.copy(
+                    typography = AppearanceStore.State.Typography(
+                        sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                        fontResId = currentAppearance.typography.fontResId,
+                        custom = AppearanceStore.State.Typography.Custom(
+                            h1 = AppearanceStore.State.Typography.Font(
+                                fontFamily = fontFamily,
+                                fontWeight = fontWeight,
+                                fontSizeSp = it,
+                                letterSpacingSp = letterSpacingSp,
+                            )
+                        )
+                    )
+                )
+            )
+        }
+        Divider()
+        IncrementDecrementItem(
+            label = "fontWeight",
+            value = fontWeight?.toFloat() ?: AppearanceStore.State.defaultCustomH1FontSizeDp,
+            incrementDecrementAmount = 100f
+        ) {
+            updateAppearance(
+                currentAppearance.copy(
+                    typography = AppearanceStore.State.Typography(
+                        sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                        fontResId = currentAppearance.typography.fontResId,
+                        custom = AppearanceStore.State.Typography.Custom(
+                            h1 = AppearanceStore.State.Typography.Font(
+                                fontFamily = fontFamily,
+                                fontWeight = it.roundToInt(),
+                                fontSizeSp = fontSizeSp,
+                                letterSpacingSp = letterSpacingSp,
+                            )
+                        )
+                    )
+                )
+            )
+        }
+        Divider()
+        IncrementDecrementItem(
+            label = "letterSpacingSp",
+            value = letterSpacingSp ?: AppearanceStore.State.defaultCustomH1LetterSpacingSp,
+            incrementDecrementAmount = 0.01f
+        ) {
+            updateAppearance(
+                currentAppearance.copy(
+                    typography = AppearanceStore.State.Typography(
+                        sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                        fontResId = currentAppearance.typography.fontResId,
+                        custom = AppearanceStore.State.Typography.Custom(
+                            h1 = AppearanceStore.State.Typography.Font(
+                                fontFamily = fontFamily,
+                                fontWeight = fontWeight,
+                                fontSizeSp = fontSizeSp,
+                                letterSpacingSp = it,
+                            )
+                        )
+                    )
+                )
+            )
+        }
     }
 }
 
@@ -758,6 +906,20 @@ private fun PrimaryButton(
 }
 
 @Composable
+private fun VerticalMode(
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
+) {
+    IncrementDecrementItem("verticalModeRowPaddingDp", currentAppearance.verticalModeRowPadding) {
+        updateAppearance(
+            currentAppearance.copy(
+                verticalModeRowPadding = it
+            )
+        )
+    }
+}
+
+@Composable
 private fun EmbeddedPicker(
     currentAppearance: AppearanceStore.State,
     updateAppearance: (AppearanceStore.State) -> Unit
@@ -827,11 +989,11 @@ private fun EmbeddedPicker(
     Divider()
 
     ColorItem(
-        label = "chevronColor",
-        currentColor = Color(embeddedAppearance.chevronColor),
+        label = "disclosureColor",
+        currentColor = Color(embeddedAppearance.disclosureColor),
         onColorPicked = {
             embeddedAppearance.copy(
-                chevronColor = it.toArgb()
+                disclosureColor = it.toArgb()
             )
         },
         updateAppearance = updateEmbedded,
@@ -918,6 +1080,56 @@ private fun EmbeddedPicker(
         )
     }
     Divider()
+
+    IncrementDecrementItem(
+        "verticalIconMargin",
+        embeddedAppearance.verticalPaymentMethodIconMargin ?: 0f
+    ) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                verticalPaymentMethodIconMargin = it
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem(
+        "horizontalIconMargin",
+        embeddedAppearance.horizontalPaymentMethodIconMargin ?: 0f
+    ) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                horizontalPaymentMethodIconMargin = it
+            )
+        )
+    }
+    Divider()
+
+    EmbeddedFontDropDown(embeddedAppearance.titleFont, "titleFont") {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                titleFont = it
+            )
+        )
+    }
+    Divider()
+
+    EmbeddedFontDropDown(embeddedAppearance.subtitleFont, "subtitleFont") {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                subtitleFont = it
+            )
+        )
+    }
+    Divider()
+
+    IconDropDown(embeddedAppearance.disclosureIconRes) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                disclosureIconRes = it
+            )
+        )
+    }
 }
 
 @Composable
@@ -1010,7 +1222,12 @@ private fun ColorIcon(innerColor: Color) {
 }
 
 @Composable
-private fun IncrementDecrementItem(label: String, value: Float, onValueChange: (Float) -> Unit) {
+private fun IncrementDecrementItem(
+    label: String,
+    value: Float,
+    incrementDecrementAmount: Float = 1f,
+    onValueChange: (Float) -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1027,7 +1244,7 @@ private fun IncrementDecrementItem(label: String, value: Float, onValueChange: (
                     .height(32.dp)
                     .width(50.dp)
                     .clickable {
-                        val newValue = value - 1
+                        val newValue = value - incrementDecrementAmount
                         onValueChange(if (newValue < 0) 0.0f else newValue)
                     }
             ) {
@@ -1043,7 +1260,7 @@ private fun IncrementDecrementItem(label: String, value: Float, onValueChange: (
                     .height(32.dp)
                     .width(50.dp)
                     .clickable {
-                        onValueChange(value + 1)
+                        onValueChange(value + incrementDecrementAmount)
                     }
             ) {
                 Icon(
@@ -1213,6 +1430,71 @@ private fun FontDropDown(fontResId: Int?, fontSelectedCallback: (Int?) -> Unit) 
 }
 
 @Composable
+private fun EmbeddedFontDropDown(
+    currentFont: AppearanceStore.State.Typography.Font?,
+    displayText: String,
+    fontSelectedCallback: (AppearanceStore.State.Typography.Font?) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val items = mapOf(
+        AppearanceStore.State.Typography.Font(
+            fontSizeSp = 12f,
+            fontWeight = 200,
+            letterSpacingSp = 8f,
+        ) to "Small",
+        AppearanceStore.State.Typography.Font(
+            fontSizeSp = 16f,
+            fontWeight = 400,
+            letterSpacingSp = 8f,
+        ) to "Medium",
+        AppearanceStore.State.Typography.Font(
+            fontSizeSp = 24f,
+            fontWeight = 700,
+            letterSpacingSp = 8f,
+        ) to "Large",
+        null to "Default"
+    )
+
+    items[currentFont]?.let {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxSize().padding(all = BASE_PADDING).wrapContentSize(Alignment.TopStart)
+        ) {
+            Text(
+                text = "$displayText: $it",
+                fontSize = BASE_FONT_SIZE,
+                modifier = Modifier.fillMaxWidth().clickable(onClick = { expanded = true })
+            )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items.forEach { font ->
+                    val style = TextStyle(
+                        fontSize = font.key?.fontSizeSp?.sp ?: TextUnit.Unspecified,
+                        fontWeight = font.key?.fontWeight?.let { FontWeight(it) },
+                        fontFamily = font.key?.fontFamily?.let { FontFamily(Font(it)) },
+                        letterSpacing = font.key?.letterSpacingSp?.sp ?: TextUnit.Unspecified,
+                    )
+                    DropdownMenuItem(
+                        onClick = {
+                            expanded = false
+                            fontSelectedCallback(font.key)
+                        },
+                    ) {
+                        Text(
+                            text = font.value,
+                            style = style
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun FontDropDownMenuItem(label: String, fontResId: Int?, onClick: () -> Unit) {
     DropdownMenuItem(
         onClick = onClick,
@@ -1221,6 +1503,58 @@ private fun FontDropDownMenuItem(label: String, fontResId: Int?, onClick: () -> 
             text = label,
             fontFamily = getFontFromResource(fontResId)
         )
+    }
+}
+
+@Composable
+private fun IconDropDown(iconResId: Int?, iconSelectedCallback: (Int) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val items = mapOf(
+        com.stripe.android.R.drawable.stripe_ic_arrow_down to "Down",
+        com.stripe.android.R.drawable.stripe_ic_add_black_32dp to "Add",
+        com.stripe.android.paymentsheet.R.drawable.stripe_ic_chevron_right to "Default"
+    )
+
+    items[iconResId].let {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(all = BASE_PADDING)
+                .wrapContentSize(Alignment.TopStart)
+        ) {
+            Text(
+                text = "Icon Resource: $it",
+                fontSize = BASE_FONT_SIZE,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = { expanded = true })
+            )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items.forEach { icon ->
+                    DropdownMenuItem(
+                        onClick = {
+                            expanded = false
+                            iconSelectedCallback(icon.key)
+                        }
+                    ) {
+                        Text(
+                            text = icon.value
+                        )
+                        icon.key?.let { iconResId ->
+                            Icon(
+                                painter = painterResource(iconResId),
+                                contentDescription = null
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

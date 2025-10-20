@@ -10,9 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.link.theme.PrimaryButtonHeight
 
 @Composable
 internal fun SecondaryButton(
@@ -25,7 +25,7 @@ internal fun SecondaryButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(PrimaryButtonHeight),
+            .height(56.dp),
         enabled = enabled,
         shape = LinkTheme.shapes.default,
         colors = ButtonDefaults.buttonColors(

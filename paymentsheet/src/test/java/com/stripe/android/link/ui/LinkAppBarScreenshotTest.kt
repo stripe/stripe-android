@@ -51,6 +51,7 @@ internal class LinkAppBarScreenshotTest(
                         canNavigateBack = false,
                         showHeader = true,
                         title = null,
+                        isElevated = false,
                     )
                 ),
                 TestCase(
@@ -59,6 +60,7 @@ internal class LinkAppBarScreenshotTest(
                         canNavigateBack = true,
                         showHeader = false,
                         title = R.string.stripe_add_payment_method.resolvableString,
+                        isElevated = false,
                     )
                 ),
                 TestCase(
@@ -67,6 +69,7 @@ internal class LinkAppBarScreenshotTest(
                         canNavigateBack = true,
                         showHeader = false,
                         title = "Ein richtig langer Titel auf Deutsch, einer sehr verbosen Sprache".resolvableString,
+                        isElevated = false,
                     )
                 ),
             )

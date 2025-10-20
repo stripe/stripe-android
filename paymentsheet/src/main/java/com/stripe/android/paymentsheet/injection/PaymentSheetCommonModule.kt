@@ -6,7 +6,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -20,7 +19,9 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkAnalyticsComponent
+import com.stripe.android.link.injection.LinkCommonModule
 import com.stripe.android.link.injection.LinkComponent
+import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -30,7 +31,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -42,6 +42,8 @@ import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
+import com.stripe.android.paymentsheet.state.CreateLinkState
+import com.stripe.android.paymentsheet.state.DefaultCreateLinkState
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
 import com.stripe.android.paymentsheet.state.DefaultRetrieveCustomerEmail
@@ -55,7 +57,6 @@ import dagger.Provides
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
 @SuppressWarnings("TooManyFunctions")
 @Module(
@@ -63,6 +64,10 @@ import kotlin.coroutines.CoroutineContext
         LinkAnalyticsComponent::class,
         LinkComponent::class,
     ],
+    includes = [
+        LinkCommonModule::class,
+        PaymentsIntegrityModule::class
+    ]
 )
 internal abstract class PaymentSheetCommonModule {
 
@@ -98,6 +103,11 @@ internal abstract class PaymentSheetCommonModule {
     ): LinkAccountStatusProvider
 
     @Binds
+    abstract fun bindsCreateLinkState(
+        impl: DefaultCreateLinkState,
+    ): CreateLinkState
+
+    @Binds
     abstract fun bindsPaymentSheetUpdater(
         impl: DefaultPaymentSelectionUpdater,
     ): PaymentSelectionUpdater
@@ -117,6 +127,11 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsCardAccountRangeRepositoryFactory(
         defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
     ): CardAccountRangeRepository.Factory
+
+    @Binds
+    abstract fun bindsPrefsRepositoryFactory(
+        factory: DefaultPrefsRepository.Factory
+    ): PrefsRepository.Factory
 
     @Suppress("TooManyFunctions")
     companion object {
@@ -155,19 +170,6 @@ internal abstract class PaymentSheetCommonModule {
         @Singleton
         @Named(ENABLE_LOGGING)
         fun provideEnabledLogging(): Boolean = BuildConfig.DEBUG
-
-        @Provides
-        @Singleton
-        fun providePrefsRepositoryFactory(
-            appContext: Context,
-            @IOContext workContext: CoroutineContext
-        ): (PaymentSheet.CustomerConfiguration?) -> PrefsRepository = { customerConfig ->
-            DefaultPrefsRepository(
-                appContext,
-                customerConfig?.id,
-                workContext
-            )
-        }
 
         @Provides
         @Singleton

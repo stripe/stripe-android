@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
 import com.stripe.android.paymentsheet.utils.PaymentMethodType
 import com.stripe.android.paymentsheet.utils.PaymentMethodTypeProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
+import com.stripe.android.paymentsheet.utils.ProductIntegrationTestRunnerContext
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -19,19 +20,20 @@ import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
 internal class DefaultPaymentMethodsConfirmationTest {
+    private val testRules: TestRules = TestRules.create()
 
     @get:Rule
-    val testRules: TestRules = TestRules.create()
+    val rules: RuleChain = RuleChain.emptyRuleChain()
+        .around(IntentsRule())
+        .around(testRules)
 
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule
-
-    @get:Rule
-    val intentsRule = IntentsRule()
 
     @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
     lateinit var integrationType: ProductIntegrationType
@@ -92,6 +94,8 @@ internal class DefaultPaymentMethodsConfirmationTest {
         )
 
         paymentSheetPage.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController()
     }
 
     @Test
@@ -139,6 +143,8 @@ internal class DefaultPaymentMethodsConfirmationTest {
             )
 
             paymentSheetPage.clickPrimaryButton()
+
+            testContext.consumePaymentOptionEventForFlowController()
         }
 
     @Test
@@ -187,6 +193,8 @@ internal class DefaultPaymentMethodsConfirmationTest {
             )
 
             paymentSheetPage.clickPrimaryButton()
+
+            testContext.consumePaymentOptionEventForFlowController()
         }
 
     @Test
@@ -228,6 +236,8 @@ internal class DefaultPaymentMethodsConfirmationTest {
         )
 
         paymentSheetPage.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController()
     }
 
     @Test
@@ -269,6 +279,8 @@ internal class DefaultPaymentMethodsConfirmationTest {
         )
 
         paymentSheetPage.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController()
     }
 
     private fun navigateToFormForLpm() {
@@ -277,5 +289,16 @@ internal class DefaultPaymentMethodsConfirmationTest {
 
         verticalModePage.clickNewPaymentMethodButton(paymentMethodType.type.code)
         formPage.waitUntilVisible()
+    }
+
+    private suspend fun ProductIntegrationTestRunnerContext.consumePaymentOptionEventForFlowController() {
+        consumePaymentOptionEventForFlowController(
+            paymentMethodType = paymentMethodType.type.code,
+            label = if (paymentMethodType is PaymentMethodType.Card) {
+                "4242"
+            } else {
+                "6789"
+            },
+        )
     }
 }

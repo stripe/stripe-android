@@ -10,6 +10,7 @@ import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.Stripe.Companion.advancedFraudSignalsEnabled
 import com.stripe.android.core.ApiKeyValidator
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
@@ -102,10 +103,11 @@ class Stripe internal constructor(
     ) : this(
         context.applicationContext,
         StripeApiRepository(
-            context.applicationContext,
-            { publishableKey },
-            appInfo,
-            Logger.getInstance(enableLogging),
+            context = context.applicationContext,
+            publishableKeyProvider = { publishableKey },
+            requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
+            appInfo = appInfo,
+            logger = Logger.getInstance(enableLogging),
             betas = betas
         ),
         ApiKeyValidator.get().requireValid(publishableKey),

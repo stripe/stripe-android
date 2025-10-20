@@ -1,10 +1,13 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.common.di.MOBILE_SESSION_ID
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.HTTP_INTERNAL_SERVER_ERROR
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
@@ -13,7 +16,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentelement.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.toDeferredIntentParams
@@ -31,6 +33,8 @@ internal interface ElementsSessionRepository {
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
+        countryOverride: String?,
+        linkDisallowedFundingSourceCreation: Set<String> = emptySet(),
     ): Result<ElementsSession>
 }
 
@@ -59,6 +63,8 @@ internal class RealElementsSessionRepository @Inject constructor(
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
+        countryOverride: String?,
+        linkDisallowedFundingSourceCreation: Set<String>,
     ): Result<ElementsSession> {
         val params = initializationMode.toElementsSessionParams(
             customer = customer,
@@ -66,7 +72,9 @@ internal class RealElementsSessionRepository @Inject constructor(
             externalPaymentMethods = externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
             mobileSessionId = mobileSessionIdProvider.get(),
-            appId = appId
+            appId = appId,
+            countryOverride = countryOverride,
+            linkDisallowedFundingSourceCreation = linkDisallowedFundingSourceCreation,
         )
 
         val elementsSession = stripeRepository.retrieveElementsSession(
@@ -75,7 +83,11 @@ internal class RealElementsSessionRepository @Inject constructor(
         )
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->
-            fallback(params, elementsSessionFailure)
+            if (shouldFallback(elementsSession)) {
+                fallback(params, elementsSessionFailure)
+            } else {
+                elementsSession
+            }
         }
     }
 
@@ -109,6 +121,12 @@ internal class RealElementsSessionRepository @Inject constructor(
             )
         }
     }
+
+    private fun shouldFallback(elementsSession: Result<ElementsSession>): Boolean {
+        return (elementsSession.exceptionOrNull() as? StripeException)?.let {
+            it.statusCode >= HTTP_INTERNAL_SERVER_ERROR
+        } ?: false
+    }
 }
 
 private fun StripeIntent.withoutWeChatPay(): StripeIntent {
@@ -127,11 +145,17 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
     externalPaymentMethods: List<String>,
     savedPaymentMethodSelectionId: String?,
     mobileSessionId: String,
-    appId: String
+    appId: String,
+    countryOverride: String?,
+    linkDisallowedFundingSourceCreation: Set<String>,
 ): ElementsSessionParams {
     val customerSessionClientSecret = customer?.customerSessionClientSecret
     val legacyCustomerEphemeralKey = customer?.legacyCustomerEphemeralKey
     val customPaymentMethodIds = customPaymentMethods.toElementSessionParam()
+
+    val linkParams = ElementsSessionParams.Link(
+        disallowFundingSourceCreation = linkDisallowedFundingSourceCreation
+    )
 
     return when (this) {
         is PaymentElementLoader.InitializationMode.PaymentIntent -> {
@@ -143,7 +167,9 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 externalPaymentMethods = externalPaymentMethods,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 mobileSessionId = mobileSessionId,
-                appId = appId
+                appId = appId,
+                countryOverride = countryOverride,
+                link = linkParams,
             )
         }
 
@@ -156,7 +182,9 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 customPaymentMethods = customPaymentMethodIds,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 mobileSessionId = mobileSessionId,
-                appId = appId
+                appId = appId,
+                countryOverride = countryOverride,
+                link = linkParams,
             )
         }
 
@@ -170,7 +198,9 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 mobileSessionId = mobileSessionId,
                 sellerDetails = intentConfiguration.toSellerDetails(),
-                appId = appId
+                appId = appId,
+                countryOverride = countryOverride,
+                link = linkParams,
             )
         }
     }
@@ -221,7 +251,8 @@ private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: Api
             currency = deferredIntentParams.mode.currency,
             isLiveMode = options.apiKeyIsLiveMode,
             unactivatedPaymentMethods = emptyList(),
-            paymentMethodOptionsJsonString = deferredIntentMode.paymentMethodOptionsJsonString
+            paymentMethodOptionsJsonString = deferredIntentMode.paymentMethodOptionsJsonString,
+            automaticPaymentMethodsEnabled = deferredIntentParams.paymentMethodTypes.isEmpty(),
         )
         is DeferredIntentParams.Mode.Setup -> SetupIntent(
             id = deferredIntentParams.paymentMethodConfigurationId,
@@ -238,6 +269,7 @@ private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: Api
             status = null,
             unactivatedPaymentMethods = emptyList(),
             usage = null,
+            automaticPaymentMethodsEnabled = deferredIntentParams.paymentMethodTypes.isEmpty(),
         )
     }
 }

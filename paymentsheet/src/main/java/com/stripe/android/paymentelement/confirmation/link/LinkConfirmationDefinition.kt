@@ -7,6 +7,7 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -16,12 +17,19 @@ import javax.inject.Inject
 internal class LinkConfirmationDefinition @Inject constructor(
     private val linkPaymentLauncher: LinkPaymentLauncher,
     private val linkStore: LinkStore,
-    private val linkAccountHolder: LinkAccountHolder
+    private val linkAccountHolder: LinkAccountHolder,
 ) : ConfirmationDefinition<LinkConfirmationOption, LinkPaymentLauncher, Unit, LinkActivityResult> {
     override val key: String = "Link"
 
+    @Volatile
+    private var attestOnIntentConfirmation: Boolean = false
+
     override fun option(confirmationOption: ConfirmationHandler.Option): LinkConfirmationOption? {
         return confirmationOption as? LinkConfirmationOption
+    }
+
+    override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
+        this.attestOnIntentConfirmation = paymentMethodMetadata.attestOnIntentConfirmation
     }
 
     override fun createLauncher(
@@ -39,7 +47,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: LinkConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<Unit> {
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = Unit,
@@ -52,19 +60,21 @@ internal class LinkConfirmationDefinition @Inject constructor(
         launcher: LinkPaymentLauncher,
         arguments: Unit,
         confirmationOption: LinkConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ) {
         launcher.present(
             configuration = confirmationOption.configuration,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-            useLinkExpress = confirmationOption.useLinkExpress,
-            launchMode = confirmationOption.linkLaunchMode
+            launchMode = confirmationOption.linkLaunchMode,
+            linkExpressMode = confirmationOption.linkExpressMode,
+            passiveCaptchaParams = confirmationOption.passiveCaptchaParams,
+            attestOnIntentConfirmation = attestOnIntentConfirmation
         )
     }
 
     override fun toResult(
         confirmationOption: LinkConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: LinkActivityResult
     ): ConfirmationDefinition.Result {
@@ -82,8 +92,9 @@ internal class LinkConfirmationDefinition @Inject constructor(
                         paymentMethod = result.paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
+                        passiveCaptchaParams = confirmationOption.passiveCaptchaParams,
                     ),
-                    parameters = confirmationParameters,
+                    arguments = confirmationArgs,
                 )
             }
             is LinkActivityResult.Failed -> {
@@ -103,7 +114,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
             is LinkActivityResult.Completed -> {
                 result.linkAccountUpdate.updateLinkAccount()
                 ConfirmationDefinition.Result.Succeeded(
-                    intent = confirmationParameters.intent,
+                    intent = confirmationArgs.intent,
                     deferredIntentConfirmationType = deferredIntentConfirmationType
                 )
             }

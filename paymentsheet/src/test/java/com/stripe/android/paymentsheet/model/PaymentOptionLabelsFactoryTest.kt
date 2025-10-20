@@ -156,6 +156,7 @@ class PaymentOptionLabelsFactoryTest {
                 selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
                     details = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
                     collectedCvc = null,
+                    billingPhone = null,
                 ),
             ),
         )

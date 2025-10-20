@@ -44,6 +44,15 @@ internal class PaymentMethodScreenScreenshotTest {
     }
 
     @Test
+    fun `form with button disabled & validation`() {
+        snapshot(
+            state = state(
+                isValidating = true
+            )
+        )
+    }
+
+    @Test
     fun `form with button enabled`() {
         snapshot(
             state = state(
@@ -71,6 +80,7 @@ internal class PaymentMethodScreenScreenshotTest {
                         state = state,
                         onFormFieldValuesChanged = {},
                         onPayClicked = {},
+                        onDisabledPayClicked = {},
                     )
                 }
             }
@@ -79,13 +89,16 @@ internal class PaymentMethodScreenScreenshotTest {
 
     private fun state(
         primaryButtonState: PrimaryButtonState = PrimaryButtonState.Disabled,
-        errorMessage: ResolvableString? = null
+        errorMessage: ResolvableString? = null,
+        isValidating: Boolean = false,
     ): PaymentMethodState {
         val metadata = PaymentMethodMetadataFactory.create()
         val uiDefinitionArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             linkConfigurationCoordinator = null,
+            linkInlineHandler = null,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },
+            autocompleteAddressInteractorFactory = null,
         )
         val formElements = metadata.formElementsForCode(
             code = PaymentMethod.Type.Card.code,
@@ -100,6 +113,7 @@ internal class PaymentMethodScreenScreenshotTest {
             primaryButtonState = primaryButtonState,
             primaryButtonLabel = "$50".resolvableString,
             errorMessage = errorMessage,
+            isValidating = isValidating,
             paymentMethodCreateParams = null
         )
     }

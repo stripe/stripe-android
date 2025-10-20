@@ -16,7 +16,22 @@ internal sealed interface LinkLaunchMode : Parcelable {
         /**
          * A previously selected payment that will be preselected at launch
          */
-        val selectedPayment: ConsumerPaymentDetails.PaymentDetails?
+        val selectedPayment: ConsumerPaymentDetails.PaymentDetails?,
+
+        /**
+         * The filter to determine available payment methods.
+         */
+        val paymentMethodFilter: LinkPaymentMethodFilter? = null,
+
+        /**
+         * If true, shares the payment details immediately after creating it in passthrough mode.
+         */
+        val sharePaymentDetailsImmediatelyAfterCreation: Boolean = true,
+
+        /**
+         * Whether or not a secondary CTA to pay another way should be shown.
+         */
+        val shouldShowSecondaryCta: Boolean = true,
     ) : LinkLaunchMode
 
     /**
@@ -33,4 +48,29 @@ internal sealed interface LinkLaunchMode : Parcelable {
          */
         val selectedPayment: LinkPaymentMethod
     ) : LinkLaunchMode
+
+    /**
+     * Link is launched with the intent to authenticate the user only.
+     * The flow will close after successful authentication instead of continuing to payment selection.
+     */
+    @Parcelize
+    data class Authentication(
+        val existingOnly: Boolean = false,
+    ) : LinkLaunchMode
+
+    /**
+     * Link is launched with the intent to authorize a LinkAuthIntent.
+     */
+    @Parcelize
+    data class Authorization(
+        val linkAuthIntentId: String,
+    ) : LinkLaunchMode
+
+    fun selectedPayment(): ConsumerPaymentDetails.PaymentDetails? = when (this) {
+        is Authentication -> null
+        is Authorization -> null
+        is Full -> null
+        is Confirmation -> selectedPayment.details
+        is PaymentMethodSelection -> selectedPayment
+    }
 }

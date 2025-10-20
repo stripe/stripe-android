@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.utils
 
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.remember
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import app.cash.turbine.Turbine
@@ -9,6 +10,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
@@ -35,6 +37,12 @@ internal class FlowControllerTestRunnerContext(
             flowController.block()
         }
         activityLaunchObserver.awaitLaunch()
+    }
+
+    suspend fun consumePaymentOptionEventForFlowController(paymentMethodType: String, label: String) {
+        val paymentOption = configureCallbackTurbine.awaitItem()
+        assertThat(paymentOption?.label).endsWith(label)
+        assertThat(paymentOption?.paymentMethodType).isEqualTo(paymentMethodType)
     }
 
     /**
@@ -86,7 +94,11 @@ internal fun runFlowControllerTest(
                     flowController = factory.make()
 
                     if (showWalletButtons) {
-                        flowController?.WalletButtons()
+                        flowController?.WalletButtons(
+                            remember {
+                                WalletButtonsViewClickHandler { false }
+                            }
+                        )
                     }
                 }
                 IntegrationType.Activity -> {

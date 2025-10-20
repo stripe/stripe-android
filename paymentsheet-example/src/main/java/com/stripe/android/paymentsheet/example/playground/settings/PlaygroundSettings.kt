@@ -6,10 +6,13 @@ import android.os.Parcelable
 import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.edit
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.link.LinkController
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
@@ -134,7 +137,23 @@ internal class PlaygroundSettings private constructor(
         }
 
         fun paymentSheetConfiguration(
-            playgroundState: PlaygroundState.Payment
+            playgroundState: PlaygroundState.Payment,
+            appSettings: Settings,
+        ): PaymentSheet.Configuration {
+            val builder = PaymentSheet.Configuration.Builder("Example, Inc.")
+            val paymentSheetConfigurationData =
+                PlaygroundSettingDefinition.PaymentSheetConfigurationData(builder)
+            settings.filter { (definition, _) ->
+                definition.applicable(configurationData)
+            }.onEach { (settingDefinition, value) ->
+                settingDefinition
+                    .configure(value, builder, playgroundState, paymentSheetConfigurationData, appSettings)
+            }
+            return builder.build()
+        }
+
+        fun paymentSheetConfiguration(
+            playgroundState: PlaygroundState.SharedPaymentToken
         ): PaymentSheet.Configuration {
             val builder = PaymentSheet.Configuration.Builder("Example, Inc.")
             val paymentSheetConfigurationData =
@@ -160,6 +179,25 @@ internal class PlaygroundSettings private constructor(
             return builder.build()
         }
 
+        fun linkControllerConfiguration(
+            context: Context,
+            playgroundState: PlaygroundState.Payment
+        ): LinkController.Configuration {
+            val paymentConfiguration = PaymentConfiguration.getInstance(context)
+            val builder = LinkController.Configuration.Builder(
+                merchantDisplayName = "Example, Inc.",
+                publishableKey = paymentConfiguration.publishableKey,
+                stripeAccountId = paymentConfiguration.stripeAccountId,
+            )
+            val linkControllerConfigurationData = PlaygroundSettingDefinition.LinkControllerConfigurationData(builder)
+            settings.filter { (definition, _) ->
+                definition.applicable(configurationData)
+            }.onEach { (settingDefinition, value) ->
+                settingDefinition.configure(value, builder, playgroundState, linkControllerConfigurationData)
+            }
+            return builder.build()
+        }
+
         fun customerSheetConfiguration(
             playgroundState: PlaygroundState.Customer
         ): CustomerSheet.Configuration {
@@ -179,6 +217,7 @@ internal class PlaygroundSettings private constructor(
             configurationBuilder: PaymentSheet.Configuration.Builder,
             playgroundState: PlaygroundState.Payment,
             configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+            settings: Settings,
         ) {
             @Suppress("UNCHECKED_CAST")
             configure(
@@ -186,6 +225,7 @@ internal class PlaygroundSettings private constructor(
                 configurationBuilder = configurationBuilder,
                 playgroundState = playgroundState,
                 configurationData = configurationData,
+                settings = settings,
             )
         }
 
@@ -206,9 +246,39 @@ internal class PlaygroundSettings private constructor(
 
         private fun <T> PlaygroundSettingDefinition<T>.configure(
             value: Any?,
+            configurationBuilder: LinkController.Configuration.Builder,
+            playgroundState: PlaygroundState.Payment,
+            configurationData: PlaygroundSettingDefinition.LinkControllerConfigurationData,
+        ) {
+            @Suppress("UNCHECKED_CAST")
+            configure(
+                value = value as T,
+                configurationBuilder = configurationBuilder,
+                playgroundState = playgroundState,
+                configurationData = configurationData,
+            )
+        }
+
+        private fun <T> PlaygroundSettingDefinition<T>.configure(
+            value: Any?,
             configurationBuilder: CustomerSheet.Configuration.Builder,
             playgroundState: PlaygroundState.Customer,
             configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData,
+        ) {
+            @Suppress("UNCHECKED_CAST")
+            configure(
+                value = value as T,
+                configurationBuilder = configurationBuilder,
+                playgroundState = playgroundState,
+                configurationData = configurationData,
+            )
+        }
+
+        private fun <T> PlaygroundSettingDefinition<T>.configure(
+            value: Any?,
+            configurationBuilder: PaymentSheet.Configuration.Builder,
+            playgroundState: PlaygroundState.SharedPaymentToken,
+            configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
         ) {
             @Suppress("UNCHECKED_CAST")
             configure(
@@ -408,7 +478,7 @@ internal class PlaygroundSettings private constructor(
             return settings
         }
 
-        private val uiSettingDefinitions: List<PlaygroundSettingDefinition.Displayable<*>> = listOf(
+        val uiSettingDefinitions: List<PlaygroundSettingDefinition.Displayable<*>> = listOf(
             InitializationTypeSettingsDefinition,
             CustomerSheetPaymentMethodModeDefinition,
             CustomerSessionSettingsDefinition,
@@ -420,8 +490,10 @@ internal class PlaygroundSettings private constructor(
             CustomerSessionRedisplaySettingsDefinition,
             CustomerSessionRedisplayFiltersSettingsDefinition,
             CustomerSessionOverrideRedisplaySettingsDefinition,
+            CustomerSessionOnBehalfOfSettingsDefinition,
             CustomerSettingsDefinition,
             CheckoutModeSettingsDefinition,
+            UserCountryOverrideSettingsDefinition,
             LinkSettingsDefinition,
             LinkTypeSettingsDefinition,
             CountrySettingsDefinition,
@@ -433,10 +505,13 @@ internal class PlaygroundSettings private constructor(
             CollectEmailSettingsDefinition,
             CollectPhoneSettingsDefinition,
             CollectAddressSettingsDefinition,
+            AllowedBillingCountriesSettingsDefinition,
+            AutocompleteAddressSettingsDefinition,
             DefaultShippingAddressSettingsDefinition,
             DelayedPaymentMethodsSettingsDefinition,
             AutomaticPaymentMethodsSettingsDefinition,
             SupportedPaymentMethodsSettingsDefinition,
+            AutomaticallyLaunchCardScanDefinition,
             RequireCvcRecollectionDefinition,
             PrimaryButtonLabelSettingsDefinition,
             PaymentMethodConfigurationSettingsDefinition,
@@ -447,8 +522,15 @@ internal class PlaygroundSettings private constructor(
             CustomPaymentMethodsSettingDefinition,
             LayoutSettingsDefinition,
             CardBrandAcceptanceSettingsDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.instantDebitsIncentives),
-            FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable),
+            FeatureFlagSettingsDefinition(
+                FeatureFlags.instantDebitsIncentives,
+                PlaygroundConfigurationData.IntegrationType.paymentFlows().toList(),
+            ),
+            FeatureFlagSettingsDefinition(
+                FeatureFlags.financialConnectionsFullSdkUnavailable,
+                PlaygroundConfigurationData.IntegrationType.paymentFlows().toList(),
+            ),
+            FeatureFlagSettingsDefinition(FeatureFlags.forceEnableNativeFinancialConnections),
             EmbeddedViewDisplaysMandateSettingDefinition,
             EmbeddedFormSheetActionSettingDefinition,
             EmbeddedTwoStepSettingsDefinition,
@@ -456,14 +538,38 @@ internal class PlaygroundSettings private constructor(
             PaymentMethodOptionsSetupFutureUsageSettingsDefinition,
             PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition,
             WalletButtonsSettingsDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.showInlineOtpInWalletButtons),
+            FeatureFlagSettingsDefinition(
+                FeatureFlags.showInlineOtpInWalletButtons,
+                allowedIntegrationTypes = PlaygroundConfigurationData.IntegrationType.paymentFlows().toList() +
+                    PlaygroundConfigurationData.IntegrationType.sptFlows().toList(),
+            ),
             ShopPaySettingsDefinition,
+            LinkControllerAllowUserEmailEditsSettingsDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.forceLinkWebAuth),
+            FeatureFlagSettingsDefinition(
+                FeatureFlags.forceEnableLinkPaymentSelectionHint,
+                listOf(PlaygroundConfigurationData.IntegrationType.LinkController)
+            ),
+            TermsDisplaySettingsDefinition,
+            FeatureFlagSettingsDefinition(
+                FeatureFlags.cardScanGooglePayMigration,
+                listOf(
+                    PlaygroundConfigurationData.IntegrationType.PaymentSheet,
+                    PlaygroundConfigurationData.IntegrationType.FlowController,
+                    PlaygroundConfigurationData.IntegrationType.Embedded,
+                    PlaygroundConfigurationData.IntegrationType.CustomerSheet,
+                )
+            ),
+            PassiveCaptchaDefinition,
+            AttestationOnIntentConfirmationDefinition,
+            EnablePromptPaySettingsDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
             AppearanceSettingsDefinition,
             CustomEndpointDefinition,
             ShippingAddressSettingsDefinition,
+            ConfirmationTokenSettingsDefinition,
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =

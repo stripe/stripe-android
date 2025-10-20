@@ -73,6 +73,8 @@
   <string name="stripe_pay_button_amount">Pagar %s</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Banco</string>
+  <!-- Label shown in the payment type picker describing a card payment -->
+  <string name="stripe_payment_method_debit_or_credit_card">Cartão de crédito ou débito</string>
   <!-- Label of a button displayed below a card entry form that saves the card details -->
   <string name="stripe_paymentsheet_add_card">Adicionar cartão</string>
   <!-- Title shown above a view allowing the customer to save a card. -->
@@ -97,6 +99,8 @@
   <string name="stripe_paypal_mandate">Ao confirmar seu pagamento com o PayPal, você permite que %s cobre sua conta do PayPal por pagamentos futuros em conformidade com os termos definidos pela empresa.</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Ao confirmar seu pagamento com o RevolutPay, você permite que %s cobre sua conta do RevolutPay por pagamentos futuros em conformidade com os termos da empresa.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">Ao continuar, você autoriza a %1$s a debitar automaticamente do seu saldo Satispay, de forma recorrente, de acordo com sua compra ou plano de assinatura.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Salvar para pagamentos futuros a %s</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->

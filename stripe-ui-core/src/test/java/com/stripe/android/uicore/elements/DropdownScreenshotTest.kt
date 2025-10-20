@@ -23,7 +23,7 @@ class DropdownScreenshotTest {
         paparazziRule.snapshot {
             DropDown(
                 controller = DropdownFieldController(
-                    CountryConfig(tinyMode = true)
+                    CountryConfig(mode = DropdownConfig.Mode.Condensed)
                 ),
                 enabled = true
             )
@@ -35,9 +35,21 @@ class DropdownScreenshotTest {
         paparazziRule.snapshot {
             DropDown(
                 controller = DropdownFieldController(
-                    CountryConfig(tinyMode = true)
+                    CountryConfig(mode = DropdownConfig.Mode.Condensed)
                 ),
                 enabled = false
+            )
+        }
+    }
+
+    @Test
+    fun testDropdownFirstOptionNotSelected() {
+        paparazziRule.snapshot {
+            DropDown(
+                controller = DropdownFieldController(
+                    CountryConfig(mode = DropdownConfig.Mode.Full(selectsFirstOptionAsDefault = false))
+                ),
+                enabled = true
             )
         }
     }

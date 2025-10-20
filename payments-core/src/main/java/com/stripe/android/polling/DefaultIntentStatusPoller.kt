@@ -14,8 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
-import kotlin.math.pow
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -26,7 +24,6 @@ class DefaultIntentStatusPoller @Inject constructor(
     private val dispatcher: CoroutineDispatcher,
 ) : IntentStatusPoller {
 
-    private var attempts: Int = 0
     private var pollingJob: Job? = null
 
     private val _state = MutableStateFlow<StripeIntent.Status?>(null)
@@ -38,18 +35,24 @@ class DefaultIntentStatusPoller @Inject constructor(
         }
     }
 
-    private suspend fun performPoll(force: Boolean = false) {
-        if (force || attempts < config.maxAttempts) {
-            attempts += 1
-
-            _state.value = fetchIntentStatus()
-
-            val canTryAgain = attempts < config.maxAttempts
-            if (canTryAgain) {
-                delay(calculateDelay(attempts))
-                performPoll()
-            }
+    private suspend fun performPoll() {
+        when (state.value) {
+            StripeIntent.Status.Canceled,
+            StripeIntent.Status.Succeeded ->
+                // Do not poll when stripe intent is in terminal state.
+                return
+            StripeIntent.Status.Processing,
+            StripeIntent.Status.RequiresAction,
+            StripeIntent.Status.RequiresConfirmation,
+            StripeIntent.Status.RequiresPaymentMethod,
+            StripeIntent.Status.RequiresCapture,
+            null -> {}
         }
+
+        _state.value = fetchIntentStatus()
+
+        delay(1.seconds)
+        performPoll()
     }
 
     private suspend fun fetchIntentStatus(): StripeIntent.Status? {
@@ -72,9 +75,4 @@ class DefaultIntentStatusPoller @Inject constructor(
         pollingJob?.cancel()
         pollingJob = null
     }
-}
-
-internal fun calculateDelay(attempts: Int): Duration {
-    val delay = (1.0 + attempts).pow(2)
-    return delay.seconds
 }

@@ -4,12 +4,14 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
@@ -18,6 +20,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val savedStateHandle: SavedStateHandle,
+    private val selectedPaymentMethodCode: String,
 ) {
     fun create(
         coroutineScope: CoroutineScope,
@@ -26,6 +29,19 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
         eventReporter: EventReporter,
         selectionUpdater: (PaymentSelection?) -> Unit,
     ): FormHelper {
+        val automaticallyLaunchedCardScanFormDataHelper = if (selectedPaymentMethodCode.isNotBlank()) {
+            val paymentSelection = embeddedSelectionHolder.selection.value as? PaymentSelection.New
+            val isLaunchingEmptyCardForm =
+                selectedPaymentMethodCode == PaymentMethod.Type.Card.code &&
+                    paymentSelection?.paymentMethodCreateParams == null
+            AutomaticallyLaunchedCardScanFormDataHelper(
+                hasAutomaticallyLaunchedCardScanInitialValue = !isLaunchingEmptyCardForm,
+                savedStateHandle = savedStateHandle,
+                openCardScanAutomaticallyConfig = paymentMethodMetadata.openCardScanAutomatically,
+            )
+        } else {
+            null
+        }
         return DefaultFormHelper(
             coroutineScope = coroutineScope,
             linkInlineHandler = LinkInlineHandler.create(),
@@ -50,6 +66,8 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
             eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
+            autocompleteAddressInteractorFactory = null,
+            automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
         )
     }
 }

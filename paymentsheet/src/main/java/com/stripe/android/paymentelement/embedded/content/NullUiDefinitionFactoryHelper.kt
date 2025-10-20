@@ -12,6 +12,8 @@ internal object NullUiDefinitionFactoryHelper {
     val nullEmbeddedUiDefinitionFactory = UiDefinitionFactory.Arguments.Factory.Default(
         cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
         linkConfigurationCoordinator = null,
+        linkInlineHandler = null,
+        autocompleteAddressInteractorFactory = null,
         onLinkInlineSignupStateChanged = {
             throw IllegalStateException("Not possible.")
         },

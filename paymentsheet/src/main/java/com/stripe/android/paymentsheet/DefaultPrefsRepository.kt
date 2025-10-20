@@ -2,17 +2,19 @@ package com.stripe.android.paymentsheet
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.VisibleForTesting
+import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 internal class DefaultPrefsRepository(
     private val context: Context,
     private val customerId: String?,
-    private val workContext: CoroutineContext
+    private val workContext: CoroutineContext,
 ) : PrefsRepository {
     private val prefs: SharedPreferences by lazy {
         context.getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE)
@@ -27,7 +29,8 @@ internal class DefaultPrefsRepository(
             "google_pay" -> SavedSelection.GooglePay.takeIf { isGooglePayAvailable }
             "link" -> SavedSelection.Link.takeIf { isLinkAvailable }
             "payment_method" -> prefData.getOrNull(1)?.let {
-                SavedSelection.PaymentMethod(id = it)
+                val isLinkOrigin = prefData.getOrNull(2)?.toBoolean() == true
+                SavedSelection.PaymentMethod(id = it, isLinkOrigin = isLinkOrigin)
             }
             else -> null
         } ?: SavedSelection.None
@@ -38,7 +41,7 @@ internal class DefaultPrefsRepository(
         when (savedSelection) {
             SavedSelection.GooglePay -> "google_pay"
             SavedSelection.Link -> "link"
-            is SavedSelection.PaymentMethod -> "payment_method:${savedSelection.id}"
+            is SavedSelection.PaymentMethod -> "payment_method:${savedSelection.id}:${savedSelection.isLinkOrigin}"
             else -> null
         }?.let { value ->
             apply(value)
@@ -49,7 +52,7 @@ internal class DefaultPrefsRepository(
         return when (savedSelection) {
             SavedSelection.GooglePay -> "google_pay"
             SavedSelection.Link -> "link"
-            is SavedSelection.PaymentMethod -> "payment_method:${savedSelection.id}"
+            is SavedSelection.PaymentMethod -> "payment_method:${savedSelection.id}:${savedSelection.isLinkOrigin}"
             else -> ""
         }.let { value ->
             commit(value)
@@ -81,5 +84,14 @@ internal class DefaultPrefsRepository(
     internal companion object {
         @VisibleForTesting
         internal const val PREF_FILE = "DefaultPrefsRepository"
+    }
+
+    class Factory @Inject constructor(
+        private val context: Context,
+        @IOContext private val workContext: CoroutineContext,
+    ) : PrefsRepository.Factory {
+        override fun create(customerId: String?): PrefsRepository {
+            return DefaultPrefsRepository(context, customerId, workContext)
+        }
     }
 }

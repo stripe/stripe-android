@@ -71,6 +71,14 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.AccountLookupFailure, params)
     }
 
+    override fun onAccountRefreshFailure(error: Throwable) {
+        val params = mapOf(FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage).plus(
+            ErrorReporter.getAdditionalParamsFromError(error)
+        )
+
+        fireEvent(LinkEvent.AccountRefreshFailure, params)
+    }
+
     override fun on2FAStart() {
         fireEvent(LinkEvent.TwoFAStart)
     }
@@ -89,6 +97,13 @@ internal class DefaultLinkEventsReporter @Inject constructor(
 
     override fun on2FACancel() {
         fireEvent(LinkEvent.TwoFACancel)
+    }
+
+    override fun on2FAResendCode(verificationType: String) {
+        fireEvent(
+            LinkEvent.TwoFAResendCode(verificationType),
+            mapOf("verification_type" to verificationType)
+        )
     }
 
     override fun onPopupShow() {

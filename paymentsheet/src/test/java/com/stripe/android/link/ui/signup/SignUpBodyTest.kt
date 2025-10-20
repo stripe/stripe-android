@@ -1,10 +1,8 @@
 package com.stripe.android.link.ui.signup
 
 import androidx.activity.ComponentActivity
-import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -80,14 +78,6 @@ internal class SignUpBodyTest {
     }
 
     @Test
-    fun `header message is correct`() {
-        setContent(SignUpState.InputtingPrimaryField)
-
-        composeTestRule.onNodeWithTag(SIGN_UP_HEADER_TAG)
-            .assert(hasTextExactly("Fast, secure, 1\u2060-\u2060click checkout"))
-    }
-
-    @Test
     fun `signup button is disabled when not ready to sign up`() {
         setContent(SignUpState.InputtingRemainingFields, isReadyToSignUp = false)
 
@@ -117,11 +107,19 @@ internal class SignUpBodyTest {
         composeTestRule.onNodeWithText(errorMessage).assertExists()
     }
 
+    @Test
+    fun `email field is disabled when canEditEmail is false`() {
+        setContent(SignUpState.InputtingPrimaryField, canEditEmail = false)
+        onEmailField().assertExists()
+        onEmailField().assertIsNotEnabled()
+    }
+
     private fun setContent(
         signUpState: SignUpState,
         isReadyToSignUp: Boolean = true,
         requiresNameCollection: Boolean = false,
-        errorMessage: ResolvableString? = null
+        errorMessage: ResolvableString? = null,
+        canEditEmail: Boolean = true
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
             SignUpBody(
@@ -134,6 +132,7 @@ internal class SignUpBodyTest {
                     merchantName = "Example, Inc.",
                     signUpEnabled = isReadyToSignUp,
                     requiresNameCollection = requiresNameCollection,
+                    canEditEmail = canEditEmail,
                     errorMessage = errorMessage,
                     signUpState = signUpState,
                 ),
@@ -146,5 +145,5 @@ internal class SignUpBodyTest {
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag(ProgressIndicatorTestTag)
     private fun onPhoneField() = composeTestRule.onNodeWithText("Phone number")
     private fun onNameField() = composeTestRule.onNodeWithText("Full name")
-    private fun onSignUpButton() = composeTestRule.onNodeWithText("Agree and continue")
+    private fun onSignUpButton() = composeTestRule.onNodeWithText("Continue")
 }

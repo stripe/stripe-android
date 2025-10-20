@@ -3,6 +3,7 @@ package com.stripe.android.stripe3ds2.utils
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.os.Build
 import android.text.SpannableString
 import android.text.style.AbsoluteSizeSpan
 import android.text.style.ForegroundColorSpan
@@ -51,7 +52,9 @@ object CustomizeUtils {
         activity: AppCompatActivity,
         @ColorInt statusBarColor: Int
     ) {
-        activity.window.statusBarColor = statusBarColor
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            activity.window.statusBarColor = statusBarColor
+        }
     }
 
     /**

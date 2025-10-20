@@ -3,11 +3,13 @@ package com.stripe.android.link.ui.wallet
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
@@ -31,6 +33,7 @@ import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -42,6 +45,8 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.ui.core.elements.CvcController
@@ -190,6 +195,54 @@ internal class WalletScreenTest {
     }
 
     @Test
+    fun `add payment method menu is shown when multiple options are available`() = runTest(dispatcher) {
+        composeTestRule.setContent {
+            DefaultLinkTheme {
+                var bottomSheetContent: BottomSheetContent? by remember { mutableStateOf(null) }
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (bottomSheetContent == null) {
+                        TestWalletBody(
+                            addPaymentMethodOptions = listOf(
+                                AddPaymentMethodOption.Card,
+                                AddPaymentMethodOption.Bank(FinancialConnectionsAvailability.Full),
+                            ),
+                            showBottomSheetContent = { bottomSheetContent = it },
+                            hideBottomSheetContent = { bottomSheetContent = null },
+                        )
+                    } else {
+                        Column {
+                            bottomSheetContent?.invoke(this)
+                        }
+                    }
+                }
+            }
+        }
+        onWalletAddPaymentMethodRow().performClick()
+        composeTestRule.waitForIdle()
+        onWalletAddPaymentMethodMenu().assertIsDisplayed()
+    }
+
+    @Test
+    fun `single payment method option is selected when only one available`() = runTest(dispatcher) {
+        var selectedAddPaymentMethodOptionClicked: AddPaymentMethodOption? = null
+        composeTestRule.setContent {
+            DefaultLinkTheme {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    TestWalletBody(
+                        addPaymentMethodOptions = listOf(AddPaymentMethodOption.Card),
+                        onAddPaymentMethodOptionClicked = { selectedAddPaymentMethodOptionClicked = it },
+                        showBottomSheetContent = {},
+                        hideBottomSheetContent = {},
+                    )
+                }
+            }
+        }
+        onWalletAddPaymentMethodRow().performClick()
+        composeTestRule.waitForIdle()
+        assertThat(selectedAddPaymentMethodOptionClicked).isEqualTo(AddPaymentMethodOption.Card)
+    }
+
+    @Test
     fun `wallet list is expanded and pay button should be disabled for expired card`() = runTest(dispatcher) {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.listPaymentDetailsResult = Result.success(
@@ -273,7 +326,7 @@ internal class WalletScreenTest {
         composeTestRule.waitForIdle()
 
         onWalletPayButton().assertIsNotEnabled()
-        onWalletFormError().assertIsDisplayed()
+        onWalletFormError().assertDoesNotExist()
         onWalletFormFields().assertIsDisplayed()
         onWalletPayButton().assertIsNotEnabled()
     }
@@ -301,7 +354,7 @@ internal class WalletScreenTest {
         composeTestRule.waitForIdle()
 
         onWalletPayButton().assertIsNotEnabled()
-        onWalletFormError().assertIsDisplayed()
+        onWalletFormError().assertDoesNotExist()
         onWalletFormFields().assertIsDisplayed()
         onWalletPayButton().assertIsNotEnabled()
     }
@@ -574,10 +627,11 @@ internal class WalletScreenTest {
     fun `pay method row is loading when card is being updated`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
             override suspend fun updatePaymentDetails(
-                updateParams: ConsumerPaymentDetailsUpdateParams
+                updateParams: ConsumerPaymentDetailsUpdateParams,
+                phone: String?
             ): Result<ConsumerPaymentDetails> {
                 delay(1.seconds)
-                return super.updatePaymentDetails(updateParams)
+                return super.updatePaymentDetails(updateParams, phone)
             }
         }
         val card1 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card1", isDefault = false)
@@ -686,10 +740,12 @@ internal class WalletScreenTest {
 
     @Composable
     private fun TestWalletBody(
+        addPaymentMethodOptions: List<AddPaymentMethodOption> = listOf(AddPaymentMethodOption.Card),
         onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
+        onAddPaymentMethodOptionClicked: (AddPaymentMethodOption) -> Unit = {},
         showBottomSheetContent: (BottomSheetContent?) -> Unit,
-        hideBottomSheetContent: () -> Unit
+        hideBottomSheetContent: () -> Unit,
     ) {
         val paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails
             .filterIsInstance<ConsumerPaymentDetails.Card>()
@@ -698,26 +754,32 @@ internal class WalletScreenTest {
             state = WalletUiState(
                 paymentDetailsList = paymentDetails,
                 email = "email@email.com",
-                selectedItemId = paymentDetails.firstOrNull()?.id,
+                allowLogOut = true,
                 cardBrandFilter = DefaultCardBrandFilter,
+                selectedItemId = paymentDetails.firstOrNull()?.id,
                 isProcessing = false,
-                hasCompleted = false,
-                primaryButtonLabel = "Buy".resolvableString,
-                secondaryButtonLabel = "Pay another way".resolvableString,
-                canAddNewPaymentMethod = true,
-                userSetIsExpanded = true,
                 isSettingUp = false,
                 merchantName = "Example Inc.",
+                sellerBusinessName = null,
+                primaryButtonLabel = "Buy".resolvableString,
+                secondaryButtonLabel = "Pay another way".resolvableString,
+                hasCompleted = false,
+                addPaymentMethodOptions = addPaymentMethodOptions,
+                userSetIsExpanded = true,
+                collectMissingBillingDetailsForExistingPaymentMethods = true,
+                signupToggleEnabled = false,
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             ),
             onItemSelected = {},
             onExpandedChanged = {},
             onPrimaryButtonClick = {},
+            onDisabledButtonClick = {},
             onPayAnotherWayClicked = {},
             onRemoveClicked = onRemoveClicked,
             onSetDefaultClicked = onSetDefaultClicked,
             showBottomSheetContent = showBottomSheetContent,
             hideBottomSheetContent = hideBottomSheetContent,
-            onAddNewPaymentMethodClicked = {},
+            onAddPaymentMethodOptionClicked = onAddPaymentMethodOptionClicked,
             onDismissAlert = {},
             onUpdateClicked = {},
             onLogoutClicked = {},
@@ -737,13 +799,23 @@ internal class WalletScreenTest {
             configuration = TestFactory.LINK_CONFIGURATION,
             linkAccount = TestFactory.LINK_ACCOUNT,
             linkAccountManager = linkAccountManager,
-            linkConfirmationHandler = linkConfirmationHandler,
             logger = FakeLogger(),
             navigateAndClearStack = {},
             dismissWithResult = {},
             navigationManager = navigationManager,
             linkLaunchMode = linkLaunchMode,
-            dismissalCoordinator = dismissalCoordinator
+            dismissalCoordinator = dismissalCoordinator,
+            completeLinkFlow = DefaultCompleteLinkFlow(
+                linkConfirmationHandler = linkConfirmationHandler,
+                linkAccountManager = linkAccountManager,
+                dismissalCoordinator = dismissalCoordinator,
+                linkLaunchMode = linkLaunchMode
+            ),
+            addPaymentMethodOptions = AddPaymentMethodOptions(
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                configuration = TestFactory.LINK_CONFIGURATION,
+                linkLaunchMode = linkLaunchMode
+            )
         )
     }
 
@@ -760,6 +832,9 @@ internal class WalletScreenTest {
 
     private fun onWalletAddPaymentMethodRow() =
         composeTestRule.onNodeWithTag(WALLET_ADD_PAYMENT_METHOD_ROW, useUnmergedTree = true)
+
+    private fun onWalletAddPaymentMethodMenu() =
+        composeTestRule.onNodeWithTag(WALLET_SCREEN_ADD_PAYMENT_METHOD_MENU, useUnmergedTree = true)
 
     private fun onPaymentMethodList() = composeTestRule.onAllNodes(hasTestTag(WALLET_SCREEN_PAYMENT_METHODS_LIST))
 

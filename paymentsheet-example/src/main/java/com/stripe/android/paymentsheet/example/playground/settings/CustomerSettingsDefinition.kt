@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
@@ -15,30 +16,31 @@ internal object CustomerSettingsDefinition :
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
     ): List<PlaygroundSettingDefinition.Displayable.Option<CustomerType>> {
-        val configurableOptions = if (configurationData.integrationType.isPaymentFlow()) {
-            listOf(option("Guest", CustomerType.GUEST))
-        } else {
-            listOf()
-        }
+        return buildList {
+            if (configurationData.integrationType.isPaymentFlow()) {
+                add(option("Guest", CustomerType.GUEST))
+            }
 
-        return configurableOptions + listOf(
-            option("New", CustomerType.NEW),
-            option("Returning", CustomerType.RETURNING),
-        )
+            add(option("New", CustomerType.NEW))
+
+            if (!configurationData.integrationType.isSptFlow()) {
+                add(option("Returning", CustomerType.RETURNING))
+            }
+        }
     }
 
     override fun configure(
         value: CustomerType,
         checkoutRequestBuilder: CheckoutRequest.Builder,
     ) {
-        checkoutRequestBuilder.customer(value.value)
+        checkoutRequestBuilder.customer(value.backendParamValue)
     }
 
     override fun configure(
         value: CustomerType,
         customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder
     ) {
-        customerEphemeralKeyRequestBuilder.customerType(value.value)
+        customerEphemeralKeyRequestBuilder.customerType(value.backendParamValue)
     }
 
     override fun configure(
@@ -57,6 +59,21 @@ internal object CustomerSettingsDefinition :
         configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData
     ) {
         configurationBuilder.customer(playgroundState.customerConfig)
+    }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    override fun configure(
+        value: CustomerType,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+    ) {
+        configurationBuilder.customer(
+            PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                id = playgroundState.customerId,
+                clientSecret = playgroundState.customerSessionClientSecret
+            )
+        )
     }
 
     override val key: String = "customer"
@@ -94,4 +111,10 @@ sealed class CustomerType(val value: String) {
             return customerId
         }
     }
+
+    val backendParamValue: String
+        get() = when (this) {
+            is Existing -> customerId
+            else -> value
+        }
 }

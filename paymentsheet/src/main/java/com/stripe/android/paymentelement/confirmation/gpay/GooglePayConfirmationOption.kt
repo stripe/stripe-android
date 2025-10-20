@@ -2,6 +2,8 @@ package com.stripe.android.paymentelement.confirmation.gpay
 
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
@@ -9,6 +11,8 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class GooglePayConfirmationOption(
     val config: Config,
+    val passiveCaptchaParams: PassiveCaptchaParams?,
+    val clientAttributionMetadata: ClientAttributionMetadata?,
 ) : ConfirmationHandler.Option {
     @Parcelize
     data class Config(

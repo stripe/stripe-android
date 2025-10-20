@@ -9,6 +9,8 @@
     <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun Colors( currentAppearance: AppearanceStore.State, updateAppearance: (AppearanceStore.State) -> Unit, )</ID>
     <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun EmbeddedPicker( currentAppearance: AppearanceStore.State, updateAppearance: (AppearanceStore.State) -> Unit )</ID>
     <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun PrimaryButton( currentAppearance: AppearanceStore.State, updateAppearance: (AppearanceStore.State) -> Unit, )</ID>
+    <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@OptIn(AppearanceAPIAdditionsPreview::class) @Composable private fun Typography( currentAppearance: AppearanceStore.State, updateAppearance: (AppearanceStore.State) -> Unit, )</ID>
+    <ID>LongMethod:SharedPaymentTokenPlaygroundActivity.kt$SharedPaymentTokenPlaygroundActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>MagicNumber:AppearanceBottomSheetDialogFragment.kt$16</ID>
     <ID>MagicNumber:AppearanceStore.kt$AppearanceStore.State.Embedded$0x33787880</ID>
     <ID>MagicNumber:AppearanceStore.kt$AppearanceStore.State.Embedded$0x40FFFFFF</ID>
@@ -18,6 +20,7 @@
     <ID>MagicNumber:DrawablePainter.kt$DrawablePainter$23</ID>
     <ID>MagicNumber:DrawablePainter.kt$DrawablePainter$255</ID>
     <ID>MagicNumber:Payment.kt$0.5f</ID>
+    <ID>MagicNumber:SharedPaymentTokenPlaygroundActivity.kt$SharedPaymentTokenPlaygroundActivity$9999L</ID>
     <ID>PackageNaming:CompleteFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow</ID>
     <ID>PackageNaming:CompleteFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow</ID>
     <ID>PackageNaming:CompleteFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow</ID>
@@ -31,6 +34,7 @@
     <ID>PackageNaming:ServerSideConfirmationCustomFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow</ID>
     <ID>PackageNaming:ServerSideConfirmationCustomFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow</ID>
     <ID>TooManyFunctions:PaymentSheetPlaygroundViewModel.kt$PaymentSheetPlaygroundViewModel : AndroidViewModel</ID>
+    <ID>TooManyFunctions:PlaygroundSettingDefinition.kt$PlaygroundSettingDefinition&lt;T></ID>
     <ID>TooManyFunctions:PlaygroundSettings.kt$PlaygroundSettings$Snapshot : Parcelable</ID>
   </CurrentIssues>
 </SmellBaseline>

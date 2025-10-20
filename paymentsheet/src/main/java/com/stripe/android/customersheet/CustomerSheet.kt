@@ -4,6 +4,7 @@ import android.app.Application
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -12,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
@@ -229,6 +231,8 @@ class CustomerSheet internal constructor(
         internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
 
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
+
+        internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
     ) : Parcelable {
 
         // Hide no-argument constructor init
@@ -254,6 +258,7 @@ class CustomerSheet internal constructor(
                 .paymentMethodOrder(paymentMethodOrder)
         }
 
+        @Suppress("TooManyFunctions")
         class Builder internal constructor(private val merchantDisplayName: String) {
             private var appearance: PaymentSheet.Appearance = ConfigurationDefaults.appearance
             private var googlePayEnabled: Boolean = ConfigurationDefaults.googlePayEnabled
@@ -266,6 +271,8 @@ class CustomerSheet internal constructor(
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
+            private var opensCardScannerAutomatically: Boolean =
+                ConfigurationDefaults.opensCardScannerAutomatically
 
             fun appearance(appearance: PaymentSheet.Appearance) = apply {
                 this.appearance = appearance
@@ -328,6 +335,17 @@ class CustomerSheet internal constructor(
                 this.cardBrandAcceptance = cardBrandAcceptance
             }
 
+            /**
+             * By default, the customer sheet offers a card scan button within the new card entry form.
+             * When opensCardScannerAutomatically is set to true,
+             * the card entry form will initialize with the card scanner already open.
+             * **Note**: The stripecardscan dependency must be added to set `opensCardScannerAutomatically` to true
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun opensCardScannerAutomatically(opensCardScannerAutomatically: Boolean) = apply {
+                this.opensCardScannerAutomatically = opensCardScannerAutomatically
+            }
+
             fun build() = Configuration(
                 appearance = appearance,
                 googlePayEnabled = googlePayEnabled,
@@ -338,7 +356,8 @@ class CustomerSheet internal constructor(
                 preferredNetworks = preferredNetworks,
                 allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
                 paymentMethodOrder = paymentMethodOrder,
-                cardBrandAcceptance = cardBrandAcceptance
+                cardBrandAcceptance = cardBrandAcceptance,
+                opensCardScannerAutomatically = opensCardScannerAutomatically,
             )
         }
 
@@ -358,6 +377,7 @@ class CustomerSheet internal constructor(
     @ExperimentalCustomerSessionApi
     class IntentConfiguration internal constructor(
         internal val paymentMethodTypes: List<String>,
+        internal val onBehalfOf: String?,
     ) {
         /**
          * Builder for creating a [IntentConfiguration]
@@ -365,6 +385,7 @@ class CustomerSheet internal constructor(
         @ExperimentalCustomerSessionApi
         class Builder {
             private var paymentMethodTypes = listOf<String>()
+            private var onBehalfOf: String? = null
 
             /**
              * The payment methods types to display. If empty, we dynamically determine the
@@ -376,11 +397,23 @@ class CustomerSheet internal constructor(
             }
 
             /**
+             * The connected account whose payment method configurations will apply to the CustomerSheet session.
+             * Affects the allowed payment methods and whether card brand choice is enabled.
+             * When provided, the payment method will be saved to your platform account. See our
+             * [SetupIntent docs](https://docs.stripe.com/api/setup_intents/object#setup_intent_object-on_behalf_of)
+             * for more information.
+             */
+            fun onBehalfOf(onBehalfOf: String) = apply {
+                this.onBehalfOf = onBehalfOf
+            }
+
+            /**
              * Creates the [IntentConfiguration] instance.
              */
             fun build(): IntentConfiguration {
                 return IntentConfiguration(
                     paymentMethodTypes = paymentMethodTypes,
+                    onBehalfOf = onBehalfOf,
                 )
             }
         }
@@ -466,7 +499,7 @@ class CustomerSheet internal constructor(
                 lifecycleOwner = activity,
                 viewModelStoreOwner = activity,
                 activityResultRegistryOwner = activity,
-                statusBarColor = { activity.window.statusBarColor },
+                statusBarColor = { StatusBarCompat.color(activity) },
                 integration = CustomerSheetIntegration.Adapter(customerAdapter),
                 callback = callback,
             )
@@ -491,7 +524,7 @@ class CustomerSheet internal constructor(
                 lifecycleOwner = activity,
                 viewModelStoreOwner = activity,
                 activityResultRegistryOwner = activity,
-                statusBarColor = { activity.window.statusBarColor },
+                statusBarColor = { StatusBarCompat.color(activity) },
                 integration = CustomerSheetIntegration.CustomerSession(customerSessionProvider),
                 callback = callback,
             )
@@ -516,7 +549,7 @@ class CustomerSheet internal constructor(
                 viewModelStoreOwner = fragment,
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
                     ?: fragment.requireActivity(),
-                statusBarColor = { fragment.activity?.window?.statusBarColor },
+                statusBarColor = { StatusBarCompat.color(fragment.requireActivity()) },
                 integration = CustomerSheetIntegration.Adapter(customerAdapter),
                 callback = callback,
             )
@@ -542,7 +575,7 @@ class CustomerSheet internal constructor(
                 viewModelStoreOwner = fragment,
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
                     ?: fragment.requireActivity(),
-                statusBarColor = { fragment.activity?.window?.statusBarColor },
+                statusBarColor = { StatusBarCompat.color(fragment.requireActivity()) },
                 integration = CustomerSheetIntegration.CustomerSession(customerSessionProvider),
                 callback = callback,
             )

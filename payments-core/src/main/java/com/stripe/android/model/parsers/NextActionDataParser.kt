@@ -21,6 +21,8 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.DisplayBoletoDetails -> DisplayBoletoDetailsJsonParser()
             StripeIntent.NextActionType.DisplayKonbiniDetails -> DisplayKonbiniDetailsJsonParser()
             StripeIntent.NextActionType.DisplayMultibancoDetails -> DisplayMultibancoDetailsJsonParser()
+            StripeIntent.NextActionType.DisplayPayNowDetails -> DisplayPayNowDetailsJsonParser()
+            StripeIntent.NextActionType.DisplayPromptPayDetails -> DisplayPromptPayDetailsJsonParser()
             StripeIntent.NextActionType.RedirectToUrl -> RedirectToUrlParser()
             StripeIntent.NextActionType.UseStripeSdk -> SdkDataJsonParser()
             StripeIntent.NextActionType.AlipayRedirect -> AlipayRedirectParser()
@@ -96,6 +98,36 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
 
         private companion object {
             private const val FIELD_HOSTED_VOUCHER_URL = "hosted_voucher_url"
+        }
+    }
+
+    private class DisplayPayNowDetailsJsonParser :
+        ModelJsonParser<StripeIntent.NextActionData.DisplayPayNowDetails> {
+        override fun parse(
+            json: JSONObject
+        ): StripeIntent.NextActionData.DisplayPayNowDetails {
+            return StripeIntent.NextActionData.DisplayPayNowDetails(
+                qrCodeUrl = optString(json, FIELD_HOSTED_INSTRUCTIONS_URL)
+            )
+        }
+
+        private companion object {
+            private const val FIELD_HOSTED_INSTRUCTIONS_URL = "hosted_instructions_url"
+        }
+    }
+
+    private class DisplayPromptPayDetailsJsonParser :
+        ModelJsonParser<StripeIntent.NextActionData.DisplayPromptPayDetails> {
+        override fun parse(
+            json: JSONObject
+        ): StripeIntent.NextActionData.DisplayPromptPayDetails {
+            return StripeIntent.NextActionData.DisplayPromptPayDetails(
+                qrCodeUrl = optString(json, FIELD_HOSTED_INSTRUCTIONS_URL)
+            )
+        }
+
+        private companion object {
+            private const val FIELD_HOSTED_INSTRUCTIONS_URL = "hosted_instructions_url"
         }
     }
 

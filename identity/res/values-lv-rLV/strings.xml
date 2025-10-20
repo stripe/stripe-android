@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">Autovadītāja apliecības aizmugure</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">Autovadītāja apliecības aizmugure ir atlasīta</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">Autovadītāja apliecības vai valsts izsniegta personu apliecinoša dokumenta ar fotogrāfiju aizmugurējā daļa</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Identifikācijas kartes aizmugure</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">Vārds</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">Maska pašportreta animācijai</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">Apgrieziet autovadītāja apliecību vai valdības izsniegtu personu apliecinošu dokumentu ar fotogrāfiju otrādi</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">Apgrieziet jūsu valsts izdoto personas apliecību ar fotogrāfiju ir uz otru pusi.</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">Autovadītāja apliecības, pases vai valsts izsniegta personu apliecinoša dokumenta priekšpuse</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">Autovadītāja apliecības priekšpuse</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">Autovadītāja apliecības priekšpuse ir atlasīta</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">Autovadītāja apliecības vai valsts izsniegta personu apliecinoša dokumenta priekšpuse</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">Autovadītāja apliecības vai pases priekšpuse</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Identifikācijas kartes priekšpuse</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Identifikācijas dokumenta priekšpuse</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">ID dokumenta priekšpuse ir atlasīta</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">Pases priekšpuse</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">Pases vai valsts izsniegta personu apliecinoša dokumenta priekšpuse</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">Doties atpakaļ</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">Tālruņa numurs</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">Nav atpazīts dokuments</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">Novietojiet autovadītāja apliecību, pasi vai valsts izsniegtu personu apliecinošu dokumentu ar fotogrāfiju rāmja centrā</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Apgrieziet autovadītāja apliecību uz otru pusi</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">Gādājiet, lai autovadītāja apliecība būtu kadra centrā</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">Novietojiet autovadītāja apliecību vai valsts izsniegtu personu apliecinošu dokumentu ar fotogrāfiju rāmja centrā</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">Novietojiet autovadītāja apliecību vai pasi rāmja centrā</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">Apgrieziet identifikācijas karti uz otru pusi</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">Gādājiet, lai identifikācijas karte būtu kadra centrā</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">Gādājiet, lai pase būtu kadra centrā</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">Novietojiet pasi vai valsts izsniegtu personu apliecinošu dokumentu ar fotogrāfiju rāmja centrā</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Gādājiet, lai seja būtu kadra centrā.</string>
   <!-- Instructional text when the document is too blurry -->
@@ -205,8 +229,6 @@
   <string name="stripe_test_model_title">Šobrīd esat testa režīmā</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Mēģināt vēlreiz</string>
-  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="stripe_unexpected_error_try_again">Radusies negaidīta kļūda — mēģiniet vēlreiz pēc dažām sekundēm</string>
   <!-- Description to upload a photo -->
   <string name="stripe_upload_a_photo">Augšupielādēt fotoattēlu</string>
   <!-- Title of dialog to upload back of driver license -->

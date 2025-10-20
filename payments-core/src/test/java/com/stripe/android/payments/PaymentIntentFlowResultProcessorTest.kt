@@ -10,30 +10,33 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.MAX_RETRIES
+import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.MAX_POLLING_DURATION
+import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.POLLING_DELAY
+import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.REDUCED_POLLING_DURATION
+import com.stripe.android.payments.PaymentIntentFlowResultProcessorTest.Companion.MINIMUM_REFRESH_CALLS
+import com.stripe.android.payments.PaymentIntentFlowResultProcessorTest.Companion.MINIMUM_RETRIEVE_CALLS
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.atMost
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
 import org.mockito.kotlin.any
+import org.mockito.kotlin.atLeast
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import kotlin.time.Duration.Companion.minutes
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentIntentFlowResultProcessorTest {
@@ -55,6 +58,10 @@ internal class PaymentIntentFlowResultProcessorTest {
                 )
             ).thenReturn(
                 Result.success(PaymentIntentFixtures.CANCELLED)
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
             )
 
             val paymentIntentResult = createProcessor().processResult(
@@ -118,53 +125,13 @@ internal class PaymentIntentFlowResultProcessorTest {
     }
 
     @Test
-    fun `refresh succeeds when user confirms the payment`() =
+    fun `refresh reaches max time user confirms the payment`() =
         runTest(testDispatcher) {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
             )
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
-                Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS)
-            )
-
-            val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
-            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-
-            val paymentIntentResult = createProcessor().processResult(
-                PaymentFlowResult.Unvalidated(
-                    clientSecret = clientSecret,
-                    flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
-                )
-            ).getOrThrow()
-
-            verify(mockStripeRepository).retrievePaymentIntent(
-                eq(clientSecret),
-                eq(requestOptions),
-                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
-            )
-
-            verify(mockStripeRepository).refreshPaymentIntent(
-                eq(clientSecret),
-                eq(requestOptions)
-            )
-
-            assertThat(paymentIntentResult)
-                .isEqualTo(
-                    PaymentIntentResult(
-                        intent = PaymentIntentFixtures.PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS,
-                        outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
-                    )
-                )
-        }
-
-    @Test
-    fun `refresh reaches max retry user confirms the payment`() =
-        runTest(testDispatcher) {
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-                Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
-            )
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
-                Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE)
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
             )
 
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
@@ -177,7 +144,10 @@ internal class PaymentIntentFlowResultProcessorTest {
                 )
             )
 
-            verify(mockStripeRepository).retrievePaymentIntent(
+            verify(
+                mockStripeRepository,
+                atLeast(MINIMUM_RETRIEVE_CALLS)
+            ).retrievePaymentIntent(
                 eq(clientSecret),
                 eq(requestOptions),
                 eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
@@ -185,32 +155,126 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             verify(
                 mockStripeRepository,
-                times(MAX_RETRIES),
-            ).refreshPaymentIntent(
-                eq(clientSecret),
-                eq(requestOptions)
-            )
+                times(0)
+            ).refreshPaymentIntent(eq(clientSecret), eq(requestOptions))
         }
 
     @Test
-    fun `timeout uses last known response`() {
+    fun `keeps retrying for polling duration and makes final attempt for wechat`() {
         runTest(testDispatcher) {
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
+            val stripeRepository = FakeStripeRepository(
+                retrievePaymentIntent = {
+                    if (testDispatcher.scheduler.currentTime < MAX_POLLING_DURATION) {
+                        testDispatcher.scheduler.advanceTimeBy(MAX_POLLING_DURATION)
+                        Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
+                    } else {
+                        Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS)
+                    }
+                },
+                refreshPaymentIntent = {
+                    throw AssertionError("No expected to call refresh in this test")
+                },
+            )
 
-            val refreshCountDownLatch = CountDownLatch(1)
+            val paymentIntentResult = createProcessor(stripeRepository).processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
+                )
+            ).getOrThrow()
+
+            assertThat(paymentIntentResult)
+                .isEqualTo(
+                    PaymentIntentResult(
+                        intent = PaymentIntentFixtures.PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS,
+                        outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED,
+                        failureMessage = null
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun `keeps retrying for polling duration and makes final attempt for revolut pay`() {
+        runTest(testDispatcher) {
+            val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.revolutPay(),
+                paymentMethodTypes = listOf("card", "revolut_pay"),
+            )
+
+            val successIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.Succeeded,
+                paymentMethod = PaymentMethodFactory.revolutPay(),
+                paymentMethodTypes = listOf("card", "revolut_pay"),
+            )
+
+            val stripeRepository = FakeStripeRepository(
+                retrievePaymentIntent = {
+                    if (testDispatcher.scheduler.currentTime < REDUCED_POLLING_DURATION) {
+                        testDispatcher.scheduler.advanceTimeBy(POLLING_DELAY)
+                        Result.success(requiresActionIntent)
+                    } else {
+                        Result.success(successIntent)
+                    }
+                },
+                refreshPaymentIntent = {
+                    throw AssertionError("No expected to call refresh in this test")
+                },
+            )
+
+            val paymentIntentResult = createProcessor(stripeRepository).processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
+                )
+            ).getOrThrow()
+
+            assertThat(paymentIntentResult)
+                .isEqualTo(
+                    PaymentIntentResult(
+                        intent = successIntent,
+                        outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED,
+                        failureMessage = null
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun `keeps retrying for polling duration for 3ds2`() {
+        runTest(testDispatcher) {
+            val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.revolutPay(),
+                paymentMethodTypes = listOf("card", "revolut_pay"),
+            )
+
+            val successIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.Succeeded,
+                paymentMethod = PaymentMethodFactory.revolutPay(),
+                paymentMethodTypes = listOf("card", "revolut_pay"),
+            )
+
+            var hasMadeInitialFetch = false
             val paymentIntentResult = async(Dispatchers.IO) {
                 val stripeRepository = FakeStripeRepository(
                     retrievePaymentIntent = {
-                        Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
+                        if (!hasMadeInitialFetch) {
+                            hasMadeInitialFetch = true
+                            Result.success(requiresActionIntent)
+                        } else if (testDispatcher.scheduler.currentTime < REDUCED_POLLING_DURATION) {
+                            testDispatcher.scheduler.advanceTimeBy(POLLING_DELAY)
+                            Result.success(requiresActionIntent)
+                        } else {
+                            Result.success(successIntent)
+                        }
                     },
                     refreshPaymentIntent = {
-                        if (refreshCountDownLatch.count == 1L) {
-                            refreshCountDownLatch.countDown()
-                            Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE)
-                        } else {
-                            delay(10.minutes)
-                            throw AssertionError("Not expected")
-                        }
+                        throw AssertionError("No expected to call refresh in this test")
                     },
                 )
 
@@ -222,16 +286,12 @@ internal class PaymentIntentFlowResultProcessorTest {
                 ).getOrThrow()
             }
 
-            assertThat(refreshCountDownLatch.await(1, TimeUnit.SECONDS)).isTrue()
-            testDispatcher.scheduler.advanceTimeBy(5.minutes)
-
             assertThat(paymentIntentResult.await())
                 .isEqualTo(
                     PaymentIntentResult(
-                        intent = PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE,
+                        intent = successIntent,
                         outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED,
-                        failureMessage = "We are unable to authenticate your payment method." +
-                            " Please choose a different payment method and try again."
+                        failureMessage = null
                     )
                 )
         }
@@ -278,7 +338,7 @@ internal class PaymentIntentFlowResultProcessorTest {
         }
 
     @Test
-    fun `3ds2 canceled reaches max retry with processing intent should cancel`() =
+    fun `3ds2 canceled reaches max time with processing intent should cancel`() =
         runTest(testDispatcher) {
             val intent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
                 status = StripeIntent.Status.RequiresAction
@@ -287,10 +347,13 @@ internal class PaymentIntentFlowResultProcessorTest {
                 Result.success(intent)
             )
 
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
+            )
+
             val clientSecret = requireNotNull(
                 intent.clientSecret
             )
-            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
             val result = createProcessor().processResult(
                 PaymentFlowResult.Unvalidated(
@@ -301,12 +364,15 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             verify(
                 mockStripeRepository,
-                times(PaymentFlowResultProcessor.MAX_RETRIES + 1)
-            ).retrievePaymentIntent(
-                eq(clientSecret),
-                eq(requestOptions),
-                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
-            )
+                atLeast(MINIMUM_RETRIEVE_CALLS)
+            ).retrievePaymentIntent(any(), any(), any())
+
+            verify(
+                mockStripeRepository,
+                atMost(
+                    getMaxNumberOfInvocations(PaymentMethod.Type.Card)
+                )
+            ).retrievePaymentIntent(any(), any(), any())
 
             assertThat(result)
                 .isEqualTo(
@@ -335,6 +401,10 @@ internal class PaymentIntentFlowResultProcessorTest {
             Result.success(succeededIntent),
         )
 
+        whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            AssertionError("No expected to call refresh in this test")
+        )
+
         val clientSecret = requireNotNull(processingIntent.clientSecret)
         val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
@@ -347,7 +417,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
         verify(
             mockStripeRepository,
-            times(PaymentFlowResultProcessor.MAX_RETRIES + 1)
+            times(6)
         ).retrievePaymentIntent(
             eq(clientSecret),
             eq(requestOptions),
@@ -364,16 +434,21 @@ internal class PaymentIntentFlowResultProcessorTest {
     }
 
     @Test
-    fun `Stops polling after max retries when encountering a Swish payment that still requires action`() =
+    fun `Stops polling after max time when encountering a Swish payment that still requires action`() =
         runTest(testDispatcher) {
+            val paymentMethod = PaymentMethodFactory.swish()
             val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 status = StripeIntent.Status.RequiresAction,
-                paymentMethod = PaymentMethodFactory.swish(),
+                paymentMethod = paymentMethod,
                 paymentMethodTypes = listOf("card", "swish"),
             )
 
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 Result.success(requiresActionIntent),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
             )
 
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
@@ -394,8 +469,17 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             assertThat(result).isEqualTo(expectedResult)
 
-            // We need to retrieve the first time, before we start retries.
-            verify(mockStripeRepository, times(MAX_RETRIES + 1)).retrievePaymentIntent(any(), any(), any())
+            verify(
+                mockStripeRepository,
+                atLeast(MINIMUM_RETRIEVE_CALLS)
+            ).retrievePaymentIntent(any(), any(), any())
+
+            verify(
+                mockStripeRepository,
+                atMost(
+                    getMaxNumberOfInvocations(paymentMethod.type!!)
+                )
+            ).retrievePaymentIntent(any(), any(), any())
         }
 
     @Test
@@ -413,6 +497,10 @@ internal class PaymentIntentFlowResultProcessorTest {
                 Result.success(requiresActionIntent),
                 Result.success(requiresActionIntent),
                 Result.success(succeededIntent),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
             )
 
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
@@ -446,6 +534,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 Result.success(requiresActionIntent),
+                Result.failure(Exception("Unexpected retrieve call")),
             )
 
             whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
@@ -481,6 +570,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 Result.success(requiresActionIntent),
+                Result.failure(Exception("Unexpected retrieve call")),
             )
 
             whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
@@ -509,16 +599,21 @@ internal class PaymentIntentFlowResultProcessorTest {
         }
 
     @Test
-    fun `Stops polling after max retries when encountering a Amazon Pay payment that still requires action`() =
+    fun `Stops polling after max time when encountering a Amazon Pay payment that still requires action`() =
         runTest(testDispatcher) {
+            val paymentMethod = PaymentMethodFactory.amazonPay()
             val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 status = StripeIntent.Status.RequiresAction,
-                paymentMethod = PaymentMethodFactory.amazonPay(),
+                paymentMethod = paymentMethod,
                 paymentMethodTypes = listOf("card", "amazon_pay"),
             )
 
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 Result.success(requiresActionIntent),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
             )
 
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
@@ -539,8 +634,17 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             assertThat(result).isEqualTo(expectedResult)
 
-            // We need to retrieve the first time, before we start retries.
-            verify(mockStripeRepository, times(MAX_RETRIES + 1)).retrievePaymentIntent(any(), any(), any())
+            verify(
+                mockStripeRepository,
+                atLeast(MINIMUM_RETRIEVE_CALLS)
+            ).retrievePaymentIntent(any(), any(), any())
+
+            verify(
+                mockStripeRepository,
+                atMost(
+                    getMaxNumberOfInvocations(paymentMethod.type!!)
+                )
+            ).retrievePaymentIntent(any(), any(), any())
         }
 
     @Test
@@ -558,6 +662,10 @@ internal class PaymentIntentFlowResultProcessorTest {
                 Result.success(requiresActionIntent),
                 Result.success(requiresActionIntent),
                 Result.success(succeededIntent),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
             )
 
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
@@ -579,16 +687,21 @@ internal class PaymentIntentFlowResultProcessorTest {
         }
 
     @Test
-    fun `Stops polling after max retries when encountering a Revolut Pay payment that still requires action`() =
+    fun `Stops polling after max time when encountering a Revolut Pay payment that still requires action`() =
         runTest(testDispatcher) {
+            val paymentMethod = PaymentMethodFactory.revolutPay()
             val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 status = StripeIntent.Status.RequiresAction,
-                paymentMethod = PaymentMethodFactory.revolutPay(),
+                paymentMethod = paymentMethod,
                 paymentMethodTypes = listOf("card", "revolut_pay"),
             )
 
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 Result.success(requiresActionIntent),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
             )
 
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
@@ -609,8 +722,15 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             assertThat(result).isEqualTo(expectedResult)
 
-            // We need to retrieve the first time, before we start retries.
-            verify(mockStripeRepository, times(MAX_RETRIES + 1)).retrievePaymentIntent(any(), any(), any())
+            verify(
+                mockStripeRepository,
+                atLeast(3)
+            ).retrievePaymentIntent(any(), any(), any())
+
+            verify(
+                mockStripeRepository,
+                atMost(8)
+            ).retrievePaymentIntent(any(), any(), any())
         }
 
     @Test
@@ -628,6 +748,10 @@ internal class PaymentIntentFlowResultProcessorTest {
                 Result.success(requiresActionIntent),
                 Result.success(requiresActionIntent),
                 Result.success(succeededIntent),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
             )
 
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
@@ -656,6 +780,10 @@ internal class PaymentIntentFlowResultProcessorTest {
         whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
             Result.success(initialIntent),
             Result.success(refreshedIntent),
+        )
+
+        whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            AssertionError("No expected to call refresh in this test")
         )
 
         val clientSecret = requireNotNull(initialIntent.clientSecret)
@@ -713,4 +841,26 @@ internal class PaymentIntentFlowResultProcessorTest {
             return refreshPaymentIntent()
         }
     }
+
+    internal companion object {
+        // Accounts for the initial retrieve call in processResult, first retrieve in
+        // refreshStripeIntentUntilTerminalState, and final retrieve after retry loop
+        const val MINIMUM_RETRIEVE_CALLS = 3
+        const val MINIMUM_REFRESH_CALLS = 2
+    }
+}
+
+internal fun getMaxNumberOfInvocations(paymentMethodType: PaymentMethod.Type): Int {
+    val retryPollMaxAttempts = when (paymentMethodType) {
+        PaymentMethod.Type.Card -> MAX_POLLING_DURATION / POLLING_DELAY + MINIMUM_RETRIEVE_CALLS
+        // WeChatPay uses the refresh endpoint
+        PaymentMethod.Type.WeChatPay -> MAX_POLLING_DURATION / POLLING_DELAY + MINIMUM_REFRESH_CALLS
+        PaymentMethod.Type.P24,
+        PaymentMethod.Type.RevolutPay,
+        PaymentMethod.Type.AmazonPay,
+        PaymentMethod.Type.Swish,
+        PaymentMethod.Type.Twint -> REDUCED_POLLING_DURATION / POLLING_DELAY + MINIMUM_RETRIEVE_CALLS
+        else -> 3
+    }
+    return retryPollMaxAttempts.toInt()
 }

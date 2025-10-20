@@ -15,6 +15,7 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
@@ -41,6 +42,9 @@ import kotlin.coroutines.CoroutineContext
 
 @Module
 internal interface CustomerSheetViewModelModule {
+    @Binds
+    fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
+
     @Binds
     fun bindsCustomerSheetEventReporter(
         impl: DefaultCustomerSheetEventReporter
@@ -105,9 +109,6 @@ internal interface CustomerSheetViewModelModule {
         fun isLiveMode(
             paymentConfiguration: Provider<PaymentConfiguration>
         ): () -> Boolean = { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
-
-        @Provides
-        fun providesUserFacingLogger(): UserFacingLogger? = null
 
         @Provides
         internal fun providesErrorReporter(

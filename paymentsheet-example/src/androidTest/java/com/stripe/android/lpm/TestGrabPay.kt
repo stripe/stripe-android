@@ -31,8 +31,7 @@ internal class TestGrabPay : BasePlaygroundTest() {
         testDriver.confirmNewOrGuestComplete(
             testParameters.copy(
                 authorizationAction = AuthorizeAction.Fail(
-                    expectedError = "We are unable to authenticate your payment method. Please " +
-                        "choose a different payment method and try again.",
+                    expectedError = "Your payment method was declined.",
                 ),
             )
         )

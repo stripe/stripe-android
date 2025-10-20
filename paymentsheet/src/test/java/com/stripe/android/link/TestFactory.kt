@@ -3,12 +3,15 @@ package com.stripe.android.link
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
@@ -19,11 +22,18 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.MobileFallbackWebviewParams
+import com.stripe.android.model.PassiveCaptchaParamsFactory
+import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.networking.RequestSurface
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
@@ -55,6 +65,7 @@ internal object TestFactory {
     const val AMOUNT = 100L
     const val CURRENCY = "USD"
     const val COUNTRY = "US"
+    const val COUNTRY_INFERRING_METHOD = "PHONE_NUMBER"
 
     val VERIFIED_SESSION = ConsumerSession.VerificationSession(
         type = ConsumerSession.VerificationSession.SessionType.Sms,
@@ -86,6 +97,16 @@ internal object TestFactory {
         publishableKey = PUBLISHABLE_KEY
     )
 
+    val MOBILE_FALLBACK_WEBVIEW_PARAMS = MobileFallbackWebviewParams(
+        webViewRequirementType = MobileFallbackWebviewParams.WebviewRequirementType.Required,
+        webviewOpenUrl = "https://fake_auth.stripe.com/mobile/12345"
+    )
+
+    val CONSUMER_SESSION_WITH_WEB_AUTH = CONSUMER_SESSION.copy(
+        verificationSessions = listOf(),
+        mobileFallbackWebviewParams = MOBILE_FALLBACK_WEBVIEW_PARAMS
+    )
+
     val PAYMENT_METHOD_CREATE_PARAMS = PaymentMethodCreateParams.createCard(
         CardParams(
             number = "4242424242424242",
@@ -96,7 +117,7 @@ internal object TestFactory {
     )
 
     val CONSUMER_PAYMENT_DETAILS_CARD = ConsumerPaymentDetails.Card(
-        id = "pm_123",
+        id = "csmrpd_123",
         last4 = "4242",
         expiryYear = 2999,
         expiryMonth = 12,
@@ -118,17 +139,25 @@ internal object TestFactory {
     )
 
     val CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT = ConsumerPaymentDetails.BankAccount(
-        id = "pm_124",
+        id = "csmrpd_124",
         last4 = "4242",
         isDefault = false,
         bankName = "Stripe Test Bank",
         bankIconCode = null,
         nickname = null,
+        billingAddress = null,
+        billingEmailAddress = null,
     )
 
     val CONSUMER_PAYMENT_DETAILS_PASSTHROUGH = ConsumerPaymentDetails.Passthrough(
-        id = "pm_125",
+        id = "csmrpd_125",
         last4 = "4242",
+        paymentMethodId = "pm_123"
+    )
+
+    val LINK_ACCOUNT_SESSION = LinkAccountSession(
+        id = "fcsess_123",
+        clientSecret = CLIENT_SECRET,
     )
 
     val LINK_NEW_PAYMENT_DETAILS = LinkPaymentDetails.New(
@@ -143,11 +172,13 @@ internal object TestFactory {
     )
 
     val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
-        paymentDetails = CONSUMER_PAYMENT_DETAILS_CARD,
+        paymentDetails = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
         paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
     )
 
     val LINK_ACCOUNT = LinkAccount(CONSUMER_SESSION)
+
+    val LINK_ACCOUNT_WITH_PK = LinkAccount(CONSUMER_SESSION, PUBLISHABLE_KEY)
 
     val CONSUMER_PAYMENT_DETAILS: ConsumerPaymentDetails = ConsumerPaymentDetails(
         paymentDetails = listOf(
@@ -182,23 +213,56 @@ internal object TestFactory {
         billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE
     )
 
+    val LINK_EMPTY_CUSTOMER_INFO = LinkConfiguration.CustomerInfo(
+        name = null,
+        email = null,
+        phone = null,
+        billingCountryCode = null
+    )
+
     val LINK_CONFIGURATION = LinkConfiguration(
         stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         merchantName = MERCHANT_NAME,
+        sellerBusinessName = null,
         merchantCountryCode = "",
+        merchantLogoUrl = null,
         customerInfo = LINK_CUSTOMER_INFO,
         shippingDetails = null,
         flags = emptyMap(),
         cardBrandChoice = null,
         cardBrandFilter = DefaultCardBrandFilter,
+        financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         passthroughModeEnabled = false,
+        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+        defaultBillingDetails = null,
         useAttestationEndpointsForLink = false,
         suppress2faModal = false,
         initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
         elementsSessionId = "session_1234",
         linkMode = LinkMode.LinkPaymentMethod,
         allowDefaultOptIn = false,
-        disableRuxInFlowController = false
+        disableRuxInFlowController = false,
+        collectMissingBillingDetailsForExistingPaymentMethods = true,
+        allowUserEmailEdits = true,
+        allowLogOut = true,
+        enableDisplayableDefaultValuesInEce = false,
+        skipWalletInFlowController = false,
+        linkAppearance = null,
+        linkSignUpOptInFeatureEnabled = false,
+        linkSignUpOptInInitialValue = false,
+        customerId = null,
+        saveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
+        forceSetupFutureUseBehaviorAndNewMandate = false,
+        linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+        clientAttributionMetadata = ClientAttributionMetadata(
+            elementsSessionConfigId = "elements_session_123",
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+        ),
+    )
+
+    val LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING = LINK_CONFIGURATION.copy(
+        linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD", "INSTANT_DEBITS"),
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(
@@ -231,11 +295,48 @@ internal object TestFactory {
 
     val NATIVE_LINK_ARGS = NativeLinkArgs(
         configuration = LINK_CONFIGURATION,
+        requestSurface = RequestSurface.PaymentElement,
         publishableKey = "",
         stripeAccountId = "",
-        startWithVerificationDialog = false,
-        linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+        linkExpressMode = LinkExpressMode.DISABLED,
+        linkAccountInfo = LinkAccountUpdate.Value(LINK_ACCOUNT),
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
         launchMode = LinkLaunchMode.Full,
+        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+        attestOnIntentConfirmation = false,
+    )
+
+    val FINANCIAL_CONNECTIONS_CHECKING_ACCOUNT = FinancialConnectionsAccount(
+        id = "la_1KMGIuClCIKljWvsLzbigpVh",
+        displayName = "My Checking",
+        institutionName = "My Bank",
+        last4 = "3456",
+        category = FinancialConnectionsAccount.Category.CASH,
+        created = 1643221992,
+        livemode = true,
+        permissions = listOf(FinancialConnectionsAccount.Permissions.PAYMENT_METHOD),
+        status = FinancialConnectionsAccount.Status.ACTIVE,
+        subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+        supportedPaymentMethodTypes = listOf(
+            FinancialConnectionsAccount.SupportedPaymentMethodTypes.US_BANK_ACCOUNT,
+            FinancialConnectionsAccount.SupportedPaymentMethodTypes.LINK
+        )
+    )
+
+    val CONSENT_PANE = ConsentUi.ConsentPane(
+        title = "Test Consent",
+        scopesSection = ConsentUi.ConsentPane.ScopesSection(
+            header = "Test Header",
+            scopes = listOf(
+                ConsentUi.ConsentPane.ScopesSection.Scope(
+                    icon = ConsentUi.Icon(default = "test_icon"),
+                    header = "Test Scope",
+                    description = "Test scope description"
+                )
+            )
+        ),
+        disclaimer = "Test disclaimer",
+        denyButtonLabel = "Deny",
+        allowButtonLabel = "Allow"
     )
 }

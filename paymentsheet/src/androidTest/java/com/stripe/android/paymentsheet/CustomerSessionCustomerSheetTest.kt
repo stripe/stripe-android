@@ -320,6 +320,7 @@ internal class CustomerSessionCustomerSheetTest {
             cardDetailsParams(),
             billingDetailsParams(),
             bodyPart("allow_redisplay", "always"),
+            clientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
@@ -332,6 +333,7 @@ internal class CustomerSessionCustomerSheetTest {
             cardBrandChoiceParams(),
             billingDetailsParams(),
             bodyPart("allow_redisplay", "always"),
+            clientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
