@@ -387,6 +387,7 @@ internal class IdentityViewModel(
     private var currentCameraLensModel: String? = null
     private var currentExposureIso: Float? = null
     private var currentFocalLength: Float? = null
+    private var currentExposureDuration: Long? = null
 
     // Store camera lens model for selfie uploads
     private var selfieCameraLensModel: String? = null
@@ -404,6 +405,10 @@ internal class IdentityViewModel(
 
     fun setCameraFocalLength(focalLength: Float?) {
         currentFocalLength = focalLength
+    }
+
+    fun setCameraExposureDuration(exposureDuration: Long?) {
+        currentExposureDuration = exposureDuration
     }
 
     /**
@@ -1589,7 +1594,8 @@ internal class IdentityViewModel(
                             frontLowResResult = requireNotNull(uploadedState.lowResResult.data),
                             cameraLensModel = currentCameraLensModel,
                             exposureIso = currentExposureIso,
-                            focalLength = currentFocalLength
+                            focalLength = currentFocalLength,
+                            exposureDuration = currentExposureDuration
                         )
                     } else {
                         CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
@@ -1597,7 +1603,8 @@ internal class IdentityViewModel(
                             backLowResResult = requireNotNull(uploadedState.lowResResult.data),
                             cameraLensModel = currentCameraLensModel,
                             exposureIso = currentExposureIso,
-                            focalLength = currentFocalLength
+                            focalLength = currentFocalLength,
+                            exposureDuration = currentExposureDuration
                         )
                     },
                     fromRoute = route,

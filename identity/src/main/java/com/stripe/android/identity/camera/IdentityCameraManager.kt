@@ -53,6 +53,13 @@ internal abstract class IdentityCameraManager {
     }
 
     /**
+     * Get current exposure duration (in milliseconds) if available.
+     */
+    fun getExposureDuration(): Long? {
+        return (cameraAdapter as? CameraXAdapter)?.getExposureDuration()
+    }
+
+    /**
      * Initialize [cameraAdapter] when a new [CameraView] is created from compose.
      */
     protected abstract fun createCameraAdapter(cameraView: CameraView): CameraAdapter<CameraPreviewImage<Bitmap>>

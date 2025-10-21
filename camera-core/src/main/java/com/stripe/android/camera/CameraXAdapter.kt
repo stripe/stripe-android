@@ -190,6 +190,7 @@ class CameraXAdapter(
 
     // latest camera metadata from analyzer frames
     private var latestExposureIso: Float? = null
+    private var latestExposureDuration: Long? = null
 
     private val cameraListeners = mutableListOf<(Camera) -> Unit>()
 
@@ -279,6 +280,11 @@ class CameraXAdapter(
     fun getExposureIso(): Float? {
         // CameraX does not provide current ISO without deeper interop; return null until available
         return latestExposureIso
+    }
+
+    /** Return current exposure duration in milliseconds if available. May be null if not yet measured. */
+    fun getExposureDuration(): Long? {
+        return latestExposureDuration?.let { it / 1_000_000 }
     }
 
     override fun setFocus(point: PointF) {
@@ -372,6 +378,7 @@ class CameraXAdapter(
                         result: TotalCaptureResult
                     ) {
                         latestExposureIso = result.get(CaptureResult.SENSOR_SENSITIVITY)?.toFloat()
+                        latestExposureDuration = result.get(CaptureResult.SENSOR_EXPOSURE_TIME)
                     }
                 }
             )

@@ -29,7 +29,9 @@ internal data class DocumentUploadParam(
     @SerialName("exposure_iso")
     val exposureIso: Float? = null,
     @SerialName("focal_length")
-    val focalLength: Float? = null
+    val focalLength: Float? = null,
+    @SerialName("exposure_duration")
+    val exposureDuration: Long? = null
 ) : Parcelable {
     @Serializable
     internal enum class UploadMethod {
