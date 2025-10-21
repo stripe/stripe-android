@@ -14,6 +14,8 @@ jobs:
   # Checkout master branch and build the APK
   build-master:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,6 +32,8 @@ jobs:
   # Checkout PR branch and build the APK
   build-pr:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
