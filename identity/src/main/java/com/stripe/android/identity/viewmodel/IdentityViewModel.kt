@@ -416,7 +416,6 @@ internal class IdentityViewModel(
      */
     fun setSelfieCameraLensModel(cameraManager: IdentityCameraManager?) {
         selfieCameraLensModel = cameraManager?.getCameraLensModel()
-        Log.d(TAG, "Selfie camera lens model set to: $selfieCameraLensModel")
     }
 
     /**
