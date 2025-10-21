@@ -16,7 +16,6 @@ import com.stripe.android.challenge.PassiveChallengeActivityContract
 import com.stripe.android.challenge.PassiveChallengeActivityResult
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
-import com.stripe.android.model.RadarOptions
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
@@ -33,6 +32,7 @@ import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.RadarOptionsFactory
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -74,7 +74,9 @@ internal class PassiveChallengeConfirmationActivityTest {
                 .isEqualTo(
                     PaymentMethodConfirmationOption.New(
                         createParams = CONFIRMATION_OPTION.createParams.copy(
-                            radarOptions = RadarOptions("test_token")
+                            radarOptions = RadarOptionsFactory.create(
+                                verificationObject = null
+                            )
                         ),
                         optionsParams = CONFIRMATION_OPTION.optionsParams,
                         shouldSave = false,

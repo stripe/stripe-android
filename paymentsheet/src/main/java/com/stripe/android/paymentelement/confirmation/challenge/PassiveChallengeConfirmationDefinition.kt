@@ -127,7 +127,10 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
                 copy(
                     createParams = createParams.copy(
                         radarOptions = token?.let {
-                            RadarOptions(it)
+                            RadarOptions(
+                                hCaptchaToken = it,
+                                androidVerificationObject = null
+                            )
                         }
                     ),
                     passiveCaptchaParams = null

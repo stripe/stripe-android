@@ -11,10 +11,10 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.RadarOptionsFactory
 import org.junit.Test
 
 class ConfirmPaymentIntentParamsFactoryTest {
@@ -493,7 +493,6 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
     @Test
     fun `create() with radarOptions should include radarOptions in result`() {
-        val radarOptions = RadarOptions(hCaptchaToken = "test_token")
         val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
             clientSecret = CLIENT_SECRET,
             intent = createPaymentIntent(),
@@ -505,11 +504,11 @@ class ConfirmPaymentIntentParamsFactoryTest {
             optionsParams = null,
             extraParams = null,
             intentConfigSetupFutureUsage = null,
-            radarOptions = radarOptions,
+            radarOptions = RadarOptionsFactory.create(),
             clientAttributionMetadata = null,
         )
 
-        assertThat(result.radarOptions).isEqualTo(radarOptions)
+        assertThat(result.radarOptions).isEqualTo(RadarOptionsFactory.create())
     }
 
     private fun ConfirmStripeIntentParams.asConfirmPaymentIntentParams(): ConfirmPaymentIntentParams {
