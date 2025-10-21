@@ -120,7 +120,7 @@ internal class VerificationViewModel @Inject constructor(
                             linkAccountUpdate = linkAccountManager.linkAccountUpdate,
                         )
                     )
-                } else if (completedAuthorizationConsent) {
+                } else if (completedAuthorizationConsent || account.consentPresentation == null) {
                     dismissWithResult(
                         LinkActivityResult.Completed(
                             linkAccountUpdate = linkAccountManager.linkAccountUpdate,

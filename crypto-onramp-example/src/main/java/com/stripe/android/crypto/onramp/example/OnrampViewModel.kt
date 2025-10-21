@@ -136,23 +136,8 @@ internal class OnrampViewModel(
                 if (response.success) {
                     _message.value = "Sign up successful!"
 
-                    // Also implement this for login
-                    val hasLinkAccountResult = onrampCoordinator.hasLinkAccount(currentEmail)
-
-                    when (hasLinkAccountResult) {
-                        is OnrampHasLinkAccountResult.Completed -> {
-                            if (hasLinkAccountResult.hasLinkAccount) {
-                                _uiState.update { it.copy(screen = Screen.Authentication, authToken = response.token) }
-                            } else {
-                                _message.value = "No account found, register!"
-                                _uiState.update { it.copy(screen = Screen.Registration, authToken = response.token) }
-                            }
-                        }
-                        is OnrampHasLinkAccountResult.Failed -> {
-                            _message.value = "Has Link Account failed: ${hasLinkAccountResult.error}"
-                            _uiState.update { it.copy(screen = Screen.LoginSignup, authToken = response.token) }
-                        }
-                    }
+                    _uiState.update { it.copy(authToken = response.token) }
+                    checkIfLinkUser(currentEmail)
                 } else {
                     _message.value = "Sign up failed: Unknown Error"
                     _uiState.update { it.copy(screen = Screen.LoginSignup, loadingMessage = null) }
@@ -185,7 +170,9 @@ internal class OnrampViewModel(
                 val response = result.value
                 if (response.success) {
                     _message.value = "Log in successful!"
-                    _uiState.update { it.copy(screen = Screen.Authentication, authToken = response.token) }
+
+                    _uiState.update { it.copy(authToken = response.token) }
+                    checkIfLinkUser(currentEmail)
                 } else {
                     _message.value = "Log in failed: Unknown Error"
                     _uiState.update { it.copy(screen = Screen.LoginSignup, loadingMessage = null) }
@@ -239,8 +226,7 @@ internal class OnrampViewModel(
                 _message.value = "Authentication successful! You can now perform authenticated operations."
                 _uiState.update {
                     it.copy(
-                        screen = Screen.AuthenticatedOperations,
-                        customerId = result.customerId
+                        screen = Screen.AuthenticatedOperations
                     )
                 }
             }
@@ -302,7 +288,6 @@ internal class OnrampViewModel(
                 _uiState.update {
                     it.copy(
                         screen = Screen.AuthenticatedOperations,
-                        customerId = result.customerId,
                         linkAuthIntentId = null,
                         consentedLinkAuthIntentIds = it.consentedLinkAuthIntentIds + it.linkAuthIntentId!!
                     )
@@ -485,13 +470,11 @@ internal class OnrampViewModel(
         val currentState = _uiState.value
         val paymentToken = currentState.cryptoPaymentToken
         val walletAddress = currentState.walletAddress
-        val customerId = currentState.customerId
         val network = currentState.network
         val authToken = currentState.authToken
 
         // Check what's missing and provide helpful guidance
         val validParams = validateOnrampSessionParams(
-            customerId = customerId,
             walletAddress = walletAddress,
             currentState = currentState,
             paymentToken = paymentToken,
@@ -507,7 +490,6 @@ internal class OnrampViewModel(
             val result = testBackendRepository.createOnrampSession(
                 paymentToken = paymentToken!!,
                 walletAddress = walletAddress!!,
-                cryptoCustomerId = customerId!!,
                 authToken = authToken!!,
                 destinationNetwork = destinationNetwork
             )
@@ -557,14 +539,12 @@ internal class OnrampViewModel(
     }
 
     private fun validateOnrampSessionParams(
-        customerId: String?,
         walletAddress: String?,
         currentState: OnrampUiState,
         paymentToken: String?,
         authToken: String?
     ): Boolean {
         val missingItems = mutableListOf<String>()
-        if (customerId.isNullOrBlank()) missingItems.add("customer authentication")
         if (walletAddress.isNullOrBlank()) missingItems.add("wallet address registration")
         if (currentState.selectedPaymentData == null) missingItems.add("payment method selection")
         if (paymentToken.isNullOrBlank()) missingItems.add("crypto payment token creation")
@@ -594,6 +574,8 @@ internal class OnrampViewModel(
     private suspend fun createAuthIntentForUser(oauthScopes: String): String? {
         val tokenWithoutLAI = _uiState.value.authToken
         if (tokenWithoutLAI == null) {
+            _message.value = "No auth token found, please log in again"
+            _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
             return null
         }
 
@@ -651,7 +633,6 @@ data class OnrampUiState(
     val email: String = "",
     val linkAuthIntentId: String? = null,
     val consentedLinkAuthIntentIds: List<String> = emptyList(),
-    val customerId: String? = null,
     val selectedPaymentData: PaymentMethodDisplayData? = null,
     val cryptoPaymentToken: String? = null,
     val walletAddress: String? = null,

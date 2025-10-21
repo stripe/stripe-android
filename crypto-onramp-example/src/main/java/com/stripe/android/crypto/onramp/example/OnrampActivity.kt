@@ -276,7 +276,6 @@ internal fun OnrampScreen(
             Screen.AuthenticatedOperations -> {
                 AuthenticatedOperationsScreen(
                     email = uiState.email,
-                    customerId = uiState.customerId ?: "",
                     consentedLinkAuthIntentIds = uiState.consentedLinkAuthIntentIds,
                     onrampSessionResponse = uiState.onrampSession,
                     selectedPaymentData = uiState.selectedPaymentData,
@@ -495,7 +494,6 @@ fun AuthenticateSection(
 @Suppress("LongMethod")
 private fun AuthenticatedOperationsScreen(
     email: String,
-    customerId: String,
     consentedLinkAuthIntentIds: List<String>,
     onrampSessionResponse: OnrampSessionResponse?,
     selectedPaymentData: PaymentMethodDisplayData?,
@@ -530,11 +528,6 @@ private fun AuthenticatedOperationsScreen(
 
         Text(
             text = "Email: $email",
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        Text(
-            text = "Customer ID: $customerId",
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
