@@ -183,54 +183,90 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
             clientSecret = clientSecret,
             options = requestOptions,
         ).mapCatching { intent ->
-            if (intent.isConfirmed) {
-                failIfSetAsDefaultFeatureIsEnabled(confirmationOption)
-
-                ConfirmationDefinition.Action.Complete(
+            when {
+                intent.isConfirmed -> handleConfirmedIntent(intent, confirmationOption)
+                intent.requiresAction() -> handleIntentRequiringAction(clientSecret, intent, paymentMethod)
+                else -> handleIntentConfirmation(
+                    clientSecret = clientSecret,
                     intent = intent,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                    completedFullPaymentFlow = true,
+                    intentConfiguration = intentConfiguration,
+                    confirmationOption = confirmationOption,
+                    paymentMethod = paymentMethod,
+                    shippingValues = shippingValues,
+                    hCaptchaToken = hCaptchaToken
                 )
-            } else if (intent.requiresAction()) {
-                runCatching<ConfirmationDefinition.Action<Args>> {
-                    DeferredIntentValidator.validatePaymentMethod(intent, paymentMethod)
-                    ConfirmationDefinition.Action.Launch(
-                        launcherArguments = Args.NextAction(clientSecret),
-                        deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                        receivesResultInProcess = false,
-                    )
-                }.getOrElse {
-                    ConfirmationDefinition.Action.Fail(
-                        cause = InvalidDeferredIntentUsageException(),
-                        message = resolvableString(R.string.stripe_paymentsheet_invalid_deferred_intent_usage),
-                        errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                    )
-                }
-            } else {
-                DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation, paymentMethod)
-                confirmActionHelper.createConfirmAction(
-                    clientSecret,
-                    intent,
-                    shippingValues,
-                    isDeferred = true
-                ) {
-                    create(
-                        paymentMethod = paymentMethod,
-                        optionsParams = confirmationOption.optionsParams,
-                        extraParams = (confirmationOption as? PaymentMethodConfirmationOption.New)
-                            ?.extraParams,
-                        intentConfigSetupFutureUsage = intentConfiguration
-                            .mode.setupFutureUse?.toConfirmParamsSetupFutureUsage(),
-                        radarOptions = hCaptchaToken?.let { RadarOptions(it) },
-                        clientAttributionMetadata = clientAttributionMetadata,
-                    )
-                }
             }
         }.getOrElse { error ->
             ConfirmationDefinition.Action.Fail(
                 cause = error,
                 message = error.stripeErrorMessage(),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        }
+    }
+
+    private fun handleConfirmedIntent(
+        intent: StripeIntent,
+        confirmationOption: PaymentMethodConfirmationOption
+    ): ConfirmationDefinition.Action<Args> {
+        failIfSetAsDefaultFeatureIsEnabled(confirmationOption)
+        return ConfirmationDefinition.Action.Complete(
+            intent = intent,
+            deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+            completedFullPaymentFlow = true,
+        )
+    }
+
+    private fun handleIntentRequiringAction(
+        clientSecret: String,
+        intent: StripeIntent,
+        paymentMethod: PaymentMethod
+    ): ConfirmationDefinition.Action<Args> {
+        return runCatching<ConfirmationDefinition.Action<Args>> {
+            DeferredIntentValidator.validatePaymentMethod(intent, paymentMethod)
+            ConfirmationDefinition.Action.Launch(
+                launcherArguments = Args.NextAction(clientSecret),
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                receivesResultInProcess = false,
+            )
+        }.getOrElse {
+            ConfirmationDefinition.Action.Fail(
+                cause = InvalidDeferredIntentUsageException(),
+                message = resolvableString(R.string.stripe_paymentsheet_invalid_deferred_intent_usage),
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        }
+    }
+
+    private fun handleIntentConfirmation(
+        clientSecret: String,
+        intent: StripeIntent,
+        intentConfiguration: PaymentSheet.IntentConfiguration,
+        confirmationOption: PaymentMethodConfirmationOption,
+        paymentMethod: PaymentMethod,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        hCaptchaToken: String?
+    ): ConfirmationDefinition.Action<Args> {
+        DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation, paymentMethod)
+        return confirmActionHelper.createConfirmAction(
+            clientSecret,
+            intent,
+            shippingValues,
+            isDeferred = true
+        ) {
+            create(
+                paymentMethod = paymentMethod,
+                optionsParams = confirmationOption.optionsParams,
+                extraParams = (confirmationOption as? PaymentMethodConfirmationOption.New)?.extraParams,
+                intentConfigSetupFutureUsage = intentConfiguration
+                    .mode.setupFutureUse?.toConfirmParamsSetupFutureUsage(),
+                radarOptions = hCaptchaToken?.let {
+                    RadarOptions(
+                        hCaptchaToken = it,
+                        androidVerificationObject = null
+                    )
+                },
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
     }

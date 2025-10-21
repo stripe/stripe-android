@@ -287,7 +287,10 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
             passiveCaptchaParams = null,
             createParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
-                radarOptions = RadarOptions(testToken)
+                radarOptions = RadarOptions(
+                    hCaptchaToken = testToken,
+                    androidVerificationObject = null
+                )
             )
         )
 
