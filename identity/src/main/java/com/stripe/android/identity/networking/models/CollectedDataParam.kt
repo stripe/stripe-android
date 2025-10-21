@@ -81,7 +81,8 @@ internal data class CollectedDataParam(
             frontLowResResult: UploadedResult,
             cameraLensModel: String? = null,
             exposureIso: Float? = null,
-            focalLength: Float? = null
+            focalLength: Float? = null,
+            exposureDuration: Long? = null
         ): CollectedDataParam =
             CollectedDataParam(
                 idDocumentFront = DocumentUploadParam(
@@ -102,7 +103,8 @@ internal data class CollectedDataParam(
                     uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE,
                     cameraLensModel = cameraLensModel,
                     exposureIso = exposureIso,
-                    focalLength = focalLength
+                    focalLength = focalLength,
+                    exposureDuration = exposureDuration
                 )
             )
 
@@ -111,7 +113,8 @@ internal data class CollectedDataParam(
             backLowResResult: UploadedResult,
             cameraLensModel: String? = null,
             exposureIso: Float? = null,
-            focalLength: Float? = null
+            focalLength: Float? = null,
+            exposureDuration: Long? = null
         ): CollectedDataParam =
             CollectedDataParam(
                 idDocumentBack = DocumentUploadParam(
@@ -132,7 +135,8 @@ internal data class CollectedDataParam(
                     uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE,
                     cameraLensModel = cameraLensModel,
                     exposureIso = exposureIso,
-                    focalLength = focalLength
+                    focalLength = focalLength,
+                    exposureDuration = exposureDuration
                 )
             )
 
