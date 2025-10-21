@@ -48,9 +48,9 @@ def publish_to_sonatype
 
             # See https://github.com/gradle-nexus/publish-plugin for info on these gradle commands.
             if (@is_dry_run)
-                publish_to_sonatype_commands = ['./gradlew', 'publishToSonatype', 'closeSonatypeStagingRepository', '--stacktrace']
+                publish_to_sonatype_commands = ['./gradlew', 'publishToSonatype', 'closeSonatypeStagingRepository', '--stacktrace', '--no-configuration-cache']
             else
-                publish_to_sonatype_commands = ['./gradlew', 'publishToSonatype', 'closeAndReleaseSonatypeStagingRepository', '--stacktrace']
+                publish_to_sonatype_commands = ['./gradlew', 'publishToSonatype', 'closeAndReleaseSonatypeStagingRepository', '--stacktrace', '--no-configuration-cache']
             end
 
             Subprocess.check_call(
