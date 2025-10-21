@@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.Serializable
 import androidx.core.content.edit
+import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 
 @Suppress("TooManyFunctions")
 internal class OnrampViewModel(
@@ -115,9 +116,9 @@ internal class OnrampViewModel(
 
             onrampCoordinator.configure(configuration = configuration)
 
-            if (loadUserData() != null) {
-                _uiState.update { it.copy(screen = Screen.SeamlessSignIn) }
-            } else {
+            loadUserData()?.let { data ->
+                _uiState.update { it.copy(email = data.email, authToken = data.token, screen = Screen.SeamlessSignIn) }
+            } ?: run {
                 _uiState.update { it.copy(screen = Screen.LoginSignup) }
             }
         }
@@ -190,6 +191,36 @@ internal class OnrampViewModel(
                 _message.value = "Log in failed: ${result.error.message}"
                 _uiState.update { it.copy(screen = Screen.LoginSignup, loadingMessage = null) }
             }
+        }
+    }
+
+    fun seamlessSignInContinue() = viewModelScope.launch {
+        _uiState.value.authToken?.let {
+            val result = testBackendRepository.createLinkAuthToken(it)
+            when (result) {
+                is Result.Success -> {
+                    val latcs = result.value.linkAuthTokenClientSecret
+                    val authenticateResult = onrampCoordinator.authenticateUserWithToken(latcs)
+
+                    when (authenticateResult) {
+                        is OnrampTokenAuthenticationResult.Completed -> {
+                            _message.value = "Seamless sign-in successful!"
+                            _uiState.update { state -> state.copy(screen = Screen.AuthenticatedOperations) }
+                        }
+                        is OnrampTokenAuthenticationResult.Failed -> {
+                            _message.value = "Seamless sign-in failed: ${authenticateResult.error.message}"
+                            _uiState.update { state -> state.copy(screen = Screen.LoginSignup) }
+                        }
+                    }
+                }
+                is Result.Failure -> {
+                    _message.value = "Seamless sign-in failed: ${result.error.message}"
+                    _uiState.update { state -> state.copy(screen = Screen.LoginSignup) }
+                }
+            }
+        } ?: run {
+            _message.value = "No auth token found, please log in again"
+            _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
         }
     }
 
@@ -293,6 +324,14 @@ internal class OnrampViewModel(
         when (result) {
             is OnrampAuthorizeResult.Consented -> {
                 _message.value = "Authorization successful! User consented to scopes."
+
+                viewModelScope.launch {
+                    testBackendRepository.saveUser(
+                        result.customerId,
+                        tokenWithLAI = _uiState.value.authToken!!
+                    )
+                }
+
                 _uiState.update {
                     it.copy(
                         screen = Screen.AuthenticatedOperations,
@@ -617,6 +656,7 @@ internal class OnrampViewModel(
             when (result) {
                 is OnrampLogOutResult.Completed -> {
                     _message.value = "Successfully logged out"
+                    clearUserData()
                     _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
                 }
                 is OnrampLogOutResult.Failed -> {
@@ -640,6 +680,11 @@ internal class OnrampViewModel(
         val prefs = application.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val json = prefs.getString(USER_DATA_KEY, null) ?: return null
         return Json.decodeFromString(json)
+    }
+
+    private fun clearUserData() {
+        val prefs = application.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit { remove(USER_DATA_KEY) }
     }
 
     class Factory : ViewModelProvider.Factory {

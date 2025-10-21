@@ -41,6 +41,7 @@ data class ConsumerSession(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class SessionType(val value: String) : Parcelable {
             Unknown(""),
+            LinkAuthToken("link_auth_token"),
             SignUp("signup"),
             Email("email"),
             Sms("sms");

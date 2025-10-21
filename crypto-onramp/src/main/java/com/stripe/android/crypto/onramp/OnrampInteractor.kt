@@ -100,6 +100,19 @@ internal class OnrampInteractor @Inject constructor(
                     OnrampAnalyticsEvent.LinkUserAuthenticationWithTokenCompleted
                 )
 
+                val secret = consumerSessionClientSecret()
+                if (secret != null) {
+                    cryptoApiRepository.createCryptoCustomer(consumerSessionClientSecret = secret)
+                        .fold(
+                            onSuccess = { customerResponse ->
+                                _state.update { it.copy(cryptoCustomerId = customerResponse.id) }
+                            },
+                            onFailure = { error ->
+                            }
+                        )
+                }
+
+
                 OnrampTokenAuthenticationResult.Completed
             }
             is LinkController.AuthenticateWithTokenResult.Failed -> {

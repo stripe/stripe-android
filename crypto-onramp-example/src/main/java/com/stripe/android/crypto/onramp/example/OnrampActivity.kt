@@ -160,12 +160,29 @@ internal class OnrampActivity : ComponentActivity() {
 
 @Composable
 internal fun SeamlessSignInScreen(
-
+    email: String,
+    onContinue: () -> Unit,
+    onNotMe: () -> Unit
 ) {
     Column {
         Text(
-            text = "Seamless Sign-In is not implemented in this example.",
+            text = email,
         )
+
+        Button(
+            onClick = { onContinue() },
+            modifier = Modifier.fillMaxWidth()
+                .padding(bottom = 16.dp)
+        ) {
+            Text("Continue")
+        }
+
+        Button(
+            onClick = { onNotMe() },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Not me")
+        }
     }
 }
 
@@ -248,7 +265,15 @@ internal fun OnrampScreen(
     ) {
         when (uiState.screen) {
             Screen.SeamlessSignIn -> {
-                SeamlessSignInScreen()
+                SeamlessSignInScreen(
+                    email = uiState.email,
+                    onContinue = {
+                        viewModel.seamlessSignInContinue()
+                    },
+                    onNotMe = {
+                        viewModel.logOut()
+                    }
+                )
             }
             Screen.LoginSignup -> {
                 LoginSignupScreen(
@@ -484,7 +509,7 @@ private fun AuthenticationScreen(
 fun AuthenticateSection(
     onAuthenticate: (oauthScopes: String?) -> Unit,
 ) {
-    var oauthScopes by remember { mutableStateOf("kyc.status:read,crypto:ramp") }
+    var oauthScopes by remember { mutableStateOf("kyc.status:read,crypto:ramp,auth.persist_login:read") }
     OutlinedTextField(
         value = oauthScopes,
         onValueChange = { oauthScopes = it },
