@@ -1,5 +1,6 @@
 package com.stripe.android.crypto.onramp.example
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -158,6 +159,17 @@ internal class OnrampActivity : ComponentActivity() {
 }
 
 @Composable
+internal fun SeamlessSignInScreen(
+
+) {
+    Column {
+        Text(
+            text = "Seamless Sign-In is not implemented in this example.",
+        )
+    }
+}
+
+@Composable
 internal fun LoginSignupScreen(
     onRegister: (email: String, password: String) -> Unit,
     onLogin: (email: String, password: String) -> Unit
@@ -235,6 +247,9 @@ internal fun OnrampScreen(
             .padding(16.dp)
     ) {
         when (uiState.screen) {
+            Screen.SeamlessSignIn -> {
+                SeamlessSignInScreen()
+            }
             Screen.LoginSignup -> {
                 LoginSignupScreen(
                     onRegister = { email, password -> viewModel.registerUser(email, password) },

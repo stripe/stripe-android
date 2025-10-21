@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.example
 
 import android.app.Application
+import android.content.Context
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
@@ -38,10 +39,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.Serializable
+import androidx.core.content.edit
 
 @Suppress("TooManyFunctions")
 internal class OnrampViewModel(
-    application: Application,
+    private val application: Application,
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
@@ -110,8 +114,12 @@ internal class OnrampViewModel(
             )
 
             onrampCoordinator.configure(configuration = configuration)
-            // Set initial state to LoginSignup after configuration
-            _uiState.update { it.copy(screen = Screen.LoginSignup) }
+
+            if (loadUserData() != null) {
+                _uiState.update { it.copy(screen = Screen.SeamlessSignIn) }
+            } else {
+                _uiState.update { it.copy(screen = Screen.LoginSignup) }
+            }
         }
     }
 
@@ -589,6 +597,9 @@ internal class OnrampViewModel(
                 val response = result.value
                 _uiState.update { it.copy(authToken = response.token) }
                 _message.value = "Auth intent created successfully"
+
+                saveUserData(OnrampUserData(_uiState.value.email, response.token))
+
                 return response.authIntentId
             }
             is Result.Failure -> {
@@ -614,6 +625,21 @@ internal class OnrampViewModel(
                 }
             }
         }
+    }
+
+    private val PREFS_NAME = "onramp_prefs"
+    private val USER_DATA_KEY = "onramp_user_data"
+
+    private fun saveUserData(userData: OnrampUserData) {
+        val prefs = application.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val json = Json.encodeToString(userData)
+        prefs.edit { putString(USER_DATA_KEY, json) }
+    }
+
+    private fun loadUserData(): OnrampUserData? {
+        val prefs = application.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val json = prefs.getString(USER_DATA_KEY, null) ?: return null
+        return Json.decodeFromString(json)
     }
 
     class Factory : ViewModelProvider.Factory {
@@ -643,6 +669,7 @@ data class OnrampUiState(
 )
 
 enum class Screen {
+    SeamlessSignIn,
     LoginSignup,
     Loading,
     Registration,
@@ -657,3 +684,9 @@ data class CheckoutEvent(
 )
 
 data class AuthorizeEvent(val linkAuthIntentId: String)
+
+@Serializable
+data class OnrampUserData(
+    val email: String,
+    val token: String
+)
