@@ -185,7 +185,7 @@ internal class OnrampViewModel(
         }
     }
 
-    fun checkIfLinkUser(email: String) = viewModelScope.launch {
+    private fun checkIfLinkUser(email: String) = viewModelScope.launch {
         if (email.isBlank()) {
             _message.value = "Please enter an email address"
             return@launch
