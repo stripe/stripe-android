@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
@@ -125,7 +126,7 @@ internal class VerticalModeFormUITest {
 
         composeRule.setContent {
             CompositionLocalProvider(
-                LocalCardScanEventsReporter provides mock(),
+                LocalCardScanEventsReporter provides NoOpCardScanEventsReporter,
                 LocalCardNumberCompletedEventReporter provides { },
                 LocalCardBrandDisallowedReporter provides { }
             ) {
@@ -136,6 +137,15 @@ internal class VerticalModeFormUITest {
         composeRule.onNodeWithTag(FORM_ELEMENT_TEST_TAG).assertExists()
 
         Scenario(viewActionRecorder).apply(block)
+    }
+
+    private object NoOpCardScanEventsReporter : CardScanEventsReporter {
+        override fun onCardScanCancelled(implementation: String) = Unit
+        override fun onCardScanFailed(implementation: String, error: Throwable?) = Unit
+        override fun onCardScanSucceeded(implementation: String) = Unit
+        override fun onCardScanStarted(implementation: String) = Unit
+        override fun onCardScanApiCheckSucceeded(implementation: String) = Unit
+        override fun onCardScanApiCheckFailed(implementation: String, error: Throwable?) = Unit
     }
 
     private fun createInteractor(
