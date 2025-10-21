@@ -390,8 +390,8 @@ class CameraXAdapter(
                 analysis.setAnalyzer(
                     cameraExecutor
                 ) { image ->
-                    @Suppress("MaxLineLength")
                     // Analyzer path does not provide per-frame ISO across all CameraX versions; keep latestExposureIso as-is.
+                    @Suppress("MaxLineLength")
                     val bitmap = image.toBitmap(getRenderScript(activity))
                         .rotate(image.imageInfo.rotationDegrees.toFloat())
                     image.close()
