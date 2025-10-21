@@ -11,6 +11,8 @@ on:
 jobs:
   upload-identity:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
@@ -21,6 +23,8 @@ jobs:
           EMERGE_TAG: push
   upload-financial-connections:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
@@ -40,6 +44,8 @@ jobs:
           groups: financial-connections-testers
   upload-payment-sheet:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
