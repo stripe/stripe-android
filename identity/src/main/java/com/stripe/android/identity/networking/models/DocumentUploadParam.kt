@@ -26,7 +26,6 @@ internal data class DocumentUploadParam(
     val forceConfirm: Boolean? = null,
     @SerialName("camera_lens_model")
     val cameraLensModel: String? = null,
-    // New optional camera metadata
     @SerialName("exposure_iso")
     val exposureIso: Float? = null,
     @SerialName("focal_length")
