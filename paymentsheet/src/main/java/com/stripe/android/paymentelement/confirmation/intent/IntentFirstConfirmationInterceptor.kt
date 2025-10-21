@@ -56,10 +56,12 @@ internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
                 optionsParams = confirmationOption.optionsParams,
                 extraParams = null,
                 intentConfigSetupFutureUsage = null,
-                radarOptions = RadarOptions(
-                    hCaptchaToken = confirmationOption.hCaptchaToken,
-                    androidVerificationObject = null
-                ),
+                radarOptions = confirmationOption.hCaptchaToken?.let {
+                    RadarOptions(
+                        hCaptchaToken = it,
+                        androidVerificationObject = null
+                    )
+                },
                 clientAttributionMetadata = clientAttributionMetadata,
             )
         }
