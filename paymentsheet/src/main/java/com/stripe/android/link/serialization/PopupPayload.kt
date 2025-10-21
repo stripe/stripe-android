@@ -56,6 +56,9 @@ internal data class PopupPayload(
 
     @SerialName("linkFundingSources")
     val linkFundingSources: List<String>,
+
+    @SerialName("clientAttributionMetadata")
+    val clientAttributionMetadata: Map<String, String>
 ) {
     @SerialName("path")
     val path: String = "mobile_pay"
@@ -172,6 +175,7 @@ internal data class PopupPayload(
                 setupFutureUsage = stripeIntent.isSetupForFutureUsage(passthroughModeEnabled),
                 flags = flags,
                 linkFundingSources = stripeIntent.linkFundingSources.map { it.uppercase() },
+                clientAttributionMetadata = clientAttributionMetadata.toParamMap(),
             )
         }
 

@@ -15,7 +15,7 @@ data class ClientAttributionMetadata(
     @get:VisibleForTesting val paymentMethodSelectionFlow: PaymentMethodSelectionFlow?,
 ) : StripeParamsModel, Parcelable {
 
-    override fun toParamMap(): Map<String, Any> {
+    override fun toParamMap(): Map<String, String> {
         return mapOf(
             "merchant_integration_source" to "elements",
             "merchant_integration_subtype" to "mobile",
