@@ -46,7 +46,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -83,7 +82,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -120,7 +118,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -159,7 +156,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -196,7 +192,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -231,7 +226,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -316,7 +310,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -376,7 +369,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -436,7 +428,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -1567,7 +1558,6 @@ class PaymentSheetEventTest {
                 isSpt = false,
                 linkEnabled = false,
                 googlePaySupported = false,
-                isStripeCardScanAvailable = true,
                 isAnalyticEventCallbackSet = false,
             ).params
         ).isEqualTo(
@@ -1615,7 +1605,6 @@ class PaymentSheetEventTest {
                 isSpt = false,
                 linkEnabled = false,
                 googlePaySupported = false,
-                isStripeCardScanAvailable = true,
                 isAnalyticEventCallbackSet = false,
             ).params
         ).isEqualTo(
@@ -1643,7 +1632,6 @@ class PaymentSheetEventTest {
                 isSpt = false,
                 linkEnabled = false,
                 googlePaySupported = false,
-                isStripeCardScanAvailable = true,
                 isAnalyticEventCallbackSet = false,
             ).params["mpe_config"]?.asMap()?.get("card_scan_available")
         ).isEqualTo(true)
@@ -1663,7 +1651,6 @@ class PaymentSheetEventTest {
                 isSpt = false,
                 linkEnabled = false,
                 googlePaySupported = false,
-                isStripeCardScanAvailable = false,
                 isAnalyticEventCallbackSet = false,
             ).params["mpe_config"]?.asMap()?.get("card_scan_available")
         ).isEqualTo(false)
@@ -1683,7 +1670,6 @@ class PaymentSheetEventTest {
                 isSpt = false,
                 linkEnabled = false,
                 googlePaySupported = false,
-                isStripeCardScanAvailable = true,
                 isAnalyticEventCallbackSet = true,
             ).params["mpe_config"]?.asMap()?.get("analytic_callback_set")
         ).isEqualTo(true)
@@ -1703,7 +1689,6 @@ class PaymentSheetEventTest {
                 isSpt = false,
                 linkEnabled = false,
                 googlePaySupported = false,
-                isStripeCardScanAvailable = false,
                 isAnalyticEventCallbackSet = false,
             ).params["mpe_config"]?.asMap()?.get("analytic_callback_set")
         ).isEqualTo(false)
@@ -1986,7 +1971,6 @@ class PaymentSheetEventTest {
             isDeferred = false,
             isSpt = false,
             linkEnabled = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
     }
