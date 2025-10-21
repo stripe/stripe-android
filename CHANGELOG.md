@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.29.1 - 2025-10-21
+
 ## 21.29.0 - 2025-10-20
 * [Added] Added support for `onBehalfOf` to CustomerSheet.IntentConfiguration. This parameter makes CustomerSheet use a connected account to determine the payment method that users see and whether CardBrandChoice is enabled. For more information, see the [SetupIntent docs](https://docs.stripe.com/api/setup_intents/object#setup_intent_object-on_behalf_of).
 
