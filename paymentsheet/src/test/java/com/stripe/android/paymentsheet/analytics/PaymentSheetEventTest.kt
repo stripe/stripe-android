@@ -1619,44 +1619,6 @@ class PaymentSheetEventTest {
     }
 
     @Test
-    fun `Init event should report card_scan_available as true if available`() {
-        val config = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING
-        assertThat(
-            PaymentSheetEvent.Init(
-                mode = EventReporter.Mode.Complete,
-                configuration = config.asCommonConfiguration(),
-                appearance = config.appearance,
-                configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
-                primaryButtonColor = config.primaryButtonColorUsage(),
-                isDeferred = false,
-                isSpt = false,
-                linkEnabled = false,
-                googlePaySupported = false,
-                isAnalyticEventCallbackSet = false,
-            ).params["mpe_config"]?.asMap()?.get("card_scan_available")
-        ).isEqualTo(true)
-    }
-
-    @Test
-    fun `Init event should report card_scan_available as false if unavailable`() {
-        val config = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING
-        assertThat(
-            PaymentSheetEvent.Init(
-                mode = EventReporter.Mode.Complete,
-                configuration = config.asCommonConfiguration(),
-                appearance = config.appearance,
-                configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
-                primaryButtonColor = config.primaryButtonColorUsage(),
-                isDeferred = false,
-                isSpt = false,
-                linkEnabled = false,
-                googlePaySupported = false,
-                isAnalyticEventCallbackSet = false,
-            ).params["mpe_config"]?.asMap()?.get("card_scan_available")
-        ).isEqualTo(false)
-    }
-
-    @Test
     fun `Init event should report analytic_callback_set as true if available`() {
         val config = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING
         assertThat(
@@ -2038,7 +2000,6 @@ class PaymentSheetEventTest {
         customPaymentMethods: String? = null,
         paymentMethodLayout: String? = "horizontal",
         cardBrandAcceptance: Boolean = false,
-        cardScanAvailable: Boolean = true,
         analyticCallbackSet: Boolean = false,
         extraParams: MutableMap<String, Any?>.() -> Unit = {},
     ): Map<String, Any?> {
@@ -2058,7 +2019,6 @@ class PaymentSheetEventTest {
             "external_payment_methods" to externalPaymentMethods,
             "custom_payment_methods" to customPaymentMethods,
             "card_brand_acceptance" to cardBrandAcceptance,
-            "card_scan_available" to cardScanAvailable,
             "analytic_callback_set" to analyticCallbackSet,
         ).apply {
             if (paymentMethodLayout != null) {
