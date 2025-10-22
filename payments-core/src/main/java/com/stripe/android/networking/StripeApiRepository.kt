@@ -1458,7 +1458,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     override suspend fun retrievePaymentMethodMessage(
-        paymentMethods: List<String>?,
+        paymentMethods: List<String>,
         amount: Long,
         currency: String,
         country: String?,
@@ -1475,7 +1475,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     "currency" to currency,
                     "locale" to locale,
                     "key" to requestOptions.apiKey
-                )
+                ) +  paymentMethods.mapIndexed { index, paymentMethodType ->
+                    "payment_methods[$index]" to paymentMethodType
+                }
             ),
             PaymentMethodMessageJsonParser()
         ) {

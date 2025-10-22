@@ -8,23 +8,38 @@ import org.junit.Test
 class PaymentMethodMessageJsonParserTest {
 
     @Test
-    fun parse_shouldCreateExpectedObject() {
-        val paymentMethodMessage = PaymentMethodMessageJsonParser().parse(
-            JSONObject(PaymentMethodMessageFixtures.DEFAULT)
-        )
-        assertThat(paymentMethodMessage?.displayHtml)
-            .isEqualTo("<img src=\"https://b.stripecdn.com/payment-method-messaging-statics-srv/assets/klarna_logo_black.png\"><img src=\"https://b.stripecdn.com/payment-method-messaging-statics-srv/assets/afterpay_logo_black.png\"><br/>4 interest-free payments of \$6.25.")
-        assertThat(paymentMethodMessage?.learnMoreUrl)
-            .isEqualTo("js.stripe.com/v3/unified-message-redirect.html#componentName=unifiedMessage&controllerId=__privateStripeController12345&locale=en_US%2520%2528current%2529&publicOptions%5Bamount%5D=2499&publicOptions%5Bclient%5D=ios&publicOptions%5BcountryCode%5D=US&publicOptions%5Bcurrency%5D=USD&publicOptions%5BpaymentMethods%5D%5B0%5D=afterpay_clearpay&publicOptions%5BpaymentMethods%5D%5B1%5D=klarna")
+    fun parsesNoContent() {
+        val message = PaymentMethodMessageJsonParser().parse(PaymentMethodMessageFixtures.NO_CONTENT_JSON)
+        assertThat(message).isNotNull()
+        assertThat(message?.paymentMethods).isEmpty()
+        assertThat(message?.inlinePartnerPromotion).isNull()
+        assertThat(message?.promotion).isNull()
+        assertThat(message?.lightImages).isEmpty()
+        assertThat(message?.darkImages).isEmpty()
+        assertThat(message?.flatImages).isEmpty()
     }
 
     @Test
-    fun parseError_shouldCreatesEmptyObject() {
-        val paymentMethodMessage = PaymentMethodMessageJsonParser().parse(
-            JSONObject("{}")
-        )
+    fun parsesSinglePartner() {
+        val message = PaymentMethodMessageJsonParser().parse(PaymentMethodMessageFixtures.SINGLE_PARTNER_JSON)
+        assertThat(message).isNotNull()
+        assertThat(message?.paymentMethods).hasSize(1)
+        assertThat(message?.inlinePartnerPromotion).isNotNull()
+        assertThat(message?.promotion).isNotNull()
+        assertThat(message?.lightImages).hasSize(1)
+        assertThat(message?.darkImages).hasSize(1)
+        assertThat(message?.flatImages).hasSize(1)
+    }
 
-        assertThat(paymentMethodMessage)
-            .isEqualTo(null)
+    @Test
+    fun parsesMultiPartner() {
+        val message = PaymentMethodMessageJsonParser().parse(PaymentMethodMessageFixtures.MULTI_PARTNER_JSON)
+        assertThat(message).isNotNull()
+        assertThat(message?.paymentMethods).hasSize(3)
+        assertThat(message?.inlinePartnerPromotion).isNull()
+        assertThat(message?.promotion).isNotNull()
+        assertThat(message?.lightImages).hasSize(3)
+        assertThat(message?.darkImages).hasSize(3)
+        assertThat(message?.flatImages).hasSize(3)
     }
 }

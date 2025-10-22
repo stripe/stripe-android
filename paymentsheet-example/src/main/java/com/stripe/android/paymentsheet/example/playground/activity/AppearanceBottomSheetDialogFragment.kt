@@ -1133,7 +1133,7 @@ private fun EmbeddedPicker(
 }
 
 @Composable
-private fun <T> ColorItem(
+internal fun <T> ColorItem(
     label: String,
     currentColor: Color,
     onColorPicked: (Color) -> T,
@@ -1222,7 +1222,7 @@ private fun ColorIcon(innerColor: Color) {
 }
 
 @Composable
-private fun IncrementDecrementItem(
+internal fun IncrementDecrementItem(
     label: String,
     value: Float,
     incrementDecrementAmount: Float = 1f,
@@ -1389,7 +1389,7 @@ private fun RowStyleDropDown(
 }
 
 @Composable
-private fun FontDropDown(fontResId: Int?, fontSelectedCallback: (Int?) -> Unit) {
+internal fun FontDropDown(fontResId: Int?, fontSelectedCallback: (Int?) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val items = mapOf(
         R.font.cursive to "Cursive",

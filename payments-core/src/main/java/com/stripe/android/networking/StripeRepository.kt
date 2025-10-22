@@ -384,7 +384,7 @@ interface StripeRepository {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun retrievePaymentMethodMessage(
-        paymentMethods: List<String>?,
+        paymentMethods: List<String>,
         amount: Long,
         currency: String,
         country: String?,

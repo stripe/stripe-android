@@ -51,15 +51,6 @@ class PaymentMethodMessagingElement @Inject internal constructor(
                 .application(application)
                 .build().element
         }
-
-        suspend fun create(application: Application, configuration: Configuration): PaymentMethodMessagingElement? {
-            val element = DaggerPaymentMethodMessagingComponent.builder()
-                .application(application)
-                .build().element
-            val result = element.configure(configuration)
-            // conditionally return
-            return element
-        }
     }
 
     /**
@@ -70,13 +61,13 @@ class PaymentMethodMessagingElement @Inject internal constructor(
         /**
          * The configuration succeeded and [Content] will display a view.
          */
-        class Succeeded internal constructor() : Result
+        data object Succeeded : Result
 
         /**
          * The configuration succeeded but no content is available to display. (e.g. the amount is less than the
          * minimum for available payment methods).
          */
-        class NoContent internal constructor() : Result
+        data object NoContent : Result
 
         /**
          * The configure call failed e.g. due to network failure or because of an invalid [Configuration].
@@ -144,13 +135,6 @@ class PaymentMethodMessagingElement @Inject internal constructor(
             this.paymentMethodTypes = paymentMethodTypes
         }
 
-//        /**
-//         * The [Appearance] of the PaymentMethodMessagingElement.Content
-//         */
-//        fun appearance(appearance: Appearance?) = apply {
-//            this.appearance = appearance?.build()
-//        }
-
         fun build(): State {
             // Implementation detail: validate that required params are not null, throw exception otherwise.
             return State(
@@ -159,7 +143,6 @@ class PaymentMethodMessagingElement @Inject internal constructor(
                 locale = locale ?: Locale.getDefault().language,
                 countryCode = countryCode,
                 paymentMethodTypes = paymentMethodTypes,
-//                appearance = appearance
             )
         }
     }
@@ -178,7 +161,7 @@ class PaymentMethodMessagingElement @Inject internal constructor(
         }
 
         /**
-         * The font style of PMME text.
+         * The font style of PaymentMethodMessagingElement text.
          * - Note: If null, [MaterialTheme.typography.body1] will be used.
          */
         fun font(font: Font) = apply {
@@ -186,7 +169,7 @@ class PaymentMethodMessagingElement @Inject internal constructor(
         }
 
         /**
-         * The colors of the PMME.
+         * The colors of the PaymentMethodMessagingElement.
          */
         fun colors(colors: Colors) = apply {
             this.colors = colors.build()
@@ -295,33 +278,5 @@ class PaymentMethodMessagingElement @Inject internal constructor(
                 infoIconColor = infoIconColor
             )
         }
-    }
-}
-
-@Composable
-fun PaymentMethodMessagingElement(
-    configuration: Configuration.State,
-    onLoadingStateChanged: ((state: PaymentMethodMessagingElement.Result) -> Unit)?
-) {
-
-    val viewModel: MessagingViewModel = viewModel(
-        key = "test",
-        factory = MessagingViewModel.Factory()
-    )
-
-    val coroutineScope = rememberCoroutineScope()
-    val state by viewModel.state.collectAsState()
-
-    // This code block will re-run whenever configuration changes
-    LaunchedEffect(configuration) {
-        coroutineScope.launch {
-            // Calls the PMME API
-            val result = viewModel.configure(configuration)
-            onLoadingStateChanged?.invoke(result)
-        }
-    }
-
-    state?.let {
-        Text(it.message)
     }
 }
