@@ -64,6 +64,8 @@ internal class OnrampViewModel(
     private val _authorizeEvent = MutableStateFlow<AuthorizeEvent?>(null)
     val authorizeEvent: StateFlow<AuthorizeEvent?> = _authorizeEvent.asStateFlow()
 
+    private val minPasswordLength = 8
+
     private fun handleError(error: Throwable, onNonAuthError: () -> Unit = {}) {
         if (error.isLinkAuthorizationError()) {
             _message.value = "Session expired. Reauthorizing..."
@@ -121,7 +123,7 @@ internal class OnrampViewModel(
             return@launch
         }
 
-        if (password.length < 8) {
+        if (password.length < minPasswordLength) {
             _message.value = "Please enter a valid password (at least 8 characters)"
             return@launch
         }
@@ -156,7 +158,7 @@ internal class OnrampViewModel(
             return@launch
         }
 
-        if (password.length < 8) {
+        if (password.length < minPasswordLength) {
             _message.value = "Please enter a valid password (at least 8 characters)"
             return@launch
         }
