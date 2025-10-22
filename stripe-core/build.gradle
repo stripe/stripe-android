@@ -27,6 +27,7 @@ dependencies {
     implementation libs.kotlin.serialization
     implementation libs.androidx.viewModel
     implementation libs.androidx.savedState
+    implementation libs.icu4j
 
     compileOnly libs.androidx.workManager
 
