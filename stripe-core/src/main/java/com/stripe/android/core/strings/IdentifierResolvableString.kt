@@ -1,8 +1,9 @@
 package com.stripe.android.core.strings
 
 import android.content.Context
+import android.icu.text.MessageFormat
+import android.os.Build
 import androidx.annotation.StringRes
-import com.ibm.icu.text.MessageFormat
 import com.stripe.android.core.strings.transformations.TransformOperation
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
@@ -16,7 +17,11 @@ internal data class IdentifierResolvableString(
     @Suppress("SpreadOperator")
     override fun resolve(context: Context): String {
         return transformations.fold(
-            initial = MessageFormat.format(context.getString(id), *resolveArgs(context, args))
+            initial = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                MessageFormat.format(context.getString(id), *resolveArgs(context, args))
+            } else {
+                context.getString(id, *resolveArgs(context, args))
+            }
         ) { currentValue, transformation ->
             transformation.transform(currentValue)
         }
