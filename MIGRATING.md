@@ -7,13 +7,7 @@
     * `CardScanSheet.CardScanResultCallback` has been removed
     * `ScannedCard` has been removed
     * `CancellationReason` and its implementations (`Closed`, `Back`, `UserCannotScan`, `CameraPermissionDenied`) have been removed                                                                                                      
-- If your app uses CardScanSheet functionality, you can continue using a legacy SDK version that includes it. This will not cause dependency conflicts when using newer Android SDK versions, though we recommend migrating to [CardScan in our PaymentSheet](LINK TO OUR NEW CARDSCAN INTEGRATION DOC) for better long-term support.
-```gradle
-// Use an older CardScan version if you need our legacy CardScanSheet with Android SDK v25+
-implementation 'com.stripe:stripe-android:25.+'
-implementation 'com.stripe:stripecardscan:21.23.0'
-```
-- Also, if you don't use PaymentSheet, you can use a product like[Google Payment Card Recognition API](https://developers.google.com/pay/payment-card-recognition/debit-credit-card-recognition)
+- If you don't use PaymentSheet, you can use a product like [Google Payment Card Recognition API](https://developers.google.com/pay/payment-card-recognition/debit-credit-card-recognition)
 
 ## Migrating from versions < 21.24.0
 - The `stripecardscan` module has been deprecated and will be removed in a future release:
