@@ -112,8 +112,8 @@ internal class OnrampInteractor @Inject constructor(
                             onFailure = { error ->
                                 analyticsService?.track(
                                     OnrampAnalyticsEvent.ErrorOccurred(
-                                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AuthenticateUserWithAuthToken,
-                                        error = error,
+                                        OnrampAnalyticsEvent.ErrorOccurred.Operation.AuthenticateUserWithAuthToken,
+                                        error,
                                     )
                                 )
 

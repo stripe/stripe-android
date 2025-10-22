@@ -1,6 +1,5 @@
 package com.stripe.android.crypto.onramp.example
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast

@@ -3,6 +3,7 @@ package com.stripe.android.crypto.onramp.example
 import android.app.Application
 import android.content.Context
 import androidx.compose.ui.graphics.Color
+import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -29,6 +30,7 @@ import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
@@ -39,10 +41,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.Serializable
-import androidx.core.content.edit
-import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
+import kotlinx.serialization.json.Json
 
 @Suppress("TooManyFunctions")
 internal class OnrampViewModel(
@@ -669,24 +669,24 @@ internal class OnrampViewModel(
         }
     }
 
-    private val PREFS_NAME = "onramp_prefs"
-    private val USER_DATA_KEY = "onramp_user_data"
+    private val prefsName = "onramp_prefs"
+    private val userDataKey = "onramp_user_data"
 
     private fun saveUserData(userData: OnrampUserData) {
-        val prefs = application.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = application.applicationContext.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
         val json = Json.encodeToString(userData)
-        prefs.edit { putString(USER_DATA_KEY, json) }
+        prefs.edit { putString(userDataKey, json) }
     }
 
     private fun loadUserData(): OnrampUserData? {
-        val prefs = application.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val json = prefs.getString(USER_DATA_KEY, null) ?: return null
+        val prefs = application.applicationContext.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+        val json = prefs.getString(userDataKey, null) ?: return null
         return Json.decodeFromString(json)
     }
 
     private fun clearUserData() {
-        val prefs = application.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit { remove(USER_DATA_KEY) }
+        val prefs = application.applicationContext.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+        prefs.edit { remove(userDataKey) }
     }
 
     class Factory : ViewModelProvider.Factory {
