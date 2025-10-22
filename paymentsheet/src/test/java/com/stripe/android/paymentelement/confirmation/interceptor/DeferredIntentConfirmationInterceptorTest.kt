@@ -8,6 +8,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -32,6 +33,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.RadarOptionsFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -363,7 +365,7 @@ class DeferredIntentConfirmationInterceptorTest {
         }
 
     @Test
-    fun `Returns confirm with attestationToken in AndroidVerificationObject for Saved payment method`() = runTest {
+    fun `Returns confirm params with attestationToken for Saved payment method`() = runTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val attestationToken = "test_attestation_token"
         val hCaptchaToken = "test_hcaptcha_token"
@@ -402,12 +404,19 @@ class DeferredIntentConfirmationInterceptorTest {
 
         val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
 
-        assertThat(confirmParams?.radarOptions?.hCaptchaToken).isEqualTo(hCaptchaToken)
-        assertThat(confirmParams?.radarOptions?.androidVerificationObject?.androidVerificationToken).isEqualTo(attestationToken)
+        assertThat(confirmParams?.radarOptions)
+            .isEqualTo(
+                RadarOptionsFactory.create(
+                    hCaptchaToken = hCaptchaToken,
+                    verificationObject = AndroidVerificationObject(
+                        androidVerificationToken = attestationToken
+                    )
+                )
+            )
     }
 
     @Test
-    fun `Returns confirm with null attestationToken when not provided for Saved payment method`() = runTest {
+    fun `Returns confirm params with null attestationToken when not provided for Saved payment method`() = runTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val hCaptchaToken = "test_hcaptcha_token"
 
@@ -445,8 +454,13 @@ class DeferredIntentConfirmationInterceptorTest {
 
         val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
 
-        assertThat(confirmParams?.radarOptions?.hCaptchaToken).isEqualTo(hCaptchaToken)
-        assertThat(confirmParams?.radarOptions?.androidVerificationObject?.androidVerificationToken).isNull()
+        assertThat(confirmParams?.radarOptions)
+            .isEqualTo(
+                RadarOptionsFactory.create(
+                    hCaptchaToken = hCaptchaToken,
+                    verificationObject = AndroidVerificationObject(null)
+                )
+            )
     }
 
     @Test
@@ -487,9 +501,13 @@ class DeferredIntentConfirmationInterceptorTest {
 
         val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
 
-        assertThat(confirmParams?.radarOptions).isNotNull()
-        assertThat(confirmParams?.radarOptions?.hCaptchaToken).isNull()
-        assertThat(confirmParams?.radarOptions?.androidVerificationObject?.androidVerificationToken).isNull()
+        assertThat(confirmParams?.radarOptions)
+            .isEqualTo(
+                RadarOptionsFactory.create(
+                    hCaptchaToken = null,
+                    verificationObject = AndroidVerificationObject(null)
+                )
+            )
     }
 
     @Test
@@ -534,7 +552,15 @@ class DeferredIntentConfirmationInterceptorTest {
 
         val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
 
-        assertThat(confirmParams?.radarOptions?.androidVerificationObject?.androidVerificationToken).isEqualTo(attestationToken)
+        assertThat(confirmParams?.radarOptions)
+            .isEqualTo(
+                RadarOptionsFactory.create(
+                    hCaptchaToken = null,
+                    verificationObject = AndroidVerificationObject(
+                        androidVerificationToken = attestationToken
+                    )
+                )
+            )
     }
 
     companion object {

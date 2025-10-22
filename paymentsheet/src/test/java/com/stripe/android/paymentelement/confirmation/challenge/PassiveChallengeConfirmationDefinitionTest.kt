@@ -459,7 +459,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'toResult' should set androidVerificationObject to null in RadarOptions for New option Success`() {
+    fun `'toResult' should set androidVerificationObject to null for new RadarOptions object`() {
         val definition = createPassiveChallengeConfirmationDefinition()
         val testToken = "test_token"
 
@@ -473,14 +473,13 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val nextStepResult = result.asNextStep()
         val option = nextStepResult.confirmationOption as PaymentMethodConfirmationOption.New
 
-        // Verify the expected RadarOptions structure by checking equality with expected option
-        val createParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
+        val expectedCreateParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
             radarOptions = RadarOptions(
                 hCaptchaToken = testToken,
                 androidVerificationObject = null
             )
         )
-        assertThat(option.createParams).isEqualTo(createParams)
+        assertThat(option.createParams).isEqualTo(expectedCreateParams)
     }
 
     @Test
@@ -508,7 +507,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'toResult' should set androidVerificationObject to null in RadarOptions for New option Success2`() {
+    fun `'toResult' should leave androidVerificationObject as is in RadarOptions for New option`() {
         val definition = createPassiveChallengeConfirmationDefinition()
         val testToken = "test_token"
         val attestationToken = "attestation_token"
@@ -530,14 +529,13 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val nextStepResult = result.asNextStep()
         val option = nextStepResult.confirmationOption as PaymentMethodConfirmationOption.New
 
-        // Verify the expected RadarOptions structure by checking equality with expected option
-        val createParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
+        val expectedCreateParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
             radarOptions = RadarOptions(
                 hCaptchaToken = testToken,
                 androidVerificationObject = null
             )
         )
-        assertThat(option.createParams).isEqualTo(createParams)
+        assertThat(option.createParams).isEqualTo(expectedCreateParams)
     }
 
     private fun createPassiveChallengeConfirmationDefinition(

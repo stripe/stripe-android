@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.interceptor
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -11,6 +12,7 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentelement.confirmation.createIntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.RadarOptionsFactory
 import com.stripe.android.testing.SetupIntentFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -138,7 +140,7 @@ class IntentFirstConfirmationInterceptorTest {
             )
 
             val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
-            assertRadarOptionsIsNull(confirmParams)
+            assertThat(confirmParams?.radarOptions).isNull()
         }
 
     @Test
@@ -159,7 +161,7 @@ class IntentFirstConfirmationInterceptorTest {
     }
 
     @Test
-    fun `Returns confirm params with androidVerificationObject set to null for Saved payment method`() =
+    fun `Returns confirm params with androidVerificationToken set to null for Saved pm with no attestation token`() =
         runInterceptorScenario(
             initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
         ) { interceptor ->
@@ -177,31 +179,15 @@ class IntentFirstConfirmationInterceptorTest {
 
             val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
 
-            assertThat(confirmParams?.radarOptions?.hCaptchaToken).isEqualTo(hCaptchaToken)
-            assertThat(confirmParams?.radarOptions?.androidVerificationObject).isNull()
-        }
-
-    @Test
-    fun `Returns confirm params with RadarOptions always created for Saved payment method with null hCaptchaToken`() =
-        runInterceptorScenario(
-            initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
-        ) { interceptor ->
-            val nextStep = interceptor.intercept(
-                intent = PaymentIntentFactory.create(),
-                confirmationOption = PaymentMethodConfirmationOption.Saved(
-                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                    optionsParams = null,
-                    hCaptchaToken = null,
-                    passiveCaptchaParams = null
-                ),
-                shippingValues = null,
-            )
-
-            val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
-
-            assertThat(confirmParams?.radarOptions).isNotNull()
-            assertThat(confirmParams?.radarOptions?.hCaptchaToken).isNull()
-            assertThat(confirmParams?.radarOptions?.androidVerificationObject).isNull()
+            assertThat(confirmParams?.radarOptions)
+                .isEqualTo(
+                    RadarOptionsFactory.create(
+                        hCaptchaToken = hCaptchaToken,
+                        verificationObject = AndroidVerificationObject(
+                            androidVerificationToken = null
+                        )
+                    )
+                )
         }
 
     @OptIn(SharedPaymentTokenSessionPreview::class)

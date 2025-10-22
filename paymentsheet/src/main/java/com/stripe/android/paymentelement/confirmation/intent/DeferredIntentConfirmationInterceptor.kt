@@ -201,7 +201,8 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                     confirmationOption = confirmationOption,
                     paymentMethod = paymentMethod,
                     shippingValues = shippingValues,
-                    hCaptchaToken = hCaptchaToken
+                    hCaptchaToken = hCaptchaToken,
+                    attestationToken = attestationToken
                 )
             }
         }.getOrElse { error ->
@@ -253,7 +254,8 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         confirmationOption: PaymentMethodConfirmationOption,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        hCaptchaToken: String?
+        hCaptchaToken: String?,
+        attestationToken: String?,
     ): ConfirmationDefinition.Action<Args> {
         DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation, paymentMethod)
         return confirmActionHelper.createConfirmAction(
@@ -268,12 +270,10 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                 extraParams = (confirmationOption as? PaymentMethodConfirmationOption.New)?.extraParams,
                 intentConfigSetupFutureUsage = intentConfiguration
                     .mode.setupFutureUse?.toConfirmParamsSetupFutureUsage(),
-                radarOptions = hCaptchaToken?.let {
-                    RadarOptions(
-                        hCaptchaToken = it,
-                        androidVerificationObject = null
-                    )
-                },
+                radarOptions = RadarOptions(
+                    hCaptchaToken = hCaptchaToken,
+                    androidVerificationObject = AndroidVerificationObject(attestationToken)
+                ),
                 clientAttributionMetadata = clientAttributionMetadata,
             )
         }
