@@ -1599,7 +1599,8 @@ internal class IdentityViewModel(
                             cameraLensModel = currentCameraLensModel,
                             exposureIso = currentExposureIso,
                             focalLength = currentFocalLength,
-                            exposureDuration = currentExposureDuration
+                            exposureDuration = currentExposureDuration,
+                            isVirtualCamera = currentIsVirtualCamera
                         )
                     } else {
                         CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
@@ -1651,7 +1652,6 @@ internal class IdentityViewModel(
                                     uploadMethod = requireNotNull(front.uploadMethod),
                                     cameraLensModel = currentCameraLensModel,
                                     exposureIso = currentExposureIso,
-                                    focalLength = currentFocalLength
                                     focalLength = currentFocalLength,
                                     exposureDuration = currentExposureDuration,
                                     isVirtualCamera = currentIsVirtualCamera
@@ -1680,7 +1680,9 @@ internal class IdentityViewModel(
                                     uploadMethod = requireNotNull(back.uploadMethod),
                                     cameraLensModel = currentCameraLensModel,
                                     exposureIso = currentExposureIso,
-                                    focalLength = currentFocalLength
+                                    focalLength = currentFocalLength,
+                                    exposureDuration = currentExposureDuration,
+                                    isVirtualCamera = currentIsVirtualCamera
                                 )
                             ),
                             fromRoute = DocumentUploadDestination.ROUTE.route
