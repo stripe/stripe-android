@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -30,14 +31,16 @@ internal class PopupPayloadTest {
             value = createPayload(),
         )
 
-        assertThat(json).isEqualTo("""{"publishableKey":"pk_test_abc","stripeAccount":"123","merchantInfo":{"businessName":"Jay's Taco Stand","country":"US"},"customerInfo":{"email":"jaystacostandfake@gmail.com","country":"US"},"paymentInfo":{"currency":"USD","amount":5555},"appId":"example.stripe.unittest","locale":"US","paymentUserAgent":"test","paymentObject":"link_payment_method","intentMode":"payment","setupFutureUsage":true,"cardBrandChoice":{"isMerchantEligibleForCBC":true,"stripePreferredNetworks":["cartes_bancaires"]},"flags":{"link_authenticated_change_event_enabled":false,"link_bank_incentives_enabled":false,"link_bank_onboarding_enabled":false,"link_email_verification_login_enabled":false,"link_financial_incentives_experiment_enabled":false,"link_local_storage_login_enabled":true,"link_only_for_payment_method_types_enabled":false,"link_passthrough_mode_enabled":true},"linkFundingSources":["CARD"],"path":"mobile_pay","integrationType":"mobile","loggerMetadata":{"mobile_session_id":"$currentSessionId"},"experiments":{}}""")
+        assertThat(json).isEqualTo(
+            """{"publishableKey":"pk_test_abc","stripeAccount":"123","merchantInfo":{"businessName":"Jay's Taco Stand","country":"US"},"customerInfo":{"email":"jaystacostandfake@stripe.com","country":"US"},"paymentInfo":{"currency":"USD","amount":5555},"appId":"example.stripe.unittest","locale":"US","paymentUserAgent":"test","paymentObject":"link_payment_method","intentMode":"payment","setupFutureUsage":true,"cardBrandChoice":{"isMerchantEligibleForCBC":true,"stripePreferredNetworks":["cartes_bancaires"]},"flags":{"link_authenticated_change_event_enabled":false,"link_bank_incentives_enabled":false,"link_bank_onboarding_enabled":false,"link_email_verification_login_enabled":false,"link_financial_incentives_experiment_enabled":false,"link_local_storage_login_enabled":true,"link_only_for_payment_method_types_enabled":false,"link_passthrough_mode_enabled":true},"linkFundingSources":["CARD"],"clientAttributionMetadata":{"merchant_integration_source":"elements","merchant_integration_subtype":"mobile","merchant_integration_version":"stripe-android/21.28.2","client_session_id":"$currentSessionId","payment_method_selection_flow":"automatic","payment_intent_creation_flow":"standard","elements_session_config_id":"e961790f-43ed-4fcc-a534-74eeca28d042"},"path":"mobile_pay","integrationType":"mobile","loggerMetadata":{"mobile_session_id":"$currentSessionId"},"experiments":{}}"""
+        )
     }
 
     @Test
     fun testToUrl() {
         AnalyticsRequestFactory.setSessionId(UUID.fromString("537a88ff-a54f-42cc-ba52-c7c5623730b6"))
 
-        assertThat(createPayload().toUrl()).isEqualTo("https://checkout.link.com/#eyJwdWJsaXNoYWJsZUtleSI6InBrX3Rlc3RfYWJjIiwic3RyaXBlQWNjb3VudCI6IjEyMyIsIm1lcmNoYW50SW5mbyI6eyJidXNpbmVzc05hbWUiOiJKYXkncyBUYWNvIFN0YW5kIiwiY291bnRyeSI6IlVTIn0sImN1c3RvbWVySW5mbyI6eyJlbWFpbCI6ImpheXN0YWNvc3RhbmRmYWtlQGdtYWlsLmNvbSIsImNvdW50cnkiOiJVUyJ9LCJwYXltZW50SW5mbyI6eyJjdXJyZW5jeSI6IlVTRCIsImFtb3VudCI6NTU1NX0sImFwcElkIjoiZXhhbXBsZS5zdHJpcGUudW5pdHRlc3QiLCJsb2NhbGUiOiJVUyIsInBheW1lbnRVc2VyQWdlbnQiOiJ0ZXN0IiwicGF5bWVudE9iamVjdCI6ImxpbmtfcGF5bWVudF9tZXRob2QiLCJpbnRlbnRNb2RlIjoicGF5bWVudCIsInNldHVwRnV0dXJlVXNhZ2UiOnRydWUsImNhcmRCcmFuZENob2ljZSI6eyJpc01lcmNoYW50RWxpZ2libGVGb3JDQkMiOnRydWUsInN0cmlwZVByZWZlcnJlZE5ldHdvcmtzIjpbImNhcnRlc19iYW5jYWlyZXMiXX0sImZsYWdzIjp7ImxpbmtfYXV0aGVudGljYXRlZF9jaGFuZ2VfZXZlbnRfZW5hYmxlZCI6ZmFsc2UsImxpbmtfYmFua19pbmNlbnRpdmVzX2VuYWJsZWQiOmZhbHNlLCJsaW5rX2Jhbmtfb25ib2FyZGluZ19lbmFibGVkIjpmYWxzZSwibGlua19lbWFpbF92ZXJpZmljYXRpb25fbG9naW5fZW5hYmxlZCI6ZmFsc2UsImxpbmtfZmluYW5jaWFsX2luY2VudGl2ZXNfZXhwZXJpbWVudF9lbmFibGVkIjpmYWxzZSwibGlua19sb2NhbF9zdG9yYWdlX2xvZ2luX2VuYWJsZWQiOnRydWUsImxpbmtfb25seV9mb3JfcGF5bWVudF9tZXRob2RfdHlwZXNfZW5hYmxlZCI6ZmFsc2UsImxpbmtfcGFzc3Rocm91Z2hfbW9kZV9lbmFibGVkIjp0cnVlfSwibGlua0Z1bmRpbmdTb3VyY2VzIjpbIkNBUkQiXSwicGF0aCI6Im1vYmlsZV9wYXkiLCJpbnRlZ3JhdGlvblR5cGUiOiJtb2JpbGUiLCJsb2dnZXJNZXRhZGF0YSI6eyJtb2JpbGVfc2Vzc2lvbl9pZCI6IjUzN2E4OGZmLWE1NGYtNDJjYy1iYTUyLWM3YzU2MjM3MzBiNiJ9LCJleHBlcmltZW50cyI6e319")
+        assertThat(createPayload().toUrl()).isEqualTo("https://checkout.link.com/#eyJwdWJsaXNoYWJsZUtleSI6InBrX3Rlc3RfYWJjIiwic3RyaXBlQWNjb3VudCI6IjEyMyIsIm1lcmNoYW50SW5mbyI6eyJidXNpbmVzc05hbWUiOiJKYXkncyBUYWNvIFN0YW5kIiwiY291bnRyeSI6IlVTIn0sImN1c3RvbWVySW5mbyI6eyJlbWFpbCI6ImpheXN0YWNvc3RhbmRmYWtlQHN0cmlwZS5jb20iLCJjb3VudHJ5IjoiVVMifSwicGF5bWVudEluZm8iOnsiY3VycmVuY3kiOiJVU0QiLCJhbW91bnQiOjU1NTV9LCJhcHBJZCI6ImV4YW1wbGUuc3RyaXBlLnVuaXR0ZXN0IiwibG9jYWxlIjoiVVMiLCJwYXltZW50VXNlckFnZW50IjoidGVzdCIsInBheW1lbnRPYmplY3QiOiJsaW5rX3BheW1lbnRfbWV0aG9kIiwiaW50ZW50TW9kZSI6InBheW1lbnQiLCJzZXR1cEZ1dHVyZVVzYWdlIjp0cnVlLCJjYXJkQnJhbmRDaG9pY2UiOnsiaXNNZXJjaGFudEVsaWdpYmxlRm9yQ0JDIjp0cnVlLCJzdHJpcGVQcmVmZXJyZWROZXR3b3JrcyI6WyJjYXJ0ZXNfYmFuY2FpcmVzIl19LCJmbGFncyI6eyJsaW5rX2F1dGhlbnRpY2F0ZWRfY2hhbmdlX2V2ZW50X2VuYWJsZWQiOmZhbHNlLCJsaW5rX2JhbmtfaW5jZW50aXZlc19lbmFibGVkIjpmYWxzZSwibGlua19iYW5rX29uYm9hcmRpbmdfZW5hYmxlZCI6ZmFsc2UsImxpbmtfZW1haWxfdmVyaWZpY2F0aW9uX2xvZ2luX2VuYWJsZWQiOmZhbHNlLCJsaW5rX2ZpbmFuY2lhbF9pbmNlbnRpdmVzX2V4cGVyaW1lbnRfZW5hYmxlZCI6ZmFsc2UsImxpbmtfbG9jYWxfc3RvcmFnZV9sb2dpbl9lbmFibGVkIjp0cnVlLCJsaW5rX29ubHlfZm9yX3BheW1lbnRfbWV0aG9kX3R5cGVzX2VuYWJsZWQiOmZhbHNlLCJsaW5rX3Bhc3N0aHJvdWdoX21vZGVfZW5hYmxlZCI6dHJ1ZX0sImxpbmtGdW5kaW5nU291cmNlcyI6WyJDQVJEIl0sImNsaWVudEF0dHJpYnV0aW9uTWV0YWRhdGEiOnsibWVyY2hhbnRfaW50ZWdyYXRpb25fc291cmNlIjoiZWxlbWVudHMiLCJtZXJjaGFudF9pbnRlZ3JhdGlvbl9zdWJ0eXBlIjoibW9iaWxlIiwibWVyY2hhbnRfaW50ZWdyYXRpb25fdmVyc2lvbiI6InN0cmlwZS1hbmRyb2lkLzIxLjI4LjIiLCJjbGllbnRfc2Vzc2lvbl9pZCI6IjUzN2E4OGZmLWE1NGYtNDJjYy1iYTUyLWM3YzU2MjM3MzBiNiIsInBheW1lbnRfbWV0aG9kX3NlbGVjdGlvbl9mbG93IjoiYXV0b21hdGljIiwicGF5bWVudF9pbnRlbnRfY3JlYXRpb25fZmxvdyI6InN0YW5kYXJkIiwiZWxlbWVudHNfc2Vzc2lvbl9jb25maWdfaWQiOiJlOTYxNzkwZi00M2VkLTRmY2MtYTUzNC03NGVlY2EyOGQwNDIifSwicGF0aCI6Im1vYmlsZV9wYXkiLCJpbnRlZ3JhdGlvblR5cGUiOiJtb2JpbGUiLCJsb2dnZXJNZXRhZGF0YSI6eyJtb2JpbGVfc2Vzc2lvbl9pZCI6IjUzN2E4OGZmLWE1NGYtNDJjYy1iYTUyLWM3YzU2MjM3MzBiNiJ9LCJleHBlcmltZW50cyI6e319")
     }
 
     @Test
@@ -373,8 +376,24 @@ internal class PopupPayloadTest {
         assertThat(payload.linkFundingSources).containsExactly("CARD", "BANK_ACCOUNT").inOrder()
     }
 
+    @Test
+    fun `create sets client attribution metadata correctly`() {
+        val linkConfiguration = createLinkConfiguration()
+        val payload = PopupPayload.create(
+            configuration = linkConfiguration,
+            context = getContext(Locale.CANADA),
+            paymentUserAgent = "Android",
+            publishableKey = "pk_123",
+            stripeAccount = "str_123"
+        )
+
+        assertThat(payload.clientAttributionMetadata).isEqualTo(
+            linkConfiguration.clientAttributionMetadata.toParamMap()
+        )
+    }
+
     private fun createLinkConfiguration(
-        customerCountryCode: String?,
+        customerCountryCode: String? = null,
         cardBrandChoice: LinkConfiguration.CardBrandChoice? = null,
         intent: StripeIntent = PaymentIntentFactory.create(),
         passthroughModeEnabled: Boolean = false
@@ -397,7 +416,7 @@ internal class PopupPayloadTest {
             country = "US",
         ),
         customerInfo = PopupPayload.CustomerInfo(
-            email = "jaystacostandfake@gmail.com",
+            email = "jaystacostandfake@stripe.com",
             country = "US",
         ),
         paymentInfo = PopupPayload.PaymentInfo(
@@ -425,6 +444,9 @@ internal class PopupPayloadTest {
             "link_passthrough_mode_enabled" to true,
         ),
         linkFundingSources = listOf("CARD"),
+        clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.copy(
+            stripeSdkVersion = "21.28.2",
+        ).toParamMap(),
     )
 
     private fun getContext(locale: Locale): Context {
