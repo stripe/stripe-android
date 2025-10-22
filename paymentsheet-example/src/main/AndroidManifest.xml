@@ -48,6 +48,7 @@
         <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.customersheet.CustomerSheetExampleActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity" />
+        <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.messagingelement.MessagingElementActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.playground.activity.FawryActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity" />
