@@ -25,7 +25,8 @@ internal class PopupPayloadTest {
 
     @Test
     fun testJsonSerialization() {
-        val currentSessionId = AnalyticsRequestFactory.sessionId
+        val currentSessionId = "537a88ff-a54f-42cc-ba52-c7c5623730b6"
+        AnalyticsRequestFactory.setSessionId(UUID.fromString("537a88ff-a54f-42cc-ba52-c7c5623730b6"))
         val json = PopupPayload.PopupPayloadJson.encodeToString(
             serializer = PopupPayload.serializer(),
             value = createPayload(),
