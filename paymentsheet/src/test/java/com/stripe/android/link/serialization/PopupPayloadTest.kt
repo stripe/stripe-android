@@ -32,42 +32,9 @@ internal class PopupPayloadTest {
             value = createPayload(),
         )
 
-        // Validate key fields individually to make it clear which part fails
-        assertThat(json).contains(""""publishableKey":"pk_test_abc"""")
-        assertThat(json).contains(""""stripeAccount":"123"""")
-        assertThat(json).contains(""""businessName":"Jay's Taco Stand"""")
-        assertThat(json).contains(""""country":"US"""")
-        assertThat(json).contains(""""email":"jaystacostandfake@stripe.com"""")
-        assertThat(json).contains(""""currency":"USD"""")
-        assertThat(json).contains(""""amount":5555""")
-        assertThat(json).contains(""""appId":"example.stripe.unittest"""")
-        assertThat(json).contains(""""locale":"US"""")
-        assertThat(json).contains(""""paymentUserAgent":"test"""")
-        assertThat(json).contains(""""paymentObject":"link_payment_method"""")
-        assertThat(json).contains(""""intentMode":"payment"""")
-        assertThat(json).contains(""""setupFutureUsage":true""")
-        assertThat(json).contains(""""isMerchantEligibleForCBC":true""")
-        assertThat(json).contains(""""stripePreferredNetworks":["cartes_bancaires"]""")
-        assertThat(json).contains(""""link_authenticated_change_event_enabled":false""")
-        assertThat(json).contains(""""link_bank_incentives_enabled":false""")
-        assertThat(json).contains(""""link_bank_onboarding_enabled":false""")
-        assertThat(json).contains(""""link_email_verification_login_enabled":false""")
-        assertThat(json).contains(""""link_financial_incentives_experiment_enabled":false""")
-        assertThat(json).contains(""""link_local_storage_login_enabled":true""")
-        assertThat(json).contains(""""link_only_for_payment_method_types_enabled":false""")
-        assertThat(json).contains(""""link_passthrough_mode_enabled":true""")
-        assertThat(json).contains(""""linkFundingSources":["CARD"]""")
-        assertThat(json).contains(""""merchant_integration_source":"elements"""")
-        assertThat(json).contains(""""merchant_integration_subtype":"mobile"""")
-        assertThat(json).contains(""""merchant_integration_version":"stripe-android/21.28.2"""")
-        assertThat(json).contains(""""client_session_id":"$currentSessionId"""")
-        assertThat(json).contains(""""payment_method_selection_flow":"automatic"""")
-        assertThat(json).contains(""""payment_intent_creation_flow":"standard"""")
-        assertThat(json).contains(""""elements_session_config_id":"e961790f-43ed-4fcc-a534-74eeca28d042"""")
-        assertThat(json).contains(""""path":"mobile_pay"""")
-        assertThat(json).contains(""""integrationType":"mobile"""")
-        assertThat(json).contains(""""mobile_session_id":"$currentSessionId"""")
-        assertThat(json).contains(""""experiments":{}""")
+        assertThat(json).isEqualTo(
+            """{"publishableKey":"pk_test_abc","stripeAccount":"123","merchantInfo":{"businessName":"Jay's Taco Stand","country":"US"},"customerInfo":{"email":"jaystacostandfake@stripe.com","country":"US"},"paymentInfo":{"currency":"USD","amount":5555},"appId":"example.stripe.unittest","locale":"US","paymentUserAgent":"test","paymentObject":"link_payment_method","intentMode":"payment","setupFutureUsage":true,"cardBrandChoice":{"isMerchantEligibleForCBC":true,"stripePreferredNetworks":["cartes_bancaires"]},"flags":{"link_authenticated_change_event_enabled":false,"link_bank_incentives_enabled":false,"link_bank_onboarding_enabled":false,"link_email_verification_login_enabled":false,"link_financial_incentives_experiment_enabled":false,"link_local_storage_login_enabled":true,"link_only_for_payment_method_types_enabled":false,"link_passthrough_mode_enabled":true},"linkFundingSources":["CARD"],"clientAttributionMetadata":{"merchant_integration_source":"elements","merchant_integration_subtype":"mobile","merchant_integration_version":"stripe-android/21.28.2","client_session_id":"$currentSessionId","payment_method_selection_flow":"automatic","payment_intent_creation_flow":"standard","elements_session_config_id":"e961790f-43ed-4fcc-a534-74eeca28d042"},"path":"mobile_pay","integrationType":"mobile","loggerMetadata":{"mobile_session_id":"$currentSessionId"},"experiments":{}}"""
+        )
     }
 
     @Test
@@ -478,7 +445,9 @@ internal class PopupPayloadTest {
             "link_passthrough_mode_enabled" to true,
         ),
         linkFundingSources = listOf("CARD"),
-        clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.toParamMap(),
+        clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.copy(
+            stripeSdkVersion = "21.28.2",
+        ).toParamMap(),
     )
 
     private fun getContext(locale: Locale): Context {

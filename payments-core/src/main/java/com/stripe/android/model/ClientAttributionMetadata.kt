@@ -13,13 +13,14 @@ data class ClientAttributionMetadata(
     @get:VisibleForTesting val elementsSessionConfigId: String?,
     @get:VisibleForTesting val paymentIntentCreationFlow: PaymentIntentCreationFlow?,
     @get:VisibleForTesting val paymentMethodSelectionFlow: PaymentMethodSelectionFlow?,
+    private val stripeSdkVersion: String = StripeSdkVersion.VERSION_NAME,
 ) : StripeParamsModel, Parcelable {
 
     override fun toParamMap(): Map<String, String> {
         return mapOf(
             "merchant_integration_source" to "elements",
             "merchant_integration_subtype" to "mobile",
-            "merchant_integration_version" to "stripe-android/${StripeSdkVersion.VERSION_NAME}",
+            "merchant_integration_version" to "stripe-android/$stripeSdkVersion",
             "client_session_id" to AnalyticsRequestFactory.sessionId.toString(),
         ).plus(
             paymentMethodSelectionFlow?.let {
