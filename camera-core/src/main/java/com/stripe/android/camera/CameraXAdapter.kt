@@ -301,7 +301,7 @@ class CameraXAdapter(
                 val camId = Camera2CameraInfo.from(requireNotNull(camera).cameraInfo).cameraId
                 val cm = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
                 val chars = cm.getCameraCharacteristics(camId)
-                
+
                 val capabilities = chars.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES) ?: intArrayOf()
                 // LOGICAL_MULTI_CAMERA indicates a virtual camera combining multiple physical cameras
                 capabilities.contains(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA)
