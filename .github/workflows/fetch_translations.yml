@@ -7,6 +7,8 @@ on:
 jobs:
   fetch-lokalize-translations:
     runs-on: macos-latest
+    permissions:
+      contents: read
     steps:
       - name: Check out the current state
         uses: actions/checkout@v4

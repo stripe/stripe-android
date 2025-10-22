@@ -406,6 +406,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                     consumerSessionClientSecret = "secret",
                     extraParams = null,
                     allowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
+                    clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                 )
             }
 

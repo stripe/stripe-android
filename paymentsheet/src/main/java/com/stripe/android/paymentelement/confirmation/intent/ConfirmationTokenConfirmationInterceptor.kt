@@ -184,7 +184,12 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 ) {
                     create(
                         confirmationTokenId = confirmationTokenId,
-                        radarOptions = hCaptchaToken?.let { RadarOptions(it) },
+                        radarOptions = hCaptchaToken?.let {
+                            RadarOptions(
+                                hCaptchaToken = it,
+                                androidVerificationObject = null,
+                            )
+                        },
                     )
                 }
             }

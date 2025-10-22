@@ -158,6 +158,7 @@ internal open class FakeLinkRepository : LinkRepository {
         userEmail: String,
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ) = createCardPaymentDetailsResult
 
     override suspend fun createBankAccountPaymentDetails(
@@ -187,7 +188,8 @@ internal open class FakeLinkRepository : LinkRepository {
 
     override suspend fun createPaymentMethod(
         consumerSessionClientSecret: String,
-        paymentMethod: LinkPaymentMethod
+        paymentMethod: LinkPaymentMethod,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ) = createPaymentMethod
 
     override suspend fun logOut(
