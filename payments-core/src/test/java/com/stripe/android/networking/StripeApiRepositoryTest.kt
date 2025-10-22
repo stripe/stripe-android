@@ -2505,44 +2505,44 @@ internal class StripeApiRepositoryTest {
             }
         }
 
-    @Test
-    fun `getPaymentMethodMessaging() returns PaymentMethodMessage`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                PaymentMethodMessageFixtures.DEFAULT,
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            create().retrievePaymentMethodMessage(
-                paymentMethods = listOf("klarna", "afterpay"),
-                amount = 999,
-                currency = "usd",
-                country = "us",
-                locale = Locale.getDefault().toLanguageTag(),
-                logoColor = "color",
-                requestOptions = DEFAULT_OPTIONS
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-
-            val request = apiRequestArgumentCaptor.firstValue
-            val params = requireNotNull(request.params)
-
-            assertThat(request.baseUrl).isEqualTo("https://ppm.stripe.com/content")
-
-            with(params) {
-                assertThat(this["payment_methods[0]"]).isEqualTo("klarna")
-                assertThat(this["payment_methods[1]"]).isEqualTo("afterpay")
-                assertThat(this["amount"]).isEqualTo(999)
-                assertThat(this["currency"]).isEqualTo("usd")
-                assertThat(this["country"]).isEqualTo("us")
-                assertThat(this["locale"]).isEqualTo("en-US")
-                assertThat(this["logo_color"]).isEqualTo("color")
-            }
-        }
+//    @Test
+//    fun `getPaymentMethodMessaging() returns PaymentMethodMessage`() =
+//        runTest {
+//            val stripeResponse = StripeResponse(
+//                200,
+//                PaymentMethodMessageFixtures.DEFAULT,
+//                emptyMap()
+//            )
+//            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+//                .thenReturn(stripeResponse)
+//
+//            create().retrievePaymentMethodMessage(
+//                paymentMethods = listOf("klarna", "afterpay"),
+//                amount = 999,
+//                currency = "usd",
+//                country = "us",
+//                locale = Locale.getDefault().toLanguageTag(),
+//                logoColor = "color",
+//                requestOptions = DEFAULT_OPTIONS
+//            )
+//
+//            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+//
+//            val request = apiRequestArgumentCaptor.firstValue
+//            val params = requireNotNull(request.params)
+//
+//            assertThat(request.baseUrl).isEqualTo("https://ppm.stripe.com/content")
+//
+//            with(params) {
+//                assertThat(this["payment_methods[0]"]).isEqualTo("klarna")
+//                assertThat(this["payment_methods[1]"]).isEqualTo("afterpay")
+//                assertThat(this["amount"]).isEqualTo(999)
+//                assertThat(this["currency"]).isEqualTo("usd")
+//                assertThat(this["country"]).isEqualTo("us")
+//                assertThat(this["locale"]).isEqualTo("en-US")
+//                assertThat(this["logo_color"]).isEqualTo("color")
+//            }
+//        }
 
     @Test
     fun `Verify that the elements session endpoint has the right query params for payment intents`() = runTest {

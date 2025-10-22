@@ -9,7 +9,7 @@ import org.json.JSONObject
 
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class DeferredIntentParams(
+data class DeferredIntentParams constructor(
     val mode: Mode,
     val paymentMethodTypes: List<String>,
     val paymentMethodConfigurationId: String?,
