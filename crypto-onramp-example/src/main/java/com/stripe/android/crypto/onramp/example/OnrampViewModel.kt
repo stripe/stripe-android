@@ -130,8 +130,8 @@ internal class OnrampViewModel(
             return@launch
         }
 
-        if (password.isBlank()) {
-            _message.value = "Please enter an valid password"
+        if (password.length < 8) {
+            _message.value = "Please enter a valid password (at least 8 characters)"
             return@launch
         }
 
@@ -165,8 +165,8 @@ internal class OnrampViewModel(
             return@launch
         }
 
-        if (password.isBlank()) {
-            _message.value = "Please enter an valid password"
+        if (password.length < 8) {
+            _message.value = "Please enter a valid password (at least 8 characters)"
             return@launch
         }
 
