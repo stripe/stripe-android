@@ -210,17 +210,20 @@ internal class OnrampViewModel(
                             _uiState.update { state -> state.copy(screen = Screen.AuthenticatedOperations) }
                         }
                         is OnrampTokenAuthenticationResult.Failed -> {
+                            clearUserData()
                             _message.value = "Seamless sign-in failed: ${authenticateResult.error.message}"
                             _uiState.update { state -> state.copy(screen = Screen.LoginSignup) }
                         }
                     }
                 }
                 is Result.Failure -> {
+                    clearUserData()
                     _message.value = "Seamless sign-in failed: ${result.error.message}"
                     _uiState.update { state -> state.copy(screen = Screen.LoginSignup) }
                 }
             }
         } ?: run {
+            clearUserData()
             _message.value = "No auth token found, please log in again"
             _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
         }
