@@ -24,6 +24,6 @@ internal data class GooglePayConfirmationOption(
         val customLabel: String?,
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         val cardBrandFilter: CardBrandFilter,
-        val additionalEnabledNetworks: List<String>?
+        val additionalEnabledNetworks: List<String> = emptyList()
     ) : Parcelable
 }

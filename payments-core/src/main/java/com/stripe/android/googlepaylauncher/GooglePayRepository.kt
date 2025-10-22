@@ -6,6 +6,7 @@ import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
@@ -74,7 +75,7 @@ internal class DefaultGooglePayRepository(
         googlePayConfig.additionalEnabledNetworks
     )
 
-    private val googlePayJsonFactory = GooglePayJsonFactory(context, cardBrandFilter = cardBrandFilter, additionalEnabledNetworks = additionalEnabledNetworks)
+    private val googlePayJsonFactory = GooglePayJsonFactory(GooglePayConfig(context), cardBrandFilter = cardBrandFilter, additionalEnabledNetworks = additionalEnabledNetworks)
 
     private val googlePayAvailabilityClient: GooglePayAvailabilityClient by lazy {
         GooglePayRepository.googlePayAvailabilityClientFactory.create(
