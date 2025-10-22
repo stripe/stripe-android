@@ -53,6 +53,13 @@ internal abstract class IdentityCameraManager {
     }
 
     /**
+     * Check if the current camera is a virtual/logical camera (combining multiple physical cameras).
+     */
+    fun isVirtualCamera(): Boolean? {
+        return (cameraAdapter as? CameraXAdapter)?.isVirtualCamera()
+    }
+
+    /**
      * Get current exposure duration (in milliseconds) if available.
      */
     fun getExposureDuration(): Long? {

@@ -41,6 +41,7 @@ internal fun LiveCaptureLaunchedEffect(
             cameraManager?.getExposureIso()?.let { identityViewModel.setCameraExposureIso(it) }
             cameraManager?.getFocalLength()?.let { identityViewModel.setCameraFocalLength(it) }
             cameraManager?.getExposureDuration()?.let { identityViewModel.setCameraExposureDuration(it) }
+            identityViewModel.setIsVirtualCamera(cameraManager?.isVirtualCamera())
             identityViewModel.uploadScanResult(
                 scanResult,
                 verificationPage
