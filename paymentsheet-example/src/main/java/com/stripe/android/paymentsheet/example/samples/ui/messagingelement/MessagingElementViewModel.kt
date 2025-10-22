@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.example.samples.networking.toCheckoutRequ
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
@@ -30,6 +31,8 @@ internal class MessagingElementViewModel(
 ) : AndroidViewModel(application) {
 
     val paymentMethodMessagingElement = PaymentMethodMessagingElement.create(getApplication())
+    private val _result = MutableStateFlow<PaymentMethodMessagingElement.Result?>(null)
+    val result: StateFlow<PaymentMethodMessagingElement.Result?> = _result.asStateFlow()
 
     fun configurePaymentMethodMessagingElement(
         amount: Long,
@@ -42,7 +45,7 @@ internal class MessagingElementViewModel(
             PaymentMethod.Type.fromCode(it)
         }
         viewModelScope.launch {
-            val result = paymentMethodMessagingElement.configure(
+            _result.value = paymentMethodMessagingElement.configure(
                 configuration = PaymentMethodMessagingElement.Configuration()
                     .amount(amount)
                     .currency(currency)

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.samples.ui.messagingelement
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -19,16 +20,19 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentmethodmessaging.view.messagingelement.PaymentMethodMessagingElement
 import com.stripe.android.paymentsheet.example.playground.activity.IncrementDecrementItem
+import kotlinx.coroutines.flow.collectLatest
 
 internal class MessagingElementActivity : AppCompatActivity() {
 
@@ -54,6 +58,9 @@ internal class MessagingElementActivity : AppCompatActivity() {
                 Box(Modifier.padding(16.dp)) {
                     viewModel.paymentMethodMessagingElement.Content(appearance)
                 }
+
+                val result by viewModel.result.collectAsState()
+                ResultToast(result)
 
                 // Config
                 IncrementDecrementItem(
@@ -179,6 +186,12 @@ internal class MessagingElementActivity : AppCompatActivity() {
 //                }
             }
         }
+    }
+
+    @Composable
+    private fun ResultToast(result: PaymentMethodMessagingElement.Result?) {
+        val context = LocalContext.current
+        result?.let { Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show() }
     }
 
     @Composable

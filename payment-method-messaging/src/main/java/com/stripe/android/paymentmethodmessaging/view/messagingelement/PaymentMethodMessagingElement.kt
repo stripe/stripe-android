@@ -4,26 +4,19 @@ import android.app.Application
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.toArgb
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentmethodmessaging.view.injection.DaggerPaymentMethodMessagingComponent
-import com.stripe.android.paymentmethodmessaging.view.messagingelement.PaymentMethodMessagingElement.Configuration
 import com.stripe.android.uicore.StripeThemeDefaults
 import dev.drewhamilton.poko.Poko
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
 
 class PaymentMethodMessagingElement @Inject internal constructor(
-    private val contentHelper: MessagingContentHelper
+    private val messagingCoordinator: MessagingCoordinator
 ) {
 
     /**
@@ -33,7 +26,7 @@ class PaymentMethodMessagingElement @Inject internal constructor(
     suspend fun configure(
         configuration: Configuration
     ): Result {
-       return contentHelper.configure(configuration)
+       return messagingCoordinator.configure(configuration)
     }
 
     /**
@@ -42,7 +35,8 @@ class PaymentMethodMessagingElement @Inject internal constructor(
      */
     @Composable
     fun Content(appearance: Appearance = Appearance()) {
-        contentHelper.Content(appearance)
+        val messagingContent by messagingCoordinator.messagingContent.collectAsState()
+        messagingContent?.Content(appearance)
     }
 
     companion object {

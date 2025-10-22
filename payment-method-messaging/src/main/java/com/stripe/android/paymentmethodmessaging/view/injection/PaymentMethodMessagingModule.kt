@@ -7,7 +7,9 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentmethodmessaging.view.messagingelement.DefaultMessagingCoordinator
 import com.stripe.android.paymentmethodmessaging.view.messagingelement.DefaultMessagingRepository
+import com.stripe.android.paymentmethodmessaging.view.messagingelement.MessagingCoordinator
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Module
@@ -48,4 +50,10 @@ internal object PaymentMethodMessagingModule {
         stripeRepository: StripeRepository,
         paymentConfiguration: PaymentConfiguration
     ) = DefaultMessagingRepository(stripeRepository, paymentConfiguration)
+
+    @Provides
+    fun providesMessagingCoordinator(
+        stripeRepository: StripeRepository,
+        paymentConfiguration: PaymentConfiguration
+    ): MessagingCoordinator = DefaultMessagingCoordinator(stripeRepository, paymentConfiguration)
 }

@@ -31,68 +31,39 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.MessagingImage
-import com.stripe.android.model.PaymentMethodMessage
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
-import com.stripe.android.uicore.utils.collectAsState
-import kotlinx.coroutines.flow.MutableStateFlow
-import javax.inject.Inject
 
-internal class MessagingContentHelper @Inject constructor(
-    private val stripeRepository: StripeRepository,
-    private val paymentConfiguration: PaymentConfiguration
-){
-    private val _state: MutableStateFlow<PaymentMethodMessage?> = MutableStateFlow(null)
-    suspend fun configure(
-        configuration: PaymentMethodMessagingElement.Configuration
-    ): PaymentMethodMessagingElement.Result {
-        val state = configuration.build()
-        val result = stripeRepository.retrievePaymentMethodMessage(
-            paymentMethods = state.paymentMethodTypes?.map { it.code } ?: listOf(),
-            amount = state.amount,
-            currency = state.currency,
-            locale = state.locale,
-            country = state.countryCode,
-            requestOptions = ApiRequest.Options(paymentConfiguration.publishableKey)
-        )
-
-        result.getOrNull()?.let {
-            println("YEET result: $it")
-            _state.value = it
-        } ?: {
-            _state.value = null
-        }
-
-        return PaymentMethodMessagingElement.Result.Succeeded
-    }
-
+internal class MessagingContent(
+    private val message: Message,
+) {
     @Composable
     fun Content(appearance: PaymentMethodMessagingElement.Appearance) {
-        val state = _state.collectAsState().value  ?: return
-        val app = appearance.build()
-
-        if (state.inlinePartnerPromotion != null) {
-            SinglePartner(state, app)
-        } else {
-            MultiPartner(state, app)
+        val appearanceState = appearance.build()
+        when (message) {
+            is Message.SinglePartner -> SinglePartner(message, appearanceState)
+            is Message.MultiPartner -> MultiPartner(message, appearanceState)
+            is Message.Empty -> {
+                // NO-OP
+            }
         }
     }
 
 
     @Composable
-    private fun SinglePartner(state: PaymentMethodMessage, appearance: PaymentMethodMessagingElement.Appearance.State) {
+    private fun SinglePartner(
+        message: Message.SinglePartner,
+        appearance: PaymentMethodMessagingElement.Appearance.State
+    ) {
         val image = when (appearance.theme) {
-            PaymentMethodMessagingElement.Appearance.Theme.LIGHT -> state.lightImages[0]
-            PaymentMethodMessagingElement.Appearance.Theme.DARK -> state.darkImages[0]
-            PaymentMethodMessagingElement.Appearance.Theme.FLAT -> state.flatImages[0]
+            PaymentMethodMessagingElement.Appearance.Theme.LIGHT -> message.lightImage
+            PaymentMethodMessagingElement.Appearance.Theme.DARK -> message.darkImage
+            PaymentMethodMessagingElement.Appearance.Theme.FLAT -> message.flatImage
         }
         Row {
             TextWithLogo(
-                label = state.inlinePartnerPromotion ?: "",
+                label = message.message,
                 image = image,
                 appearance = appearance,
             )
@@ -100,15 +71,17 @@ internal class MessagingContentHelper @Inject constructor(
     }
 
     @Composable
-    private fun MultiPartner(state: PaymentMethodMessage, appearance: PaymentMethodMessagingElement.Appearance.State) {
-        if (state.promotion == null) return
+    private fun MultiPartner(
+        message: Message.MultiPartner,
+        appearance: PaymentMethodMessagingElement.Appearance.State
+    ) {
         val style = appearance.font?.toTextStyle()
             ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Normal)
         Column {
-            Images(getImages(state, appearance.theme))
+            Images(getImages(message, appearance.theme))
             Row {
                 Text(
-                    text = state.promotion ?: "",
+                    text = message.message,
                     style = style
                 )
             }
@@ -157,7 +130,7 @@ internal class MessagingContentHelper @Inject constructor(
                         imageVector = Icons.Outlined.Info,
                         contentDescription = null,
                         tint = Color(appearance.colors.infoIconColor),
-                         modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
             )
@@ -210,7 +183,10 @@ internal class MessagingContentHelper @Inject constructor(
         )
     }
 
-    private fun getImages(message: PaymentMethodMessage, theme: PaymentMethodMessagingElement.Appearance.Theme): List<MessagingImage> {
+    private fun getImages(
+        message: Message.MultiPartner,
+        theme: PaymentMethodMessagingElement.Appearance.Theme
+    ): List<MessagingImage> {
         return when (theme) {
             PaymentMethodMessagingElement.Appearance.Theme.LIGHT -> message.lightImages
             PaymentMethodMessagingElement.Appearance.Theme.DARK -> message.darkImages
@@ -218,38 +194,3 @@ internal class MessagingContentHelper @Inject constructor(
         }
     }
 }
-
-//    var skipHalfExpanded by remember { mutableStateOf(false) }
-//    val state = rememberModalBottomSheetState(
-//        initialValue = ModalBottomSheetValue.Hidden,
-//        skipHalfExpanded = skipHalfExpanded
-//    )
-//    val scope = rememberCoroutineScope()
-//    ModalBottomSheetLayout(
-//    sheetState = state,
-//    sheetContent = {
-//        Text("yolo")
-//    }
-//    ) {
-//        Column(
-//            modifier = Modifier.fillMaxSize().padding(16.dp),
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            Row(
-//                Modifier.toggleable(
-//                    value = skipHalfExpanded,
-//                    role = Role.Checkbox,
-//                    onValueChange = { checked -> skipHalfExpanded = checked }
-//                )
-//            ) {
-//                Checkbox(checked = skipHalfExpanded, onCheckedChange = null)
-//                Spacer(Modifier.width(16.dp))
-//                Text("Skip Half Expanded State")
-//            }
-//            Spacer(Modifier.height(20.dp))
-//            Button(onClick = { scope.launch { state.show() } }) {
-//                Text("Click to show sheet")
-//            }
-//        }
-//    }
-//}
