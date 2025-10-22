@@ -104,8 +104,8 @@ internal class TestConfirmationToken : BasePlaygroundTest() {
             settings[DelayedPaymentMethodsSettingsDefinition] = true
         }
 
-        testDriver.confirmCustomUSBankAccount(
-            testParameters = testParameters
+        testDriver.confirmCustomUSBankAccountAndBuy(
+            testParameters = testParameters,
         )
     }
 
