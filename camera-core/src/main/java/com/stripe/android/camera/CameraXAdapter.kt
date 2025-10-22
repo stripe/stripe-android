@@ -1,10 +1,17 @@
 package com.stripe.android.camera
 
 import android.app.Activity
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.graphics.PointF
 import android.graphics.Rect
+import android.hardware.camera2.CameraCaptureSession
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
+import android.hardware.camera2.CaptureRequest
+import android.hardware.camera2.CaptureResult
+import android.hardware.camera2.TotalCaptureResult
 import android.os.Build
 import android.os.Handler
 import android.renderscript.RenderScript
@@ -14,6 +21,8 @@ import android.util.Size
 import android.view.ViewGroup
 import androidx.annotation.CheckResult
 import androidx.annotation.RestrictTo
+import androidx.camera.camera2.interop.Camera2CameraInfo
+import androidx.camera.camera2.interop.Camera2Interop
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.DisplayOrientedMeteringPointFactory
@@ -179,6 +188,10 @@ class CameraXAdapter(
     private val cameraProviderFuture = ProcessCameraProvider.getInstance(activity)
     private lateinit var lifecycleOwner: LifecycleOwner
 
+    // latest camera metadata from analyzer frames
+    private var latestExposureIso: Float? = null
+    private var latestExposureDuration: Long? = null
+
     private val cameraListeners = mutableListOf<(Camera) -> Unit>()
 
     /** Blocking camera operations are performed using this executor */
@@ -222,6 +235,7 @@ class CameraXAdapter(
         }
     }
 
+    @androidx.camera.camera2.interop.ExperimentalCamera2Interop
     override fun changeCamera() {
         withCameraProvider {
             lensFacing = when {
@@ -244,16 +258,36 @@ class CameraXAdapter(
      */
     fun getCameraLensModel(): String? {
         return camera?.let {
-            // Determine lens facing
             val facing = when (lensFacing) {
                 CameraSelector.LENS_FACING_BACK -> "back"
                 CameraSelector.LENS_FACING_FRONT -> "front"
                 else -> "unknown"
             }
-            // Return device model with lens facing
-            // Format: "Manufacturer Model (facing)"
             "${Build.MANUFACTURER} ${Build.MODEL} ($facing)"
         }
+    }
+
+    /** Return current focal length in mm if available. */
+    @androidx.camera.camera2.interop.ExperimentalCamera2Interop
+    fun getFocalLength(): Float? {
+        return runCatching {
+            val camId = Camera2CameraInfo.from(requireNotNull(camera).cameraInfo).cameraId
+            val cm = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+            val chars = cm.getCameraCharacteristics(camId)
+            chars.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.firstOrNull()
+        }.getOrNull()
+    }
+
+    /** Return current exposure ISO if available. May be null if not yet measured. */
+    fun getExposureIso(): Float? {
+        // CameraX does not provide current ISO without deeper interop; return null until available
+        return latestExposureIso
+    }
+
+    /** Return current exposure duration in milliseconds if available. May be null if not yet measured. */
+    @Suppress("MagicNumber")
+    fun getExposureDuration(): Long? {
+        return latestExposureDuration?.let { it / 1_000_000 }
     }
 
     override fun setFocus(point: PointF) {
@@ -271,6 +305,7 @@ class CameraXAdapter(
         }
     }
 
+    @androidx.camera.camera2.interop.ExperimentalCamera2Interop
     override fun onCreate() {
         // Initialize our background executor
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -306,6 +341,7 @@ class CameraXAdapter(
         }
     }
 
+    @androidx.camera.camera2.interop.ExperimentalCamera2Interop
     private fun setUpCamera() {
         withCameraProvider {
             lensFacing = if (startWithBackCamera && hasBackCamera(it)) {
@@ -323,6 +359,7 @@ class CameraXAdapter(
     }
 
     @Synchronized
+    @androidx.camera.camera2.interop.ExperimentalCamera2Interop
     private fun bindCameraUseCases(cameraProvider: ProcessCameraProvider) {
         // CameraSelector
         val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
@@ -332,11 +369,27 @@ class CameraXAdapter(
             .setTargetResolution(previewView.size())
             .build()
 
-        imageAnalyzer = ImageAnalysis.Builder()
+        val analysisBuilder = ImageAnalysis.Builder()
             .setTargetRotation(displayRotation)
             .setTargetResolution(minimumResolution.resolutionToSize(displaySize))
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .setImageQueueDepth(1)
+        // Attach Camera2 session callback to read dynamic capture results (ISO/focal length)
+        runCatching {
+            Camera2Interop.Extender(analysisBuilder).setSessionCaptureCallback(
+                object : CameraCaptureSession.CaptureCallback() {
+                    override fun onCaptureCompleted(
+                        session: CameraCaptureSession,
+                        request: CaptureRequest,
+                        result: TotalCaptureResult
+                    ) {
+                        latestExposureIso = result.get(CaptureResult.SENSOR_SENSITIVITY)?.toFloat()
+                        latestExposureDuration = result.get(CaptureResult.SENSOR_EXPOSURE_TIME)
+                    }
+                }
+            )
+        }
+        imageAnalyzer = analysisBuilder
             .build()
             .also { analysis ->
                 analysis.setAnalyzer(
