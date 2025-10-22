@@ -82,7 +82,8 @@ class GooglePayLauncher internal constructor(
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE),
-                )
+                ),
+                additionalEnabledNetworks = config.additionalEnabledNetworks
             )
         },
         PaymentAnalyticsRequestFactory(
@@ -129,7 +130,8 @@ class GooglePayLauncher internal constructor(
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE)
-                )
+                ),
+                additionalEnabledNetworks = config.additionalEnabledNetworks
             )
         },
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -260,7 +262,7 @@ class GooglePayLauncher internal constructor(
         var allowCreditCards: Boolean = true,
 
         /**
-         * Set this property to enable other card networks in aditional to the default list, such as "INTERAC"
+         * Set this property to enable other card networks in additional to the default list, such as "INTERAC"
          */
         var additionalEnabledNetworks: List<String> = emptyList()
     ) : Parcelable {
@@ -394,7 +396,8 @@ fun rememberGooglePayLauncher(
                     errorReporter = ErrorReporter.createFallbackInstance(
                         context = context,
                         productUsage = setOf(GooglePayLauncher.PRODUCT_USAGE)
-                    )
+                    ),
+                    additionalEnabledNetworks = config.additionalEnabledNetworks
                 )
             },
             PaymentAnalyticsRequestFactory(

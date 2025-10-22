@@ -161,6 +161,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                     ?: config.merchantName,
                 isEmailRequired = config.billingDetailsCollectionConfiguration.collectsEmail,
                 billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
+                additionalEnabledNetworks = config.additionalEnabledNetworks ?: emptyList()
             ),
             readyCallback = {
                 // Do nothing since we are skipping the ready check below

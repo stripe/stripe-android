@@ -51,6 +51,7 @@ internal class DefaultGooglePayRepository(
     private val errorReporter: ErrorReporter,
     private val logger: Logger = Logger.noop(),
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val additionalEnabledNetworks: List<String> = emptyList()
 ) : GooglePayRepository {
 
     @Inject
@@ -69,10 +70,11 @@ internal class DefaultGooglePayRepository(
         DefaultPaymentsClientFactory(context),
         errorReporter,
         logger,
-        cardBrandFilter
+        cardBrandFilter,
+        googlePayConfig.additionalEnabledNetworks
     )
 
-    private val googlePayJsonFactory = GooglePayJsonFactory(context, cardBrandFilter = cardBrandFilter)
+    private val googlePayJsonFactory = GooglePayJsonFactory(context, cardBrandFilter = cardBrandFilter, additionalEnabledNetworks = additionalEnabledNetworks)
 
     private val googlePayAvailabilityClient: GooglePayAvailabilityClient by lazy {
         GooglePayRepository.googlePayAvailabilityClientFactory.create(

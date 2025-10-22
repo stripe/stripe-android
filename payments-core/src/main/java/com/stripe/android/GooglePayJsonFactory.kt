@@ -104,7 +104,8 @@ class GooglePayJsonFactory internal constructor(
     ) : this(
         googlePayConfig = GooglePayConfig(publishableKeyProvider(), stripeAccountIdProvider()),
         isJcbEnabled = googlePayConfig.isJcbEnabled,
-        cardBrandFilter = cardBrandFilter
+        cardBrandFilter = cardBrandFilter,
+        additionalEnabledNetworks = googlePayConfig.additionalEnabledNetworks
     )
 
     /**

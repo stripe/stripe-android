@@ -53,6 +53,7 @@ import com.stripe.android.uicore.getRawValueFromDimenResource
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import kotlin.collections.List
 
 /**
  * A drop-in class that presents a bottom sheet to collect and process a customer's payment.
@@ -3170,6 +3171,7 @@ class PaymentSheet internal constructor(
      * @param buttonType The Google Pay button type to use. Set to "Pay" by default. See
      * [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment)
      * for more information on button types.
+     * * @param additionalEnabledNetworks An optional List<String> to signal GooglePay to display additional enabled networks (e.g. 'INTERAC')
      */
     @Parcelize
     data class GooglePayConfiguration @JvmOverloads constructor(
@@ -3178,7 +3180,8 @@ class PaymentSheet internal constructor(
         val currencyCode: String? = null,
         val amount: Long? = null,
         val label: String? = null,
-        val buttonType: ButtonType = ButtonType.Pay
+        val buttonType: ButtonType = ButtonType.Pay,
+        val additionalEnabledNetworks: List<String> = emptyList()
     ) : Parcelable {
 
         enum class Environment {
