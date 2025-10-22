@@ -237,8 +237,8 @@ internal fun OnrampScreen(
         when (uiState.screen) {
             Screen.LoginSignup -> {
                 LoginSignupScreen(
-                    onRegister = { email, password -> viewModel.registerUser(email, password) },
-                    onLogin = { email, password -> viewModel.loginUser(email, password) }
+                    onRegister = viewModel::registerUser,
+                    onLogin = viewModel::loginUser
                 )
             }
             Screen.Loading -> {
