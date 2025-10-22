@@ -114,7 +114,6 @@ apiValidation {
             "payment-element-test-pages",
             "payments-core-testing",
             "paymentsheet-example",
-            "stripecardscan-example",
             "connect-example",
             "screenshot-testing",
             "3ds2playground",

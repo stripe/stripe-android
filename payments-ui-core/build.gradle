@@ -9,7 +9,6 @@ dependencies {
     implementation project(":stripe-core")
     implementation project(":payments-core")
     implementation project(":stripe-ui-core")
-    compileOnly project(":stripecardscan")
     compileOnly libs.places
 
     implementation libs.androidx.constraintLayout
@@ -39,7 +38,6 @@ dependencies {
     implementation libs.playServicesWallet
 
     testImplementation project(':payments-core-testing')
-    testImplementation project(':stripecardscan')
     testImplementation libs.places
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core

@@ -7,7 +7,6 @@ import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.activity.result.contract.ActivityResultContract
-import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -19,7 +18,6 @@ import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.stripecardscan.R
 import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cardscan.FakeCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.FakePaymentCardRecognitionClient
@@ -44,8 +42,7 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 internal class CardDetailsSectionElementUITest {
-    private val context =
-        ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeCardScanDefaultTheme)
+    private val context: Context = ApplicationProvider.getApplicationContext()
 
     @get:Rule
     val composeTestRule = createComposeRule()
