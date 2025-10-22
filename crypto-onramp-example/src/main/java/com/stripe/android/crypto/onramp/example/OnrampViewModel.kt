@@ -658,8 +658,12 @@ internal class OnrampViewModel(
             when (result) {
                 is OnrampLogOutResult.Completed -> {
                     _message.value = "Successfully logged out"
-                    clearUserData()
-                    _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
+
+                    if (loadUserData() != null) {
+                        _uiState.update { OnrampUiState(screen = Screen.SeamlessSignIn) }
+                    } else {
+                        _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
+                    }
                 }
                 is OnrampLogOutResult.Failed -> {
                     _message.value = "Logout failed: ${result.error.message}"
