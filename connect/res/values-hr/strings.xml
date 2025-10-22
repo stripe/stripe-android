@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_download_complete">Preuzimanje je završeno</string>
   <string name="stripe_downloading_file">Preuzimanje datoteke</string>
-  <string name="stripe_failed_to_open_url">Nije moguće otvoriti URL: %s</string>
+  <string name="stripe_failed_to_open_url">Nije moguće otvoriti URL: {0}</string>
   <string name="stripe_not_yet_built">Još nije izgrađeno...</string>
   <string name="stripe_unable_to_download_file">Nije moguće preuzeti datoteku</string>
 </resources>

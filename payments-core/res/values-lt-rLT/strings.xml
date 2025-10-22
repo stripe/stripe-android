@@ -2,16 +2,16 @@
 <resources>
   <!-- Label for card number entry text field -->
   <string name="stripe_acc_label_card_number">Kortelės numeris</string>
-  <string name="stripe_acc_label_card_number_node">%s, kortelės numeris</string>
-  <string name="stripe_acc_label_cvc_node">%s, CVC</string>
+  <string name="stripe_acc_label_card_number_node">{0}, kortelės numeris</string>
+  <string name="stripe_acc_label_cvc_node">{0}, CVC</string>
   <string name="stripe_acc_label_expiry_date">Galiojimo pabaigos data</string>
-  <string name="stripe_acc_label_expiry_date_node">%s, galiojimo pabaigos data</string>
+  <string name="stripe_acc_label_expiry_date_node">{0}, galiojimo pabaigos data</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
   <string name="stripe_acc_label_zip">Pašto kodas</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="stripe_acc_label_zip_short">Pašto kodas</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_added">%s pridėtas</string>
+  <string name="stripe_added">{0} pridėtas</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="stripe_address_city_required">Įveskite savo miestą</string>
   <!-- Error text indicating country is invalid -->
@@ -75,9 +75,9 @@
   <!-- Placeholder for AU BECS BSB number -->
   <string name="stripe_au_becs_bsb_number">BSB numeris</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="stripe_au_becs_mandate">Pateikdami savo banko sąskaitos duomenis ir patvirtindami šį mokėjimą, jūs sutinkate su šiuo tiesioginio debeto prašymu ir &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;tiesioginio debeto prašymo paslaugų sutartimi&lt;/a&gt; bei įgaliojate \"Stripe Payments Australia Pty Ltd\", ACN 160 180 343, tiesioginio debeto naudotojo ID numeris 507156 (toliau – \"Stripe\") nurašyti nuo jūsų sąskaitos per masinę elektroninę tarpuskaitos sistemą (BECS) %s vardu (toliau – \"Pardavėjas\") bet kokias sumas, atskirai jums nurodytas Pardavėjo. Jūs patvirtinate, kad esate sąskaitos turėtojas arba įgaliotas pasirašyti minėtą sąskaitą asmuo.</string>
+  <string name="stripe_au_becs_mandate">Pateikdami savo banko sąskaitos duomenis ir patvirtindami šį mokėjimą, jūs sutinkate su šiuo tiesioginio debeto prašymu ir &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;tiesioginio debeto prašymo paslaugų sutartimi&lt;/a&gt; bei įgaliojate \"Stripe Payments Australia Pty Ltd\", ACN 160 180 343, tiesioginio debeto naudotojo ID numeris 507156 (toliau – \"Stripe\") nurašyti nuo jūsų sąskaitos per masinę elektroninę tarpuskaitos sistemą (BECS) {0} vardu (toliau – \"Pardavėjas\") bet kokias sumas, atskirai jums nurodytas Pardavėjo. Jūs patvirtinate, kad esate sąskaitos turėtojas arba įgaliotas pasirašyti minėtą sąskaitą asmuo.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="stripe_becs_mandate_acceptance">\n    Pateikdami banko sąskaitos duomenis ir patvirtindami šį mokėjimą, jūs sutinkate su šia\n    tiesioginio debeto užklausa ir tiesioginio debeto užklausos paslaugų sutartimi bei įgaliojate\n    \"Stripe Payments Australia Pty Ltd\", ACN 160 180 343, tiesioginio debeto naudotojo ID numeris 507156,\n    (toliau – \"Stripe\") nurašyti nuo jūsų sąskaitos per masinę elektroninę tarpuskaitos sistemą (BECS)\n    %1$s vardu (toliau – \"Pardavėjas\") bet kokias sumas, atskirai jums nurodytas\n    Pardavėjo. Jūs patvirtinate, kad esate sąskaitos turėtojas arba įgaliotas\n    pasirašyti minėtą sąskaitą asmuo.\n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    Pateikdami banko sąskaitos duomenis ir patvirtindami šį mokėjimą, jūs sutinkate su šia\n    tiesioginio debeto užklausa ir tiesioginio debeto užklausos paslaugų sutartimi bei įgaliojate\n    \"Stripe Payments Australia Pty Ltd\", ACN 160 180 343, tiesioginio debeto naudotojo ID numeris 507156,\n    (toliau – \"Stripe\") nurašyti nuo jūsų sąskaitos per masinę elektroninę tarpuskaitos sistemą (BECS)\n    {0} vardu (toliau – \"Pardavėjas\") bet kokias sumas, atskirai jums nurodytas\n    Pardavėjo. Jūs patvirtinate, kad esate sąskaitos turėtojas arba įgaliotas\n    pasirašyti minėtą sąskaitą asmuo.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Sąskaitos numeris</string>
   <!-- Error description for incomplete account number -->
@@ -109,11 +109,11 @@
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">Kortelė buvo atmesta</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="stripe_card_ending_in">%1$s, kuri baigiasi %2$s</string>
+  <string name="stripe_card_ending_in">{0}, kuri baigiasi {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
-  <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
+  <string name="stripe_card_plus_last_4">{0} ···· {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
-  <string name="stripe_card_with_last_4">%1$s ····%2$s</string>
+  <string name="stripe_card_with_last_4">{0} ····{1}</string>
   <!-- Text for close button -->
   <string name="stripe_close">Užverti</string>
   <!-- Accessibility title used during Talkback to indicate to users that a transaction is being confirmed -->
@@ -122,7 +122,7 @@
   <string name="stripe_delete_payment_method">Pašalinti mokėjimo būdą?</string>
   <string name="stripe_delete_payment_method_prompt_title">Pašalinti mokėjimo būdą?</string>
   <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
-  <string name="stripe_disallowed_card_brand">\"%s\" nepriimama</string>
+  <string name="stripe_disallowed_card_brand">\"{0}\" nepriimama</string>
   <!-- Done button title -->
   <string name="stripe_done">Atlikta</string>
   <!-- Button title to enter editing mode -->
@@ -139,7 +139,7 @@
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Baigėsi mokėjimo būdui autentifikuoti skirtas laikas, bandykite dar kartą</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
-  <string name="stripe_fpx_bank_offline">%s – neprisijungęs</string>
+  <string name="stripe_fpx_bank_offline">{0} – neprisijungęs</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Jūsų mokėjimo būdas buvo atmestas.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
@@ -167,7 +167,7 @@
    Text for remove button -->
   <string name="stripe_remove">Pašalinti</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_removed">%s pašalintas</string>
+  <string name="stripe_removed">{0} pašalintas</string>
   <string name="stripe_secure_checkout">Saugus pirkimo užbaigimas</string>
   <string name="stripe_title_add_a_card">Pridėti kortelę</string>
   <!-- Screen title telling users they should add an address -->

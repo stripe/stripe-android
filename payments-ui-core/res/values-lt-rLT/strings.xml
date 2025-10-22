@@ -5,9 +5,9 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Mokėti <num_installments/> be palūkanų <installment_price/> mokėjimus naudojant <img/>]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_afterpay_clearpay_subtitle">%1$d mokėjimai be palūkanų %2$s</string>
+  <string name="stripe_afterpay_clearpay_subtitle">{0} mokėjimai be palūkanų {1}</string>
   <!-- Amazon Pay mandate text -->
-  <string name="stripe_amazon_pay_mandate">Patvirtindami savo mokėjimą \"Amazon Pay\" leidžiate \"%s\" nuskaityti mokestį nuo jūsų \"Amazon Pay\" sąskaitos vėlesniems mokėjimams pagal jų sąlygas.</string>
+  <string name="stripe_amazon_pay_mandate">Patvirtindami savo mokėjimą \"Amazon Pay\" leidžiate \"{0}\" nuskaityti mokestį nuo jūsų \"Amazon Pay\" sąskaitos vėlesniems mokėjimams pagal jų sąlygas.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Atgal</string>
   <!-- Label for Bacs account number field -->
@@ -17,7 +17,7 @@
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">Banko sąskaita</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
-  <string name="stripe_bacs_confirm_mandate_label">Suprantu, kad \"Stripe\" atliks tiesioginio debeto nuskaitymus %s vardu ir patvirtinu, kad esu sąskaitos turėtojas ir vienintelis asmuo, galintis leisti atlikti debeto nuskaitymus nuo šios sąskaitos.</string>
+  <string name="stripe_bacs_confirm_mandate_label">Suprantu, kad \"Stripe\" atliks tiesioginio debeto nuskaitymus {0} vardu ir patvirtinu, kad esu sąskaitos turėtojas ir vienintelis asmuo, galintis leisti atlikti debeto nuskaitymus nuo šios sąskaitos.</string>
   <!-- Label for Bacs sort code field -->
   <string name="stripe_bacs_sort_code">Identifikacinis kodas</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
@@ -31,9 +31,9 @@
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(nepriimama)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
-  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (nepriimama)</string>
+  <string name="stripe_card_brand_not_accepted_with_brand">{0} (nepriimama)</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">Tęsdami įgaliojate \"%1$s\" nurašyti mokestį nuo jūsų \"Cash App\" sąskaitos už šį mokėjimą ir būsimuosius mokėjimus pagal \"%2$s\" sąlygas, kol šis įgaliojimas bus atšauktas. Galite bet kada tai pakeisti \"Cash App\" nuostatose.</string>
+  <string name="stripe_cash_app_pay_mandate">Tęsdami įgaliojate \"{0}\" nurašyti mokestį nuo jūsų \"Cash App\" sąskaitos už šį mokėjimą ir būsimuosius mokėjimus pagal \"{1}\" sąlygas, kol šis įgaliojimas bus atšauktas. Galite bet kada tai pakeisti \"Cash App\" nuostatose.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Kontaktinė informacija</string>
   <!-- Text for continue button -->
@@ -45,7 +45,7 @@
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Įvedėte ne visą IBAN.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="stripe_iban_invalid_country">Įvedėte neteisingą IBAN kodą, \"%s\" nėra palaikomas šalies kodas.</string>
+  <string name="stripe_iban_invalid_country">Įvedėte neteisingą IBAN kodą, \"{0}\" nėra palaikomas šalies kodas.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Jūsų IBAN turėtų prasidėti šalies kodu iš dviejų raidžių.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
@@ -54,13 +54,13 @@
   <string name="stripe_incomplete_blik_code">Jūsų BLIK kodas neišsamus.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_invalid_blik_code">Jūsų BLIK kodas netinkamas.</string>
-  <string name="stripe_invalid_email_address">Netinkamas el. pašto adresas: %s</string>
+  <string name="stripe_invalid_email_address">Netinkamas el. pašto adresas: {0}</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Netinkamas UPI ID</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Pirkite dabar arba mokėkite vėliau naudodami \"Klarna\".</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Pereidami prie \"Klarna\" leidžiate \"%1$s\" nuskaityti mokestį nuo jūsų \"Klarna\" sąskaitos vėlesniems mokėjimams pagal jų ir \"Klarna\" sąlygas. Galite bet kada tai pakeisti \"Klarna\" programėlėje arba susisiekdami su \"%2$s\".</string>
+  <string name="stripe_klarna_mandate">Pereidami prie \"Klarna\" leidžiate \"{0}\" nuskaityti mokestį nuo jūsų \"Klarna\" sąskaitos vėlesniems mokėjimams pagal jų ir \"Klarna\" sąlygas. Galite bet kada tai pakeisti \"Klarna\" programėlėje arba susisiekdami su \"{1}\".</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Mokėkite vėliau naudodami \"Klarna\".</string>
   <!-- Caption for Phone field on address form -->
@@ -70,7 +70,7 @@
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_pay_button_amount">Mokėti %s</string>
+  <string name="stripe_pay_button_amount">Mokėti {0}</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Bankas</string>
   <!-- Label shown in the payment type picker describing a card payment -->
@@ -96,19 +96,19 @@
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA debetas</string>
   <!-- PayPal mandate text -->
-  <string name="stripe_paypal_mandate">Patvirtindami savo mokėjimą \"PayPal\" leidžiate \"%s\" nuskaityti mokestį nuo jūsų \"PayPal\" sąskaitos vėlesniems mokėjimams pagal jų sąlygas.</string>
+  <string name="stripe_paypal_mandate">Patvirtindami savo mokėjimą \"PayPal\" leidžiate \"{0}\" nuskaityti mokestį nuo jūsų \"PayPal\" sąskaitos vėlesniems mokėjimams pagal jų sąlygas.</string>
   <!-- Revolut mandate text -->
-  <string name="stripe_revolut_mandate">Patvirtindami savo mokėjimą \"RevolutPay\" leidžiate %s nuskaityti mokestį nuo jūsų \"RevolutPay\" sąskaitos vėlesniems mokėjimams pagal jų sąlygas.</string>
+  <string name="stripe_revolut_mandate">Patvirtindami savo mokėjimą \"RevolutPay\" leidžiate {0} nuskaityti mokestį nuo jūsų \"RevolutPay\" sąskaitos vėlesniems mokėjimams pagal jų sąlygas.</string>
   <!-- Satispay mandate text -->
-  <string name="stripe_satispay_mandate">Tęsdami jūs suteikiate leidimą %1$s automatiškai nurašyti lėšas nuo jūsų „Satispay Balance“ likučio periodiškai, pagal jūsų pirkimo arba prenumeratos planą.</string>
+  <string name="stripe_satispay_mandate">Tęsdami jūs suteikiate leidimą {0} automatiškai nurašyti lėšas nuo jūsų „Satispay Balance“ likučio periodiškai, pagal jūsų pirkimo arba prenumeratos planą.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="stripe_save_for_future_payments_with_merchant_name">Išsaugoti vėlesniems %s mokėjimams</string>
+  <string name="stripe_save_for_future_payments_with_merchant_name">Išsaugoti vėlesniems {0} mokėjimams</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
-  <string name="stripe_save_payment_details_to_merchant_name">Išsaugoti mokėjimo duomenis \"%s” būsimiems pirkimams</string>
+  <string name="stripe_save_payment_details_to_merchant_name">Išsaugoti mokėjimo duomenis \"{0}” būsimiems pirkimams</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Nuskaityti kortelę</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">Pateikdami mokėjimo duomenis ir patvirtindami šį mokėjimą, leidžiate (A) \"%s\" ir \"Stripe\" (mūsų mokėjimo paslaugų teikėjui) jūsų bankui siųsti nurodymus nurašyti pinigus iš jūsų sąskaitos ir (B) leidžiate savo bankui, gavus tokius nurodymus, nurašyti pinigus iš jūsų sąskaitos. Pagal jūsų su banku sudarytos sutarties sąlygas turite teisę iš banko reikalauti pinigų grąžinimo. Prašymą grąžinti pinigus turite pateikti per 8 savaites nuo pinigų iš jūsų sąskaitos nurašymo dienos. Jūsų teisės paaiškintos pareiškime, kurį galite gauti iš savo banko. Sutinkate gauti pranešimus apie būsimus nurašymus likus iki 2 dienų iki jų įvykdymo momento.</string>
+  <string name="stripe_sepa_mandate">Pateikdami mokėjimo duomenis ir patvirtindami šį mokėjimą, leidžiate (A) \"{0}\" ir \"Stripe\" (mūsų mokėjimo paslaugų teikėjui) jūsų bankui siųsti nurodymus nurašyti pinigus iš jūsų sąskaitos ir (B) leidžiate savo bankui, gavus tokius nurodymus, nurašyti pinigus iš jūsų sąskaitos. Pagal jūsų su banku sudarytos sutarties sąlygas turite teisę iš banko reikalauti pinigų grąžinimo. Prašymą grąžinti pinigus turite pateikti per 8 savaites nuo pinigų iš jūsų sąskaitos nurašymo dienos. Jūsų teisės paaiškintos pareiškime, kurį galite gauti iš savo banko. Sutinkate gauti pranešimus apie būsimus nurašymus likus iki 2 dienų iki jų įvykdymo momento.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Nustatyti kaip numatytąjį mokėjimo būdą</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

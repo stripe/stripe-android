@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_download_complete">下載完成</string>
   <string name="stripe_downloading_file">正在下載檔案</string>
-  <string name="stripe_failed_to_open_url">未能打開 URL：%s</string>
+  <string name="stripe_failed_to_open_url">未能打開 URL：{0}</string>
   <string name="stripe_not_yet_built">尚未構建...</string>
   <string name="stripe_unable_to_download_file">無法下載檔案</string>
 </resources>

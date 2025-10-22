@@ -244,7 +244,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">Vai arī varat manuāli augšupielādēt fotoattēlu no sava ID dokumenta ar fotoattēlu</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">Vai arī varat manuāli augšupielādēt %1$s</string>
+  <string name="stripe_upload_file_text">Vai arī varat manuāli augšupielādēt {0}</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">Augšupielādējiet savu ID dokumentu ar fotogrāfiju</string>
 </resources>

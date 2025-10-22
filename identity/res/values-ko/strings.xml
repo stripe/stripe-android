@@ -244,7 +244,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">또는 사진이 있는 신분증을 직접 업로드하실 수도 있습니다.</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">또는 %1$s 사진을 직접 업로드하실 수도 있습니다.</string>
+  <string name="stripe_upload_file_text">또는 {0} 사진을 직접 업로드하실 수도 있습니다.</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">사진 ID 업로드</string>
 </resources>

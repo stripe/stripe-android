@@ -5,9 +5,9 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[<img/>로 <installment_price/>의 <num_installments/>회 무이자 결제로 대금을 지급하십시오.]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_afterpay_clearpay_subtitle">%1$d%2$s회 무이자 결제</string>
+  <string name="stripe_afterpay_clearpay_subtitle">{0}{1}회 무이자 결제</string>
   <!-- Amazon Pay mandate text -->
-  <string name="stripe_amazon_pay_mandate">AmazonPay 결제를 확인하면 %s에서 해당 회사의 약관에 따라 향후 AmazonPay 계정에 결제 대금을 청구할 수 있습니다.</string>
+  <string name="stripe_amazon_pay_mandate">AmazonPay 결제를 확인하면 {0}에서 해당 회사의 약관에 따라 향후 AmazonPay 계정에 결제 대금을 청구할 수 있습니다.</string>
   <!-- Text for back button -->
   <string name="stripe_back">뒤로</string>
   <!-- Label for Bacs account number field -->
@@ -17,7 +17,7 @@
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">은행 계좌</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
-  <string name="stripe_bacs_confirm_mandate_label">본인은 Stripe가 %s을(를) 대신하여 자동 이체를 수취하고 본인이 계정 소유자이며 이 계정에서 인출을 승인할 수 있는 유일한 당사자임을 확인합니다.</string>
+  <string name="stripe_bacs_confirm_mandate_label">본인은 Stripe가 {0}을(를) 대신하여 자동 이체를 수취하고 본인이 계정 소유자이며 이 계정에서 인출을 승인할 수 있는 유일한 당사자임을 확인합니다.</string>
   <!-- Label for Bacs sort code field -->
   <string name="stripe_bacs_sort_code">분류 코드</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
@@ -31,9 +31,9 @@
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(허용되지 않음)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
-  <string name="stripe_card_brand_not_accepted_with_brand">%1$s(허용되지 않음)</string>
+  <string name="stripe_card_brand_not_accepted_with_brand">{0}(허용되지 않음)</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">계속하면 이 승인이 취소될 때까지 %2$s의 약관에 따라 이 결제 및 향후 결제에 대해 %1$s이(가) Cash App 계좌에서 인출하도록 승인하는 것입니다. 이는 Cash App 설정에서 언제든지 변경할 수 있습니다.</string>
+  <string name="stripe_cash_app_pay_mandate">계속하면 이 승인이 취소될 때까지 {1}의 약관에 따라 이 결제 및 향후 결제에 대해 {0}이(가) Cash App 계좌에서 인출하도록 승인하는 것입니다. 이는 Cash App 설정에서 언제든지 변경할 수 있습니다.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">연락처 정보</string>
   <!-- Text for continue button -->
@@ -45,7 +45,7 @@
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">입력한 IBAN이 불완전합니다.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="stripe_iban_invalid_country">입력한 IBAN이 잘못되었습니다. \"%s\"은(는) 지원되는 국가 코드가 아닙니다.</string>
+  <string name="stripe_iban_invalid_country">입력한 IBAN이 잘못되었습니다. \"{0}\"은(는) 지원되는 국가 코드가 아닙니다.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">IBAN은 두 글자의 국가 코드로 시작해야 합니다.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
@@ -54,13 +54,13 @@
   <string name="stripe_incomplete_blik_code">BLIK 코드가 불완전합니다.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_invalid_blik_code">BLIK 코드가 유효하지 않습니다.</string>
-  <string name="stripe_invalid_email_address">잘못된 이메일 주소: %s</string>
+  <string name="stripe_invalid_email_address">잘못된 이메일 주소: {0}</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">잘못된 UPI ID</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">지금 구매하거나 Klarna로 나중에 결제</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Klarna를 계속 사용하면 %1$s에서 해당 회사 및 Klarna의 약관에 따라 향후 Klarna 계정에 결제 대금을 청구할 수 있습니다. 이 설정은 언제든지 Klarna 앱에서 또는 %2$s에 문의하여 변경할 수 있습니다.</string>
+  <string name="stripe_klarna_mandate">Klarna를 계속 사용하면 {0}에서 해당 회사 및 Klarna의 약관에 따라 향후 Klarna 계정에 결제 대금을 청구할 수 있습니다. 이 설정은 언제든지 Klarna 앱에서 또는 {1}에 문의하여 변경할 수 있습니다.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Klarna로 나중에 결제</string>
   <!-- Caption for Phone field on address form -->
@@ -70,7 +70,7 @@
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 은행</string>
   <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_pay_button_amount">%s 결제</string>
+  <string name="stripe_pay_button_amount">{0} 결제</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">은행</string>
   <!-- Label shown in the payment type picker describing a card payment -->
@@ -96,17 +96,17 @@
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
   <!-- PayPal mandate text -->
-  <string name="stripe_paypal_mandate">PayPal 결제를 확인하면 %s에서 해당 회사의 약관에 따라 향후 결제에 대해 PayPal 계정에 대금을 청구하도록 허용하는 것입니다.</string>
+  <string name="stripe_paypal_mandate">PayPal 결제를 확인하면 {0}에서 해당 회사의 약관에 따라 향후 결제에 대해 PayPal 계정에 대금을 청구하도록 허용하는 것입니다.</string>
   <!-- Revolut mandate text -->
-  <string name="stripe_revolut_mandate">RevolutPay 결제를 확인하면 %s에서 해당 회사의 약관에 따라 향후 결제에 대해 RevolutPay 계정에 대금을 청구하도록 허용하는 것입니다.</string>
+  <string name="stripe_revolut_mandate">RevolutPay 결제를 확인하면 {0}에서 해당 회사의 약관에 따라 향후 결제에 대해 RevolutPay 계정에 대금을 청구하도록 허용하는 것입니다.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="stripe_save_for_future_payments_with_merchant_name">향후 %s 결제에 사용하도록 저장</string>
+  <string name="stripe_save_for_future_payments_with_merchant_name">향후 {0} 결제에 사용하도록 저장</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
-  <string name="stripe_save_payment_details_to_merchant_name">향후 구매를 위해 결제 세부사항 %s에 저장</string>
+  <string name="stripe_save_payment_details_to_merchant_name">향후 구매를 위해 결제 세부사항 {0}에 저장</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">카드 스캔</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">결제 정보를 제공하고 이 결제를 확인하면 (A) %s 및 결제 서비스 공급업체 Stripe가 은행에 계좌 출금에 관련한 지침을 전송하고 (B) 은행이 해당 지침에 따라 출금하도록 승인하는 것입니다. 귀하의 권리 중 일부로, 은행에 대한 이용 약관 동의 하에 은행에서 환불을 받을 자격을 부여받게 됩니다. 환불은 계좌에서 출금이 이루어진 날짜로부터 8주 이내에 요청해야 합니다. 귀하의 권리는 은행에서 받으시는 명세서에 설명되어 있습니다. 귀하는 향후 출금 시 최대 2일 전에 알림을 받겠다고 동의하는 것입니다.</string>
+  <string name="stripe_sepa_mandate">결제 정보를 제공하고 이 결제를 확인하면 (A) {0} 및 결제 서비스 공급업체 Stripe가 은행에 계좌 출금에 관련한 지침을 전송하고 (B) 은행이 해당 지침에 따라 출금하도록 승인하는 것입니다. 귀하의 권리 중 일부로, 은행에 대한 이용 약관 동의 하에 은행에서 환불을 받을 자격을 부여받게 됩니다. 환불은 계좌에서 출금이 이루어진 날짜로부터 8주 이내에 요청해야 합니다. 귀하의 권리는 은행에서 받으시는 명세서에 설명되어 있습니다. 귀하는 향후 출금 시 최대 2일 전에 알림을 받겠다고 동의하는 것입니다.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">결제 방식 기본값으로 설정</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

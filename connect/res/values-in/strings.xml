@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_download_complete">Unduhan selesai</string>
   <string name="stripe_downloading_file">Mengunduh file</string>
-  <string name="stripe_failed_to_open_url">Gagal membuka URL: %s</string>
+  <string name="stripe_failed_to_open_url">Gagal membuka URL: {0}</string>
   <string name="stripe_not_yet_built">Belum dibangun…</string>
   <string name="stripe_unable_to_download_file">Tidak dapat mengunduh file</string>
 </resources>

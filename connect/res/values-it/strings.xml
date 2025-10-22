@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_download_complete">Download completato</string>
   <string name="stripe_downloading_file">Download del file in corso</string>
-  <string name="stripe_failed_to_open_url">Impossibile aprire l\'URL: %s</string>
+  <string name="stripe_failed_to_open_url">Impossibile aprire l\'URL: {0}</string>
   <string name="stripe_not_yet_built">Non ancora creato…</string>
   <string name="stripe_unable_to_download_file">Impossibile scaricare il file</string>
 </resources>

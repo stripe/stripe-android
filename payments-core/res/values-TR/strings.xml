@@ -2,16 +2,16 @@
 <resources>
   <!-- Label for card number entry text field -->
   <string name="stripe_acc_label_card_number">Kart numarası</string>
-  <string name="stripe_acc_label_card_number_node">%s, Kart numarası</string>
-  <string name="stripe_acc_label_cvc_node">%s, CVC</string>
+  <string name="stripe_acc_label_card_number_node">{0}, Kart numarası</string>
+  <string name="stripe_acc_label_cvc_node">{0}, CVC</string>
   <string name="stripe_acc_label_expiry_date">Son Kullanma Tarihi</string>
-  <string name="stripe_acc_label_expiry_date_node">%s, Son kullanma tarihi</string>
+  <string name="stripe_acc_label_expiry_date_node">{0}, Son kullanma tarihi</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
   <string name="stripe_acc_label_zip">Posta Kodu</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="stripe_acc_label_zip_short">Posta Kodu</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_added">%s eklendi</string>
+  <string name="stripe_added">{0} eklendi</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="stripe_address_city_required">Lütfen şehrinizi girin</string>
   <!-- Error text indicating country is invalid -->
@@ -75,9 +75,9 @@
   <!-- Placeholder for AU BECS BSB number -->
   <string name="stripe_au_becs_bsb_number">BSB numarası</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="stripe_au_becs_mandate">Banka hesap bilgilerinizi sağlayarak ve bu ödemeyi onaylayarak, bu Otomatik Ödeme Talebini ve &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;Otomatik Ödeme Talebi hizmet sözleşmesini&lt;/a&gt; kabul etmiş olursunuz ve Otomatik Ödeme 507156 Kullanıcı Kimlikli Stripe Payments Australia Pty Ltd ACN 160 180 343 (\"Stripe\") şirketine %s (\"Satıcı\") adına, Satıcı tarafından size iletilen herhangi bir tutarı Toplu Elektronik Takas Sistemi (BECS) aracılığıyla hesabınızı borçlandırması için yetki verirsiniz. Yukarıda listelenen hesabın sahibi veya yetkili imza sahibi olduğunuzu onaylarsınız.</string>
+  <string name="stripe_au_becs_mandate">Banka hesap bilgilerinizi sağlayarak ve bu ödemeyi onaylayarak, bu Otomatik Ödeme Talebini ve &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;Otomatik Ödeme Talebi hizmet sözleşmesini&lt;/a&gt; kabul etmiş olursunuz ve Otomatik Ödeme 507156 Kullanıcı Kimlikli Stripe Payments Australia Pty Ltd ACN 160 180 343 (\"Stripe\") şirketine {0} (\"Satıcı\") adına, Satıcı tarafından size iletilen herhangi bir tutarı Toplu Elektronik Takas Sistemi (BECS) aracılığıyla hesabınızı borçlandırması için yetki verirsiniz. Yukarıda listelenen hesabın sahibi veya yetkili imza sahibi olduğunuzu onaylarsınız.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="stripe_becs_mandate_acceptance">\n    Banka hesap bilgilerinizi sağlayarak ve bu ödemeyi onaylayarak, bu Otomatik\n    Ödeme Talebini ve Otomatik Ödeme Talebi hizmet sözleşmesini kabul etmiş\n    olursunuz ve Otomatik Ödeme 507156 Kullanıcı Kimlikli Stripe Payments\n    Australia Pty Ltd ACN 160 180 343 (\"Stripe\")\n    şirketine %1$s (\"Satıcı\") adına, Satıcı tarafından size iletilen herhangi bir tutarı\n    Toplu Elektronik Takas Sistemi (BECS) aracılığıyla hesabınızı borçlandırması için\n    yetki verirsiniz. Yukarıda listelenen hesabın sahibi veya yetkili imza sahibi olduğunuzu onaylarsınız.\n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    Banka hesap bilgilerinizi sağlayarak ve bu ödemeyi onaylayarak, bu Otomatik\n    Ödeme Talebini ve Otomatik Ödeme Talebi hizmet sözleşmesini kabul etmiş\n    olursunuz ve Otomatik Ödeme 507156 Kullanıcı Kimlikli Stripe Payments\n    Australia Pty Ltd ACN 160 180 343 (\"Stripe\")\n    şirketine {0} (\"Satıcı\") adına, Satıcı tarafından size iletilen herhangi bir tutarı\n    Toplu Elektronik Takas Sistemi (BECS) aracılığıyla hesabınızı borçlandırması için\n    yetki verirsiniz. Yukarıda listelenen hesabın sahibi veya yetkili imza sahibi olduğunuzu onaylarsınız.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Hesap numarası</string>
   <!-- Error description for incomplete account number -->
@@ -109,11 +109,11 @@
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">Kartınız reddedildi</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="stripe_card_ending_in">%2$s İle Biten %1$s</string>
+  <string name="stripe_card_ending_in">{1} İle Biten {0}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
-  <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
+  <string name="stripe_card_plus_last_4">{0} ···· {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
-  <string name="stripe_card_with_last_4">%1$s ····%2$s</string>
+  <string name="stripe_card_with_last_4">{0} ····{1}</string>
   <!-- Text for close button -->
   <string name="stripe_close">Kapat</string>
   <!-- Accessibility title used during Talkback to indicate to users that a transaction is being confirmed -->
@@ -122,7 +122,7 @@
   <string name="stripe_delete_payment_method">Ödeme Metodu Silinsin mi?</string>
   <string name="stripe_delete_payment_method_prompt_title">Ödeme yöntemi silinsin mi?</string>
   <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
-  <string name="stripe_disallowed_card_brand">%s kabul edilmiyor</string>
+  <string name="stripe_disallowed_card_brand">{0} kabul edilmiyor</string>
   <!-- Done button title -->
   <string name="stripe_done">Tamam</string>
   <!-- Button title to enter editing mode -->
@@ -139,7 +139,7 @@
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Ödeme metodunuz doğrulanırken zaman aşımına uğradı -- tekrar deneyin</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
-  <string name="stripe_fpx_bank_offline">%s - Çevrimdışı</string>
+  <string name="stripe_fpx_bank_offline">{0} - Çevrimdışı</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Ödeme yönteminiz reddedildi.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
@@ -167,7 +167,7 @@
    Text for remove button -->
   <string name="stripe_remove">Kaldır</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_removed">%s çıkartıldı</string>
+  <string name="stripe_removed">{0} çıkartıldı</string>
   <string name="stripe_secure_checkout">Güvenli Ödeme</string>
   <string name="stripe_title_add_a_card">Kart Ekle</string>
   <!-- Screen title telling users they should add an address -->

@@ -5,9 +5,9 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Zaplaťte v <num_installments/>bezúročných splátkach čiastku <installment_price/> pomocou <img/>]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_afterpay_clearpay_subtitle">%1$d platby/platieb bez úrokov vo výške %2$s</string>
+  <string name="stripe_afterpay_clearpay_subtitle">{0} platby/platieb bez úrokov vo výške {1}</string>
   <!-- Amazon Pay mandate text -->
-  <string name="stripe_amazon_pay_mandate">Potvrdením platby prostredníctvom služby AmazonPay povolíte spoločnosti %s, aby z vášho účtu AmazonPay účtovala poplatky za budúce platby v súlade s podmienkami tejto spoločnosti.</string>
+  <string name="stripe_amazon_pay_mandate">Potvrdením platby prostredníctvom služby AmazonPay povolíte spoločnosti {0}, aby z vášho účtu AmazonPay účtovala poplatky za budúce platby v súlade s podmienkami tejto spoločnosti.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Späť</string>
   <!-- Label for Bacs account number field -->
@@ -17,7 +17,7 @@
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">Bankový účet</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
-  <string name="stripe_bacs_confirm_mandate_label">Rozumiem, že spoločnosť Stripe bude inkasovať priame inkasá v mene spoločnosti %s a potvrdzujem, že som majiteľom účtu a som jediná osoba, ktorá musí autorizovať inkasá z tohto účtu.</string>
+  <string name="stripe_bacs_confirm_mandate_label">Rozumiem, že spoločnosť Stripe bude inkasovať priame inkasá v mene spoločnosti {0} a potvrdzujem, že som majiteľom účtu a som jediná osoba, ktorá musí autorizovať inkasá z tohto účtu.</string>
   <!-- Label for Bacs sort code field -->
   <string name="stripe_bacs_sort_code">Triediaci kód</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
@@ -31,9 +31,9 @@
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(neprijaté)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
-  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (neprijaté)</string>
+  <string name="stripe_card_brand_not_accepted_with_brand">{0} (neprijaté)</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">Pokračovaním oprávňujete spoločnosť %1$s, aby zaúčtovala túto platbu a budúce platby na debet vášho účtu Cash App v súlade s podmienkami spoločnosti %2$s, až do odvolania tohto oprávnenia. Toto oprávnenie môžete kedykoľvek zmeniť v nastaveniach aplikácie Cash App.</string>
+  <string name="stripe_cash_app_pay_mandate">Pokračovaním oprávňujete spoločnosť {0}, aby zaúčtovala túto platbu a budúce platby na debet vášho účtu Cash App v súlade s podmienkami spoločnosti {1}, až do odvolania tohto oprávnenia. Toto oprávnenie môžete kedykoľvek zmeniť v nastaveniach aplikácie Cash App.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Kontaktné informácie</string>
   <!-- Text for continue button -->
@@ -45,7 +45,7 @@
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Zadaný IBAN je neúplný.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="stripe_iban_invalid_country">Zadaný IBAN je neplatný, „%s“ nie je podporovaný kód krajiny.</string>
+  <string name="stripe_iban_invalid_country">Zadaný IBAN je neplatný, „{0}“ nie je podporovaný kód krajiny.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Váš IBAN by mal začínať dvojpísmenovým kódom krajiny.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
@@ -54,13 +54,13 @@
   <string name="stripe_incomplete_blik_code">Váš kód BLIK je neúplný.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_invalid_blik_code">Váš kód BLIK je neplatný.</string>
-  <string name="stripe_invalid_email_address">Neplatná e-mailová adresa: %s</string>
+  <string name="stripe_invalid_email_address">Neplatná e-mailová adresa: {0}</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Neplatné identifikačné číslo UPI</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Kúpte teraz alebo zaplaťte neskôr pomocou služby Klarna.</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Pokračovaním na službu Klarna povolíte spoločnosti %1$s, aby z vášho účtu Klarna účtovala budúce platby v súlade s ich podmienkami a podmienkami služby Klarna. Toto môžete kedykoľvek zmeniť vo svojej aplikácii Klarna alebo oslovením spoločnosti %2$s.</string>
+  <string name="stripe_klarna_mandate">Pokračovaním na službu Klarna povolíte spoločnosti {0}, aby z vášho účtu Klarna účtovala budúce platby v súlade s ich podmienkami a podmienkami služby Klarna. Toto môžete kedykoľvek zmeniť vo svojej aplikácii Klarna alebo oslovením spoločnosti {1}.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Zaplatiť neskôr pomocou služby Klarna</string>
   <!-- Caption for Phone field on address form -->
@@ -70,7 +70,7 @@
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_pay_button_amount">Zaplatiť %s</string>
+  <string name="stripe_pay_button_amount">Zaplatiť {0}</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Banka</string>
   <!-- Label shown in the payment type picker describing a card payment -->
@@ -96,19 +96,19 @@
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA inkaso</string>
   <!-- PayPal mandate text -->
-  <string name="stripe_paypal_mandate">Potvrdením platby prostredníctvom služby PayPal povolíte spoločnosti %s, aby z vášho účtu PayPal účtovala poplatky za budúce platby v súlade s podmienkami tejto spoločnosti.</string>
+  <string name="stripe_paypal_mandate">Potvrdením platby prostredníctvom služby PayPal povolíte spoločnosti {0}, aby z vášho účtu PayPal účtovala poplatky za budúce platby v súlade s podmienkami tejto spoločnosti.</string>
   <!-- Revolut mandate text -->
-  <string name="stripe_revolut_mandate">Potvrdením platby prostredníctvom služby RevolutPay povolíte spoločnosti %s, aby z vášho účtu RevolutPay účtovala poplatky za budúce platby v súlade s podmienkami tejto spoločnosti.</string>
+  <string name="stripe_revolut_mandate">Potvrdením platby prostredníctvom služby RevolutPay povolíte spoločnosti {0}, aby z vášho účtu RevolutPay účtovala poplatky za budúce platby v súlade s podmienkami tejto spoločnosti.</string>
   <!-- Satispay mandate text -->
-  <string name="stripe_satispay_mandate">Pokračovaním oprávňujete %1$s na automatické opakované odpísanie vášho zostatku Satispay v súlade s vaším nákupom alebo plánom predplatného.</string>
+  <string name="stripe_satispay_mandate">Pokračovaním oprávňujete {0} na automatické opakované odpísanie vášho zostatku Satispay v súlade s vaším nákupom alebo plánom predplatného.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="stripe_save_for_future_payments_with_merchant_name">Uložiť pre budúce platby spoločnosti %s</string>
+  <string name="stripe_save_for_future_payments_with_merchant_name">Uložiť pre budúce platby spoločnosti {0}</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
-  <string name="stripe_save_payment_details_to_merchant_name">Uložiť údaje o platbe na %s pre budúce nákupy</string>
+  <string name="stripe_save_payment_details_to_merchant_name">Uložiť údaje o platbe na {0} pre budúce nákupy</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Naskenovať kartu</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">Poskytnutím informácií o platbe a potvrdením tejto platby splnomocňujete (A) spoločnosti %s a Stripe, nášho poskytovateľa platobných služieb, na posielanie platobných príkazov do vašej banky na odpísanie finančných prostriedkov z vášho účtu a (B) vašu banku na odpísanie finančných prostriedkov z vášho účtu v súlade s pokynmi. V rámci vašich práv máte právo na refundáciu od vašej banky podľa zmluvných podmienok uvedených v zmluve s vašou bankou. Refundáciu si musíte vyžiadať do 8 týždňov odo dňa, kedy boli finančné prostriedky odpísané z vášho účtu. Vaše práva sú vysvetlené vo vyhlásení, ktoré môžete získať od svojej banky. Súhlasíte s tým, že budete dostávať oznámenia o budúcich debetných platbách až 2 dni pred ich uskutočnením.</string>
+  <string name="stripe_sepa_mandate">Poskytnutím informácií o platbe a potvrdením tejto platby splnomocňujete (A) spoločnosti {0} a Stripe, nášho poskytovateľa platobných služieb, na posielanie platobných príkazov do vašej banky na odpísanie finančných prostriedkov z vášho účtu a (B) vašu banku na odpísanie finančných prostriedkov z vášho účtu v súlade s pokynmi. V rámci vašich práv máte právo na refundáciu od vašej banky podľa zmluvných podmienok uvedených v zmluve s vašou bankou. Refundáciu si musíte vyžiadať do 8 týždňov odo dňa, kedy boli finančné prostriedky odpísané z vášho účtu. Vaše práva sú vysvetlené vo vyhlásení, ktoré môžete získať od svojej banky. Súhlasíte s tým, že budete dostávať oznámenia o budúcich debetných platbách až 2 dni pred ich uskutočnením.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Nastaviť ako predvolený spôsob platby</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

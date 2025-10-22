@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_download_complete">Allalaadimine on lõpule viidud</string>
   <string name="stripe_downloading_file">Faili allalaadimine</string>
-  <string name="stripe_failed_to_open_url">URL-i avamine nurjus: %s</string>
+  <string name="stripe_failed_to_open_url">URL-i avamine nurjus: {0}</string>
   <string name="stripe_not_yet_built">Pole veel loodud …</string>
   <string name="stripe_unable_to_download_file">Faili ei saanud alla laadida</string>
 </resources>

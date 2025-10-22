@@ -244,7 +244,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">Inkella tista\' tipprova ttella\' ritratt tad-dokument tal-identità bir-ritratt tiegħek int stess</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">Inkella tista\' tipprova ttella\' ritratt tal-%1$s tiegħek int stess</string>
+  <string name="stripe_upload_file_text">Inkella tista\' tipprova ttella\' ritratt tal-{0} tiegħek int stess</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">Tella\' d-dokument tal-identità b\'ritratt tiegħek</string>
 </resources>

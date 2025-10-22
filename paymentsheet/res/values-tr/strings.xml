@@ -9,13 +9,13 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Şimdi satın alın veya daha sonra Afterpay ile ödeyin</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_bank_account_ending_in">%s ile biten banka hesabı</string>
+  <string name="stripe_bank_account_ending_in">{0} ile biten banka hesabı</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
-  <string name="stripe_bank_account_plus_last_4">Banka hesabı ···· %s</string>
+  <string name="stripe_bank_account_plus_last_4">Banka hesabı ···· {0}</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
-  <string name="stripe_bank_account_with_last_4">Banka hesabı ···· %s</string>
+  <string name="stripe_bank_account_with_last_4">Banka hesabı ···· {0}</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
-  <string name="stripe_blik_confirm_payment">%s içinde banka uygulamanızda ödemeyi onaylayarak satın almayı tamamlayın.</string>
+  <string name="stripe_blik_confirm_payment">{0} içinde banka uygulamanızda ödemeyi onaylayarak satın almayı tamamlayın.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_cashapp_afterpay_subtitle">Şimdi satın alın veya daha sonra Cash App Afterpay ile ödeyin</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
@@ -33,13 +33,13 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Web genelinde daha hızlı ödeme yapmak için Link ile bir hesap oluşturun</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
-  <string name="stripe_link_card_type_credit">%1$s Kredisi</string>
+  <string name="stripe_link_card_type_credit">{0} Kredisi</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
-  <string name="stripe_link_card_type_debit">%1$s Borcu</string>
+  <string name="stripe_link_card_type_debit">{0} Borcu</string>
   <!-- Label a prepaid funding source. E.g. 'Visa Prepaid' -->
-  <string name="stripe_link_card_type_prepaid">%1$s Ön Ödemeli</string>
+  <string name="stripe_link_card_type_prepaid">{0} Ön Ödemeli</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
-  <string name="stripe_link_card_type_unknown">%1$s Kartı</string>
+  <string name="stripe_link_card_type_unknown">{0} Kartı</string>
   <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
   <string name="stripe_link_confirm_payment_title">Ödeme ayrıntılarını onaylayın</string>
   <!-- Email suggestion prompt shown when we detect a typo. The %1$s is a placeholder for the suggested email address. -->
@@ -67,9 +67,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for the update card screen in Link native -->
   <string name="stripe_link_update_card_title">Kartı güncelle</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message">Kaydedilmiş bilgilerinizi kullanmak için %s numaralı telefona gönderilen kodu girin.</string>
+  <string name="stripe_link_verification_message">Kaydedilmiş bilgilerinizi kullanmak için {0} numaralı telefona gönderilen kodu girin.</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message_short">%s yoluyla gönderilen kodu girin.</string>
+  <string name="stripe_link_verification_message_short">{0} yoluyla gönderilen kodu girin.</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">Kartı güncelle</string>
   <!-- Title of the logout action. -->
@@ -81,7 +81,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Devam ettiğinizde ödemeleri <terms>bu koşullara</terms> göre yetkilendirmeyi kabul etmiş olursunuz.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
-  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[%s için banka hesabınızı kaydettiğinizde ödemeleri <terms>bu koşullara</terms> göre yetkilendirmeyi kabul etmiş olursunuz.]]></string>
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[{0} için banka hesabınızı kaydettiğinizde ödemeleri <terms>bu koşullara</terms> göre yetkilendirmeyi kabul etmiş olursunuz.]]></string>
   <!-- Error message when an error case happens when linking your account -->
   <string name="stripe_paymentsheet_ach_something_went_wrong">Hesabınızı bağlarken bir şeyler ters gitti. Lütfen daha sonra tekrar deneyin.</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
@@ -95,35 +95,35 @@ to be saved and used in future checkout sessions. -->
   <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
   <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">Gönderim için fatura adresini kullan</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
-  <string name="stripe_paymentsheet_bacs_email_mandate">Bu ödeme talimatını onaylamanız için %s adresine üç iş günü içinde bir e-posta gönderilecektir.</string>
+  <string name="stripe_paymentsheet_bacs_email_mandate">Bu ödeme talimatını onaylamanız için {0} adresine üç iş günü içinde bir e-posta gönderilecektir.</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
   <string name="stripe_paymentsheet_bacs_mandate_title">Otomatik Ödeme detaylarınızı onaylayın</string>
   <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
   <string name="stripe_paymentsheet_bacs_modify_details_button_label">Detayları değiştir</string>
   <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
-  <string name="stripe_paymentsheet_bacs_notice_mandate">Ayrıca, bu talimat kapsamında borçlandırılacak herhangi bir tutar için iki gün önceden e-posta yoluyla bildirim alacaksınız. Ödemeler banka ekstrenizde \'%s\' olarak gösterilir.</string>
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Ayrıca, bu talimat kapsamında borçlandırılacak herhangi bir tutar için iki gün önceden e-posta yoluyla bildirim alacaksınız. Ödemeler banka ekstrenizde \'{0}\' olarak gösterilir.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
-  <string name="stripe_paymentsheet_bacs_protection_mandate">Ödemeleriniz %s ile güvence altındadır.</string>
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Ödemeleriniz {0} ile güvence altındadır.</string>
   <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
   <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Banka hesabı ayrıntıları değiştirilemiyor.</string>
   <!-- Text shown in the bank payment form when a promo is available and the user is paying, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Banka ile ödeme yaptığınızda %s tutarını geri alın. <a href=\"https://link.com/promotion-terms\">Şartları görün</a>]]></string>
+  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Banka ile ödeme yaptığınızda {0} tutarını geri alın. <a href=\"https://link.com/promotion-terms\">Şartları görün</a>]]></string>
   <!-- Text shown in the bank payment form when a promo is available and the user is setting up an account, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Bankanızla ilk kez ödeme yaptığınızda %s tutarını geri alın. <a href=\"https://link.com/promotion-terms\">Şartları görün</a>]]></string>
+  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Bankanızla ilk kez ödeme yaptığınızda {0} tutarını geri alın. <a href=\"https://link.com/promotion-terms\">Şartları görün</a>]]></string>
   <!-- Label shown when paying with a bank account is not eligible for the incentive, e.g. 'No $5 promo' -->
-  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">%s promosyonu yok</string>
+  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">{0} promosyonu yok</string>
   <!-- Text displayed on manage card screen when card details are not editable. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Kart ayrıntıları değiştirilemiyor.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
-  <string name="stripe_paymentsheet_card_mandate">Kart bilgilerinizi sağlayarak %s işletmesinin gelecekteki ödemeler için kartınızı kendi şartlarına uygun olarak ücretlendirmesine izin vermiş olursunuz.</string>
+  <string name="stripe_paymentsheet_card_mandate">Kart bilgilerinizi sağlayarak {0} işletmesinin gelecekteki ödemeler için kartınızı kendi şartlarına uygun olarak ücretlendirmesine izin vermiş olursunuz.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Devam ederek, bilgilerinizi gelecekteki %s satın alımları için kaydetmeyi kabul etmiş olursunuz.</string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Devam ederek, bilgilerinizi gelecekteki {0} satın alımları için kaydetmeyi kabul etmiş olursunuz.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Devam ederek, bilgilerinizi gelecekteki %s satın alımları için kaydetmeyi kabul etmiş olursunuz ve <link>Link</link>Ayrıca Link\'in <terms>Koşulları</terms> ve <privacy>Gizlilik</privacy> hükümlerini kabul etmiş olursunuz.]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Devam ederek, bilgilerinizi gelecekteki {0} satın alımları için kaydetmeyi kabul etmiş olursunuz ve <link>Link</link>Ayrıca Link\'in <terms>Koşulları</terms> ve <privacy>Gizlilik</privacy> hükümlerini kabul etmiş olursunuz.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Devam ederek, bilgilerinizi gelecekteki %s satın alımları için kaydetmeyi kabul etmiş olursunuz ve <link>Link</link> (bkz. <terms>Koşullar</terms> ve <privacy>Gizlilik</privacy>).]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Devam ederek, bilgilerinizi gelecekteki {0} satın alımları için kaydetmeyi kabul etmiş olursunuz ve <link>Link</link> (bkz. <terms>Koşullar</terms> ve <privacy>Gizlilik</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Devam ederek, bilgilerinizi gelecekteki %s ve <link>Link satın alımları için</link> Link <terms>koşulları</terms> ve <privacy>gizlilik kuralları</privacy> uyarınca kaydetmeyi kabul etmiş olursunuz.]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Devam ederek, bilgilerinizi gelecekteki {0} ve <link>Link satın alımları için</link> Link <terms>koşulları</terms> ve <privacy>gizlilik kuralları</privacy> uyarınca kaydetmeyi kabul etmiş olursunuz.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kart güncellenmedi. Lütfen tekrar deneyin.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -150,9 +150,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Ödeme yöntemlerinizi yönetin</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
-  <string name="stripe_paymentsheet_microdeposit">Stripe, 1-2 iş günü içinde hesabınıza 0,01 ABD doları yatıracaktır. Ardından, %s ödemesini tamamlama talimatlarını içeren bir e-posta alacaksınız.</string>
+  <string name="stripe_paymentsheet_microdeposit">Stripe, 1-2 iş günü içinde hesabınıza 0,01 ABD doları yatıracaktır. Ardından, {0} ödemesini tamamlama talimatlarını içeren bir e-posta alacaksınız.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
-  <string name="stripe_paymentsheet_modify_pm">%s yöntemini düzenle</string>
+  <string name="stripe_paymentsheet_modify_pm">{0} yöntemini düzenle</string>
   <!-- Label of a button that appears on a checkout screen. When tapped, it displays a credit card form. This button is shown next to another button representing the customer's saved card; the word 'new' is meant to differentiate this button's action with the saved card button. -->
   <string name="stripe_paymentsheet_new_card">Yeni kart</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
@@ -184,9 +184,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Kart kaldırılsın mı?</string>
   <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
-  <string name="stripe_paymentsheet_remove_partial_description">Bu ödeme yöntemi kaldırılacak ancak %s abonelikleri için kullanılabilir kalacaktır.</string>
+  <string name="stripe_paymentsheet_remove_partial_description">Bu ödeme yöntemi kaldırılacak ancak {0} abonelikleri için kullanılabilir kalacaktır.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
-  <string name="stripe_paymentsheet_remove_pm">%s yöntemini kaldırın</string>
+  <string name="stripe_paymentsheet_remove_pm">{0} yöntemini kaldırın</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
   <string name="stripe_paymentsheet_remove_pm_title">Ödeme yöntemini kaldır</string>
   <!-- A button used for saving a new payment method -->
@@ -198,7 +198,7 @@ to be saved and used in future checkout sessions. -->
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Gelecekteki ödemeler için kaydedilsin</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Bu kartı gelecekteki %s ödemeleri için kaydedin</string>
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Bu kartı gelecekteki {0} ödemeleri için kaydedin</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Kaydedildi</string>
   <!-- Title shown above a view containing the customer's cards -->
@@ -212,15 +212,15 @@ to be saved and used in future checkout sessions. -->
   <!-- Error message displayed when setting a default payment method fails. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Varsayılan ödeme yöntemi değiştirilmedi. Lütfen tekrar deneyin.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
-  <string name="stripe_paymentsheet_total_amount">Toplam: %s</string>
+  <string name="stripe_paymentsheet_total_amount">Toplam: {0}</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Kart markası güncellenmedi. Lütfen tekrar deneyin.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
-  <string name="stripe_paynow_confirm_payment">Satın alma işlemini tamamlamak için bankanızda veya ödeme uygulamanızda ödemeyi %s içinde onaylayın.</string>
+  <string name="stripe_paynow_confirm_payment">Satın alma işlemini tamamlamak için bankanızda veya ödeme uygulamanızda ödemeyi {0} içinde onaylayın.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Varsayılan ödeme yöntemi olarak ayarla</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_remove_bank_account_ending_in">%s ile biten banka hesabını kaldır</string>
+  <string name="stripe_remove_bank_account_ending_in">{0} ile biten banka hesabını kaldır</string>
   <!-- Accessibility description for a button that launches Shop Pay. -->
   <string name="stripe_shop_pay_button_description">Mağaza Ödemesi düğmesi</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
@@ -230,7 +230,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for the Link signup screen -->
   <string name="stripe_sign_up_header">Tek tıklamayla güvenli ödeme</string>
   <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
-  <string name="stripe_sign_up_message">%s dahil binlerce satıcı için daha hızlı ödeme yapın.</string>
+  <string name="stripe_sign_up_message">{0} dahil binlerce satıcı için daha hızlı ödeme yapın.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Link\'e katılarak <terms>Hükümleri</terms> ve <privacy>Gizlilik Politikasını</privacy> kabul etmiş olursunuz.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
@@ -250,7 +250,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Ödemeyi onaylayın</string>
   <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Ödemenizi onaylamak için %s içinde UPI uygulamanızı açın</string>
+  <string name="stripe_upi_polling_message">Ödemenizi onaylamak için {0} içinde UPI uygulamanızı açın</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Lütfen geri gidip başka bir ödeme yöntemi seçin</string>
   <!-- Text on a screen that indicates a payment has failed -->
@@ -270,9 +270,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_header_prefilled">Kayıtlı bilgilerinizi kullanarak daha hızlı ödeme yapabilirsiniz</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_verification_message">Ödemenizde varsayılan olarak Link\'i kullanmak için %s numaralı telefona gönderilen kodu girin</string>
+  <string name="stripe_verification_message">Ödemenizde varsayılan olarak Link\'i kullanmak için {0} numaralı telefona gönderilen kodu girin</string>
   <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
-  <string name="stripe_verification_not_email">%s doğru değil mi?</string>
+  <string name="stripe_verification_not_email">{0} doğru değil mi?</string>
   <!-- Label for a button that re-sends the a login code when tapped -->
   <string name="stripe_verification_resend">Kodu tekrar gönder</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
@@ -280,9 +280,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Devam ettiğinizde, bu <terms>koşullar</terms>a uygun olarak ödemelere izin vermeyi kabul etmiş olursunuz.]]></string>
   <!-- Text providing link to terms for bank payments when seller information is provided -->
-  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Siparişinizi %1$s ve %2$s\'e göndererek, bilgilerinizi gelecekteki satın alımlar için %3$s ile kaydetmeyi ve <terms>bu koşullar</terms> uyarınca ödemeleri yetkilendirmeyi kabul etmiş olursunuz.]]></string>
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Siparişinizi {0} ve {1}\'e göndererek, bilgilerinizi gelecekteki satın alımlar için {2} ile kaydetmeyi ve <terms>bu koşullar</terms> uyarınca ödemeleri yetkilendirmeyi kabul etmiş olursunuz.]]></string>
   <!-- Text providing link to terms for bank payments -->
-  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Siparişinizi %s’ye göndererek ödemeleri <terms>bu koşullara</terms> uygun olarak yetkilendirmeyi kabul etmiş olursunuz.]]></string>
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Siparişinizi {0}’ye göndererek ödemeleri <terms>bu koşullara</terms> uygun olarak yetkilendirmeyi kabul etmiş olursunuz.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Ödeme</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

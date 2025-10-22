@@ -5,9 +5,9 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Maksu <num_installments/> korottomassa <installment_price/> osassa maksutavalla <img/>]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_afterpay_clearpay_subtitle">%1$d korotonta %2$s maksua</string>
+  <string name="stripe_afterpay_clearpay_subtitle">{0} korotonta {1} maksua</string>
   <!-- Amazon Pay mandate text -->
-  <string name="stripe_amazon_pay_mandate">Kun vahvistat maksusi Amazon Paylla, %s valtuutetaan veloittamaan tulevia maksuja Amazon Pay -tililtäsi omien ehtojensa mukaisesti.</string>
+  <string name="stripe_amazon_pay_mandate">Kun vahvistat maksusi Amazon Paylla, {0} valtuutetaan veloittamaan tulevia maksuja Amazon Pay -tililtäsi omien ehtojensa mukaisesti.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Takaisin</string>
   <!-- Label for Bacs account number field -->
@@ -17,7 +17,7 @@
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">Pankkitili</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
-  <string name="stripe_bacs_confirm_mandate_label">Ymmärrän, että Stripe kerää suoraveloituksia yrityksen %s puolesta sekä vahvistan, että olen tilinhaltija ja ainoa henkilö, jota tarvitaan tämän tilin veloitusten varmentamiseen.</string>
+  <string name="stripe_bacs_confirm_mandate_label">Ymmärrän, että Stripe kerää suoraveloituksia yrityksen {0} puolesta sekä vahvistan, että olen tilinhaltija ja ainoa henkilö, jota tarvitaan tämän tilin veloitusten varmentamiseen.</string>
   <!-- Label for Bacs sort code field -->
   <string name="stripe_bacs_sort_code">Pankin tunnusnumero</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
@@ -31,9 +31,9 @@
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(ei hyväksytty)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
-  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (ei hyväksytty)</string>
+  <string name="stripe_card_brand_not_accepted_with_brand">{0} (ei hyväksytty)</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">Jatkamalla valtuutat kauppiaan %1$s veloittamaan Cash App -tiliäsi tälle ja tuleville maksuille kauppiaan %2$s ehtojen mukaisesti, kunnes tämä todennus peruutetaan. Voit muuttaa tätä milloin tahansa Cash App -asetuksista.</string>
+  <string name="stripe_cash_app_pay_mandate">Jatkamalla valtuutat kauppiaan {0} veloittamaan Cash App -tiliäsi tälle ja tuleville maksuille kauppiaan {1} ehtojen mukaisesti, kunnes tämä todennus peruutetaan. Voit muuttaa tätä milloin tahansa Cash App -asetuksista.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Yhteystiedot</string>
   <!-- Text for continue button -->
@@ -45,7 +45,7 @@
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">IBAN on puutteellinen.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="stripe_iban_invalid_country">Antamasi IBAN on virheellinen, \"%s\" ei ole tuettu maakoodi.</string>
+  <string name="stripe_iban_invalid_country">Antamasi IBAN on virheellinen, \"{0}\" ei ole tuettu maakoodi.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">IBAN-tilinumero alkaa kaksikirjaimisella maakoodilla.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
@@ -54,13 +54,13 @@
   <string name="stripe_incomplete_blik_code">BLIK-koodisi on puutteellinen.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_invalid_blik_code">BLIK-koodi ei kelpaa.</string>
-  <string name="stripe_invalid_email_address">Virheellinen sähköpostiosoite: %s</string>
+  <string name="stripe_invalid_email_address">Virheellinen sähköpostiosoite: {0}</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Virheellinen UPI-tunnus</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Osta nyt tai maksa myöhemmin Klarnalla.</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Jatkamalla Klarnaan valtuutat %1$s veloittamaan tulevia maksuja Klarna-tililtäsi heidän ehtojensa mukaisesti. Voit muuttaa tämän koska tahansa Klarna-sovelluksessa tai ottamalla yhteyttä kohteeseen %2$s.</string>
+  <string name="stripe_klarna_mandate">Jatkamalla Klarnaan valtuutat {0} veloittamaan tulevia maksuja Klarna-tililtäsi heidän ehtojensa mukaisesti. Voit muuttaa tämän koska tahansa Klarna-sovelluksessa tai ottamalla yhteyttä kohteeseen {1}.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Maksa myöhemmin Klarnalla.</string>
   <!-- Caption for Phone field on address form -->
@@ -70,7 +70,7 @@
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_pay_button_amount">Maksa %s</string>
+  <string name="stripe_pay_button_amount">Maksa {0}</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Pankki</string>
   <!-- Label shown in the payment type picker describing a card payment -->
@@ -96,19 +96,19 @@
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
   <!-- PayPal mandate text -->
-  <string name="stripe_paypal_mandate">Vahvistamalla maksusi PayPalin kanssa valtuutat kohteen %s veloittamaan tulevia maksuja PayPal-tililtäsi heidän ehtojensa mukaisesti.</string>
+  <string name="stripe_paypal_mandate">Vahvistamalla maksusi PayPalin kanssa valtuutat kohteen {0} veloittamaan tulevia maksuja PayPal-tililtäsi heidän ehtojensa mukaisesti.</string>
   <!-- Revolut mandate text -->
-  <string name="stripe_revolut_mandate">Vahvistamalla maksusi RevolutPayn kanssa, valtuutat yrityksen %s veloittamaan tulevia maksuja RevolutPay-tililtäsi heidän ehtojensa mukaisesti.</string>
+  <string name="stripe_revolut_mandate">Vahvistamalla maksusi RevolutPayn kanssa, valtuutat yrityksen {0} veloittamaan tulevia maksuja RevolutPay-tililtäsi heidän ehtojensa mukaisesti.</string>
   <!-- Satispay mandate text -->
-  <string name="stripe_satispay_mandate">Jatkamalla sallit, että %1$s voi veloittaa Satispay-saldoasi automaattisesti toistuvasti ostoksesi tai tilaussuunnitelmasi mukaisesti.</string>
+  <string name="stripe_satispay_mandate">Jatkamalla sallit, että {0} voi veloittaa Satispay-saldoasi automaattisesti toistuvasti ostoksesi tai tilaussuunnitelmasi mukaisesti.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="stripe_save_for_future_payments_with_merchant_name">Tallenna tulevia maksuja (%s) varten</string>
+  <string name="stripe_save_for_future_payments_with_merchant_name">Tallenna tulevia maksuja ({0}) varten</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
-  <string name="stripe_save_payment_details_to_merchant_name">Tallenna maksutiedot yritykselle %s tulevia ostoksia varten</string>
+  <string name="stripe_save_payment_details_to_merchant_name">Tallenna maksutiedot yritykselle {0} tulevia ostoksia varten</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Skannaa kortti</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">Antamalla maksutiedot ja vahvistamalla tämän maksun, valtuutat (A) %s ja Stripen, maksupalvelun tarjoajamme, lähettämään ohjeita pankillesi tilisi veloittamiseksi ja (B) pankkisi veloittamaan tiliäsi annettujen ohjeiden mukaisesti. Oikeuksiesi mukaisesti olet oikeutettu maksun palautukseen pankiltasi heidän kanssaan tekemäsi sopimuksen mukaisesti. Maksun palautus on lunastettava kahdeksan viikon kuluessa tilisi veloituksesta. Oikeutesi kerrotaan lausunnossa, jonka voit hankkia pankiltasi. Hyväksyt vastaanottamaan ilmoituksia tulevista veloituksista kaksi päivää ennen niiden tapahtumista.</string>
+  <string name="stripe_sepa_mandate">Antamalla maksutiedot ja vahvistamalla tämän maksun, valtuutat (A) {0} ja Stripen, maksupalvelun tarjoajamme, lähettämään ohjeita pankillesi tilisi veloittamiseksi ja (B) pankkisi veloittamaan tiliäsi annettujen ohjeiden mukaisesti. Oikeuksiesi mukaisesti olet oikeutettu maksun palautukseen pankiltasi heidän kanssaan tekemäsi sopimuksen mukaisesti. Maksun palautus on lunastettava kahdeksan viikon kuluessa tilisi veloituksesta. Oikeutesi kerrotaan lausunnossa, jonka voit hankkia pankiltasi. Hyväksyt vastaanottamaan ilmoituksia tulevista veloituksista kaksi päivää ennen niiden tapahtumista.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Aseta oletusarvoiseksi maksutavaksi</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

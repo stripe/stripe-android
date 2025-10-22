@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_download_complete">Lejupielāde pabeigta</string>
   <string name="stripe_downloading_file">Lejupielādē failu</string>
-  <string name="stripe_failed_to_open_url">Neizdevās atvērt URL:%s</string>
+  <string name="stripe_failed_to_open_url">Neizdevās atvērt URL:{0}</string>
   <string name="stripe_not_yet_built">Vēl nav izveidots...</string>
   <string name="stripe_unable_to_download_file">Neizdevās lejupielādēt failu</string>
 </resources>

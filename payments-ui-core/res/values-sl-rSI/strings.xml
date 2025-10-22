@@ -5,9 +5,9 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Plačajte v <num_installments/> obrokih po <installment_price/> brez obresti s storitvijo <img/>.]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_afterpay_clearpay_subtitle">%1$d plačil brez obresti v znesku %2$s</string>
+  <string name="stripe_afterpay_clearpay_subtitle">{0} plačil brez obresti v znesku {1}</string>
   <!-- Amazon Pay mandate text -->
-  <string name="stripe_amazon_pay_mandate">S potrditvijo plačila s storitvijo AmazonPay pooblaščate podjetje %s, da bremeni vaš račun za AmazonPay s prihodnjimi plačili v skladu s pogoji podjetja.</string>
+  <string name="stripe_amazon_pay_mandate">S potrditvijo plačila s storitvijo AmazonPay pooblaščate podjetje {0}, da bremeni vaš račun za AmazonPay s prihodnjimi plačili v skladu s pogoji podjetja.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Nazaj</string>
   <!-- Label for Bacs account number field -->
@@ -17,7 +17,7 @@
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">Bančni račun</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
-  <string name="stripe_bacs_confirm_mandate_label">Potrjujem, da bo podjetje Stripe zbiralo direktne obremenitve v imenu podjetja %s ter da sem lastnik računa in edina oseba, ki lahko odobri bremenitve s tega računa.</string>
+  <string name="stripe_bacs_confirm_mandate_label">Potrjujem, da bo podjetje Stripe zbiralo direktne obremenitve v imenu podjetja {0} ter da sem lastnik računa in edina oseba, ki lahko odobri bremenitve s tega računa.</string>
   <!-- Label for Bacs sort code field -->
   <string name="stripe_bacs_sort_code">Številka banke</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
@@ -31,9 +31,9 @@
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(ni sprejeto)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
-  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (ni sprejeto)</string>
+  <string name="stripe_card_brand_not_accepted_with_brand">{0} (ni sprejeto)</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">Če nadaljujete, pooblaščate podjetje %1$s, da bremeni vaš račun za Cash App s tem plačilom in prihodnjimi plačili v skladu s pogoji podjetja %2$s do preklica tega pooblastila. To lahko kadar koli spremenite v nastavitvah aplikacije Cash App.</string>
+  <string name="stripe_cash_app_pay_mandate">Če nadaljujete, pooblaščate podjetje {0}, da bremeni vaš račun za Cash App s tem plačilom in prihodnjimi plačili v skladu s pogoji podjetja {1} do preklica tega pooblastila. To lahko kadar koli spremenite v nastavitvah aplikacije Cash App.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Podatki za stik</string>
   <!-- Text for continue button -->
@@ -45,7 +45,7 @@
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Vnesena koda IBAN ni popolna.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="stripe_iban_invalid_country">Vnesena koda IBAN ni veljavna. \"%s\" ni podprta koda države.</string>
+  <string name="stripe_iban_invalid_country">Vnesena koda IBAN ni veljavna. \"{0}\" ni podprta koda države.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Vaša koda IBAN se mora začeti z dvomestno kodo države.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
@@ -54,13 +54,13 @@
   <string name="stripe_incomplete_blik_code">Vaša koda BLIK ni popolna.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_invalid_blik_code">Vaša koda BLIK ni veljavna.</string>
-  <string name="stripe_invalid_email_address">Neveljaven e-poštni naslov: %s</string>
+  <string name="stripe_invalid_email_address">Neveljaven e-poštni naslov: {0}</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Neveljaven UPI ID</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Kupite zdaj ali pa plačajte pozneje s storitvijo Klarna.</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Če potrdite preusmeritev v storitev Klarna, pooblaščate podjetje %1$s, da bremeni vaš račun Klarna s prihodnjimi plačili v skladu s pogoji podjetja in pogoji storitve Klarna. To lahko kadar koli spremenite v aplikaciji Klarna ali tako, da pišete na naslov %2$s.</string>
+  <string name="stripe_klarna_mandate">Če potrdite preusmeritev v storitev Klarna, pooblaščate podjetje {0}, da bremeni vaš račun Klarna s prihodnjimi plačili v skladu s pogoji podjetja in pogoji storitve Klarna. To lahko kadar koli spremenite v aplikaciji Klarna ali tako, da pišete na naslov {1}.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Plačajte pozneje s storitvijo Klarna.</string>
   <!-- Caption for Phone field on address form -->
@@ -70,7 +70,7 @@
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_pay_button_amount">Plačaj %s</string>
+  <string name="stripe_pay_button_amount">Plačaj {0}</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Banka</string>
   <!-- Label shown in the payment type picker describing a card payment -->
@@ -96,19 +96,19 @@
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Obremenitev SEPA</string>
   <!-- PayPal mandate text -->
-  <string name="stripe_paypal_mandate">S potrditvijo plačila s storitvijo PayPal pooblaščate podjetje %s, da bremeni vaš račun za PayPal s prihodnjimi plačili v skladu s pogoji podjetja.</string>
+  <string name="stripe_paypal_mandate">S potrditvijo plačila s storitvijo PayPal pooblaščate podjetje {0}, da bremeni vaš račun za PayPal s prihodnjimi plačili v skladu s pogoji podjetja.</string>
   <!-- Revolut mandate text -->
-  <string name="stripe_revolut_mandate">S potrditvijo plačila s storitvijo RevolutPay pooblaščate podjetje %s, da bremeni vaš račun za RevolutPay s prihodnjimi plačili v skladu s pogoji podjetja.</string>
+  <string name="stripe_revolut_mandate">S potrditvijo plačila s storitvijo RevolutPay pooblaščate podjetje {0}, da bremeni vaš račun za RevolutPay s prihodnjimi plačili v skladu s pogoji podjetja.</string>
   <!-- Satispay mandate text -->
-  <string name="stripe_satispay_mandate">Z nadaljevanjem pooblaščate podjetje %1$s, da samodejno bremeni vaše stanje Satispay na ponavljajoči se osnovi v skladu z vašim nakupom ali naročnino.</string>
+  <string name="stripe_satispay_mandate">Z nadaljevanjem pooblaščate podjetje {0}, da samodejno bremeni vaše stanje Satispay na ponavljajoči se osnovi v skladu z vašim nakupom ali naročnino.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="stripe_save_for_future_payments_with_merchant_name">Shrani za prihodnja plačila trgovcu %s</string>
+  <string name="stripe_save_for_future_payments_with_merchant_name">Shrani za prihodnja plačila trgovcu {0}</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
-  <string name="stripe_save_payment_details_to_merchant_name">Shranite podatke o plačilu podjetju %s za prihodnja plačila</string>
+  <string name="stripe_save_payment_details_to_merchant_name">Shranite podatke o plačilu podjetju {0} za prihodnja plačila</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Optično preberi kartico</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">Z navedbo podatkov o plačilu in potrditvijo tega plačila pooblaščate (A) podjetje %s in družbo Stripe, našega ponudnika plačilnih storitev, da posreduje navodila vaši banki za bremenitev vašega računa, in (B) vašo banko, da bremeni vaš račun v skladu s temi navodili. Vaše pravice vključujejo tudi pravico do povračila denarnih sredstev s strani vaše banke v skladu s pogoji in določili vaše pogodbe z banko. Povračilo denarnih sredstev morate zahtevati v 8 tednih od dneva bremenitve vašega računa. Vaše pravice so podrobno opisane na izpisku, ki ga lahko pridobite v banki. Strinjate se s prejemom obvestil za prihodnje bremenitve največ 2 dni pred njihovo izvedbo.</string>
+  <string name="stripe_sepa_mandate">Z navedbo podatkov o plačilu in potrditvijo tega plačila pooblaščate (A) podjetje {0} in družbo Stripe, našega ponudnika plačilnih storitev, da posreduje navodila vaši banki za bremenitev vašega računa, in (B) vašo banko, da bremeni vaš račun v skladu s temi navodili. Vaše pravice vključujejo tudi pravico do povračila denarnih sredstev s strani vaše banke v skladu s pogoji in določili vaše pogodbe z banko. Povračilo denarnih sredstev morate zahtevati v 8 tednih od dneva bremenitve vašega računa. Vaše pravice so podrobno opisane na izpisku, ki ga lahko pridobite v banki. Strinjate se s prejemom obvestil za prihodnje bremenitve največ 2 dni pred njihovo izvedbo.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Nastavi kot privzeti način plačila</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

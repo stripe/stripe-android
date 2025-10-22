@@ -244,7 +244,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">Como alternativa, puedes subir una foto de tu documento de identidad con foto de forma manual</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">También puedes subir una foto de tu %1$s manualmente.</string>
+  <string name="stripe_upload_file_text">También puedes subir una foto de tu {0} manualmente.</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">Carga tu documento de identidad con foto</string>
 </resources>

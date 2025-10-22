@@ -9,13 +9,13 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">지금 구매하거나 Afterpay로 나중에 결제</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_bank_account_ending_in">%s(으)로 끝나는 은행 계좌</string>
+  <string name="stripe_bank_account_ending_in">{0}(으)로 끝나는 은행 계좌</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
-  <string name="stripe_bank_account_plus_last_4">은행 계좌 ···· %s</string>
+  <string name="stripe_bank_account_plus_last_4">은행 계좌 ···· {0}</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
-  <string name="stripe_bank_account_with_last_4">은행 계좌 ····%s</string>
+  <string name="stripe_bank_account_with_last_4">은행 계좌 ····{0}</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
-  <string name="stripe_blik_confirm_payment">%s 이내에 은행 앱에서 결제를 확인하여 구매를 완료하십시오.</string>
+  <string name="stripe_blik_confirm_payment">{0} 이내에 은행 앱에서 결제를 확인하여 구매를 완료하십시오.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_cashapp_afterpay_subtitle">지금 구매하거나 Cash App Afterpay로 나중에 결제</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
@@ -33,17 +33,17 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Link 계정을 생성하여 웹 전반에서 더 빠르게 체크아웃하세요</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
-  <string name="stripe_link_card_type_credit">%1$s 신용</string>
+  <string name="stripe_link_card_type_credit">{0} 신용</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
-  <string name="stripe_link_card_type_debit">%1$s 직불</string>
+  <string name="stripe_link_card_type_debit">{0} 직불</string>
   <!-- Label a prepaid funding source. E.g. 'Visa Prepaid' -->
-  <string name="stripe_link_card_type_prepaid">%1$s 선불</string>
+  <string name="stripe_link_card_type_prepaid">{0} 선불</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
-  <string name="stripe_link_card_type_unknown">%1$s 카드</string>
+  <string name="stripe_link_card_type_unknown">{0} 카드</string>
   <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
   <string name="stripe_link_confirm_payment_title">결제 세부사항 확인</string>
   <!-- Email suggestion prompt shown when we detect a typo. The %1$s is a placeholder for the suggested email address. -->
-  <string name="stripe_link_email_suggestion">%1$s를 의미하는 건가요?</string>
+  <string name="stripe_link_email_suggestion">{0}를 의미하는 건가요?</string>
   <!-- CTA text for accepting the suggested email correction -->
   <string name="stripe_link_email_suggestion_update">예, 업데이트합니다</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
@@ -67,9 +67,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for the update card screen in Link native -->
   <string name="stripe_link_update_card_title">카드 업데이트</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message">저장된 정보를 사용하려면 %s(으)로 보낸 코드를 입력하십시오.</string>
+  <string name="stripe_link_verification_message">저장된 정보를 사용하려면 {0}(으)로 보낸 코드를 입력하십시오.</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message_short">%s번으로 보낸 코드를 입력해 주십시오.</string>
+  <string name="stripe_link_verification_message_short">{0}번으로 보낸 코드를 입력해 주십시오.</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">카드 업데이트</string>
   <!-- Title of the logout action. -->
@@ -81,7 +81,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[계속하면 <terms>해당 약관</terms>에 따라 결제를 승인하는 데 동의하는 것입니다.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
-  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[%s에 대해 귀하의 은행 계좌를 저장하면 <terms>해당 약관</terms>에 따라 결제를 승인하는 데 동의하는 것입니다.]]></string>
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[{0}에 대해 귀하의 은행 계좌를 저장하면 <terms>해당 약관</terms>에 따라 결제를 승인하는 데 동의하는 것입니다.]]></string>
   <!-- Error message when an error case happens when linking your account -->
   <string name="stripe_paymentsheet_ach_something_went_wrong">계정에 연결하는 동안 문제가 발생했습니다.\n나중에 다시 시도하십시오.</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
@@ -95,35 +95,35 @@ to be saved and used in future checkout sessions. -->
   <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
   <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">배송에 청구지 주소 사용</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
-  <string name="stripe_paymentsheet_bacs_email_mandate">영업일 기준 3일 이내에 %s(으)로 이 인출 지침 설정을 확인하는 이메일이 전송됩니다.</string>
+  <string name="stripe_paymentsheet_bacs_email_mandate">영업일 기준 3일 이내에 {0}(으)로 이 인출 지침 설정을 확인하는 이메일이 전송됩니다.</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
   <string name="stripe_paymentsheet_bacs_mandate_title">자동 이체 세부사항 확인</string>
   <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
   <string name="stripe_paymentsheet_bacs_modify_details_button_label">세부사항 수정</string>
   <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
-  <string name="stripe_paymentsheet_bacs_notice_mandate">또한, 본 지침에 따라 인출해야 할 금액에 대해 2일 전 사전 통지를 이메일로 받으실 수 있습니다. 결제는 은행 계좌에 \'%s\'(으)로 표시됩니다.</string>
+  <string name="stripe_paymentsheet_bacs_notice_mandate">또한, 본 지침에 따라 인출해야 할 금액에 대해 2일 전 사전 통지를 이메일로 받으실 수 있습니다. 결제는 은행 계좌에 \'{0}\'(으)로 표시됩니다.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
-  <string name="stripe_paymentsheet_bacs_protection_mandate">결제는 %s에 의해 보호됩니다.</string>
+  <string name="stripe_paymentsheet_bacs_protection_mandate">결제는 {0}에 의해 보호됩니다.</string>
   <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
   <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">은행 계좌 세부사항은 설정되면 변경할 수 없습니다.</string>
   <!-- Text shown in the bank payment form when a promo is available and the user is paying, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[은행으로 결제할 때 %s를 돌려받으십시오. <a href=\"https://link.com/promotion-terms\">약관&#160;보기</a>]]></string>
+  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[은행으로 결제할 때 {0}를 돌려받으십시오. <a href=\"https://link.com/promotion-terms\">약관&#160;보기</a>]]></string>
   <!-- Text shown in the bank payment form when a promo is available and the user is setting up an account, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[은행으로 처음 결제할 때 %s를 돌려받으십시오. <a href=\"https://link.com/promotion-terms\">약관&#160;보기</a>]]></string>
+  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[은행으로 처음 결제할 때 {0}를 돌려받으십시오. <a href=\"https://link.com/promotion-terms\">약관&#160;보기</a>]]></string>
   <!-- Label shown when paying with a bank account is not eligible for the incentive, e.g. 'No $5 promo' -->
-  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">%s 프로모션 없음</string>
+  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">{0} 프로모션 없음</string>
   <!-- Text displayed on manage card screen when card details are not editable. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">카드 세부사항은 설정되면 변경할 수 없습니다.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
-  <string name="stripe_paymentsheet_card_mandate">카드 정보를 제공하면 %s에서 향후 결제에 대해 해당 약관에 따라 귀하의 카드에 대금을 청구할 수 있습니다.</string>
+  <string name="stripe_paymentsheet_card_mandate">카드 정보를 제공하면 {0}에서 향후 결제에 대해 해당 약관에 따라 귀하의 카드에 대금을 청구할 수 있습니다.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 %s에 저장하는 데 동의하시는 것입니다.</string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 {0}에 저장하는 데 동의하시는 것입니다.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 %s 및 <link>Link</link>에 저장하는 데 동의하는 것입니다. 또한 Link의 <terms>약관</terms> 및 <privacy>개인정보정책</privacy>에 동의하시는 것입니다.]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 {0} 및 <link>Link</link>에 저장하는 데 동의하는 것입니다. 또한 Link의 <terms>약관</terms> 및 <privacy>개인정보정책</privacy>에 동의하시는 것입니다.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 %s 및 <link>Link</link> (<terms>약관</terms> 및 <privacy>개인정보 보호</privacy> 참조)에 저장하는 데 동의하시는 것입니다.]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 {0} 및 <link>Link</link> (<terms>약관</terms> 및 <privacy>개인정보 보호</privacy> 참조)에 저장하는 데 동의하시는 것입니다.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 %s 및 <link>Link</link> 에 Link <terms>약관</terms> 및 <privacy>개인정보 보호</privacy>에 따라 저장하시는 데 동의하시는 것입니다.]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 {0} 및 <link>Link</link> 에 Link <terms>약관</terms> 및 <privacy>개인정보 보호</privacy>에 따라 저장하시는 데 동의하시는 것입니다.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">카드가 업데이트되지 않았습니다. 다시 시도하십시오.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -150,9 +150,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">내 결제 방식 관리</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
-  <string name="stripe_paymentsheet_microdeposit">Stripe에서 영업일 기준 1~2일 후에 계좌로 0.01$를 입금할 예정입니다. 그런 다음 %s에 대한 결제를 완료하기 위한 지침이 포함된 이메일을 전송할 것입니다.</string>
+  <string name="stripe_paymentsheet_microdeposit">Stripe에서 영업일 기준 1~2일 후에 계좌로 0.01$를 입금할 예정입니다. 그런 다음 {0}에 대한 결제를 완료하기 위한 지침이 포함된 이메일을 전송할 것입니다.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
-  <string name="stripe_paymentsheet_modify_pm">%s 수정</string>
+  <string name="stripe_paymentsheet_modify_pm">{0} 수정</string>
   <!-- Label of a button that appears on a checkout screen. When tapped, it displays a credit card form. This button is shown next to another button representing the customer's saved card; the word 'new' is meant to differentiate this button's action with the saved card button. -->
   <string name="stripe_paymentsheet_new_card">새 카드</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
@@ -184,9 +184,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">카드를 삭제하시겠습니까?</string>
   <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
-  <string name="stripe_paymentsheet_remove_partial_description">이 결제 방식은 제거되지만 %s 구독에는 계속 사용할 수 있습니다.</string>
+  <string name="stripe_paymentsheet_remove_partial_description">이 결제 방식은 제거되지만 {0} 구독에는 계속 사용할 수 있습니다.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
-  <string name="stripe_paymentsheet_remove_pm">%s 제거</string>
+  <string name="stripe_paymentsheet_remove_pm">{0} 제거</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
   <string name="stripe_paymentsheet_remove_pm_title">결제 방식 삭제</string>
   <!-- A button used for saving a new payment method -->
@@ -198,7 +198,7 @@ to be saved and used in future checkout sessions. -->
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">향후 결제에 사용하도록 저장</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">이 카드를 향후 %s 결제에 사용하도록 저장</string>
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">이 카드를 향후 {0} 결제에 사용하도록 저장</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">저장함</string>
   <!-- Title shown above a view containing the customer's cards -->
@@ -212,15 +212,15 @@ to be saved and used in future checkout sessions. -->
   <!-- Error message displayed when setting a default payment method fails. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">기본 결제 방식이 변경되지 않았습니다. 다시 시도하십시오.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
-  <string name="stripe_paymentsheet_total_amount">합계 : %s</string>
+  <string name="stripe_paymentsheet_total_amount">합계 : {0}</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">카드 브랜드가 업데이트되지 않았습니다. 다시 시도하십시오.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
-  <string name="stripe_paynow_confirm_payment">%s 이내에 귀하의 은행 또는 결제 앱에서 결제를 확인하여 구매를 완료하십시오.</string>
+  <string name="stripe_paynow_confirm_payment">{0} 이내에 귀하의 은행 또는 결제 앱에서 결제를 확인하여 구매를 완료하십시오.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">기본 결제 방식으로 설정</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_remove_bank_account_ending_in">%s(으)로 끝나는 은행 계좌 제거</string>
+  <string name="stripe_remove_bank_account_ending_in">{0}(으)로 끝나는 은행 계좌 제거</string>
   <!-- Accessibility description for a button that launches Shop Pay. -->
   <string name="stripe_shop_pay_button_description">Shop Pay 버튼</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
@@ -230,7 +230,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for the Link signup screen -->
   <string name="stripe_sign_up_header">보안 원클릭 체크아웃</string>
   <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
-  <string name="stripe_sign_up_message">%s 및 수많은 가맹점에서 더 빠르게 결제하십시오.</string>
+  <string name="stripe_sign_up_message">{0} 및 수많은 가맹점에서 더 빠르게 결제하십시오.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Link에 참여하면 <terms>약관</terms> 및 <privacy>개인정보정책</privacy>에 동의하는 것입니다.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
@@ -250,7 +250,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">결제 승인</string>
   <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">결제를 승인하려면 %s 안에 UPI 앱을 여십시오.</string>
+  <string name="stripe_upi_polling_message">결제를 승인하려면 {0} 안에 UPI 앱을 여십시오.</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">뒤로 돌아가서 다른 결제 방식을 선택해 주십시오.</string>
   <!-- Text on a screen that indicates a payment has failed -->
@@ -270,9 +270,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_header_prefilled">저장된 정보를 사용하여 더 빠르게 체크아웃</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_verification_message">Link를 기본값으로 결제하려면 %s에 전송된 코드를 입력해 주십시오.</string>
+  <string name="stripe_verification_message">Link를 기본값으로 결제하려면 {0}에 전송된 코드를 입력해 주십시오.</string>
   <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
-  <string name="stripe_verification_not_email">%s 님이 아니십니까?</string>
+  <string name="stripe_verification_not_email">{0} 님이 아니십니까?</string>
   <!-- Label for a button that re-sends the a login code when tapped -->
   <string name="stripe_verification_resend">코드 재전송</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
@@ -280,9 +280,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[계속하면 해당 <terms>약관</terms>에 따라 결제를 승인하는 데 동의하는 것입니다.]]></string>
   <!-- Text providing link to terms for bank payments when seller information is provided -->
-  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[%1$s 및 %2$s에 주문을 제출하면 귀하는 향후 구매 시 사용하기 위해 귀하의 정보를 %3$s에 저장하고 <terms>이 약관</terms>에 따라 결제를 승인하는 데 동의하는 것입니다.]]></string>
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[{0} 및 {1}에 주문을 제출하면 귀하는 향후 구매 시 사용하기 위해 귀하의 정보를 {2}에 저장하고 <terms>이 약관</terms>에 따라 결제를 승인하는 데 동의하는 것입니다.]]></string>
   <!-- Text providing link to terms for bank payments -->
-  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[%s에 주문을 제출하면 귀하는 <terms>이 약관</terms>에 따라 결제 승인을 동의하는 것입니다.]]></string>
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[{0}에 주문을 제출하면 귀하는 <terms>이 약관</terms>에 따라 결제 승인을 동의하는 것입니다.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">결제</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

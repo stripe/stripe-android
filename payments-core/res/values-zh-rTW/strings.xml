@@ -2,16 +2,16 @@
 <resources>
   <!-- Label for card number entry text field -->
   <string name="stripe_acc_label_card_number">卡號</string>
-  <string name="stripe_acc_label_card_number_node">%s，卡號</string>
-  <string name="stripe_acc_label_cvc_node">%s, 安全碼</string>
+  <string name="stripe_acc_label_card_number_node">{0}，卡號</string>
+  <string name="stripe_acc_label_cvc_node">{0}, 安全碼</string>
   <string name="stripe_acc_label_expiry_date">到期日</string>
-  <string name="stripe_acc_label_expiry_date_node">%s，到期日</string>
+  <string name="stripe_acc_label_expiry_date_node">{0}，到期日</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
   <string name="stripe_acc_label_zip">郵遞區號</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="stripe_acc_label_zip_short">郵遞區號</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_added">已添加 %s</string>
+  <string name="stripe_added">已添加 {0}</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="stripe_address_city_required">請輸入您的城市</string>
   <!-- Error text indicating country is invalid -->
@@ -75,9 +75,9 @@
   <!-- Placeholder for AU BECS BSB number -->
   <string name="stripe_au_becs_bsb_number">BSB 號碼</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="stripe_au_becs_mandate">提供您的銀行帳戶詳情並確認這筆付款即表示您同意該「直接借記請求」以及&lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;「直接借記請求」服務協議&lt;/a&gt;，並授權 Stripe Payments Australia Pty Ltd ACN 160 180 343，直接借記使用者 ID 507156 (「Stripe」)透過「批量電子清算系統」(BECS) 代 %s（「商家」）向您收取「商家」單獨與您議定的金額。您確認您是上述所列帳戶的開戶人或授權簽字者。</string>
+  <string name="stripe_au_becs_mandate">提供您的銀行帳戶詳情並確認這筆付款即表示您同意該「直接借記請求」以及&lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;「直接借記請求」服務協議&lt;/a&gt;，並授權 Stripe Payments Australia Pty Ltd ACN 160 180 343，直接借記使用者 ID 507156 (「Stripe」)透過「批量電子清算系統」(BECS) 代 {0}（「商家」）向您收取「商家」單獨與您議定的金額。您確認您是上述所列帳戶的開戶人或授權簽字者。</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="stripe_becs_mandate_acceptance">\n    透過提供您的銀行帳戶資訊並確認該筆付款，\n    表示您同意本「直接簽賬請求」及其服務條款，\n    並授權 Stripe Payments Australia Pty Ltd ACN 160 180 343\n    Direct Debit User ID number 507156 (「Stripe」) 透過批量電子清算系統 (BECS)\n    代 %1$s（「商家」）向您的帳戶扣取商家單獨告知您的金額。\n    您確認您是開戶人或上述帳戶的授權簽字人。\n    \n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    透過提供您的銀行帳戶資訊並確認該筆付款，\n    表示您同意本「直接簽賬請求」及其服務條款，\n    並授權 Stripe Payments Australia Pty Ltd ACN 160 180 343\n    Direct Debit User ID number 507156 (「Stripe」) 透過批量電子清算系統 (BECS)\n    代 {0}（「商家」）向您的帳戶扣取商家單獨告知您的金額。\n    您確認您是開戶人或上述帳戶的授權簽字人。\n    \n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">帳號</string>
   <!-- Error description for incomplete account number -->
@@ -109,11 +109,11 @@
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">您的卡已被拒絕</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="stripe_card_ending_in">%1$s - 尾號：%2$s</string>
+  <string name="stripe_card_ending_in">{0} - 尾號：{1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
-  <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
+  <string name="stripe_card_plus_last_4">{0} ···· {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
-  <string name="stripe_card_with_last_4">%1$s ···· %2$s</string>
+  <string name="stripe_card_with_last_4">{0} ···· {1}</string>
   <!-- Text for close button -->
   <string name="stripe_close">關閉</string>
   <!-- Accessibility title used during Talkback to indicate to users that a transaction is being confirmed -->
@@ -122,7 +122,7 @@
   <string name="stripe_delete_payment_method">刪除支付方式</string>
   <string name="stripe_delete_payment_method_prompt_title">刪除支付方式</string>
   <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
-  <string name="stripe_disallowed_card_brand">不接受 %s</string>
+  <string name="stripe_disallowed_card_brand">不接受 {0}</string>
   <!-- Done button title -->
   <string name="stripe_done">完成</string>
   <!-- Button title to enter editing mode -->
@@ -139,7 +139,7 @@
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">驗證您的支付方式時逾時——請重試</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
-  <string name="stripe_fpx_bank_offline">%s - 線下</string>
+  <string name="stripe_fpx_bank_offline">{0} - 線下</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">您的支付方式被拒絕了。</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
@@ -167,7 +167,7 @@
    Text for remove button -->
   <string name="stripe_remove">移除</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_removed">已移除 %s</string>
+  <string name="stripe_removed">已移除 {0}</string>
   <string name="stripe_secure_checkout">安全結帳</string>
   <string name="stripe_title_add_a_card">新增卡</string>
   <!-- Screen title telling users they should add an address -->

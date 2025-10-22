@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_download_complete">Download fuldført</string>
   <string name="stripe_downloading_file">Downloader fil</string>
-  <string name="stripe_failed_to_open_url">Kunne ikke åbne URL-adressen: %s</string>
+  <string name="stripe_failed_to_open_url">Kunne ikke åbne URL-adressen: {0}</string>
   <string name="stripe_not_yet_built">Ikke bygget endnu…</string>
   <string name="stripe_unable_to_download_file">Kunne ikke downloade filen</string>
 </resources>

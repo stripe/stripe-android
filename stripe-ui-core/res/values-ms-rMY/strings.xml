@@ -65,19 +65,19 @@
   <!-- Error message when email is invalid -->
   <string name="stripe_email_is_invalid">E-mel anda tidak sah.</string>
   <!-- String to describe an complete expiration date text field. Formatted as 'Expiration date. [month] [year] -->
-  <string name="stripe_expiration_date_content_description" formatted="false">Tarikh tamat tempoh. %s %s</string>
+  <string name="stripe_expiration_date_content_description" formatted="false">Tarikh tamat tempoh. {0} {1}</string>
   <!-- String to describe an empty expiration date text field. -->
   <string name="stripe_expiration_date_empty_content_description">Tarikh tamat tempoh. Bulan dua digit dan tahun dua digit, kosong.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_expiration_date_hint">BB / TT</string>
   <!-- String to describe an expiration date text field with complete month and empty year. -->
-  <string name="stripe_expiration_date_month_complete_content_description">Tarikh tamat tempoh. %s dan tahun dua digit, kosong.</string>
+  <string name="stripe_expiration_date_month_complete_content_description">Tarikh tamat tempoh. {0} dan tahun dua digit, kosong.</string>
   <!-- String to describe an expiration date text field with complete month and incomplete year. -->
-  <string name="stripe_expiration_date_year_incomplete_content_description">Tarikh tamat tempoh. %s dan tahun dua digit, tidak lengkap.</string>
+  <string name="stripe_expiration_date_year_incomplete_content_description">Tarikh tamat tempoh. {0} dan tahun dua digit, tidak lengkap.</string>
   <!-- String to describe that a form field is required to be completed. -->
   <string name="stripe_field_required">Medan ini diperlukan</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="stripe_form_label_optional">%s (opsyenal)</string>
+  <string name="stripe_form_label_optional">{0} (opsyenal)</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
   <string name="stripe_incomplete_expiry_date">Tarikh tamat tempoh kad anda tidak lengkap.</string>
   <!-- Error description for incomplete phone number -->

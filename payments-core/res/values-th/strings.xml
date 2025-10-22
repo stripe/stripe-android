@@ -2,16 +2,16 @@
 <resources>
   <!-- Label for card number entry text field -->
   <string name="stripe_acc_label_card_number">หมายเลขบัตร</string>
-  <string name="stripe_acc_label_card_number_node">%s, หมายเลขบัตร</string>
-  <string name="stripe_acc_label_cvc_node">%s, CVC</string>
+  <string name="stripe_acc_label_card_number_node">{0}, หมายเลขบัตร</string>
+  <string name="stripe_acc_label_cvc_node">{0}, CVC</string>
   <string name="stripe_acc_label_expiry_date">วันหมดอายุ</string>
-  <string name="stripe_acc_label_expiry_date_node">%s, วันหมดอายุ</string>
+  <string name="stripe_acc_label_expiry_date_node">{0}, วันหมดอายุ</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
   <string name="stripe_acc_label_zip">รหัสไปรษณีย์</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="stripe_acc_label_zip_short">รหัสไปรษณีย์</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_added">เพิ่ม %s แล้ว</string>
+  <string name="stripe_added">เพิ่ม {0} แล้ว</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="stripe_address_city_required">โปรดป้อนชื่อเมือง</string>
   <!-- Error text indicating country is invalid -->
@@ -75,9 +75,9 @@
   <!-- Placeholder for AU BECS BSB number -->
   <string name="stripe_au_becs_bsb_number">หมายเลข BSB</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="stripe_au_becs_mandate">การระบุรายละเอียดบัญชีธนาคารและการยืนยันการชำระเงินนี้หมายความว่าคุณยอมรับ&lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;ข้อตกลงในการให้บริการการขอหักบัญชีอัตโนมัติ&lt;/a&gt; และอนุญาตให้ Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID หมายเลข 507156 (“Stripe”) หักเงินจากบัญชีของคุณผ่าน Bulk Electronic Clearing System (BECS) ในนามของ %s (\"ผู้ค้า\") สำหรับจำนวนเงินใดก็ตามที่ผู้ค้าได้แจ้งคุณไว้ต่างหาก และคุณรับรองว่าตนเองเป็นเจ้าของบัญชีหรือผู้มีอำนาจลงนามในบัญชีที่ระบุข้างต้น</string>
+  <string name="stripe_au_becs_mandate">การระบุรายละเอียดบัญชีธนาคารและการยืนยันการชำระเงินนี้หมายความว่าคุณยอมรับ&lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;ข้อตกลงในการให้บริการการขอหักบัญชีอัตโนมัติ&lt;/a&gt; และอนุญาตให้ Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID หมายเลข 507156 (“Stripe”) หักเงินจากบัญชีของคุณผ่าน Bulk Electronic Clearing System (BECS) ในนามของ {0} (\"ผู้ค้า\") สำหรับจำนวนเงินใดก็ตามที่ผู้ค้าได้แจ้งคุณไว้ต่างหาก และคุณรับรองว่าตนเองเป็นเจ้าของบัญชีหรือผู้มีอำนาจลงนามในบัญชีที่ระบุข้างต้น</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="stripe_becs_mandate_acceptance">\n    การระบุรายละเอียดบัญชีธนาคารและการยืนยันการชำระเงินนี้หมายความว่าคุณยอมรับ\n    ข้อตกลงในการให้บริการการขอหักบัญชีอัตโนมัติ และอนุญาตให้\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID\n    หมายเลข 507156 (“Stripe”) หักเงินจากบัญชีของคุณผ่าน\n    Bulk Electronic Clearing System (BECS) ในนามของ %1$s (\"ผู้ค้า\") สำหรับจำนวนเงิน\n    ใดก็ตามที่ผู้ค้าได้แจ้งคุณไว้ต่างหาก และคุณรับรองว่า\n    ตนเองเป็นเจ้าของบัญชีหรือผู้มีอำนาจลงนามในบัญชีที่ระบุข้างต้น\n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    การระบุรายละเอียดบัญชีธนาคารและการยืนยันการชำระเงินนี้หมายความว่าคุณยอมรับ\n    ข้อตกลงในการให้บริการการขอหักบัญชีอัตโนมัติ และอนุญาตให้\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID\n    หมายเลข 507156 (“Stripe”) หักเงินจากบัญชีของคุณผ่าน\n    Bulk Electronic Clearing System (BECS) ในนามของ {0} (\"ผู้ค้า\") สำหรับจำนวนเงิน\n    ใดก็ตามที่ผู้ค้าได้แจ้งคุณไว้ต่างหาก และคุณรับรองว่า\n    ตนเองเป็นเจ้าของบัญชีหรือผู้มีอำนาจลงนามในบัญชีที่ระบุข้างต้น\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">หมายเลขบัญชี</string>
   <!-- Error description for incomplete account number -->
@@ -109,11 +109,11 @@
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">บัตรของคุณถูกปฏิเสธ</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="stripe_card_ending_in">%1$s ลงท้ายด้วย %2$s</string>
+  <string name="stripe_card_ending_in">{0} ลงท้ายด้วย {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
-  <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
+  <string name="stripe_card_plus_last_4">{0} ···· {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
-  <string name="stripe_card_with_last_4">%1$s ····%2$s</string>
+  <string name="stripe_card_with_last_4">{0} ····{1}</string>
   <!-- Text for close button -->
   <string name="stripe_close">ปิด</string>
   <!-- Accessibility title used during Talkback to indicate to users that a transaction is being confirmed -->
@@ -122,7 +122,7 @@
   <string name="stripe_delete_payment_method">ลบวิธีการชำระเงิน</string>
   <string name="stripe_delete_payment_method_prompt_title">ลบวิธีการชำระเงินใช่ไหม</string>
   <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
-  <string name="stripe_disallowed_card_brand">ระบบไม่รองรับ %s</string>
+  <string name="stripe_disallowed_card_brand">ระบบไม่รองรับ {0}</string>
   <!-- Done button title -->
   <string name="stripe_done">เสร็จสิ้น</string>
   <!-- Button title to enter editing mode -->
@@ -139,7 +139,7 @@
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">หมดเวลาตรวจสอบสิทธิ์วิธีการชำระเงินแล้ว โปรดลองอีกครั้ง</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
-  <string name="stripe_fpx_bank_offline">%s - ออฟไลน์</string>
+  <string name="stripe_fpx_bank_offline">{0} - ออฟไลน์</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">การชำระเงินของคุณถูกปฏิเสธ</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
@@ -167,7 +167,7 @@
    Text for remove button -->
   <string name="stripe_remove">นำออก</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_removed">นำ %s ออกแล้ว</string>
+  <string name="stripe_removed">นำ {0} ออกแล้ว</string>
   <string name="stripe_secure_checkout">การชำระเงินที่ปลอดภัย</string>
   <string name="stripe_title_add_a_card">เพิ่มบัตร</string>
   <!-- Screen title telling users they should add an address -->

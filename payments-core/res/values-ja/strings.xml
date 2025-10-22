@@ -2,16 +2,16 @@
 <resources>
   <!-- Label for card number entry text field -->
   <string name="stripe_acc_label_card_number">カード番号</string>
-  <string name="stripe_acc_label_card_number_node">%s、カード番号</string>
-  <string name="stripe_acc_label_cvc_node">%s、セキュリティコード</string>
+  <string name="stripe_acc_label_card_number_node">{0}、カード番号</string>
+  <string name="stripe_acc_label_cvc_node">{0}、セキュリティコード</string>
   <string name="stripe_acc_label_expiry_date">有効期限</string>
-  <string name="stripe_acc_label_expiry_date_node">%s、有効期限</string>
+  <string name="stripe_acc_label_expiry_date_node">{0}、有効期限</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
   <string name="stripe_acc_label_zip">郵便番号</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="stripe_acc_label_zip_short">郵便番号</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_added">%s が追加されました</string>
+  <string name="stripe_added">{0} が追加されました</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="stripe_address_city_required">市区町村を入力してください</string>
   <!-- Error text indicating country is invalid -->
@@ -75,9 +75,9 @@
   <!-- Placeholder for AU BECS BSB number -->
   <string name="stripe_au_becs_bsb_number">BSB 番号</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="stripe_au_becs_mandate">銀行口座情報を提供し、この支払いを確認することにより、お客様はこのダイレクトデビットのリクエストと&lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;ダイレクトデビットリクエスト利用規約&lt;/a&gt;に同意し、Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156 (以下「Stripe」) が、 %s (「加盟店」) に代わって、加盟店から別途通知された金額について、Bulk Electronic Clearing System (BECS) を使用してお客様の口座から引き落としを行うことを承認したものとします。また、お客様が上記の口座の名義人または承認された署名者であることを保証したものとみなされます。</string>
+  <string name="stripe_au_becs_mandate">銀行口座情報を提供し、この支払いを確認することにより、お客様はこのダイレクトデビットのリクエストと&lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;ダイレクトデビットリクエスト利用規約&lt;/a&gt;に同意し、Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156 (以下「Stripe」) が、 {0} (「加盟店」) に代わって、加盟店から別途通知された金額について、Bulk Electronic Clearing System (BECS) を使用してお客様の口座から引き落としを行うことを承認したものとします。また、お客様が上記の口座の名義人または承認された署名者であることを保証したものとみなされます。</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="stripe_becs_mandate_acceptance">\n    お客様の銀行情報を提供し、この支払いを確認することで、お客様はこの口座引き落とし依頼およびダイレクトデビットリクエスト利用規約 \n    に同意し、\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156\n    (「Stripe」) が、%1$s (「加盟店」) の代理として、加盟店から別途連絡された金額について、Bulk \n    Electronic Clearing System (BECS 振替) を通して口座引き落としを行うことを承認するものとします。お客様が上\n    記の口座の口座名義人または承認された署名者であることを、\n    お客様は証明するものとします。\n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    お客様の銀行情報を提供し、この支払いを確認することで、お客様はこの口座引き落とし依頼およびダイレクトデビットリクエスト利用規約 \n    に同意し、\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156\n    (「Stripe」) が、{0} (「加盟店」) の代理として、加盟店から別途連絡された金額について、Bulk \n    Electronic Clearing System (BECS 振替) を通して口座引き落としを行うことを承認するものとします。お客様が上\n    記の口座の口座名義人または承認された署名者であることを、\n    お客様は証明するものとします。\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">アカウント番号</string>
   <!-- Error description for incomplete account number -->
@@ -109,11 +109,11 @@
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">クレジットカードが拒否されました</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="stripe_card_ending_in">末尾が %2$s の %1$s</string>
+  <string name="stripe_card_ending_in">末尾が {1} の {0}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
-  <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
+  <string name="stripe_card_plus_last_4">{0} ···· {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
-  <string name="stripe_card_with_last_4">%1$s ····%2$s</string>
+  <string name="stripe_card_with_last_4">{0} ····{1}</string>
   <!-- Text for close button -->
   <string name="stripe_close">閉じる</string>
   <!-- Accessibility title used during Talkback to indicate to users that a transaction is being confirmed -->
@@ -122,7 +122,7 @@
   <string name="stripe_delete_payment_method">支払い方法を削除する</string>
   <string name="stripe_delete_payment_method_prompt_title">支払い方法を削除しますか？</string>
   <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
-  <string name="stripe_disallowed_card_brand">%s は受け付けられません</string>
+  <string name="stripe_disallowed_card_brand">{0} は受け付けられません</string>
   <!-- Done button title -->
   <string name="stripe_done">完了</string>
   <!-- Button title to enter editing mode -->
@@ -139,7 +139,7 @@
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">支払い方法の認証がタイムアウトしました。もう一度お試しください</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
-  <string name="stripe_fpx_bank_offline">%s - オフライン</string>
+  <string name="stripe_fpx_bank_offline">{0} - オフライン</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">お客様の支払い方法が拒否されました。</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
@@ -167,7 +167,7 @@
    Text for remove button -->
   <string name="stripe_remove">削除</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_removed">%s が削除されました</string>
+  <string name="stripe_removed">{0} が削除されました</string>
   <string name="stripe_secure_checkout">安全なチェックアウト</string>
   <string name="stripe_title_add_a_card">カードを追加</string>
   <!-- Screen title telling users they should add an address -->

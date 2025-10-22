@@ -5,9 +5,9 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Makske <num_installments/> <installment_price/> suuruse intressivaba osamaksega <img/> abil]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_afterpay_clearpay_subtitle">%1$d intressivaba makset summas %2$s</string>
+  <string name="stripe_afterpay_clearpay_subtitle">{0} intressivaba makset summas {1}</string>
   <!-- Amazon Pay mandate text -->
-  <string name="stripe_amazon_pay_mandate">AmazonPay makse kinnitamisega lubate ettevõttel %s oma AmazonPay kontot vastavalt tema tingimustele tulevasteks makseteks debiteerida.</string>
+  <string name="stripe_amazon_pay_mandate">AmazonPay makse kinnitamisega lubate ettevõttel {0} oma AmazonPay kontot vastavalt tema tingimustele tulevasteks makseteks debiteerida.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Tagasi</string>
   <!-- Label for Bacs account number field -->
@@ -17,7 +17,7 @@
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">Pangakonto</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
-  <string name="stripe_bacs_confirm_mandate_label">Mõistan, et Stripe kogub ettevõtte %s nimel otsekorraldusi, ja kinnitan, et olen konto omanik ja ainus isik, kes peab konto debiteerimise lubama.</string>
+  <string name="stripe_bacs_confirm_mandate_label">Mõistan, et Stripe kogub ettevõtte {0} nimel otsekorraldusi, ja kinnitan, et olen konto omanik ja ainus isik, kes peab konto debiteerimise lubama.</string>
   <!-- Label for Bacs sort code field -->
   <string name="stripe_bacs_sort_code">Sorteerimiskood</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
@@ -31,9 +31,9 @@
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(pole aktsepteeritud)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
-  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (pole aktsepteeritud)</string>
+  <string name="stripe_card_brand_not_accepted_with_brand">{0} (pole aktsepteeritud)</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">Jätkamisel volitate %1$s debiteerima teie Cash Appi kontot selle makse ja tulevaste maksete eest vastavalt ettevõtte %2$s tingimustele, kuni see volitus tühistatakse. Saate seda igal ajal oma Cash rakenduse seadetes muuta.</string>
+  <string name="stripe_cash_app_pay_mandate">Jätkamisel volitate {0} debiteerima teie Cash Appi kontot selle makse ja tulevaste maksete eest vastavalt ettevõtte {1} tingimustele, kuni see volitus tühistatakse. Saate seda igal ajal oma Cash rakenduse seadetes muuta.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Kontaktandmed</string>
   <!-- Text for continue button -->
@@ -45,7 +45,7 @@
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Sisestatud IBAN on puudulik.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="stripe_iban_invalid_country">Sisestatud IBAN on kehtetu, \"%s\" ei ole toetatud riigikood.</string>
+  <string name="stripe_iban_invalid_country">Sisestatud IBAN on kehtetu, \"{0}\" ei ole toetatud riigikood.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Teie IBAN peab algama kahetähelise riigikoodiga.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
@@ -54,13 +54,13 @@
   <string name="stripe_incomplete_blik_code">Teie BLIK-kood on puudulik.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_invalid_blik_code">Teie BLIK-kood on kehtetu.</string>
-  <string name="stripe_invalid_email_address">Kehtetu e-posti address: %s</string>
+  <string name="stripe_invalid_email_address">Kehtetu e-posti address: {0}</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Kehtetu UPI ID</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Ostke nüüd või makske hiljem Klarnaga.</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Klarnaga jätkates, lubate ettevõttel %1$s oma Klarna kontot vastavalt tema tingimustele ja vastavalt Klarna tingimustele tulevasteks makseteks debiteerida. Saate seda igal ajal oma Klarna rakenduses või ettevõtte %2$s poole pöördudes muuta.</string>
+  <string name="stripe_klarna_mandate">Klarnaga jätkates, lubate ettevõttel {0} oma Klarna kontot vastavalt tema tingimustele ja vastavalt Klarna tingimustele tulevasteks makseteks debiteerida. Saate seda igal ajal oma Klarna rakenduses või ettevõtte {1} poole pöördudes muuta.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Makske hiljem Klarnaga.</string>
   <!-- Caption for Phone field on address form -->
@@ -70,7 +70,7 @@
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_pay_button_amount">Maksa %s</string>
+  <string name="stripe_pay_button_amount">Maksa {0}</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Pank</string>
   <!-- Label shown in the payment type picker describing a card payment -->
@@ -96,19 +96,19 @@
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA deebet</string>
   <!-- PayPal mandate text -->
-  <string name="stripe_paypal_mandate">Kinnitades oma PayPali makse, lubate ettevõttel %s oma PayPali kontot tulevasteks makseteks vastavalt nende tingimustele debiteerida.</string>
+  <string name="stripe_paypal_mandate">Kinnitades oma PayPali makse, lubate ettevõttel {0} oma PayPali kontot tulevasteks makseteks vastavalt nende tingimustele debiteerida.</string>
   <!-- Revolut mandate text -->
-  <string name="stripe_revolut_mandate">Revolut Pay makse kinnitamisega lubate ettevõttel %s oma Revolut Pay kontot tulevasteks makseteks vastavalt nende tingimustele debiteerida.</string>
+  <string name="stripe_revolut_mandate">Revolut Pay makse kinnitamisega lubate ettevõttel {0} oma Revolut Pay kontot tulevasteks makseteks vastavalt nende tingimustele debiteerida.</string>
   <!-- Satispay mandate text -->
-  <string name="stripe_satispay_mandate">Jätkates annate loa, et %1$s debiteerib regulaarselt teie Satispay kontot vastavalt teie ostule või tellimusplaanile.</string>
+  <string name="stripe_satispay_mandate">Jätkates annate loa, et {0} debiteerib regulaarselt teie Satispay kontot vastavalt teie ostule või tellimusplaanile.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="stripe_save_for_future_payments_with_merchant_name">Salvestage tulevasteks %s makseteks</string>
+  <string name="stripe_save_for_future_payments_with_merchant_name">Salvestage tulevasteks {0} makseteks</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
-  <string name="stripe_save_payment_details_to_merchant_name">Salvesta makseandmed %s tulevaste ostude jaoks</string>
+  <string name="stripe_save_payment_details_to_merchant_name">Salvesta makseandmed {0} tulevaste ostude jaoks</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Skanni kaart</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">Makseteabe esitamise ja käesoleva makse kinnitamisega volitatate (A) ettevõtet %s ja Stripe\'i, meie makseteenuse osutajat, saatma teie panka juhiseid teie konto debiteerimiseks ning (B) oma panka nende juhiste alusel teie kontot debiteerima. Vastavalt teie õigustele, pangaga sõlmitud lepingule ja panga üldtingimustele on teil õigus saada pangalt tagasimakset. Tagasimakse taotlus tuleb esitada 8 nädala jooksul alates teie konto debiteerimise kuupäevast. Teie õigusi selgitatakse avalduses, mille saate oma pangast. Nõustute saama teavitusi tulevaste debiteerimiste kohta kaks päeva enne nende toimumist.</string>
+  <string name="stripe_sepa_mandate">Makseteabe esitamise ja käesoleva makse kinnitamisega volitatate (A) ettevõtet {0} ja Stripe\'i, meie makseteenuse osutajat, saatma teie panka juhiseid teie konto debiteerimiseks ning (B) oma panka nende juhiste alusel teie kontot debiteerima. Vastavalt teie õigustele, pangaga sõlmitud lepingule ja panga üldtingimustele on teil õigus saada pangalt tagasimakset. Tagasimakse taotlus tuleb esitada 8 nädala jooksul alates teie konto debiteerimise kuupäevast. Teie õigusi selgitatakse avalduses, mille saate oma pangast. Nõustute saama teavitusi tulevaste debiteerimiste kohta kaks päeva enne nende toimumist.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Määra vaikimisi makseviisiks</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

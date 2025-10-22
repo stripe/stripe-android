@@ -9,13 +9,13 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">ซื้อตอนนี้หรือจ่ายทีหลังด้วย Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_bank_account_ending_in">บัญชีธนาคารที่มีหมายเลขลงท้ายด้วย %s</string>
+  <string name="stripe_bank_account_ending_in">บัญชีธนาคารที่มีหมายเลขลงท้ายด้วย {0}</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
-  <string name="stripe_bank_account_plus_last_4">บัญชีธนาคาร ···· %s</string>
+  <string name="stripe_bank_account_plus_last_4">บัญชีธนาคาร ···· {0}</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
-  <string name="stripe_bank_account_with_last_4">บัญชีธนาคาร ····%s</string>
+  <string name="stripe_bank_account_with_last_4">บัญชีธนาคาร ····{0}</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
-  <string name="stripe_blik_confirm_payment">ยืนยันการชำระเงินในแอปของธนาคารภายใน %s เพื่อชำระเงินให้เสร็จสิ้น</string>
+  <string name="stripe_blik_confirm_payment">ยืนยันการชำระเงินในแอปของธนาคารภายใน {0} เพื่อชำระเงินให้เสร็จสิ้น</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_cashapp_afterpay_subtitle">ซื้อตอนนี้หรือจ่ายทีหลังด้วย Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
@@ -33,17 +33,17 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">สร้างบัญชีด้วย Link เพื่อการชำระเงินบนเว็บที่รวดเร็วขึ้น</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
-  <string name="stripe_link_card_type_credit">บัตรเครดิต %1$s</string>
+  <string name="stripe_link_card_type_credit">บัตรเครดิต {0}</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
-  <string name="stripe_link_card_type_debit">บัตรเดบิต %1$s</string>
+  <string name="stripe_link_card_type_debit">บัตรเดบิต {0}</string>
   <!-- Label a prepaid funding source. E.g. 'Visa Prepaid' -->
-  <string name="stripe_link_card_type_prepaid">บัตรเติมเงิน %1$s</string>
+  <string name="stripe_link_card_type_prepaid">บัตรเติมเงิน {0}</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
-  <string name="stripe_link_card_type_unknown">บัตร %1$s</string>
+  <string name="stripe_link_card_type_unknown">บัตร {0}</string>
   <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
   <string name="stripe_link_confirm_payment_title">ยืนยันรายละเอียดการชำระเงิน</string>
   <!-- Email suggestion prompt shown when we detect a typo. The %1$s is a placeholder for the suggested email address. -->
-  <string name="stripe_link_email_suggestion">คุณหมายถึง %1$s ใช่หรือไม่</string>
+  <string name="stripe_link_email_suggestion">คุณหมายถึง {0} ใช่หรือไม่</string>
   <!-- CTA text for accepting the suggested email correction -->
   <string name="stripe_link_email_suggestion_update">ใช่ อัปเดต</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
@@ -67,9 +67,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for the update card screen in Link native -->
   <string name="stripe_link_update_card_title">อัปเดตบัตร</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message">ป้อนรหัสยืนยันที่ส่งไปยัง %s เพื่อใช้ข้อมูลที่บันทึกไว้</string>
+  <string name="stripe_link_verification_message">ป้อนรหัสยืนยันที่ส่งไปยัง {0} เพื่อใช้ข้อมูลที่บันทึกไว้</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message_short">ป้อนรหัสที่เราส่งให้ที่ %s</string>
+  <string name="stripe_link_verification_message_short">ป้อนรหัสที่เราส่งให้ที่ {0}</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">อัปเดตบัตร</string>
   <!-- Title of the logout action. -->
@@ -81,7 +81,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[การดำเนินการต่อหมายความว่าคุณตกลงที่จะอนุมัติการชำระเงินซึ่งดำเนินการตาม<terms>ข้อกำหนดเหล่านี้</terms>]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
-  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[การบันทึกบัญชีธนาคารของ %s หมายความว่าคุณตกลงที่จะอนุมัติการชำระเงินซึ่งดำเนินการตาม<terms>ข้อกำหนดเหล่านี้</terms>]]></string>
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[การบันทึกบัญชีธนาคารของ {0} หมายความว่าคุณตกลงที่จะอนุมัติการชำระเงินซึ่งดำเนินการตาม<terms>ข้อกำหนดเหล่านี้</terms>]]></string>
   <!-- Error message when an error case happens when linking your account -->
   <string name="stripe_paymentsheet_ach_something_went_wrong">เกิดข้อผิดพลาดบางอย่างขณะเชื่อมโยงกับบัญชีของคุณ \nโปรดลองอีกครั้งในภายหลัง</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
@@ -95,35 +95,35 @@ to be saved and used in future checkout sessions. -->
   <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
   <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">ใช้ที่อยู่เรียกเก็บเงินสำหรับการจัดส่ง</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
-  <string name="stripe_paymentsheet_bacs_email_mandate">ระบบจะส่งอีเมลถึง %s ภายใน 3 วันทำการเพื่อยืนยันการตั้งค่าขั้นตอนการหักเงินนี้</string>
+  <string name="stripe_paymentsheet_bacs_email_mandate">ระบบจะส่งอีเมลถึง {0} ภายใน 3 วันทำการเพื่อยืนยันการตั้งค่าขั้นตอนการหักเงินนี้</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
   <string name="stripe_paymentsheet_bacs_mandate_title">ยืนยันรายละเอียดการหักบัญชีอัตโนมัติ</string>
   <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
   <string name="stripe_paymentsheet_bacs_modify_details_button_label">แก้ไขรายละเอียด</string>
   <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
-  <string name="stripe_paymentsheet_bacs_notice_mandate">นอกจากนี้ ระบบจะส่งอีเมลเพื่อแจ้งจำนวนเงินที่จะหักจากบัญชีภายใต้วิธีการนี้ให้คุณทราบล่วงหน้า 2 วันอีกด้วย การชำระเงินจะแสดงเป็น \"%s\" ในรายการเดินบัญชีธนาคารของคุณ</string>
+  <string name="stripe_paymentsheet_bacs_notice_mandate">นอกจากนี้ ระบบจะส่งอีเมลเพื่อแจ้งจำนวนเงินที่จะหักจากบัญชีภายใต้วิธีการนี้ให้คุณทราบล่วงหน้า 2 วันอีกด้วย การชำระเงินจะแสดงเป็น \"{0}\" ในรายการเดินบัญชีธนาคารของคุณ</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
-  <string name="stripe_paymentsheet_bacs_protection_mandate">การชำระเงินของคุณจะได้รับการคุ้มครองโดย %s</string>
+  <string name="stripe_paymentsheet_bacs_protection_mandate">การชำระเงินของคุณจะได้รับการคุ้มครองโดย {0}</string>
   <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
   <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">เปลี่ยนแปลงรายละเอียดบัญชีธนาคารไม่ได้</string>
   <!-- Text shown in the bank payment form when a promo is available and the user is paying, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[รับคืน %s เมื่อชำระผ่านธนาคาร <a href=\"https://link.com/promotion-terms\">ดูข้อกำหนด#160;</a>]]></string>
+  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[รับคืน {0} เมื่อชำระผ่านธนาคาร <a href=\"https://link.com/promotion-terms\">ดูข้อกำหนด#160;</a>]]></string>
   <!-- Text shown in the bank payment form when a promo is available and the user is setting up an account, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[รับคืน %s เมื่อชำระครั้งแรกผ่านธนาคาร <a href=\"https://link.com/promotion-terms\">ดูข้อกำหนด#160;</a>]]></string>
+  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[รับคืน {0} เมื่อชำระครั้งแรกผ่านธนาคาร <a href=\"https://link.com/promotion-terms\">ดูข้อกำหนด#160;</a>]]></string>
   <!-- Label shown when paying with a bank account is not eligible for the incentive, e.g. 'No $5 promo' -->
-  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">ไม่มีโปรโมชัน %s</string>
+  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">ไม่มีโปรโมชัน {0}</string>
   <!-- Text displayed on manage card screen when card details are not editable. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">เปลี่ยนแปลงรายละเอียดบัตรไม่ได้</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
-  <string name="stripe_paymentsheet_card_mandate">การให้ข้อมูลบัตร หมายความว่าคุณอนุญาตให้ %s เรียกเก็บเงินจากบัตรสำหรับการชำระเงินในอนาคตตามเงื่อนไขของผู้ค้ารายดังกล่าว</string>
+  <string name="stripe_paymentsheet_card_mandate">การให้ข้อมูลบัตร หมายความว่าคุณอนุญาตให้ {0} เรียกเก็บเงินจากบัตรสำหรับการชำระเงินในอนาคตตามเงื่อนไขของผู้ค้ารายดังกล่าว</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">เมื่อดำเนินการต่อ จะถือว่าคุณตกลงที่จะบันทึกข้อมูลไว้สําหรับการซื้อด้วย %s ในอนาคต</string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">เมื่อดำเนินการต่อ จะถือว่าคุณตกลงที่จะบันทึกข้อมูลไว้สําหรับการซื้อด้วย {0} ในอนาคต</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[เมื่อดำเนินการต่อ จะถือว่าคุณตกลงที่จะบันทึกข้อมูลไว้สำหรับการซื้อด้วย %s ในอนาคต และ <link>Link</link>คุณยังยอมรับ<terms>ข้อกำหนด</terms>และ<privacy>ความเป็นส่วนตัว</privacy>ของ Link ด้วย]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[เมื่อดำเนินการต่อ จะถือว่าคุณตกลงที่จะบันทึกข้อมูลไว้สำหรับการซื้อด้วย {0} ในอนาคต และ <link>Link</link>คุณยังยอมรับ<terms>ข้อกำหนด</terms>และ<privacy>ความเป็นส่วนตัว</privacy>ของ Link ด้วย]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[เมื่อดำเนินการต่อ แสดงว่ายินยอมที่จะบันทึกข้อมูลไว้สำหรับการซื้อด้วย %s ในอนาคต และ <link>Link</link> (ดู<terms>ข้อกำหนด</terms>และ<privacy>ความเป็นส่วนตัว</privacy>)]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[เมื่อดำเนินการต่อ แสดงว่ายินยอมที่จะบันทึกข้อมูลไว้สำหรับการซื้อด้วย {0} ในอนาคต และ <link>Link</link> (ดู<terms>ข้อกำหนด</terms>และ<privacy>ความเป็นส่วนตัว</privacy>)]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[เมื่อดำเนินการต่อ แสดงว่าคุณยินยอมที่จะบันทึกข้อมูลไว้สำหรับการซื้อด้วย %s ในอนาคต และ <link>Link</link> ตาม<terms>ข้อกำหนด</terms>และ<privacy>ความเป็นส่วนตัว</privacy>ของ Link]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[เมื่อดำเนินการต่อ แสดงว่าคุณยินยอมที่จะบันทึกข้อมูลไว้สำหรับการซื้อด้วย {0} ในอนาคต และ <link>Link</link> ตาม<terms>ข้อกำหนด</terms>และ<privacy>ความเป็นส่วนตัว</privacy>ของ Link]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">บัตรไม่ได้อัปเดต โปรดลองอีกครั้ง</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -150,9 +150,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">จัดการวิธีการชำระเงินของคุณ</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
-  <string name="stripe_paymentsheet_microdeposit">Stripe จะฝากเงินจำนวน $0.01 ในบัญชีของคุณภายใน 1-2 วันทำการ จากนั้นคุณก็จะได้รับอีเมลแจ้งวิธีชำระเงินแก่ %s ให้เสร็จสิ้น</string>
+  <string name="stripe_paymentsheet_microdeposit">Stripe จะฝากเงินจำนวน $0.01 ในบัญชีของคุณภายใน 1-2 วันทำการ จากนั้นคุณก็จะได้รับอีเมลแจ้งวิธีชำระเงินแก่ {0} ให้เสร็จสิ้น</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
-  <string name="stripe_paymentsheet_modify_pm">แก้ไข %s</string>
+  <string name="stripe_paymentsheet_modify_pm">แก้ไข {0}</string>
   <!-- Label of a button that appears on a checkout screen. When tapped, it displays a credit card form. This button is shown next to another button representing the customer's saved card; the word 'new' is meant to differentiate this button's action with the saved card button. -->
   <string name="stripe_paymentsheet_new_card">บัตรใหม่</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
@@ -184,9 +184,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">นำบัตรออกไหม</string>
   <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
-  <string name="stripe_paymentsheet_remove_partial_description">วิธีการชำระเงินนี้จะถูกนำออกไปแต่จะยังคงใช้ได้สำหรับการชำระเงินตามรอบบิล %s</string>
+  <string name="stripe_paymentsheet_remove_partial_description">วิธีการชำระเงินนี้จะถูกนำออกไปแต่จะยังคงใช้ได้สำหรับการชำระเงินตามรอบบิล {0}</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
-  <string name="stripe_paymentsheet_remove_pm">นำ %s ออก</string>
+  <string name="stripe_paymentsheet_remove_pm">นำ {0} ออก</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
   <string name="stripe_paymentsheet_remove_pm_title">นำวิธีการชำระเงินออก</string>
   <!-- A button used for saving a new payment method -->
@@ -198,7 +198,7 @@ to be saved and used in future checkout sessions. -->
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">บันทึกไว้เพื่อชำระเงินในอนาคต</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">บันทึกบัตรนี้เพื่อชำระเงินให้ %s ในอนาคต</string>
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">บันทึกบัตรนี้เพื่อชำระเงินให้ {0} ในอนาคต</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">บันทึกแล้ว</string>
   <!-- Title shown above a view containing the customer's cards -->
@@ -212,15 +212,15 @@ to be saved and used in future checkout sessions. -->
   <!-- Error message displayed when setting a default payment method fails. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">วิธีการชำระเงินเริ่มต้นไม่มีการเปลี่ยนแปลง โปรดลองอีกครั้ง</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
-  <string name="stripe_paymentsheet_total_amount">รวม: %s</string>
+  <string name="stripe_paymentsheet_total_amount">รวม: {0}</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">ระบบไม่ได้อัปเดตแบรนด์ของบัตร โปรดลองอีกครั้ง</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
-  <string name="stripe_paynow_confirm_payment">ยืนยันการชำระเงินในแอปของธนาคารหรือแอปชำระเงินภายใน %s เพื่อชำระเงินให้เสร็จสิ้น</string>
+  <string name="stripe_paynow_confirm_payment">ยืนยันการชำระเงินในแอปของธนาคารหรือแอปชำระเงินภายใน {0} เพื่อชำระเงินให้เสร็จสิ้น</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">ตั้งเป็นวิธีการชำระเงินเริ่มต้น</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_remove_bank_account_ending_in">ลบบัญชีธนาคารที่ลงท้ายด้วย %s</string>
+  <string name="stripe_remove_bank_account_ending_in">ลบบัญชีธนาคารที่ลงท้ายด้วย {0}</string>
   <!-- Accessibility description for a button that launches Shop Pay. -->
   <string name="stripe_shop_pay_button_description">ปุ่ม Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
@@ -230,7 +230,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for the Link signup screen -->
   <string name="stripe_sign_up_header">การชำระเงินที่ปลอดภัยในคลิกเดียว</string>
   <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
-  <string name="stripe_sign_up_message">ชำระเงินที่ %s และผู้ค้าอีกนับพันแห่งได้เร็วขึ้น</string>
+  <string name="stripe_sign_up_message">ชำระเงินที่ {0} และผู้ค้าอีกนับพันแห่งได้เร็วขึ้น</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[การเข้าร่วม Link หมายถึงคุณยอมรับ<terms>ข้อกำหนด</terms>และ<privacy>นโยบายความเป็นส่วนตัว</privacy>]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
@@ -250,7 +250,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">อนุมัติการชำระเงิน</string>
   <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">เปิดแอป UPI เพื่ออนุมัติการชำระเงินของคุณภายใน %s</string>
+  <string name="stripe_upi_polling_message">เปิดแอป UPI เพื่ออนุมัติการชำระเงินของคุณภายใน {0}</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">โปรดย้อนกลับและเลือกวิธีการชำระเงินอื่น</string>
   <!-- Text on a screen that indicates a payment has failed -->
@@ -270,9 +270,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_header_prefilled">ใช้ข้อมูลที่บันทึกไว้เพื่อให้ชำระเงินได้รวดเร็วขึ้น</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_verification_message">ป้อนรหัสที่เราส่งให้ที่ %s เพื่อใช้ Link ในการชำระเงินตามค่าเริ่มต้น</string>
+  <string name="stripe_verification_message">ป้อนรหัสที่เราส่งให้ที่ {0} เพื่อใช้ Link ในการชำระเงินตามค่าเริ่มต้น</string>
   <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
-  <string name="stripe_verification_not_email">หากไม่ใช่ %s</string>
+  <string name="stripe_verification_not_email">หากไม่ใช่ {0}</string>
   <!-- Label for a button that re-sends the a login code when tapped -->
   <string name="stripe_verification_resend">ส่งรหัสอีกครั้ง</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
@@ -280,9 +280,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[การดำเนินการต่อหมายความว่าคุณตกลงที่จะอนุมัติการชำระเงินซึ่งดำเนินการตาม<terms>ข้อกำหนด</terms>เหล่านี้]]></string>
   <!-- Text providing link to terms for bank payments when seller information is provided -->
-  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[การส่งคำสั่งซื้อของคุณไปยัง %1$s และ %2$s หมายความว่าคุณตกลงที่จะบันทึกข้อมูลไว้กับ %3$s สำหรับการซื้อในอนาคต และตกลงที่จะอนุมัติการชำระเงินตาม<terms>ข้อกำหนดเหล่านี้</terms>]]></string>
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[การส่งคำสั่งซื้อของคุณไปยัง {0} และ {1} หมายความว่าคุณตกลงที่จะบันทึกข้อมูลไว้กับ {2} สำหรับการซื้อในอนาคต และตกลงที่จะอนุมัติการชำระเงินตาม<terms>ข้อกำหนดเหล่านี้</terms>]]></string>
   <!-- Text providing link to terms for bank payments -->
-  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[การส่งคำสั่งซื้อให้ %s หมายความว่าคุณตกลงที่จะอนุมัติการชำระเงินตาม<terms>ข้อกำหนดเหล่านี้</terms>]]></string>
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[การส่งคำสั่งซื้อให้ {0} หมายความว่าคุณตกลงที่จะอนุมัติการชำระเงินตาม<terms>ข้อกำหนดเหล่านี้</terms>]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">การชำระเงิน</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

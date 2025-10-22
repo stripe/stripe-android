@@ -244,7 +244,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">Alternativt kan du laste opp et bilde av bilde-ID-en din</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">Alternativt kan du laste opp et bilde av %1$s manuelt</string>
+  <string name="stripe_upload_file_text">Alternativt kan du laste opp et bilde av {0} manuelt</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">Last opp din bilde-ID</string>
 </resources>

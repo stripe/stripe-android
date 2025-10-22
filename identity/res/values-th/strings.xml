@@ -244,7 +244,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">หรือคุณจะทำการอัปโหลดรูปภาพด้วยตัวเองก็ได้</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">หรือคุณจะทำการอัปโหลดรูปภาพของ%1$sด้วยตัวเองก็ได้</string>
+  <string name="stripe_upload_file_text">หรือคุณจะทำการอัปโหลดรูปภาพของ{0}ด้วยตัวเองก็ได้</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">อัปโหลดบัตรประจำตัวของคุณ</string>
 </resources>

@@ -65,19 +65,19 @@
   <!-- Error message when email is invalid -->
   <string name="stripe_email_is_invalid">L-indirizz tal-email li daħħalt mhux tajjeb.</string>
   <!-- String to describe an complete expiration date text field. Formatted as 'Expiration date. [month] [year] -->
-  <string name="stripe_expiration_date_content_description" formatted="false">Id-data tal-iskadenza. %s %s</string>
+  <string name="stripe_expiration_date_content_description" formatted="false">Id-data tal-iskadenza. {0} {1}</string>
   <!-- String to describe an empty expiration date text field. -->
   <string name="stripe_expiration_date_empty_content_description">Id-data tal-iskadenza. Ix-xahar b\'żewġ ċifri u s-sena b\'żewġ ċifri, battala</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_expiration_date_hint">XX / SS</string>
   <!-- String to describe an expiration date text field with complete month and empty year. -->
-  <string name="stripe_expiration_date_month_complete_content_description">Id-data tal-iskadenza. %s u s-sena b\'żewġ ċifri, battala</string>
+  <string name="stripe_expiration_date_month_complete_content_description">Id-data tal-iskadenza. {0} u s-sena b\'żewġ ċifri, battala</string>
   <!-- String to describe an expiration date text field with complete month and incomplete year. -->
-  <string name="stripe_expiration_date_year_incomplete_content_description">Id-data tal-iskadenza. %s u s-sena b\'żewġ ċifri, mhix kompluta</string>
+  <string name="stripe_expiration_date_year_incomplete_content_description">Id-data tal-iskadenza. {0} u s-sena b\'żewġ ċifri, mhix kompluta</string>
   <!-- String to describe that a form field is required to be completed. -->
   <string name="stripe_field_required">Din hija meħtieġa</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="stripe_form_label_optional">%s (mhux obbligatorja)</string>
+  <string name="stripe_form_label_optional">{0} (mhux obbligatorja)</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
   <string name="stripe_incomplete_expiry_date">Id-data tal-iskadenza tal-karta tiegħek mhix sħiħa.</string>
   <!-- Error description for incomplete phone number -->

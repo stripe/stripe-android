@@ -2,16 +2,16 @@
 <resources>
   <!-- Label for card number entry text field -->
   <string name="stripe_acc_label_card_number">Kartes numurs</string>
-  <string name="stripe_acc_label_card_number_node">%s, kartes numurs</string>
-  <string name="stripe_acc_label_cvc_node">%s, CVC</string>
+  <string name="stripe_acc_label_card_number_node">{0}, kartes numurs</string>
+  <string name="stripe_acc_label_cvc_node">{0}, CVC</string>
   <string name="stripe_acc_label_expiry_date">Derīguma termiņš</string>
-  <string name="stripe_acc_label_expiry_date_node">%s, derīguma termiņš</string>
+  <string name="stripe_acc_label_expiry_date_node">{0}, derīguma termiņš</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
   <string name="stripe_acc_label_zip">Pasta indekss</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="stripe_acc_label_zip_short">Pasta ind.</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_added">%s pievienots</string>
+  <string name="stripe_added">{0} pievienots</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="stripe_address_city_required">Ievadiet pilsētu</string>
   <!-- Error text indicating country is invalid -->
@@ -75,9 +75,9 @@
   <!-- Placeholder for AU BECS BSB number -->
   <string name="stripe_au_becs_bsb_number">BSB numurs</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="stripe_au_becs_mandate">Sniedzot savu bankas konta informāciju un apstiprinot šo maksājumu, jūs piekrītat šim tiešā debeta pieprasījumam un &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;tiešā debeta pieprasījuma pakalpojuma līgumam&lt;/a&gt;, kā arī pilnvarojat uzņēmumu Stripe Payments Australia Pty Ltd ACN 160 180 343, tiešā debeta lietotāja ID numurs 507156 (turpmāk — “Stripe”) izmantot lielapjoma elektronisko klīringa sistēmu (BECS), lai uzņēmuma %s (turpmāk — “Tirgotājs”) vārdā debitētu jūsu kontu par jebkādām summām, par kurām Tirgotājs jums ir atsevišķi ziņojis. Jūs apliecināt, ka esat vai nu iepriekš minētā konta īpašnieks, vai tā pilnvarota persona ar paraksta tiesībām.</string>
+  <string name="stripe_au_becs_mandate">Sniedzot savu bankas konta informāciju un apstiprinot šo maksājumu, jūs piekrītat šim tiešā debeta pieprasījumam un &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;tiešā debeta pieprasījuma pakalpojuma līgumam&lt;/a&gt;, kā arī pilnvarojat uzņēmumu Stripe Payments Australia Pty Ltd ACN 160 180 343, tiešā debeta lietotāja ID numurs 507156 (turpmāk — “Stripe”) izmantot lielapjoma elektronisko klīringa sistēmu (BECS), lai uzņēmuma {0} (turpmāk — “Tirgotājs”) vārdā debitētu jūsu kontu par jebkādām summām, par kurām Tirgotājs jums ir atsevišķi ziņojis. Jūs apliecināt, ka esat vai nu iepriekš minētā konta īpašnieks, vai tā pilnvarota persona ar paraksta tiesībām.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="stripe_becs_mandate_acceptance">\n    Sniedzot savu bankas konta informāciju un apstiprinot šo maksājumu, jūs\n    piekrītat šim tiešā debeta pieprasījumam un pakalpojuma līgumam, kā arī pilnvarojat uzņēmumu\n    Stripe Payments Australia Pty Ltd ACN 160 180 343, tiešā debeta lietotāja ID numurs 507156\n    (turpmāk — “Stripe”) izmantot lielapjoma elektronisko klīringa sistēmu (BECS),\n    lai uzņēmuma %1$s (turpmāk — “Tirgotājs”) vārdā debitētu jūsu kontu par jebkādām summām,\n    par kurām Tirgotājs jums ir atsevišķi ziņojis. Jūs apliecināt, ka esat vai nu\n    iepriekš minētā konta īpašnieks, vai tā pilnvarota persona ar paraksta tiesībām.\n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    Sniedzot savu bankas konta informāciju un apstiprinot šo maksājumu, jūs\n    piekrītat šim tiešā debeta pieprasījumam un pakalpojuma līgumam, kā arī pilnvarojat uzņēmumu\n    Stripe Payments Australia Pty Ltd ACN 160 180 343, tiešā debeta lietotāja ID numurs 507156\n    (turpmāk — “Stripe”) izmantot lielapjoma elektronisko klīringa sistēmu (BECS),\n    lai uzņēmuma {0} (turpmāk — “Tirgotājs”) vārdā debitētu jūsu kontu par jebkādām summām,\n    par kurām Tirgotājs jums ir atsevišķi ziņojis. Jūs apliecināt, ka esat vai nu\n    iepriekš minētā konta īpašnieks, vai tā pilnvarota persona ar paraksta tiesībām.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Konta numurs</string>
   <!-- Error description for incomplete account number -->
@@ -109,11 +109,11 @@
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">Karte tika noraidīta</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="stripe_card_ending_in">%1$s, kuras numura pēdējie cipari ir %2$s</string>
+  <string name="stripe_card_ending_in">{0}, kuras numura pēdējie cipari ir {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
-  <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
+  <string name="stripe_card_plus_last_4">{0} ···· {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
-  <string name="stripe_card_with_last_4">%1$s ····%2$s</string>
+  <string name="stripe_card_with_last_4">{0} ····{1}</string>
   <!-- Text for close button -->
   <string name="stripe_close">Aizvērt</string>
   <!-- Accessibility title used during Talkback to indicate to users that a transaction is being confirmed -->
@@ -122,7 +122,7 @@
   <string name="stripe_delete_payment_method">Dzēst maksājuma metodi</string>
   <string name="stripe_delete_payment_method_prompt_title">Vai dzēst maksājuma metodi?</string>
   <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
-  <string name="stripe_disallowed_card_brand">%s netiek pieņemts</string>
+  <string name="stripe_disallowed_card_brand">{0} netiek pieņemts</string>
   <!-- Done button title -->
   <string name="stripe_done">Gatavs</string>
   <!-- Button title to enter editing mode -->
@@ -139,7 +139,7 @@
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Autentificējot jūsu maksājuma metodi, iestājās noildze — mēģiniet vēlreiz</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
-  <string name="stripe_fpx_bank_offline">%s — bezsaistē</string>
+  <string name="stripe_fpx_bank_offline">{0} — bezsaistē</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Maksājuma veids tika noraidīts.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
@@ -167,7 +167,7 @@
    Text for remove button -->
   <string name="stripe_remove">Noņemt</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_removed">%s noņemts</string>
+  <string name="stripe_removed">{0} noņemts</string>
   <string name="stripe_secure_checkout">Droša norēķināšanās</string>
   <string name="stripe_title_add_a_card">Kartes pievienošana</string>
   <!-- Screen title telling users they should add an address -->

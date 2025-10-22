@@ -9,13 +9,13 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Beli sekarang atau bayar nanti dengan Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_bank_account_ending_in">Rekening bank yang berakhiran %s</string>
+  <string name="stripe_bank_account_ending_in">Rekening bank yang berakhiran {0}</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
-  <string name="stripe_bank_account_plus_last_4">Rekening bank ···· %s</string>
+  <string name="stripe_bank_account_plus_last_4">Rekening bank ···· {0}</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
-  <string name="stripe_bank_account_with_last_4">Rekening bank ····%s</string>
+  <string name="stripe_bank_account_with_last_4">Rekening bank ····{0}</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
-  <string name="stripe_blik_confirm_payment">Konfirmasikan pembayaran di aplikasi bank Anda dalam %s untuk menyelesaikan pembelian.</string>
+  <string name="stripe_blik_confirm_payment">Konfirmasikan pembayaran di aplikasi bank Anda dalam {0} untuk menyelesaikan pembelian.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_cashapp_afterpay_subtitle">Beli sekarang atau bayar nanti dengan Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
@@ -33,17 +33,17 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Buat rekening dengan Link untuk checkout yang lebih cepat di seluruh web</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
-  <string name="stripe_link_card_type_credit">Kredit %1$s</string>
+  <string name="stripe_link_card_type_credit">Kredit {0}</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
-  <string name="stripe_link_card_type_debit">Debit %1$s</string>
+  <string name="stripe_link_card_type_debit">Debit {0}</string>
   <!-- Label a prepaid funding source. E.g. 'Visa Prepaid' -->
-  <string name="stripe_link_card_type_prepaid">Prabayar %1$s</string>
+  <string name="stripe_link_card_type_prepaid">Prabayar {0}</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
-  <string name="stripe_link_card_type_unknown">Kartu %1$s</string>
+  <string name="stripe_link_card_type_unknown">Kartu {0}</string>
   <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
   <string name="stripe_link_confirm_payment_title">Konfirmasi detail pembayaran</string>
   <!-- Email suggestion prompt shown when we detect a typo. The %1$s is a placeholder for the suggested email address. -->
-  <string name="stripe_link_email_suggestion">Apakah yang Anda maksud %1$s?</string>
+  <string name="stripe_link_email_suggestion">Apakah yang Anda maksud {0}?</string>
   <!-- CTA text for accepting the suggested email correction -->
   <string name="stripe_link_email_suggestion_update">Ya, perbarui</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
@@ -67,9 +67,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for the update card screen in Link native -->
   <string name="stripe_link_update_card_title">Perbarui kartu</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message">Masukkan kode yang dikirim ke %s untuk menggunakan informasi tersimpan Anda.</string>
+  <string name="stripe_link_verification_message">Masukkan kode yang dikirim ke {0} untuk menggunakan informasi tersimpan Anda.</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message_short">Masukkan kode yang dikirim ke %s.</string>
+  <string name="stripe_link_verification_message_short">Masukkan kode yang dikirim ke {0}.</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">Perbarui kartu</string>
   <!-- Title of the logout action. -->
@@ -81,7 +81,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Dengan melanjutkan, Anda berarti setuju untuk mengotorisasi pembayaran sesuai dengan <terms>ketentuan-ketentuan berikut</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
-  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Dengan menyimpan rekening bank Anda untuk %s, Anda berarti setuju untuk mengotorisasi pembayaran sesuai dengan <terms>ketentuan-ketentuan berikut</terms>.]]></string>
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Dengan menyimpan rekening bank Anda untuk {0}, Anda berarti setuju untuk mengotorisasi pembayaran sesuai dengan <terms>ketentuan-ketentuan berikut</terms>.]]></string>
   <!-- Error message when an error case happens when linking your account -->
   <string name="stripe_paymentsheet_ach_something_went_wrong">Ada masalah saat menautkan rekening Anda.\nCoba lagi nanti.</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
@@ -95,35 +95,35 @@ to be saved and used in future checkout sessions. -->
   <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
   <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">Gunakan alamat penagihan untuk pengiriman</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
-  <string name="stripe_paymentsheet_bacs_email_mandate">Sebuah email akan dikirim ke %s dalam waktu tiga hari kerja untuk mengonfirmasi penyiapan instruksi debit ini.</string>
+  <string name="stripe_paymentsheet_bacs_email_mandate">Sebuah email akan dikirim ke {0} dalam waktu tiga hari kerja untuk mengonfirmasi penyiapan instruksi debit ini.</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
   <string name="stripe_paymentsheet_bacs_mandate_title">Konfirmasikan detail Debit Langsung Anda</string>
   <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
   <string name="stripe_paymentsheet_bacs_modify_details_button_label">Ubah detail</string>
   <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
-  <string name="stripe_paymentsheet_bacs_notice_mandate">Selain itu, Anda akan menerima pemberitahuan dua hari di muka lewat email mengenai berapa pun jumlah yang akan didebit menurut instruksi ini. Pembayaran akan ditampilkan sebagai \'%s\' pada rekening koran Anda</string>
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Selain itu, Anda akan menerima pemberitahuan dua hari di muka lewat email mengenai berapa pun jumlah yang akan didebit menurut instruksi ini. Pembayaran akan ditampilkan sebagai \'{0}\' pada rekening koran Anda</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
-  <string name="stripe_paymentsheet_bacs_protection_mandate">Pembayaran Anda diproteksi oleh %s.</string>
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Pembayaran Anda diproteksi oleh {0}.</string>
   <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
   <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Detail rekening bank tidak dapat diubah.</string>
   <!-- Text shown in the bank payment form when a promo is available and the user is paying, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Dapatkan %s kembali saat Anda membayar dengan bank. <a href=\"https://link.com/promotion-terms\">Lihat ketentuan</a>]]></string>
+  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Dapatkan {0} kembali saat Anda membayar dengan bank. <a href=\"https://link.com/promotion-terms\">Lihat ketentuan</a>]]></string>
   <!-- Text shown in the bank payment form when a promo is available and the user is setting up an account, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Dapatkan %s saat membayar pertama kalinya pada bank Anda. <a href=\"https://link.com/promotion-terms\">Lihat ketentuan</a>]]></string>
+  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Dapatkan {0} saat membayar pertama kalinya pada bank Anda. <a href=\"https://link.com/promotion-terms\">Lihat ketentuan</a>]]></string>
   <!-- Label shown when paying with a bank account is not eligible for the incentive, e.g. 'No $5 promo' -->
-  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">Tidak ada promo %s</string>
+  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">Tidak ada promo {0}</string>
   <!-- Text displayed on manage card screen when card details are not editable. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Detail kartu tidak dapat diubah.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
-  <string name="stripe_paymentsheet_card_mandate">Dengan memberikan informasi kartu, Anda berarti mengizinkan %s mengenakan charge pada kartu Anda untuk pembayaran mendatang sesuai dengan ketentuan mereka.</string>
+  <string name="stripe_paymentsheet_card_mandate">Dengan memberikan informasi kartu, Anda berarti mengizinkan {0} mengenakan charge pada kartu Anda untuk pembayaran mendatang sesuai dengan ketentuan mereka.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Dengan melanjutkan, Anda setuju untuk menyimpan informasi Anda untuk pembelian di masa mendatang dengan %s.</string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Dengan melanjutkan, Anda setuju untuk menyimpan informasi Anda untuk pembelian di masa mendatang dengan {0}.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Dengan melanjutkan, Anda setuju untuk menyimpan informasi Anda untuk pembelian di masa mendatang dengan %s dan <link>Link</link>. Anda juga menyetujui <terms>Ketentuan</terms> dan <privacy>Privasi</privacy> Link.]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Dengan melanjutkan, Anda setuju untuk menyimpan informasi Anda untuk pembelian di masa mendatang dengan {0} dan <link>Link</link>. Anda juga menyetujui <terms>Ketentuan</terms> dan <privacy>Privasi</privacy> Link.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Dengan melanjutkan, Anda menyetujui informasi Anda disimpan untuk pembelian di masa mendatang dengan %s dan <link>Tautan</link> (lihat <terms>Ketentuan</terms> dan <privacy>Privasi</privacy>).]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Dengan melanjutkan, Anda menyetujui informasi Anda disimpan untuk pembelian di masa mendatang dengan {0} dan <link>Tautan</link> (lihat <terms>Ketentuan</terms> dan <privacy>Privasi</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Dengan melanjutkan, Anda menyetujui informasi Anda disimpan untuk pembelian di masa mendatang dengan %s dan <link>Link</link> sesuai dengan <terms>ketentuan</terms> dan <privacy>privasi</privacy> Link.]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Dengan melanjutkan, Anda menyetujui informasi Anda disimpan untuk pembelian di masa mendatang dengan {0} dan <link>Link</link> sesuai dengan <terms>ketentuan</terms> dan <privacy>privasi</privacy> Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kartu tidak diperbarui. Cobalah lagi.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -150,9 +150,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Kelola metode pembayaran Anda</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
-  <string name="stripe_paymentsheet_microdeposit">Stripe akan menyetorkan $0,01 ke rekening Anda dalam waktu 1–2 hari kerja. Kemudian Anda akan mendapatkan email yang berisi petunjuk untuk menyelesaikan pembayaran kepada %s.</string>
+  <string name="stripe_paymentsheet_microdeposit">Stripe akan menyetorkan $0,01 ke rekening Anda dalam waktu 1–2 hari kerja. Kemudian Anda akan mendapatkan email yang berisi petunjuk untuk menyelesaikan pembayaran kepada {0}.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
-  <string name="stripe_paymentsheet_modify_pm">Edit %s</string>
+  <string name="stripe_paymentsheet_modify_pm">Edit {0}</string>
   <!-- Label of a button that appears on a checkout screen. When tapped, it displays a credit card form. This button is shown next to another button representing the customer's saved card; the word 'new' is meant to differentiate this button's action with the saved card button. -->
   <string name="stripe_paymentsheet_new_card">Kartu baru</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
@@ -184,9 +184,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Hapus kartu?</string>
   <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
-  <string name="stripe_paymentsheet_remove_partial_description">Metode pembayaran ini akan dihapus tetapi akan tetap tersedia untuk langganan %s.</string>
+  <string name="stripe_paymentsheet_remove_partial_description">Metode pembayaran ini akan dihapus tetapi akan tetap tersedia untuk langganan {0}.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
-  <string name="stripe_paymentsheet_remove_pm">Hapus %s</string>
+  <string name="stripe_paymentsheet_remove_pm">Hapus {0}</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
   <string name="stripe_paymentsheet_remove_pm_title">Hapus metode pembayaran</string>
   <!-- A button used for saving a new payment method -->
@@ -198,7 +198,7 @@ to be saved and used in future checkout sessions. -->
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Simpan untuk pembayaran mendatang</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Simpan kartu ini untuk pembayaran %s mendatang</string>
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Simpan kartu ini untuk pembayaran {0} mendatang</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Disimpan</string>
   <!-- Title shown above a view containing the customer's cards -->
@@ -212,15 +212,15 @@ to be saved and used in future checkout sessions. -->
   <!-- Error message displayed when setting a default payment method fails. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Metode pembayaran default tidak diubah. Cobalah lagi.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
-  <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+  <string name="stripe_paymentsheet_total_amount">Total: {0}</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Brand kartu tidak diperbarui. Cobalah lagi.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
-  <string name="stripe_paynow_confirm_payment">Konfirmasi pembayaran di aplikasi pembayaran atau bank Anda dalam %s untuk menyelesaikan pembelian.</string>
+  <string name="stripe_paynow_confirm_payment">Konfirmasi pembayaran di aplikasi pembayaran atau bank Anda dalam {0} untuk menyelesaikan pembelian.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Atur sebagai metode pembayaran default</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_remove_bank_account_ending_in">Hapus rekening bank yang berakhiran dengan %s</string>
+  <string name="stripe_remove_bank_account_ending_in">Hapus rekening bank yang berakhiran dengan {0}</string>
   <!-- Accessibility description for a button that launches Shop Pay. -->
   <string name="stripe_shop_pay_button_description">Tombol Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
@@ -230,7 +230,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for the Link signup screen -->
   <string name="stripe_sign_up_header">Checkout 1-klik dengan aman</string>
   <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
-  <string name="stripe_sign_up_message">Bayar lebih cepat di %s dan ribuan merchant lainnya.</string>
+  <string name="stripe_sign_up_message">Bayar lebih cepat di {0} dan ribuan merchant lainnya.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Dengan bergabung ke Link, Anda berarti menyetujui <terms>Ketentuan</terms> dan <privacy>Kebijakan Privasi</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
@@ -250,7 +250,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Setujui pembayaran</string>
   <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Buka aplikasi UPI Anda untuk menyetujui pembayaran di dalam %s</string>
+  <string name="stripe_upi_polling_message">Buka aplikasi UPI Anda untuk menyetujui pembayaran di dalam {0}</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Harap kembali dan pilih metode pembayaran lain</string>
   <!-- Text on a screen that indicates a payment has failed -->
@@ -270,9 +270,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_header_prefilled">Gunakan info yang tersimpan untuk memproses pembayaran dengan lebih cepat</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_verification_message">Masukkan kode yang dikirim ke %s untuk menggunakan Link untuk membayar secara default.</string>
+  <string name="stripe_verification_message">Masukkan kode yang dikirim ke {0} untuk menggunakan Link untuk membayar secara default.</string>
   <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
-  <string name="stripe_verification_not_email">Bukan %s?</string>
+  <string name="stripe_verification_not_email">Bukan {0}?</string>
   <!-- Label for a button that re-sends the a login code when tapped -->
   <string name="stripe_verification_resend">Kirim ulang kode</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
@@ -280,9 +280,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Dengan melanjutkan, berarti Anda setuju untuk mengotorisasi pembayaran sesuai dengan <terms>ketentuan</terms> ini.]]></string>
   <!-- Text providing link to terms for bank payments when seller information is provided -->
-  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Dengan mengirimkan pesanan ke %1$s dan %2$s, Anda setuju untuk menyimpan informasi Anda dengan %3$s untuk pembelian di masa mendatang, dan setuju untuk mengotorisasi pembayaran sesuai dengan <terms>ketentuan ini</terms>.]]></string>
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Dengan mengirimkan pesanan ke {0} dan {1}, Anda setuju untuk menyimpan informasi Anda dengan {2} untuk pembelian di masa mendatang, dan setuju untuk mengotorisasi pembayaran sesuai dengan <terms>ketentuan ini</terms>.]]></string>
   <!-- Text providing link to terms for bank payments -->
-  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Dengan mengirimkan pesanan Anda ke %s, Anda setuju untuk mengotorisasi pembayaran sesuai dengan <terms>ketentuan ini</terms>.]]></string>
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Dengan mengirimkan pesanan Anda ke {0}, Anda setuju untuk mengotorisasi pembayaran sesuai dengan <terms>ketentuan ini</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Pembayaran</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

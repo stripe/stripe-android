@@ -9,13 +9,13 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Kup teraz lub zapłać później z Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_bank_account_ending_in">Konto bankowe o numerze kończącym się na %s</string>
+  <string name="stripe_bank_account_ending_in">Konto bankowe o numerze kończącym się na {0}</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
-  <string name="stripe_bank_account_plus_last_4">Konto bankowe ···· %s</string>
+  <string name="stripe_bank_account_plus_last_4">Konto bankowe ···· {0}</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
-  <string name="stripe_bank_account_with_last_4">Konto bankowe ····%s</string>
+  <string name="stripe_bank_account_with_last_4">Konto bankowe ····{0}</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
-  <string name="stripe_blik_confirm_payment">Potwierdź płatność w aplikacji bankowej w ciągu %s, aby sfinalizować zakup.</string>
+  <string name="stripe_blik_confirm_payment">Potwierdź płatność w aplikacji bankowej w ciągu {0}, aby sfinalizować zakup.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_cashapp_afterpay_subtitle">Kup teraz lub zapłać później za pomocą Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
@@ -33,17 +33,17 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Utwórz konto w usłudze Link, aby przyspieszyć finalizację transakcji online</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
-  <string name="stripe_link_card_type_credit">Karta kredytowa %1$s</string>
+  <string name="stripe_link_card_type_credit">Karta kredytowa {0}</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
-  <string name="stripe_link_card_type_debit">Karta debetowa %1$s</string>
+  <string name="stripe_link_card_type_debit">Karta debetowa {0}</string>
   <!-- Label a prepaid funding source. E.g. 'Visa Prepaid' -->
-  <string name="stripe_link_card_type_prepaid">Karta przedpłacona %1$s</string>
+  <string name="stripe_link_card_type_prepaid">Karta przedpłacona {0}</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
-  <string name="stripe_link_card_type_unknown">Karta %1$s</string>
+  <string name="stripe_link_card_type_unknown">Karta {0}</string>
   <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
   <string name="stripe_link_confirm_payment_title">Potwierdź szczegóły płatności</string>
   <!-- Email suggestion prompt shown when we detect a typo. The %1$s is a placeholder for the suggested email address. -->
-  <string name="stripe_link_email_suggestion">Czy chodziło Ci o: %1$s?</string>
+  <string name="stripe_link_email_suggestion">Czy chodziło Ci o: {0}?</string>
   <!-- CTA text for accepting the suggested email correction -->
   <string name="stripe_link_email_suggestion_update">Tak, aktualizuj</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
@@ -67,9 +67,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for the update card screen in Link native -->
   <string name="stripe_link_update_card_title">Zaktualizuj kartę</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message">Wprowadź kod wysłany na nr %s, aby użyć zapisanych informacji.</string>
+  <string name="stripe_link_verification_message">Wprowadź kod wysłany na nr {0}, aby użyć zapisanych informacji.</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message_short">Wprowadź kod wysłany na %s.</string>
+  <string name="stripe_link_verification_message_short">Wprowadź kod wysłany na {0}.</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">Zaktualizuj kartę</string>
   <!-- Title of the logout action. -->
@@ -81,7 +81,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Kontynuując, wyrażasz zgodę na autoryzowanie płatności zgodnie z <terms>tymi warunkami</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
-  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Zapisując swoje konto bankowe dla %s, zgadzasz się na autoryzowanie płatności zgodnie z <terms>tymi warunkami</terms>.]]></string>
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Zapisując swoje konto bankowe dla {0}, zgadzasz się na autoryzowanie płatności zgodnie z <terms>tymi warunkami</terms>.]]></string>
   <!-- Error message when an error case happens when linking your account -->
   <string name="stripe_paymentsheet_ach_something_went_wrong">Coś poszło nie tak przy podłączaniu konta.\nSpróbuj ponownie później.</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
@@ -95,35 +95,35 @@ to be saved and used in future checkout sessions. -->
   <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
   <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">Użyj adresu rozliczeniowego do dostawy</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
-  <string name="stripe_paymentsheet_bacs_email_mandate">Na adres %s w ciągu trzech dni roboczych zostanie wysłana wiadomość e-mail w celu potwierdzenia konfiguracji tej instrukcji zapłaty.</string>
+  <string name="stripe_paymentsheet_bacs_email_mandate">Na adres {0} w ciągu trzech dni roboczych zostanie wysłana wiadomość e-mail w celu potwierdzenia konfiguracji tej instrukcji zapłaty.</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
   <string name="stripe_paymentsheet_bacs_mandate_title">Potwierdź szczegóły polecenia zapłaty</string>
   <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
   <string name="stripe_paymentsheet_bacs_modify_details_button_label">Modyfikuj szczegóły</string>
   <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
-  <string name="stripe_paymentsheet_bacs_notice_mandate">Dodatkowo otrzymasz dwa powiadomienia e-mail o każdej kwocie, która będzie pobierana na podstawie tej instrukcji. Płatności będą widoczne na wyciągu bankowym jako „%s”.</string>
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Dodatkowo otrzymasz dwa powiadomienia e-mail o każdej kwocie, która będzie pobierana na podstawie tej instrukcji. Płatności będą widoczne na wyciągu bankowym jako „{0}”.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
-  <string name="stripe_paymentsheet_bacs_protection_mandate">Twoje płatności są chronione przez %s.</string>
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Twoje płatności są chronione przez {0}.</string>
   <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
   <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Nie można zmienić szczegółów konta bankowego.</string>
   <!-- Text shown in the bank payment form when a promo is available and the user is paying, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Uzyskaj zwrot %s, płacąc za pośrednictwem banku. <a href=\"https://link.com/promotion-terms\">Zobacz warunki</a>]]></string>
+  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Uzyskaj zwrot {0}, płacąc za pośrednictwem banku. <a href=\"https://link.com/promotion-terms\">Zobacz warunki</a>]]></string>
   <!-- Text shown in the bank payment form when a promo is available and the user is setting up an account, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Uzyskaj zwrot %s, gdy płacisz po raz pierwszy poprzez bank. <a href=\"https://link.com/promotion-terms\">Zobacz warunki</a>]]></string>
+  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Uzyskaj zwrot {0}, gdy płacisz po raz pierwszy poprzez bank. <a href=\"https://link.com/promotion-terms\">Zobacz warunki</a>]]></string>
   <!-- Label shown when paying with a bank account is not eligible for the incentive, e.g. 'No $5 promo' -->
-  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">Brak promocji %s</string>
+  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">Brak promocji {0}</string>
   <!-- Text displayed on manage card screen when card details are not editable. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Nie można zmienić szczegółów karty.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
-  <string name="stripe_paymentsheet_card_mandate">Poprzez podanie danych karty wyrażasz zgodę na obciążanie przez %s Twojej karty kwotami przyszłych płatności zgodnie z obowiązującymi warunkami.</string>
+  <string name="stripe_paymentsheet_card_mandate">Poprzez podanie danych karty wyrażasz zgodę na obciążanie przez {0} Twojej karty kwotami przyszłych płatności zgodnie z obowiązującymi warunkami.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Kontynuując, wyrażasz zgodę na zapisywanie swoich danych na potrzeby przyszłych zakupów w firmie %s.</string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Kontynuując, wyrażasz zgodę na zapisywanie swoich danych na potrzeby przyszłych zakupów w firmie {0}.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Kontynuując, wyrażasz zgodę na zapisywanie swoich danych na potrzeby przyszłych zakupów w firmie %s i <link>Link</link>. Wyrażasz również zgodę na <terms>Warunki</terms> i <privacy>Politykę prywatności</privacy>.]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Kontynuując, wyrażasz zgodę na zapisywanie swoich danych na potrzeby przyszłych zakupów w firmie {0} i <link>Link</link>. Wyrażasz również zgodę na <terms>Warunki</terms> i <privacy>Politykę prywatności</privacy>.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Kontynuując, wyrażasz zgodę na zapisywanie swoich danych na potrzeby przyszłych zakupów w firmie %s i <link>Link</link> (zob. <terms>Warunki</terms> i <privacy>Politykę prywatności</privacy>).]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Kontynuując, wyrażasz zgodę na zapisywanie swoich danych na potrzeby przyszłych zakupów w firmie {0} i <link>Link</link> (zob. <terms>Warunki</terms> i <privacy>Politykę prywatności</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Kontynuując, wyrażasz zgodę na zapisywanie swoich danych na potrzeby przyszłych zakupów w firmie %s i <link>Link</link> zgodnie z <terms>warunkami</terms> i <privacy>polityką prywatnością</privacy> Link.]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Kontynuując, wyrażasz zgodę na zapisywanie swoich danych na potrzeby przyszłych zakupów w firmie {0} i <link>Link</link> zgodnie z <terms>warunkami</terms> i <privacy>polityką prywatnością</privacy> Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Karta nie została zaktualizowana. Spróbuj ponownie.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -150,9 +150,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Zarządzaj metodami płatności</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
-  <string name="stripe_paymentsheet_microdeposit">Stripe wpłaci 0,01 USD na Twoje konto w ciągu 1-2 dni roboczych. Następnie otrzymasz wiadomość e-mail z instrukcjami dotyczącymi zakończenia płatności na rzecz %s.</string>
+  <string name="stripe_paymentsheet_microdeposit">Stripe wpłaci 0,01 USD na Twoje konto w ciągu 1-2 dni roboczych. Następnie otrzymasz wiadomość e-mail z instrukcjami dotyczącymi zakończenia płatności na rzecz {0}.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
-  <string name="stripe_paymentsheet_modify_pm">Edytuj %s</string>
+  <string name="stripe_paymentsheet_modify_pm">Edytuj {0}</string>
   <!-- Label of a button that appears on a checkout screen. When tapped, it displays a credit card form. This button is shown next to another button representing the customer's saved card; the word 'new' is meant to differentiate this button's action with the saved card button. -->
   <string name="stripe_paymentsheet_new_card">Nowa karta</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
@@ -184,9 +184,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Usunąć kartę?</string>
   <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
-  <string name="stripe_paymentsheet_remove_partial_description">Ta metoda płatności zostanie usunięta, ale pozostanie dostępna dla %s subskrypcji.</string>
+  <string name="stripe_paymentsheet_remove_partial_description">Ta metoda płatności zostanie usunięta, ale pozostanie dostępna dla {0} subskrypcji.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
-  <string name="stripe_paymentsheet_remove_pm">Usuń: %s</string>
+  <string name="stripe_paymentsheet_remove_pm">Usuń: {0}</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
   <string name="stripe_paymentsheet_remove_pm_title">Usuń metodę płatności</string>
   <!-- A button used for saving a new payment method -->
@@ -198,7 +198,7 @@ to be saved and used in future checkout sessions. -->
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Zapisz do przyszłych płatności</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Zapisz dane tej karty do przyszłych płatności %s</string>
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Zapisz dane tej karty do przyszłych płatności {0}</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Zapisano</string>
   <!-- Title shown above a view containing the customer's cards -->
@@ -212,17 +212,17 @@ to be saved and used in future checkout sessions. -->
   <!-- Error message displayed when setting a default payment method fails. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Domyślna metoda płatności nie została zmieniona. Spróbuj ponownie.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
-  <string name="stripe_paymentsheet_total_amount">Razem: %s</string>
+  <string name="stripe_paymentsheet_total_amount">Razem: {0}</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Marka karty nie została zaktualizowana. Spróbuj ponownie.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
-  <string name="stripe_paynow_confirm_payment">Potwierdź płatność w banku lub aplikacji do dokonywania płatności w ciągu %s, aby sfinalizować zakup.</string>
+  <string name="stripe_paynow_confirm_payment">Potwierdź płatność w banku lub aplikacji do dokonywania płatności w ciągu {0}, aby sfinalizować zakup.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Użyj jako domyślnej metody płatności</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->
-  <string name="stripe_qrcode_lpm_confirm_payment">Potwierdź płatność w banku lub aplikacji do dokonywania płatności w ciągu %s, aby sfinalizować zakup.</string>
+  <string name="stripe_qrcode_lpm_confirm_payment">Potwierdź płatność w banku lub aplikacji do dokonywania płatności w ciągu {0}, aby sfinalizować zakup.</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_remove_bank_account_ending_in">Usuń konto bankowe kończące się na %s</string>
+  <string name="stripe_remove_bank_account_ending_in">Usuń konto bankowe kończące się na {0}</string>
   <!-- Accessibility description for a button that launches Shop Pay. -->
   <string name="stripe_shop_pay_button_description">Przycisk Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
@@ -232,7 +232,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for the Link signup screen -->
   <string name="stripe_sign_up_header">Bezpieczna finalizacja jednym kliknięciem</string>
   <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
-  <string name="stripe_sign_up_message">Płać szybciej w %s i u tysięcy sprzedawców.</string>
+  <string name="stripe_sign_up_message">Płać szybciej w {0} i u tysięcy sprzedawców.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Dołączając do Link, wyrażasz zgodę na <terms>Warunki</terms> i <privacy>Politykę prywatności</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
@@ -252,7 +252,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Zatwierdź płatność</string>
   <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Otwórz aplikację UPI, aby zatwierdzić płatność w %s</string>
+  <string name="stripe_upi_polling_message">Otwórz aplikację UPI, aby zatwierdzić płatność w {0}</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Wróć i wybierz inną metodę płatności</string>
   <!-- Text on a screen that indicates a payment has failed -->
@@ -272,9 +272,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_header_prefilled">Użyj zapisanych danych, aby szybciej zakończyć operację.</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_verification_message">Wprowadź kod wysłany na adres %s, aby domyślnie używać Link do płatności.</string>
+  <string name="stripe_verification_message">Wprowadź kod wysłany na adres {0}, aby domyślnie używać Link do płatności.</string>
   <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
-  <string name="stripe_verification_not_email">Nie jesteś %s?</string>
+  <string name="stripe_verification_not_email">Nie jesteś {0}?</string>
   <!-- Label for a button that re-sends the a login code when tapped -->
   <string name="stripe_verification_resend">Wyślij kod ponownie</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
@@ -282,9 +282,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Kontynuując, wyrażasz zgodę na autoryzowanie płatności zgodnie z tymi <terms>warunkami</terms>.]]></string>
   <!-- Text providing link to terms for bank payments when seller information is provided -->
-  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Przesyłając zamówienie do %1$s i %2$s, zgadzasz się na zachowanie informacji przez %3$s do wykorzystania przy przyszłych zakupach oraz na autoryzowanie płatności zgodnie z <terms>tymi warunkami</terms>.]]></string>
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Przesyłając zamówienie do {0} i {1}, zgadzasz się na zachowanie informacji przez {2} do wykorzystania przy przyszłych zakupach oraz na autoryzowanie płatności zgodnie z <terms>tymi warunkami</terms>.]]></string>
   <!-- Text providing link to terms for bank payments -->
-  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Przesyłając zamówienie do %s, wyrażasz zgodę na autoryzację płatności zgodnie z <terms>niniejszymi warunkami</terms>.]]></string>
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Przesyłając zamówienie do {0}, wyrażasz zgodę na autoryzację płatności zgodnie z <terms>niniejszymi warunkami</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Płatność</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

@@ -5,9 +5,9 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[用 <img/> 分 <num_installments/> 支付，無利息，每期 <installment_price/>]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_afterpay_clearpay_subtitle">%1$d 無息付款 %2$s</string>
+  <string name="stripe_afterpay_clearpay_subtitle">{0} 無息付款 {1}</string>
   <!-- Amazon Pay mandate text -->
-  <string name="stripe_amazon_pay_mandate">確認您的 Amazon Pay 付款即表示您允許 %s 按照其條款從您的 Amazon Pay 賬戶扣取未來款項。</string>
+  <string name="stripe_amazon_pay_mandate">確認您的 Amazon Pay 付款即表示您允許 {0} 按照其條款從您的 Amazon Pay 賬戶扣取未來款項。</string>
   <!-- Text for back button -->
   <string name="stripe_back">上一步</string>
   <!-- Label for Bacs account number field -->
@@ -17,7 +17,7 @@
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">銀行賬戶</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
-  <string name="stripe_bacs_confirm_mandate_label">我理解 Stripe 將代表 %s 收取直接扣款，且確認我是該賬戶持有人，且是唯一一個需要授權該賬戶扣款的人。</string>
+  <string name="stripe_bacs_confirm_mandate_label">我理解 Stripe 將代表 {0} 收取直接扣款，且確認我是該賬戶持有人，且是唯一一個需要授權該賬戶扣款的人。</string>
   <!-- Label for Bacs sort code field -->
   <string name="stripe_bacs_sort_code">分類代碼</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
@@ -31,9 +31,9 @@
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">（未接受）</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
-  <string name="stripe_card_brand_not_accepted_with_brand">%1$s（未接受）</string>
+  <string name="stripe_card_brand_not_accepted_with_brand">{0}（未接受）</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">繼續操作，即表示您授權 %1$s 按照 %2$s 的條款從您的 Cash App 賬戶中扣取該款項及未來的款項，直至撤銷授權。您可以隨時在 Cash App 設置中進行修改。</string>
+  <string name="stripe_cash_app_pay_mandate">繼續操作，即表示您授權 {0} 按照 {1} 的條款從您的 Cash App 賬戶中扣取該款項及未來的款項，直至撤銷授權。您可以隨時在 Cash App 設置中進行修改。</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">聯絡資訊</string>
   <!-- Text for continue button -->
@@ -45,7 +45,7 @@
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">您輸入的 IBAN 不完整。</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="stripe_iban_invalid_country">您輸入的 IBAN 無效，「%s」是不支援的國家代碼。</string>
+  <string name="stripe_iban_invalid_country">您輸入的 IBAN 無效，「{0}」是不支援的國家代碼。</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">您的 IBAN 應以兩個字母的國家代碼開頭。</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
@@ -54,13 +54,13 @@
   <string name="stripe_incomplete_blik_code">您的 BLIK 代碼不完整。</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_invalid_blik_code">您的 BLIK 代碼無效。</string>
-  <string name="stripe_invalid_email_address">電郵地址無效：%s</string>
+  <string name="stripe_invalid_email_address">電郵地址無效：{0}</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">UPI ID 無效</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">用 Klarna 先買後付。</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">繼續前往 Klarna 即表示您允許 %1$s 按照他們的條款和 Klarna 的條款從您的 Klarna 賬戶扣取未來款項。您可以在您的 Klarna 應用程式中隨時對其進行修改，也可以聯絡 %2$s。</string>
+  <string name="stripe_klarna_mandate">繼續前往 Klarna 即表示您允許 {0} 按照他們的條款和 Klarna 的條款從您的 Klarna 賬戶扣取未來款項。您可以在您的 Klarna 應用程式中隨時對其進行修改，也可以聯絡 {1}。</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">用 Klarna 先買後付</string>
   <!-- Caption for Phone field on address form -->
@@ -70,7 +70,7 @@
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 銀行</string>
   <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_pay_button_amount">支付%s</string>
+  <string name="stripe_pay_button_amount">支付{0}</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">銀行</string>
   <!-- Label shown in the payment type picker describing a card payment -->
@@ -96,19 +96,19 @@
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
   <!-- PayPal mandate text -->
-  <string name="stripe_paypal_mandate">確認您的 PayPal 付款，即表示您允許 %s 按照他們的條款從您的 PayPal 扣取未來款項。</string>
+  <string name="stripe_paypal_mandate">確認您的 PayPal 付款，即表示您允許 {0} 按照他們的條款從您的 PayPal 扣取未來款項。</string>
   <!-- Revolut mandate text -->
-  <string name="stripe_revolut_mandate">確認您的 RevolutPay 付款即表示您允許 %s 按照其條款從您的 RevolutPay 賬戶扣取未來款項。</string>
+  <string name="stripe_revolut_mandate">確認您的 RevolutPay 付款即表示您允許 {0} 按照其條款從您的 RevolutPay 賬戶扣取未來款項。</string>
   <!-- Satispay mandate text -->
-  <string name="stripe_satispay_mandate">一旦繼續使用，即表示您授權 %1$s 根據您的購買或訂閱方案，定期自動從您的 Satispay 結餘扣款。</string>
+  <string name="stripe_satispay_mandate">一旦繼續使用，即表示您授權 {0} 根據您的購買或訂閱方案，定期自動從您的 Satispay 結餘扣款。</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="stripe_save_for_future_payments_with_merchant_name">儲存以用於未來的%s付款</string>
+  <string name="stripe_save_for_future_payments_with_merchant_name">儲存以用於未來的{0}付款</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
-  <string name="stripe_save_payment_details_to_merchant_name">將支付資訊儲存到 %s 以備將來購物使用</string>
+  <string name="stripe_save_payment_details_to_merchant_name">將支付資訊儲存到 {0} 以備將來購物使用</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">掃描卡</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">提供您的支付方式並確認該付款即表示您授權 (A) %s 與我們的支付服務者 Stripe 向您的銀行發送對您的賬戶進行扣款的指令以及 (B) 您的銀行按照這些指令對您的賬戶進行扣款。根據您與您的銀行協議的條款和條件，您有權從您的銀行得到退款。退款必須在 8 周內申請，從您的賬戶被扣款之日起算。您的權利在結單上有解釋，可從您的銀行獲取。您同意提前 2 天接收後續扣款的通知。</string>
+  <string name="stripe_sepa_mandate">提供您的支付方式並確認該付款即表示您授權 (A) {0} 與我們的支付服務者 Stripe 向您的銀行發送對您的賬戶進行扣款的指令以及 (B) 您的銀行按照這些指令對您的賬戶進行扣款。根據您與您的銀行協議的條款和條件，您有權從您的銀行得到退款。退款必須在 8 周內申請，從您的賬戶被扣款之日起算。您的權利在結單上有解釋，可從您的銀行獲取。您同意提前 2 天接收後續扣款的通知。</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">設置為預設支付方式</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_download_complete">Stiahnutie je dokončené</string>
   <string name="stripe_downloading_file">Stiahnutie súboru</string>
-  <string name="stripe_failed_to_open_url">Nepodarilo sa otvoriť adresu URL: %s</string>
+  <string name="stripe_failed_to_open_url">Nepodarilo sa otvoriť adresu URL: {0}</string>
   <string name="stripe_not_yet_built">Ešte nie je vytvorené…</string>
   <string name="stripe_unable_to_download_file">Nepodarilo sa stiahnuť súbor</string>
 </resources>

@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_download_complete">ดาวน์โหลดเสร็จ</string>
   <string name="stripe_downloading_file">กำลังดาวน์โหลดไฟล์</string>
-  <string name="stripe_failed_to_open_url">เปิด URL ไม่สำเร็จ: %s</string>
+  <string name="stripe_failed_to_open_url">เปิด URL ไม่สำเร็จ: {0}</string>
   <string name="stripe_not_yet_built">ยังไม่ได้สร้าง…</string>
   <string name="stripe_unable_to_download_file">ดาวน์โหลดไฟล์ไม่ได้</string>
 </resources>

@@ -244,7 +244,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">Alternativ können Sie manuell ein Foto Ihres Lichtbildausweises hochladen</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">Alternativ können Sie manuell ein Foto Ihres %1$s hochladen.</string>
+  <string name="stripe_upload_file_text">Alternativ können Sie manuell ein Foto Ihres {0} hochladen.</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">Lichtbildausweis hochladen</string>
 </resources>

@@ -5,9 +5,9 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Maksāt ar <num_installments/> bezprocentu maksājumiem <installment_price/> ar <img/>]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_afterpay_clearpay_subtitle">%1$d %2$s bezprocentu maksājumi</string>
+  <string name="stripe_afterpay_clearpay_subtitle">{0} {1} bezprocentu maksājumi</string>
   <!-- Amazon Pay mandate text -->
-  <string name="stripe_amazon_pay_mandate">Apstiprinot maksājumu Amazon Pay, jūs atļaujat %s saskaņā ar viņu noteikumiem iekasēt no jūsu Amazon Pay konta summas par turpmākajiem maksājumiem.</string>
+  <string name="stripe_amazon_pay_mandate">Apstiprinot maksājumu Amazon Pay, jūs atļaujat {0} saskaņā ar viņu noteikumiem iekasēt no jūsu Amazon Pay konta summas par turpmākajiem maksājumiem.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Atpakaļ</string>
   <!-- Label for Bacs account number field -->
@@ -17,7 +17,7 @@
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">Bankas konts</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
-  <string name="stripe_bacs_confirm_mandate_label">Es saprotu, ka Stripe iekasēs tiešā debeta maksājumus %s vārdā, un apstiprinu, ka esmu konta īpašnieks un vienīgā persona, kurai ir jāautorizē debeti no šī konta.</string>
+  <string name="stripe_bacs_confirm_mandate_label">Es saprotu, ka Stripe iekasēs tiešā debeta maksājumus {0} vārdā, un apstiprinu, ka esmu konta īpašnieks un vienīgā persona, kurai ir jāautorizē debeti no šī konta.</string>
   <!-- Label for Bacs sort code field -->
   <string name="stripe_bacs_sort_code">Bankas filiāles kods</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
@@ -31,9 +31,9 @@
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(netiek pieņemts)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
-  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (netiek pieņemts)</string>
+  <string name="stripe_card_brand_not_accepted_with_brand">{0} (netiek pieņemts)</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">Turpinot, jūs atļaujat %1$s iekasēt no jūsu Cash App konta par šo un turpmākiem maksājumiem saskaņā ar %2$s noteikumiem, līdz šī atļauja netiek atsaukta. To varat mainīt jebkurā laikā Cash App iestatījumos.</string>
+  <string name="stripe_cash_app_pay_mandate">Turpinot, jūs atļaujat {0} iekasēt no jūsu Cash App konta par šo un turpmākiem maksājumiem saskaņā ar {1} noteikumiem, līdz šī atļauja netiek atsaukta. To varat mainīt jebkurā laikā Cash App iestatījumos.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Kontaktinformācija</string>
   <!-- Text for continue button -->
@@ -45,7 +45,7 @@
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Ievadītais IBAN nav pilnīgs.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="stripe_iban_invalid_country">Ievadītais IBAN nav derīgs, \"%s\" nav atbalstīts valsts kods.</string>
+  <string name="stripe_iban_invalid_country">Ievadītais IBAN nav derīgs, \"{0}\" nav atbalstīts valsts kods.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">IBAN sākumā jābūt divu burtu valsts kodam.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
@@ -54,13 +54,13 @@
   <string name="stripe_incomplete_blik_code">Jūsu BLIK kods nav pilnīgs.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_invalid_blik_code">Jūsu BLIK kods nav derīgs.</string>
-  <string name="stripe_invalid_email_address">Nederīga e-pasta adrese: %s</string>
+  <string name="stripe_invalid_email_address">Nederīga e-pasta adrese: {0}</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Nederīgs UPI ID</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Pērciet tagad vai maksājiet vēlāk ar Klarna.</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Turpinot doties uz Klarna, jūs atļaujat %1$s iekasēt no jūsu Klarna konta turpmākajiem maksājumiem saskaņā viņu noteikumiem un Klarna noteikumiem. To jebkurā laikā varat mainīt savā Klarna lietotnē vai sazinoties ar %2$s.</string>
+  <string name="stripe_klarna_mandate">Turpinot doties uz Klarna, jūs atļaujat {0} iekasēt no jūsu Klarna konta turpmākajiem maksājumiem saskaņā viņu noteikumiem un Klarna noteikumiem. To jebkurā laikā varat mainīt savā Klarna lietotnē vai sazinoties ar {1}.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Maksāt vēlāk ar Klarna.</string>
   <!-- Caption for Phone field on address form -->
@@ -70,7 +70,7 @@
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 banka</string>
   <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_pay_button_amount">Maksāt %s</string>
+  <string name="stripe_pay_button_amount">Maksāt {0}</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Banka</string>
   <!-- Label shown in the payment type picker describing a card payment -->
@@ -96,19 +96,19 @@
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA debets</string>
   <!-- PayPal mandate text -->
-  <string name="stripe_paypal_mandate">Apstiprinot maksājumu PayPal, jūs atļaujat %s saskaņā ar viņu noteikumiem iekasēt no jūsu PayPal konta summas par turpmākajiem maksājumiem.</string>
+  <string name="stripe_paypal_mandate">Apstiprinot maksājumu PayPal, jūs atļaujat {0} saskaņā ar viņu noteikumiem iekasēt no jūsu PayPal konta summas par turpmākajiem maksājumiem.</string>
   <!-- Revolut mandate text -->
-  <string name="stripe_revolut_mandate">Apstiprinot maksājumu RevolutPal, jūs atļaujat %s saskaņā ar viņu noteikumiem iekasēt no jūsu RevolutPal konta summas par turpmākajiem maksājumiem.</string>
+  <string name="stripe_revolut_mandate">Apstiprinot maksājumu RevolutPal, jūs atļaujat {0} saskaņā ar viņu noteikumiem iekasēt no jūsu RevolutPal konta summas par turpmākajiem maksājumiem.</string>
   <!-- Satispay mandate text -->
-  <string name="stripe_satispay_mandate">Turpinot jūs pilnvarojat %1$s automātiski un regulāri iekasēt maksājumus no jūsu Satispay konta atlikuma saskaņā ar jūsu pirkuma vai abonementa plānu.</string>
+  <string name="stripe_satispay_mandate">Turpinot jūs pilnvarojat {0} automātiski un regulāri iekasēt maksājumus no jūsu Satispay konta atlikuma saskaņā ar jūsu pirkuma vai abonementa plānu.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="stripe_save_for_future_payments_with_merchant_name">Saglabāt nākotnes %s maksājumiem</string>
+  <string name="stripe_save_for_future_payments_with_merchant_name">Saglabāt nākotnes {0} maksājumiem</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
-  <string name="stripe_save_payment_details_to_merchant_name">Saglabāt maksājuma informāciju %s turpmākiem pirkumiem</string>
+  <string name="stripe_save_payment_details_to_merchant_name">Saglabāt maksājuma informāciju {0} turpmākiem pirkumiem</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Skenēt karti</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">Norādot savu maksājuma informāciju un apstiprinot šo maksājumu, jūs pilnvarojat A) %s un Stripe (mūsu maksājumu pakalpojumu sniedzēju) nosūtīt rīkojumu jūsu bankai debetēt jūsu kontu un B) jūsu banku debetēt jūsu kontu saskaņā ar šo rīkojumu. Jums ir tiesības pieprasīt naudas līdzekļu atmaksu no jūsu bankas saskaņā ar jūsu bankas konta apkalpošanas līguma noteikumiem un nosacījumiem. Naudas līdzekļu atmaksa jāpieprasa astoņu nedēļu laikā, sākot no jūsu konta debetēšanas datuma. Jūsu tiesības ir paskaidrotas paziņojumā, kuru varat saņemt savā bankā. Jūs piekrītat saņemt paziņojumus par turpmākajiem debeta darījumiem vismaz divas dienas pirms to veikšanas.</string>
+  <string name="stripe_sepa_mandate">Norādot savu maksājuma informāciju un apstiprinot šo maksājumu, jūs pilnvarojat A) {0} un Stripe (mūsu maksājumu pakalpojumu sniedzēju) nosūtīt rīkojumu jūsu bankai debetēt jūsu kontu un B) jūsu banku debetēt jūsu kontu saskaņā ar šo rīkojumu. Jums ir tiesības pieprasīt naudas līdzekļu atmaksu no jūsu bankas saskaņā ar jūsu bankas konta apkalpošanas līguma noteikumiem un nosacījumiem. Naudas līdzekļu atmaksa jāpieprasa astoņu nedēļu laikā, sākot no jūsu konta debetēšanas datuma. Jūsu tiesības ir paskaidrotas paziņojumā, kuru varat saņemt savā bankā. Jūs piekrītat saņemt paziņojumus par turpmākajiem debeta darījumiem vismaz divas dienas pirms to veikšanas.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Iestatīt kā noklusējuma maksājuma veidu</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

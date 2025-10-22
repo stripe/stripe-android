@@ -65,19 +65,19 @@
   <!-- Error message when email is invalid -->
   <string name="stripe_email_is_invalid">O seu email é inválido.</string>
   <!-- String to describe an complete expiration date text field. Formatted as 'Expiration date. [month] [year] -->
-  <string name="stripe_expiration_date_content_description" formatted="false">Data de validade. %s %s</string>
+  <string name="stripe_expiration_date_content_description" formatted="false">Data de validade. {0} {1}</string>
   <!-- String to describe an empty expiration date text field. -->
   <string name="stripe_expiration_date_empty_content_description">Data de validade. Mês com dois dígitos e ano com dois dígitos, vazio</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_expiration_date_hint">MM/AA</string>
   <!-- String to describe an expiration date text field with complete month and empty year. -->
-  <string name="stripe_expiration_date_month_complete_content_description">Data de validade. %s e ano com dois dígitos, vazio</string>
+  <string name="stripe_expiration_date_month_complete_content_description">Data de validade. {0} e ano com dois dígitos, vazio</string>
   <!-- String to describe an expiration date text field with complete month and incomplete year. -->
-  <string name="stripe_expiration_date_year_incomplete_content_description">Data de validade. %s e ano com dois dígitos, incompleto</string>
+  <string name="stripe_expiration_date_year_incomplete_content_description">Data de validade. {0} e ano com dois dígitos, incompleto</string>
   <!-- String to describe that a form field is required to be completed. -->
   <string name="stripe_field_required">Isto é necessário</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="stripe_form_label_optional">%s (opcional)</string>
+  <string name="stripe_form_label_optional">{0} (opcional)</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
   <string name="stripe_incomplete_expiry_date">A data de validade do seu cartão está incompleta.</string>
   <!-- Error description for incomplete phone number -->

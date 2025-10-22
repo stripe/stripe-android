@@ -5,9 +5,9 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Zahlen Sie mit <img/> in <num_installments/> zinslosen Raten zu je <installment_price/>.]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_afterpay_clearpay_subtitle">%1$d zinslose Zahlungen in Höhe von %2$s</string>
+  <string name="stripe_afterpay_clearpay_subtitle">{0} zinslose Zahlungen in Höhe von {1}</string>
   <!-- Amazon Pay mandate text -->
-  <string name="stripe_amazon_pay_mandate">Indem Sie Ihre Zahlung bei Amazon Pay bestätigen, erklären Sie sich damit einverstanden, dass %s Ihr Amazon Pay-Konto zur Durchführung zukünftiger Zahlungen gemäß den Nutzungsbedingungen belastet.</string>
+  <string name="stripe_amazon_pay_mandate">Indem Sie Ihre Zahlung bei Amazon Pay bestätigen, erklären Sie sich damit einverstanden, dass {0} Ihr Amazon Pay-Konto zur Durchführung zukünftiger Zahlungen gemäß den Nutzungsbedingungen belastet.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Zurück</string>
   <!-- Label for Bacs account number field -->
@@ -17,7 +17,7 @@
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">Bankkonto</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
-  <string name="stripe_bacs_confirm_mandate_label">Ich verstehe, dass Stripe im Namen von %s Lastschriften einzieht und bestätige, dass ich der Kontoinhaber/die Kontoinhaberin und die einzige Person bin, die zur Autorisierung von Lastschriften von diesem Konto erforderlich ist.</string>
+  <string name="stripe_bacs_confirm_mandate_label">Ich verstehe, dass Stripe im Namen von {0} Lastschriften einzieht und bestätige, dass ich der Kontoinhaber/die Kontoinhaberin und die einzige Person bin, die zur Autorisierung von Lastschriften von diesem Konto erforderlich ist.</string>
   <!-- Label for Bacs sort code field -->
   <string name="stripe_bacs_sort_code">Bankleitzahl</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
@@ -31,9 +31,9 @@
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(nicht akzeptiert)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
-  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (nicht akzeptiert)</string>
+  <string name="stripe_card_brand_not_accepted_with_brand">{0} (nicht akzeptiert)</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">Indem Sie fortfahren, erteilen Sie %1$s die Genehmigung, Ihr Cash-App-Konto in Höhe dieser und künftiger Zahlungen zu belasten im Einklang mit den AGB von %2$s, bis diese Genehmigung widerrufen wird. Sie können dies jederzeit in Ihren Cash-App-Einstellungen ändern.</string>
+  <string name="stripe_cash_app_pay_mandate">Indem Sie fortfahren, erteilen Sie {0} die Genehmigung, Ihr Cash-App-Konto in Höhe dieser und künftiger Zahlungen zu belasten im Einklang mit den AGB von {1}, bis diese Genehmigung widerrufen wird. Sie können dies jederzeit in Ihren Cash-App-Einstellungen ändern.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Kontaktinformationen</string>
   <!-- Text for continue button -->
@@ -45,7 +45,7 @@
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Die eingegebene IBAN ist unvollständig.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="stripe_iban_invalid_country">Die eingegebene IBAN ist ungültig. „%s“ ist kein unterstützter Ländercode.</string>
+  <string name="stripe_iban_invalid_country">Die eingegebene IBAN ist ungültig. „{0}“ ist kein unterstützter Ländercode.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Ihre IBAN sollte mit einem zweistelligen Ländercode beginnen.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
@@ -54,13 +54,13 @@
   <string name="stripe_incomplete_blik_code">Ihr BLIK-Code ist unvollständig.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_invalid_blik_code">Ihr BLIK code ist ungültig.</string>
-  <string name="stripe_invalid_email_address">Ungültige E-Mail-Adresse: %s</string>
+  <string name="stripe_invalid_email_address">Ungültige E-Mail-Adresse: {0}</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Ungültige UPI-ID</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Jetzt kaufen oder später mit Klarna bezahlen.</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Indem Sie zur Klarna-Website wechseln, erklären Sie sich damit einverstanden, dass %1$s Ihr Klarna-Konto zur Durchführung zukünftiger Zahlungen gemäß den eigenen AGB und den AGB von Klarna belastet. Sie können Ihr Einverständnis jederzeit in Ihrer Klarna-App widerrufen oder indem Sie sich an %2$s wenden.</string>
+  <string name="stripe_klarna_mandate">Indem Sie zur Klarna-Website wechseln, erklären Sie sich damit einverstanden, dass {0} Ihr Klarna-Konto zur Durchführung zukünftiger Zahlungen gemäß den eigenen AGB und den AGB von Klarna belastet. Sie können Ihr Einverständnis jederzeit in Ihrer Klarna-App widerrufen oder indem Sie sich an {1} wenden.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Später mit Klarna bezahlen.</string>
   <!-- Caption for Phone field on address form -->
@@ -70,7 +70,7 @@
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_pay_button_amount">%s zahlen</string>
+  <string name="stripe_pay_button_amount">{0} zahlen</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Bank</string>
   <!-- Label shown in the payment type picker describing a card payment -->
@@ -96,19 +96,19 @@
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA-Lastschrift</string>
   <!-- PayPal mandate text -->
-  <string name="stripe_paypal_mandate">Indem Sie Ihre Zahlung bei PayPal bestätigen, erklären Sie sich damit einverstanden, dass %s Ihr PayPal-Konto zur Durchführung zukünftiger Zahlungen gemäß der Nutzungsbedingungen belastet.</string>
+  <string name="stripe_paypal_mandate">Indem Sie Ihre Zahlung bei PayPal bestätigen, erklären Sie sich damit einverstanden, dass {0} Ihr PayPal-Konto zur Durchführung zukünftiger Zahlungen gemäß der Nutzungsbedingungen belastet.</string>
   <!-- Revolut mandate text -->
-  <string name="stripe_revolut_mandate">Indem Sie Ihre Zahlung bei RevolutPay bestätigen, erklären Sie sich damit einverstanden, dass %s Ihr RevolutPay-Konto zur Durchführung zukünftiger Zahlungen gemäß den Nutzungsbedingungen belastet.</string>
+  <string name="stripe_revolut_mandate">Indem Sie Ihre Zahlung bei RevolutPay bestätigen, erklären Sie sich damit einverstanden, dass {0} Ihr RevolutPay-Konto zur Durchführung zukünftiger Zahlungen gemäß den Nutzungsbedingungen belastet.</string>
   <!-- Satispay mandate text -->
-  <string name="stripe_satispay_mandate">Indem Sie fortfahren, autorisieren Sie %1$s, Ihr Satispay-Guthaben regelmäßig gemäß Ihrem Kauf- oder Abonnementplan automatisch zu belasten.</string>
+  <string name="stripe_satispay_mandate">Indem Sie fortfahren, autorisieren Sie {0}, Ihr Satispay-Guthaben regelmäßig gemäß Ihrem Kauf- oder Abonnementplan automatisch zu belasten.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="stripe_save_for_future_payments_with_merchant_name">Für zukünftige %s-Zahlungen speichern</string>
+  <string name="stripe_save_for_future_payments_with_merchant_name">Für zukünftige {0}-Zahlungen speichern</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
-  <string name="stripe_save_payment_details_to_merchant_name">Zahlungsinformationen für %s für spätere Käufe speichern</string>
+  <string name="stripe_save_payment_details_to_merchant_name">Zahlungsinformationen für {0} für spätere Käufe speichern</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Karte scannen</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">Durch Angabe der Zahlungsinformationen und Bestätigung der Zahlung ermächtigen Sie (A) %s und Stripe, unseren Zahlungsdienstleister, Zahlungen von Ihrem Konto mittels Lastschrift einzuziehen. Zugleich (B) weisen Sie Ihr Kreditinstitut gemäß diesen Anweisungen an, Ihr Konto entsprechend zu belasten. Sie haben im Rahmen Ihrer Rechte Anspruch auf Erstattung von Ihrem Kreditinstitut gemäß den vereinbarten Bedingungen mit Ihrem Kreditinstitut. Sie können innerhalb von 8 Wochen, beginnend mit dem Belastungsdatum, die Erstattung des belasteten Betrages verlangen. Es gelten dabei die mit Ihrem Kreditinstitut vereinbarten Bedingungen. Weiterhin erklären Sie sich damit einverstanden, die Vorabankündigung bis spätestens 2 Tage vor Zahlungseinzug zu erhalten.</string>
+  <string name="stripe_sepa_mandate">Durch Angabe der Zahlungsinformationen und Bestätigung der Zahlung ermächtigen Sie (A) {0} und Stripe, unseren Zahlungsdienstleister, Zahlungen von Ihrem Konto mittels Lastschrift einzuziehen. Zugleich (B) weisen Sie Ihr Kreditinstitut gemäß diesen Anweisungen an, Ihr Konto entsprechend zu belasten. Sie haben im Rahmen Ihrer Rechte Anspruch auf Erstattung von Ihrem Kreditinstitut gemäß den vereinbarten Bedingungen mit Ihrem Kreditinstitut. Sie können innerhalb von 8 Wochen, beginnend mit dem Belastungsdatum, die Erstattung des belasteten Betrages verlangen. Es gelten dabei die mit Ihrem Kreditinstitut vereinbarten Bedingungen. Weiterhin erklären Sie sich damit einverstanden, die Vorabankündigung bis spätestens 2 Tage vor Zahlungseinzug zu erhalten.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Als Standard-Zahlungsmethode festlegen</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

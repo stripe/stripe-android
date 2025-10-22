@@ -5,9 +5,9 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Betaal in <num_installments/> rentevrije termijnen van <installment_price/> met <img/>]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_afterpay_clearpay_subtitle">%1$d rentevrije betalingen van %2$s</string>
+  <string name="stripe_afterpay_clearpay_subtitle">{0} rentevrije betalingen van {1}</string>
   <!-- Amazon Pay mandate text -->
-  <string name="stripe_amazon_pay_mandate">Als je je betaling op Amazon Pay bevestigt, geef je %s toestemming om toekomstige betalingen in rekening te brengen op je Amazon Pay-account in overeenstemming met hun voorwaarden.</string>
+  <string name="stripe_amazon_pay_mandate">Als je je betaling op Amazon Pay bevestigt, geef je {0} toestemming om toekomstige betalingen in rekening te brengen op je Amazon Pay-account in overeenstemming met hun voorwaarden.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Terug</string>
   <!-- Label for Bacs account number field -->
@@ -17,7 +17,7 @@
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">Bankrekening</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
-  <string name="stripe_bacs_confirm_mandate_label">Ik begrijp dat Stripe namens %s bedragen via automatische incasso gaat afschrijven en ik bevestig dat ik als rekeninghouder de enige vereiste persoon ben om afschrijvingen van deze rekening te autoriseren.</string>
+  <string name="stripe_bacs_confirm_mandate_label">Ik begrijp dat Stripe namens {0} bedragen via automatische incasso gaat afschrijven en ik bevestig dat ik als rekeninghouder de enige vereiste persoon ben om afschrijvingen van deze rekening te autoriseren.</string>
   <!-- Label for Bacs sort code field -->
   <string name="stripe_bacs_sort_code">Sort-code</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
@@ -31,9 +31,9 @@
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(niet geaccepteerd)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
-  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (niet geaccepteerd)</string>
+  <string name="stripe_card_brand_not_accepted_with_brand">{0} (niet geaccepteerd)</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">Als je doorgaat, geef je %1$s toestemming om deze betaling en toekomstige betalingen in rekening te brengen op je Cash App-account, in overeenstemming met de voorwaarden van %2$s, totdat je deze toestemming intrekt. Je kunt dit op elk moment wijzigen via je Cash App-instellingen.</string>
+  <string name="stripe_cash_app_pay_mandate">Als je doorgaat, geef je {0} toestemming om deze betaling en toekomstige betalingen in rekening te brengen op je Cash App-account, in overeenstemming met de voorwaarden van {1}, totdat je deze toestemming intrekt. Je kunt dit op elk moment wijzigen via je Cash App-instellingen.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Contactgegevens</string>
   <!-- Text for continue button -->
@@ -45,7 +45,7 @@
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Het opgegeven IBAN-nummer is onvolledig.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="stripe_iban_invalid_country">Het opgegeven IBAN-nummer is ongeldig: \"%s\" is geen ondersteunde landcode.</string>
+  <string name="stripe_iban_invalid_country">Het opgegeven IBAN-nummer is ongeldig: \"{0}\" is geen ondersteunde landcode.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Het IBAN-nummer moet beginnen met een landcode van twee letters.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
@@ -54,13 +54,13 @@
   <string name="stripe_incomplete_blik_code">Je BLIK-code is onvolledig.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_invalid_blik_code">Je BLIK-code is ongeldig.</string>
-  <string name="stripe_invalid_email_address">Ongeldig e-mailadres: %s</string>
+  <string name="stripe_invalid_email_address">Ongeldig e-mailadres: {0}</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Ongeldige UPI-ID</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Koop nu of betaal later met Klarna.</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Als je doorgaat naar Klarna, geef je %1$s toestemming om toekomstige betalingen in rekening te brengen op je Klarna-account in overeenstemming met hun voorwaarden en de voorwaarden van Klarna. Je kunt dit altijd wijzigen in je Klarna-app of door contact op te nemen met %2$s.</string>
+  <string name="stripe_klarna_mandate">Als je doorgaat naar Klarna, geef je {0} toestemming om toekomstige betalingen in rekening te brengen op je Klarna-account in overeenstemming met hun voorwaarden en de voorwaarden van Klarna. Je kunt dit altijd wijzigen in je Klarna-app of door contact op te nemen met {1}.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Betaal later met Klarna.</string>
   <!-- Caption for Phone field on address form -->
@@ -70,7 +70,7 @@
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_pay_button_amount">%s betalen</string>
+  <string name="stripe_pay_button_amount">{0} betalen</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Bank</string>
   <!-- Label shown in the payment type picker describing a card payment -->
@@ -96,19 +96,19 @@
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA-incasso</string>
   <!-- PayPal mandate text -->
-  <string name="stripe_paypal_mandate">Als je je betaling met PayPal bevestigt, geef je %s toestemming om toekomstige betalingen af te schrijven van je PayPal-rekening in overeenstemming met hun voorwaarden.</string>
+  <string name="stripe_paypal_mandate">Als je je betaling met PayPal bevestigt, geef je {0} toestemming om toekomstige betalingen af te schrijven van je PayPal-rekening in overeenstemming met hun voorwaarden.</string>
   <!-- Revolut mandate text -->
-  <string name="stripe_revolut_mandate">Als je je betaling op RevolutPay bevestigt, geef je %s toestemming om toekomstige betalingen in rekening te brengen op je RevolutPay-account in overeenstemming met hun voorwaarden.</string>
+  <string name="stripe_revolut_mandate">Als je je betaling op RevolutPay bevestigt, geef je {0} toestemming om toekomstige betalingen in rekening te brengen op je RevolutPay-account in overeenstemming met hun voorwaarden.</string>
   <!-- Satispay mandate text -->
-  <string name="stripe_satispay_mandate">Door verder te gaan, machtigt u %1$s om uw Satispay-saldo automatisch op terugkerende basis af te schrijven in overeenstemming met uw aankoop- of abonnementsplan.</string>
+  <string name="stripe_satispay_mandate">Door verder te gaan, machtigt u {0} om uw Satispay-saldo automatisch op terugkerende basis af te schrijven in overeenstemming met uw aankoop- of abonnementsplan.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="stripe_save_for_future_payments_with_merchant_name">Opslaan voor toekomstige %s-betalingen</string>
+  <string name="stripe_save_for_future_payments_with_merchant_name">Opslaan voor toekomstige {0}-betalingen</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
-  <string name="stripe_save_payment_details_to_merchant_name">Betaalgegevens opslaan naar %s voor toekomstige aankopen</string>
+  <string name="stripe_save_payment_details_to_merchant_name">Betaalgegevens opslaan naar {0} voor toekomstige aankopen</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Betaalkaart scannen</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">Door je betaalgegevens op te geven en deze betaling te bevestigen geef je toestemming aan (A) %s en Stripe, onze betaaldienstverlener, een opdracht te sturen aan je bank om je rekening te debiteren en aan (B) je bank om je rekening te debiteren conform deze opdracht. Je hebt het recht op terugbetaling door je bank conform de met je bank overeengekomen voorwaarden. Een verzoek tot terugbetaling moet worden ingediend binnen 8 weken vanaf de datum waarop je rekening is gedebiteerd. Je rechten worden uitgelegd in een verklaring die je kunt opvragen bij je bank. Je stemt ermee in dat je minstens 2 dagen voor de uitvoering van toekomstige debiteringen hierover op de hoogte wordt gesteld.</string>
+  <string name="stripe_sepa_mandate">Door je betaalgegevens op te geven en deze betaling te bevestigen geef je toestemming aan (A) {0} en Stripe, onze betaaldienstverlener, een opdracht te sturen aan je bank om je rekening te debiteren en aan (B) je bank om je rekening te debiteren conform deze opdracht. Je hebt het recht op terugbetaling door je bank conform de met je bank overeengekomen voorwaarden. Een verzoek tot terugbetaling moet worden ingediend binnen 8 weken vanaf de datum waarop je rekening is gedebiteerd. Je rechten worden uitgelegd in een verklaring die je kunt opvragen bij je bank. Je stemt ermee in dat je minstens 2 dagen voor de uitvoering van toekomstige debiteringen hierover op de hoogte wordt gesteld.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Instellen als standaardbetaalmethode</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

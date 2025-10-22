@@ -244,7 +244,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">Emellett lehetősége van arra is, hogy fotót töltsön fel a fényképes azonosító igazolványáról.</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">Emellett lehetősége van arra is, hogy fotót töltsön fel a következőről: %1$s</string>
+  <string name="stripe_upload_file_text">Emellett lehetősége van arra is, hogy fotót töltsön fel a következőről: {0}</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">Fényképes azonosító igazolvány feltöltése</string>
 </resources>

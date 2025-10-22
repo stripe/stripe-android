@@ -2,16 +2,16 @@
 <resources>
   <!-- Label for card number entry text field -->
   <string name="stripe_acc_label_card_number">Número de targeta</string>
-  <string name="stripe_acc_label_card_number_node">%s, Número de targeta</string>
-  <string name="stripe_acc_label_cvc_node">%s, CVC</string>
+  <string name="stripe_acc_label_card_number_node">{0}, Número de targeta</string>
+  <string name="stripe_acc_label_cvc_node">{0}, CVC</string>
   <string name="stripe_acc_label_expiry_date">Data de caducitat</string>
-  <string name="stripe_acc_label_expiry_date_node">%s, Data de caducitat</string>
+  <string name="stripe_acc_label_expiry_date_node">{0}, Data de caducitat</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
   <string name="stripe_acc_label_zip">Codi ZIP</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="stripe_acc_label_zip_short">ZIP</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_added">Afegit %s</string>
+  <string name="stripe_added">Afegit {0}</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="stripe_address_city_required">Si us plau, introdueix la teva ciutat</string>
   <!-- Error text indicating country is invalid -->
@@ -75,9 +75,9 @@
   <!-- Placeholder for AU BECS BSB number -->
   <string name="stripe_au_becs_bsb_number">Número BSB</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="stripe_au_becs_mandate">En facilitar-nos les dades bancàries i confirmar aquest pagament, esteu d\'acord amb aquesta Sol·licitud de Domiciliació Bancària i amb el &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;Servei de Sol·licitud de Domiciliació Bancària&lt;/a&gt;, i autoritzeu Stripe Payments Australia Pty Ltd ACN 160 180 343, amb número d\'identificador d\'usuari de domiciliació bancària 507156 («Stripe») a carregar el vostre compte mitjançant el Sistema de Compensació Electrònica a gran escala (BECS per les seves sigles en anglès) en nom de %s (el «Venedor») per qualsevol import que se us hagi comunicat de manera separada per part del Venedor. Certifiqueu que sou el titular del compte o un signatari autoritzat del compte indicat anteriorment.</string>
+  <string name="stripe_au_becs_mandate">En facilitar-nos les dades bancàries i confirmar aquest pagament, esteu d\'acord amb aquesta Sol·licitud de Domiciliació Bancària i amb el &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;Servei de Sol·licitud de Domiciliació Bancària&lt;/a&gt;, i autoritzeu Stripe Payments Australia Pty Ltd ACN 160 180 343, amb número d\'identificador d\'usuari de domiciliació bancària 507156 («Stripe») a carregar el vostre compte mitjançant el Sistema de Compensació Electrònica a gran escala (BECS per les seves sigles en anglès) en nom de {0} (el «Venedor») per qualsevol import que se us hagi comunicat de manera separada per part del Venedor. Certifiqueu que sou el titular del compte o un signatari autoritzat del compte indicat anteriorment.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="stripe_becs_mandate_acceptance">\n    Facilitant-nos les teves dades bancàries i confirmant aquest pagament, estàs d\'acord amb aquesta Sol·licitud de Domiciliació Bancària i amb el Servei de Sol·licitud de Domiciliació Bancària, i autoritzes Stripe Payments Australia Pty Ltd ACN 160 180 343, amb número d\'identificador d\'usuari de domiciliació bancària 507156 («Stripe») a carregar en el teu compte mitjançant el Sistema de Compensació Electrònica a gran escala (BECS per les seves sigles en anglès) en nom de %1$s (el «Venedor») per qualsevol import que se t\'hagi comunicat de manera separada per part del Venedor. Certifiques que ets el titular del compte o un signatari autoritzat del compte indicat anteriorment.\n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    Facilitant-nos les teves dades bancàries i confirmant aquest pagament, estàs d\'acord amb aquesta Sol·licitud de Domiciliació Bancària i amb el Servei de Sol·licitud de Domiciliació Bancària, i autoritzes Stripe Payments Australia Pty Ltd ACN 160 180 343, amb número d\'identificador d\'usuari de domiciliació bancària 507156 («Stripe») a carregar en el teu compte mitjançant el Sistema de Compensació Electrònica a gran escala (BECS per les seves sigles en anglès) en nom de {0} (el «Venedor») per qualsevol import que se t\'hagi comunicat de manera separada per part del Venedor. Certifiques que ets el titular del compte o un signatari autoritzat del compte indicat anteriorment.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Número de Compte</string>
   <!-- Error description for incomplete account number -->
@@ -109,11 +109,11 @@
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">S\'ha rebutjat la teva targeta</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="stripe_card_ending_in">%1$s que acaba en %2$s</string>
+  <string name="stripe_card_ending_in">{0} que acaba en {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
-  <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
+  <string name="stripe_card_plus_last_4">{0} ···· {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
-  <string name="stripe_card_with_last_4">%1$s ····%2$s</string>
+  <string name="stripe_card_with_last_4">{0} ····{1}</string>
   <!-- Text for close button -->
   <string name="stripe_close">Tanca</string>
   <!-- Accessibility title used during Talkback to indicate to users that a transaction is being confirmed -->
@@ -122,7 +122,7 @@
   <string name="stripe_delete_payment_method">Eliminar mètode de pagament</string>
   <string name="stripe_delete_payment_method_prompt_title">Vols eliminar mètode de pagament?</string>
   <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
-  <string name="stripe_disallowed_card_brand">%s no s\'accepta</string>
+  <string name="stripe_disallowed_card_brand">{0} no s\'accepta</string>
   <!-- Done button title -->
   <string name="stripe_done">Fet</string>
   <!-- Button title to enter editing mode -->
@@ -139,7 +139,7 @@
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">S\'ha esgotat el temps d\'autenticació del teu mètode de pagament - intenta-ho un altre cop</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
-  <string name="stripe_fpx_bank_offline">%s - Fora de línia</string>
+  <string name="stripe_fpx_bank_offline">{0} - Fora de línia</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">S\'ha rebutjat el mètode de pagament.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
@@ -167,7 +167,7 @@
    Text for remove button -->
   <string name="stripe_remove">Eliminar</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_removed">Eliminat %s</string>
+  <string name="stripe_removed">Eliminat {0}</string>
   <string name="stripe_secure_checkout">Compra Segura</string>
   <string name="stripe_title_add_a_card">Afegir una targeta</string>
   <!-- Screen title telling users they should add an address -->

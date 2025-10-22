@@ -2,16 +2,16 @@
 <resources>
   <!-- Label for card number entry text field -->
   <string name="stripe_acc_label_card_number">Card number</string>
-  <string name="stripe_acc_label_card_number_node">%s, Card number</string>
-  <string name="stripe_acc_label_cvc_node">%s, CVC</string>
+  <string name="stripe_acc_label_card_number_node">{0}, Card number</string>
+  <string name="stripe_acc_label_cvc_node">{0}, CVC</string>
   <string name="stripe_acc_label_expiry_date">Expiry date</string>
-  <string name="stripe_acc_label_expiry_date_node">%s, Expiry date</string>
+  <string name="stripe_acc_label_expiry_date_node">{0}, Expiry date</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
   <string name="stripe_acc_label_zip">ZIP Code</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="stripe_acc_label_zip_short">ZIP</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_added">Added %s</string>
+  <string name="stripe_added">Added {0}</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="stripe_address_city_required">Please enter your city</string>
   <!-- Error text indicating country is invalid -->
@@ -75,9 +75,9 @@
   <!-- Placeholder for AU BECS BSB number -->
   <string name="stripe_au_becs_bsb_number">BSB number</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="stripe_au_becs_mandate">By providing your bank account details and confirming this payment, you agree to this Direct Debit Request and the &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;Direct Debit Request service agreement&lt;/a&gt;, and authorise Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156 (“Stripe”) to debit your account through the Bulk Electronic Clearing System (BECS) on behalf of %s (the \"Merchant\") for any amounts separately communicated to you by the Merchant. You certify that you are either an account holder or an authorised signatory on the account listed above.</string>
+  <string name="stripe_au_becs_mandate">By providing your bank account details and confirming this payment, you agree to this Direct Debit Request and the &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;Direct Debit Request service agreement&lt;/a&gt;, and authorise Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156 (“Stripe”) to debit your account through the Bulk Electronic Clearing System (BECS) on behalf of {0} (the \"Merchant\") for any amounts separately communicated to you by the Merchant. You certify that you are either an account holder or an authorised signatory on the account listed above.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="stripe_becs_mandate_acceptance">\n    By providing your bank account details and confirming this payment, you agree to this\n    Direct Debit Request and the Direct Debit Request service agreement, and authorise\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156\n    (“Stripe”) to debit your account through the Bulk Electronic Clearing System (BECS) on\n    behalf of %1$s (the \"Merchant\") for any amounts separately communicated to you\n    by the Merchant. You certify that you are either an account holder or an authorised\n    signatory on the account listed above.\n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    By providing your bank account details and confirming this payment, you agree to this\n    Direct Debit Request and the Direct Debit Request service agreement, and authorise\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156\n    (“Stripe”) to debit your account through the Bulk Electronic Clearing System (BECS) on\n    behalf of {0} (the \"Merchant\") for any amounts separately communicated to you\n    by the Merchant. You certify that you are either an account holder or an authorised\n    signatory on the account listed above.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Account number</string>
   <!-- Error description for incomplete account number -->
@@ -109,11 +109,11 @@
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">Your card has been declined</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="stripe_card_ending_in">%1$s ending in %2$s</string>
+  <string name="stripe_card_ending_in">{0} ending in {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
-  <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
+  <string name="stripe_card_plus_last_4">{0} ···· {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
-  <string name="stripe_card_with_last_4">%1$s ····%2$s</string>
+  <string name="stripe_card_with_last_4">{0} ····{1}</string>
   <!-- Text for close button -->
   <string name="stripe_close">Close</string>
   <!-- Accessibility title used during Talkback to indicate to users that a transaction is being confirmed -->
@@ -122,7 +122,7 @@
   <string name="stripe_delete_payment_method">Delete Payment Method?</string>
   <string name="stripe_delete_payment_method_prompt_title">Delete payment method?</string>
   <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
-  <string name="stripe_disallowed_card_brand">%s is not accepted</string>
+  <string name="stripe_disallowed_card_brand">{0} is not accepted</string>
   <!-- Done button title -->
   <string name="stripe_done">Done</string>
   <!-- Button title to enter editing mode -->
@@ -139,7 +139,7 @@
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Timed out authenticating your payment method - please try again</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
-  <string name="stripe_fpx_bank_offline">%s - Offline</string>
+  <string name="stripe_fpx_bank_offline">{0} - Offline</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Your payment method was declined.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
@@ -167,7 +167,7 @@
    Text for remove button -->
   <string name="stripe_remove">Remove</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_removed">Removed %s</string>
+  <string name="stripe_removed">Removed {0}</string>
   <string name="stripe_secure_checkout">Secure Checkout</string>
   <string name="stripe_title_add_a_card">Add a card</string>
   <!-- Screen title telling users they should add an address -->

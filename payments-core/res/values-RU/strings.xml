@@ -2,16 +2,16 @@
 <resources>
   <!-- Label for card number entry text field -->
   <string name="stripe_acc_label_card_number">Номер карты</string>
-  <string name="stripe_acc_label_card_number_node">%s, номер карты</string>
-  <string name="stripe_acc_label_cvc_node">%s, код CVV/CVC</string>
+  <string name="stripe_acc_label_card_number_node">{0}, номер карты</string>
+  <string name="stripe_acc_label_cvc_node">{0}, код CVV/CVC</string>
   <string name="stripe_acc_label_expiry_date">Окончание срока действия</string>
-  <string name="stripe_acc_label_expiry_date_node">%s, дата истечения срока действия</string>
+  <string name="stripe_acc_label_expiry_date_node">{0}, дата истечения срока действия</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
   <string name="stripe_acc_label_zip">Почтовый индекс</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="stripe_acc_label_zip_short">Почтовый индекс</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_added">Добавлено: %s</string>
+  <string name="stripe_added">Добавлено: {0}</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="stripe_address_city_required">Введите город</string>
   <!-- Error text indicating country is invalid -->
@@ -75,9 +75,9 @@
   <!-- Placeholder for AU BECS BSB number -->
   <string name="stripe_au_becs_bsb_number">Номер BSB</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="stripe_au_becs_mandate">Указывая свои банковские реквизиты и подтверждая платеж, вы принимаете данный запрос прямого списания средств и &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;Сервисное соглашение о запросе прямого списания средств&lt;/a&gt;, а также уполномочиваете компанию Stripe Payments Australia Pty Ltd ACN 160 180 343, идентификационный номер пользователя системы прямого списания средств 507156, (“Stripe”), снимать средства с вашего счета через систему Bulk Electronic Clearing System (BECS) от имени %s (далее \"Продавец\") на суммы, отдельно указанные вам Продавцом. Вы подтверждаете, что являетесь либо владельцем указанного выше счета, либо его уполномоченным представителем.</string>
+  <string name="stripe_au_becs_mandate">Указывая свои банковские реквизиты и подтверждая платеж, вы принимаете данный запрос прямого списания средств и &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;Сервисное соглашение о запросе прямого списания средств&lt;/a&gt;, а также уполномочиваете компанию Stripe Payments Australia Pty Ltd ACN 160 180 343, идентификационный номер пользователя системы прямого списания средств 507156, (“Stripe”), снимать средства с вашего счета через систему Bulk Electronic Clearing System (BECS) от имени {0} (далее \"Продавец\") на суммы, отдельно указанные вам Продавцом. Вы подтверждаете, что являетесь либо владельцем указанного выше счета, либо его уполномоченным представителем.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="stripe_becs_mandate_acceptance">\n    Предоставляя данные банковского счета и подтверждая платеж, вы принимаете данный запрос прямого списания средств и сервисное\n    соглашение на запрос прямого списания средств, а также уполномочиваете компанию\n    Stripe Payments Australia Pty Ltd, ACN 160 180 343, идентификационный номер пользователя службы прямого списания средств: 507156,\n    (“Stripe”) на списание средств с вашего счета через систему BECS от\n    имени %1$s (\"Продавец\") на суммы, отдельно указанные вам Продавцом.\n    Вы подтверждаете, что являетесь владельцем указанного ниже счета или\n    его уполномоченным представителем\n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    Предоставляя данные банковского счета и подтверждая платеж, вы принимаете данный запрос прямого списания средств и сервисное\n    соглашение на запрос прямого списания средств, а также уполномочиваете компанию\n    Stripe Payments Australia Pty Ltd, ACN 160 180 343, идентификационный номер пользователя службы прямого списания средств: 507156,\n    (“Stripe”) на списание средств с вашего счета через систему BECS от\n    имени {0} (\"Продавец\") на суммы, отдельно указанные вам Продавцом.\n    Вы подтверждаете, что являетесь владельцем указанного ниже счета или\n    его уполномоченным представителем\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Номер счета</string>
   <!-- Error description for incomplete account number -->
@@ -109,11 +109,11 @@
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">Карта отклонена</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="stripe_card_ending_in">%1$s, оканч. на %2$s</string>
+  <string name="stripe_card_ending_in">{0}, оканч. на {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
-  <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
+  <string name="stripe_card_plus_last_4">{0} ···· {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
-  <string name="stripe_card_with_last_4">%1$s ····%2$s</string>
+  <string name="stripe_card_with_last_4">{0} ····{1}</string>
   <!-- Text for close button -->
   <string name="stripe_close">Закрыть</string>
   <!-- Accessibility title used during Talkback to indicate to users that a transaction is being confirmed -->
@@ -122,7 +122,7 @@
   <string name="stripe_delete_payment_method">Удалить способ оплаты?</string>
   <string name="stripe_delete_payment_method_prompt_title">Удалить метод оплаты?</string>
   <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
-  <string name="stripe_disallowed_card_brand">%s не принимается</string>
+  <string name="stripe_disallowed_card_brand">{0} не принимается</string>
   <!-- Done button title -->
   <string name="stripe_done">Готово</string>
   <!-- Button title to enter editing mode -->
@@ -139,7 +139,7 @@
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Лимит времени для аутентификации метода оплаты истек. Попробуйте еще раз</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
-  <string name="stripe_fpx_bank_offline">%s - не в сети</string>
+  <string name="stripe_fpx_bank_offline">{0} - не в сети</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Не удалось выполнить оплату этим способом.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
@@ -167,7 +167,7 @@
    Text for remove button -->
   <string name="stripe_remove">Удалить</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_removed">Удалено: %s</string>
+  <string name="stripe_removed">Удалено: {0}</string>
   <string name="stripe_secure_checkout">Безопасное оформление и оплата заказа</string>
   <string name="stripe_title_add_a_card">Добавить карту</string>
   <!-- Screen title telling users they should add an address -->

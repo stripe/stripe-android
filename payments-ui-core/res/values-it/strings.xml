@@ -5,9 +5,9 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Paga in <num_installments/> rate senza interessi di <installment_price/> con <img/>]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_afterpay_clearpay_subtitle">%1$d pagamenti senza interessi pari a %2$s</string>
+  <string name="stripe_afterpay_clearpay_subtitle">{0} pagamenti senza interessi pari a {1}</string>
   <!-- Amazon Pay mandate text -->
-  <string name="stripe_amazon_pay_mandate">Confermando il tuo pagamento con AmazonPay, consenti a %s di addebitare i pagamenti futuri sul tuo account AmazonPay in base a quanto previsto dai relativi termini e condizioni.</string>
+  <string name="stripe_amazon_pay_mandate">Confermando il tuo pagamento con AmazonPay, consenti a {0} di addebitare i pagamenti futuri sul tuo account AmazonPay in base a quanto previsto dai relativi termini e condizioni.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Indietro</string>
   <!-- Label for Bacs account number field -->
@@ -17,7 +17,7 @@
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">Conto bancario</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
-  <string name="stripe_bacs_confirm_mandate_label">Sono consapevole che Stripe raccoglierà addebiti diretti per conto di %s e confermo di essere il titolare del conto e l\'unica persona idonea ad autorizzare addebiti da questo conto.</string>
+  <string name="stripe_bacs_confirm_mandate_label">Sono consapevole che Stripe raccoglierà addebiti diretti per conto di {0} e confermo di essere il titolare del conto e l\'unica persona idonea ad autorizzare addebiti da questo conto.</string>
   <!-- Label for Bacs sort code field -->
   <string name="stripe_bacs_sort_code">Sort code</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
@@ -31,9 +31,9 @@
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(non accettata)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
-  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (non accettata)</string>
+  <string name="stripe_card_brand_not_accepted_with_brand">{0} (non accettata)</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">Continuando, autorizzi %1$s ad addebitare questo pagamento e i pagamenti futuri sul tuo conto Cash App conformemente ai termini di %2$s, fino alla revoca di tale autorizzazione. Puoi modificarla in qualsiasi momento nelle impostazioni di Cash app.</string>
+  <string name="stripe_cash_app_pay_mandate">Continuando, autorizzi {0} ad addebitare questo pagamento e i pagamenti futuri sul tuo conto Cash App conformemente ai termini di {1}, fino alla revoca di tale autorizzazione. Puoi modificarla in qualsiasi momento nelle impostazioni di Cash app.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Informazioni di contatto</string>
   <!-- Text for continue button -->
@@ -45,7 +45,7 @@
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">L\'IBAN inserito è incompleto.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="stripe_iban_invalid_country">L\'IBAN inserito non è valido; \"%s\" non è un codice di paese valido.</string>
+  <string name="stripe_iban_invalid_country">L\'IBAN inserito non è valido; \"{0}\" non è un codice di paese valido.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">L\'IBAN deve iniziare con un codice di paese di due lettere.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
@@ -54,13 +54,13 @@
   <string name="stripe_incomplete_blik_code">Il codice BLIK non è completo.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_invalid_blik_code">Il codice BLIK non è valido.</string>
-  <string name="stripe_invalid_email_address">Indirizzo email non valido: %s</string>
+  <string name="stripe_invalid_email_address">Indirizzo email non valido: {0}</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">ID UPI non valido</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Acquista ora o paga dopo con Klarna.</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Continuando su Klarna, consenti a %1$s di addebitare i pagamenti futuri sul tuo account Klarna in base a quanto previsto dai suoi termini e condizioni e da quelli di Klarna. Puoi modificare questa impostazione in qualsiasi momento nell\'app Klarna o contattando %2$s.</string>
+  <string name="stripe_klarna_mandate">Continuando su Klarna, consenti a {0} di addebitare i pagamenti futuri sul tuo account Klarna in base a quanto previsto dai suoi termini e condizioni e da quelli di Klarna. Puoi modificare questa impostazione in qualsiasi momento nell\'app Klarna o contattando {1}.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Paga dopo con Klarna.</string>
   <!-- Caption for Phone field on address form -->
@@ -70,7 +70,7 @@
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Banca Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_pay_button_amount">Paga %s</string>
+  <string name="stripe_pay_button_amount">Paga {0}</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Banca</string>
   <!-- Label shown in the payment type picker describing a card payment -->
@@ -96,17 +96,17 @@
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Addebito SEPA</string>
   <!-- PayPal mandate text -->
-  <string name="stripe_paypal_mandate">Confermando il tuo pagamento con PayPal, consenti a %s di addebitare i pagamenti futuri sul tuo conto PayPal in base a quanto previsto dai relativi termini e condizioni.</string>
+  <string name="stripe_paypal_mandate">Confermando il tuo pagamento con PayPal, consenti a {0} di addebitare i pagamenti futuri sul tuo conto PayPal in base a quanto previsto dai relativi termini e condizioni.</string>
   <!-- Revolut mandate text -->
-  <string name="stripe_revolut_mandate">Confermando il tuo pagamento con RevolutPay, consenti a %s di addebitare i pagamenti futuri sul tuo account RevolutPay in base a quanto previsto dai relativi termini e condizioni.</string>
+  <string name="stripe_revolut_mandate">Confermando il tuo pagamento con RevolutPay, consenti a {0} di addebitare i pagamenti futuri sul tuo account RevolutPay in base a quanto previsto dai relativi termini e condizioni.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="stripe_save_for_future_payments_with_merchant_name">Salva per i pagamenti futuri con %s</string>
+  <string name="stripe_save_for_future_payments_with_merchant_name">Salva per i pagamenti futuri con {0}</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
-  <string name="stripe_save_payment_details_to_merchant_name">Salva i dati di pagamento su %s per acquisti futuri</string>
+  <string name="stripe_save_payment_details_to_merchant_name">Salva i dati di pagamento su {0} per acquisti futuri</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Scansiona carta</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">Fornendo le informazioni di pagamento e confermando questo pagamento, autorizzi (A) %s e Stripe, il nostro fornitore di servizi di pagamento, a inviare istruzioni alla tua banca per l\'addebito sul tuo conto e (B) la tua banca a procedere con tale addebito conformemente alle istruzioni fornite. Tra gli altri diritti, hai anche diritto a un rimborso dalla tua banca in base ai termini e condizioni dell\'accordo sottoscritto con l\'istituto. Un eventuale rimborso va richiesto entro otto settimane a decorrere dalla data di addebito in conto. I tuoi diritti sono consultabili in una dichiarazione che puoi richiedere alla tua banca. Accetti di ricevere una notifica per addebiti futuri fino a 2 giorni prima.</string>
+  <string name="stripe_sepa_mandate">Fornendo le informazioni di pagamento e confermando questo pagamento, autorizzi (A) {0} e Stripe, il nostro fornitore di servizi di pagamento, a inviare istruzioni alla tua banca per l\'addebito sul tuo conto e (B) la tua banca a procedere con tale addebito conformemente alle istruzioni fornite. Tra gli altri diritti, hai anche diritto a un rimborso dalla tua banca in base ai termini e condizioni dell\'accordo sottoscritto con l\'istituto. Un eventuale rimborso va richiesto entro otto settimane a decorrere dalla data di addebito in conto. I tuoi diritti sono consultabili in una dichiarazione che puoi richiedere alla tua banca. Accetti di ricevere una notifica per addebiti futuri fino a 2 giorni prima.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Imposta come metodo di pagamento predefinito</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

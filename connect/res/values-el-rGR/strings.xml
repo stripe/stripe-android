@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_download_complete">Η λήψη ολοκληρώθηκε</string>
   <string name="stripe_downloading_file">Λήψη αρχείου σε εξέλιξη</string>
-  <string name="stripe_failed_to_open_url">Δεν ήταν δυνατό το άνοιγμα της διεύθυνσης URL: %s</string>
+  <string name="stripe_failed_to_open_url">Δεν ήταν δυνατό το άνοιγμα της διεύθυνσης URL: {0}</string>
   <string name="stripe_not_yet_built">Δεν έχει δημιουργηθεί ακόμα…</string>
   <string name="stripe_unable_to_download_file">Δεν είναι δυνατή η λήψη του αρχείου</string>
 </resources>

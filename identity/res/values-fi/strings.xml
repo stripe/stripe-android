@@ -244,7 +244,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">Voit vaihtoehtoisesti ladata henkilöllisyystodistuksen kuvan manuaalisesti</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">Voit vaihtoehtoisesti ladata %1$s kuvan manuaalisesti</string>
+  <string name="stripe_upload_file_text">Voit vaihtoehtoisesti ladata {0} kuvan manuaalisesti</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">Lataa kuvallinen henkilöllisyystodistus</string>
 </resources>

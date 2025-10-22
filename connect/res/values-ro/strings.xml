@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_download_complete">Descărcare finalizată</string>
   <string name="stripe_downloading_file">Se descarcă fișierul</string>
-  <string name="stripe_failed_to_open_url">Eroare la deschiderea adresei URL: %s</string>
+  <string name="stripe_failed_to_open_url">Eroare la deschiderea adresei URL: {0}</string>
   <string name="stripe_not_yet_built">Încă nu a fost construit...</string>
   <string name="stripe_unable_to_download_file">Nu se poate descărca fișierul</string>
 </resources>

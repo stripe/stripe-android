@@ -244,7 +244,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">Bilang alternatibo, maaari kang manu-manong mag-upload ng larawan ng iyong photo ID</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">Bilang alternatibo, maaari kang manu-manong mag-upload ng larawan ng iyong %1$s</string>
+  <string name="stripe_upload_file_text">Bilang alternatibo, maaari kang manu-manong mag-upload ng larawan ng iyong {0}</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">I-upload ang iyong photo ID</string>
 </resources>

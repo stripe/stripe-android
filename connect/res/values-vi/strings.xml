@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_download_complete">Hoàn tất tải về</string>
   <string name="stripe_downloading_file">Đang tải xuống tệp</string>
-  <string name="stripe_failed_to_open_url">Không mở được URL: %s</string>
+  <string name="stripe_failed_to_open_url">Không mở được URL: {0}</string>
   <string name="stripe_not_yet_built">Chưa tạo…</string>
   <string name="stripe_unable_to_download_file">Không thể tải xuống tệp</string>
 </resources>

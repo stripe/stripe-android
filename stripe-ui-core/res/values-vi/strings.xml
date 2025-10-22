@@ -65,19 +65,19 @@
   <!-- Error message when email is invalid -->
   <string name="stripe_email_is_invalid">Email của quý vị không hợp lệ.</string>
   <!-- String to describe an complete expiration date text field. Formatted as 'Expiration date. [month] [year] -->
-  <string name="stripe_expiration_date_content_description" formatted="false">Ngày hết hạn. %s %s</string>
+  <string name="stripe_expiration_date_content_description" formatted="false">Ngày hết hạn. {0} {1}</string>
   <!-- String to describe an empty expiration date text field. -->
   <string name="stripe_expiration_date_empty_content_description">Ngày hết hạn. Tháng gồm hai chữ số và năm gồm hai chữ số, để trống</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_expiration_date_hint">Tháng /Năm</string>
   <!-- String to describe an expiration date text field with complete month and empty year. -->
-  <string name="stripe_expiration_date_month_complete_content_description">Ngày hết hạn. %s và năm gồm hai chữ số, để trống</string>
+  <string name="stripe_expiration_date_month_complete_content_description">Ngày hết hạn. {0} và năm gồm hai chữ số, để trống</string>
   <!-- String to describe an expiration date text field with complete month and incomplete year. -->
-  <string name="stripe_expiration_date_year_incomplete_content_description">Ngày hết hạn. %s và năm gồm hai chữ số, không đầy đủ</string>
+  <string name="stripe_expiration_date_year_incomplete_content_description">Ngày hết hạn. {0} và năm gồm hai chữ số, không đầy đủ</string>
   <!-- String to describe that a form field is required to be completed. -->
   <string name="stripe_field_required">Điều này là bắt buộc</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="stripe_form_label_optional">%s (tùy chọn)</string>
+  <string name="stripe_form_label_optional">{0} (tùy chọn)</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
   <string name="stripe_incomplete_expiry_date">Ngày hết hạn trên thẻ không hợp lệ.</string>
   <!-- Error description for incomplete phone number -->

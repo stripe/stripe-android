@@ -9,13 +9,13 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Αγορά τώρα ή πληρωμή αργότερα με Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_bank_account_ending_in">Τραπεζικός λογαριασμός που λήγει σε %s</string>
+  <string name="stripe_bank_account_ending_in">Τραπεζικός λογαριασμός που λήγει σε {0}</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
-  <string name="stripe_bank_account_plus_last_4">Τραπεζικός λογαριασμός ···· %s</string>
+  <string name="stripe_bank_account_plus_last_4">Τραπεζικός λογαριασμός ···· {0}</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
-  <string name="stripe_bank_account_with_last_4">Τραπεζικός λογαριασμός ····%s</string>
+  <string name="stripe_bank_account_with_last_4">Τραπεζικός λογαριασμός ····{0}</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
-  <string name="stripe_blik_confirm_payment">Επιβεβαιώστε την πληρωμή στην εφαρμογή της τράπεζάς σας μέσα σε %s για την ολοκλήρωση της αγοράς.</string>
+  <string name="stripe_blik_confirm_payment">Επιβεβαιώστε την πληρωμή στην εφαρμογή της τράπεζάς σας μέσα σε {0} για την ολοκλήρωση της αγοράς.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_cashapp_afterpay_subtitle">Αγορά τώρα ή πληρωμή αργότερα με Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
@@ -33,17 +33,17 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Δημιουργήστε λογαριασμό με το Link για ταχύτερη ολοκλήρωση αγοράς σε όλο το διαδίκτυο</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
-  <string name="stripe_link_card_type_credit">Πιστωτική κάρτα %1$s</string>
+  <string name="stripe_link_card_type_credit">Πιστωτική κάρτα {0}</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
-  <string name="stripe_link_card_type_debit">Χρεωστική κάρτα %1$s</string>
+  <string name="stripe_link_card_type_debit">Χρεωστική κάρτα {0}</string>
   <!-- Label a prepaid funding source. E.g. 'Visa Prepaid' -->
-  <string name="stripe_link_card_type_prepaid">Προπληρωμένη κάρτα %1$s</string>
+  <string name="stripe_link_card_type_prepaid">Προπληρωμένη κάρτα {0}</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
-  <string name="stripe_link_card_type_unknown">Κάρτα %1$s</string>
+  <string name="stripe_link_card_type_unknown">Κάρτα {0}</string>
   <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
   <string name="stripe_link_confirm_payment_title">Επιβεβαίωση στοιχείων πληρωμής</string>
   <!-- Email suggestion prompt shown when we detect a typo. The %1$s is a placeholder for the suggested email address. -->
-  <string name="stripe_link_email_suggestion">Εννοούσατε %1$s;</string>
+  <string name="stripe_link_email_suggestion">Εννοούσατε {0};</string>
   <!-- CTA text for accepting the suggested email correction -->
   <string name="stripe_link_email_suggestion_update">Ναι, κάντε ενημέρωση</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
@@ -67,9 +67,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for the update card screen in Link native -->
   <string name="stripe_link_update_card_title">Ενημέρωση κάρτας</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message">Εισαγάγετε τον κωδικό που στάλθηκε στο %s για να χρησιμοποιήσετε τα αποθηκευμένα στοιχεία σας.</string>
+  <string name="stripe_link_verification_message">Εισαγάγετε τον κωδικό που στάλθηκε στο {0} για να χρησιμοποιήσετε τα αποθηκευμένα στοιχεία σας.</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message_short">Εισαγάγετε τον κωδικό που στάλθηκε στο %s.</string>
+  <string name="stripe_link_verification_message_short">Εισαγάγετε τον κωδικό που στάλθηκε στο {0}.</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">Ενημέρωση κάρτας</string>
   <!-- Title of the logout action. -->
@@ -81,7 +81,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Εάν συνεχίσετε, συμφωνείτε να εξουσιοδοτείτε πληρωμές με βάση <terms>αυτούς τους όρους</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
-  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Αποθηκεύοντας τον τραπεζικό λογαριασμό σας για την %s, συμφωνείτε να εξουσιοδοτείτε πληρωμές σύμφωνα με <terms>αυτούς τους όρους</terms>.]]></string>
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Αποθηκεύοντας τον τραπεζικό λογαριασμό σας για την {0}, συμφωνείτε να εξουσιοδοτείτε πληρωμές σύμφωνα με <terms>αυτούς τους όρους</terms>.]]></string>
   <!-- Error message when an error case happens when linking your account -->
   <string name="stripe_paymentsheet_ach_something_went_wrong">Παρουσιάστηκε κάποιο πρόβλημα κατά τη σύνδεση του λογαριασμού σας.\nΔοκιμάστε ξανά αργότερα.</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
@@ -95,35 +95,35 @@ to be saved and used in future checkout sessions. -->
   <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
   <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">Χρήση διεύθυνσης χρέωσης για αποστολή</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
-  <string name="stripe_paymentsheet_bacs_email_mandate">Ένα email θα σταλεί στη διεύθυνση %s εντός τριών εργάσιμων ημερών για να επιβεβαιωθεί η διαμόρφωση αυτής της οδηγίας χρέωσης.</string>
+  <string name="stripe_paymentsheet_bacs_email_mandate">Ένα email θα σταλεί στη διεύθυνση {0} εντός τριών εργάσιμων ημερών για να επιβεβαιωθεί η διαμόρφωση αυτής της οδηγίας χρέωσης.</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
   <string name="stripe_paymentsheet_bacs_mandate_title">Επιβεβαιώστε τις λεπτομέρειες της Άμεσης χρέωσης</string>
   <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
   <string name="stripe_paymentsheet_bacs_modify_details_button_label">Τροποποίηση λεπτομερειών</string>
   <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
-  <string name="stripe_paymentsheet_bacs_notice_mandate">Επιπλέον, θα λάβετε προηγούμενη ειδοποίηση δύο ημερών μέσω email για οποιοδήποτε ποσό πρόκειται να χρεωθεί στο πλαίσιο αυτής της οδηγίας. Οι πληρωμές θα εμφανίζονται ως \"%s\" στο αντίγραφο κίνησης του τραπεζικού λογαριασμού σας.</string>
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Επιπλέον, θα λάβετε προηγούμενη ειδοποίηση δύο ημερών μέσω email για οποιοδήποτε ποσό πρόκειται να χρεωθεί στο πλαίσιο αυτής της οδηγίας. Οι πληρωμές θα εμφανίζονται ως \"{0}\" στο αντίγραφο κίνησης του τραπεζικού λογαριασμού σας.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
-  <string name="stripe_paymentsheet_bacs_protection_mandate">Οι πληρωμές σας προστατεύονται από το %s.</string>
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Οι πληρωμές σας προστατεύονται από το {0}.</string>
   <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
   <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Δεν είναι δυνατή η αλλαγή των στοιχείων τραπεζικού λογαριασμού.</string>
   <!-- Text shown in the bank payment form when a promo is available and the user is paying, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Λάβετε επιστροφή %s όταν πληρώσετε μέσω τράπεζας. <a href=\"https://link.com/promotion-terms\">Δείτε τους όρους</a>]]></string>
+  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Λάβετε επιστροφή {0} όταν πληρώσετε μέσω τράπεζας. <a href=\"https://link.com/promotion-terms\">Δείτε τους όρους</a>]]></string>
   <!-- Text shown in the bank payment form when a promo is available and the user is setting up an account, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Λάβετε επιστροφή %s όταν πληρώσετε για πρώτη φορά με την τράπεζά σας. <a href=\"https://link.com/promotion-terms\">Δείτε τους όρους</a>]]></string>
+  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Λάβετε επιστροφή {0} όταν πληρώσετε για πρώτη φορά με την τράπεζά σας. <a href=\"https://link.com/promotion-terms\">Δείτε τους όρους</a>]]></string>
   <!-- Label shown when paying with a bank account is not eligible for the incentive, e.g. 'No $5 promo' -->
-  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">Χωρίς προώθηση %s</string>
+  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">Χωρίς προώθηση {0}</string>
   <!-- Text displayed on manage card screen when card details are not editable. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Δεν είναι δυνατή η αλλαγή των στοιχείων κάρτας.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
-  <string name="stripe_paymentsheet_card_mandate">Με την παροχή των στοιχείων της κάρτας σας, επιτρέπετε στην %s να χρεώνει την κάρτα σας για μελλοντικές πληρωμές σύμφωνα με τους όρους της.</string>
+  <string name="stripe_paymentsheet_card_mandate">Με την παροχή των στοιχείων της κάρτας σας, επιτρέπετε στην {0} να χρεώνει την κάρτα σας για μελλοντικές πληρωμές σύμφωνα με τους όρους της.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Συνεχίζοντας, συμφωνείτε να αποθηκεύσετε τις πληροφορίες σας για μελλοντικές αγορές με το %s.</string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Συνεχίζοντας, συμφωνείτε να αποθηκεύσετε τις πληροφορίες σας για μελλοντικές αγορές με το {0}.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Συνεχίζοντας, συμφωνείτε να αποθηκεύσετε τις πληροφορίες σας για μελλοντικές αγορές με το %s και <link>Link</link>. Συμφωνείτε επίσης με τους <terms>Όρους</terms> και το <privacy>Απόρρητο</privacy> του Link.]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Συνεχίζοντας, συμφωνείτε να αποθηκεύσετε τις πληροφορίες σας για μελλοντικές αγορές με το {0} και <link>Link</link>. Συμφωνείτε επίσης με τους <terms>Όρους</terms> και το <privacy>Απόρρητο</privacy> του Link.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Συνεχίζοντας, συμφωνείτε να αποθηκεύσετε τις πληροφορίες σας για μελλοντικές αγορές με το %s και <link>Link</link> (βλέπε <terms>Όρους</terms> και <privacy>Απόρρητο</privacy>).]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Συνεχίζοντας, συμφωνείτε να αποθηκεύσετε τις πληροφορίες σας για μελλοντικές αγορές με το {0} και <link>Link</link> (βλέπε <terms>Όρους</terms> και <privacy>Απόρρητο</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Συνεχίζοντας, συμφωνείτε να αποθηκεύσετε τις πληροφορίες σας για μελλοντικές αγορές με το %s και <link>Link</link> σύμφωνα με τους <terms>όρους</terms> και το <privacy>απόρρητο</privacy> του Link.]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Συνεχίζοντας, συμφωνείτε να αποθηκεύσετε τις πληροφορίες σας για μελλοντικές αγορές με το {0} και <link>Link</link> σύμφωνα με τους <terms>όρους</terms> και το <privacy>απόρρητο</privacy> του Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Η κάρτα δεν ενημερώθηκε. Δοκιμάστε ξανά.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -150,9 +150,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Διαχειριστείτε τις μεθόδους πληρωμής σας</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
-  <string name="stripe_paymentsheet_microdeposit">Η Stripe θα καταθέσει 0,01 $ στον λογαριασμό σας σε 1-2 εργάσιμες ημέρες. Στη συνέχεια, θα λάβετε email με οδηγίες για να ολοκληρώσετε την πληρωμή στην %s.</string>
+  <string name="stripe_paymentsheet_microdeposit">Η Stripe θα καταθέσει 0,01 $ στον λογαριασμό σας σε 1-2 εργάσιμες ημέρες. Στη συνέχεια, θα λάβετε email με οδηγίες για να ολοκληρώσετε την πληρωμή στην {0}.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
-  <string name="stripe_paymentsheet_modify_pm">Επεξεργασία %s</string>
+  <string name="stripe_paymentsheet_modify_pm">Επεξεργασία {0}</string>
   <!-- Label of a button that appears on a checkout screen. When tapped, it displays a credit card form. This button is shown next to another button representing the customer's saved card; the word 'new' is meant to differentiate this button's action with the saved card button. -->
   <string name="stripe_paymentsheet_new_card">Νέα κάρτα</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
@@ -184,9 +184,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Αφαίρεση κάρτας;</string>
   <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
-  <string name="stripe_paymentsheet_remove_partial_description">Αυτή η μέθοδος πληρωμής θα καταργηθεί, αλλά θα παραμείνει διαθέσιμη για %s συνδρομές.</string>
+  <string name="stripe_paymentsheet_remove_partial_description">Αυτή η μέθοδος πληρωμής θα καταργηθεί, αλλά θα παραμείνει διαθέσιμη για {0} συνδρομές.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
-  <string name="stripe_paymentsheet_remove_pm">Αφαίρεση %s</string>
+  <string name="stripe_paymentsheet_remove_pm">Αφαίρεση {0}</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
   <string name="stripe_paymentsheet_remove_pm_title">Αφαίρεση μεθόδου πληρωμής</string>
   <!-- A button used for saving a new payment method -->
@@ -198,7 +198,7 @@ to be saved and used in future checkout sessions. -->
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Αποθήκευση για μελλοντικές πληρωμές</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Αποθηκεύστε αυτή την κάρτα για μελλοντικές %s πληρωμές</string>
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Αποθηκεύστε αυτή την κάρτα για μελλοντικές {0} πληρωμές</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Αποθηκεύτηκε</string>
   <!-- Title shown above a view containing the customer's cards -->
@@ -212,17 +212,17 @@ to be saved and used in future checkout sessions. -->
   <!-- Error message displayed when setting a default payment method fails. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Η προεπιλεγμένη μέθοδος πληρωμής δεν άλλαξε. Δοκιμάστε ξανά.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
-  <string name="stripe_paymentsheet_total_amount">Σύνολο: %s</string>
+  <string name="stripe_paymentsheet_total_amount">Σύνολο: {0}</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Η επωνυμία κάρτας δεν ενημερώθηκε. Δοκιμάστε ξανά.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
-  <string name="stripe_paynow_confirm_payment">Επιβεβαιώστε την πληρωμή στην εφαρμογή τράπεζας ή πληρωμής εντός %s για να ολοκληρώσετε την αγορά.</string>
+  <string name="stripe_paynow_confirm_payment">Επιβεβαιώστε την πληρωμή στην εφαρμογή τράπεζας ή πληρωμής εντός {0} για να ολοκληρώσετε την αγορά.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Ορισμός ως προεπιλεγμένη μέθοδος πληρωμής</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->
-  <string name="stripe_qrcode_lpm_confirm_payment">Επιβεβαιώστε την πληρωμή στην τράπεζα ή στην εφαρμογή πληρωμών εντός %s για να ολοκληρώσετε την αγορά.</string>
+  <string name="stripe_qrcode_lpm_confirm_payment">Επιβεβαιώστε την πληρωμή στην τράπεζα ή στην εφαρμογή πληρωμών εντός {0} για να ολοκληρώσετε την αγορά.</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_remove_bank_account_ending_in">Αφαίρεση του τραπεζικού λογαριασμού που λήγει σε %s</string>
+  <string name="stripe_remove_bank_account_ending_in">Αφαίρεση του τραπεζικού λογαριασμού που λήγει σε {0}</string>
   <!-- Accessibility description for a button that launches Shop Pay. -->
   <string name="stripe_shop_pay_button_description">Κουμπί Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
@@ -232,7 +232,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for the Link signup screen -->
   <string name="stripe_sign_up_header">Ασφαλής ολοκλήρωση αγοράς με 1 κλικ</string>
   <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
-  <string name="stripe_sign_up_message">Ταχύτερες πληρωμές στην %s και σε χιλιάδες εμπόρους.</string>
+  <string name="stripe_sign_up_message">Ταχύτερες πληρωμές στην {0} και σε χιλιάδες εμπόρους.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Με την εγγραφή σας στο Link, συμφωνείτε με τους <terms>Όρους</terms> και την <privacy>Πολιτική απορρήτου</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
@@ -252,7 +252,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Έγκριση πληρωμής</string>
   <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Ανοίξτε την εφαρμογή UPI για να εγκρίνετε την πληρωμή σας σε %s</string>
+  <string name="stripe_upi_polling_message">Ανοίξτε την εφαρμογή UPI για να εγκρίνετε την πληρωμή σας σε {0}</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Πηγαίνετε πίσω και επιλέξτε μια άλλη μέθοδο πληρωμής</string>
   <!-- Text on a screen that indicates a payment has failed -->
@@ -272,9 +272,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_header_prefilled">Χρησιμοποιήστε τα αποθηκευμένα στοιχεία σας για τη συντομότερη ολοκλήρωση της αγοράς</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_verification_message">Εισαγάγετε τον κωδικό που εστάλη στο %s για να χρησιμοποιήσετε το Link ως προεπιλεγμένη μέθοδο πληρωμής.</string>
+  <string name="stripe_verification_message">Εισαγάγετε τον κωδικό που εστάλη στο {0} για να χρησιμοποιήσετε το Link ως προεπιλεγμένη μέθοδο πληρωμής.</string>
   <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
-  <string name="stripe_verification_not_email">Δεν είναι το %s;</string>
+  <string name="stripe_verification_not_email">Δεν είναι το {0};</string>
   <!-- Label for a button that re-sends the a login code when tapped -->
   <string name="stripe_verification_resend">Επανάληψη αποστολής κωδικού</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
@@ -282,9 +282,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Εάν συνεχίσετε, συμφωνείτε να εξουσιοδοτείτε πληρωμές με βάση αυτούς τους <terms>όρους</terms>.]]></string>
   <!-- Text providing link to terms for bank payments when seller information is provided -->
-  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Υποβάλλοντας την παραγγελία σας σε %1$s και σε %2$s, συμφωνείτε στην αποθήκευση των στοιχείων σας στο %3$s για μελλοντικές αγορές και συμφωνείτε στην εξουσιοδότηση πληρωμών σύμφωνα με <terms>αυτούς τους όρους</terms>.]]></string>
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Υποβάλλοντας την παραγγελία σας σε {0} και σε {1}, συμφωνείτε στην αποθήκευση των στοιχείων σας στο {2} για μελλοντικές αγορές και συμφωνείτε στην εξουσιοδότηση πληρωμών σύμφωνα με <terms>αυτούς τους όρους</terms>.]]></string>
   <!-- Text providing link to terms for bank payments -->
-  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Υποβάλλοντας την παραγγελία σας σε %s, συμφωνείτε στην εξουσιοδότηση πληρωμών σύμφωνα με <terms>αυτούς τους όρους</terms>.]]></string>
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Υποβάλλοντας την παραγγελία σας σε {0}, συμφωνείτε στην εξουσιοδότηση πληρωμών σύμφωνα με <terms>αυτούς τους όρους</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Πληρωμή</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

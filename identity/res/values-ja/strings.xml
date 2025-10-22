@@ -244,7 +244,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">または、写真付き身分証明書の写真を手動でアップロードすることもできます。</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">または、%1$sの写真を手動でアップロードすることもできます。</string>
+  <string name="stripe_upload_file_text">または、{0}の写真を手動でアップロードすることもできます。</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">写真付き身分証明書をアップロードする</string>
 </resources>

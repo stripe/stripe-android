@@ -244,7 +244,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">Alternatively, you may manually upload a photo of your photo ID</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">Alternatively, you may manually upload a photo of your %1$s</string>
+  <string name="stripe_upload_file_text">Alternatively, you may manually upload a photo of your {0}</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">Upload your photo ID</string>
 </resources>

@@ -244,7 +244,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">您也可以手动上传您的带照片身份证件的图片。</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">您也可以手动上传您的%1$s</string>
+  <string name="stripe_upload_file_text">您也可以手动上传您的{0}</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">上传您的带照片身份证件</string>
 </resources>

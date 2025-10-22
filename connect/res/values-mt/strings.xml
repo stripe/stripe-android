@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_download_complete">It-tniżżil lest</string>
   <string name="stripe_downloading_file">Qed iniżżlu l-fajl</string>
-  <string name="stripe_failed_to_open_url">Ma stajniex niftħu l-URL: %s</string>
+  <string name="stripe_failed_to_open_url">Ma stajniex niftħu l-URL: {0}</string>
   <string name="stripe_not_yet_built">Għadha ma nbnietx...</string>
   <string name="stripe_unable_to_download_file">Ma stajniex inniżżlu l-fajl</string>
 </resources>

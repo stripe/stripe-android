@@ -244,7 +244,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">Prípadne môžete nahrať fotografiu vášho dokladu totožnosti s fotografiou</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">Prípadne môžete nahrať fotografiu vášho %1$s</string>
+  <string name="stripe_upload_file_text">Prípadne môžete nahrať fotografiu vášho {0}</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">Nahrajte doklad totožnosti s fotografiou</string>
 </resources>

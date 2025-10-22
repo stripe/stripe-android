@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_download_complete">Baixada completada</string>
   <string name="stripe_downloading_file">S\'està baixant el fitxer</string>
-  <string name="stripe_failed_to_open_url">No s\'ha pogut obrir l\'URL: %s</string>
+  <string name="stripe_failed_to_open_url">No s\'ha pogut obrir l\'URL: {0}</string>
   <string name="stripe_not_yet_built">Encara no s\'ha construït…</string>
   <string name="stripe_unable_to_download_file">No es pot baixar el fitxer</string>
 </resources>

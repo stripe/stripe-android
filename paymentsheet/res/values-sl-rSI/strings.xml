@@ -9,13 +9,13 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Kupite zdaj ali pa plačajte pozneje s storitvijo Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_bank_account_ending_in">Bančni račun, ki se konča s/z %s</string>
+  <string name="stripe_bank_account_ending_in">Bančni račun, ki se konča s/z {0}</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
-  <string name="stripe_bank_account_plus_last_4">Bančni račun ···· %s</string>
+  <string name="stripe_bank_account_plus_last_4">Bančni račun ···· {0}</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
-  <string name="stripe_bank_account_with_last_4">Bančni račun ····%s</string>
+  <string name="stripe_bank_account_with_last_4">Bančni račun ····{0}</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
-  <string name="stripe_blik_confirm_payment">Potrdite plačilo v aplikaciji banke %s, da zaključite nakup.</string>
+  <string name="stripe_blik_confirm_payment">Potrdite plačilo v aplikaciji banke {0}, da zaključite nakup.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_cashapp_afterpay_subtitle">Kupite zdaj ali pa plačajte pozneje s storitvijo Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
@@ -33,17 +33,17 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Ustvarite račun v storitvi Link za hitrejšo izvedbo plačila na spletu</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
-  <string name="stripe_link_card_type_credit">Kreditna kartica %1$s</string>
+  <string name="stripe_link_card_type_credit">Kreditna kartica {0}</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
-  <string name="stripe_link_card_type_debit">Debetna kartica %1$s</string>
+  <string name="stripe_link_card_type_debit">Debetna kartica {0}</string>
   <!-- Label a prepaid funding source. E.g. 'Visa Prepaid' -->
-  <string name="stripe_link_card_type_prepaid">Predplačniška kartica %1$s</string>
+  <string name="stripe_link_card_type_prepaid">Predplačniška kartica {0}</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
-  <string name="stripe_link_card_type_unknown">Kartica %1$s</string>
+  <string name="stripe_link_card_type_unknown">Kartica {0}</string>
   <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
   <string name="stripe_link_confirm_payment_title">Potrditev podatkov o plačilu</string>
   <!-- Email suggestion prompt shown when we detect a typo. The %1$s is a placeholder for the suggested email address. -->
-  <string name="stripe_link_email_suggestion">Ali ste mislili %1$s?</string>
+  <string name="stripe_link_email_suggestion">Ali ste mislili {0}?</string>
   <!-- CTA text for accepting the suggested email correction -->
   <string name="stripe_link_email_suggestion_update">Da, posodobi</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
@@ -67,9 +67,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for the update card screen in Link native -->
   <string name="stripe_link_update_card_title">Posodobite kartico</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message">Vnesite kodo, ki smo jo poslali na telefonsko številko %s, da boste lahko uporabili shranjene podatke.</string>
+  <string name="stripe_link_verification_message">Vnesite kodo, ki smo jo poslali na telefonsko številko {0}, da boste lahko uporabili shranjene podatke.</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message_short">Vnesite kodo, ki je bila poslana na %s.</string>
+  <string name="stripe_link_verification_message_short">Vnesite kodo, ki je bila poslana na {0}.</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">Posodobite kartico</string>
   <!-- Title of the logout action. -->
@@ -81,7 +81,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Če nadaljujete postopek, se strinjate z odobritvijo plačil v skladu s <terms>temi pogoji</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
-  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Če shranite bančni račun za %s, se strinjate z odobritvijo plačil v skladu s <terms>temi pogoji</terms>.]]></string>
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Če shranite bančni račun za {0}, se strinjate z odobritvijo plačil v skladu s <terms>temi pogoji</terms>.]]></string>
   <!-- Error message when an error case happens when linking your account -->
   <string name="stripe_paymentsheet_ach_something_went_wrong">Pri povezovanju vašega računa je prišlo do napake.\nPoskusite znova pozneje.</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
@@ -95,35 +95,35 @@ to be saved and used in future checkout sessions. -->
   <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
   <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">Za dostavo uporabite naslov za izstavitev računa</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
-  <string name="stripe_paymentsheet_bacs_email_mandate">V treh delovnih dneh bomo poslali e-poštno sporočilo na naslov %s, v katerem bomo potrdili nastavitev teh navodil za bremenitev.</string>
+  <string name="stripe_paymentsheet_bacs_email_mandate">V treh delovnih dneh bomo poslali e-poštno sporočilo na naslov {0}, v katerem bomo potrdili nastavitev teh navodil za bremenitev.</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
   <string name="stripe_paymentsheet_bacs_mandate_title">Potrdite podrobnosti direktne obremenitve</string>
   <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
   <string name="stripe_paymentsheet_bacs_modify_details_button_label">Spremeni podrobnosti</string>
   <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
-  <string name="stripe_paymentsheet_bacs_notice_mandate">Poleg tega boste po e-pošti dva dni vnaprej prejeli predhodno obvestilo o morebitnem znesku, za katerega bo bremenjen vaš račun v skladu s temi navodili. Plačila bodo na bančnem izpisku prikazana kot \'%s\'.</string>
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Poleg tega boste po e-pošti dva dni vnaprej prejeli predhodno obvestilo o morebitnem znesku, za katerega bo bremenjen vaš račun v skladu s temi navodili. Plačila bodo na bančnem izpisku prikazana kot \'{0}\'.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
-  <string name="stripe_paymentsheet_bacs_protection_mandate">Vaša plačila so zaščitena z %s.</string>
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Vaša plačila so zaščitena z {0}.</string>
   <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
   <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Podatkov o bančnem računu ni mogoče spremeniti.</string>
   <!-- Text shown in the bank payment form when a promo is available and the user is paying, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Pridobite %s povračila za plačilo prek bančnega računa. <a href=\"https://link.com/promotion-terms\">Oglejte si pogoje</a>]]></string>
+  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Pridobite {0} povračila za plačilo prek bančnega računa. <a href=\"https://link.com/promotion-terms\">Oglejte si pogoje</a>]]></string>
   <!-- Text shown in the bank payment form when a promo is available and the user is setting up an account, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Pridobite %s povračila za prvo plačilo prek svojega bančnega računa. <a href=\"https://link.com/promotion-terms\">Oglejte si pogoje</a>]]></string>
+  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Pridobite {0} povračila za prvo plačilo prek svojega bančnega računa. <a href=\"https://link.com/promotion-terms\">Oglejte si pogoje</a>]]></string>
   <!-- Label shown when paying with a bank account is not eligible for the incentive, e.g. 'No $5 promo' -->
-  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">Brez promocije v višini %s</string>
+  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">Brez promocije v višini {0}</string>
   <!-- Text displayed on manage card screen when card details are not editable. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Podrobnosti kartice ni mogoče spremeniti.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
-  <string name="stripe_paymentsheet_card_mandate">S posredovanjem podatkov o svoji kartici dovoljujete, da %s bremeni vašo kartico za prihodnja plačila v skladu z njihovimi pogoji.</string>
+  <string name="stripe_paymentsheet_card_mandate">S posredovanjem podatkov o svoji kartici dovoljujete, da {0} bremeni vašo kartico za prihodnja plačila v skladu z njihovimi pogoji.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri %s.</string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri {0}.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri %s in <link>Link</link>. Strinjate se tudi s <terms>Pogoji</terms> in <privacy>Politiko zasebnosti</privacy> Link.]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri {0} in <link>Link</link>. Strinjate se tudi s <terms>Pogoji</terms> in <privacy>Politiko zasebnosti</privacy> Link.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri %s in <link>Link</link> (glejte <terms>Pogoji</terms> in <privacy>Politika o zasebnost</privacy>).]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri {0} in <link>Link</link> (glejte <terms>Pogoji</terms> in <privacy>Politika o zasebnost</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri %s in <link>Link</link> glede na povezavo <terms>pogoji</terms> in <privacy>zasebnost</privacy>.]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri {0} in <link>Link</link> glede na povezavo <terms>pogoji</terms> in <privacy>zasebnost</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kartica ni bila posodobljena. Poskusite znova.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -150,9 +150,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Upravljajte svoje načine plačila</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
-  <string name="stripe_paymentsheet_microdeposit">Stripe bo v 1–2 delovnih dneh na vaš račun nakazal znesek v višini 0,01 USD. Nato boste prejeli e-poštno sporočilo z navodili za dokončanje plačila podjetju %s.</string>
+  <string name="stripe_paymentsheet_microdeposit">Stripe bo v 1–2 delovnih dneh na vaš račun nakazal znesek v višini 0,01 USD. Nato boste prejeli e-poštno sporočilo z navodili za dokončanje plačila podjetju {0}.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
-  <string name="stripe_paymentsheet_modify_pm">Uredite %s</string>
+  <string name="stripe_paymentsheet_modify_pm">Uredite {0}</string>
   <!-- Label of a button that appears on a checkout screen. When tapped, it displays a credit card form. This button is shown next to another button representing the customer's saved card; the word 'new' is meant to differentiate this button's action with the saved card button. -->
   <string name="stripe_paymentsheet_new_card">Nova kartica</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
@@ -184,9 +184,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Ali želite odstranit kartico?</string>
   <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
-  <string name="stripe_paymentsheet_remove_partial_description">Ta način plačila bo odstranjen, vendar bo še naprej na voljo za naročnine %s.</string>
+  <string name="stripe_paymentsheet_remove_partial_description">Ta način plačila bo odstranjen, vendar bo še naprej na voljo za naročnine {0}.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
-  <string name="stripe_paymentsheet_remove_pm">Odstrani %s</string>
+  <string name="stripe_paymentsheet_remove_pm">Odstrani {0}</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
   <string name="stripe_paymentsheet_remove_pm_title">Odstranite način plačila</string>
   <!-- A button used for saving a new payment method -->
@@ -198,7 +198,7 @@ to be saved and used in future checkout sessions. -->
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Shrani za prihodnja plačila</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Shrani to kartico za prihodnja plačila trgovcu %s</string>
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Shrani to kartico za prihodnja plačila trgovcu {0}</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Shranjeno</string>
   <!-- Title shown above a view containing the customer's cards -->
@@ -212,17 +212,17 @@ to be saved and used in future checkout sessions. -->
   <!-- Error message displayed when setting a default payment method fails. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Privzet način plačila ni bil spremenjen. Poskusite znova.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
-  <string name="stripe_paymentsheet_total_amount">Skupaj: %s</string>
+  <string name="stripe_paymentsheet_total_amount">Skupaj: {0}</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Blagovna znamka kartice ni bila posodobljena. Poskusite znova.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
-  <string name="stripe_paynow_confirm_payment">Za dokončanje nakupa potrdite plačilo v svoji banki ali aplikaciji za plačevanje v roku %s.</string>
+  <string name="stripe_paynow_confirm_payment">Za dokončanje nakupa potrdite plačilo v svoji banki ali aplikaciji za plačevanje v roku {0}.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Nastavi kot privzeti način plačila</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->
-  <string name="stripe_qrcode_lpm_confirm_payment">Za dokončanje nakupa potrdite plačilo v svoji banki ali aplikaciji za plačevanje v roku %s.</string>
+  <string name="stripe_qrcode_lpm_confirm_payment">Za dokončanje nakupa potrdite plačilo v svoji banki ali aplikaciji za plačevanje v roku {0}.</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_remove_bank_account_ending_in">Odstranite bančni račun, ki se konča s števkami %s</string>
+  <string name="stripe_remove_bank_account_ending_in">Odstranite bančni račun, ki se konča s števkami {0}</string>
   <!-- Accessibility description for a button that launches Shop Pay. -->
   <string name="stripe_shop_pay_button_description">Gumb Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
@@ -232,7 +232,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for the Link signup screen -->
   <string name="stripe_sign_up_header">Varna izvedba plačila z enim klikom</string>
   <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
-  <string name="stripe_sign_up_message">Plačajte hitreje pri podjetju %s in več tisoč trgovcih.</string>
+  <string name="stripe_sign_up_message">Plačajte hitreje pri podjetju {0} in več tisoč trgovcih.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Če se pridružite storitvi Link, se strinjate s <terms>pogoji</terms> in <privacy>pravilnikom o zasebnosti</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
@@ -252,7 +252,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Odobrite plačilo</string>
   <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Odprite aplikacijo UPI in odobrite plačilo v %s</string>
+  <string name="stripe_upi_polling_message">Odprite aplikacijo UPI in odobrite plačilo v {0}</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Vrnite se in izberite drug način plačila</string>
   <!-- Text on a screen that indicates a payment has failed -->
@@ -272,9 +272,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_header_prefilled">Uporabite svoje shranjene podatke za hitrejšo izvedbo plačila</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_verification_message">Vnesite kodo, ki ste jo prejeli na številko %s, če želite uporabljati Link kot privzeti način plačila.</string>
+  <string name="stripe_verification_message">Vnesite kodo, ki ste jo prejeli na številko {0}, če želite uporabljati Link kot privzeti način plačila.</string>
   <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
-  <string name="stripe_verification_not_email">Niste %s?</string>
+  <string name="stripe_verification_not_email">Niste {0}?</string>
   <!-- Label for a button that re-sends the a login code when tapped -->
   <string name="stripe_verification_resend">Znova pošlji kodo</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
@@ -282,9 +282,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Če nadaljujete postopek, se strinjate z odobritvijo plačil v skladu s temi <terms>pogoji</terms>.]]></string>
   <!-- Text providing link to terms for bank payments when seller information is provided -->
-  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Z oddajo naročila %1$s in %2$s se strinjate, da bodo vaši podatki shranjeni pri %3$s za prihodnje nakupe, in se strinjate, da boste odobrili plačila v skladu s <terms>temi pogoji</terms>.]]></string>
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Z oddajo naročila {0} in {1} se strinjate, da bodo vaši podatki shranjeni pri {2} za prihodnje nakupe, in se strinjate, da boste odobrili plačila v skladu s <terms>temi pogoji</terms>.]]></string>
   <!-- Text providing link to terms for bank payments -->
-  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Z oddajo naročila podjetju %s se strinjate, da boste odobrili plačila v skladu s <terms>temi pogoji</terms>.]]></string>
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Z oddajo naročila podjetju {0} se strinjate, da boste odobrili plačila v skladu s <terms>temi pogoji</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Plačilo</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

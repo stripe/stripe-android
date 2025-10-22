@@ -244,7 +244,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">В качестве альтернативы вы можете загрузить фотографию своего удостоверения личности с фотографией.</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">В качестве альтернативы вы можете загрузить фотографию своего документа %1$s</string>
+  <string name="stripe_upload_file_text">В качестве альтернативы вы можете загрузить фотографию своего документа {0}</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">Отправьте удостоверение личности с фото</string>
 </resources>

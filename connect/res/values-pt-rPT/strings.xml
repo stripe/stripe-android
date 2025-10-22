@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_download_complete">Transferência concluída</string>
   <string name="stripe_downloading_file">A transferir ficheiro</string>
-  <string name="stripe_failed_to_open_url">Falha ao abrir URL: %s</string>
+  <string name="stripe_failed_to_open_url">Falha ao abrir URL: {0}</string>
   <string name="stripe_not_yet_built">Por construir…</string>
   <string name="stripe_unable_to_download_file">Não foi possível transferir o ficheiro</string>
 </resources>

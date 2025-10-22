@@ -2,16 +2,16 @@
 <resources>
   <!-- Label for card number entry text field -->
   <string name="stripe_acc_label_card_number">Broj kartice</string>
-  <string name="stripe_acc_label_card_number_node">%s, broj kartice</string>
-  <string name="stripe_acc_label_cvc_node">%s, CVC</string>
+  <string name="stripe_acc_label_card_number_node">{0}, broj kartice</string>
+  <string name="stripe_acc_label_cvc_node">{0}, CVC</string>
   <string name="stripe_acc_label_expiry_date">Datum isteka</string>
-  <string name="stripe_acc_label_expiry_date_node">%s, datum isteka</string>
+  <string name="stripe_acc_label_expiry_date_node">{0}, datum isteka</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
   <string name="stripe_acc_label_zip">ZIP broj</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="stripe_acc_label_zip_short">ZIP</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_added">%s je dodano</string>
+  <string name="stripe_added">{0} je dodano</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="stripe_address_city_required">Unesite svoj grad</string>
   <!-- Error text indicating country is invalid -->
@@ -75,9 +75,9 @@
   <!-- Placeholder for AU BECS BSB number -->
   <string name="stripe_au_becs_bsb_number">BSB broj</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="stripe_au_becs_mandate">Unosom svojih podataka o bankovnom računu i potvrdom ovoga plaćanja, suglasni ste s ovim Zahtjevom za izravno terećenje i &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;Ugovorom o usluzi za izravno terećenje&lt;/a&gt;, te ovlašćujete Stripe Payments Australia Pty Ltd ACN 160 180 343, ID broj korisnika za izravno terećenje 507156 (“Stripe”) da tereti vaš račun koristeći Bulk Electronic Clearing System (BECS) u ime %s (\"Trgovac\") za bilo koji iznos koji vam je Trgovac javio u odvojenoj korespondenciji. Potvrđujete da ste ili vlasnik računa ili ovlašteni potpisnik na prethodno navedenom računu.</string>
+  <string name="stripe_au_becs_mandate">Unosom svojih podataka o bankovnom računu i potvrdom ovoga plaćanja, suglasni ste s ovim Zahtjevom za izravno terećenje i &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;Ugovorom o usluzi za izravno terećenje&lt;/a&gt;, te ovlašćujete Stripe Payments Australia Pty Ltd ACN 160 180 343, ID broj korisnika za izravno terećenje 507156 (“Stripe”) da tereti vaš račun koristeći Bulk Electronic Clearing System (BECS) u ime {0} (\"Trgovac\") za bilo koji iznos koji vam je Trgovac javio u odvojenoj korespondenciji. Potvrđujete da ste ili vlasnik računa ili ovlašteni potpisnik na prethodno navedenom računu.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="stripe_becs_mandate_acceptance">\n    Unosom svojih podataka o bankovnom računu i potvrdom ovoga plaćanja, suglasni ste s \n    ovim Zahtjevom za izravno terećenje i Ugovorom o usluzi za izravno terećenje te ovlašćujete\n    Stripe Payments Australia Pty Ltd ACN 160 180 343, ID broj korisnika za izravno terećenje\n    507156 (“Stripe”) da tereti vaš račun koristeći Bulk Electronic Clearing System (BECS) u ime %1$s \n    (\"Trgovac\") za bilo koji iznos koji vam je Trgovac javio u odvojenoj korespondenciji. \n    Potvrđujete da ste ili vlasnik računa ili ovlašteni potpisnik na prethodno \n    navedenom računu.\n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    Unosom svojih podataka o bankovnom računu i potvrdom ovoga plaćanja, suglasni ste s \n    ovim Zahtjevom za izravno terećenje i Ugovorom o usluzi za izravno terećenje te ovlašćujete\n    Stripe Payments Australia Pty Ltd ACN 160 180 343, ID broj korisnika za izravno terećenje\n    507156 (“Stripe”) da tereti vaš račun koristeći Bulk Electronic Clearing System (BECS) u ime {0} \n    (\"Trgovac\") za bilo koji iznos koji vam je Trgovac javio u odvojenoj korespondenciji. \n    Potvrđujete da ste ili vlasnik računa ili ovlašteni potpisnik na prethodno \n    navedenom računu.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Broj računa</string>
   <!-- Error description for incomplete account number -->
@@ -109,11 +109,11 @@
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">Kartica je odbijena</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="stripe_card_ending_in">%1$s završava na %2$s</string>
+  <string name="stripe_card_ending_in">{0} završava na {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
-  <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
+  <string name="stripe_card_plus_last_4">{0} ···· {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
-  <string name="stripe_card_with_last_4">%1$s ····%2$s</string>
+  <string name="stripe_card_with_last_4">{0} ····{1}</string>
   <!-- Text for close button -->
   <string name="stripe_close">Zatvori</string>
   <!-- Accessibility title used during Talkback to indicate to users that a transaction is being confirmed -->
@@ -122,7 +122,7 @@
   <string name="stripe_delete_payment_method">Izbriši način plaćanja</string>
   <string name="stripe_delete_payment_method_prompt_title">Izbrisati način plaćanja?</string>
   <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
-  <string name="stripe_disallowed_card_brand">%s nije prihvaćeno</string>
+  <string name="stripe_disallowed_card_brand">{0} nije prihvaćeno</string>
   <!-- Done button title -->
   <string name="stripe_done">Gotovo</string>
   <!-- Button title to enter editing mode -->
@@ -139,7 +139,7 @@
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Istek vremena pri provjeri načina plaćanja -- pokušajte ponovno</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
-  <string name="stripe_fpx_bank_offline">%s - Izvan mreže</string>
+  <string name="stripe_fpx_bank_offline">{0} - Izvan mreže</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Vaš način plaćanja je odbijen.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
@@ -167,7 +167,7 @@
    Text for remove button -->
   <string name="stripe_remove">Ukloni</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_removed">%s je uklonjeno</string>
+  <string name="stripe_removed">{0} je uklonjeno</string>
   <string name="stripe_secure_checkout">Sigurna naplata</string>
   <string name="stripe_title_add_a_card">Dodaj karticu</string>
   <!-- Screen title telling users they should add an address -->

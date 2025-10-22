@@ -5,9 +5,9 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Оплатить в беспроцентную рассрочку <num_installments/> выплатами по <installment_price/> через <img/>]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_afterpay_clearpay_subtitle">%1$d беспроцентных платежа(-ей) по %2$s</string>
+  <string name="stripe_afterpay_clearpay_subtitle">{0} беспроцентных платежа(-ей) по {1}</string>
   <!-- Amazon Pay mandate text -->
-  <string name="stripe_amazon_pay_mandate">Подтверждая платеж через AmazonPay, вы тем самым разрешаете компании %s списывать с вашего счета AmazonPay суммы будущих платежей согласно условиям компании.</string>
+  <string name="stripe_amazon_pay_mandate">Подтверждая платеж через AmazonPay, вы тем самым разрешаете компании {0} списывать с вашего счета AmazonPay суммы будущих платежей согласно условиям компании.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Назад</string>
   <!-- Label for Bacs account number field -->
@@ -17,7 +17,7 @@
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">Банковский счет</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
-  <string name="stripe_bacs_confirm_mandate_label">Я понимаю, что Stripe будет принимать прямые дебетования от имени %s, и подтверждаю, что являюсь владельцем счета и единственным лицом, согласие которого требуется для проведения дебетований с этого счета.</string>
+  <string name="stripe_bacs_confirm_mandate_label">Я понимаю, что Stripe будет принимать прямые дебетования от имени {0}, и подтверждаю, что являюсь владельцем счета и единственным лицом, согласие которого требуется для проведения дебетований с этого счета.</string>
   <!-- Label for Bacs sort code field -->
   <string name="stripe_bacs_sort_code">Код банка</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
@@ -31,9 +31,9 @@
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(не принимается)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
-  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (не принимается)</string>
+  <string name="stripe_card_brand_not_accepted_with_brand">{0} (не принимается)</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">Продолжая, вы уполномочиваете компанию %1$s списывать с вашего счета Cash App суммы в соответствии с этим, а также будущими платежами согласно условиям компании %2$s, пока это разрешение не будет отозвано. Отозвать разрешение можно в любой момент в настройках приложения Cash App.</string>
+  <string name="stripe_cash_app_pay_mandate">Продолжая, вы уполномочиваете компанию {0} списывать с вашего счета Cash App суммы в соответствии с этим, а также будущими платежами согласно условиям компании {1}, пока это разрешение не будет отозвано. Отозвать разрешение можно в любой момент в настройках приложения Cash App.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Контактные данные</string>
   <!-- Text for continue button -->
@@ -45,7 +45,7 @@
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Введенный код IBAN неполон.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="stripe_iban_invalid_country">Введенный код IBAN ошибочен, \"%s\" – неверный код страны.</string>
+  <string name="stripe_iban_invalid_country">Введенный код IBAN ошибочен, \"{0}\" – неверный код страны.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Код IBAN должен начинаться с двухбуквенного кода страны.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
@@ -54,13 +54,13 @@
   <string name="stripe_incomplete_blik_code">Ваш код BLIK неполный.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_invalid_blik_code">Ваш код BLIK недействителен.</string>
-  <string name="stripe_invalid_email_address">Недопустимый эл. адрес: %s</string>
+  <string name="stripe_invalid_email_address">Недопустимый эл. адрес: {0}</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Недействительный идентификатор UPI</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Купить немедленно или оплатить позже через систему Klarna.</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Перейдя к Klarna, вы тем самым разрешаете компании %1$s списывать с вашего счета в Klarna суммы будущих платежей согласно условиям компании и Klarna. Это разрешение можно отозвать в любой момент в вашем приложении Klarna или связавшись с %2$s.</string>
+  <string name="stripe_klarna_mandate">Перейдя к Klarna, вы тем самым разрешаете компании {0} списывать с вашего счета в Klarna суммы будущих платежей согласно условиям компании и Klarna. Это разрешение можно отозвать в любой момент в вашем приложении Klarna или связавшись с {1}.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Оплатить позже через систему Klarna.</string>
   <!-- Caption for Phone field on address form -->
@@ -70,7 +70,7 @@
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Банк Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_pay_button_amount">Оплатить %s</string>
+  <string name="stripe_pay_button_amount">Оплатить {0}</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Банк</string>
   <!-- Label shown in the payment type picker describing a card payment -->
@@ -96,17 +96,17 @@
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Списание средств SEPA</string>
   <!-- PayPal mandate text -->
-  <string name="stripe_paypal_mandate">Подтверждая оплату через PayPal, вы разрешаете компании %s списывать с вашего счета PayPal суммы будущих платежей согласно ее условиями.</string>
+  <string name="stripe_paypal_mandate">Подтверждая оплату через PayPal, вы разрешаете компании {0} списывать с вашего счета PayPal суммы будущих платежей согласно ее условиями.</string>
   <!-- Revolut mandate text -->
-  <string name="stripe_revolut_mandate">Подтверждая платеж через RevolutPay, вы тем самым разрешаете компании %s списывать с вашего счета RevolutPay суммы будущих платежей согласно условиям компании.</string>
+  <string name="stripe_revolut_mandate">Подтверждая платеж через RevolutPay, вы тем самым разрешаете компании {0} списывать с вашего счета RevolutPay суммы будущих платежей согласно условиям компании.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="stripe_save_for_future_payments_with_merchant_name">Сохранить данные для будущих платежей поставщику %s</string>
+  <string name="stripe_save_for_future_payments_with_merchant_name">Сохранить данные для будущих платежей поставщику {0}</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
-  <string name="stripe_save_payment_details_to_merchant_name">Сохранить реквизиты платежа в адрес %s для будущих покупок</string>
+  <string name="stripe_save_payment_details_to_merchant_name">Сохранить реквизиты платежа в адрес {0} для будущих покупок</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Сканировать карту</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">Указав свои платежные данные и подтвердив платеж, вы уполномочиваете (A) %s и Stripe, нашего поставщика платежных услуг, на отправку вашему банку инструкций на списание средств с вашего счета и (B) ваш банк на списание средств с вашего счета согласно данным инструкциям. Вы имеете право на возврат средств от вашего банка согласно положениям и условиям Вашего соглашения с банком. Подать заявку на возврат средств следует в течение 8 недель с даты списания средств с вашего счета. Ваши права объясняются в выписке, которую вы можете получить в своем банке. Вы даете согласие на получение уведомлений о будущих дебетованиях в срок до 2 дней до их поступления.</string>
+  <string name="stripe_sepa_mandate">Указав свои платежные данные и подтвердив платеж, вы уполномочиваете (A) {0} и Stripe, нашего поставщика платежных услуг, на отправку вашему банку инструкций на списание средств с вашего счета и (B) ваш банк на списание средств с вашего счета согласно данным инструкциям. Вы имеете право на возврат средств от вашего банка согласно положениям и условиям Вашего соглашения с банком. Подать заявку на возврат средств следует в течение 8 недель с даты списания средств с вашего счета. Ваши права объясняются в выписке, которую вы можете получить в своем банке. Вы даете согласие на получение уведомлений о будущих дебетованиях в срок до 2 дней до их поступления.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Назначить способом оплаты по умолчанию</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

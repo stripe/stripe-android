@@ -5,9 +5,9 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Magbayad ng <num_installments/> na walang interes na pagbabayad ng <installment_price/> gamit ang <img/>]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_afterpay_clearpay_subtitle">%1$d walang interes na mga pagbabayad ng %2$s</string>
+  <string name="stripe_afterpay_clearpay_subtitle">{0} walang interes na mga pagbabayad ng {1}</string>
   <!-- Amazon Pay mandate text -->
-  <string name="stripe_amazon_pay_mandate">Sa pagkumpirma sa iyong pagbabayad sa AmazonPay, pinapayagan mo ang %s na singilin ang iyong AmazonPay account para sa mga pagbabayad sa hinaharap alinsunod sa kanilang mga tuntunin.</string>
+  <string name="stripe_amazon_pay_mandate">Sa pagkumpirma sa iyong pagbabayad sa AmazonPay, pinapayagan mo ang {0} na singilin ang iyong AmazonPay account para sa mga pagbabayad sa hinaharap alinsunod sa kanilang mga tuntunin.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Bumalik</string>
   <!-- Label for Bacs account number field -->
@@ -17,7 +17,7 @@
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">Account sa bangko</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
-  <string name="stripe_bacs_confirm_mandate_label">Nauunawaan ko na mangongolekta ang Stripe ng Direct Debits sa ngalan ng %s at kinukumpirma ko na ako ang may-ari ng account at tanging taong kinakailangan na magpahintulot sa mga debit mula sa account na ito.</string>
+  <string name="stripe_bacs_confirm_mandate_label">Nauunawaan ko na mangongolekta ang Stripe ng Direct Debits sa ngalan ng {0} at kinukumpirma ko na ako ang may-ari ng account at tanging taong kinakailangan na magpahintulot sa mga debit mula sa account na ito.</string>
   <!-- Label for Bacs sort code field -->
   <string name="stripe_bacs_sort_code">Sort code</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
@@ -31,9 +31,9 @@
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(hindi tinatanggap)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
-  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (hindi tinatanggap)</string>
+  <string name="stripe_card_brand_not_accepted_with_brand">{0} (hindi tinatanggap)</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">Sa pagpapatuloy, binibigyan mo ng awtorisasyon ang %1$s na i-debit ang iyong Cash App account para sa pagbabayad na ito at sa mga pagbabayad sa hinaharap alinsunod sa mga tuntunin ng  %2$s, hanggang bawiin mo ang awtorisasyong ito. Maaari mong palitan ito sa anumang oras sa iyong Cash App Settings.</string>
+  <string name="stripe_cash_app_pay_mandate">Sa pagpapatuloy, binibigyan mo ng awtorisasyon ang {0} na i-debit ang iyong Cash App account para sa pagbabayad na ito at sa mga pagbabayad sa hinaharap alinsunod sa mga tuntunin ng  {1}, hanggang bawiin mo ang awtorisasyong ito. Maaari mong palitan ito sa anumang oras sa iyong Cash App Settings.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Impormasyon sa pakikipag-ugnayan</string>
   <!-- Text for continue button -->
@@ -45,7 +45,7 @@
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Ang IBAN na iniligay mo ay di kumpleto.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="stripe_iban_invalid_country">Ang IBAN na iniligay mo ay imbalido. \"%s\" ay di suportadong code ng bansa.</string>
+  <string name="stripe_iban_invalid_country">Ang IBAN na iniligay mo ay imbalido. \"{0}\" ay di suportadong code ng bansa.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Ang iyong IBAN ay dapat magsimula sa dalawang letra na code ng bansa.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
@@ -54,13 +54,13 @@
   <string name="stripe_incomplete_blik_code">Ang iyong BLIK code ay kulang.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_invalid_blik_code">Ang iyong BLIK code ay hindi valid.</string>
-  <string name="stripe_invalid_email_address">Hindi valid na email address: %s</string>
+  <string name="stripe_invalid_email_address">Hindi valid na email address: {0}</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Di valid na UPI ID</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Bumili ngayon o magbayad sa ibang pagkakataon gamit ang Klarna.</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Sa pagpapatuloy sa Klarna, pinahihintulutan mo ang %1$s na singilin ang iyong Klarna account para sa mga pagbabayad sa hinaharap alinsunod sa kanilang mga tuntunin. Maaari mong palitan ito anumang oras sa iyong Klarna app o sa pakikipag-ugnayan sa %2$s.</string>
+  <string name="stripe_klarna_mandate">Sa pagpapatuloy sa Klarna, pinahihintulutan mo ang {0} na singilin ang iyong Klarna account para sa mga pagbabayad sa hinaharap alinsunod sa kanilang mga tuntunin. Maaari mong palitan ito anumang oras sa iyong Klarna app o sa pakikipag-ugnayan sa {1}.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Magbayad sa ibang pagkakataon gamit ang Klarna.</string>
   <!-- Caption for Phone field on address form -->
@@ -70,7 +70,7 @@
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Bangko ng Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_pay_button_amount">Magbayad ng %s</string>
+  <string name="stripe_pay_button_amount">Magbayad ng {0}</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Bangko</string>
   <!-- Label shown in the payment type picker describing a card payment -->
@@ -96,19 +96,19 @@
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
   <!-- PayPal mandate text -->
-  <string name="stripe_paypal_mandate">Sa pagkumpirma sa iyong pagbabayad sa PayPal, pinapayagan mo ang %s na singilin ang iyong PayPal account para sa mga pagbabayad sa hinaharap alinsunod sa kanilang mga tuntunin.</string>
+  <string name="stripe_paypal_mandate">Sa pagkumpirma sa iyong pagbabayad sa PayPal, pinapayagan mo ang {0} na singilin ang iyong PayPal account para sa mga pagbabayad sa hinaharap alinsunod sa kanilang mga tuntunin.</string>
   <!-- Revolut mandate text -->
-  <string name="stripe_revolut_mandate">Sa pagkumpirma sa iyong pagbabayad sa RevolutPay, pinapayagan mo ang %s na singilin ang iyong RevolutPay account para sa mga pagbabayad sa hinaharap alinsunod sa kanilang mga tuntunin.</string>
+  <string name="stripe_revolut_mandate">Sa pagkumpirma sa iyong pagbabayad sa RevolutPay, pinapayagan mo ang {0} na singilin ang iyong RevolutPay account para sa mga pagbabayad sa hinaharap alinsunod sa kanilang mga tuntunin.</string>
   <!-- Satispay mandate text -->
-  <string name="stripe_satispay_mandate">Sa pagpapatuloy, pinahihintulutan mo ang %1$s na awtomatikong i-debit ang Satispay Balance mo sa isang paulit-ulit na batayan alinsunod sa plano ng pagbili o subscription mo.</string>
+  <string name="stripe_satispay_mandate">Sa pagpapatuloy, pinahihintulutan mo ang {0} na awtomatikong i-debit ang Satispay Balance mo sa isang paulit-ulit na batayan alinsunod sa plano ng pagbili o subscription mo.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="stripe_save_for_future_payments_with_merchant_name">I-save para sa mga pagbabayad sa %s sa hinaharap</string>
+  <string name="stripe_save_for_future_payments_with_merchant_name">I-save para sa mga pagbabayad sa {0} sa hinaharap</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
-  <string name="stripe_save_payment_details_to_merchant_name">I-save ang mga detalye ng pababayad sa %s para sa mga pagbili sa hinaharap</string>
+  <string name="stripe_save_payment_details_to_merchant_name">I-save ang mga detalye ng pababayad sa {0} para sa mga pagbili sa hinaharap</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">I-scan ang kard</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">Sa pagbibigay ng iyong impormasyon ng pagbabayad at pagkukupirma sa bayad na ito, pinapayagan mo ang (A) %s at ang Stripe, ang ating payment service provider, na magpadala ng mga tagubilin sa iyong bangko para i-debit ang iyong account at (B) ang iyong bangko na i-debit ang iyong account ayon sa mga naturang tuntunin. Bilang bahagi ng iyong mga karapatan, maaari kang makakuha ng refund mula sa iyong bangko sa ilalim ng mga takda at kundisyon ng iyong kasunduan sa iyong bangko. Ang refund ay dapat hingin sa loob ng 8 linggo mula sa petsa na na-debit ang iyong account. Ang iyong mga karapatan ay naipaliwanag sa isang pahayag na maari mong makuha sa iyong bangko. Pumapayag ka na makatanggap ng mga abiso ukol sa mga debit sa hinaharap ng hanggang 2 na araw bago sila maganap.</string>
+  <string name="stripe_sepa_mandate">Sa pagbibigay ng iyong impormasyon ng pagbabayad at pagkukupirma sa bayad na ito, pinapayagan mo ang (A) {0} at ang Stripe, ang ating payment service provider, na magpadala ng mga tagubilin sa iyong bangko para i-debit ang iyong account at (B) ang iyong bangko na i-debit ang iyong account ayon sa mga naturang tuntunin. Bilang bahagi ng iyong mga karapatan, maaari kang makakuha ng refund mula sa iyong bangko sa ilalim ng mga takda at kundisyon ng iyong kasunduan sa iyong bangko. Ang refund ay dapat hingin sa loob ng 8 linggo mula sa petsa na na-debit ang iyong account. Ang iyong mga karapatan ay naipaliwanag sa isang pahayag na maari mong makuha sa iyong bangko. Pumapayag ka na makatanggap ng mga abiso ukol sa mga debit sa hinaharap ng hanggang 2 na araw bago sila maganap.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">I-set bilang default na paraan ng pagbabayad</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

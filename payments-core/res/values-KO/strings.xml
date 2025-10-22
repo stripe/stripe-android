@@ -2,16 +2,16 @@
 <resources>
   <!-- Label for card number entry text field -->
   <string name="stripe_acc_label_card_number">카드 번호</string>
-  <string name="stripe_acc_label_card_number_node">%s, 카드 번호</string>
-  <string name="stripe_acc_label_cvc_node">%s, CVC</string>
+  <string name="stripe_acc_label_card_number_node">{0}, 카드 번호</string>
+  <string name="stripe_acc_label_cvc_node">{0}, CVC</string>
   <string name="stripe_acc_label_expiry_date">만료 날짜</string>
-  <string name="stripe_acc_label_expiry_date_node">%s, 만료 날짜</string>
+  <string name="stripe_acc_label_expiry_date_node">{0}, 만료 날짜</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
   <string name="stripe_acc_label_zip">우편번호</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="stripe_acc_label_zip_short">우편번호</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_added">%s 추가됨</string>
+  <string name="stripe_added">{0} 추가됨</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="stripe_address_city_required">도시를 입력하십시오</string>
   <!-- Error text indicating country is invalid -->
@@ -75,9 +75,9 @@
   <!-- Placeholder for AU BECS BSB number -->
   <string name="stripe_au_becs_bsb_number">BSB 번호</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="stripe_au_becs_mandate">은행 계좌 세부 정보를 제공하고 이 결제를 확인하면 다음 자동 이체 요청 및 &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;자동 이체 요청 서비스 계약&lt;/a&gt;에 동의하는 것이며, 또한 Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID 번호 507156(“Stripe”)에서 BECS(Bulk Electronic Clearing System)를 통해 %s(이하 \"판매자\")의 대리로 판매자가 별도로 귀하에게 전달한 금액에 대해 결제하는 것을 승인하게 됩니다. 본인은 위에 나열된 계정의 계정 보유자 또는 승인된 서명자임을 증명합니다.</string>
+  <string name="stripe_au_becs_mandate">은행 계좌 세부 정보를 제공하고 이 결제를 확인하면 다음 자동 이체 요청 및 &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;자동 이체 요청 서비스 계약&lt;/a&gt;에 동의하는 것이며, 또한 Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID 번호 507156(“Stripe”)에서 BECS(Bulk Electronic Clearing System)를 통해 {0}(이하 \"판매자\")의 대리로 판매자가 별도로 귀하에게 전달한 금액에 대해 결제하는 것을 승인하게 됩니다. 본인은 위에 나열된 계정의 계정 보유자 또는 승인된 서명자임을 증명합니다.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="stripe_becs_mandate_acceptance">\n    은행 계좌 세부 정보를 제공하고 이 결제를 확인하면 다음 자동 이체 요청 및\n    자동 이체 요청 서비스 계약에 동의하는 것이며, 또한\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID 번호 507156\n    (“Stripe”)에서 BECS(Bulk Electronic Clearing System)를\n    통해 %1$s(이하 \"판매자\")의 대리로 \n    판매자가 별도로 귀하에게 전달한 금액에 대해 결제하는 것을 승인하게 됩니다.\n    본인은 위에 나열된 계정의 계정 보유자 또는 승인된 서명자임을 증명합니다.\n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    은행 계좌 세부 정보를 제공하고 이 결제를 확인하면 다음 자동 이체 요청 및\n    자동 이체 요청 서비스 계약에 동의하는 것이며, 또한\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID 번호 507156\n    (“Stripe”)에서 BECS(Bulk Electronic Clearing System)를\n    통해 {0}(이하 \"판매자\")의 대리로 \n    판매자가 별도로 귀하에게 전달한 금액에 대해 결제하는 것을 승인하게 됩니다.\n    본인은 위에 나열된 계정의 계정 보유자 또는 승인된 서명자임을 증명합니다.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">계좌 번호</string>
   <!-- Error description for incomplete account number -->
@@ -109,11 +109,11 @@
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">카드가 거절되었습니다</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="stripe_card_ending_in">%2$s(으)로 끝나는 %1$s</string>
+  <string name="stripe_card_ending_in">{1}(으)로 끝나는 {0}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
-  <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
+  <string name="stripe_card_plus_last_4">{0} ···· {1}</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
-  <string name="stripe_card_with_last_4">%1$s ····%2$s</string>
+  <string name="stripe_card_with_last_4">{0} ····{1}</string>
   <!-- Text for close button -->
   <string name="stripe_close">닫기</string>
   <!-- Accessibility title used during Talkback to indicate to users that a transaction is being confirmed -->
@@ -122,7 +122,7 @@
   <string name="stripe_delete_payment_method">결제 수단 삭제</string>
   <string name="stripe_delete_payment_method_prompt_title">결제 수단을 삭제하시겠습니까?</string>
   <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
-  <string name="stripe_disallowed_card_brand">%s이(가) 허용되지 않습니다</string>
+  <string name="stripe_disallowed_card_brand">{0}이(가) 허용되지 않습니다</string>
   <!-- Done button title -->
   <string name="stripe_done">완료</string>
   <!-- Button title to enter editing mode -->
@@ -139,7 +139,7 @@
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">결제 수단 인증 시간이 초과되었습니다. 다시 시도하십시오.</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
-  <string name="stripe_fpx_bank_offline">%s - 오프라인</string>
+  <string name="stripe_fpx_bank_offline">{0} - 오프라인</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">결제 방식이 거부되었습니다.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
@@ -167,7 +167,7 @@
    Text for remove button -->
   <string name="stripe_remove">제거</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="stripe_removed">%s 제거됨</string>
+  <string name="stripe_removed">{0} 제거됨</string>
   <string name="stripe_secure_checkout">보안 체크 아웃</string>
   <string name="stripe_title_add_a_card">카드 추가</string>
   <!-- Screen title telling users they should add an address -->

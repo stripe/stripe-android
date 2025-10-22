@@ -244,7 +244,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">Atau, Anda dapat mengunggah foto identitas berfoto secara manual</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">Atau, Anda dapat mengunggah foto %1$s secara manual</string>
+  <string name="stripe_upload_file_text">Atau, Anda dapat mengunggah foto {0} secara manual</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">Unggah ID berfoto Anda</string>
 </resources>

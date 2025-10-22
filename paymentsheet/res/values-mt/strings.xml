@@ -9,13 +9,13 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Ixtri issa jew ħallas iktar tard b\'Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_bank_account_ending_in">Numru ta\' kont tal-bank li jintemm biċ-ċifri %s</string>
+  <string name="stripe_bank_account_ending_in">Numru ta\' kont tal-bank li jintemm biċ-ċifri {0}</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
-  <string name="stripe_bank_account_plus_last_4">Kont tal-bank ···· %s</string>
+  <string name="stripe_bank_account_plus_last_4">Kont tal-bank ···· {0}</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
-  <string name="stripe_bank_account_with_last_4">Kont tal-bank ····%s</string>
+  <string name="stripe_bank_account_with_last_4">Kont tal-bank ····{0}</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
-  <string name="stripe_blik_confirm_payment">Ikkonferma l-pagament fl-app tal-bank fi żmien %s biex tlesti x-xirja.</string>
+  <string name="stripe_blik_confirm_payment">Ikkonferma l-pagament fl-app tal-bank fi żmien {0} biex tlesti x-xirja.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_cashapp_afterpay_subtitle">Ixtri issa jew ħallas iktar tard b\'Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
@@ -33,17 +33,17 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Oħloq kont ma’ Link għal pagament aktar mgħaġġel fuq il-web</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
-  <string name="stripe_link_card_type_credit">%1$s Credit</string>
+  <string name="stripe_link_card_type_credit">{0} Credit</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
-  <string name="stripe_link_card_type_debit">%1$s Debit</string>
+  <string name="stripe_link_card_type_debit">{0} Debit</string>
   <!-- Label a prepaid funding source. E.g. 'Visa Prepaid' -->
-  <string name="stripe_link_card_type_prepaid">%1$s Prepaid</string>
+  <string name="stripe_link_card_type_prepaid">{0} Prepaid</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
-  <string name="stripe_link_card_type_unknown">Karta %1$s</string>
+  <string name="stripe_link_card_type_unknown">Karta {0}</string>
   <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
   <string name="stripe_link_confirm_payment_title">Ikkonferma d-dettalji tal-ħlas</string>
   <!-- Email suggestion prompt shown when we detect a typo. The %1$s is a placeholder for the suggested email address. -->
-  <string name="stripe_link_email_suggestion">Ridt tfisser %1$s?</string>
+  <string name="stripe_link_email_suggestion">Ridt tfisser {0}?</string>
   <!-- CTA text for accepting the suggested email correction -->
   <string name="stripe_link_email_suggestion_update">Iva, aġġorna</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
@@ -67,9 +67,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for the update card screen in Link native -->
   <string name="stripe_link_update_card_title">Ibdel il-karta</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message">Daħħal il-kodiċi li bgħatna fuq %s biex tuża l-informazzjoni merfugħa tiegħek.</string>
+  <string name="stripe_link_verification_message">Daħħal il-kodiċi li bgħatna fuq {0} biex tuża l-informazzjoni merfugħa tiegħek.</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message_short">Daħħal il-kodiċi li bgħatna lil %s.</string>
+  <string name="stripe_link_verification_message_short">Daħħal il-kodiċi li bgħatna lil {0}.</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">Ibdel il-karta</string>
   <!-- Title of the logout action. -->
@@ -81,7 +81,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Meta tkompli tkun qed taqbel li tawtorizza l-pagamenti skont <terms>dar-regoli</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
-  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Meta tissejvja l-kont tal-bank tiegħek għal %s tkun qed taqbel li tawtorizza l-pagamenti skont <terms>dar-regoli</terms>.]]></string>
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Meta tissejvja l-kont tal-bank tiegħek għal {0} tkun qed taqbel li tawtorizza l-pagamenti skont <terms>dar-regoli</terms>.]]></string>
   <!-- Error message when an error case happens when linking your account -->
   <string name="stripe_paymentsheet_ach_something_went_wrong">Xi ħaġa marret ħażin aħna u norbtu l-kont tiegħek.\nJekk jogħġbok erġa\' pprova iktar tard.</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
@@ -95,35 +95,35 @@ to be saved and used in future checkout sessions. -->
   <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
   <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">Uża l-indirizz tal-ħlas għall-kunsinna</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
-  <string name="stripe_paymentsheet_bacs_email_mandate">Se tintbagħat email lil %s fi żmien tlett ijiem tax-xogħol biex tikkonferma l-ħolqien ta\' din l-istruzzjoni ta\' debitu.</string>
+  <string name="stripe_paymentsheet_bacs_email_mandate">Se tintbagħat email lil {0} fi żmien tlett ijiem tax-xogħol biex tikkonferma l-ħolqien ta\' din l-istruzzjoni ta\' debitu.</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
   <string name="stripe_paymentsheet_bacs_mandate_title">Ikkonferma d-dettalji tad-Debitu Dirett tiegħek</string>
   <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
   <string name="stripe_paymentsheet_bacs_modify_details_button_label">Ibdel id-dettalji</string>
   <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
-  <string name="stripe_paymentsheet_bacs_notice_mandate">Barra minn hekk, se ngħarrfuk jumejn bil-quddiem b\'email dwar kull somma li se tinġabar skont din l-istruzzjoni. Il-pagamenti se jidhru bħala %s fir-rendikont tal-bank tiegħek.</string>
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Barra minn hekk, se ngħarrfuk jumejn bil-quddiem b\'email dwar kull somma li se tinġabar skont din l-istruzzjoni. Il-pagamenti se jidhru bħala {0} fir-rendikont tal-bank tiegħek.</string>
   <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
-  <string name="stripe_paymentsheet_bacs_protection_mandate">Il-pagamenti tiegħek huma mħarsa mill-%s.</string>
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Il-pagamenti tiegħek huma mħarsa mill-{0}.</string>
   <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
   <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Id-dettalji tal-kont tal-bank ma jistgħux jinbidlu.</string>
   <!-- Text shown in the bank payment form when a promo is available and the user is paying, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Ikseb %s lura meta tħallas bil-bank. <a href=\"https://link.com/promotion-terms\">Aqra&#160;r-regoli</a>]]></string>
+  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Ikseb {0} lura meta tħallas bil-bank. <a href=\"https://link.com/promotion-terms\">Aqra&#160;r-regoli</a>]]></string>
   <!-- Text shown in the bank payment form when a promo is available and the user is setting up an account, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
-  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Ikseb %s lura meta tħallas għall-ewwel darba bil-bank tiegħek. <a href=\"https://link.com/promotion-terms\">Aqra&#160;r-regoli</a>]]></string>
+  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Ikseb {0} lura meta tħallas għall-ewwel darba bil-bank tiegħek. <a href=\"https://link.com/promotion-terms\">Aqra&#160;r-regoli</a>]]></string>
   <!-- Label shown when paying with a bank account is not eligible for the incentive, e.g. 'No $5 promo' -->
-  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">L-ebda offerta \"%s\"</string>
+  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">L-ebda offerta \"{0}\"</string>
   <!-- Text displayed on manage card screen when card details are not editable. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Id-dettalji tal-karta ma jistgħux jinbidlu.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
-  <string name="stripe_paymentsheet_card_mandate">Meta tagħti l-informazzjoni tal-karta tiegħek, tkun qed tħalli lil %s tiġbor il-pagamenti tal-ġejjieni mill-karta tiegħek skont ir-regoli tagħha.</string>
+  <string name="stripe_paymentsheet_card_mandate">Meta tagħti l-informazzjoni tal-karta tiegħek, tkun qed tħalli lil {0} tiġbor il-pagamenti tal-ġejjieni mill-karta tiegħek skont ir-regoli tagħha.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Billi tkompli, taqbel li tissejvja l-informazzjoni tiegħek għal xiri futur ma\' %s.</string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Billi tkompli, taqbel li tissejvja l-informazzjoni tiegħek għal xiri futur ma\' {0}.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Billi tkompli, taqbel li tissejvja l-informazzjoni tiegħek għal xiri futur ma\' %s u <link>Link</link>. Inti taqbel ukoll mat-<terms>Termini</terms> u <privacy>l-Privatezza</privacy> ta’ Link.]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Billi tkompli, taqbel li tissejvja l-informazzjoni tiegħek għal xiri futur ma\' {0} u <link>Link</link>. Inti taqbel ukoll mat-<terms>Termini</terms> u <privacy>l-Privatezza</privacy> ta’ Link.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Billi tkompli, int taqbel li tissejvja l-informazzjoni tiegħek għal xirjiet futuri ma\' %s u <link>Ħolqa</link> (ara t-<terms>Termini</terms> u l-<privacy>Privatezza</privacy>).]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Billi tkompli, int taqbel li tissejvja l-informazzjoni tiegħek għal xirjiet futuri ma\' {0} u <link>Ħolqa</link> (ara t-<terms>Termini</terms> u l-<privacy>Privatezza</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Billi tkompli, int taqbel li tissejvja l-informazzjoni tiegħek għal xirjiet futuri ma\' %s u <link>Ħolqa</link> skont il-Ħolqa <terms>termini</terms> u <privacy>privatezza</privacy>.]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Billi tkompli, int taqbel li tissejvja l-informazzjoni tiegħek għal xirjiet futuri ma\' {0} u <link>Ħolqa</link> skont il-Ħolqa <terms>termini</terms> u <privacy>privatezza</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Il-karta ma nbidlitx. Jekk jogħġbok erġa\' pprova.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -150,9 +150,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title shown above a carousel containing the customer's payment methods -->
   <string name="stripe_paymentsheet_manage_your_payment_methods">Ħu ħsieb il-metodi tal-pagament tiegħek</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
-  <string name="stripe_paymentsheet_microdeposit">Stripe se tiddepożita $0.01 fil-kont tiegħek fi żmien jum/jumejn tax-xogħol. Imbagħad se tirċievi email bl-istruzzjonijiet biex tagħmel il-pagament lil %s.</string>
+  <string name="stripe_paymentsheet_microdeposit">Stripe se tiddepożita $0.01 fil-kont tiegħek fi żmien jum/jumejn tax-xogħol. Imbagħad se tirċievi email bl-istruzzjonijiet biex tagħmel il-pagament lil {0}.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
-  <string name="stripe_paymentsheet_modify_pm">Ibdel %s</string>
+  <string name="stripe_paymentsheet_modify_pm">Ibdel {0}</string>
   <!-- Label of a button that appears on a checkout screen. When tapped, it displays a credit card form. This button is shown next to another button representing the customer's saved card; the word 'new' is meant to differentiate this button's action with the saved card button. -->
   <string name="stripe_paymentsheet_new_card">Karta ġdida</string>
   <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
@@ -184,9 +184,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Tixtieq tneħħi l-karta?</string>
   <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
-  <string name="stripe_paymentsheet_remove_partial_description">Dan il-metodu ta\' pagament se jitneħħa iżda se jibqa\' disponibbli għal abbonamenti ta\' %s.</string>
+  <string name="stripe_paymentsheet_remove_partial_description">Dan il-metodu ta\' pagament se jitneħħa iżda se jibqa\' disponibbli għal abbonamenti ta\' {0}.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
-  <string name="stripe_paymentsheet_remove_pm">Neħħi %s</string>
+  <string name="stripe_paymentsheet_remove_pm">Neħħi {0}</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
   <string name="stripe_paymentsheet_remove_pm_title">Neħħi l-metodu tal-pagament</string>
   <!-- A button used for saving a new payment method -->
@@ -198,7 +198,7 @@ to be saved and used in future checkout sessions. -->
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Erfa\' għall-pagamenti fil-ġejjieni</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Erfa\' din il-karta għall-pagamenti tal-ġejjieni fuq %s</string>
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Erfa\' din il-karta għall-pagamenti tal-ġejjieni fuq {0}</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Merfugħ</string>
   <!-- Title shown above a view containing the customer's cards -->
@@ -212,17 +212,17 @@ to be saved and used in future checkout sessions. -->
   <!-- Error message displayed when setting a default payment method fails. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Il-metodu tal-pagament standard ma nbidilx. Jekk jogħġbok erġa\' pprova.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
-  <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+  <string name="stripe_paymentsheet_total_amount">Total: {0}</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Id-ditta tal-karti ma nbidlitx. Jekk jogħġbok erġa\' pprova.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
-  <string name="stripe_paynow_confirm_payment">Ikkonferma l-pagament fil-bank jew fl-app tal-pagament tiegħek fi żmien %s biex tlesti x-xiri.</string>
+  <string name="stripe_paynow_confirm_payment">Ikkonferma l-pagament fil-bank jew fl-app tal-pagament tiegħek fi żmien {0} biex tlesti x-xiri.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Qiegħed bħala l-metodu tal-pagament standard</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->
-  <string name="stripe_qrcode_lpm_confirm_payment">Ikkonferma l-pagament fil-bank jew fl-app tal-pagament tiegħek fi żmien %s biex tlesti x-xiri.</string>
+  <string name="stripe_qrcode_lpm_confirm_payment">Ikkonferma l-pagament fil-bank jew fl-app tal-pagament tiegħek fi żmien {0} biex tlesti x-xiri.</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-  <string name="stripe_remove_bank_account_ending_in">Neħħi l-kont tal-bank li jispiċċa b\'%s</string>
+  <string name="stripe_remove_bank_account_ending_in">Neħħi l-kont tal-bank li jispiċċa b\'{0}</string>
   <!-- Accessibility description for a button that launches Shop Pay. -->
   <string name="stripe_shop_pay_button_description">Buttuna ta\' Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
@@ -232,7 +232,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Title for the Link signup screen -->
   <string name="stripe_sign_up_header">Ħlas sigur b\'mossa waħda</string>
   <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
-  <string name="stripe_sign_up_message">Ħallas lil %s u lil eluf ta\' negozjanti oħra iktar malajr.</string>
+  <string name="stripe_sign_up_message">Ħallas lil {0} u lil eluf ta\' negozjanti oħra iktar malajr.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Meta tingħaqad ma\' Link tkun qed taqbel mar-<terms>Regoli</terms> u l-<privacy>Politika tal-Privatezza</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
@@ -252,7 +252,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Approva l-pagament</string>
   <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Iftaħ l-app ta\' UPI biex tapprova l-pagamenti tiegħek fi żmien %s</string>
+  <string name="stripe_upi_polling_message">Iftaħ l-app ta\' UPI biex tapprova l-pagamenti tiegħek fi żmien {0}</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Jekk jogħġbok mur lura u agħżel metodu tal-pagament ieħor</string>
   <!-- Text on a screen that indicates a payment has failed -->
@@ -272,9 +272,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_header_prefilled">Uża l-informazzjoni li għandek merfugħa biex tħallas iktar malajr</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_verification_message">Daħħal il-kodiċi li bgħatna fuq %s biex tuża Link u tħallas bil-metodu tal-pagament standard.</string>
+  <string name="stripe_verification_message">Daħħal il-kodiċi li bgħatna fuq {0} biex tuża Link u tħallas bil-metodu tal-pagament standard.</string>
   <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
-  <string name="stripe_verification_not_email">M\'intix %s?</string>
+  <string name="stripe_verification_not_email">M\'intix {0}?</string>
   <!-- Label for a button that re-sends the a login code when tapped -->
   <string name="stripe_verification_resend">Erġa\' ibgħat il-kodiċi</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
@@ -282,9 +282,9 @@ to be saved and used in future checkout sessions. -->
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Meta tkompli tkun qed taqbel li tawtorizza l-pagamenti skont dar-<terms>regoli</terms>.]]></string>
   <!-- Text providing link to terms for bank payments when seller information is provided -->
-  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Billi tissottometti l-ordni tiegħek lil %1$s u %2$s, inti taqbel li tissejvja l-informazzjoni tiegħek ma’ %3$s għal xirjiet futuri, u taqbel li tawtorizza pagamenti skont <terms>dawn it-termini</terms>.]]></string>
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Billi tissottometti l-ordni tiegħek lil {0} u {1}, inti taqbel li tissejvja l-informazzjoni tiegħek ma’ {2} għal xirjiet futuri, u taqbel li tawtorizza pagamenti skont <terms>dawn it-termini</terms>.]]></string>
   <!-- Text providing link to terms for bank payments -->
-  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Billi tissottometti l-ordni tiegħek lil %s inti taqbel li tawtorizza pagamenti skont <terms>dawn it-termini</terms>.]]></string>
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Billi tissottometti l-ordni tiegħek lil {0} inti taqbel li tawtorizza pagamenti skont <terms>dawn it-termini</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Pagament</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

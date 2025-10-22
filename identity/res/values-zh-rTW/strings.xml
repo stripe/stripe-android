@@ -220,7 +220,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">您也可以手動上傳您帶照片的身分證件</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">您也可以手動上傳您的%1$s。</string>
+  <string name="stripe_upload_file_text">您也可以手動上傳您的{0}。</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">上傳您帶照片的身分證件</string>
 </resources>

@@ -244,7 +244,7 @@
   <!-- Generic message for alternative options when uploading a document -->
   <string name="stripe_upload_file_generic_text">Případně můžete ručně nahrát fotografii svého průkazu totožnosti s fotografií.</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="stripe_upload_file_text">Můžete také ručně nahrát fotografii %1$s</string>
+  <string name="stripe_upload_file_text">Můžete také ručně nahrát fotografii {0}</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">Nahrajte svou fotografii</string>
 </resources>

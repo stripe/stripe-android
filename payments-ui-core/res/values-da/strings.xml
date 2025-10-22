@@ -5,9 +5,9 @@
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Betal i <num_installments/> rentefri afdrag på <installment_price/> hver med <img/>]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_afterpay_clearpay_subtitle">%1$d rentefri betalinger på %2$s</string>
+  <string name="stripe_afterpay_clearpay_subtitle">{0} rentefri betalinger på {1}</string>
   <!-- Amazon Pay mandate text -->
-  <string name="stripe_amazon_pay_mandate">Ved at bekræfte din betaling med Amazon Pay tillader du %s at debitere din Amazon Pay-konto for fremtidige betalinger i overensstemmelse med deres vilkår.</string>
+  <string name="stripe_amazon_pay_mandate">Ved at bekræfte din betaling med Amazon Pay tillader du {0} at debitere din Amazon Pay-konto for fremtidige betalinger i overensstemmelse med deres vilkår.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Tilbage</string>
   <!-- Label for Bacs account number field -->
@@ -17,7 +17,7 @@
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">Bankkonto</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
-  <string name="stripe_bacs_confirm_mandate_label">Jeg er indforstået med, at Stripe vil opkræve direkte debiteringer på vegne af %s og bekræfter, at jeg er kontoindehaveren og den eneste person, der skal godkende debiteringer fra denne konto.</string>
+  <string name="stripe_bacs_confirm_mandate_label">Jeg er indforstået med, at Stripe vil opkræve direkte debiteringer på vegne af {0} og bekræfter, at jeg er kontoindehaveren og den eneste person, der skal godkende debiteringer fra denne konto.</string>
   <!-- Label for Bacs sort code field -->
   <string name="stripe_bacs_sort_code">Sort code</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
@@ -31,9 +31,9 @@
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(ikke accepteret)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
-  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (ikke accepteret)</string>
+  <string name="stripe_card_brand_not_accepted_with_brand">{0} (ikke accepteret)</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">Ved at fortsætte giver du %1$s tilladelse til at debitere din Cash App-konto for denne betaling og fremtidige betalinger i overensstemmelse med %2$ss vilkår, indtil denne tilladelse tilbagekaldes. Du kan til enhver tid ændre dette i dine Cash App-indstillinger.</string>
+  <string name="stripe_cash_app_pay_mandate">Ved at fortsætte giver du {0} tilladelse til at debitere din Cash App-konto for denne betaling og fremtidige betalinger i overensstemmelse med {1}s vilkår, indtil denne tilladelse tilbagekaldes. Du kan til enhver tid ændre dette i dine Cash App-indstillinger.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Kontaktoplysninger</string>
   <!-- Text for continue button -->
@@ -45,7 +45,7 @@
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Det indtastede IBAN-nummer er ufuldstændigt.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="stripe_iban_invalid_country">Den indtastede IBAN er ugyldig, \"%s\" er ikke en gyldig landekode.</string>
+  <string name="stripe_iban_invalid_country">Den indtastede IBAN er ugyldig, \"{0}\" er ikke en gyldig landekode.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Dit IBAN-nummer skal starte med en landekode på to bogstaver.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
@@ -54,13 +54,13 @@
   <string name="stripe_incomplete_blik_code">Din BLIK-kode er ufuldstændig.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_invalid_blik_code">Din BLIK-kode er ugyldig.</string>
-  <string name="stripe_invalid_email_address">Ugyldig e-mailadresse: %s</string>
+  <string name="stripe_invalid_email_address">Ugyldig e-mailadresse: {0}</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">Ugyldigt UPI ID</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Køb nu, eller betal senere med Klarna.</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Når du fortsætter til Klarna, giver du %1$s tilladelse til at debitere din Klarna-konto for fremtidige betalinger i overensstemmelse med deres vilkår og Klarnas vilkår. Du kan til enhver tid ændre dette i din Klarna-app eller ved at kontakte %2$s.</string>
+  <string name="stripe_klarna_mandate">Når du fortsætter til Klarna, giver du {0} tilladelse til at debitere din Klarna-konto for fremtidige betalinger i overensstemmelse med deres vilkår og Klarnas vilkår. Du kan til enhver tid ændre dette i din Klarna-app eller ved at kontakte {1}.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Betal senere med Klarna.</string>
   <!-- Caption for Phone field on address form -->
@@ -70,7 +70,7 @@
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_pay_button_amount">Betal %s</string>
+  <string name="stripe_pay_button_amount">Betal {0}</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Bank</string>
   <!-- Label shown in the payment type picker describing a card payment -->
@@ -96,19 +96,19 @@
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
   <!-- PayPal mandate text -->
-  <string name="stripe_paypal_mandate">Ved at bekræfte din betaling med PayPal, tillader du %s at debitere din PayPal-konto for fremtidige betalinger i overensstemmelse med deres vilkår.</string>
+  <string name="stripe_paypal_mandate">Ved at bekræfte din betaling med PayPal, tillader du {0} at debitere din PayPal-konto for fremtidige betalinger i overensstemmelse med deres vilkår.</string>
   <!-- Revolut mandate text -->
-  <string name="stripe_revolut_mandate">Ved at bekræfte din betaling med RevolutPay, tillader du %s at debitere din RevolutPay-konto for fremtidige betalinger i overensstemmelse med deres vilkår.</string>
+  <string name="stripe_revolut_mandate">Ved at bekræfte din betaling med RevolutPay, tillader du {0} at debitere din RevolutPay-konto for fremtidige betalinger i overensstemmelse med deres vilkår.</string>
   <!-- Satispay mandate text -->
-  <string name="stripe_satispay_mandate">Ved at fortsætte giver du %1$s tilladelse til automatisk at debitere din Satispay-saldo på tilbagevendende basis i overensstemmelse med dit køb eller din abonnementsplan.</string>
+  <string name="stripe_satispay_mandate">Ved at fortsætte giver du {0} tilladelse til automatisk at debitere din Satispay-saldo på tilbagevendende basis i overensstemmelse med dit køb eller din abonnementsplan.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="stripe_save_for_future_payments_with_merchant_name">Gem til fremtidige %s-betalinger</string>
+  <string name="stripe_save_for_future_payments_with_merchant_name">Gem til fremtidige {0}-betalinger</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
-  <string name="stripe_save_payment_details_to_merchant_name">Gem betalingsoplysninger for %s til senere køb</string>
+  <string name="stripe_save_payment_details_to_merchant_name">Gem betalingsoplysninger for {0} til senere køb</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Scan kort</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">Ved at give dine betalingsoplysninger og bekræfte denne betaling giver du (A) %s og Stripe, vores betalingstjenesteudbyder, tilladelse til at sende instruktioner til din bank om at debitere din konto og (B) din bank til at debitere din konto i overensstemmelse med disse instruktioner. Som en del af dine rettigheder har du ret til en refusion fra din bank under vilkårene og betingelserne i din aftale med din bank. Der skal kræves refusion inden for 8 uger fra den dato, hvor din konto blev debiteret. Dine rettigheder forklares i en erklæring, som du kan få fra din bank. Du accepterer at modtage underretninger om fremtidig debitering op til to dage før de opstår.</string>
+  <string name="stripe_sepa_mandate">Ved at give dine betalingsoplysninger og bekræfte denne betaling giver du (A) {0} og Stripe, vores betalingstjenesteudbyder, tilladelse til at sende instruktioner til din bank om at debitere din konto og (B) din bank til at debitere din konto i overensstemmelse med disse instruktioner. Som en del af dine rettigheder har du ret til en refusion fra din bank under vilkårene og betingelserne i din aftale med din bank. Der skal kræves refusion inden for 8 uger fra den dato, hvor din konto blev debiteret. Dine rettigheder forklares i en erklæring, som du kan få fra din bank. Du accepterer at modtage underretninger om fremtidig debitering op til to dage før de opstår.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Angiv som standardbetalingsmetode</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
