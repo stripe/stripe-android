@@ -1,7 +1,6 @@
 package com.stripe.android.paymentmethodmessaging.element
 
 import android.app.Application
-import android.os.Parcelable
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
@@ -11,8 +10,6 @@ import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentmethodmessaging.injection.DaggerPaymentMethodMessagingComponent
 import com.stripe.android.uicore.StripeThemeDefaults
-import dev.drewhamilton.poko.Poko
-import kotlinx.parcelize.Parcelize
 import java.util.Locale
 import javax.inject.Inject
 
@@ -39,6 +36,7 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
         appearance.build()
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun create(application: Application): PaymentMethodMessagingElement {
             return DaggerPaymentMethodMessagingComponent.builder()
@@ -50,28 +48,33 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
     /**
      * The result of a [configure] call.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface Result {
 
         /**
          * The configuration succeeded and [Content] will display a view.
          */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data object Succeeded : Result
 
         /**
          * The configuration succeeded but no content is available to display. (e.g. the amount is less than the
          * minimum for available payment methods).
          */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data object NoContent : Result
 
         /**
          * The configure call failed e.g. due to network failure or because of an invalid [Configuration].
          */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Failed internal constructor(val error: Throwable) : Result
     }
 
     /**
      * Configuration for [PaymentMethodMessagingElement].
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
         private var amount: Long? = null
         private var currency: String? = null
@@ -121,15 +124,13 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
             this.paymentMethodTypes = paymentMethodTypes
         }
 
-        @Parcelize
-        @Poko
         internal class State(
             val amount: Long?,
             val currency: String?,
             val locale: String?,
             val countryCode: String?,
             val paymentMethodTypes: List<PaymentMethod.Type>?,
-        ) : Parcelable
+        )
 
         internal fun build(): State {
             return State(
@@ -142,6 +143,7 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Appearance {
         private var theme: Theme = Theme.LIGHT
         private var font: Font.State? = null
@@ -170,13 +172,11 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
             this.colors = colors.build()
         }
 
-        @Parcelize
-        @Poko
         internal class State(
             val theme: Theme,
             val font: Font.State?,
             val colors: Colors.State,
-        ) : Parcelable
+        )
 
         internal fun build() = State(
             theme = theme,
@@ -187,12 +187,14 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
         /**
          * The theme of the payment method icons to display.
          */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class Theme {
             LIGHT,
             DARK,
             FLAT
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Font {
             private var fontFamily: Int? = null
             private var fontSizeSp: Float? = null
@@ -227,15 +229,13 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
                 this.letterSpacingSp = letterSpacingSp
             }
 
-            @Parcelize
-            @Poko
             internal class State(
                 @FontRes
                 val fontFamily: Int? = null,
                 val fontSizeSp: Float? = null,
                 val fontWeight: Int? = null,
                 val letterSpacingSp: Float? = null,
-            ) : Parcelable
+            )
 
             internal fun build() = State(
                 fontFamily = fontFamily,
@@ -245,6 +245,7 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
             )
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Colors {
             private var textColor: Int = StripeThemeDefaults.colorsLight.onComponent.toArgb()
             private var infoIconColor: Int = StripeThemeDefaults.colorsLight.subtitle.toArgb()
@@ -263,14 +264,12 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
                 this.infoIconColor = infoIconColor
             }
 
-            @Parcelize
-            @Poko
             internal class State(
                 @ColorInt
                 val textColor: Int,
                 @ColorInt
                 val infoIconColor: Int
-            ) : Parcelable
+            )
 
             internal fun build() = State(
                 textColor = textColor,
