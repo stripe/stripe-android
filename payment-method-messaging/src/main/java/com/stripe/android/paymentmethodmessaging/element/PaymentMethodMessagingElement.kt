@@ -32,8 +32,7 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
     }
 
     /**
-     * A composable function that displays BNPL promo messaging.
-     * @param appearance the custom [Appearance] for the element.
+     * A composable function that displays BNPL promotional messaging.
      */
     @Composable
     fun Content(appearance: Appearance = Appearance()) {
@@ -79,6 +78,7 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
         private var locale: String? = null
         private var countryCode: String? = null
         private var paymentMethodTypes: List<PaymentMethod.Type>? = null
+
         /**
          * Amount intended to be collected in the smallest currency unit (e.g. 100 cents to charge $1.00).
          */
