@@ -254,7 +254,11 @@ internal class OnrampViewModel(
     }
 
     fun onBackToLoginSignup() {
-        _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
+        loadUserData()?.let {
+            _uiState.update { OnrampUiState(email = it.email, authToken = it.authToken, screen = Screen.SeamlessSignIn) }
+        } ?: run {
+            _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
+        }
     }
 
     fun clearMessage() {
@@ -658,12 +662,8 @@ internal class OnrampViewModel(
             when (result) {
                 is OnrampLogOutResult.Completed -> {
                     _message.value = "Successfully logged out"
-
-                    if (loadUserData() != null) {
-                        _uiState.update { OnrampUiState(screen = Screen.SeamlessSignIn) }
-                    } else {
-                        _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
-                    }
+                    clearUserData()
+                    _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
                 }
                 is OnrampLogOutResult.Failed -> {
                     _message.value = "Logout failed: ${result.error.message}"

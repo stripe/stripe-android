@@ -499,7 +499,7 @@ private fun AuthenticationScreen(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Back to Email Input")
+            Text("Back to Sign in")
         }
     }
 }
@@ -793,7 +793,7 @@ private fun AuthenticatedOperationsScreen(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Back to Email Input")
+            Text("Back to Sign in")
         }
 
         Spacer(Modifier.height(24.dp))
