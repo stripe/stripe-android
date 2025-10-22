@@ -235,6 +235,7 @@ class CameraXAdapter(
         }
     }
 
+    @androidx.camera.camera2.interop.ExperimentalCamera2Interop
     override fun changeCamera() {
         withCameraProvider {
             lensFacing = when {
@@ -267,6 +268,7 @@ class CameraXAdapter(
     }
 
     /** Return current focal length in mm if available. */
+    @androidx.camera.camera2.interop.ExperimentalCamera2Interop
     fun getFocalLength(): Float? {
         return runCatching {
             val camId = Camera2CameraInfo.from(requireNotNull(camera).cameraInfo).cameraId
@@ -303,6 +305,7 @@ class CameraXAdapter(
         }
     }
 
+    @androidx.camera.camera2.interop.ExperimentalCamera2Interop
     override fun onCreate() {
         // Initialize our background executor
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -338,6 +341,7 @@ class CameraXAdapter(
         }
     }
 
+    @androidx.camera.camera2.interop.ExperimentalCamera2Interop
     private fun setUpCamera() {
         withCameraProvider {
             lensFacing = if (startWithBackCamera && hasBackCamera(it)) {
@@ -355,6 +359,7 @@ class CameraXAdapter(
     }
 
     @Synchronized
+    @androidx.camera.camera2.interop.ExperimentalCamera2Interop
     private fun bindCameraUseCases(cameraProvider: ProcessCameraProvider) {
         // CameraSelector
         val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
