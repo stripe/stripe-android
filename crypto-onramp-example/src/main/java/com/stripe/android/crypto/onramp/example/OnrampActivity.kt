@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -48,6 +50,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.utils.FeatureFlags
@@ -163,10 +166,30 @@ internal fun SeamlessSignInScreen(
     onContinue: () -> Unit,
     onNotMe: () -> Unit
 ) {
-    Column {
-        Text(
-            text = email,
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+        Image(
+            painter = painterResource(id = android.R.drawable.ic_menu_myplaces),
+            contentDescription = "User Icon",
+            modifier = Modifier.size(128.dp)
         )
+
+        Row {
+            Text(
+                text = "Continue as",
+                fontSize = 20.sp
+            )
+
+            Spacer(modifier = Modifier.width(6.dp))
+
+            Text(
+                text = "$email?",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(48.dp))
 
         Button(
             onClick = { onContinue() },

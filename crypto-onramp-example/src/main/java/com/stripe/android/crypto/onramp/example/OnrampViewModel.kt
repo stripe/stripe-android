@@ -255,7 +255,9 @@ internal class OnrampViewModel(
 
     fun onBackToLoginSignup() {
         loadUserData()?.let {
-            _uiState.update { OnrampUiState(email = it.email, authToken = it.authToken, screen = Screen.SeamlessSignIn) }
+            _uiState.update {
+                OnrampUiState(email = it.email, authToken = it.authToken, screen = Screen.SeamlessSignIn)
+            }
         } ?: run {
             _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
         }
