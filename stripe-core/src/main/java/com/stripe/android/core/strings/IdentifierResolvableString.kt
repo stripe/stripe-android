@@ -15,7 +15,7 @@ internal data class IdentifierResolvableString(
     @Suppress("SpreadOperator")
     override fun resolve(context: Context): String {
         return transformations.fold(
-            initial = context.getString(id, *resolveArgs(context, args))
+            context.getStringIcu(id, *resolveArgs(context, args))
         ) { currentValue, transformation ->
             transformation.transform(currentValue)
         }

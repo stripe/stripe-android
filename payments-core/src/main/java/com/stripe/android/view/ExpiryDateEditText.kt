@@ -10,6 +10,7 @@ import android.widget.EditText
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.R
+import com.stripe.android.core.strings.getStringIcu
 import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.ExpirationDate
 import kotlin.math.min
@@ -52,7 +53,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
 
     override val accessibilityText: String
         get() {
-            return resources.getString(R.string.stripe_acc_label_expiry_date_node, text)
+            return resources.getStringIcu(R.string.stripe_acc_label_expiry_date_node, text)
         }
 
     internal var includeSeparatorGaps: Boolean by Delegates.observable(

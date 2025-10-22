@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.strings.stringResourceIcu
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -51,13 +52,13 @@ fun CheckboxFieldUI(
         onValueChange = controller::onValueChange,
         label = @ReadOnlyComposable {
             controller.labelResource?.let { resource ->
-                stringResource(id = resource.labelId, formatArgs = resource.formatArgs)
+                stringResourceIcu(id = resource.labelId, formatArgs = resource.formatArgs)
             } ?: ""
         },
         error = error?.let { fieldError ->
             @ReadOnlyComposable {
                 fieldError.formatArgs?.let { args ->
-                    stringResource(id = fieldError.errorMessage, formatArgs = args)
+                    stringResourceIcu(id = fieldError.errorMessage, formatArgs = args)
                 } ?: stringResource(id = fieldError.errorMessage)
             }
         }

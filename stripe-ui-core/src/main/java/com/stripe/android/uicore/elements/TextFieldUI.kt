@@ -74,6 +74,7 @@ import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.strings.stringResourceIcu
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
@@ -294,7 +295,7 @@ internal fun TextFieldUi(
             label = {
                 FormLabel(
                     text = if (showOptionalLabel) {
-                        stringResource(
+                        stringResourceIcu(
                             R.string.stripe_form_label_optional,
                             label,
                         )

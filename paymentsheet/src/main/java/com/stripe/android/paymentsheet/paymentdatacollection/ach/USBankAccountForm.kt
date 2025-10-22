@@ -60,6 +60,7 @@ import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.strings.stringResourceIcu
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as StripeR
@@ -534,7 +535,7 @@ private fun AccountDetailsRemoveBankDialog(
         titleText = stringResource(
             id = R.string.stripe_paymentsheet_remove_bank_account_title
         ),
-        messageText = stringResource(
+        messageText = stringResourceIcu(
             id = R.string.stripe_bank_account_ending_in,
             last4
         ),

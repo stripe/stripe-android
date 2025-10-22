@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.text.Html
 import com.stripe.android.R
+import com.stripe.android.core.strings.getStringIcu
 
 /**
  * A class to create BECS Debit Mandate Agreement text for the [BecsDebitWidget].
@@ -12,7 +13,7 @@ class BecsDebitMandateAcceptanceTextFactory(
     private val context: Context
 ) {
     fun create(companyName: String): CharSequence {
-        val mandateAcceptanceText = context.getString(
+        val mandateAcceptanceText = context.getStringIcu(
             R.string.stripe_becs_mandate_acceptance,
             companyName
         )

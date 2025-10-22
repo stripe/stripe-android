@@ -14,13 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getOnSuccessBackgroundColor
 import com.stripe.android.uicore.getSuccessBackgroundColor
+import com.stripe.android.uicore.strings.stringResourceIcu
 import com.stripe.android.uicore.stripeColors
 import java.util.Locale
 
@@ -84,7 +84,7 @@ private fun formatPromoText(
             text
         }
     } else {
-        stringResource(R.string.stripe_paymentsheet_bank_payment_promo_ineligible, text)
+        stringResourceIcu(R.string.stripe_paymentsheet_bank_payment_promo_ineligible, text)
     }
 }
 

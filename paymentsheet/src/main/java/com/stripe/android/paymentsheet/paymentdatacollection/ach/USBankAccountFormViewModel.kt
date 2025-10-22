@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.getStringIcu
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.financialconnections.ElementsSessionContext
@@ -744,7 +745,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
 
         val labelResource = last4?.let {
-            application.getString(
+            application.getStringIcu(
                 R.string.stripe_paymentsheet_payment_method_item_card_number,
                 it,
             )

@@ -20,6 +20,7 @@ import com.stripe.example.R
 import com.stripe.example.StripeFactory
 import com.stripe.example.adapter.SourcesAdapter
 import com.stripe.example.databinding.CreateCardSourceActivityBinding
+import com.stripe.android.core.strings.getStringIcu
 
 /**
  * Activity that lets you redirect for a 3DS source verification.
@@ -189,7 +190,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
         return MaterialAlertDialogBuilder(this)
             .setTitle(this.getString(R.string.authentication_dialog_title))
             .setMessage(
-                getString(
+                getStringIcu(
                     R.string.authentication_dialog_message,
                     cardBrand.displayName,
                     typeData["last4"]

@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.strings.stringResourceIcu
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -106,7 +107,7 @@ internal fun SepaMandateScreen(
                 text = stringResource(id = StripeUiCoreR.string.stripe_paymentsheet_payment_method_sepa_debit),
             )
             Text(
-                text = stringResource(
+                text = stringResourceIcu(
                     id = StripeUiCoreR.string.stripe_sepa_mandate,
                     merchantName
                 ),

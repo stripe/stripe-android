@@ -9,6 +9,7 @@ import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
 import com.stripe.android.cards.Cvc
+import com.stripe.android.core.strings.getStringIcu
 import com.stripe.android.model.CardBrand
 import androidx.appcompat.R as AppCompatR
 
@@ -68,7 +69,7 @@ class CvcEditText @JvmOverloads constructor(
 
     override val accessibilityText: String
         get() {
-            return resources.getString(R.string.stripe_acc_label_cvc_node, text)
+            return resources.getStringIcu(R.string.stripe_acc_label_cvc_node, text)
         }
 
     /**

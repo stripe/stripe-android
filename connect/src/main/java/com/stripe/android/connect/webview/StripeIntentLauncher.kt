@@ -8,6 +8,7 @@ import com.stripe.android.connect.R
 import com.stripe.android.connect.StripeConnectRedirectActivity
 import com.stripe.android.connect.di.StripeConnectComponent
 import com.stripe.android.core.Logger
+import com.stripe.android.core.strings.getStringIcu
 
 internal interface StripeIntentLauncher {
     /**
@@ -49,7 +50,7 @@ internal class StripeIntentLauncherImpl(
             context.startActivity(intent)
         } catch (e: ActivityNotFoundException) {
             logger.error("Failed to open URL with system handler: ${e.message}")
-            toastManagerImpl.showToast(context, context.getString(R.string.stripe_failed_to_open_url, uri.toString()))
+            toastManagerImpl.showToast(context, context.getStringIcu(R.string.stripe_failed_to_open_url, uri.toString()))
         }
     }
 

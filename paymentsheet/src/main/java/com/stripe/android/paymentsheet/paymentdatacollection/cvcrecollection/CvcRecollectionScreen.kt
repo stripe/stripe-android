@@ -53,6 +53,7 @@ import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.elements.TrailingIcon
 import com.stripe.android.uicore.getOuterFormInsets
+import com.stripe.android.uicore.strings.stringResourceIcu
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
@@ -161,7 +162,7 @@ internal fun CvcRecollectionField(
                         contentDescription = "",
                     )
                     Text(
-                        text = stringResource(
+                        text = stringResourceIcu(
                             R.string.stripe_paymentsheet_payment_method_item_card_number,
                             lastFour
                         ),

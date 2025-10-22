@@ -16,7 +16,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
@@ -26,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.text.getSpans
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.uicore.strings.stringResourceIcu
 
 @Composable
 internal fun AnnotatedText(
@@ -149,9 +149,9 @@ internal fun pluralStringResource(
     vararg formatArgs: Any
 ): String {
     val quantityString = if (count == 1) {
-        stringResource(singular, *formatArgs)
+        stringResourceIcu(singular, *formatArgs)
     } else {
-        stringResource(plural, *formatArgs)
+        stringResourceIcu(plural, *formatArgs)
     }
     return quantityString
 }

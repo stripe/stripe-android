@@ -21,6 +21,7 @@ import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.core.strings.getStringIcu
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -255,7 +256,7 @@ class CardNumberEditText internal constructor(
 
     override val accessibilityText: String
         get() {
-            return resources.getString(R.string.stripe_acc_label_card_number_node, text)
+            return resources.getStringIcu(R.string.stripe_acc_label_card_number_node, text)
         }
 
     override fun onDetachedFromWindow() {

@@ -70,6 +70,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
+import com.stripe.android.uicore.strings.stringResourceIcu
 import com.stripe.android.uicore.text.MiddleEllipsisText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -248,7 +249,7 @@ private fun SuccessFooter(
             MiddleEllipsisText(
                 text = when (merchantName) {
                     null -> stringResource(id = R.string.stripe_success_pane_done)
-                    else -> stringResource(id = R.string.stripe_success_pane_done_with_merchant, merchantName)
+                    else -> stringResourceIcu(id = R.string.stripe_success_pane_done_with_merchant, merchantName)
                 }
             )
         }

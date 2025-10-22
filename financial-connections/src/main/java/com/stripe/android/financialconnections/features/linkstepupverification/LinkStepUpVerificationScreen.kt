@@ -48,6 +48,7 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.uicore.strings.stringResourceIcu
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -159,7 +160,7 @@ private fun HeaderSection(
             color = colors.textDefault,
         )
         Text(
-            text = stringResource(id = R.string.stripe_link_stepup_verification_desc, email),
+            text = stringResourceIcu(id = R.string.stripe_link_stepup_verification_desc, email),
             style = typography.bodyMedium,
             color = colors.textDefault,
         )

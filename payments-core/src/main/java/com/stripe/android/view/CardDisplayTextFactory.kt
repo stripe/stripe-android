@@ -9,6 +9,7 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.TypefaceSpan
 import androidx.annotation.ColorInt
 import com.stripe.android.R
+import com.stripe.android.core.strings.getStringIcu
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 
@@ -37,7 +38,7 @@ internal class CardDisplayTextFactory internal constructor(
             return displayString
         }
 
-        val cardEndingIn = resources.getString(R.string.stripe_card_ending_in, brandText, last4)
+        val cardEndingIn = resources.getStringIcu(R.string.stripe_card_ending_in, brandText, last4)
         val totalLength = cardEndingIn.length
         val last4Start = cardEndingIn.indexOf(last4)
         val last4End = last4Start + last4.length
@@ -91,7 +92,7 @@ internal class CardDisplayTextFactory internal constructor(
 
     @JvmSynthetic
     internal fun createUnstyled(card: PaymentMethod.Card): String {
-        return resources.getString(
+        return resources.getStringIcu(
             R.string.stripe_card_ending_in,
             card.brand.displayName,
             card.last4

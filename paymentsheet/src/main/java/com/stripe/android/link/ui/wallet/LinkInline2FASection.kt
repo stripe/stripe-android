@@ -42,6 +42,7 @@ import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementColors
 import com.stripe.android.uicore.elements.OTPElementUI
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.strings.stringResourceIcu
 
 @Composable
 internal fun LinkInline2FASection(
@@ -202,7 +203,7 @@ private fun Title(
     verificationState: VerificationViewState
 ) {
     Text(
-        text = stringResource(
+        text = stringResourceIcu(
             R.string.stripe_link_verification_message,
             verificationState.redactedPhoneNumber
         ),

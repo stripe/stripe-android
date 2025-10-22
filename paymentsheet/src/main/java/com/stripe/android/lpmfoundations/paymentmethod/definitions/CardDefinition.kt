@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
@@ -36,6 +35,7 @@ import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.strings.stringResourceIcu
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
@@ -279,12 +279,12 @@ internal class CombinedLinkMandateElement(
             // when displaying the mandate from Link UI (add card to Link) we always want the
             // non-signup version of the mandate text.
             mandateText = if (linkState?.isExpanded == true && isLinkUI.not()) {
-                stringResource(
+                stringResourceIcu(
                     id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on_v3,
                     formatArgs = arrayOf(merchantName)
                 ).replaceHyperlinks()
             } else {
-                stringResource(
+                stringResourceIcu(
                     id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_off,
                     formatArgs = arrayOf(merchantName)
                 ).replaceHyperlinks()

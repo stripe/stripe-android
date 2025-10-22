@@ -5,7 +5,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
@@ -15,6 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.strings.stringResourceIcu
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
@@ -27,7 +27,7 @@ internal fun MandateTextUI(
     element: MandateTextElement,
     modifier: Modifier = Modifier,
 ) {
-    Mandate(stringResource(element.stringResId, *element.args.toTypedArray()), modifier)
+    Mandate(stringResourceIcu(element.stringResId, *element.args.toTypedArray()), modifier)
 }
 
 @Composable

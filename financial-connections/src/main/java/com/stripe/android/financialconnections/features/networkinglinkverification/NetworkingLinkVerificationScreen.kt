@@ -44,6 +44,7 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.financialconnections.utils.error
+import com.stripe.android.uicore.strings.stringResourceIcu
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -143,7 +144,7 @@ private fun Header(payload: Payload) {
             color = FinancialConnectionsTheme.colors.textDefault,
         )
         Text(
-            text = stringResource(R.string.stripe_networking_verification_desc, payload.phoneNumber),
+            text = stringResourceIcu(R.string.stripe_networking_verification_desc, payload.phoneNumber),
             style = FinancialConnectionsTheme.typography.bodyMedium,
             color = FinancialConnectionsTheme.colors.textDefault,
         )

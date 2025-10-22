@@ -72,6 +72,7 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.menu.Checkbox
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.strings.stringResourceIcu
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
@@ -246,7 +247,7 @@ private fun LinkCheckbox(
     val label = stringResource(id = R.string.stripe_inline_sign_up_header_default_opt_in)
 
     val sublabel = if (!simplifiedCheckbox) {
-        stringResource(R.string.stripe_sign_up_message, merchantName)
+        stringResourceIcu(R.string.stripe_sign_up_message, merchantName)
     } else {
         null
     }

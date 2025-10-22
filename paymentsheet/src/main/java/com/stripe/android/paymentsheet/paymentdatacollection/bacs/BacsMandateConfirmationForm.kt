@@ -35,6 +35,7 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.strings.stringResourceIcu
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.uicore.text.Html
@@ -77,16 +78,16 @@ internal fun BacsMandateConfirmationFormView(
             sortCode = state.sortCode,
             accountNumber = state.accountNumber
         )
-        BacsMandateItem(stringResource(R.string.stripe_paymentsheet_bacs_email_mandate, state.email))
+        BacsMandateItem(stringResourceIcu(R.string.stripe_paymentsheet_bacs_email_mandate, state.email))
         BacsMandateItem(
-            stringResource(
+            stringResourceIcu(
                 R.string.stripe_paymentsheet_bacs_notice_mandate,
                 state.payer.resolve()
             )
         )
         Row {
             BacsMandateItem(
-                stringResource(
+                stringResourceIcu(
                     R.string.stripe_paymentsheet_bacs_protection_mandate,
                     state.debitGuaranteeAsHtml.resolve()
                 ),

@@ -35,6 +35,7 @@ import com.stripe.android.financialconnections.ui.components.pluralStringResourc
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.uicore.strings.stringResourceIcu
 import java.text.SimpleDateFormat
 
 @Composable
@@ -90,7 +91,7 @@ internal fun InstitutionUnplannedDowntimeErrorContent(
         iconContent = {
             InstitutionIcon(institutionIcon = exception.institution.icon?.default ?: "")
         },
-        title = stringResource(
+        title = stringResourceIcu(
             R.string.stripe_error_unplanned_downtime_title,
             exception.institution.name
         ),
@@ -124,11 +125,11 @@ internal fun InstitutionPlannedDowntimeErrorContent(
         iconContent = {
             InstitutionIcon(institutionIcon = exception.institution.icon?.default ?: "")
         },
-        title = stringResource(
+        title = stringResourceIcu(
             R.string.stripe_error_planned_downtime_title,
             exception.institution.name
         ),
-        content = stringResource(
+        content = stringResourceIcu(
             R.string.stripe_error_planned_downtime_desc,
             readableDate
         ),
@@ -217,7 +218,7 @@ internal fun NoAccountsAvailableErrorContent(
         iconContent = {
             InstitutionIcon(institutionIcon = exception.institution.icon?.default ?: "")
         },
-        title = stringResource(
+        title = stringResourceIcu(
             R.string.stripe_account_picker_error_no_account_available_title,
             exception.institution.name
         ),

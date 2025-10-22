@@ -55,6 +55,7 @@ import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementColors
 import com.stripe.android.uicore.elements.OTPElementUI
+import com.stripe.android.uicore.strings.stringResourceIcu
 import com.stripe.android.uicore.text.Html
 import kotlinx.coroutines.delay
 
@@ -112,7 +113,7 @@ internal fun VerificationBody(
         Spacer(modifier = Modifier.size(8.dp))
 
         Text(
-            text = stringResource(R.string.stripe_link_verification_message_short, state.redactedPhoneNumber),
+            text = stringResourceIcu(R.string.stripe_link_verification_message_short, state.redactedPhoneNumber),
             modifier = Modifier
                 .testTag(VERIFICATION_SUBTITLE_TAG)
                 .fillMaxWidth(),

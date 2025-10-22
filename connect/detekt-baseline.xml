@@ -2,5 +2,7 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>MaxLineLength:StripeIntentLauncher.kt$StripeIntentLauncherImpl$toastManagerImpl.showToast(context, context.getStringIcu(R.string.stripe_failed_to_open_url, uri.toString()))</ID>
+    <ID>MaximumLineLength:StripeIntentLauncher.kt$StripeIntentLauncherImpl$ </ID>
   </CurrentIssues>
 </SmellBaseline>
