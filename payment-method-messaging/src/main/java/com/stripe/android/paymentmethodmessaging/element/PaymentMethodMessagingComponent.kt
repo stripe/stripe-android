@@ -1,4 +1,4 @@
-package com.stripe.android.paymentmethodmessaging.view.injection
+package com.stripe.android.paymentmethodmessaging.element
 
 import android.app.Application
 import com.stripe.android.core.injection.CoreCommonModule
@@ -20,6 +20,8 @@ import javax.inject.Singleton
     ]
 )
 internal interface PaymentMethodMessagingComponent {
+    @OptIn(PaymentMethodMessagingElementPreview::class)
+    val element: PaymentMethodMessagingElement
 
     @Component.Builder
     interface Builder {
