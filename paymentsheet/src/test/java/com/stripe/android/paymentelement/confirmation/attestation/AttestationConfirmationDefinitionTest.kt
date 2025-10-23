@@ -255,7 +255,7 @@ internal class AttestationConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'toResult' should return 'NextStep' unchanged for Success result with Saved option`() {
+    fun `'toResult' should return 'NextStep' with attestationToken for Success result with Saved option`() {
         val definition = createAttestationConfirmationDefinition()
         val testToken = "test_token"
 
@@ -270,8 +270,11 @@ internal class AttestationConfirmationDefinitionTest {
 
         val nextStepResult = result.asNextStep()
 
-        // For saved options, the token attachment is handled by interceptors
-        assertThat(nextStepResult.confirmationOption).isEqualTo(PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED)
+        val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
+            attestationToken = testToken
+        )
+
+        assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
         assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
