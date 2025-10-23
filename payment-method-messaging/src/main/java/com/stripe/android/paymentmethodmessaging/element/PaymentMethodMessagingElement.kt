@@ -147,7 +147,7 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
     class Appearance {
         private var theme: Theme = Theme.LIGHT
         private var font: Font.State? = null
-        private var colors: Colors.State = Colors().build()
+        private var colors: Colors.State? = null
 
         /**
          * The theme of the payment method icons to display.
@@ -181,7 +181,7 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
         internal fun build() = State(
             theme = theme,
             font = font,
-            colors = colors,
+            colors = colors ?: Colors().build(),
         )
 
         /**
