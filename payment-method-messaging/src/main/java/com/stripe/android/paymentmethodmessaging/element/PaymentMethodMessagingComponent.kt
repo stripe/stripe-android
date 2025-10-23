@@ -1,11 +1,9 @@
-package com.stripe.android.paymentmethodmessaging.injection
+package com.stripe.android.paymentmethodmessaging.element
 
 import android.app.Application
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
-import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElement
-import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElementPreview
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
 import dagger.Component

@@ -1,4 +1,4 @@
-package com.stripe.android.paymentmethodmessaging.injection
+package com.stripe.android.paymentmethodmessaging.element
 
 import android.app.Application
 import android.content.Context

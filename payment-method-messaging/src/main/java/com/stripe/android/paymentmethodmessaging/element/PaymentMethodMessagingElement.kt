@@ -8,7 +8,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentmethodmessaging.injection.DaggerPaymentMethodMessagingComponent
 import com.stripe.android.uicore.StripeThemeDefaults
 import java.util.Locale
 import javax.inject.Inject
