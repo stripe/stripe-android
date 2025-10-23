@@ -34,7 +34,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * End-to-end tests for Confirmation Token flow with Deferred Server-Side Confirmation.
+ * End-to-end tests for Confirmation Token flow.
  */
 @RunWith(AndroidJUnit4::class)
 internal class TestConfirmationToken : BasePlaygroundTest() {
@@ -53,19 +53,19 @@ internal class TestConfirmationToken : BasePlaygroundTest() {
     ) { settings ->
         settings[CustomerSessionSettingsDefinition] = true
         settings[CustomerSessionSaveSettingsDefinition] = true
-        settings[InitializationTypeSettingsDefinition] = InitializationType.DeferredServerSideConfirmation
         settings[ConfirmationTokenSettingsDefinition] = true
         additionalSettings(settings)
     }
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun testSavedCardWithConfirmationToken() {
+    fun testSavedCardWithConfirmationToken_withSSC() {
         val cardNumber = "6011111111111117"
 
         val testParameters = createConfirmationTokenParams("card") { settings ->
             settings[CustomerSettingsDefinition] = CustomerType.NEW
             settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT
+            settings[InitializationTypeSettingsDefinition] = InitializationType.DeferredServerSideConfirmation
         }.copy(
             authorizationAction = null,
             saveForFutureUseCheckboxVisible = true,
@@ -97,11 +97,12 @@ internal class TestConfirmationToken : BasePlaygroundTest() {
     }
 
     @Test
-    fun testBankAccountWithConfirmationTokenInCustomFlow() {
+    fun testBankAccountWithConfirmationTokenInCustomFlow_withCSC() {
         val testParameters = createConfirmationTokenParams("us_bank_account") { settings ->
             settings[CountrySettingsDefinition] = Country.US
             settings[CurrencySettingsDefinition] = Currency.USD
             settings[DelayedPaymentMethodsSettingsDefinition] = true
+            settings[InitializationTypeSettingsDefinition] = InitializationType.DeferredClientSideConfirmation
         }
 
         testDriver.confirmCustomUSBankAccountAndBuy(
@@ -110,7 +111,7 @@ internal class TestConfirmationToken : BasePlaygroundTest() {
     }
 
     @Test
-    fun testCashAppWithConfirmationTokenInEmbedded() {
+    fun testCashAppWithConfirmationTokenInEmbedded_withSSC() {
         val testParameters = createConfirmationTokenParams("cashapp") { settings ->
             settings[CountrySettingsDefinition] = Country.US
             settings[CurrencySettingsDefinition] = Currency.USD
@@ -120,6 +121,7 @@ internal class TestConfirmationToken : BasePlaygroundTest() {
             ).joinToString(",")
             settings[EmbeddedFormSheetActionSettingDefinition] =
                 EmbeddedFormSheetActionSettingDefinition.FormSheetAction.Confirm
+            settings[InitializationTypeSettingsDefinition] = InitializationType.DeferredServerSideConfirmation
         }
 
         testDriver.confirmEmbedded(
