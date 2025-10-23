@@ -1,5 +1,6 @@
 package com.stripe.android.paymentmethodmessaging.view.messagingelement
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -8,6 +9,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
@@ -23,6 +25,7 @@ internal class TermsActivity : AppCompatActivity() {
         TermsActivityArgs.fromIntent(intent)
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val termsArgs = args
@@ -30,8 +33,6 @@ internal class TermsActivity : AppCompatActivity() {
             finish()
             return
         }
-
-        renderE
 
         setContent {
             StripeTheme {
@@ -45,9 +46,11 @@ internal class TermsActivity : AppCompatActivity() {
                         finish()
                     }
                 ) {
-                    AndroidView(factory = { context ->
+                    AndroidView(
+                        factory = { context ->
                         WebView(context).apply {
-                            webViewClient = WebViewClient() // Ensure links open inside the WebView
+                            webViewClient = WebViewClient()
+                            settings.javaScriptEnabled = true
                             loadUrl(termsArgs.learnMoreUrl + termsArgs.theme.toQueryParam())
                         }
                     })
