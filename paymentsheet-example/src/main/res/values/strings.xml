@@ -87,6 +87,4 @@
     <string name="unable_to_load_checkout_button">Try again</string>
     <string name="success">Success</string>
     <string name="finish">Finish</string>
-    <string name="messaging_element_title">Payment Method Messaging Element</string>
-    <string name="messaging_element_subtitle">Display BNPL promotions</string>
 </resources>

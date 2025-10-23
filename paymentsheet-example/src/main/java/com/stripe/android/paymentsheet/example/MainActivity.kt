@@ -38,7 +38,6 @@ import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedExamp
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.customersheet.CustomerSheetExampleActivity
-import com.stripe.android.paymentsheet.example.samples.ui.messagingelement.MessagingElementActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow.CustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
@@ -103,12 +102,6 @@ class MainActivity : AppCompatActivity() {
                 klass = AddressElementExampleActivity::class.java,
                 section = MenuItem.Section.AddressElement,
             ),
-            MenuItem(
-                titleResId = R.string.messaging_element_title,
-                subtitleResId = R.string.messaging_element_subtitle,
-                klass = MessagingElementActivity::class.java,
-                section = MenuItem.Section.PaymentMethodMessagingElement,
-            )
         )
     }
 
@@ -148,7 +141,6 @@ private data class MenuItem(
         Embedded,
         AddressElement,
         Onramp,
-        PaymentMethodMessagingElement
     }
 }
 
@@ -192,11 +184,6 @@ private fun MainScreen(items: List<MenuItem>) {
         Section(
             title = "Onramp",
             items = groupedItems.getOrElse(MenuItem.Section.Onramp) { emptyList() }
-        )
-
-        Section(
-            title = "Payment Method Messaging Element",
-            items = groupedItems.getOrElse(MenuItem.Section.PaymentMethodMessagingElement) { emptyList() }
         )
 
         item {
