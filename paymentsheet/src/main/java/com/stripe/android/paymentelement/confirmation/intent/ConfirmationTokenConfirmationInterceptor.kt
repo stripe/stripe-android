@@ -38,7 +38,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     @Assisted private val createIntentCallback: CreateIntentWithConfirmationTokenCallback,
     @Assisted(CUSTOMER_ID) private val customerId: String?,
     @Assisted(EPHEMERAL_KEY_SECRET) private val ephemeralKeySecret: String?,
-    @Assisted(CLIENT_ATTRIBUTION_METADATA) private val clientAttributionMetadata: ClientAttributionMetadata?,
+    @Assisted private val clientAttributionMetadata: ClientAttributionMetadata?,
     private val context: Context,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
@@ -285,14 +285,13 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             createIntentCallback: CreateIntentWithConfirmationTokenCallback,
             @Assisted(CUSTOMER_ID) customerId: String?,
             @Assisted(EPHEMERAL_KEY_SECRET) ephemeralKeySecret: String?,
-            @Assisted(CLIENT_ATTRIBUTION_METADATA) clientAttributionMetadata: ClientAttributionMetadata?,
+            @Assisted clientAttributionMetadata: ClientAttributionMetadata?,
         ): ConfirmationTokenConfirmationInterceptor
     }
 
     companion object {
         private const val CUSTOMER_ID = "customerId"
         private const val EPHEMERAL_KEY_SECRET = "ephemeralKeySecret"
-        private const val CLIENT_ATTRIBUTION_METADATA = "clientAttributionMetadata"
 
         private const val ERROR_MISSING_EPHEMERAL_KEY_SECRET =
             "Ephemeral key secret is required to confirm with saved payment method"
