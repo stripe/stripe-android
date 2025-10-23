@@ -368,12 +368,6 @@ class PaymentSheet internal constructor(
             return PaymentSheet(DefaultPaymentSheetLauncher(activity, resultCallback))
         }
 
-        /**
-         * Returns a [PaymentSheet].
-         *
-         * @param activity The Activity that is presenting [PaymentSheet].
-         * @param signal
-         */
         @ReactNativeSdkInternal
         fun build(activity: ComponentActivity, signal: UnregisterSignal): PaymentSheet {
             initializeCallbacks()

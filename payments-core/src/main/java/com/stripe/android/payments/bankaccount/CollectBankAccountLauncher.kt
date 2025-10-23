@@ -94,12 +94,6 @@ interface CollectBankAccountLauncher {
             )
         }
 
-        /**
-         * Create a [CollectBankAccountLauncher] instance with [ComponentActivity].
-         *
-         * This API registers an [ActivityResultLauncher] into the [ComponentActivity],  it needs
-         * to be called before the [ComponentActivity] is created.
-         */
         @ReactNativeSdkInternal
         fun create(
             activity: ComponentActivity,

@@ -43,13 +43,6 @@ class AddressLauncher internal constructor(
         },
     )
 
-    /**
-     * Constructor to be used when launching the address element from an Activity.
-     *
-     * @param activity  the Activity that is presenting the address element.
-     * @param signal
-     * @param callback  called with the result after the address element is dismissed.
-     */
     @ReactNativeSdkInternal
     constructor(
         activity: ComponentActivity,

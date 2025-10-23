@@ -81,13 +81,6 @@ class FinancialConnectionsSheet internal constructor(
             )
         }
 
-        /**
-         * Constructor to be used when launching the [FinancialConnectionsSheet] from an Activity.
-         *
-         * @param activity  the Activity that is presenting the [FinancialConnectionsSheet].
-         * @param signal
-         * @param callback  called with the result of the connections session after the connections sheet is dismissed.
-         */
         @JvmStatic
         @ReactNativeSdkInternal
         fun create(
@@ -145,13 +138,6 @@ class FinancialConnectionsSheet internal constructor(
             )
         }
 
-        /**
-         * Constructor to be used when launching the connections sheet from an Activity.
-         *
-         * @param activity  the Activity that is presenting the connections sheet.
-         * @param signal
-         * @param callback  called with the result of the connections session after the connections sheet is dismissed.
-         */
         @JvmStatic
         @ReactNativeSdkInternal
         fun createForBankAccountToken(
