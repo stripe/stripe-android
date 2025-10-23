@@ -53,7 +53,6 @@ import com.stripe.android.uicore.getRawValueFromDimenResource
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
-import kotlin.collections.List
 
 /**
  * A drop-in class that presents a bottom sheet to collect and process a customer's payment.
