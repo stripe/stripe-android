@@ -1963,6 +1963,7 @@ class PaymentSheetEventTest {
             currency = "usd",
             isDeferred = false,
             isSpt = false,
+            isConfirmationToken = false,
             linkEnabled = false,
             googlePaySupported = false,
             deferredIntentConfirmationType = null,
