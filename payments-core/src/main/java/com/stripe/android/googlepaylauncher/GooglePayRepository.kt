@@ -78,7 +78,8 @@ internal class DefaultGooglePayRepository(
     private val googlePayJsonFactory = GooglePayJsonFactory(
         GooglePayConfig(context),
         cardBrandFilter = cardBrandFilter,
-        additionalEnabledNetworks = additionalEnabledNetworks)
+        additionalEnabledNetworks = additionalEnabledNetworks
+    )
 
     private val googlePayAvailabilityClient: GooglePayAvailabilityClient by lazy {
         GooglePayRepository.googlePayAvailabilityClientFactory.create(
