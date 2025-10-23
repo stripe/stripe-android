@@ -11,14 +11,16 @@ internal sealed class Message {
         val lightImage: MessagingImage,
         val darkImage: MessagingImage,
         val flatImage: MessagingImage,
-        val message: String
+        val message: String,
+        val learnMoreUrl: String
     ) : Message()
 
     data class MultiPartner(
         val lightImages: List<MessagingImage>,
         val darkImages: List<MessagingImage>,
         val flatImages: List<MessagingImage>,
-        val message: String
+        val message: String,
+        val learnMoreUrl: String
     ) : Message()
 
     data object Empty : Message()
@@ -50,7 +52,8 @@ internal object MessageTransformer {
             lightImage = lightImage,
             darkImage = darkImage,
             flatImage = flatImage,
-            message = inlinePromo
+            message = inlinePromo,
+            learnMoreUrl = paymentMethodMessage.learnMoreUrl ?: ""
         )
     }
 
@@ -60,7 +63,8 @@ internal object MessageTransformer {
             lightImages = paymentMethodMessage.lightImages,
             darkImages = paymentMethodMessage.darkImages,
             flatImages = paymentMethodMessage.flatImages,
-            message = promo
+            message = promo,
+            learnMoreUrl = paymentMethodMessage.learnMoreUrl ?: ""
         )
     }
 }

@@ -1,2 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+    <activity
+        android:name=".view.messagingelement.TermsActivity"
+        android:theme="@style/StripePaymentSheetDefaultTheme"
+        android:exported="false" />
+    </application>
+</manifest>

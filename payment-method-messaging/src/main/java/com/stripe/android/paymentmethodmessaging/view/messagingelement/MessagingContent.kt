@@ -1,5 +1,7 @@
 package com.stripe.android.paymentmethodmessaging.view.messagingelement
 
+import android.content.Intent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -56,12 +59,23 @@ internal class MessagingContent(
         message: Message.SinglePartner,
         appearance: PaymentMethodMessagingElement.Appearance.State
     ) {
+        val context = LocalContext.current
         val image = when (appearance.theme) {
             PaymentMethodMessagingElement.Appearance.Theme.LIGHT -> message.lightImage
             PaymentMethodMessagingElement.Appearance.Theme.DARK -> message.darkImage
             PaymentMethodMessagingElement.Appearance.Theme.FLAT -> message.flatImage
         }
-        Row {
+        Row(Modifier.clickable {
+            context.startActivity(
+                TermsActivityArgs.createIntent(
+                    context,
+                    TermsActivityArgs(
+                        learnMoreUrl = message.learnMoreUrl,
+                        theme = appearance.theme
+                    )
+                )
+            )
+        }) {
             TextWithLogo(
                 label = message.message,
                 image = image,
@@ -75,9 +89,20 @@ internal class MessagingContent(
         message: Message.MultiPartner,
         appearance: PaymentMethodMessagingElement.Appearance.State
     ) {
+        val context = LocalContext.current
         val style = appearance.font?.toTextStyle()
             ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Normal)
-        Column {
+        Column(Modifier.clickable {
+            context.startActivity(
+                TermsActivityArgs.createIntent(
+                    context,
+                    TermsActivityArgs(
+                        learnMoreUrl = message.learnMoreUrl,
+                        theme = appearance.theme
+                    )
+                )
+            )
+        }) {
             Images(getImages(message, appearance.theme))
             Row {
                 Text(
