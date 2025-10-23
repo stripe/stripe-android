@@ -167,7 +167,6 @@ internal fun SeamlessSignInScreen(
     onNotMe: () -> Unit
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
         Image(
             painter = painterResource(id = android.R.drawable.ic_menu_myplaces),
             contentDescription = "User Icon",
