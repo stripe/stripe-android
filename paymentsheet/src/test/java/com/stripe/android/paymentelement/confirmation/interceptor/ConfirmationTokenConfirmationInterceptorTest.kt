@@ -263,6 +263,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
             ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                isConfirmationToken = true,
                 completedFullPaymentFlow = true,
             )
         )
@@ -304,6 +305,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>(
                     launcherArguments = IntentConfirmationDefinition.Args.NextAction("pi_123_secret_456"),
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    isConfirmationToken = true,
                     receivesResultInProcess = false,
                 )
             )
@@ -335,6 +337,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
             ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                 intent = intent,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                isConfirmationToken = true,
                 completedFullPaymentFlow = true,
             )
         )
@@ -490,6 +493,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                     intent = PaymentIntentFixtures.PI_SUCCEEDED,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    isConfirmationToken = true,
                     completedFullPaymentFlow = true,
                 )
             )
@@ -531,6 +535,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                     intent = PaymentIntentFixtures.PI_SUCCEEDED,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    isConfirmationToken = true,
                     completedFullPaymentFlow = true,
                 )
             )

@@ -360,6 +360,33 @@ class DefaultEventReporterTest {
         }
 
     @Test
+    fun `onPaymentSuccess() with confirmation token should include isConfirmationToken in analytics`() =
+        runTest(testDispatcher) {
+            // Log initial event so that duration is tracked
+            val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+                simulateSuccessfulSetup()
+                onShowExistingPaymentOptions()
+            }
+            analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+
+            completeEventReporter.onPaymentSuccess(
+                paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                deferredIntentConfirmationType = null,
+                isConfirmationToken = true,
+            )
+
+            verify(analyticsRequestExecutor).executeAsync(
+                argWhere { req ->
+                    req.params["event"] == "mc_complete_payment_savedpm_success" &&
+                        req.params["is_confirmation_tokens"] == true &&
+                        req.params["duration"] == 1f &&
+                        req.params["currency"] == "usd" &&
+                        req.params["locale"] == "en_US"
+                }
+            )
+        }
+
+    @Test
     fun `onPaymentFailure() should fire analytics request with expected event value`() = runTest(testDispatcher) {
         // Log initial event so that duration is tracked
         val completeEventReporter = createEventReporter(
