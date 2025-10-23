@@ -1,0 +1,57 @@
+apply from: configs.androidApplication
+
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+
+// Read values from gradle.properties or system environment variable
+def getPublishableKey() {
+    return findProperty('STRIPE_EXAMPLE_PUBLISHABLE_KEY') ?: ""
+}
+
+def getAccountId() {
+    return findProperty('STRIPE_ACCOUNT_ID') ?: ""
+}
+
+dependencies {
+    implementation project(':payment-method-messaging')
+    implementation project(':payments-core')
+
+    implementation libs.androidx.viewModel
+    implementation libs.compose.activity
+    implementation libs.compose.material
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+    implementation libs.material
+
+    debugImplementation libs.leakCanary
+}
+
+android {
+    defaultConfig {
+        vectorDrawables.useSupportLibrary = true
+
+        manifestPlaceholders = [
+                PUBLISHABLE_KEY: getPublishableKey(),
+                STRIPE_ACCOUNT_ID: getAccountId()
+        ]
+    }
+
+    lint {
+        disable 'MissingTranslation'
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+        androidTest {
+            setRoot('src/test')
+        }
+    }
+
+    buildFeatures {
+        compose true
+    }
+}
