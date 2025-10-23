@@ -3171,7 +3171,8 @@ class PaymentSheet internal constructor(
      * @param buttonType The Google Pay button type to use. Set to "Pay" by default. See
      * [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment)
      * for more information on button types.
-     * * @param additionalEnabledNetworks An optional List<String> to signal GooglePay to display additional enabled networks (e.g. 'INTERAC')
+     * @param additionalEnabledNetworks An optional List<String> to signal GooglePay to
+     * display additional enabled networks (e.g. 'INTERAC')
      */
     @Parcelize
     data class GooglePayConfiguration @JvmOverloads constructor(
