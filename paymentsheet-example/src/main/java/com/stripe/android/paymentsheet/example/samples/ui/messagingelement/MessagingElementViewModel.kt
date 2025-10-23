@@ -17,8 +17,8 @@ internal class MessagingElementViewModel(
 ) : AndroidViewModel(application) {
 
     val paymentMethodMessagingElement = PaymentMethodMessagingElement.create(getApplication())
-    private val _result = MutableStateFlow<PaymentMethodMessagingElement.Result?>(null)
-    val result: StateFlow<PaymentMethodMessagingElement.Result?> = _result.asStateFlow()
+    private val _Configure_result = MutableStateFlow<PaymentMethodMessagingElement.ConfigureResult?>(null)
+    val configureResult: StateFlow<PaymentMethodMessagingElement.ConfigureResult?> = _Configure_result.asStateFlow()
 
     private val _config = MutableStateFlow(Config())
     val config: StateFlow<Config> = _config.asStateFlow()
@@ -28,7 +28,7 @@ internal class MessagingElementViewModel(
             PaymentMethod.Type.fromCode(it)
         }
         viewModelScope.launch {
-            _result.value = paymentMethodMessagingElement.configure(
+            _Configure_result.value = paymentMethodMessagingElement.configure(
                 configuration = PaymentMethodMessagingElement.Configuration()
                     .amount(config.value.amount)
                     .currency(config.value.currency)

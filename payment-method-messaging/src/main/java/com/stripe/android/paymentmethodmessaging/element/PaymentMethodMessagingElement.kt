@@ -23,9 +23,9 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
      */
     suspend fun configure(
         configuration: Configuration
-    ): Result {
+    ): ConfigureResult {
         configuration.build()
-        return Result.NoContent
+        return ConfigureResult.NoContent()
     }
 
     /**
@@ -49,26 +49,26 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
      * The result of a [configure] call.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    sealed interface Result {
+    sealed interface ConfigureResult {
 
         /**
          * The configuration succeeded and [Content] will display a view.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class Succeeded internal constructor() : Result
+        class Succeeded internal constructor() : ConfigureResult
 
         /**
          * The configuration succeeded but no content is available to display. (e.g. the amount is less than the
          * minimum for available payment methods).
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class NoContent internal constructor() : Result
+        class NoContent internal constructor() : ConfigureResult
 
         /**
          * The configure call failed e.g. due to network failure or because of an invalid [Configuration].
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class Failed internal constructor(val error: Throwable) : Result
+        class Failed internal constructor(val error: Throwable) : ConfigureResult
     }
 
     /**

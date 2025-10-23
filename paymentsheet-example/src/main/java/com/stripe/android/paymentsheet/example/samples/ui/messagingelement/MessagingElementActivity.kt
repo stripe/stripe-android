@@ -58,7 +58,7 @@ internal class MessagingElementActivity : AppCompatActivity() {
                     Text("Configure")
                 }
 
-                val result by viewModel.result.collectAsState()
+                val result by viewModel.configureResult.collectAsState()
                 ResultToast(result)
             }
         }
@@ -111,8 +111,8 @@ internal class MessagingElementActivity : AppCompatActivity() {
     }
 
     @Composable
-    private fun ResultToast(result: PaymentMethodMessagingElement.Result?) {
+    private fun ResultToast(configureResult: PaymentMethodMessagingElement.ConfigureResult?) {
         val context = LocalContext.current
-        result?.let { Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show() }
+        configureResult?.let { Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show() }
     }
 }
