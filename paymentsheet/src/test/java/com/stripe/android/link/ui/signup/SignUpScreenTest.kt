@@ -251,11 +251,10 @@ internal class SignUpScreenTest {
         linkAccountManager._suggestedEmail.value = "test@example.com"
         composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithText("Did you mean test@example.com?")
+        composeTestRule.onNodeWithText("Did you mean test@example.com? Yes, update.", substring = true)
             .assertIsDisplayed()
-        composeTestRule.onNodeWithText("Yes, update")
+        composeTestRule.onNodeWithText("Yes, update", substring = true)
             .assertIsDisplayed()
-            .assertHasClickAction()
     }
 
     @Test
@@ -320,7 +319,7 @@ internal class SignUpScreenTest {
         linkAccountManager._suggestedEmail.value = null
         composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithText("Did you mean test@example.com?")
+        composeTestRule.onNodeWithText("Did you mean test@example.com?", substring = true)
             .assertDoesNotExist()
     }
 

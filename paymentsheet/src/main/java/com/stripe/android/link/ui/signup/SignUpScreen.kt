@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,10 +30,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -323,32 +324,25 @@ private fun EmailSuggestion(
 
     val annotatedString = buildEmailSuggestionAnnotatedString(
         fullText = fullText,
-        updateText = updateText
+        updateText = updateText,
+        onSuggestedEmailClick = { onSuggestedEmailClick(suggestedEmail) }
     )
 
-    ClickableText(
+    Text(
         text = annotatedString,
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp)
             .testTag("emailSuggestionUpdateTag"),
-        style = LinkTheme.typography.detail.copy(textAlign = TextAlign.Center),
-        onClick = { offset ->
-            annotatedString.getStringAnnotations(
-                tag = "CLICKABLE",
-                start = offset,
-                end = offset
-            ).firstOrNull()?.let {
-                onSuggestedEmailClick(suggestedEmail)
-            }
-        }
+        style = LinkTheme.typography.detail.copy(textAlign = TextAlign.Center)
     )
 }
 
 @Composable
 private fun buildEmailSuggestionAnnotatedString(
     fullText: String,
-    updateText: String
+    updateText: String,
+    onSuggestedEmailClick: () -> Unit
 ) = buildAnnotatedString {
     val updateStartIndex = fullText.indexOf(updateText)
     val baseStyle = detailSpanStyle(LinkTheme.colors.textSecondary)
@@ -359,11 +353,16 @@ private fun buildEmailSuggestionAnnotatedString(
             append(fullText.substring(0, updateStartIndex))
         }
 
-        pushStringAnnotation(tag = "CLICKABLE", annotation = "update")
-        withStyle(clickableStyle) {
-            append(updateText)
+        withLink(
+            LinkAnnotation.Clickable(
+                tag = "update",
+                linkInteractionListener = { onSuggestedEmailClick() }
+            )
+        ) {
+            withStyle(clickableStyle) {
+                append(updateText)
+            }
         }
-        pop()
 
         withStyle(baseStyle) {
             append(fullText.substring(updateStartIndex + updateText.length))
