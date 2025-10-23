@@ -24,12 +24,6 @@ internal class TestLink : BasePlaygroundTest() {
     }
 
     @Test
-    @Ignore("neutral-culminate")
-    fun testLinkInlineCustom() {
-        testDriver.testLinkCustom(linkNewUser)
-    }
-
-    @Test
     fun testLinkPaymentWithBankAccountInPaymentMethodMode() {
         val testParameters = makeLinkTestParameters(passthroughMode = false)
         testDriver.confirmWithBankAccountInLink(testParameters)
