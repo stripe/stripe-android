@@ -6,6 +6,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenClientContextParams
@@ -37,6 +38,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     @Assisted private val createIntentCallback: CreateIntentWithConfirmationTokenCallback,
     @Assisted(CUSTOMER_ID) private val customerId: String?,
     @Assisted(EPHEMERAL_KEY_SECRET) private val ephemeralKeySecret: String?,
+    @Assisted(CLIENT_ATTRIBUTION_METADATA) private val clientAttributionMetadata: ClientAttributionMetadata?,
     private val context: Context,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
@@ -53,6 +55,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             confirmationTokenParams = prepareConfirmationTokenParams(
                 confirmationOption,
                 shippingValues,
+                clientAttributionMetadata,
             ),
             options = requestOptions,
         ).fold(
@@ -86,6 +89,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             confirmationTokenParams = prepareConfirmationTokenParams(
                 confirmationOption,
                 shippingValues,
+                clientAttributionMetadata,
             ),
             options = if (paymentMethod.customerId != null) {
                 requestOptions.copy(
@@ -205,6 +209,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     private fun prepareConfirmationTokenParams(
         confirmationOption: PaymentMethodConfirmationOption,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): ConfirmationTokenParams {
         val confirmationOption = confirmationOption.updatedForDeferredIntent(intentConfiguration)
         return ConfirmationTokenParams(
@@ -236,7 +241,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 prepareConfirmationTokenClientContextParams(
                     confirmationOption.optionsParams
                 )
-            }
+            },
+            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 
@@ -279,12 +285,15 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             createIntentCallback: CreateIntentWithConfirmationTokenCallback,
             @Assisted(CUSTOMER_ID) customerId: String?,
             @Assisted(EPHEMERAL_KEY_SECRET) ephemeralKeySecret: String?,
+            @Assisted(CLIENT_ATTRIBUTION_METADATA) clientAttributionMetadata: ClientAttributionMetadata?,
         ): ConfirmationTokenConfirmationInterceptor
     }
 
     companion object {
         private const val CUSTOMER_ID = "customerId"
         private const val EPHEMERAL_KEY_SECRET = "ephemeralKeySecret"
+        private const val CLIENT_ATTRIBUTION_METADATA = "clientAttributionMetadata"
+
         private const val ERROR_MISSING_EPHEMERAL_KEY_SECRET =
             "Ephemeral key secret is required to confirm with saved payment method"
     }

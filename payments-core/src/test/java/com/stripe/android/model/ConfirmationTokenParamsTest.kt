@@ -330,4 +330,21 @@ class ConfirmationTokenParamsTest {
         val paramMap = params.toParamMap()
         assertThat(paramMap.containsKey("set_as_default_payment_method")).isFalse()
     }
+
+    @Test
+    fun toParamMap_withClientAttributionMetadata_setsClientAttributionMetadataParam() {
+        val clientAttributionMetadata = ClientAttributionMetadata(
+            elementsSessionConfigId = "elements_session_123",
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+        )
+        val params = ConfirmationTokenParams(
+            clientAttributionMetadata = clientAttributionMetadata
+        )
+
+        assertThat(params.toParamMap()).containsEntry(
+            "client_attribution_metadata",
+            clientAttributionMetadata.toParamMap(),
+        )
+    }
 }
