@@ -29,14 +29,12 @@ internal class TestLink : BasePlaygroundTest() {
         testDriver.testLinkCustom(linkNewUser)
     }
 
-    @Ignore("celadon-support")
     @Test
     fun testLinkPaymentWithBankAccountInPaymentMethodMode() {
         val testParameters = makeLinkTestParameters(passthroughMode = false)
         testDriver.confirmWithBankAccountInLink(testParameters)
     }
 
-    @Ignore("celadon-support")
     @Test
     fun testLinkPaymentWithBankAccountInPassthroughMode() {
         val testParameters = makeLinkTestParameters(passthroughMode = true)
