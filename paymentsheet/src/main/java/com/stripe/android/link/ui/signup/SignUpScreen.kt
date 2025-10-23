@@ -2,15 +2,15 @@ package com.stripe.android.link.ui.signup
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,8 +31,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -263,7 +266,7 @@ private fun SecondaryFields(
 }
 
 @Composable
-private fun SignUpHeader() {
+private fun ColumnScope.SignUpHeader() {
     Text(
         text = stringResource(R.string.stripe_link_sign_up_header_v2),
         modifier = Modifier
@@ -315,33 +318,70 @@ private fun EmailSuggestion(
     suggestedEmail: String,
     onSuggestedEmailClick: (String) -> Unit
 ) {
-    val context = LocalContext.current
-    val suggestionText = context.getString(R.string.stripe_link_email_suggestion, suggestedEmail)
     val updateText = stringResource(R.string.stripe_link_email_suggestion_update)
+    val fullText = stringResource(R.string.stripe_link_email_suggestion, suggestedEmail, updateText)
 
-    Row(
+    val annotatedString = buildEmailSuggestionAnnotatedString(
+        fullText = fullText,
+        updateText = updateText
+    )
+
+    ClickableText(
+        text = annotatedString,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = suggestionText,
-            style = LinkTheme.typography.detail,
-            color = LinkTheme.colors.textSecondary
-        )
-        Spacer(modifier = Modifier.size(4.dp))
-        Text(
-            text = updateText,
-            modifier = Modifier
-                .testTag("emailSuggestionUpdateTag")
-                .clickable { onSuggestedEmailClick(suggestedEmail) },
-            style = LinkTheme.typography.detail,
-            color = LinkTheme.colors.textBrand
-        )
+            .padding(bottom = 8.dp)
+            .testTag("emailSuggestionUpdateTag"),
+        style = LinkTheme.typography.detail.copy(textAlign = TextAlign.Center),
+        onClick = { offset ->
+            annotatedString.getStringAnnotations(
+                tag = "CLICKABLE",
+                start = offset,
+                end = offset
+            ).firstOrNull()?.let {
+                onSuggestedEmailClick(suggestedEmail)
+            }
+        }
+    )
+}
+
+@Composable
+private fun buildEmailSuggestionAnnotatedString(
+    fullText: String,
+    updateText: String
+) = buildAnnotatedString {
+    val updateStartIndex = fullText.indexOf(updateText)
+    val baseStyle = detailSpanStyle(LinkTheme.colors.textSecondary)
+    val clickableStyle = detailSpanStyle(LinkTheme.colors.textBrand)
+
+    if (updateStartIndex >= 0) {
+        withStyle(baseStyle) {
+            append(fullText.substring(0, updateStartIndex))
+        }
+
+        pushStringAnnotation(tag = "CLICKABLE", annotation = "update")
+        withStyle(clickableStyle) {
+            append(updateText)
+        }
+        pop()
+
+        withStyle(baseStyle) {
+            append(fullText.substring(updateStartIndex + updateText.length))
+        }
+    } else {
+        withStyle(baseStyle) {
+            append(fullText)
+        }
     }
 }
+
+@Composable
+private fun detailSpanStyle(color: androidx.compose.ui.graphics.Color) = SpanStyle(
+    color = color,
+    fontSize = LinkTheme.typography.detail.fontSize,
+    fontFamily = LinkTheme.typography.detail.fontFamily,
+    fontWeight = LinkTheme.typography.detail.fontWeight
+)
 
 internal const val SIGN_UP_HEADER_TAG = "signUpHeaderTag"
 internal const val SIGN_UP_ERROR_TAG = "signUpErrorTag"

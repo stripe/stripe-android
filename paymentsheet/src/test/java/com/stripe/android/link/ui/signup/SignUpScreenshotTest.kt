@@ -46,7 +46,11 @@ internal class SignUpScreenshotTest(
             val signUpStates = SignUpState.entries
             val requiresNameCollectionStates = listOf(true to "RequiresNameCollection", false to "")
             val errorMessages = listOf("Something went wrong".resolvableString to "ErrorMessage", null to "")
-            val suggestedEmails = listOf("suggested@example.com" to "WithSuggestion", null to "")
+            val suggestedEmails = listOf(
+                "suggested@example.com" to "WithSuggestion",
+                "very.long.email.address.for.testing.overflow@subdomain.example.com" to "WithLongSuggestion",
+                null to ""
+            )
 
             return signUpStates.flatMap { signUpState ->
                 val signUpEnabled = signUpState == SignUpState.InputtingRemainingFields
