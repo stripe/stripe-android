@@ -133,9 +133,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
                 )
             }
             is PaymentMethodConfirmationOption.Saved -> {
-                // For saved payment methods, we need to attach the token via radar options
-                // This will be handled in the confirmation interceptors
-                copy()
+                copy(attestationToken = token)
             }
         }
     }
