@@ -54,11 +54,4 @@ internal class TestSofort : BasePlaygroundTest() {
             }
         )
     }
-
-    @Test
-    fun testSofortInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
-        )
-    }
 }

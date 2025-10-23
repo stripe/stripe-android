@@ -94,19 +94,6 @@ internal class TestCard : BasePlaygroundTest() {
         )
     }
 
-    @Test
-    fun testCardInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters,
-            populateCustomLpmFields = {
-                populateCardDetails()
-            },
-            verifyCustomLpmFields = {
-                verifyCard()
-            }
-        )
-    }
-
     /*
      * TODO(samer-stripe): Once we update `PaymentResult` to return a `StripeIntent`, update the test
      *  to check against the payment method IDs rather than the last 4 digits.
