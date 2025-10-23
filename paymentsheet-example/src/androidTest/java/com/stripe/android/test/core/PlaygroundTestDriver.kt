@@ -1772,10 +1772,6 @@ internal class PlaygroundTestDriver(
     }
 
     internal fun setup(testParameters: TestParameters) {
-        if (BuildConfig.IS_NIGHTLY_BUILD) {
-            assumeTrue(testParameters.executeInNightlyRun)
-        }
-
         if (Build.VERSION.SDK_INT <= 28) {
             val unsupportedAuthorizeActions = setOf(AuthorizeAction.Authorize3ds2, AuthorizeAction.DisplayQrCode)
             assumeFalse(unsupportedAuthorizeActions.contains(testParameters.authorizationAction))

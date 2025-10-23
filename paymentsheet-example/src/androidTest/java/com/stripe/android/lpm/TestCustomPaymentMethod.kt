@@ -22,7 +22,6 @@ import org.junit.runner.RunWith
 internal class TestCustomPaymentMethod : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = DEFAULT_CUSTOM_PAYMENT_METHOD_ID,
-        executeInNightlyRun = true,
     ) { settings ->
         settings[CustomerSettingsDefinition] = CustomerType.GUEST
         settings[CountrySettingsDefinition] = Country.US

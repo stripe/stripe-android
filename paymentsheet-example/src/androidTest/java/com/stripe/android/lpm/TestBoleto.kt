@@ -23,7 +23,6 @@ import org.junit.runner.RunWith
 internal class TestBoleto : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "boleto",
-        executeInNightlyRun = true,
     ) { settings ->
         settings[CustomerSettingsDefinition] = CustomerType.GUEST
         settings[CountrySettingsDefinition] = Country.BR
