@@ -49,7 +49,7 @@ internal class AttestationViewModelTest {
         }
 
         val viewModel = createViewModel(fakeIntegrityRequestManager)
-        
+
         assertThat(fakeIntegrityRequestManager.awaitRequestTokenCall()).isNull()
 
         viewModel.result.test {

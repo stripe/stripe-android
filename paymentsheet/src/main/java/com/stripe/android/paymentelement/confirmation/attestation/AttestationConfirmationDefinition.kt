@@ -91,6 +91,8 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         confirmationArgs: ConfirmationHandler.Args
     ): ConfirmationDefinition.Action<AttestationActivityContract.Args> {
         if (attestOnIntentConfirmation) {
+            // Disable attestation after first call to prevent multiple attestations
+            attestOnIntentConfirmation = false
             return ConfirmationDefinition.Action.Launch(
                 launcherArguments = AttestationActivityContract.Args(
                     publishableKey = publishableKeyProvider(),
@@ -133,9 +135,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
             is PaymentMethodConfirmationOption.Saved -> {
                 // For saved payment methods, we need to attach the token via radar options
                 // This will be handled in the confirmation interceptors
-                copy(
-
-                )
+                copy()
             }
         }
     }
