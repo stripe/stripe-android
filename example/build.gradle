@@ -20,7 +20,7 @@ dependencies {
     implementation project(':payments')
     implementation project(':financial-connections')
 
-    implementation libs.accompanist.materialThemeAdapter
+//    implementation libs.accompanist.materialThemeAdapter
     implementation libs.alipay
     implementation libs.androidx.appCompat
     implementation libs.androidx.constraintLayout

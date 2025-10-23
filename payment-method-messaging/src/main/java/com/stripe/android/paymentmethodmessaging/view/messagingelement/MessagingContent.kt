@@ -1,5 +1,8 @@
 package com.stripe.android.paymentmethodmessaging.view.messagingelement
 
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,11 +13,18 @@ import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.stripe.android.model.MessagingImage
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -40,6 +51,7 @@ internal class MessagingContent(
 ) {
     @Composable
     fun Content(appearance: PaymentMethodMessagingElement.Appearance) {
+        appearance.theme(PaymentMethodMessagingElement.Appearance.Theme.FLAT)
         val appearanceState = appearance.build()
         when (message) {
             is Message.SinglePartner -> SinglePartner(message, appearanceState)
@@ -50,40 +62,88 @@ internal class MessagingContent(
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun BottomSheetWrapper(learnMoreUrl: String, onDismiss: () -> Unit) {
+        var showBottomSheet by remember { mutableStateOf(true) }
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+        ModalBottomSheet(
+            onDismissRequest = {
+                showBottomSheet = false
+                onDismiss.invoke()
+           },
+            sheetState = sheetState,
+        ) {
+            AndroidView(
+                modifier = Modifier.fillMaxSize(),
+                factory = { context ->
+                    WebView(context).apply {
+                        webViewClient = WebViewClient()
+                        settings.javaScriptEnabled = true
+                        loadUrl(learnMoreUrl + "&theme=flat")
+                    }
+                }
+            )
+        }
+    }
+
 
     @Composable
     private fun SinglePartner(
         message: Message.SinglePartner,
-        appearance: PaymentMethodMessagingElement.Appearance.State
+        appearance: PaymentMethodMessagingElement.Appearance.State,
     ) {
+        var showSheet by remember { mutableStateOf(false) }
         val image = when (appearance.theme) {
             PaymentMethodMessagingElement.Appearance.Theme.LIGHT -> message.lightImage
             PaymentMethodMessagingElement.Appearance.Theme.DARK -> message.darkImage
             PaymentMethodMessagingElement.Appearance.Theme.FLAT -> message.flatImage
         }
-        Row {
+        Row(Modifier.clickable {
+            showSheet = true
+        }) {
             TextWithLogo(
                 label = message.message,
                 image = image,
                 appearance = appearance,
             )
         }
+
+        println("YEET learnMore: ${message.learnMoreUrl}")
+
+        if (showSheet) {
+            BottomSheetWrapper(message.learnMoreUrl) {
+                showSheet = false
+            }
+        }
+
+
     }
 
     @Composable
     private fun MultiPartner(
         message: Message.MultiPartner,
-        appearance: PaymentMethodMessagingElement.Appearance.State
+        appearance: PaymentMethodMessagingElement.Appearance.State,
     ) {
+        var showSheet by remember { mutableStateOf(false) }
         val style = appearance.font?.toTextStyle()
             ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Normal)
-        Column {
+        Column(Modifier.clickable {
+            showSheet = true
+        }) {
             Images(getImages(message, appearance.theme))
             Row {
                 Text(
                     text = message.message,
                     style = style
                 )
+            }
+        }
+
+        if (showSheet) {
+            BottomSheetWrapper(message.learnMoreUrl) {
+                showSheet = false
             }
         }
     }

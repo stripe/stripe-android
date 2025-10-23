@@ -43,7 +43,7 @@ dependencies {
     implementation libs.compose.materialIcons
     implementation libs.compose.activity
     implementation libs.compose.navigation
-    implementation libs.accompanist.systemUiController
+//    implementation libs.accompanist.systemUiController
 
     // Other
     implementation libs.playServicesWallet

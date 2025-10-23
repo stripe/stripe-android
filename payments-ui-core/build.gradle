@@ -25,7 +25,7 @@ dependencies {
     implementation libs.compose.material
     implementation libs.compose.materialIcons
     implementation libs.compose.activity
-    implementation libs.accompanist.flowLayout
+//    implementation libs.accompanist.flowLayout
     implementation libs.compose.uiToolingPreview
 
     implementation libs.kotlin.coroutines

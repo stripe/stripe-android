@@ -23,6 +23,11 @@ buildscript {
         classpath buildLibs.kotlinGradlePlugin
         classpath buildLibs.kotlinSerializationPlugin
         classpath buildLibs.paparazzi
+        configurations.configureEach {
+            resolutionStrategy {
+                force 'androidx.compose.material3:material3-android:1.4.0'
+            }
+        }
     }
 }
 
@@ -49,7 +54,7 @@ allprojects {
 }
 
 ext {
-    compileSdkVersion = 34
+    compileSdkVersion = 35
 
     group_name = GROUP
     version_name = VERSION_NAME

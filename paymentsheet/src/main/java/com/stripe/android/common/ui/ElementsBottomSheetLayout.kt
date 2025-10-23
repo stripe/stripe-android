@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
@@ -28,7 +27,7 @@ internal fun ElementsBottomSheetLayout(
     content: @Composable () -> Unit,
 ) {
     @Suppress("DEPRECATION")
-    val systemUiController = rememberSystemUiController()
+    //val systemUiController = rememberSystemUiController()
     val layoutInfo = rememberStripeBottomSheetLayoutInfo(
         cornerRadius = cornerRadius,
         scrimColor = Color.Black.copy(alpha = 0.32f),
@@ -46,19 +45,19 @@ internal fun ElementsBottomSheetLayout(
         label = "StatusBarColorAlpha",
     )
 
-    LaunchedEffect(systemUiController, statusBarColorAlpha) {
-        systemUiController.setStatusBarColor(
-            color = layoutInfo.scrimColor.copy(statusBarColorAlpha),
-            darkIcons = false,
-        )
-    }
-
-    LaunchedEffect(systemUiController) {
-        systemUiController.setNavigationBarColor(
-            color = Color.Transparent,
-            darkIcons = false,
-        )
-    }
+//    LaunchedEffect(systemUiController, statusBarColorAlpha) {
+//        systemUiController.setStatusBarColor(
+//            color = layoutInfo.scrimColor.copy(statusBarColorAlpha),
+//            darkIcons = false,
+//        )
+//    }
+//
+//    LaunchedEffect(systemUiController) {
+//        systemUiController.setNavigationBarColor(
+//            color = Color.Transparent,
+//            darkIcons = false,
+//        )
+//    }
 
     StripeBottomSheetLayout(
         state = state,

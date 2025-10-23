@@ -14,9 +14,9 @@ dependencies {
     implementation project(':financial-connections-lite')
     implementation project(':3ds2sdk')
 
-    implementation libs.accompanist.appCompatThemeAdapter
-    implementation libs.accompanist.materialThemeAdapter
-    implementation libs.accompanist.material3ThemeAdapter
+   // implementation libs.accompanist.appCompatThemeAdapter
+   // implementation libs.accompanist.materialThemeAdapter
+    //implementation libs.accompanist.material3ThemeAdapter
     implementation libs.androidx.activity
     implementation libs.androidx.annotation
     implementation libs.androidx.appCompat

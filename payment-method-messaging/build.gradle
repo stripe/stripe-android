@@ -62,6 +62,7 @@ dependencies {
 
     // DI
     implementation libs.dagger
+    implementation ('androidx.compose.material3:material3-android:1.4.0')
     ksp libs.daggerCompiler
 
     testImplementation testLibs.androidx.archCore

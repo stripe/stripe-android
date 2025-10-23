@@ -11,7 +11,7 @@ dependencies {
     implementation project(":stripe-ui-core")
     implementation project(":ml-core:default")
 
-    implementation libs.accompanist.materialThemeAdapter
+//    implementation libs.accompanist.materialThemeAdapter
     implementation libs.androidx.activity
     implementation libs.androidx.appCompat
     implementation libs.androidx.browser
