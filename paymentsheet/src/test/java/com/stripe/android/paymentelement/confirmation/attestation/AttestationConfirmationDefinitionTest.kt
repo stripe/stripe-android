@@ -396,6 +396,64 @@ internal class AttestationConfirmationDefinitionTest {
         assertThat(result).isFalse()
     }
 
+    @Test
+    fun `'action' should become disabled after first successful call`() = runTest {
+        val definition = createAttestationConfirmationDefinition()
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            attestOnIntentConfirmation = true
+        )
+        definition.bootstrap(paymentMethodMetadata)
+
+        // First call should succeed
+        val firstAction = definition.action(
+            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+        )
+
+        assertThat(firstAction)
+            .isInstanceOf<ConfirmationDefinition.Action.Launch<AttestationActivityContract.Args>>()
+
+        // Second call should fail
+        val secondAction = definition.action(
+            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+        )
+
+        assertThat(secondAction)
+            .isInstanceOf<ConfirmationDefinition.Action.Fail<AttestationActivityContract.Args>>()
+    }
+
+    @Test
+    fun `'canConfirm' should return false after calling action`() = runTest {
+        val definition = createAttestationConfirmationDefinition()
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            attestOnIntentConfirmation = true
+        )
+        definition.bootstrap(paymentMethodMetadata)
+
+        // Verify it can confirm before action is called
+        assertThat(
+            definition.canConfirm(
+                confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
+                confirmationArgs = CONFIRMATION_PARAMETERS
+            )
+        ).isTrue()
+
+        // Call action
+        definition.action(
+            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+        )
+
+        // Verify it can no longer confirm after action is called
+        assertThat(
+            definition.canConfirm(
+                confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
+                confirmationArgs = CONFIRMATION_PARAMETERS
+            )
+        ).isFalse()
+    }
+
     private fun createAttestationConfirmationDefinition(
         errorReporter: ErrorReporter = FakeErrorReporter(),
         publishableKey: String = launcherArgs.publishableKey,
