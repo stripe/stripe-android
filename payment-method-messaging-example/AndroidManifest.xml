@@ -20,13 +20,12 @@
             android:value="${STRIPE_ACCOUNT_ID}" />
 
         <activity
-            android:name="com.stripe.android.paymentmethodmessaging.example.MainActivity"
+            android:name="com.stripe.android.paymentmethodmessaging.example.MessagingElementActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.stripe.android.paymentmethodmessaging.example.MessagingElementActivity" />
     </application>
 </manifest>
