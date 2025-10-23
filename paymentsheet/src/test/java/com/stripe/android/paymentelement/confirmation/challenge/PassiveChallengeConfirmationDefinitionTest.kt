@@ -7,6 +7,7 @@ import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.RadarOptions
@@ -455,6 +456,86 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         fakePassiveChallengeWarmer.awaitUnregisterCall()
         fakePassiveChallengeWarmer.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `'toResult' should set androidVerificationObject to null for new RadarOptions object`() {
+        val definition = createPassiveChallengeConfirmationDefinition()
+        val testToken = "test_token"
+
+        val result = definition.toResult(
+            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            deferredIntentConfirmationType = null,
+            result = PassiveChallengeActivityResult.Success(testToken),
+        )
+
+        val nextStepResult = result.asNextStep()
+        val option = nextStepResult.confirmationOption as PaymentMethodConfirmationOption.New
+
+        val expectedCreateParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
+            radarOptions = RadarOptions(
+                hCaptchaToken = testToken,
+                androidVerificationObject = null
+            )
+        )
+        assertThat(option.createParams).isEqualTo(expectedCreateParams)
+    }
+
+    @Test
+    fun `'toResult' should set RadarOptions to null for New option when token is null (Failed result)`() {
+        val definition = createPassiveChallengeConfirmationDefinition()
+
+        val result = definition.toResult(
+            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            deferredIntentConfirmationType = null,
+            result = PassiveChallengeActivityResult.Failed(RuntimeException("Failed")),
+        )
+
+        val nextStepResult = result.asNextStep()
+        val option = nextStepResult.confirmationOption as PaymentMethodConfirmationOption.New
+
+        // Verify that radarOptions is not set by checking equality with expected option
+        val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
+            passiveCaptchaParams = null,
+            createParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
+                radarOptions = null
+            )
+        )
+        assertThat(option).isEqualTo(expectedOption)
+    }
+
+    @Test
+    fun `'toResult' should leave androidVerificationObject as is in RadarOptions for New option`() {
+        val definition = createPassiveChallengeConfirmationDefinition()
+        val testToken = "test_token"
+        val attestationToken = "attestation_token"
+
+        val result = definition.toResult(
+            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
+                createParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
+                    radarOptions = RadarOptions(
+                        androidVerificationObject = AndroidVerificationObject(attestationToken),
+                        hCaptchaToken = null
+                    )
+                )
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            deferredIntentConfirmationType = null,
+            result = PassiveChallengeActivityResult.Success(testToken),
+        )
+
+        val nextStepResult = result.asNextStep()
+        val option = nextStepResult.confirmationOption as PaymentMethodConfirmationOption.New
+
+        val expectedCreateParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
+            radarOptions = RadarOptions(
+                hCaptchaToken = testToken,
+                androidVerificationObject = null
+            )
+        )
+        assertThat(option.createParams).isEqualTo(expectedCreateParams)
     }
 
     private fun createPassiveChallengeConfirmationDefinition(
