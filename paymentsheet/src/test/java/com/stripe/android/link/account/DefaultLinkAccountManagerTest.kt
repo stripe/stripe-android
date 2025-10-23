@@ -721,7 +721,8 @@ class DefaultLinkAccountManagerTest {
         val result = accountManager.updatePaymentDetails(
             updateParams = ConsumerPaymentDetailsUpdateParams(
                 "",
-                clientAttributionMetadataParams = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.toParamMap(),
+                clientAttributionMetadataParams =
+                PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.toParamMap(),
             )
         )
 
@@ -737,10 +738,13 @@ class DefaultLinkAccountManagerTest {
 
         linkRepository.updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
 
-        val result = accountManager.updatePaymentDetails(ConsumerPaymentDetailsUpdateParams(
-            "",
-            clientAttributionMetadataParams = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.toParamMap(),
-        ))
+        val result = accountManager.updatePaymentDetails(
+            ConsumerPaymentDetailsUpdateParams(
+                "",
+                clientAttributionMetadataParams =
+                PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.toParamMap(),
+            )
+        )
 
         assertThat(result.getOrNull()).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS)
     }

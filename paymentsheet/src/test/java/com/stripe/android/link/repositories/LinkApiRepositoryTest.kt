@@ -895,7 +895,7 @@ class LinkApiRepositoryTest {
             ConsumerPaymentDetailsUpdateParams(
                 "id",
                 clientAttributionMetadataParams = mapOf("merchant_integration_source" to "elements"),
-                ),
+            ),
             "secret",
         )
 
