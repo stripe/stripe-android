@@ -55,14 +55,14 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
          * The configuration succeeded and [Content] will display a view.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data object Succeeded : Result
+        class Succeeded internal constructor() : Result
 
         /**
          * The configuration succeeded but no content is available to display. (e.g. the amount is less than the
          * minimum for available payment methods).
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data object NoContent : Result
+        class NoContent internal constructor() : Result
 
         /**
          * The configure call failed e.g. due to network failure or because of an invalid [Configuration].
