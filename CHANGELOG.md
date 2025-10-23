@@ -2,6 +2,7 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 * [Added] Added support for `onBehalfOf` to CustomerSheet.IntentConfiguration. This parameter makes CustomerSheet use a connected account to determine the payment method that users see and whether CardBrandChoice is enabled. For more information, see the [SetupIntent docs](https://docs.stripe.com/api/setup_intents/object#setup_intent_object-on_behalf_of).
+* [Added] Internal APIs for react-native sdk integration.
 
 ## 21.28.2 - 2025-10-13
 
@@ -573,7 +574,7 @@ Dependencies updated in [9345](https://github.com/stripe/stripe-android/pull/934
 * [REMOVED][8504](https://github.com/stripe/stripe-android/pull/8504) Remove support for using `Maestro` cards with `Google Pay`
 
 ### Identity
-* [FIXED][8485](https://github.com/stripe/stripe-android/pull/8485) Fixed a crash when scanned type of an uploading image is not expected. 
+* [FIXED][8485](https://github.com/stripe/stripe-android/pull/8485) Fixed a crash when scanned type of an uploading image is not expected.
 
 ## 20.43.0 - 2024-05-13
 
@@ -846,7 +847,7 @@ Dependencies updated:
   * [7269](https://github.com/stripe/stripe-android/pull/7269) iDEAL
   * [7270](https://github.com/stripe/stripe-android/pull/7270) SEPA
   * [7272](https://github.com/stripe/stripe-android/pull/7272) Sofort
-* [FIXED][7283](https://github.com/stripe/stripe-android/pull/7283) Fixed an issue where Bancontact SetupIntent or PaymentIntent with setup for future usage would show the mandate text in the middle of the form. 
+* [FIXED][7283](https://github.com/stripe/stripe-android/pull/7283) Fixed an issue where Bancontact SetupIntent or PaymentIntent with setup for future usage would show the mandate text in the middle of the form.
 
 ## 20.29.2 - 2023-09-05
 
@@ -897,7 +898,7 @@ Dependencies updated:
 
 ### Payments
 * [CHANGED] The return type for several methods in `Stripe` has changed from `T?` (nullable) to `T` to better reflect possible behavior. These methods continue to be throwing and should be wrapped in a `try/catch` block.
-* [FIXED][6977](https://github.com/stripe/stripe-android/pull/6977) Fixed an issue where `Stripe.retrievePossibleBrands()` returned incorrect results. 
+* [FIXED][6977](https://github.com/stripe/stripe-android/pull/6977) Fixed an issue where `Stripe.retrievePossibleBrands()` returned incorrect results.
 
 ## 20.27.2 - 2023-07-18
 
@@ -984,7 +985,7 @@ Dependencies updated:
 * [FIXED][6680](https://github.com/stripe/stripe-android/pull/6680) Made payments with Cash App Pay more reliable.
 
 ## 20.25.1 - 2023-05-10
-* [CHANGED][6697](https://github.com/stripe/stripe-android/pull/6697) Revert BOM change and use compose 1.4.3. 
+* [CHANGED][6697](https://github.com/stripe/stripe-android/pull/6697) Revert BOM change and use compose 1.4.3.
 * [FIXED][6698](https://github.com/stripe/stripe-android/pull/6698) ImageDecoder: Exception in invokeOnCancellation handler.
 
 ## 20.25.0 - 2023-05-08
@@ -995,7 +996,7 @@ Dependencies updated:
 
 ### Identity
 * [ADDED][6642](https://github.com/stripe/stripe-android/pull/6642) Support Test mode M1.
- 
+
 ## 20.24.2 - 2023-05-03
 
 ### Payments
@@ -1098,7 +1099,7 @@ Dependencies updated:
 * [FIXED][6253](https://github.com/stripe/stripe-android/pull/6253) Use the full screen card scanner to alleviate fragment crashes
 
 ### All SDKs
-* [ADDED][6227](https://github.com/stripe/stripe-android/pull/6227) Removed keep-all proguard rules in favor of the minimal required ones. 
+* [ADDED][6227](https://github.com/stripe/stripe-android/pull/6227) Removed keep-all proguard rules in favor of the minimal required ones.
 
 ## 20.19.3 - 2023-02-13
 
@@ -1277,10 +1278,10 @@ This release makes the `PaymentMethod.Card.networks` field public, fixes the Ali
 
 ### CardScan
 
-* [FIXED] [5574](https://github.com/stripe/stripe-android/pull/5574) Fix encoding for form parameters for scan stats. 
+* [FIXED] [5574](https://github.com/stripe/stripe-android/pull/5574) Fix encoding for form parameters for scan stats.
 
 ## 20.12.0 - 2022-09-13
-This release upgrades `compileSdkVersion` to 33, updates Google Pay button to match the new brand 
+This release upgrades `compileSdkVersion` to 33, updates Google Pay button to match the new brand
 guidelines and fixes some bugs in `FlowController`.
 
 * [CHANGED] [5495](https://github.com/stripe/stripe-android/pull/5495) Upgrade `compileSdkVersion`
@@ -1296,7 +1297,7 @@ guidelines and fixes some bugs in `FlowController`.
   match new brand guidelines.
 * [FIXED][5480](https://github.com/stripe/stripe-android/pull/5480) `FlowController` now correctly
   preserves the previously selected payment method for guests.
-* [FIXED][5545](https://github.com/stripe/stripe-android/pull/5545) Fix an issue where custom flow 
+* [FIXED][5545](https://github.com/stripe/stripe-android/pull/5545) Fix an issue where custom flow
   PaymentSheet UI would have the bottom of the form cut off.
 
 ## 20.11.0 - 2022-08-29
@@ -1306,7 +1307,7 @@ This release adds postal code validation for PaymentSheet and fixed a fileprovid
 
 * [ADDED][5456](https://github.com/stripe/stripe-android/pull/5456) Added postal code validation.
 
-### Identity 
+### Identity
 
 * [FIXED][5474](https://github.com/stripe/stripe-android/pull/5474) Update fileprovider name.
 
@@ -1318,25 +1319,25 @@ This release contains several bug fixes for PaymentSheet and binary size optimiz
 * [FIXED][5422](https://github.com/stripe/stripe-android/pull/5422) Card expiration dates with a single-digit month are now preserved correctly when closing and re-opening the `PaymentSheet` via the `FlowController`.
 
 ### Identity
-* [FIXED][5404](https://github.com/stripe/stripe-android/pull/5404) Remove Flex OP dependency from 
+* [FIXED][5404](https://github.com/stripe/stripe-android/pull/5404) Remove Flex OP dependency from
   Identity SDK and reduce its binary size.
 
 ## 20.9.0 - 2022-08-16
-This release contains several bug fixes for Payments, PaymentSheet and Financial Connections. 
-Adds `IdentityVerificationSheet#rememberIdentityVerificationSheet` for Identity. 
+This release contains several bug fixes for Payments, PaymentSheet and Financial Connections.
+Adds `IdentityVerificationSheet#rememberIdentityVerificationSheet` for Identity.
 
 ### PaymentSheet
 
-* [ADDED][5340](https://github.com/stripe/stripe-android/pull/5340) Add a `resetCustomer` method to 
+* [ADDED][5340](https://github.com/stripe/stripe-android/pull/5340) Add a `resetCustomer` method to
   `PaymentSheet`, that clears any persisted authentication state.
 * [FIXED][5388](https://github.com/stripe/stripe-android/pull/5388) Fixed issue with Appearance API
   not working with `FlowController`.
-* [FIXED][5399](https://github.com/stripe/stripe-android/pull/5399) Bank Account Payments that pass 
+* [FIXED][5399](https://github.com/stripe/stripe-android/pull/5399) Bank Account Payments that pass
   stripeAccountId for connected accounts will now succeed.
 
 ### Payments
 
-* [FIXED][5399](https://github.com/stripe/stripe-android/pull/5399) `CollectBankAccountLauncher` now 
+* [FIXED][5399](https://github.com/stripe/stripe-android/pull/5399) `CollectBankAccountLauncher` now
   accepts `stripeAccountId` for Connect merchants.
 
 ### Financial Connections
@@ -1349,7 +1350,7 @@ Adds `IdentityVerificationSheet#rememberIdentityVerificationSheet` for Identity.
 
 ## 20.8.0 - 2022-08-01
 
-This release contains several bug fixes for Payments, PaymentSheet, deprecates `createForCompose`, 
+This release contains several bug fixes for Payments, PaymentSheet, deprecates `createForCompose`,
 and adds new `rememberLauncher` features for Payments
 
 ### PaymentSheet
@@ -2101,7 +2102,7 @@ the [guide](https://stripe.com/docs/payments/accept-a-payment?platform=android) 
           clientSecret,
           extraParams = mapOf("setup_future_usage" to "off_session")
       )
-      
+
       // after
       ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
           params,
@@ -3365,7 +3366,7 @@ or greater.*
     val enableLogging: Boolean = true
     val stripe: Stripe = Stripe(this, "pk_test_demo", enableLogging = enableLogging)
     stripe.confirmPayment(this, confirmPaymentIntentParams)
-    
+
     // View logs using
     // $ adb logcat -s StripeSdk
     ```
@@ -3420,7 +3421,7 @@ or greater.*
     val result: AddPaymentMethodActivityStarter.Result =
         AddPaymentMethodActivityStarter.Result.fromIntent(data)
     val paymentMethod: PaymentMethod? = result?.paymentMethod
-    ```    
+    ```
 * [#1587](https://github.com/stripe/stripe-android/pull/1587) Fix logic for entering 3DS2 challenge
   flow
 
