@@ -56,6 +56,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        isConfirmationToken: Boolean,
         result: PassiveChallengeActivityResult
     ): ConfirmationDefinition.Result {
         return when (result) {
@@ -105,6 +106,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
                 ),
                 receivesResultInProcess = false,
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
             )
         }
 

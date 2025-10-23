@@ -60,6 +60,7 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = Unit,
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
                 receivesResultInProcess = false,
             )
         }
@@ -99,12 +100,14 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
         confirmationOption: ExternalPaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        isConfirmationToken: Boolean,
         result: PaymentResult
     ): ConfirmationDefinition.Result {
         return when (result) {
             is PaymentResult.Completed -> ConfirmationDefinition.Result.Succeeded(
                 intent = confirmationArgs.intent,
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
             )
             is PaymentResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,

@@ -224,6 +224,7 @@ class DeferredIntentConfirmationInterceptorTest {
             ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                isConfirmationToken = false,
                 completedFullPaymentFlow = true,
             )
         )
@@ -261,6 +262,7 @@ class DeferredIntentConfirmationInterceptorTest {
                 ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>(
                     launcherArguments = IntentConfirmationDefinition.Args.NextAction("pi_123_secret_456"),
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    isConfirmationToken = false,
                     receivesResultInProcess = false,
                 )
             )
@@ -333,6 +335,7 @@ class DeferredIntentConfirmationInterceptorTest {
             ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                 intent = intent,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                isConfirmationToken = false,
                 completedFullPaymentFlow = true,
             )
         )

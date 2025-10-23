@@ -23,7 +23,8 @@ internal fun confirmationStateComplete(succeeded: Boolean): ConfirmationHandler.
     val result = if (succeeded) {
         ConfirmationHandler.Result.Succeeded(
             PaymentIntentFixtures.PI_SUCCEEDED,
-            null
+            null,
+            false,
         )
     } else {
         ConfirmationHandler.Result.Failed(

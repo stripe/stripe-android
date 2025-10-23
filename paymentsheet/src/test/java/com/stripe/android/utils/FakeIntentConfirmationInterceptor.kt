@@ -33,6 +33,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = IntentConfirmationDefinition.Args.Confirm(confirmParams),
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Client.takeIf { isDeferred },
+                isConfirmationToken = false,
                 receivesResultInProcess = false,
             )
         channel.trySend(nextStep)
@@ -51,6 +52,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
                 } else {
                     DeferredIntentConfirmationType.Server
                 },
+                isConfirmationToken = false,
                 completedFullPaymentFlow = completedFullPaymentFlow,
             )
         )
@@ -61,6 +63,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = IntentConfirmationDefinition.Args.NextAction(clientSecret),
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                isConfirmationToken = false,
                 receivesResultInProcess = false,
             )
         )

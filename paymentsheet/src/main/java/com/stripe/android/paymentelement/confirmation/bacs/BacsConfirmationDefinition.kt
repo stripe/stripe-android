@@ -35,6 +35,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = data,
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
                 receivesResultInProcess = true,
             )
         } ?: run {
@@ -76,6 +77,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
         confirmationOption: BacsConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        isConfirmationToken: Boolean,
         result: BacsMandateConfirmationResult,
     ): ConfirmationDefinition.Result {
         return when (result) {

@@ -131,6 +131,7 @@ class IntentConfirmationDefinitionTest {
 
         assertThat(completeAction.intent).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
+        assertThat(completeAction.isConfirmationToken).isEqualTo(false)
     }
 
     @Test
@@ -155,6 +156,7 @@ class IntentConfirmationDefinitionTest {
 
             assertThat(completeAction.intent).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
             assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
+            assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(false)
             assertThat(completeAction.completedFullPaymentFlow).isFalse()
         }
 
@@ -207,6 +209,7 @@ class IntentConfirmationDefinitionTest {
             )
         )
         assertThat(launchAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
+        assertThat(launchAction.isConfirmationToken).isEqualTo(false)
     }
 
     @Test
@@ -236,6 +239,7 @@ class IntentConfirmationDefinitionTest {
             )
         )
         assertThat(launchAction.deferredIntentConfirmationType).isNull()
+        assertThat(launchAction.isConfirmationToken).isFalse()
     }
 
     @Test
@@ -342,6 +346,7 @@ class IntentConfirmationDefinitionTest {
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
             ),
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+            isConfirmationToken = false,
             result = InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED),
         )
 
@@ -349,6 +354,7 @@ class IntentConfirmationDefinitionTest {
 
         assertThat(succeededResult.intent).isEqualTo(PaymentIntentFixtures.PI_SUCCEEDED)
         assertThat(succeededResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
+        assertThat(succeededResult.isConfirmationToken).isEqualTo(false)
         assertThat(succeededResult.completedFullPaymentFlow).isTrue()
     }
 
@@ -366,6 +372,7 @@ class IntentConfirmationDefinitionTest {
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
             result = InternalPaymentResult.Failed(exception),
         )
 
@@ -388,6 +395,7 @@ class IntentConfirmationDefinitionTest {
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
             result = InternalPaymentResult.Canceled,
         )
 
