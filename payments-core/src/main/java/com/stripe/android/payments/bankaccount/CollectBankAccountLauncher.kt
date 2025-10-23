@@ -109,7 +109,7 @@ interface CollectBankAccountLauncher {
             return CollectBankAccountForACHLauncher(
                 // L1 (public standalone) integration is not hosted by any Stripe surface.
                 hostedSurface = null,
-                hostActivityLauncher = registerForReactNativeActivityResult(activity, signal,CollectBankAccountContract()) {
+                hostActivityLauncher = registerForReactNativeActivityResult(activity, signal, CollectBankAccountContract()) {
                     callback(it.toUSBankAccountResult())
                 },
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
