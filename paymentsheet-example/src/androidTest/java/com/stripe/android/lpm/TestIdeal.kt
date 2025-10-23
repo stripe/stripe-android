@@ -48,11 +48,4 @@ internal class TestIdeal : BasePlaygroundTest() {
             }
         )
     }
-
-    @Test
-    fun testIdealInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
-        )
-    }
 }

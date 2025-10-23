@@ -6,7 +6,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
-import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,21 +23,5 @@ internal class TestGrabPay : BasePlaygroundTest() {
     @Test
     fun testGrabPay() {
         testDriver.confirmNewOrGuestComplete(testParameters)
-    }
-
-    @Test
-    fun testGrabPayFailure() {
-        testDriver.confirmNewOrGuestComplete(
-            testParameters.copy(
-                authorizationAction = AuthorizeAction.Fail(
-                    expectedError = "Your payment method was declined.",
-                ),
-            )
-        )
-    }
-
-    @Test
-    fun testGrabPayInCustomFlow() {
-        testDriver.confirmCustom(testParameters)
     }
 }

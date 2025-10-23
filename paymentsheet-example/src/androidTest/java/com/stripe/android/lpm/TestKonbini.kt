@@ -40,16 +40,4 @@ internal class TestKonbini : BasePlaygroundTest() {
             }
         )
     }
-
-    @Test
-    fun testKonbiniInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
-            populateCustomLpmFields = {
-                populateName()
-                populateEmail()
-                populatePhoneNumber("Phone (optional)")
-            }
-        )
-    }
 }

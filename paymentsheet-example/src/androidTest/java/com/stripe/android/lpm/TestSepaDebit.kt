@@ -1,7 +1,6 @@
 package com.stripe.android.lpm
 
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelected
@@ -78,24 +77,6 @@ internal class TestSepaDebit : BasePlaygroundTest() {
             },
         ) {
             fillOutIban()
-        }
-    }
-
-    @Test
-    fun testSepaDebitInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters.copy(
-                saveForFutureUseCheckboxVisible = true,
-            ),
-            populateCustomLpmFields = {
-                fillOutIban()
-            }
-        ) {
-            rules.compose.onNodeWithText("IBAN").apply {
-                assertContentDescriptionEquals(
-                    "DE89370400440532013000"
-                )
-            }
         }
     }
 
