@@ -627,7 +627,8 @@ class WalletViewModelTest {
             ConsumerPaymentDetailsUpdateParams(
                 id = "card1",
                 isDefault = true,
-                cardPaymentMethodCreateParamsMap = null
+                cardPaymentMethodCreateParamsMap = null,
+                clientAttributionMetadataParams = TestFactory.LINK_CONFIGURATION.clientAttributionMetadata.toParamMap(),
             )
         )
         assertThat(viewModel.uiState.value.paymentDetailsList).containsExactly(updatedCard1, updatedCard2)
