@@ -10,6 +10,7 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -960,6 +961,25 @@ internal class PlaygroundTestDriver(
             testParameters = testParameters,
             executeFlow = { doUSBankAccountAuthorization(testParameters.authorizationAction) },
             afterCollectingBankInfo = afterAuthorization,
+        )
+    }
+
+    fun confirmCustomUSBankAccountAndBuy(
+        testParameters: TestParameters,
+    ) {
+        confirmBankAccountInCustomFlow(
+            testParameters = testParameters,
+            executeFlow = { doUSBankAccountAuthorization(testParameters.authorizationAction) },
+            afterCollectingBankInfo = {
+                composeTestRule.waitUntil { selectors.buyButton.checkEnabled() }
+                selectors.buyButton.click()
+                selectors.playgroundBuyButton.apply {
+                    waitFor(isEnabled())
+                    click()
+                }
+                resultCountDownLatch = testParameters.countDownLatch()
+                finishAfterAuthorization()
+            }
         )
     }
 
