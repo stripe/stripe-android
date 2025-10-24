@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -48,6 +50,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.utils.FeatureFlags
@@ -158,6 +161,53 @@ internal class OnrampActivity : ComponentActivity() {
 }
 
 @Composable
+internal fun SeamlessSignInScreen(
+    email: String,
+    onContinue: () -> Unit,
+    onNotMe: () -> Unit
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Image(
+            painter = painterResource(id = android.R.drawable.ic_menu_myplaces),
+            contentDescription = "User Icon",
+            modifier = Modifier.size(128.dp)
+        )
+
+        Row {
+            Text(
+                text = "Continue as",
+                fontSize = 20.sp
+            )
+
+            Spacer(modifier = Modifier.width(6.dp))
+
+            Text(
+                text = "$email?",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(48.dp))
+
+        Button(
+            onClick = { onContinue() },
+            modifier = Modifier.fillMaxWidth()
+                .padding(bottom = 16.dp)
+        ) {
+            Text("Continue")
+        }
+
+        Button(
+            onClick = { onNotMe() },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Not me")
+        }
+    }
+}
+
+@Composable
 internal fun LoginSignupScreen(
     onRegister: (email: String, password: String) -> Unit,
     onLogin: (email: String, password: String) -> Unit
@@ -235,6 +285,17 @@ internal fun OnrampScreen(
             .padding(16.dp)
     ) {
         when (uiState.screen) {
+            Screen.SeamlessSignIn -> {
+                SeamlessSignInScreen(
+                    email = uiState.email,
+                    onContinue = {
+                        viewModel.seamlessSignInContinue()
+                    },
+                    onNotMe = {
+                        viewModel.logOut()
+                    }
+                )
+            }
             Screen.LoginSignup -> {
                 LoginSignupScreen(
                     onRegister = viewModel::registerUser,
@@ -460,7 +521,7 @@ private fun AuthenticationScreen(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Back to Email Input")
+            Text("Back to Sign in")
         }
     }
 }
@@ -469,7 +530,7 @@ private fun AuthenticationScreen(
 fun AuthenticateSection(
     onAuthenticate: (oauthScopes: String?) -> Unit,
 ) {
-    var oauthScopes by remember { mutableStateOf("kyc.status:read,crypto:ramp") }
+    var oauthScopes by remember { mutableStateOf("kyc.status:read,crypto:ramp,auth.persist_login:read") }
     OutlinedTextField(
         value = oauthScopes,
         onValueChange = { oauthScopes = it },
@@ -754,7 +815,7 @@ private fun AuthenticatedOperationsScreen(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Back to Email Input")
+            Text("Back to Sign in")
         }
 
         Spacer(Modifier.height(24.dp))
