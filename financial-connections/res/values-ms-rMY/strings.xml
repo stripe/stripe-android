@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_account_picker_cta_link_plural">Hubungkan akaun</string>
+  <string name="stripe_account_picker_cta_link_singular">Hubungkan akaun</string>
+  <string name="stripe_account_picker_error_no_account_available_title">Ada masalah ketika mengakses akaun %1$s anda</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">Kami menemui %1$s %2$s akaun tetapi anda hanya boleh memautkan akaun semasa atau simpanan kepada %3$s. Sila cuba pilih bank yang lain.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">Kami menemui %1$s %2$s akaun tetapi anda hanya boleh memautkan akaun semasa atau simpanan kepada %3$s. Sila cuba pilih bank yang lain.</string>
+  <string name="stripe_account_picker_error_no_payment_method_title">Tiada akaun pembayaran tersedia</string>
+  <string name="stripe_account_picker_multiselect_account">Pilih akaun</string>
+  <!-- Account picker -->
+  <string name="stripe_account_picker_singleselect_account">Pilih akaun</string>
+  <string name="stripe_accounts_error_desc_manualentry">Sila masukkan butiran bank anda secara manual atau pilih bank yang lain.</string>
+  <string name="stripe_accounts_error_desc_no_retry">Sila pilih bank yang lain.</string>
+  <string name="stripe_accounts_error_desc_retry">Sila pilih bank yang lain atau cuba lagi.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc">Sila masukkan butiran bank anda secara manual</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Sila masukkan butiran bank anda secara manual atau pilih bank yang lain.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_title">Nombor akaun anda tidak dapat diakses pada masa ini</string>
+  <string name="stripe_close_dialog_networking_desc">Jika anda membuat pembatalan sekarang, akaun anda akan dipautkan kepada %1$s tetapi ia tidak akan disimpan pada Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business">Jika anda membuat pembatalan sekarang, akaun anda akan dipautkan kepada perniagaan ini tetapi ia tidak akan disimpan pada Link.</string>
+  <string name="stripe_error_cta_close">Tutup</string>
+  <string name="stripe_error_cta_manual_entry">Masukkan butiran bank secara manual</string>
+  <string name="stripe_error_cta_retry">Cuba lagi</string>
+  <string name="stripe_error_cta_select_another_bank">Pilih bank yang lain</string>
+  <string name="stripe_error_generic_desc">Akaun anda tidak boleh dipautkan pada masa ini. Sila cuba lagi kemudian.</string>
+  <!-- Error pane -->
+  <string name="stripe_error_generic_title">Ada sesuatu yang tidak kena</string>
+  <string name="stripe_error_planned_downtime_desc">Penyelenggaraan dijadualkan tamat pada %1$s. Sila pilih bank yang lain atau cuba lagi kemudian.</string>
+  <string name="stripe_error_planned_downtime_title">%1$s sedang menjalani penyelenggaraan</string>
+  <string name="stripe_error_unplanned_downtime_desc">Sila pilih bank yang lain atau cuba lagi kemudian.</string>
+  <string name="stripe_error_unplanned_downtime_title">%1$s tidak tersedia pada masa ini</string>
+  <string name="stripe_exit_modal_cta_accept">Ya, keluar</string>
+  <string name="stripe_exit_modal_cta_cancel">Batalkan</string>
+  <string name="stripe_exit_modal_desc">Akaun bank anda tidak akan dihubungkan kepada %1$s dan semua kemajuan akan hilang.</string>
+  <string name="stripe_exit_modal_desc_no_business">Bank akaun anda tidak akan dihubungkan kepada perniagaan ini dan semua kemajuan akan hilang.</string>
+  <!-- Exit modal -->
+  <string name="stripe_exit_modal_title">Keluar tanpa menghubungkan akaun?</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">Masukkan nombor akaun dan nombor penghalaan anda</string>
+  <string name="stripe_institutionpicker_manual_entry_title">Tidak nampak bank anda?</string>
+  <string name="stripe_institutionpicker_pane_error_desc">Cuba cari bank lain</string>
+  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Cuba cari bank lain atau </string>
+  <string name="stripe_institutionpicker_pane_error_title">Tiada hasil</string>
+  <!-- Institution picker -->
+  <string name="stripe_institutionpicker_pane_select_bank">Pilih bank</string>
+  <string name="stripe_institutionpicker_search_more_title">Cari lebih banyak bank</string>
+  <string name="stripe_link_stepup_verification_desc">Masukkan kod yang dihantar ke %1$s. Kami meminta langkah tambahan ini secara berkala untuk memastikan akaun anda selamat.</string>
+  <string name="stripe_link_stepup_verification_resend_code">Hantar semula kod</string>
+  <!-- Networking step-up verification -->
+  <string name="stripe_link_stepup_verification_title">Tentusahkan e-mel anda</string>
+  <!-- Loading -->
+  <string name="stripe_loading_pill_label">Tunggu sebentar, hampir selesai</string>
+  <string name="stripe_manualentry_account">Nombor akaun</string>
+  <string name="stripe_manualentry_accountconfirm">Sahkan nombor akaun</string>
+  <string name="stripe_manualentry_cta">Serahkan</string>
+  <string name="stripe_manualentry_microdeposits_desc">Maklumat bank anda akan ditentusahkan melalui deposit mikro kepada akaun anda, yang biasanya mengambil masa 1 – 2 hari bekerja. Hanya akaun semasa disokong.</string>
+  <string name="stripe_manualentry_routing">Nombor penghalaan</string>
+  <string name="stripe_manualentry_test_banner">Gunakan akaun ujian</string>
+  <!-- Manual entry -->
+  <string name="stripe_manualentry_title">Masukkan butiran bank</string>
+  <string name="stripe_networking_link_login_warmup_cta_cancel">Batalkan</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue">Teruskan dengan Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_skip">Bukan sekarang</string>
+  <!-- Networking warmup -->
+  <string name="stripe_networking_link_login_warmup_description">Gunakan maklumat yang anda simpan sebelum ini dengan akaun Link anda.</string>
+  <string name="stripe_networking_link_login_warmup_title">Teruskan dengan Link</string>
+  <string name="stripe_networking_save_to_link_verification_cta_negative">Bukan sekarang</string>
+  <string name="stripe_networking_save_to_link_verification_title">Sahkan andalah orangnya</string>
+  <!-- Networking signup -->
+  <string name="stripe_networking_signup_email_label">Alamat e-mel</string>
+  <string name="stripe_networking_verification_desc">Masukkan kod yang dihantar ke %1$s</string>
+  <!-- Networking verification -->
+  <string name="stripe_networking_verification_title">Sahkan andalah orangnya</string>
+  <!-- Partner auth -->
+  <string name="stripe_prepane_cancel_cta">Batalkan</string>
+  <string name="stripe_prepane_choose_different_bank_cta">Pilih bank yang berbeza</string>
+  <string name="stripe_search">Cari</string>
+  <string name="stripe_success_pane_desc_link_error_plural">Akaun anda telah dihubungkan tetapi tidak dapat disimpan dengan Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular">Akaun anda telah dihubungkan tetapi tidak dapat disimpan dengan Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural">Akaun anda telah dihubungkan dan disimpan dengan Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular">Akaun anda telah dihubungkan dan disimpan dengan Link.</string>
+  <string name="stripe_success_pane_desc_microdeposits">Anda boleh menjangkakan deposit mikro kepada akaun ••••%1$s dalam masa 1 – 2 hari dan satu e-mel dengan arahan selanjutnya.</string>
+  <string name="stripe_success_pane_desc_plural">Akaun anda telah dihubungkan</string>
+  <string name="stripe_success_pane_desc_singular">Akaun anda telah dihubungkan</string>
+  <string name="stripe_success_pane_done">Selesai</string>
+  <string name="stripe_success_pane_done_with_merchant">Undur ke %1$s</string>
+  <!-- Success panes -->
+  <string name="stripe_success_pane_title">Berjaya</string>
+  <string name="stripe_success_pane_title_microdeposits">Hampir selesai</string>
+  <string name="stripe_validation_account_confirm_mismatch">Nombor akaun anda tidak sepadan.</string>
+  <string name="stripe_validation_account_required">Nombor akaun diperlukan.</string>
+  <string name="stripe_validation_account_too_long">Nombor akaun bank tidak sah: mestilah paling banyak 17 digit panjangnya.</string>
+  <string name="stripe_validation_no_us_routing">Nombor penghalaan tidak sah.</string>
+  <string name="stripe_validation_routing_required">Nombor penghalaan diperlukan.</string>
+  <string name="stripe_validation_routing_too_short">Sila masukkan 9 digit untuk nombor penghalaan anda.</string>
+  <string name="stripe_verification.codeExpiredEmail">Nampaknya kod penentusahan yang anda berikan tidak lagi sah. Klik “Hantar semula kod” dan cuba lagi, atau </string>
+  <string name="stripe_verification.codeExpiredSms">Nampaknya kod penentusahan yang anda berikan tidak lagi sah. Cuba lagi atau </string>
+  <!-- Verification (shared) -->
+  <string name="stripe_verification.codeInvalid">Hmm, kod tersebut tidak betul. Semak sekali lagi dan cuba semula.</string>
+  <string name="stripe_verification.inTestMode">Anda berada dalam mod ujian.</string>
+  <string name="stripe_verification.useTestCode">Gunakan kod ujian</string>
+</resources>

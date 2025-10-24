@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_account_picker_cta_link_plural">계좌 연결</string>
+  <string name="stripe_account_picker_cta_link_singular">계좌 연결</string>
+  <string name="stripe_account_picker_error_no_account_available_title">%1$s 계좌에 액세스하는 중에 문제가 발생했습니다</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">%1$s개의 %2$s 계좌를 찾았지만, 당좌 예금이나 저축 예금 계좌는 %3$s에만 연결할 수 있습니다. 다른 은행을 선택하십시오.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">%1$s개의 %2$s계좌를 찾았지만, 당좌 예금이나 저축 예금 계좌는 %3$s에만 연결할 수 있습니다. 다른 은행을 선택하십시오.</string>
+  <string name="stripe_account_picker_error_no_payment_method_title">사용 가능한 결제 계좌 없음</string>
+  <string name="stripe_account_picker_multiselect_account">계좌 선택</string>
+  <!-- Account picker -->
+  <string name="stripe_account_picker_singleselect_account">계좌 선택</string>
+  <string name="stripe_accounts_error_desc_manualentry">수동으로 은행 세부사항을 입력하거나 다른 은행을 선택하십시오.</string>
+  <string name="stripe_accounts_error_desc_no_retry">다른 은행을 선택해 주십시오.</string>
+  <string name="stripe_accounts_error_desc_retry">다른 은행을 선택하거나 다시 시도해 주십시오.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc">은행 세부사항을 직접 입력하십시오</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">수동으로 은행 세부사항을 입력하거나 다른 은행을 선택하십시오.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_title">현재 귀하의 계좌 번호에 액세스할 수 없습니다</string>
+  <string name="stripe_close_dialog_networking_desc">지금 취소하면 계좌가 %1$s에 연결되지만 Link에는 저장되지 않습니다.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business">지금 취소하면 계좌가 이 비즈니스에 연결되지만 Link에는 저장되지 않습니다.</string>
+  <string name="stripe_error_cta_close">닫기</string>
+  <string name="stripe_error_cta_manual_entry">은행 세부사항을 직접 입력</string>
+  <string name="stripe_error_cta_retry">다시 시도</string>
+  <string name="stripe_error_cta_select_another_bank">다른 은행 선택</string>
+  <string name="stripe_error_generic_desc">현재 계좌를 연결할 수 없습니다. 나중에 다시 시도하십시오.</string>
+  <!-- Error pane -->
+  <string name="stripe_error_generic_title">문제 발생</string>
+  <string name="stripe_error_planned_downtime_desc">%1$s에 유지관리 작업이 종료될 예정입니다. 다른 은행을 선택하거나 나중에 다시 시도해 주십시오.</string>
+  <string name="stripe_error_planned_downtime_title">%1$s이(가) 유지관리 중입니다</string>
+  <string name="stripe_error_unplanned_downtime_desc">다른 은행을 선택하거나 나중에 다시 시도해 주십시오.</string>
+  <string name="stripe_error_unplanned_downtime_title">현재 %1$s을(를) 이용할 수 없습니다</string>
+  <string name="stripe_exit_modal_cta_accept">예, 종료합니다</string>
+  <string name="stripe_exit_modal_cta_cancel">취소</string>
+  <string name="stripe_exit_modal_desc">은행 계좌가 %1$s에 연결되지 않으며 모든 진행 상황이 사라집니다.</string>
+  <string name="stripe_exit_modal_desc_no_business">은행 계좌가 이 비즈니스에 연결되지 않으며 모든 진행 상황이 사라집니다.</string>
+  <!-- Exit modal -->
+  <string name="stripe_exit_modal_title">연결하지 않고 종료하시겠습니까?</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">계정 및 라우팅 번호 입력</string>
+  <string name="stripe_institutionpicker_manual_entry_title">은행이 보이지 않으십니까?</string>
+  <string name="stripe_institutionpicker_pane_error_desc">다른 은행 검색 시도</string>
+  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">다른 은행 검색 시도 또는 </string>
+  <string name="stripe_institutionpicker_pane_error_title">결과 없음</string>
+  <!-- Institution picker -->
+  <string name="stripe_institutionpicker_pane_select_bank">은행 선택</string>
+  <string name="stripe_institutionpicker_search_more_title">더 많은 은행 검색</string>
+  <string name="stripe_link_stepup_verification_desc">%1$s(으)로 전송된 코드를 입력하십시오. 계정을 안전하게 보호하기 위해 정기적으로 이 추가 단계를 요청합니다.</string>
+  <string name="stripe_link_stepup_verification_resend_code">코드 재전송</string>
+  <!-- Networking step-up verification -->
+  <string name="stripe_link_stepup_verification_title">이메일 확인</string>
+  <!-- Loading -->
+  <string name="stripe_loading_pill_label">잠시만 기다려 주십시오. 거의 다 되었습니다.</string>
+  <string name="stripe_manualentry_account">계좌 번호</string>
+  <string name="stripe_manualentry_accountconfirm">계좌 번호 확인</string>
+  <string name="stripe_manualentry_cta">제출</string>
+  <string name="stripe_manualentry_microdeposits_desc">귀하의 은행 정보는 일반적으로 영업일 기준 1-2일 내에 귀하의 계좌에 소액 입금하여 확인합니다. 당좌 계좌만 지원됩니다.</string>
+  <string name="stripe_manualentry_routing">라우팅 번호</string>
+  <string name="stripe_manualentry_test_banner">테스트 계정 사용</string>
+  <!-- Manual entry -->
+  <string name="stripe_manualentry_title">은행 세부사항 입력</string>
+  <string name="stripe_networking_link_login_warmup_cta_cancel">취소</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue">Link에서 계속</string>
+  <string name="stripe_networking_link_login_warmup_cta_skip">나중에 확인</string>
+  <!-- Networking warmup -->
+  <string name="stripe_networking_link_login_warmup_description">이전에 Link 계정에 저장한 정보를 사용하십시오.</string>
+  <string name="stripe_networking_link_login_warmup_title">Link에서 계속</string>
+  <string name="stripe_networking_save_to_link_verification_cta_negative">나중에 확인</string>
+  <string name="stripe_networking_save_to_link_verification_title">본인 확인</string>
+  <!-- Networking signup -->
+  <string name="stripe_networking_signup_email_label">이메일 주소</string>
+  <string name="stripe_networking_verification_desc">%1$s에 전송된 코드를 입력하십시오.</string>
+  <!-- Networking verification -->
+  <string name="stripe_networking_verification_title">본인 확인</string>
+  <!-- Partner auth -->
+  <string name="stripe_prepane_cancel_cta">취소</string>
+  <string name="stripe_prepane_choose_different_bank_cta">다른 은행 선택</string>
+  <string name="stripe_search">검색</string>
+  <string name="stripe_success_pane_desc_link_error_plural">귀하의 계정이 연결되었지만 Link를 사용하여 저장할 수 없습니다.</string>
+  <string name="stripe_success_pane_desc_link_error_singular">귀하의 계정이 연결되었지만 Link를 사용하여 저장할 수 없습니다.</string>
+  <string name="stripe_success_pane_desc_link_success_plural">귀하의 계정이 연결되었고 Link를 사용하여 저장되었습니다.</string>
+  <string name="stripe_success_pane_desc_link_success_singular">귀하의 계정이 연결되었고 Link를 사용하여 저장되었습니다.</string>
+  <string name="stripe_success_pane_desc_microdeposits">영업일 기준 1-2일 후에 끝자리가 ••••%1$s인 계좌로 소액 입금과 추가 지침이 포함된 이메일이 전송될 예정입니다.</string>
+  <string name="stripe_success_pane_desc_plural">귀하의 계정이 연결되었습니다</string>
+  <string name="stripe_success_pane_desc_singular">귀하의 계정이 연결되었습니다</string>
+  <string name="stripe_success_pane_done">완료</string>
+  <string name="stripe_success_pane_done_with_merchant">%1$s에 돌아가기</string>
+  <!-- Success panes -->
+  <string name="stripe_success_pane_title">성공</string>
+  <string name="stripe_success_pane_title_microdeposits">거의 끝나갑니다</string>
+  <string name="stripe_validation_account_confirm_mismatch">계좌 번호가 일치하지 않습니다.</string>
+  <string name="stripe_validation_account_required">계좌 번호가 필요합니다.</string>
+  <string name="stripe_validation_account_too_long">잘못된 은행 계좌 번호: 최대 17자리여야 합니다.</string>
+  <string name="stripe_validation_no_us_routing">잘못된 라우팅 번호입니다.</string>
+  <string name="stripe_validation_routing_required">라우팅 번호가 필요합니다.</string>
+  <string name="stripe_validation_routing_too_short">라우팅 번호 9자리를 입력하십시오.</string>
+  <string name="stripe_verification.codeExpiredEmail">제공해 주신 확인 코드가 더 이상 유효하지 않은 것 같습니다. \"코드 재전송\"을 클릭하고 다시 시도해 보거나 </string>
+  <string name="stripe_verification.codeExpiredSms">제공해 주신 확인 코드가 유효하지 않은 것 같습니다. 다시 시도해 보거나 </string>
+  <!-- Verification (shared) -->
+  <string name="stripe_verification.codeInvalid">이 코드는 작동하지 않는 것 같습니다. 한 번 더 확인하고 다시 시도하십시오.</string>
+  <string name="stripe_verification.inTestMode">테스트 모드입니다.</string>
+  <string name="stripe_verification.useTestCode">테스트 코드 사용</string>
+</resources>
