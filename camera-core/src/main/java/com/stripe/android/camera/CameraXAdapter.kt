@@ -263,6 +263,9 @@ class CameraXAdapter(
                 CameraSelector.LENS_FACING_FRONT -> "front"
                 else -> "unknown"
             }
+
+            // Return device model with lens facing
+            // Format: "Manufacturer Model (facing)"
             "${Build.MANUFACTURER} ${Build.MODEL} ($facing)"
         }
     }
