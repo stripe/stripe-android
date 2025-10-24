@@ -94,6 +94,7 @@ interface CollectBankAccountLauncher {
             )
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ReactNativeSdkInternal
         fun create(
             activity: ComponentActivity,

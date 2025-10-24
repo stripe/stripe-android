@@ -82,6 +82,7 @@ class FinancialConnectionsSheet internal constructor(
         }
 
         @JvmStatic
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ReactNativeSdkInternal
         fun create(
             activity: ComponentActivity,
@@ -139,6 +140,7 @@ class FinancialConnectionsSheet internal constructor(
         }
 
         @JvmStatic
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ReactNativeSdkInternal
         fun createForBankAccountToken(
             activity: ComponentActivity,

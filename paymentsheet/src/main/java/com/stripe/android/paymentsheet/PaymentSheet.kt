@@ -368,6 +368,7 @@ class PaymentSheet internal constructor(
             return PaymentSheet(DefaultPaymentSheetLauncher(activity, resultCallback))
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ReactNativeSdkInternal
         fun build(activity: ComponentActivity, signal: UnregisterSignal): PaymentSheet {
             initializeCallbacks()

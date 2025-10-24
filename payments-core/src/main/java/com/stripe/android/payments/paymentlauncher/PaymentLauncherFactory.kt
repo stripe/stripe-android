@@ -36,6 +36,7 @@ class PaymentLauncherFactory(
         statusBarColor = StatusBarCompat.color(activity),
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @ReactNativeSdkInternal
     constructor(
         activity: ComponentActivity,

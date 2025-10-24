@@ -4,8 +4,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.RestrictTo
 import java.util.UUID
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @ReactNativeSdkInternal
 fun <I, O> registerForReactNativeActivityResult(
     activity: ComponentActivity,

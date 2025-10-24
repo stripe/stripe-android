@@ -5,6 +5,7 @@ import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
+import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -57,6 +58,7 @@ internal class DefaultPaymentSheetLauncher(
         callback = callback,
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @ReactNativeSdkInternal
     constructor(
         activity: ComponentActivity,
