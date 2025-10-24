@@ -3181,7 +3181,7 @@ class PaymentSheet internal constructor(
         val amount: Long? = null,
         val label: String? = null,
         val buttonType: ButtonType = ButtonType.Pay,
-        val additionalEnabledNetworks: List<String> = emptyList()
+        internal val additionalEnabledNetworks: List<String> = emptyList()
     ) : Parcelable {
 
         enum class Environment {

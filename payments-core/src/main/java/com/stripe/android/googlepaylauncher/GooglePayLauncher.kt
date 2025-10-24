@@ -264,7 +264,7 @@ class GooglePayLauncher internal constructor(
         /**
          * Set this property to enable other card networks in additional to the default list, such as "INTERAC"
          */
-        var additionalEnabledNetworks: List<String> = emptyList()
+        internal val additionalEnabledNetworks: List<String> = emptyList()
     ) : Parcelable {
 
         internal val isJcbEnabled: Boolean
