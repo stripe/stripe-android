@@ -90,6 +90,8 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_load_succeeded")
         testContext.validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        // cardscan is not available in test mode
+        testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
         testContext.validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", Uri.encode("cashapp,alipay")),
@@ -169,6 +171,8 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_load_succeeded")
         testContext.validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        // cardscan is not available in test mode
+        testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
         testContext.validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", Uri.encode("cashapp,alipay")),
@@ -253,6 +257,8 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        // cardscan is not available in test mode
+        testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
@@ -327,6 +333,8 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_load_succeeded")
         testContext.validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        // cardscan is not available in test mode
+        testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
 
         testContext.configureFlowController {
             configureWithPaymentIntent(

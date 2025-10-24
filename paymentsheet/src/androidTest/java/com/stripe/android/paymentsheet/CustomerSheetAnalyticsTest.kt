@@ -68,6 +68,7 @@ internal class CustomerSheetAnalyticsTest {
         context.presentCustomerSheet()
 
         validateAnalyticsRequest(eventName = "cs_card_number_completed")
+        validateAnalyticsRequest(eventName = "cs_cardscan_api_check_failed")
 
         page.fillOutCardDetails()
 
@@ -86,6 +87,7 @@ internal class CustomerSheetAnalyticsTest {
         )
 
         validateAnalyticsRequest(eventName = "stripe_android.payment_method_creation")
+        validateAnalyticsRequest(eventName = "cs_cardscan_api_check_failed")
         validateAnalyticsRequest(eventName = "stripe_android.setup_intent_retrieval")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.started",
