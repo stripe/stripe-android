@@ -31,6 +31,11 @@ class GooglePayJsonFactory internal constructor(
      */
     private val isJcbEnabled: Boolean = false,
 
+    /**
+     * Enable additional networks, e.g. INTERAC
+     */
+    private val additionalEnabledNetworks: List<String> = emptyList(),
+
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
 ) {
     /**
@@ -77,10 +82,16 @@ class GooglePayJsonFactory internal constructor(
          *
          * JCB currently can only be accepted in Japan.
          */
-        isJcbEnabled: Boolean = false
+        isJcbEnabled: Boolean = false,
+
+        /**
+         * Enable additional networks, e.g. INTERAC
+         */
+        additionalEnabledNetworks: List<String> = emptyList()
     ) : this(
         googlePayConfig = googlePayConfig,
         isJcbEnabled = isJcbEnabled,
+        additionalEnabledNetworks = additionalEnabledNetworks,
         cardBrandFilter = DefaultCardBrandFilter
     )
 
@@ -93,7 +104,8 @@ class GooglePayJsonFactory internal constructor(
     ) : this(
         googlePayConfig = GooglePayConfig(publishableKeyProvider(), stripeAccountIdProvider()),
         isJcbEnabled = googlePayConfig.isJcbEnabled,
-        cardBrandFilter = cardBrandFilter
+        cardBrandFilter = cardBrandFilter,
+        additionalEnabledNetworks = googlePayConfig.additionalEnabledNetworks
     )
 
     /**
@@ -296,10 +308,12 @@ class GooglePayJsonFactory internal constructor(
         val acceptedCardBrands = if (forIsReadyToPayRequest) {
             // Use all card networks for isReadyToPayRequest
             DEFAULT_CARD_NETWORKS.plus(listOf(JCB_CARD_NETWORK).takeIf { isJcbEnabled } ?: emptyList())
+                .plus(additionalEnabledNetworks)
         } else {
             // Apply filtering for actual payment request
             DEFAULT_CARD_NETWORKS
                 .plus(listOf(JCB_CARD_NETWORK).takeIf { isJcbEnabled } ?: emptyList())
+                .plus(additionalEnabledNetworks)
                 .filter {
                     val cardBrand = networkStringToCardBrandMap[it] ?: CardBrand.Unknown
                     cardBrandFilter.isAccepted(cardBrand)

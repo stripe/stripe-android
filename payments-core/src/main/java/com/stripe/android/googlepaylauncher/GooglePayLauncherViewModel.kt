@@ -328,7 +328,8 @@ internal class GooglePayLauncherViewModel(
                 ),
                 googlePayJsonFactory = GooglePayJsonFactory(
                     googlePayConfig = GooglePayConfig(publishableKey, stripeAccountId),
-                    isJcbEnabled = args.config.isJcbEnabled
+                    isJcbEnabled = args.config.isJcbEnabled,
+                    additionalEnabledNetworks = args.config.additionalEnabledNetworks
                 ),
                 googlePayRepository = googlePayRepository,
                 savedStateHandle = extras.createSavedStateHandle(),

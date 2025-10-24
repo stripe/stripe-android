@@ -261,6 +261,37 @@ class GooglePayJsonFactoryTest {
     }
 
     @Test
+    fun allowedCardNetworks_whenAdditionalEnabledNetworksEmpty_shouldNotIncludeAdditionEnabledNetworks() {
+        val allowedCardNetworks = factory.createIsReadyToPayRequest()
+            .getJSONArray("allowedPaymentMethods")
+            .getJSONObject(0)
+            .getJSONObject("parameters")
+            .getJSONArray("allowedCardNetworks")
+            .let {
+                StripeJsonUtils.jsonArrayToList(it)
+            }
+
+        assertThat(allowedCardNetworks)
+            .isEqualTo(listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA"))
+    }
+
+    @Test
+    fun allowedCardNetworks_whenAdditionalEnabledNetworksNotEmpty_shouldIncludeAdditionEnabledNetworks() {
+        val allowedCardNetworks = GooglePayJsonFactory(googlePayConfig, additionalEnabledNetworks = listOf("INTERAC"))
+            .createIsReadyToPayRequest()
+            .getJSONArray("allowedPaymentMethods")
+            .getJSONObject(0)
+            .getJSONObject("parameters")
+            .getJSONArray("allowedCardNetworks")
+            .let {
+                StripeJsonUtils.jsonArrayToList(it)
+            }
+
+        assertThat(allowedCardNetworks)
+            .isEqualTo(listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA", "INTERAC"))
+    }
+
+    @Test
     fun allowCreditCards_whenTrue_shouldIncludeAllowCreditCardsInRequest() {
         val allowCreditCards =
             GooglePayJsonFactory(googlePayConfig)

@@ -86,7 +86,8 @@ class GooglePayLauncher internal constructor(
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE),
-                )
+                ),
+                additionalEnabledNetworks = config.additionalEnabledNetworks
             )
         },
         PaymentAnalyticsRequestFactory(
@@ -175,7 +176,8 @@ class GooglePayLauncher internal constructor(
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE)
-                )
+                ),
+                additionalEnabledNetworks = config.additionalEnabledNetworks
             )
         },
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -303,7 +305,12 @@ class GooglePayLauncher internal constructor(
          *
          * Default: The credit card class is supported for the card networks specified.
          */
-        var allowCreditCards: Boolean = true
+        var allowCreditCards: Boolean = true,
+
+        /**
+         * Set this property to enable other card networks in additional to the default list, such as "INTERAC"
+         */
+        internal val additionalEnabledNetworks: List<String> = emptyList()
     ) : Parcelable {
 
         internal val isJcbEnabled: Boolean
@@ -435,7 +442,8 @@ fun rememberGooglePayLauncher(
                     errorReporter = ErrorReporter.createFallbackInstance(
                         context = context,
                         productUsage = setOf(GooglePayLauncher.PRODUCT_USAGE)
-                    )
+                    ),
+                    additionalEnabledNetworks = config.additionalEnabledNetworks
                 )
             },
             PaymentAnalyticsRequestFactory(
