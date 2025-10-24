@@ -105,13 +105,14 @@ internal interface ConfirmationDefinition<
      *
      * @param confirmationOption the expected [ConfirmationHandler.Option] type used during confirmation
      * @param confirmationArgs a set of general confirmation parameters using during confirmation
-     * @param deferredIntentConfirmationType DO NOT USE OUTSIDE OF INTENT CONFIRMATION
+     * @param confirmationMetadata metadata about the confirmation process, useful for analytics or other data incurred
+     *   during the confirmation process
      * @param result the launcher result received after the confirmation flow was closed.
      */
     fun toResult(
         confirmationOption: TConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        confirmationMetadata: Map<String, String>,
         result: TLauncherResult,
     ): Result
 
@@ -140,9 +141,10 @@ internal interface ConfirmationDefinition<
              */
             val intent: StripeIntent,
             /**
-             * DO NOT USE OUTSIDE OF INTENT CONFIRMATION
+             * Metadata about the confirmation process, useful for analytics or data that does not fit in confirmation
+             * option or args.
              */
-            val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+            val metadata: Map<String, String>,
             /**
              * Indicates if the full payment flow was completed by the handler. Can be used to decide if internal
              * product state needs to be reset. Useful for confirmation flows that are handed off to merchants to
@@ -203,9 +205,10 @@ internal interface ConfirmationDefinition<
              */
             val intent: StripeIntent,
             /**
-             * DO NOT USE OUTSIDE OF INTENT CONFIRMATION
+             * Metadata about the confirmation process, useful for analytics or data that does not fit in confirmation
+             * option or args.
              */
-            val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+            val confirmationMetadata: Map<String, String>,
             /**
              * Indicates if the full payment flow was completed by the handler. Can be used to decide if internal
              * product state needs to be reset. Useful for confirmation flows that are handed off to merchants to
@@ -253,9 +256,10 @@ internal interface ConfirmationDefinition<
              */
             val receivesResultInProcess: Boolean,
             /**
-             * DO NOT USE OUTSIDE OF INTENT CONFIRMATION
+             * Metadata about the confirmation process, useful for analytics or data that does not fit in confirmation
+             * option or args.
              */
-            val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+            val confirmationMetadata: Map<String, String>,
         ) : Action<TLauncherArgs>
     }
 }

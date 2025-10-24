@@ -628,13 +628,13 @@ internal class DefaultFlowController @Inject internal constructor(
                 viewModel.paymentSelection?.let { paymentSelection ->
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
-                        deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                        deferredIntentConfirmationType = null,
                     )
                 }
 
                 onPaymentResult(
                     paymentResult = PaymentResult.Completed,
-                    deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                    deferredIntentConfirmationType = null,
                     shouldLog = false,
                     shouldResetOnCompleted = result.completedFullPaymentFlow,
                 )

@@ -8,7 +8,6 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
 import kotlinx.parcelize.Parcelize
 
@@ -55,7 +54,7 @@ internal class ConfirmationMediator<
                     confirmationOption = params.confirmationOption,
                     confirmationArgs = params.confirmationArgs,
                     result = result,
-                    deferredIntentConfirmationType = params.deferredIntentConfirmationType
+                    confirmationMetadata = params.confirmationMetadata
                 )
             } ?: run {
                 val exception = IllegalStateException(
@@ -107,7 +106,7 @@ internal class ConfirmationMediator<
                             persistedParameters = Parameters(
                                 confirmationOption = confirmationOption,
                                 confirmationArgs = arguments,
-                                deferredIntentConfirmationType = action.deferredIntentConfirmationType,
+                                confirmationMetadata = action.confirmationMetadata,
                             )
 
                             definition.launch(
@@ -134,7 +133,7 @@ internal class ConfirmationMediator<
             is ConfirmationDefinition.Action.Complete -> {
                 Action.Complete(
                     intent = action.intent,
-                    deferredIntentConfirmationType = action.deferredIntentConfirmationType,
+                    metadata = action.confirmationMetadata,
                     completedFullPaymentFlow = action.completedFullPaymentFlow,
                 )
             }
@@ -162,7 +161,7 @@ internal class ConfirmationMediator<
 
         data class Complete(
             val intent: StripeIntent,
-            val deferredIntentConfirmationType: DeferredIntentConfirmationType? = null,
+            val metadata: Map<String, String>,
             val completedFullPaymentFlow: Boolean,
         ) : Action
     }
@@ -171,7 +170,7 @@ internal class ConfirmationMediator<
     internal data class Parameters<TConfirmationOption : ConfirmationHandler.Option>(
         val confirmationOption: TConfirmationOption,
         val confirmationArgs: ConfirmationHandler.Args,
-        val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        val confirmationMetadata: Map<String, String>,
     ) : Parcelable
 
     companion object {

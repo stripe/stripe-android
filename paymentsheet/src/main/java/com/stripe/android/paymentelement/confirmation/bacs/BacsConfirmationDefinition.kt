@@ -34,7 +34,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
         return BacsMandateData.fromConfirmationOption(confirmationOption)?.let { data ->
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = data,
-                deferredIntentConfirmationType = null,
+                confirmationMetadata = emptyMap(),
                 receivesResultInProcess = true,
             )
         } ?: run {
@@ -75,7 +75,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
     override fun toResult(
         confirmationOption: BacsConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        confirmationMetadata: Map<String, String>,
         result: BacsMandateConfirmationResult,
     ): ConfirmationDefinition.Result {
         return when (result) {

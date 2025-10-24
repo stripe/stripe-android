@@ -150,7 +150,9 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                 if (result.clientSecret == IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT) {
                     ConfirmationDefinition.Action.Complete(
                         intent = intent,
-                        deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                        confirmationMetadata = mapOf(
+                            "deferred_intent_confirmation_type" to DeferredIntentConfirmationType.None.value
+                        ),
                         completedFullPaymentFlow = true,
                     )
                 } else {
@@ -221,7 +223,9 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         failIfSetAsDefaultFeatureIsEnabled(confirmationOption)
         return ConfirmationDefinition.Action.Complete(
             intent = intent,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+            confirmationMetadata = mapOf(
+                "deferred_intent_confirmation_type" to DeferredIntentConfirmationType.Server.value
+            ),
             completedFullPaymentFlow = true,
         )
     }
@@ -235,7 +239,9 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
             DeferredIntentValidator.validatePaymentMethod(intent, paymentMethod)
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = Args.NextAction(clientSecret),
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                confirmationMetadata = mapOf(
+                    "deferred_intent_confirmation_type" to DeferredIntentConfirmationType.Server.value
+                ),
                 receivesResultInProcess = false,
             )
         }.getOrElse {

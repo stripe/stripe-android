@@ -185,7 +185,7 @@ internal class DefaultConfirmationHandler(
                 onHandlerResult(
                     ConfirmationHandler.Result.Succeeded(
                         intent = action.intent,
-                        deferredIntentConfirmationType = action.deferredIntentConfirmationType,
+                        metadata = action.metadata,
                         completedFullPaymentFlow = action.completedFullPaymentFlow,
                     )
                 )
@@ -216,7 +216,7 @@ internal class DefaultConfirmationHandler(
             }
             is ConfirmationDefinition.Result.Succeeded -> ConfirmationHandler.Result.Succeeded(
                 intent = result.intent,
-                deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                metadata = result.metadata,
                 completedFullPaymentFlow = result.completedFullPaymentFlow,
             )
             is ConfirmationDefinition.Result.Failed -> ConfirmationHandler.Result.Failed(

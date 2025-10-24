@@ -111,13 +111,13 @@ internal class IntentConfirmationDefinition(
     override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        confirmationMetadata: Map<String, String>,
         result: InternalPaymentResult
     ): ConfirmationDefinition.Result {
         return when (result) {
             is InternalPaymentResult.Completed -> ConfirmationDefinition.Result.Succeeded(
                 intent = result.intent,
-                deferredIntentConfirmationType = deferredIntentConfirmationType,
+                metadata = confirmationMetadata,
             )
             is InternalPaymentResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,

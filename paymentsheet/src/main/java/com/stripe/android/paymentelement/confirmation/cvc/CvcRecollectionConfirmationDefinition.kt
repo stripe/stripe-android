@@ -47,7 +47,7 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = Unit,
             receivesResultInProcess = true,
-            deferredIntentConfirmationType = null,
+            confirmationMetadata = emptyMap()
         )
     }
 
@@ -81,7 +81,7 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
     override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        confirmationMetadata: Map<String, String>,
         result: CvcRecollectionResult
     ): ConfirmationDefinition.Result {
         return when (result) {

@@ -55,7 +55,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        confirmationMetadata: Map<String, String>,
         result: PassiveChallengeActivityResult
     ): ConfirmationDefinition.Result {
         return when (result) {
@@ -104,7 +104,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
                     productUsage = productUsage
                 ),
                 receivesResultInProcess = false,
-                deferredIntentConfirmationType = null,
+                confirmationMetadata = emptyMap(),
             )
         }
 

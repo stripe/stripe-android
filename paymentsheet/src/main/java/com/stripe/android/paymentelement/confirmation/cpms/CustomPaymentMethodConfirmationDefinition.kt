@@ -58,7 +58,7 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
         } else {
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = Unit,
-                deferredIntentConfirmationType = null,
+                confirmationMetadata = emptyMap(),
                 receivesResultInProcess = false,
             )
         }
@@ -99,13 +99,13 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
     override fun toResult(
         confirmationOption: CustomPaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        confirmationMetadata: Map<String, String>,
         result: InternalCustomPaymentMethodResult
     ): ConfirmationDefinition.Result {
         return when (result) {
             is InternalCustomPaymentMethodResult.Completed -> ConfirmationDefinition.Result.Succeeded(
                 intent = confirmationArgs.intent,
-                deferredIntentConfirmationType = null,
+                metadata = confirmationMetadata,
             )
             is InternalCustomPaymentMethodResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,

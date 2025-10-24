@@ -29,7 +29,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -271,7 +270,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             // PaymentSheet and return a `Completed` result to the caller.
             handlePaymentCompleted(
                 intent = pendingResult.intent,
-                deferredIntentConfirmationType = pendingResult.deferredIntentConfirmationType,
                 finishImmediately = true
             )
         } else if (state.validationError != null) {
@@ -573,14 +571,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun handlePaymentCompleted(
         intent: StripeIntent,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         finishImmediately: Boolean
     ) {
         val currentSelection = inProgressSelection
         currentSelection?.let { paymentSelection ->
             eventReporter.onPaymentSuccess(
                 paymentSelection = paymentSelection,
-                deferredIntentConfirmationType = deferredIntentConfirmationType,
+                deferredIntentConfirmationType = null,
             )
         }
 
@@ -620,7 +617,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> handlePaymentCompleted(
                 intent = result.intent,
-                deferredIntentConfirmationType = result.deferredIntentConfirmationType,
                 finishImmediately = false,
             )
             is ConfirmationHandler.Result.Failed -> processConfirmationFailure(result)

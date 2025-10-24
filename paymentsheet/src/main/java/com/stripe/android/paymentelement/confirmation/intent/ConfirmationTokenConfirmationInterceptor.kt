@@ -132,7 +132,9 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 if (result.clientSecret == IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT) {
                     ConfirmationDefinition.Action.Complete(
                         intent = intent,
-                        deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                        confirmationMetadata = mapOf(
+                            "deferred_intent_confirmation_type" to DeferredIntentConfirmationType.None.value
+                        ),
                         completedFullPaymentFlow = true,
                     )
                 } else {
@@ -170,13 +172,17 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             if (intent.isConfirmed) {
                 ConfirmationDefinition.Action.Complete(
                     intent = intent,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    confirmationMetadata = mapOf(
+                        "deferred_intent_confirmation_type" to DeferredIntentConfirmationType.Server.value
+                    ),
                     completedFullPaymentFlow = true,
                 )
             } else if (intent.requiresAction()) {
                 ConfirmationDefinition.Action.Launch<Args>(
                     launcherArguments = Args.NextAction(clientSecret),
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    confirmationMetadata = mapOf(
+                        "deferred_intent_confirmation_type" to DeferredIntentConfirmationType.Server.value
+                    ),
                     receivesResultInProcess = false,
                 )
             } else {

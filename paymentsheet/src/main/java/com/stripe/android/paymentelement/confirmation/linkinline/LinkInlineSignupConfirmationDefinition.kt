@@ -48,7 +48,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = LauncherArguments(nextConfirmationOption),
             receivesResultInProcess = true,
-            deferredIntentConfirmationType = null,
+            confirmationMetadata = emptyMap(),
         )
     }
 
@@ -71,7 +71,7 @@ internal class LinkInlineSignupConfirmationDefinition(
     override fun toResult(
         confirmationOption: LinkInlineSignupConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        confirmationMetadata: Map<String, String>,
         result: Result,
     ): ConfirmationDefinition.Result {
         return ConfirmationDefinition.Result.NextStep(

@@ -6,7 +6,6 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -157,7 +156,7 @@ internal interface ConfirmationHandler {
          */
         data class Succeeded(
             val intent: StripeIntent,
-            val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+            val metadata: Map<String, String>,
             val completedFullPaymentFlow: Boolean = true,
         ) : Result
 
