@@ -101,14 +101,14 @@ class AddressLauncher internal constructor(
     /** Configuration for [AddressLauncher] **/
     @Parcelize
     data class Configuration internal constructor(
-        val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
-        val address: AddressDetails? = null,
-        val allowedCountries: Set<String> = emptySet(),
-        val buttonTitle: String? = null,
-        val additionalFields: AdditionalFieldsConfiguration? = null,
-        val title: String? = null,
-        val googlePlacesApiKey: String? = null,
-        val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+        internal val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+        internal val address: AddressDetails? = null,
+        internal val allowedCountries: Set<String> = emptySet(),
+        internal val buttonTitle: String? = null,
+        internal val additionalFields: AdditionalFieldsConfiguration? = null,
+        internal val title: String? = null,
+        internal val googlePlacesApiKey: String? = null,
+        internal val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
         internal val billingAddress: PaymentSheet.BillingDetails?,
     ) : Parcelable {
         @JvmOverloads
@@ -233,8 +233,8 @@ class AddressLauncher internal constructor(
      */
     @Parcelize
     data class AdditionalFieldsConfiguration(
-        val phone: FieldConfiguration = FieldConfiguration.HIDDEN,
-        val checkboxLabel: String? = null,
+        internal val phone: FieldConfiguration = FieldConfiguration.HIDDEN,
+        internal val checkboxLabel: String? = null,
     ) : Parcelable {
         @Parcelize
         enum class FieldConfiguration : Parcelable {
