@@ -78,7 +78,8 @@ internal data class CollectedDataParam(
 
         fun createFromFrontUploadedResultsForAutoCapture(
             frontHighResResult: UploadedResult,
-            frontLowResResult: UploadedResult
+            frontLowResResult: UploadedResult,
+            cameraLensModel: String? = null
         ): CollectedDataParam =
             CollectedDataParam(
                 idDocumentFront = DocumentUploadParam(
@@ -96,13 +97,15 @@ internal data class CollectedDataParam(
                     ) {
                         "front low res image id is null"
                     },
-                    uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
+                    uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE,
+                    cameraLensModel = cameraLensModel
                 )
             )
 
         fun createFromBackUploadedResultsForAutoCapture(
             backHighResResult: UploadedResult,
-            backLowResResult: UploadedResult
+            backLowResResult: UploadedResult,
+            cameraLensModel: String? = null
         ): CollectedDataParam =
             CollectedDataParam(
                 idDocumentBack = DocumentUploadParam(
@@ -120,7 +123,8 @@ internal data class CollectedDataParam(
                     ) {
                         "back low res image id is null"
                     },
-                    uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
+                    uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE,
+                    cameraLensModel = cameraLensModel
                 )
             )
 
@@ -134,7 +138,8 @@ internal data class CollectedDataParam(
             trainingConsent: Boolean,
             bestFaceScore: Float,
             faceScoreVariance: Float,
-            numFrames: Int
+            numFrames: Int,
+            bestCameraLensModel: String? = null
         ) = CollectedDataParam(
             face = FaceUploadParam(
                 bestHighResImage = requireNotNull(bestHighResResult.uploadedStripeFile.id),
@@ -146,7 +151,8 @@ internal data class CollectedDataParam(
                 bestFaceScore = bestFaceScore,
                 faceScoreVariance = faceScoreVariance,
                 numFrames = numFrames,
-                trainingConsent = trainingConsent
+                trainingConsent = trainingConsent,
+                bestCameraLensModel = bestCameraLensModel
             )
         )
 

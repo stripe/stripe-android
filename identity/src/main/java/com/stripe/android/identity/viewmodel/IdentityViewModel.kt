@@ -31,6 +31,7 @@ import com.stripe.android.identity.analytics.AnalyticsState
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
+import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.injection.IdentityActivitySubcomponent
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.Category
@@ -380,6 +381,27 @@ internal class IdentityViewModel(
     override fun onCleared() {
         super.onCleared()
         errorCause.removeObserver(errorCauseObServer)
+    }
+
+    // Store camera lens model for document uploads
+    private var currentCameraLensModel: String? = null
+
+    // Store camera lens model for selfie uploads
+    private var selfieCameraLensModel: String? = null
+
+    /**
+     * Set the camera lens model for subsequent uploads.
+     */
+    fun setCameraLensModel(cameraLensModel: String?) {
+        currentCameraLensModel = cameraLensModel
+    }
+
+    /**
+     * Set the camera lens model for selfie uploads.
+     */
+    fun setSelfieCameraLensModel(cameraManager: IdentityCameraManager?) {
+        selfieCameraLensModel = cameraManager?.getCameraLensModel()
+        Log.d(TAG, "Selfie camera lens model set to: $selfieCameraLensModel")
     }
 
     /**
@@ -1554,12 +1576,14 @@ internal class IdentityViewModel(
                     collectedDataParam = if (isFront) {
                         CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
                             frontHighResResult = requireNotNull(uploadedState.highResResult.data),
-                            frontLowResResult = requireNotNull(uploadedState.lowResResult.data)
+                            frontLowResResult = requireNotNull(uploadedState.lowResResult.data),
+                            cameraLensModel = currentCameraLensModel
                         )
                     } else {
                         CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
                             backHighResResult = requireNotNull(uploadedState.highResResult.data),
-                            backLowResResult = requireNotNull(uploadedState.lowResResult.data)
+                            backLowResResult = requireNotNull(uploadedState.lowResResult.data),
+                            cameraLensModel = currentCameraLensModel
                         )
                     },
                     fromRoute = route,
@@ -1664,7 +1688,8 @@ internal class IdentityViewModel(
                                 trainingConsent = allowImageCollection,
                                 faceScoreVariance = faceDetectorTransitioner.scoreVariance,
                                 bestFaceScore = faceDetectorTransitioner.bestFaceScore,
-                                numFrames = faceDetectorTransitioner.numFrames
+                                numFrames = faceDetectorTransitioner.numFrames,
+                                bestCameraLensModel = selfieCameraLensModel
                             ),
                             fromRoute = SelfieDestination.ROUTE.route
                         ) {

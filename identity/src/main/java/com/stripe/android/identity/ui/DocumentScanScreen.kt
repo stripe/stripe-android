@@ -106,7 +106,8 @@ internal fun DocumentScanScreen(
             identityViewModel = identityViewModel,
             lifecycleOwner = lifecycleOwner,
             verificationPage = pageAndModelFiles.page,
-            navController = navController
+            navController = navController,
+            cameraManager = cameraManager
         )
 
         // UX based on documentScannerState
