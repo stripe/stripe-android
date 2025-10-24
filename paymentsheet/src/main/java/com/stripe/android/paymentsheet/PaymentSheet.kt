@@ -2570,20 +2570,6 @@ class PaymentSheet internal constructor(
          */
         val heightDp: Float? = null
     ) : Parcelable {
-        @Deprecated("Use @DimenRes constructor")
-        constructor(
-            context: Context,
-            cornerRadiusDp: Int? = null,
-            borderStrokeWidthDp: Int? = null
-        ) : this(
-            cornerRadiusDp = cornerRadiusDp?.let {
-                context.getRawValueFromDimenResource(it)
-            },
-            borderStrokeWidthDp = borderStrokeWidthDp?.let {
-                context.getRawValueFromDimenResource(it)
-            }
-        )
-
         constructor(
             context: Context,
             @DimenRes cornerRadiusRes: Int? = null,
