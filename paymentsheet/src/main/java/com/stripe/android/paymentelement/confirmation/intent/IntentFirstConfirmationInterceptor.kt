@@ -30,7 +30,8 @@ internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
             clientSecret = clientSecret,
             intent = intent,
             shippingValues = shippingValues,
-            isDeferred = false
+            isDeferred = false,
+            isConfirmationToken = false,
         ) {
             create(
                 confirmationOption.createParams,
@@ -51,6 +52,7 @@ internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
             intent = intent,
             shippingValues = shippingValues,
             isDeferred = false,
+            isConfirmationToken = false,
         ) {
             create(
                 paymentMethod = confirmationOption.paymentMethod,

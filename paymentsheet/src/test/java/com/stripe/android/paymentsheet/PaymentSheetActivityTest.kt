@@ -786,6 +786,7 @@ internal class PaymentSheetActivityTest {
                 result = ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = null,
+                    isConfirmationToken = false,
                 )
             )
         }

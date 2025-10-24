@@ -278,6 +278,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
             result = PassiveChallengeActivityResult.Success(testToken),
         )
 
@@ -308,6 +309,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
             result = PassiveChallengeActivityResult.Success(testToken),
         )
 
@@ -333,6 +335,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
             result = PassiveChallengeActivityResult.Failed(exception),
         )
 
@@ -355,6 +358,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
             result = PassiveChallengeActivityResult.Failed(exception),
         )
 
@@ -467,6 +471,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
             result = PassiveChallengeActivityResult.Success(testToken),
         )
 
@@ -490,6 +495,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
             result = PassiveChallengeActivityResult.Failed(RuntimeException("Failed")),
         )
 
@@ -523,6 +529,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
             result = PassiveChallengeActivityResult.Success(testToken),
         )
 

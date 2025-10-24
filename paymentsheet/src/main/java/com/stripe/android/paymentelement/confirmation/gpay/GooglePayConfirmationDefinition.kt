@@ -63,6 +63,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             launcherArguments = Unit,
             receivesResultInProcess = true,
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
         )
     }
 
@@ -108,6 +109,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         confirmationOption: GooglePayConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        isConfirmationToken: Boolean,
         result: GooglePayPaymentMethodLauncher.Result,
     ): ConfirmationDefinition.Result {
         return when (result) {

@@ -193,8 +193,9 @@ internal class LinkConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            result = LinkActivityResult.PaymentMethodObtained(paymentMethod),
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
+            result = LinkActivityResult.PaymentMethodObtained(paymentMethod),
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.NextStep>()
@@ -220,16 +221,18 @@ internal class LinkConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
+            deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
             result = LinkActivityResult.Completed(
                 linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
             ),
-            deferredIntentConfirmationType = null,
         )
 
         assertThat(result).isEqualTo(
             ConfirmationDefinition.Result.Succeeded(
                 intent = CONFIRMATION_PARAMETERS.intent,
-                deferredIntentConfirmationType = null
+                deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
             )
         )
         assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
@@ -249,12 +252,13 @@ internal class LinkConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
+            deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
             result = LinkActivityResult.Failed(
                 error = exception,
                 linkAccountUpdate = LinkAccountUpdate.Value(null)
 
-            ),
-            deferredIntentConfirmationType = null
+            )
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Failed>()
@@ -281,11 +285,12 @@ internal class LinkConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
+            deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
             result = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.LoggedOut,
                 linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
             ),
-            deferredIntentConfirmationType = null,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Canceled>()
@@ -310,11 +315,12 @@ internal class LinkConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
+            deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
             result = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.BackPressed,
                 linkAccountUpdate = LinkAccountUpdate.None
-            ),
-            deferredIntentConfirmationType = null
+            )
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Canceled>()

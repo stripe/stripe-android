@@ -387,6 +387,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onPaymentSuccess(
         paymentSelection: PaymentSelection,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        isConfirmationToken: Boolean,
     ) {
         // Wallets are treated as a saved payment method after confirmation, so we need
         // to "reset" to the correct PaymentSelection for accurate reporting.
@@ -406,6 +407,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+                isConfirmationToken = isConfirmationToken,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
             )
         )
@@ -425,6 +427,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 result = PaymentSheetEvent.Payment.Result.Failure(error),
                 currency = currency,
                 isDeferred = isDeferred,
+                isConfirmationToken = null,
                 isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,

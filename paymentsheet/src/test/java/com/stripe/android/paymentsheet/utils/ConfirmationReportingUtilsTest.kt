@@ -77,7 +77,8 @@ class ConfirmationReportingUtilsTest {
         val eventReporter = FakeEventReporter()
         val result = ConfirmationHandler.Result.Succeeded(
             intent = PaymentIntentFixtures.PI_SUCCEEDED,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client
+            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+            isConfirmationToken = false,
         )
 
         eventReporter.reportPaymentResult(result, PaymentSelection.GooglePay)
@@ -85,6 +86,7 @@ class ConfirmationReportingUtilsTest {
         val event = eventReporter.paymentSuccessCalls.awaitItem()
         assertThat(event.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
         assertThat(event.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
+        assertThat(event.isConfirmationToken).isEqualTo(false)
         eventReporter.validate()
     }
 

@@ -332,10 +332,11 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = createLinkInlineSignupConfirmationOption(),
             confirmationArgs = CONFIRMATION_PARAMETERS,
+            deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
             result = LinkInlineSignupConfirmationDefinition.Result(
                 nextConfirmationOption = nextOption,
             ),
-            deferredIntentConfirmationType = null,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.NextStep>()

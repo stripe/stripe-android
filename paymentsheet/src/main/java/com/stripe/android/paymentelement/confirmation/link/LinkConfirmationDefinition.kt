@@ -53,6 +53,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
             launcherArguments = Unit,
             receivesResultInProcess = false,
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
         )
     }
 
@@ -76,6 +77,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
         confirmationOption: LinkConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        isConfirmationToken: Boolean,
         result: LinkActivityResult
     ): ConfirmationDefinition.Result {
         if (
@@ -115,7 +117,8 @@ internal class LinkConfirmationDefinition @Inject constructor(
                 result.linkAccountUpdate.updateLinkAccount()
                 ConfirmationDefinition.Result.Succeeded(
                     intent = confirmationArgs.intent,
-                    deferredIntentConfirmationType = deferredIntentConfirmationType
+                    deferredIntentConfirmationType = deferredIntentConfirmationType,
+                    isConfirmationToken = isConfirmationToken,
                 )
             }
         }
