@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_account_picker_cta_link_plural">Rekeningen koppelen</string>
+  <string name="stripe_account_picker_cta_link_singular">Rekening koppelen</string>
+  <string name="stripe_account_picker_error_no_account_available_title">Er is een probleem met de toegang tot je %1$s-rekening.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">We hebben %1$s %2$s rekeningen gevonden, maar je kunt alleen betaal- of spaarrekeningen koppelen aan %3$s. Selecteer een andere bank.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">We hebben %1$s %2$s rekeningen gevonden, maar je kunt alleen betaal- of spaarrekeningen koppelen aan %3$s. Selecteer een andere bank.</string>
+  <string name="stripe_account_picker_error_no_payment_method_title">Geen betaalrekeningen beschikbaar</string>
+  <string name="stripe_account_picker_multiselect_account">Rekeningen selecteren</string>
+  <!-- Account picker -->
+  <string name="stripe_account_picker_singleselect_account">Een rekening selecteren</string>
+  <string name="stripe_accounts_error_desc_manualentry">Voer je bankgegevens handmatig in of selecteer een andere bank.</string>
+  <string name="stripe_accounts_error_desc_no_retry">Selecteer een andere bank.</string>
+  <string name="stripe_accounts_error_desc_retry">Selecteer een andere bank of probeer het nog eens.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc">Voer je bankgegevens handmatig in</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Voer je bankgegevens handmatig in of selecteer een andere bank.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_title">We hebben op dit moment geen toegang tot je rekeningnummer</string>
+  <string name="stripe_close_dialog_networking_desc">Als je nu annuleert, wordt je rekening gekoppeld aan %1$s, maar niet opgeslagen in Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business">Als je nu annuleert, wordt je rekening gekoppeld aan deze onderneming, maar niet opgeslagen in Link.</string>
+  <string name="stripe_error_cta_close">Sluiten</string>
+  <string name="stripe_error_cta_manual_entry">Voer de bankgegevens handmatig in</string>
+  <string name="stripe_error_cta_retry">Opnieuw proberen</string>
+  <string name="stripe_error_cta_select_another_bank">Selecteer een andere bank</string>
+  <string name="stripe_error_generic_desc">Je rekening kan op dit moment niet worden gekoppeld. Probeer het later nog eens.</string>
+  <!-- Error pane -->
+  <string name="stripe_error_generic_title">Er is iets misgegaan</string>
+  <string name="stripe_error_planned_downtime_desc">Onderhoud is gepland tot %1$s. Selecteer een andere bank of probeer het later opnieuw.</string>
+  <string name="stripe_error_planned_downtime_title">Er wordt onderhoud uitgevoerd bij %1$s</string>
+  <string name="stripe_error_unplanned_downtime_desc">Selecteer een andere bank of probeer het later opnieuw.</string>
+  <string name="stripe_error_unplanned_downtime_title">%1$s is nu niet beschikbaar</string>
+  <string name="stripe_exit_modal_cta_accept">Ja, afsluiten</string>
+  <string name="stripe_exit_modal_cta_cancel">Annuleren</string>
+  <string name="stripe_exit_modal_desc">Je bankrekening wordt niet gekoppeld aan %1$s en alle voortgang gaat verloren.</string>
+  <string name="stripe_exit_modal_desc_no_business">Je bankrekening wordt niet gekoppeld aan deze onderneming en alle voortgang gaat verloren.</string>
+  <!-- Exit modal -->
+  <string name="stripe_exit_modal_title">Afsluiten zonder te koppelen?</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">Voer je rekening- en routingnummer in</string>
+  <string name="stripe_institutionpicker_manual_entry_title">Staat je bank er niet bij?</string>
+  <string name="stripe_institutionpicker_pane_error_desc">Andere bank zoeken</string>
+  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Zoek naar een andere bank of </string>
+  <string name="stripe_institutionpicker_pane_error_title">Geen resultaten</string>
+  <!-- Institution picker -->
+  <string name="stripe_institutionpicker_pane_select_bank">Bank selecteren</string>
+  <string name="stripe_institutionpicker_search_more_title">Meer banken zoeken</string>
+  <string name="stripe_link_stepup_verification_desc">Voer de code in die naar %1$s is gestuurd. We vragen je regelmatig om deze extra stap uit te voeren, zodat je account veilig blijft.</string>
+  <string name="stripe_link_stepup_verification_resend_code">Code opnieuw versturen</string>
+  <!-- Networking step-up verification -->
+  <string name="stripe_link_stepup_verification_title">Je e-mailadres verifiëren</string>
+  <!-- Loading -->
+  <string name="stripe_loading_pill_label">Even geduld</string>
+  <string name="stripe_manualentry_account">Rekeningnummer</string>
+  <string name="stripe_manualentry_accountconfirm">Rekeningnummer bevestigen</string>
+  <string name="stripe_manualentry_cta">Indienen</string>
+  <string name="stripe_manualentry_microdeposits_desc">Je bankgegevens worden gecontroleerd met microstortingen op je rekening. Dit duurt meestal 1-2 werkdagen. Alleen betaalrekeningen worden ondersteund.</string>
+  <string name="stripe_manualentry_routing">Routingnummer</string>
+  <string name="stripe_manualentry_test_banner">Testaccount gebruiken</string>
+  <!-- Manual entry -->
+  <string name="stripe_manualentry_title">Bankgegevens invoeren</string>
+  <string name="stripe_networking_link_login_warmup_cta_cancel">Annuleren</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue">Doorgaan met Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_skip">Niet nu</string>
+  <!-- Networking warmup -->
+  <string name="stripe_networking_link_login_warmup_description">Gebruik informatie die je eerder hebt opgeslagen met je Link-account.</string>
+  <string name="stripe_networking_link_login_warmup_title">Doorgaan met Link</string>
+  <string name="stripe_networking_save_to_link_verification_cta_negative">Niet nu</string>
+  <string name="stripe_networking_save_to_link_verification_title">Bevestig dat jij het bent</string>
+  <!-- Networking signup -->
+  <string name="stripe_networking_signup_email_label">E-mailadres</string>
+  <string name="stripe_networking_verification_desc">Voer de code in die is verstuurd naar %1$s</string>
+  <!-- Networking verification -->
+  <string name="stripe_networking_verification_title">Bevestig dat jij het bent</string>
+  <!-- Partner auth -->
+  <string name="stripe_prepane_cancel_cta">Annuleren</string>
+  <string name="stripe_prepane_choose_different_bank_cta">Een andere bank kiezen</string>
+  <string name="stripe_search">Zoeken</string>
+  <string name="stripe_success_pane_desc_link_error_plural">Je rekeningen zijn gekoppeld, maar kunnen niet worden opgeslagen met Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular">Je rekening is gekoppeld, maar kan niet worden opgeslagen met Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural">Je rekeningen zijn gekoppeld en opgeslagen met Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular">Je rekening is gekoppeld en opgeslagen met Link.</string>
+  <string name="stripe_success_pane_desc_microdeposits">Er worden binnen 1-2 dagen microstortingen gedaan op rekening ••••%1$s. Je ontvangt vervolgens een e-mail met verdere instructies.</string>
+  <string name="stripe_success_pane_desc_plural">Je rekeningen zijn gekoppeld</string>
+  <string name="stripe_success_pane_desc_singular">Je rekening is gekoppeld</string>
+  <string name="stripe_success_pane_done">Gereed</string>
+  <string name="stripe_success_pane_done_with_merchant">Terug naar %1$s</string>
+  <!-- Success panes -->
+  <string name="stripe_success_pane_title">Geslaagd</string>
+  <string name="stripe_success_pane_title_microdeposits">Bijna klaar</string>
+  <string name="stripe_validation_account_confirm_mismatch">Je rekeningnummers komen niet overeen.</string>
+  <string name="stripe_validation_account_required">Rekeningnummer vereist.</string>
+  <string name="stripe_validation_account_too_long">Ongeldig bankrekeningnummer: mag maximaal 17 cijfers bevatten.</string>
+  <string name="stripe_validation_no_us_routing">Ongeldig routingnummer.</string>
+  <string name="stripe_validation_routing_required">Routingnummer vereist.</string>
+  <string name="stripe_validation_routing_too_short">Voer je 9-cijferige routingnummer in.</string>
+  <string name="stripe_verification.codeExpiredEmail">De opgegeven verificatiecode lijkt niet meer geldig te zijn. Klik op “Code opnieuw versturen“ en probeer het daarna nog eens, of </string>
+  <string name="stripe_verification.codeExpiredSms">De opgegeven verificatiecode lijkt ongeldig te zijn. Probeer het nog eens, of </string>
+  <!-- Verification (shared) -->
+  <string name="stripe_verification.codeInvalid">De code werkt niet. Controleer de code en probeer het nogmaals.</string>
+  <string name="stripe_verification.inTestMode">Je werkt nu in de testmodus.</string>
+  <string name="stripe_verification.useTestCode">Testcode gebruiken</string>
+</resources>

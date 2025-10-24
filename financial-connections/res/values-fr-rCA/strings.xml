@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_account_picker_cta_link_plural">Associer les comptes</string>
+  <string name="stripe_account_picker_cta_link_singular">Associer le compte</string>
+  <string name="stripe_account_picker_error_no_account_available_title">Un problème est survenu lors de l\'accès à votre compte %1$s</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">Nous avons trouvé %1$s comptes %2$s, mais vous pouvez uniquement associer des comptes chèques ou d\'épargne à %3$s. Essayez de sélectionner une autre institution financière.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">Nous avons trouvé %1$s comptes %2$s, mais vous pouvez uniquement associer des comptes chèques ou d\'épargne à %3$s. Essayez de sélectionner une autre institution financière.</string>
+  <string name="stripe_account_picker_error_no_payment_method_title">Aucun compte de paiement disponible</string>
+  <string name="stripe_account_picker_multiselect_account">Choisir des comptes</string>
+  <!-- Account picker -->
+  <string name="stripe_account_picker_singleselect_account">Choisir un compte</string>
+  <string name="stripe_accounts_error_desc_manualentry">Veuillez saisir vos coordonnées bancaires manuellement ou choisir un autre compte bancaire.</string>
+  <string name="stripe_accounts_error_desc_no_retry">Veuillez choisir un autre compte bancaire.</string>
+  <string name="stripe_accounts_error_desc_retry">Veuillez choisir un autre compte bancaire ou réessayer.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc">Veuillez saisir vos coordonnées bancaires manuellement</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Veuillez saisir vos coordonnées bancaires manuellement ou choisir un autre compte bancaire.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_title">Impossible d\'accéder à votre numéro de compte actuellement</string>
+  <string name="stripe_close_dialog_networking_desc">Si vous annulez maintenant, votre compte sera associé à %1$s, mais ne sera pas enregistré dans Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business">Si vous annulez maintenant, votre compte sera associé à cette entreprise, mais ne sera pas enregistré dans Link.</string>
+  <string name="stripe_error_cta_close">Fermer</string>
+  <string name="stripe_error_cta_manual_entry">Saisir les coordonnées bancaires manuellement</string>
+  <string name="stripe_error_cta_retry">Réessayer</string>
+  <string name="stripe_error_cta_select_another_bank">Choisir un autre compte bancaire</string>
+  <string name="stripe_error_generic_desc">Impossible d\'associer votre compte pour le moment. Veuillez réessayer ultérieurement.</string>
+  <!-- Error pane -->
+  <string name="stripe_error_generic_title">Un problème est survenu</string>
+  <string name="stripe_error_planned_downtime_desc">La maintenance doit se terminer à %1$s. Veuillez choisir une autre institution financière ou réessayer ultérieurement.</string>
+  <string name="stripe_error_planned_downtime_title">%1$s est en cours de maintenance</string>
+  <string name="stripe_error_unplanned_downtime_desc">Veuillez choisir une autre institution financière ou réessayer ultérieurement.</string>
+  <string name="stripe_error_unplanned_downtime_title">%1$s est actuellement indisponible</string>
+  <string name="stripe_exit_modal_cta_accept">Oui, quitter</string>
+  <string name="stripe_exit_modal_cta_cancel">Annuler</string>
+  <string name="stripe_exit_modal_desc">Votre compte bancaire ne sera pas associé à %1$s et l\'ensemble de votre progression sera perdue.</string>
+  <string name="stripe_exit_modal_desc_no_business">Votre compte bancaire ne sera pas associé à cette entreprise et l\'ensemble de votre progression sera perdue.</string>
+  <!-- Exit modal -->
+  <string name="stripe_exit_modal_title">Voulez-vous quitter sans associer le compte?</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">Saisissez vos numéros de compte et d\'acheminement</string>
+  <string name="stripe_institutionpicker_manual_entry_title">Vous ne trouvez pas votre institution financière?</string>
+  <string name="stripe_institutionpicker_pane_error_desc">Essayez de rechercher une autre institution financière</string>
+  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Essayez de rechercher une autre institution financière ou</string>
+  <string name="stripe_institutionpicker_pane_error_title">Aucun résultat</string>
+  <!-- Institution picker -->
+  <string name="stripe_institutionpicker_pane_select_bank">Choisir l\'institution financière</string>
+  <string name="stripe_institutionpicker_search_more_title">Rechercher d\'autres institutions financières</string>
+  <string name="stripe_link_stepup_verification_desc">Saisissez le code envoyé à %1$s. Nous vous demandons régulièrement d\'effectuer cette étape supplémentaire afin de protéger votre compte.</string>
+  <string name="stripe_link_stepup_verification_resend_code">Renvoyer le code</string>
+  <!-- Networking step-up verification -->
+  <string name="stripe_link_stepup_verification_title">Confirmez votre adresse de courriel</string>
+  <!-- Loading -->
+  <string name="stripe_loading_pill_label">Veuillez patienter</string>
+  <string name="stripe_manualentry_account">Numéro de compte</string>
+  <string name="stripe_manualentry_accountconfirm">Confirmer le numéro de compte</string>
+  <string name="stripe_manualentry_cta">Envoyer</string>
+  <string name="stripe_manualentry_microdeposits_desc">Vos coordonnées bancaires seront vérifiées à l\'aide de microversements sur votre compte. Cette opération prend généralement 1 à 2 jours ouvrables. Seuls les comptes chèques sont pris en charge.</string>
+  <string name="stripe_manualentry_routing">Numéro d\'acheminement</string>
+  <string name="stripe_manualentry_test_banner">Utiliser le compte de test</string>
+  <!-- Manual entry -->
+  <string name="stripe_manualentry_title">Saisissez vos coordonnées bancaires</string>
+  <string name="stripe_networking_link_login_warmup_cta_cancel">Annuler</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue">Continuer avec Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_skip">Pas maintenant</string>
+  <!-- Networking warmup -->
+  <string name="stripe_networking_link_login_warmup_description">Utilisez les informations précédemment enregistrées dans votre compte Link.</string>
+  <string name="stripe_networking_link_login_warmup_title">Continuer avec Link</string>
+  <string name="stripe_networking_save_to_link_verification_cta_negative">Pas maintenant</string>
+  <string name="stripe_networking_save_to_link_verification_title">Confirmez votre identité</string>
+  <!-- Networking signup -->
+  <string name="stripe_networking_signup_email_label">Adresse de courriel</string>
+  <string name="stripe_networking_verification_desc">Saisissez le code envoyé au %1$s</string>
+  <!-- Networking verification -->
+  <string name="stripe_networking_verification_title">Confirmez votre identité</string>
+  <!-- Partner auth -->
+  <string name="stripe_prepane_cancel_cta">Annuler</string>
+  <string name="stripe_prepane_choose_different_bank_cta">Choisir une autre institution financière</string>
+  <string name="stripe_search">Rechercher</string>
+  <string name="stripe_success_pane_desc_link_error_plural">Vos comptes ont été associés, mais n\'ont pas pu être enregistrés dans Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular">Votre compte a été associé, mais n\'a pas pu être enregistré dans Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural">Vos comptes ont été associés et enregistrés dans Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular">Votre compte a été associé et enregistré dans Link.</string>
+  <string name="stripe_success_pane_desc_microdeposits">Attendez-vous à recevoir des microversements sur le compte ••••%1$s d\'ici 1 à 2 jours. Vous recevrez un courriel contenant des instructions supplémentaires.</string>
+  <string name="stripe_success_pane_desc_plural">Vos comptes ont été associés</string>
+  <string name="stripe_success_pane_desc_singular">Votre compte a été associé</string>
+  <string name="stripe_success_pane_done">Terminé</string>
+  <string name="stripe_success_pane_done_with_merchant">Retour à %1$s</string>
+  <!-- Success panes -->
+  <string name="stripe_success_pane_title">Réussi</string>
+  <string name="stripe_success_pane_title_microdeposits">Vous y êtes presque</string>
+  <string name="stripe_validation_account_confirm_mismatch">Vos numéros de compte ne correspondent pas.</string>
+  <string name="stripe_validation_account_required">Numéro de compte obligatoire.</string>
+  <string name="stripe_validation_account_too_long">Numéro de compte bancaire non valide : ce numéro doit comporter 17 chiffres maximum.</string>
+  <string name="stripe_validation_no_us_routing">Numéro d\'acheminement non valide.</string>
+  <string name="stripe_validation_routing_required">Numéro d\'acheminement obligatoire.</string>
+  <string name="stripe_validation_routing_too_short">Veuillez saisir un numéro d\'acheminement à 9 chiffres.</string>
+  <string name="stripe_verification.codeExpiredEmail">Le code de vérification fourni ne semble plus valide. Cliquez sur Renvoyer le code et réessayez, ou </string>
+  <string name="stripe_verification.codeExpiredSms">Le code de vérification fourni ne semble plus valide. Réessayez ou </string>
+  <!-- Verification (shared) -->
+  <string name="stripe_verification.codeInvalid">Ce code n\'est pas valide. Vérifiez-le et réessayez.</string>
+  <string name="stripe_verification.inTestMode">Vous êtes en mode test.</string>
+  <string name="stripe_verification.useTestCode">Utiliser le code de test</string>
+</resources>

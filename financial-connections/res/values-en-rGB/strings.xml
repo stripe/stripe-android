@@ -3,8 +3,8 @@
   <string name="stripe_account_picker_cta_link_plural">Connect accounts</string>
   <string name="stripe_account_picker_cta_link_singular">Connect account</string>
   <string name="stripe_account_picker_error_no_account_available_title">There was a problem accessing your %1$s account</string>
-  <string name="stripe_account_picker_error_no_payment_method_desc_plural">We found %1$s %2$s accounts but you can only link checking or savings accounts to %3$s. Please try selecting another bank.</string>
-  <string name="stripe_account_picker_error_no_payment_method_desc_singular">We found %1$s %2$s account but you can only link checking or savings accounts to %3$s. Please try selecting another bank.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">We found %1$s %2$s accounts, but you can only link current or savings accounts to %3$s. Please try selecting another bank.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">We found %1$s %2$s account, but you can only link current or savings accounts to %3$s. Please try selecting another bank.</string>
   <string name="stripe_account_picker_error_no_payment_method_title">No payment accounts available</string>
   <string name="stripe_account_picker_multiselect_account">Select accounts</string>
   <!-- Account picker -->
@@ -21,7 +21,7 @@
   <string name="stripe_error_cta_manual_entry">Enter bank details manually</string>
   <string name="stripe_error_cta_retry">Try again</string>
   <string name="stripe_error_cta_select_another_bank">Select another bank</string>
-  <string name="stripe_error_generic_desc">Your account can’t be linked at this time. Please try again later.</string>
+  <string name="stripe_error_generic_desc">Your account can’t be linked at the moment. Please try again later.</string>
   <!-- Error pane -->
   <string name="stripe_error_generic_title">Something went wrong</string>
   <string name="stripe_error_planned_downtime_desc">Maintenance is scheduled to end at %1$s. Please select another bank or try again later.</string>
@@ -34,7 +34,7 @@
   <string name="stripe_exit_modal_desc_no_business">Your bank account won’t be connected to this business and all progress will be lost.</string>
   <!-- Exit modal -->
   <string name="stripe_exit_modal_title">Exit without connecting?</string>
-  <string name="stripe_institutionpicker_manual_entry_desc">Enter your account and routing numbers</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">Enter your account and routing </string>
   <string name="stripe_institutionpicker_manual_entry_title">Don’t see your bank?</string>
   <string name="stripe_institutionpicker_pane_error_desc">Try searching another bank</string>
   <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Try searching another bank or </string>
@@ -51,7 +51,7 @@
   <string name="stripe_manualentry_account">Account number</string>
   <string name="stripe_manualentry_accountconfirm">Confirm account number</string>
   <string name="stripe_manualentry_cta">Submit</string>
-  <string name="stripe_manualentry_microdeposits_desc">Your bank information will be verified via micro-deposits to your account, typically within 1–2 business days. Only checking accounts are supported.</string>
+  <string name="stripe_manualentry_microdeposits_desc">Your bank information will be verified via micro-deposits to your account, usually within 1–2 business days. Only current accounts are supported.</string>
   <string name="stripe_manualentry_routing">Routing number</string>
   <string name="stripe_manualentry_test_banner">Use test account</string>
   <!-- Manual entry -->
@@ -91,10 +91,10 @@
   <string name="stripe_validation_no_us_routing">Invalid routing number.</string>
   <string name="stripe_validation_routing_required">Routing number required.</string>
   <string name="stripe_validation_routing_too_short">Please enter 9 digits for your routing number.</string>
-  <string name="stripe_verification.codeExpiredEmail">It looks like the verification code you provided is not valid anymore. Click “Resend code” and try again, or </string>
-  <string name="stripe_verification.codeExpiredSms">It looks like the verification code you provided is not valid anymore. Try again, or </string>
+  <string name="stripe_verification.codeExpiredEmail">It looks like the verification code you provided is no longer valid. Click “Resend code” and try again, or </string>
+  <string name="stripe_verification.codeExpiredSms">It looks like the verification code you provided is no longer valid. Try again, or </string>
   <!-- Verification (shared) -->
-  <string name="stripe_verification.codeInvalid">Hmm, that code didn’t work. Double check it and try again.</string>
+  <string name="stripe_verification.codeInvalid">Hmm, that code didn’t work. Double-check it and try again.</string>
   <string name="stripe_verification.inTestMode">You\'re in test mode.</string>
   <string name="stripe_verification.useTestCode">Use test code</string>
 </resources>

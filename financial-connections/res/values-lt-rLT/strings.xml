@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_account_picker_cta_link_plural">Susieti sąskaitas</string>
+  <string name="stripe_account_picker_cta_link_singular">Susieti sąskaitą</string>
+  <string name="stripe_account_picker_error_no_account_available_title">Bandant pasiekti jūsų „%1$s“ sąskaitą kilo problema</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">Radome %1$s %2$s sąskaitas, tačiau su %3$s galite susieti tik einamąsias arba taupomąsias sąskaitas. Pabandykite pasirinkti kitą banką.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">Radome %1$s %2$s sąskaitą, tačiau su %3$s galite susieti tik einamąsias arba taupomąsias sąskaitas. Pabandykite pasirinkti kitą banką.</string>
+  <string name="stripe_account_picker_error_no_payment_method_title">Nėra prieinamų mokėjimo sąskaitų</string>
+  <string name="stripe_account_picker_multiselect_account">Pasirinkite sąskaitas</string>
+  <!-- Account picker -->
+  <string name="stripe_account_picker_singleselect_account">Pasirinkite sąskaitą</string>
+  <string name="stripe_accounts_error_desc_manualentry">Įveskite savo banko duomenis rankiniu būdu arba pasirinkite kitą banką.</string>
+  <string name="stripe_accounts_error_desc_no_retry">Pasirinkite kitą banką.</string>
+  <string name="stripe_accounts_error_desc_retry">Pasirinkite kitą banką arba bandykite dar kartą.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc">Įveskite savo banko duomenis rankiniu būdu</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Įveskite savo banko duomenis rankiniu būdu arba pasirinkite kitą banką.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_title">Šiuo metu jūsų sąskaitos numerio negalima pasiekti</string>
+  <string name="stripe_close_dialog_networking_desc">Jei atšauksite dabar, jūsų sąskaita bus susieta su „%1$s“, bet nebus išsaugota „Link“.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business">Jei atšauksite dabar, jūsų sąskaita bus susieta su šia įmone, bet nebus išsaugota „Link“.</string>
+  <string name="stripe_error_cta_close">Uždaryti</string>
+  <string name="stripe_error_cta_manual_entry">Įvesti banko duomenis rankiniu būdu</string>
+  <string name="stripe_error_cta_retry">Bandyti dar kartą</string>
+  <string name="stripe_error_cta_select_another_bank">Pasirinkite kitą banką</string>
+  <string name="stripe_error_generic_desc">Šiuo metu jūsų sąskaitos susieti negalima. Bandykite dar kartą vėliau.</string>
+  <!-- Error pane -->
+  <string name="stripe_error_generic_title">Kažkas nepavyko</string>
+  <string name="stripe_error_planned_downtime_desc">Planuojama, kad techninė priežiūra baigsis %1$s. Pasirinkite kitą banką arba bandykite dar kartą vėliau.</string>
+  <string name="stripe_error_planned_downtime_title">Atliekama „%1$s“ techninė priežiūra</string>
+  <string name="stripe_error_unplanned_downtime_desc">Pasirinkite kitą banką arba bandykite dar kartą vėliau.</string>
+  <string name="stripe_error_unplanned_downtime_title">„%1$s“ laikinai nepasiekiamas</string>
+  <string name="stripe_exit_modal_cta_accept">Taip, išeiti</string>
+  <string name="stripe_exit_modal_cta_cancel">Atšaukti</string>
+  <string name="stripe_exit_modal_desc">Jūsų banko sąskaita nebus susieta su „%1$s“, o visa eiga bus prarasta.</string>
+  <string name="stripe_exit_modal_desc_no_business">Jūsų banko sąskaita nebus susieta su šia įmone, o visa eiga bus prarasta.</string>
+  <!-- Exit modal -->
+  <string name="stripe_exit_modal_title">Išeiti nesusiejus?</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">Įveskite savo sąskaitos ir banko skyriaus kodus</string>
+  <string name="stripe_institutionpicker_manual_entry_title">Nematote savo banko?</string>
+  <string name="stripe_institutionpicker_pane_error_desc">Pabandykite ieškoti kito banko</string>
+  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Pabandykite ieškoti kito banko arba </string>
+  <string name="stripe_institutionpicker_pane_error_title">Nėra rezultatų</string>
+  <!-- Institution picker -->
+  <string name="stripe_institutionpicker_pane_select_bank">Pasirinkti banką</string>
+  <string name="stripe_institutionpicker_search_more_title">Ieškoti daugiau bankų</string>
+  <string name="stripe_link_stepup_verification_desc">Įveskite kodą, išsiųstą „%1$s“. Periodiškai prašome atlikti šį papildomą veiksmą, kad jūsų sąskaita liktų saugi.</string>
+  <string name="stripe_link_stepup_verification_resend_code">Persiųsti kodą</string>
+  <!-- Networking step-up verification -->
+  <string name="stripe_link_stepup_verification_title">Patvirtinkite savo el. pašto adresą</string>
+  <!-- Loading -->
+  <string name="stripe_loading_pill_label">Palaukite, beveik baigta</string>
+  <string name="stripe_manualentry_account">Sąskaitos numeris</string>
+  <string name="stripe_manualentry_accountconfirm">Patvirtinti sąskaitos numerį</string>
+  <string name="stripe_manualentry_cta">Pateikti</string>
+  <string name="stripe_manualentry_microdeposits_desc">Jūsų banko informacija bus patikrinta naudojant jūsų sąskaitoje esančius mikroindėlius (paprastai per 1–2 darbo dienas). Palaikomos tik einamosios sąskaitos.</string>
+  <string name="stripe_manualentry_routing">Banko skyriaus kodas</string>
+  <string name="stripe_manualentry_test_banner">Naudoti bandomąją sąskaitą</string>
+  <!-- Manual entry -->
+  <string name="stripe_manualentry_title">Įvesti banko duomenis</string>
+  <string name="stripe_networking_link_login_warmup_cta_cancel">Atšaukti</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue">Tęsti naudojant „Link“</string>
+  <string name="stripe_networking_link_login_warmup_cta_skip">Ne dabar</string>
+  <!-- Networking warmup -->
+  <string name="stripe_networking_link_login_warmup_description">Naudokite anksčiau savo „Link“ sąskaitoje išsaugotą informaciją.</string>
+  <string name="stripe_networking_link_login_warmup_title">Tęsti naudojant „Link“</string>
+  <string name="stripe_networking_save_to_link_verification_cta_negative">Ne dabar</string>
+  <string name="stripe_networking_save_to_link_verification_title">Patvirtinkite, kad tai jūs</string>
+  <!-- Networking signup -->
+  <string name="stripe_networking_signup_email_label">El. pašto adresas</string>
+  <string name="stripe_networking_verification_desc">Įveskite kodą, išsiųstą %1$s</string>
+  <!-- Networking verification -->
+  <string name="stripe_networking_verification_title">Patvirtinkite, kad tai jūs</string>
+  <!-- Partner auth -->
+  <string name="stripe_prepane_cancel_cta">Atšaukti</string>
+  <string name="stripe_prepane_choose_different_bank_cta">Pasirinkti kitą banką</string>
+  <string name="stripe_search">Ieškoti</string>
+  <string name="stripe_success_pane_desc_link_error_plural">Jūsų sąskaitos buvo susietos, tačiau nepavyko išsaugoti „Link“.</string>
+  <string name="stripe_success_pane_desc_link_error_singular">Jūsų sąskaita buvo susieta, tačiau nepavyko išsaugoti „Link“.</string>
+  <string name="stripe_success_pane_desc_link_success_plural">Jūsų sąskaitos buvo susietos ir išsaugotos „Link“.</string>
+  <string name="stripe_success_pane_desc_link_success_singular">Jūsų sąskaita buvo susieta ir išsaugota „Link“.</string>
+  <string name="stripe_success_pane_desc_microdeposits">Laukite mikroindėlių į sąskaitą ••••%1$s per 1–2 dienas ir el. laiško su papildomomis instrukcijomis.</string>
+  <string name="stripe_success_pane_desc_plural">Jūsų sąskaitos buvo susietos</string>
+  <string name="stripe_success_pane_desc_singular">Jūsų sąskaita buvo susieta</string>
+  <string name="stripe_success_pane_done">Atlikta</string>
+  <string name="stripe_success_pane_done_with_merchant">Grįžti pas „%1$s“</string>
+  <!-- Success panes -->
+  <string name="stripe_success_pane_title">Sėkmingai</string>
+  <string name="stripe_success_pane_title_microdeposits">Beveik baigta</string>
+  <string name="stripe_validation_account_confirm_mismatch">Jūsų sąskaitos numeriai nesutampa.</string>
+  <string name="stripe_validation_account_required">Būtina nurodyti sąskaitos numerį.</string>
+  <string name="stripe_validation_account_too_long">Netinkamas banko sąskaitos numeris: jį turi sudaryti daugiausia 17 skaitmenų.</string>
+  <string name="stripe_validation_no_us_routing">Neteisingas banko skyriaus kodas.</string>
+  <string name="stripe_validation_routing_required">Būtina nurodyti banko skyriaus kodą.</string>
+  <string name="stripe_validation_routing_too_short">Įveskite 9 skaitmenų banko skyriaus kodą.</string>
+  <string name="stripe_verification.codeExpiredEmail">Atrodo, kad jūsų pateiktas patvirtinimo kodas nebegalioja. Spustelėkite „Persiųsti kodą“ ir bandykite dar kartą arba </string>
+  <string name="stripe_verification.codeExpiredSms">Atrodo, kad jūsų pateiktas patvirtinimo kodas nebegalioja. Bandykite dar kartą arba </string>
+  <!-- Verification (shared) -->
+  <string name="stripe_verification.codeInvalid">Hmm, tas kodas neveikė. Dar kartą jį patikrinkite ir bandykite iš naujo.</string>
+  <string name="stripe_verification.inTestMode">Naudojatės bandomuoju režimu.</string>
+  <string name="stripe_verification.useTestCode">Naudoti bandomąjį kodą</string>
+</resources>
