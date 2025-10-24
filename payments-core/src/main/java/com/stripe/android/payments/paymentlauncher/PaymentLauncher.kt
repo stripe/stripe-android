@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.fragment.app.Fragment
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -72,6 +74,22 @@ interface PaymentLauncher {
             callback: PaymentResultCallback
         ) = PaymentLauncherFactory(
             activity,
+            callback.toInternalResultCallback()
+        ).create(publishableKey, stripeAccountId)
+
+        @JvmStatic
+        @JvmOverloads
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ReactNativeSdkInternal
+        fun create(
+            activity: ComponentActivity,
+            signal: UnregisterSignal,
+            publishableKey: String,
+            stripeAccountId: String? = null,
+            callback: PaymentResultCallback
+        ) = PaymentLauncherFactory(
+            activity,
+            signal,
             callback.toInternalResultCallback()
         ).create(publishableKey, stripeAccountId)
 

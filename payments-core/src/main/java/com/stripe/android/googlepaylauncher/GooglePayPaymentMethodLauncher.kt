@@ -20,6 +20,9 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
+import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -80,6 +83,29 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         activity,
         activity.lifecycleScope,
         activity.registerForActivityResult(
+            GooglePayPaymentMethodLauncherContractV2()
+        ) {
+            resultCallback.onResult(it)
+        },
+        config,
+        readyCallback,
+        DefaultCardBrandFilter
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ReactNativeSdkInternal
+    constructor(
+        activity: ComponentActivity,
+        signal: UnregisterSignal,
+        config: Config,
+        readyCallback: ReadyCallback,
+        resultCallback: ResultCallback
+    ) : this(
+        activity,
+        activity.lifecycleScope,
+        registerForReactNativeActivityResult(
+            activity,
+            signal,
             GooglePayPaymentMethodLauncherContractV2()
         ) {
             resultCallback.onResult(it)

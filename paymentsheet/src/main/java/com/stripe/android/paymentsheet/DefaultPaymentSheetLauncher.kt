@@ -5,10 +5,14 @@ import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
+import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
+import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -45,6 +49,26 @@ internal class DefaultPaymentSheetLauncher(
     ) : this(
         activityResultLauncher = activity.registerForActivityResult(
             PaymentSheetContractV2()
+        ) {
+            callback.onPaymentSheetResult(it)
+        },
+        activity = activity,
+        lifecycleOwner = activity,
+        application = activity.application,
+        callback = callback,
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ReactNativeSdkInternal
+    constructor(
+        activity: ComponentActivity,
+        signal: UnregisterSignal,
+        callback: PaymentSheetResultCallback
+    ) : this(
+        activityResultLauncher = registerForReactNativeActivityResult(
+            activity,
+            signal,
+            PaymentSheetContractV2(),
         ) {
             callback.onPaymentSheetResult(it)
         },
