@@ -60,18 +60,19 @@ internal class AttestationConfirmationFlowTest {
         )
 
     @Test
-    fun `on result with Success, should return NextStep result with attestationToken for Saved option`() = runResultTest(
-        confirmationOption = SAVED_CONFIRMATION_OPTION,
-        definition = confirmationDefinition(),
-        launcherResult = AttestationActivityResult.Success("test_token"),
-        parameters = CONFIRMATION_PARAMETERS,
-        definitionResult = ConfirmationDefinition.Result.NextStep(
-            confirmationOption = SAVED_CONFIRMATION_OPTION.copy(
-                attestationToken = "test_token"
+    fun `on result with Success, should return NextStep result with attestationToken for Saved option`() =
+        runResultTest(
+            confirmationOption = SAVED_CONFIRMATION_OPTION,
+            definition = confirmationDefinition(),
+            launcherResult = AttestationActivityResult.Success("test_token"),
+            parameters = CONFIRMATION_PARAMETERS,
+            definitionResult = ConfirmationDefinition.Result.NextStep(
+                confirmationOption = SAVED_CONFIRMATION_OPTION.copy(
+                    attestationToken = "test_token"
+                ),
+                arguments = CONFIRMATION_PARAMETERS,
             ),
-            arguments = CONFIRMATION_PARAMETERS,
-        ),
-    )
+        )
 
     @Test
     fun `on result with Failed, should return NextStep result with no token for New option`() = runResultTest(
