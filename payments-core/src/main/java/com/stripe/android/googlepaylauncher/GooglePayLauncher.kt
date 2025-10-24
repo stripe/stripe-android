@@ -24,6 +24,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -273,7 +274,8 @@ class GooglePayLauncher internal constructor(
     }
 
     @Parcelize
-    data class Config @JvmOverloads constructor(
+    @Poko
+    class Config @JvmOverloads constructor(
         val environment: GooglePayEnvironment,
         val merchantCountryCode: String,
         val merchantName: String,
@@ -311,7 +313,8 @@ class GooglePayLauncher internal constructor(
     }
 
     @Parcelize
-    data class BillingAddressConfig @JvmOverloads constructor(
+    @Poko
+    class BillingAddressConfig @JvmOverloads constructor(
         internal val isRequired: Boolean = false,
 
         /**
@@ -345,7 +348,8 @@ class GooglePayLauncher internal constructor(
         data object Completed : Result()
 
         @Parcelize
-        data class Failed(
+        @Poko
+        class Failed(
             val error: Throwable
         ) : Result()
 
