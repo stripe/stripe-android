@@ -5,8 +5,10 @@ import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -222,6 +224,8 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             host("api.stripe.com"),
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
+            bodyPart("confirmation_token", "ctoken_example"),
+            bodyPart("return_url", urlEncode("stripesdk://payment_return_url/com.stripe.android.paymentsheet.test")),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
