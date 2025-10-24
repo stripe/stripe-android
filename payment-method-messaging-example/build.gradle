@@ -14,7 +14,6 @@ def getAccountId() {
 
 dependencies {
     implementation project(':payment-method-messaging')
-    implementation project(':payments-core')
 
     implementation libs.androidx.viewModel
     implementation libs.compose.activity
