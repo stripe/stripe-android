@@ -1,0 +1,60 @@
+{
+  "id": "ctoken_1SLpg3Lu5o3P18ZpAoFn4OBQ",
+  "object": "confirmation_token",
+  "created": 1761330327,
+  "expires_at": 1761373527,
+  "livemode": false,
+  "mandate_data": null,
+  "payment_intent": "pi_example",
+  "payment_method_options": null,
+  "payment_method_preview": {
+    "allow_redisplay": "unspecified",
+    "billing_details": {
+      "address": {
+        "city": "South San Francisco",
+        "country": "US",
+        "line1": "354 Oyster Point Blvd",
+        "line2": null,
+        "postal_code": "94080",
+        "state": "CA"
+      },
+      "email": "email@email.com",
+      "name": "Jenny Rosen",
+      "phone": "+18008675309",
+      "tax_id": null
+    },
+    "card": {
+      "brand": "visa",
+      "checks": {
+        "address_line1_check": "pass",
+        "address_postal_code_check": "pass",
+        "cvc_check": "pass"
+      },
+      "country": "US",
+      "display_brand": "visa",
+      "exp_month": 4,
+      "exp_year": 2044,
+      "funding": "credit",
+      "generated_from": null,
+      "last4": "4242",
+      "networks": {
+        "available": [
+          "visa"
+        ],
+        "preferred": null
+      },
+      "regulated_status": "unregulated",
+      "three_d_secure_usage": {
+        "supported": true
+      },
+      "wallet": null
+    },
+    "customer": null,
+    "type": "card"
+  },
+  "return_url": "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example",
+  "setup_future_usage": null,
+  "setup_intent": null,
+  "shipping": null,
+  "use_stripe_sdk": true
+}
