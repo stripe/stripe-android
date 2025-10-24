@@ -427,7 +427,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 result = PaymentSheetEvent.Payment.Result.Failure(error),
                 currency = currency,
                 isDeferred = isDeferred,
-                isConfirmationToken = TODO(),
+                isConfirmationToken = null,
                 isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
