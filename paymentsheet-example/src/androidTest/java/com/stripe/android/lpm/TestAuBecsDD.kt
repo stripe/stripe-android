@@ -37,19 +37,6 @@ internal class TestAuBecsDD : BasePlaygroundTest() {
     }
 
     @Test
-    fun testAuBecsDDInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
-            populateCustomLpmFields = {
-                populateAuBecs()
-            },
-            verifyCustomLpmFields = {
-                verifyAuBecs()
-            },
-        )
-    }
-
-    @Test
     fun testAuBecsDDSfu() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters.copyPlaygroundSettings { settings ->

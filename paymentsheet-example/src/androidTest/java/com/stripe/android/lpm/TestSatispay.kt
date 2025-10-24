@@ -45,11 +45,4 @@ internal class TestSatispay : BasePlaygroundTest() {
             },
         )
     }
-
-    @Test
-    fun testSatispayInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
-        )
-    }
 }

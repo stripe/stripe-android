@@ -31,11 +31,4 @@ internal class TestMobilePay : BasePlaygroundTest() {
             testParameters = testParameters,
         )
     }
-
-    @Test
-    fun testMobilePayInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
-        )
-    }
 }

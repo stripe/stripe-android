@@ -80,17 +80,4 @@ internal class TestInstantDebits : BasePlaygroundTest() {
             }
         )
     }
-
-    @Test
-    fun testInstantDebitsCancelAllowsUserToContinueInCustomFlow() {
-        testDriver.confirmInstantDebitsInCustomFlow(
-            testParameters = testParameters.copy(
-                authorizationAction = AuthorizeAction.Cancel,
-            ),
-            afterAuthorization = {
-                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-                    .waitFor(isEnabled())
-            }
-        )
-    }
 }

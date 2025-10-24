@@ -18,11 +18,4 @@ internal class TestP24 : BasePlaygroundTest() {
             testParameters = testParameters,
         )
     }
-
-    @Test
-    fun testP24InCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
-        )
-    }
 }

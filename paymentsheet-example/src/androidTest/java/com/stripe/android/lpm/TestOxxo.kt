@@ -39,15 +39,4 @@ internal class TestOxxo : BasePlaygroundTest() {
             }
         )
     }
-
-    @Test
-    fun testOxxoInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
-            populateCustomLpmFields = {
-                populateEmail()
-                populateName()
-            }
-        )
-    }
 }

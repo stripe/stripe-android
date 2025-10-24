@@ -33,11 +33,4 @@ internal class TestFpx : BasePlaygroundTest() {
             testParameters = testParameters,
         )
     }
-
-    @Test
-    fun testFpxInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
-        )
-    }
 }

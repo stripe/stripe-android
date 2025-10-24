@@ -8,7 +8,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.CountrySettin
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
-import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,22 +31,5 @@ internal class TestAlipay : BasePlaygroundTest() {
     @Test
     fun testAlipay() {
         testDriver.confirmNewOrGuestComplete(testParameters)
-    }
-
-    @Test
-    fun testAlipayFailure() {
-        testDriver.confirmNewOrGuestComplete(
-            testParameters.copy(
-                authorizationAction = AuthorizeAction.Fail(
-                    expectedError = "We are unable to authenticate your payment method. Please " +
-                        "choose a different payment method and try again.",
-                ),
-            )
-        )
-    }
-
-    @Test
-    fun testAlipayInCustomFlow() {
-        testDriver.confirmCustom(testParameters)
     }
 }

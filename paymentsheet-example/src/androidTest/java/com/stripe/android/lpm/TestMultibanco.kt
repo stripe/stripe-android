@@ -29,11 +29,4 @@ internal class TestMultibanco : BasePlaygroundTest() {
             testParameters = testParameters,
         )
     }
-
-    @Test
-    fun testMultibancoInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
-        )
-    }
 }

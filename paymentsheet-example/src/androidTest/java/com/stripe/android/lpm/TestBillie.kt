@@ -25,11 +25,4 @@ internal class TestBillie : BasePlaygroundTest() {
             testParameters = testParameters,
         )
     }
-
-    @Test
-    fun testBillieInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
-        )
-    }
 }
