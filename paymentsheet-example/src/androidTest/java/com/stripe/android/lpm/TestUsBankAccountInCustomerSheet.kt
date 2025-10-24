@@ -21,7 +21,6 @@ import org.junit.Test
 internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "us_bank_account",
-        executeInNightlyRun = true,
         authorizationAction = null
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.US
@@ -50,7 +49,6 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
         testDriver.saveUsBankAccountInCustomerSheet(
             financialConnectionsLiteEnabled = true,
             testParameters = testParameters.copy(
-                executeInNightlyRun = false,
                 authorizationAction = AuthorizeAction.Cancel,
             ).copyPlaygroundSettings {
                 it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
@@ -78,7 +76,6 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
         testDriver.saveUsBankAccountInCustomerSheet(
             financialConnectionsLiteEnabled = true,
             testParameters = testParameters.copy(
-                executeInNightlyRun = false,
                 authorizationAction = AuthorizeAction.Cancel,
             ).copyPlaygroundSettings { settings ->
                 settings[CustomerSessionSettingsDefinition] = true

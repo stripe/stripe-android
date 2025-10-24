@@ -27,7 +27,6 @@ internal data class TestParameters(
     val useBrowser: Browser? = null,
     val resetCustomer: Boolean = false,
     val authorizationAction: AuthorizeAction? = null,
-    val executeInNightlyRun: Boolean = false,
     val playgroundSettingsSnapshot: PlaygroundSettings.Snapshot = playgroundSettings().snapshot(),
 ) {
     val isSetupMode: Boolean =
@@ -45,7 +44,6 @@ internal data class TestParameters(
             paymentMethodCode: String,
             requiresBrowser: Boolean = true,
             authorizationAction: AuthorizeAction? = AuthorizeAction.AuthorizePayment(requiresBrowser),
-            executeInNightlyRun: Boolean = false,
             saveForFutureUseCheckboxVisible: Boolean = false,
             playgroundSettingsBlock: (PlaygroundSettings) -> Unit = {},
         ): TestParameters {
@@ -54,7 +52,6 @@ internal data class TestParameters(
                 saveCheckboxValue = false,
                 saveForFutureUseCheckboxVisible = saveForFutureUseCheckboxVisible,
                 authorizationAction = authorizationAction,
-                executeInNightlyRun = executeInNightlyRun,
                 playgroundSettingsSnapshot = playgroundSettings(playgroundSettingsBlock).snapshot()
             )
         }

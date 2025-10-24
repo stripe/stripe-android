@@ -27,7 +27,6 @@ internal class TestEmbedded : BasePlaygroundTest() {
 
     private val parameters = TestParameters.create(
         paymentMethodCode = "card",
-        executeInNightlyRun = true,
     ) { settings ->
         settings[EmbeddedFormSheetActionSettingDefinition] = FormSheetAction.Confirm
     }

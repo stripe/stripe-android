@@ -21,7 +21,6 @@ internal class TestVerticalMode : BasePlaygroundTest() {
     private val cardTestParameters = TestParameters.create(
         paymentMethodCode = "card",
         authorizationAction = null,
-        executeInNightlyRun = true,
     ).copy(
         saveForFutureUseCheckboxVisible = true,
     ).copyPlaygroundSettings { settings ->
@@ -30,7 +29,6 @@ internal class TestVerticalMode : BasePlaygroundTest() {
 
     private val cashAppTestParameters = TestParameters.create(
         paymentMethodCode = "cashapp",
-        executeInNightlyRun = true,
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.US
         settings[CurrencySettingsDefinition] = Currency.USD

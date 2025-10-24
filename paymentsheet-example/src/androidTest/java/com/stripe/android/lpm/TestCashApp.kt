@@ -27,7 +27,6 @@ internal class TestCashApp : BasePlaygroundTest() {
 
     private val testParameters = TestParameters.create(
         paymentMethodCode = "cashapp",
-        executeInNightlyRun = true,
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.US
         settings[CurrencySettingsDefinition] = Currency.USD

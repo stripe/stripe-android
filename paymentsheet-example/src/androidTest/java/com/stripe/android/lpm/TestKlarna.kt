@@ -17,7 +17,6 @@ import org.junit.runner.RunWith
 internal class TestKlarna : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "klarna",
-        executeInNightlyRun = true,
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.US
         settings[CurrencySettingsDefinition] = Currency.USD
