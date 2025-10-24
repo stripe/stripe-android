@@ -31,7 +31,9 @@ internal data class DocumentUploadParam(
     @SerialName("focal_length")
     val focalLength: Float? = null,
     @SerialName("exposure_duration")
-    val exposureDuration: Long? = null
+    val exposureDuration: Long? = null,
+    @SerialName("is_virtual_camera")
+    val isVirtualCamera: Boolean? = null
 ) : Parcelable {
     @Serializable
     internal enum class UploadMethod {

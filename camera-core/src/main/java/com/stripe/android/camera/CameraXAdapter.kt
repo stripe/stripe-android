@@ -293,6 +293,28 @@ class CameraXAdapter(
         return latestExposureDuration?.let { it / 1_000_000 }
     }
 
+    /**
+     * Return whether the current camera is a virtual/logical camera (combining multiple physical cameras).
+     * Returns true if it's a logical multi-camera, false if it's a single physical camera, null if unknown.
+     */
+    @androidx.camera.camera2.interop.ExperimentalCamera2Interop
+    fun isVirtualCamera(): Boolean? {
+        return runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                val camId = Camera2CameraInfo.from(requireNotNull(camera).cameraInfo).cameraId
+                val cm = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+                val chars = cm.getCameraCharacteristics(camId)
+
+                val capabilities = chars.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES) ?: intArrayOf()
+                // LOGICAL_MULTI_CAMERA indicates a virtual camera combining multiple physical cameras
+                capabilities.contains(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA)
+            } else {
+                // Can't determine on older Android versions
+                null
+            }
+        }.getOrNull()
+    }
+
     override fun setFocus(point: PointF) {
         camera?.let { cam ->
             val meteringPointFactory = DisplayOrientedMeteringPointFactory(
