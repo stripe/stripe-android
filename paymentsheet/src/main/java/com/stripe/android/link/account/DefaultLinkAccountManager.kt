@@ -66,6 +66,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override var cachedShippingAddresses: ConsumerShippingAddresses? = null
 
+    private val _suggestedEmail: MutableStateFlow<String?> = MutableStateFlow(null)
+    override val suggestedEmail: StateFlow<String?> = _suggestedEmail.asStateFlow()
+
     override val accountStatus: Flow<AccountStatus> =
         linkAccountHolder.linkAccountInfo
             .map {
@@ -318,6 +321,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         startSession: Boolean,
         linkAuthIntentId: String?,
     ): LinkAccount? {
+        _suggestedEmail.value = lookup.suggestedEmail
         val linkAuthIntentInfo = linkAuthIntentId?.let {
             LinkAuthIntentInfo(
                 linkAuthIntentId = it,

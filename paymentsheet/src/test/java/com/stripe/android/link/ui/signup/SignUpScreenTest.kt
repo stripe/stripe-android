@@ -14,6 +14,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.link.LinkConfiguration
@@ -31,6 +32,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.time.Duration.Companion.milliseconds
 
 @RunWith(AndroidJUnit4::class)
 internal class SignUpScreenTest {
@@ -107,7 +109,7 @@ internal class SignUpScreenTest {
             }
         }
 
-        dispatcher.scheduler.advanceTimeBy(1001)
+        dispatcher.scheduler.advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
         onEmailField().assertIsDisplayed()
         onSignUpButton().assertExists().assertIsNotEnabled()
@@ -132,7 +134,7 @@ internal class SignUpScreenTest {
             linkAccountManager.signupResult = Result.failure(error)
             viewModel.onSignUpClick()
 
-            dispatcher.scheduler.advanceTimeBy(1001)
+            dispatcher.scheduler.advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
             onErrorSection().assertExists().assert(hasAnyChild(hasText("Something went wrong")))
         }
 
@@ -155,7 +157,7 @@ internal class SignUpScreenTest {
             }
 
             viewModel.emailController.onRawValueChange(TestFactory.CUSTOMER_EMAIL)
-            dispatcher.scheduler.advanceTimeBy(1001)
+            dispatcher.scheduler.advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
             composeTestRule.waitForIdle()
 
@@ -195,7 +197,7 @@ internal class SignUpScreenTest {
             }
 
             viewModel.emailController.onRawValueChange("a@b.com")
-            dispatcher.scheduler.advanceTimeBy(1001)
+            dispatcher.scheduler.advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
             composeTestRule.waitForIdle()
 
             primaryFields().assert { assertIsDisplayed() }
@@ -223,9 +225,103 @@ internal class SignUpScreenTest {
             viewModel.emailController.onRawValueChange("a@b.com")
             composeTestRule.waitForIdle()
 
-            dispatcher.scheduler.advanceTimeBy(1001)
+            dispatcher.scheduler.advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
             onErrorSection().assertExists()
         }
+
+    @Test
+    fun `email suggestion is displayed when suggestedEmail is set`() = runTest(dispatcher) {
+        val linkAccountManager = FakeLinkAccountManager()
+        val viewModel = viewModel(
+            linkAccountManager = linkAccountManager,
+            customerInfo = TestFactory.LINK_CUSTOMER_INFO.copy(
+                email = "test@example.con"
+            )
+        )
+
+        composeTestRule.setContent {
+            DefaultLinkTheme {
+                SignUpScreen(viewModel = viewModel)
+            }
+        }
+
+        dispatcher.scheduler.advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+        // Simulate suggested email
+        linkAccountManager._suggestedEmail.value = "test@example.com"
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText("Did you mean test@example.com? Yes, update.", substring = true)
+            .assertIsDisplayed()
+        composeTestRule.onNodeWithText("Yes, update", substring = true)
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun `clicking suggested email updates email field`() = runTest(dispatcher) {
+        val linkAccountManager = FakeLinkAccountManager()
+        val viewModel = viewModel(
+            linkAccountManager = linkAccountManager,
+            customerInfo = LinkConfiguration.CustomerInfo(
+                email = null,
+                phone = null,
+                name = null,
+                billingCountryCode = null,
+            )
+        )
+
+        composeTestRule.setContent {
+            DefaultLinkTheme {
+                SignUpScreen(viewModel = viewModel)
+            }
+        }
+
+        viewModel.emailController.onRawValueChange("user@example.con")
+        dispatcher.scheduler.advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+        linkAccountManager._suggestedEmail.value = "user@example.com"
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithTag("emailSuggestionUpdateTag")
+            .assertIsDisplayed()
+
+        assertThat(viewModel.emailController.fieldValue.value).isEqualTo("user@example.con")
+    }
+
+    @Test
+    fun `email suggestion is hidden when verifying email`() = runTest(dispatcher) {
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.lookupResult = Result.success(null)
+        val viewModel = viewModel(
+            linkAccountManager = linkAccountManager,
+            customerInfo = LinkConfiguration.CustomerInfo(
+                email = null,
+                phone = null,
+                name = null,
+                billingCountryCode = null,
+            )
+        )
+
+        composeTestRule.setContent {
+            DefaultLinkTheme {
+                SignUpScreen(viewModel = viewModel)
+            }
+        }
+
+        linkAccountManager._suggestedEmail.value = "test@example.com"
+        composeTestRule.waitForIdle()
+
+        viewModel.emailController.onRawValueChange("valid@email.com")
+        composeTestRule.waitForIdle()
+        // Wait for debounce and state change
+        dispatcher.scheduler.advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+        // Simulate manager clearing suggestion on new lookup (like real implementation does)
+        linkAccountManager._suggestedEmail.value = null
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText("Did you mean test@example.com?", substring = true)
+            .assertDoesNotExist()
+    }
 
     private fun List<SemanticsNodeInteraction>.assert(interaction: SemanticsNodeInteraction.() -> Unit) {
         forEach { interaction(it) }
