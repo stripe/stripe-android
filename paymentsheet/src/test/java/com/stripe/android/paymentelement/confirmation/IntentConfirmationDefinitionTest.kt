@@ -156,7 +156,7 @@ class IntentConfirmationDefinitionTest {
 
             assertThat(completeAction.intent).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
             assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
-            assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(false)
+            assertThat(completeAction.isConfirmationToken).isEqualTo(false)
             assertThat(completeAction.completedFullPaymentFlow).isFalse()
         }
 
