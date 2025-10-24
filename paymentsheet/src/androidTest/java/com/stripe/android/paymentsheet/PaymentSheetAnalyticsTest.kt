@@ -462,7 +462,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
         networkRule.validateAnalyticsRequest(
             eventName = "stripe_android.confirmation_token_creation",
-            productUsage = setOf("PaymentSheet","deferred-intent","autopm")
+            productUsage = setOf("PaymentSheet", "deferred-intent", "autopm")
         )
         testContext.validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
         testContext.validateAnalyticsRequest(
@@ -563,7 +563,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
         networkRule.validateAnalyticsRequest(
             eventName = "stripe_android.confirmation_token_creation",
-            productUsage = setOf("PaymentSheet.FlowController","deferred-intent","autopm")
+            productUsage = setOf("PaymentSheet.FlowController", "deferred-intent", "autopm")
         )
         testContext.validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
         testContext.validateAnalyticsRequest(
