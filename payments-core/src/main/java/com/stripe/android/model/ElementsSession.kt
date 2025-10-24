@@ -3,11 +3,8 @@ package com.stripe.android.model
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.model.PaymentMethod.Type.Link
 import kotlinx.parcelize.Parcelize
 import java.util.UUID
-
-private val LinkSupportedFundingSources = setOf("card", "bank_account")
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
@@ -41,11 +38,7 @@ data class ElementsSession(
         get() = linkSettings?.disableLinkSignup ?: false
 
     val isLinkEnabled: Boolean
-        get() {
-            val allowsLink = Link.code in stripeIntent.paymentMethodTypes
-            val hasValidFundingSource = stripeIntent.linkFundingSources.any { it in LinkSupportedFundingSources }
-            return (allowsLink && hasValidFundingSource) || linkPassthroughModeEnabled
-        }
+        get() = linkSettings?.linkMode != null && linkSettings.fundingSourcesSupportedByClient
 
     val useAttestationEndpointsForLink: Boolean
         get() = linkSettings?.useAttestationEndpoints ?: false
@@ -105,7 +98,11 @@ data class ElementsSession(
         val linkSignUpOptInFeatureEnabled: Boolean,
         val linkSignUpOptInInitialValue: Boolean,
         val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
-    ) : StripeModel
+    ) : StripeModel {
+
+        val fundingSourcesSupportedByClient: Boolean
+            get() = linkFundingSources.any { it.lowercase() in ConsumerPaymentDetails.supportedFundingSources }
+    }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
