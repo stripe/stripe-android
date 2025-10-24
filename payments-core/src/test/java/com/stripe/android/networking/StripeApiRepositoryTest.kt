@@ -3248,6 +3248,7 @@ internal class StripeApiRepositoryTest {
         )
         whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
             .thenReturn(stripeResponse)
+        val clientAttributionMetadataParams = mapOf("merchant_integration_source" to "elements")
 
         val id = "id"
         val clientSecret = "secret"
@@ -3255,7 +3256,8 @@ internal class StripeApiRepositoryTest {
         val paymentDetailsUpdateParams = ConsumerPaymentDetailsUpdateParams(
             id,
             isDefault,
-            PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap()
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap(),
+            clientAttributionMetadataParams,
         )
         create().updatePaymentDetails(
             clientSecret,
@@ -3277,6 +3279,9 @@ internal class StripeApiRepositoryTest {
             withNestedParams("billing_address") {
                 assertThat(this["country_code"]).isEqualTo("US")
                 assertThat(this["postal_code"]).isEqualTo("94111")
+            }
+            withNestedParams("client_attribution_metadata") {
+                assertThat(this).isEqualTo(clientAttributionMetadataParams)
             }
         }
     }

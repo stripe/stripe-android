@@ -852,7 +852,10 @@ class LinkApiRepositoryTest {
     @Test
     fun `updatePaymentDetails sends correct parameters`() = runTest {
         val secret = "secret"
-        val params = ConsumerPaymentDetailsUpdateParams("id")
+        val params = ConsumerPaymentDetailsUpdateParams(
+            "id",
+            clientAttributionMetadataParams = mapOf("merchant_integration_source" to "elements"),
+        )
 
         linkRepository.updatePaymentDetails(
             params,
@@ -872,7 +875,10 @@ class LinkApiRepositoryTest {
             .thenReturn(Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS))
 
         val result = linkRepository.updatePaymentDetails(
-            ConsumerPaymentDetailsUpdateParams("id"),
+            ConsumerPaymentDetailsUpdateParams(
+                "id",
+                clientAttributionMetadataParams = mapOf("merchant_integration_source" to "elements"),
+            ),
             "secret",
         )
 
@@ -886,7 +892,10 @@ class LinkApiRepositoryTest {
             .thenReturn(Result.failure(error))
 
         val result = linkRepository.updatePaymentDetails(
-            ConsumerPaymentDetailsUpdateParams("id"),
+            ConsumerPaymentDetailsUpdateParams(
+                "id",
+                clientAttributionMetadataParams = mapOf("merchant_integration_source" to "elements"),
+            ),
             "secret",
         )
 
