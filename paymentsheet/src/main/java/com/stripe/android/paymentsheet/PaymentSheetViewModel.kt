@@ -272,7 +272,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             handlePaymentCompleted(
                 intent = pendingResult.intent,
                 deferredIntentConfirmationType = pendingResult.deferredIntentConfirmationType,
-                finishImmediately = true
+                isConfirmationToken = pendingResult.isConfirmationToken,
+                finishImmediately = true,
             )
         } else if (state.validationError != null) {
             handlePaymentSheetStateLoadFailure(state.validationError)
@@ -574,13 +575,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun handlePaymentCompleted(
         intent: StripeIntent,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        finishImmediately: Boolean
+        finishImmediately: Boolean,
+        isConfirmationToken: Boolean
     ) {
         val currentSelection = inProgressSelection
         currentSelection?.let { paymentSelection ->
             eventReporter.onPaymentSuccess(
                 paymentSelection = paymentSelection,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
+                isConfirmationToken = isConfirmationToken,
             )
         }
 
@@ -621,6 +624,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is ConfirmationHandler.Result.Succeeded -> handlePaymentCompleted(
                 intent = result.intent,
                 deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                isConfirmationToken = result.isConfirmationToken,
                 finishImmediately = false,
             )
             is ConfirmationHandler.Result.Failed -> processConfirmationFailure(result)

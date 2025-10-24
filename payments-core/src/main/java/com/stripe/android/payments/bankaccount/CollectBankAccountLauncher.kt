@@ -6,6 +6,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
+import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
@@ -85,6 +88,27 @@ interface CollectBankAccountLauncher {
                 // L1 (public standalone) integration is not hosted by any Stripe surface.
                 hostedSurface = null,
                 hostActivityLauncher = activity.registerForActivityResult(CollectBankAccountContract()) {
+                    callback(it.toUSBankAccountResult())
+                },
+                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ReactNativeSdkInternal
+        fun create(
+            activity: ComponentActivity,
+            signal: UnregisterSignal,
+            callback: (CollectBankAccountResult) -> Unit
+        ): CollectBankAccountLauncher {
+            return CollectBankAccountForACHLauncher(
+                // L1 (public standalone) integration is not hosted by any Stripe surface.
+                hostedSurface = null,
+                hostActivityLauncher = registerForReactNativeActivityResult(
+                    activity,
+                    signal,
+                    CollectBankAccountContract()
+                ) {
                     callback(it.toUSBankAccountResult())
                 },
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),

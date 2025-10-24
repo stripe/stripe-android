@@ -9,7 +9,8 @@ class ConsumerPaymentDetailsUpdateParamsTest {
     fun `toParamMap should include is_default when provided`() {
         val params = ConsumerPaymentDetailsUpdateParams(
             id = "id",
-            isDefault = true
+            isDefault = true,
+            clientAttributionMetadataParams = emptyMap(),
         ).toParamMap()
 
         assertThat(params["is_default"]).isEqualTo(true)
@@ -26,7 +27,8 @@ class ConsumerPaymentDetailsUpdateParamsTest {
         )
         val params = ConsumerPaymentDetailsUpdateParams(
             id = "id",
-            cardPaymentMethodCreateParamsMap = cardDetails
+            cardPaymentMethodCreateParamsMap = cardDetails,
+            clientAttributionMetadataParams = emptyMap(),
         ).toParamMap()
 
         assertThat(params["exp_month"]).isEqualTo(12)
@@ -46,7 +48,8 @@ class ConsumerPaymentDetailsUpdateParamsTest {
         )
         val params = ConsumerPaymentDetailsUpdateParams(
             id = "id",
-            cardPaymentMethodCreateParamsMap = cardDetails
+            cardPaymentMethodCreateParamsMap = cardDetails,
+            clientAttributionMetadataParams = emptyMap(),
         ).toParamMap()
         val address = params["billing_address"] as Map<*, *>
 
@@ -57,7 +60,8 @@ class ConsumerPaymentDetailsUpdateParamsTest {
     @Test
     fun `toParamMap should return empty map when no optional fields are provided`() {
         val params = ConsumerPaymentDetailsUpdateParams(
-            id = "id"
+            id = "id",
+            clientAttributionMetadataParams = emptyMap(),
         ).toParamMap()
 
         assertThat(params).isEmpty()
@@ -72,7 +76,8 @@ class ConsumerPaymentDetailsUpdateParamsTest {
         )
         val params = ConsumerPaymentDetailsUpdateParams(
             id = "id",
-            cardPaymentMethodCreateParamsMap = cardDetails
+            cardPaymentMethodCreateParamsMap = cardDetails,
+            clientAttributionMetadataParams = emptyMap(),
         ).toParamMap()
 
         assertThat(params["billing_email_address"]).isEqualTo("test@example.com")
@@ -89,7 +94,8 @@ class ConsumerPaymentDetailsUpdateParamsTest {
         )
         val params = ConsumerPaymentDetailsUpdateParams(
             id = "id",
-            cardPaymentMethodCreateParamsMap = cardDetails
+            cardPaymentMethodCreateParamsMap = cardDetails,
+            clientAttributionMetadataParams = emptyMap(),
         ).toParamMap()
 
         assertThat(params).doesNotContainKey("billing_email_address")
@@ -105,7 +111,8 @@ class ConsumerPaymentDetailsUpdateParamsTest {
         )
         val params = ConsumerPaymentDetailsUpdateParams(
             id = "id",
-            cardPaymentMethodCreateParamsMap = cardDetails
+            cardPaymentMethodCreateParamsMap = cardDetails,
+            clientAttributionMetadataParams = emptyMap(),
         ).toParamMap()
 
         assertThat(params).doesNotContainKey("billing_email_address")
@@ -123,7 +130,8 @@ class ConsumerPaymentDetailsUpdateParamsTest {
         )
         val params = ConsumerPaymentDetailsUpdateParams(
             id = "id",
-            cardPaymentMethodCreateParamsMap = cardDetails
+            cardPaymentMethodCreateParamsMap = cardDetails,
+            clientAttributionMetadataParams = emptyMap(),
         ).toParamMap()
 
         assertThat(params).doesNotContainKey("billing_email_address")
@@ -148,7 +156,8 @@ class ConsumerPaymentDetailsUpdateParamsTest {
         val params = ConsumerPaymentDetailsUpdateParams(
             id = "id",
             isDefault = true,
-            cardPaymentMethodCreateParamsMap = cardDetails
+            cardPaymentMethodCreateParamsMap = cardDetails,
+            clientAttributionMetadataParams = emptyMap(),
         ).toParamMap()
 
         assertThat(params["is_default"]).isEqualTo(true)

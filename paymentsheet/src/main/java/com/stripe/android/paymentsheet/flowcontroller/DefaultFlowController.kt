@@ -629,6 +629,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
                         deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                        isConfirmationToken = result.isConfirmationToken,
                     )
                 }
 
@@ -775,6 +776,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
                         deferredIntentConfirmationType = deferredIntentConfirmationType,
+                        isConfirmationToken = false,
                     )
                 }
             }

@@ -23,7 +23,6 @@ import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.lifecycleScope
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso
-import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingPolicies
 import androidx.test.espresso.action.ViewActions.click
@@ -114,89 +113,6 @@ internal class PlaygroundTestDriver(
         override fun onActivityResumed(activity: Activity) {
             currentActivity = activity
         }
-    }
-
-    fun testLinkCustom(
-        testParameters: TestParameters,
-        values: FieldPopulator.Values = FieldPopulator.Values(),
-        populateCustomLpmFields: FieldPopulator.() -> Unit = {},
-        verifyCustomLpmFields: FieldPopulator.() -> Unit = {},
-    ) {
-        setup(testParameters)
-        launchCustom()
-
-        composeTestRule.waitForIdle()
-
-        composeTestRule.waitUntil(timeoutMillis = 5000L) {
-            selectors.addPaymentMethodButton.isDisplayed()
-        }
-
-        addPaymentMethodNode().apply {
-            assertExists()
-            performClick()
-        }
-
-        val fieldPopulator = FieldPopulator(
-            selectors,
-            testParameters,
-            populateCustomLpmFields,
-            verifyCustomLpmFields,
-            values,
-        )
-        fieldPopulator.populateFields()
-
-        composeTestRule.onNodeWithText("Save my info for secure 1-click checkout").apply {
-            assertExists()
-            performClick()
-        }
-
-        composeTestRule.onNodeWithText("Email").apply {
-            assertExists()
-            performTextInput("email@email.com")
-        }
-
-        closeSoftKeyboard()
-
-        runCatching {
-            // We need to wait for the built in debounce time for filling in the link email.
-            composeTestRule.waitUntil(timeoutMillis = 1100L) {
-                false
-            }
-        }
-
-        composeTestRule.waitUntil(timeoutMillis = 5000L) {
-            selectors.continueButton.checkEnabled()
-        }
-
-        composeTestRule.waitForIdle()
-
-        selectors.continueButton.click()
-
-        composeTestRule.waitUntil(timeoutMillis = 5000L) {
-            composeTestRule.onAllNodesWithTag("OTP-0").fetchSemanticsNodes().isNotEmpty()
-        }
-
-        composeTestRule.onNodeWithTag("OTP-0").performTextInput("123456")
-
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
-        waitForPlaygroundActivity()
-
-        selectors.multiStepSelect.click()
-
-        waitForNotPlaygroundActivity()
-
-        composeTestRule.waitUntil(timeoutMillis = 5000L) {
-            composeTestRule.onAllNodesWithTag("SignedInBox").fetchSemanticsNodes().isNotEmpty()
-        }
-
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
-        fieldPopulator.verifyFields()
-
-        teardown()
     }
 
     fun confirmCustom(

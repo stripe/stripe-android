@@ -9,6 +9,9 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.BuildConfig
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
+import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.core.utils.StatusBarCompat
 
 /**
@@ -27,6 +30,22 @@ class PaymentLauncherFactory(
         callback: PaymentLauncher.InternalPaymentResultCallback
     ) : this(
         hostActivityLauncher = activity.registerForActivityResult(
+            PaymentLauncherContract(),
+            callback::onPaymentResult
+        ),
+        statusBarColor = StatusBarCompat.color(activity),
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ReactNativeSdkInternal
+    constructor(
+        activity: ComponentActivity,
+        signal: UnregisterSignal,
+        callback: PaymentLauncher.InternalPaymentResultCallback
+    ) : this(
+        hostActivityLauncher = registerForReactNativeActivityResult(
+            activity,
+            signal,
             PaymentLauncherContract(),
             callback::onPaymentResult
         ),

@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -15,6 +16,9 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
+import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -66,6 +70,48 @@ class GooglePayLauncher internal constructor(
         config,
         readyCallback,
         activity.registerForActivityResult(
+            GooglePayLauncherContract()
+        ) {
+            resultCallback.onResult(it)
+        },
+        googlePayRepositoryFactory = {
+            val context = activity.application
+
+            DefaultGooglePayRepository(
+                context = context,
+                environment = config.environment,
+                billingAddressParameters = config.billingAddressConfig.convert(),
+                existingPaymentMethodRequired = config.existingPaymentMethodRequired,
+                allowCreditCards = config.allowCreditCards,
+                errorReporter = ErrorReporter.createFallbackInstance(
+                    context = context,
+                    productUsage = setOf(PRODUCT_USAGE),
+                )
+            )
+        },
+        PaymentAnalyticsRequestFactory(
+            activity,
+            PaymentConfiguration.getInstance(activity).publishableKey,
+            setOf(PRODUCT_USAGE)
+        ),
+        DefaultAnalyticsRequestExecutor()
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ReactNativeSdkInternal
+    constructor(
+        activity: ComponentActivity,
+        signal: UnregisterSignal,
+        config: Config,
+        readyCallback: ReadyCallback,
+        resultCallback: ResultCallback
+    ) : this(
+        activity.lifecycleScope,
+        config,
+        readyCallback,
+        registerForReactNativeActivityResult(
+            activity,
+            signal,
             GooglePayLauncherContract()
         ) {
             resultCallback.onResult(it)

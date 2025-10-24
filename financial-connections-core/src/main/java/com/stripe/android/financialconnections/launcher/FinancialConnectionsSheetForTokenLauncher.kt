@@ -6,6 +6,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
+import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResultForTokenCallback
@@ -22,6 +25,22 @@ class FinancialConnectionsSheetForTokenLauncher(
         callback: FinancialConnectionsSheetResultForTokenCallback
     ) : this(
         activity.registerForActivityResult(
+            FinancialConnectionsSheetForTokenContract(intentBuilder)
+        ) {
+            callback.onFinancialConnectionsSheetResult(it)
+        }
+    )
+
+    @ReactNativeSdkInternal
+    constructor(
+        activity: ComponentActivity,
+        signal: UnregisterSignal,
+        intentBuilder: (FinancialConnectionsSheetActivityArgs) -> Intent,
+        callback: FinancialConnectionsSheetResultForTokenCallback
+    ) : this(
+        registerForReactNativeActivityResult(
+            activity,
+            signal,
             FinancialConnectionsSheetForTokenContract(intentBuilder)
         ) {
             callback.onFinancialConnectionsSheetResult(it)

@@ -195,6 +195,7 @@ internal class DefaultFlowControllerTest {
             .onPaymentSuccess(
                 paymentSelection = isA<PaymentSelection.New>(),
                 deferredIntentConfirmationType = isNull(),
+                isConfirmationToken = eq(false),
             )
     }
 
@@ -237,6 +238,7 @@ internal class DefaultFlowControllerTest {
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 deferredIntentConfirmationType = null,
                 completedFullPaymentFlow = false,
+                isConfirmationToken = false,
             )
         )
 
@@ -1716,6 +1718,7 @@ internal class DefaultFlowControllerTest {
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
             )
         )
 
@@ -1902,12 +1905,14 @@ internal class DefaultFlowControllerTest {
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
             )
         )
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
             deferredIntentConfirmationType = isNull(),
+            isConfirmationToken = eq(false),
         )
     }
 
@@ -1932,12 +1937,14 @@ internal class DefaultFlowControllerTest {
                 ConfirmationHandler.Result.Succeeded(
                     intent = PaymentIntentFixtures.PI_SUCCEEDED,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+                    isConfirmationToken = false,
                 )
             )
 
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Client),
+                isConfirmationToken = eq(false),
             )
         }
 
@@ -1962,12 +1969,14 @@ internal class DefaultFlowControllerTest {
                 ConfirmationHandler.Result.Succeeded(
                     intent = PaymentIntentFixtures.PI_SUCCEEDED,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    isConfirmationToken = false,
                 )
             )
 
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Server),
+                isConfirmationToken = eq(false),
             )
         }
 
@@ -2155,6 +2164,7 @@ internal class DefaultFlowControllerTest {
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
             )
         )
 
@@ -2455,6 +2465,7 @@ internal class DefaultFlowControllerTest {
             ConfirmationHandler.Result.Succeeded(
                 intent = paymentIntent,
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
             )
         )
 

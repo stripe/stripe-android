@@ -879,6 +879,7 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = null,
+                    isConfirmationToken = false,
                 )
             )
 
@@ -991,6 +992,7 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = null,
+                    isConfirmationToken = false,
                 )
             )
 
@@ -1027,6 +1029,7 @@ internal class PaymentSheetViewModelTest {
                 result = ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = null,
+                    isConfirmationToken = false,
                 )
             )
 
@@ -1046,6 +1049,7 @@ internal class PaymentSheetViewModelTest {
                 .onPaymentSuccess(
                     paymentSelection = selection,
                     deferredIntentConfirmationType = null,
+                    isConfirmationToken = false,
                 )
             assertThat(prefsRepository.paymentSelectionArgs)
                 .containsExactly(selection)
@@ -1097,6 +1101,7 @@ internal class PaymentSheetViewModelTest {
                 result = ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = null,
+                    isConfirmationToken = false,
                 )
             )
 
@@ -1115,6 +1120,7 @@ internal class PaymentSheetViewModelTest {
                 .onPaymentSuccess(
                     paymentSelection = selection,
                     deferredIntentConfirmationType = null,
+                    isConfirmationToken = false,
                 )
 
             assertThat(prefsRepository.paymentSelectionArgs).isEmpty()
@@ -2138,6 +2144,7 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = null,
+                    isConfirmationToken = false,
                 )
             )
 
@@ -2276,12 +2283,14 @@ internal class PaymentSheetViewModelTest {
             result = ConfirmationHandler.Result.Succeeded(
                 intent = PAYMENT_INTENT,
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
             )
         )
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
             deferredIntentConfirmationType = isNull(),
+            isConfirmationToken = eq(false),
         )
     }
 
@@ -2311,12 +2320,14 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                    isConfirmationToken = false,
                 )
             )
 
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.None),
+                isConfirmationToken = eq(false),
             )
         }
 
@@ -2346,12 +2357,14 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+                    isConfirmationToken = false,
                 )
             )
 
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Client),
+                isConfirmationToken = eq(false),
             )
         }
 
@@ -2381,12 +2394,14 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    isConfirmationToken = false,
                 )
             )
 
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Server),
+                isConfirmationToken = eq(false),
             )
         }
 
@@ -2729,6 +2744,7 @@ internal class PaymentSheetViewModelTest {
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
             )
         )
 
@@ -2812,6 +2828,7 @@ internal class PaymentSheetViewModelTest {
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
             )
         )
 
@@ -2889,6 +2906,7 @@ internal class PaymentSheetViewModelTest {
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
             )
         )
 
@@ -3661,6 +3679,7 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Succeeded(
                     intent = stripeIntent,
                     deferredIntentConfirmationType = null,
+                    isConfirmationToken = false,
                 )
             )
         }
@@ -3727,6 +3746,7 @@ internal class PaymentSheetViewModelTest {
             ConfirmationHandler.Result.Succeeded(
                 intent = intent,
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
             )
         )
 

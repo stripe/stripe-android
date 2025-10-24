@@ -20,6 +20,8 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -364,6 +366,13 @@ class PaymentSheet internal constructor(
         fun build(activity: ComponentActivity): PaymentSheet {
             initializeCallbacks()
             return PaymentSheet(DefaultPaymentSheetLauncher(activity, resultCallback))
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ReactNativeSdkInternal
+        fun build(activity: ComponentActivity, signal: UnregisterSignal): PaymentSheet {
+            initializeCallbacks()
+            return PaymentSheet(DefaultPaymentSheetLauncher(activity, signal, resultCallback))
         }
 
         /**

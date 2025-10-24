@@ -50,7 +50,8 @@ internal class FormActivityConfirmationHandlerTest {
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Client
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+                isConfirmationToken = false,
             )
         )
 
