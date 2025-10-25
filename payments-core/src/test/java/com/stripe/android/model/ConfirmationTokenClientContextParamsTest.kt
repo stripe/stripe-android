@@ -254,4 +254,72 @@ class ConfirmationTokenClientContextParamsTest {
         val cardOptions = pmoMap?.get("card") as? Map<*, *>
         assertThat(cardOptions?.containsKey("setup_future_usage")).isNotEqualTo(true)
     }
+
+    @Test
+    fun toParamMap_withRequireCvcRecollectionOnly_shouldCreateExpectedMap() {
+        val params = ConfirmationTokenClientContextParams(
+            mode = "payment",
+            currency = "usd",
+            requireCvcRecollection = true
+        )
+
+        assertThat(params.toParamMap())
+            .isEqualTo(
+                mapOf(
+                    "mode" to "payment",
+                    "currency" to "usd",
+                    "payment_method_options" to mapOf(
+                        "card" to mapOf(
+                            "require_cvc_recollection" to true
+                        )
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun toParamMap_withRequireCvcRecollectionAndNonCardPmo_shouldCreateSeparateCardEntry() {
+        val paymentMethodOptions = PaymentMethodOptionsParams.SepaDebit(
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+        )
+        val params = ConfirmationTokenClientContextParams(
+            mode = "payment",
+            currency = "eur",
+            paymentMethodOptions = paymentMethodOptions,
+            requireCvcRecollection = true
+        )
+
+        assertThat(params.toParamMap())
+            .isEqualTo(
+                mapOf(
+                    "mode" to "payment",
+                    "currency" to "eur",
+                    "payment_method_options" to mapOf(
+                        "sepa_debit" to mapOf(
+                            "setup_future_usage" to "off_session"
+                        ),
+                        "card" to mapOf(
+                            "require_cvc_recollection" to true
+                        )
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun toParamMap_withRequireCvcRecollectionFalse_shouldNotIncludeCvcRecollection() {
+        val params = ConfirmationTokenClientContextParams(
+            mode = "payment",
+            currency = "usd",
+            requireCvcRecollection = false
+        )
+
+        assertThat(params.toParamMap())
+            .isEqualTo(
+                mapOf(
+                    "mode" to "payment",
+                    "currency" to "usd"
+                )
+            )
+    }
 }
