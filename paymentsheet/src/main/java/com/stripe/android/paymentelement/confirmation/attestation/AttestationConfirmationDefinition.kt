@@ -45,7 +45,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args
     ): Boolean {
-        return attestOnIntentConfirmation
+        return attestOnIntentConfirmation && confirmationOption.hasToken().not()
     }
 
     override fun toResult(
@@ -134,6 +134,17 @@ internal class AttestationConfirmationDefinition @Inject constructor(
             }
             is PaymentMethodConfirmationOption.Saved -> {
                 copy(attestationToken = token)
+            }
+        }
+    }
+
+    private fun PaymentMethodConfirmationOption.hasToken(): Boolean {
+        return when (this) {
+            is PaymentMethodConfirmationOption.New -> {
+                createParams.radarOptions?.androidVerificationObject?.androidVerificationToken != null
+            }
+            is PaymentMethodConfirmationOption.Saved -> {
+                attestationToken != null
             }
         }
     }

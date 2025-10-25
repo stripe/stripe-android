@@ -21,6 +21,7 @@ import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.RadarOptionsFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultLauncher
 import kotlinx.coroutines.test.runTest
@@ -455,6 +456,50 @@ internal class AttestationConfirmationDefinitionTest {
                 confirmationArgs = CONFIRMATION_PARAMETERS
             )
         ).isFalse()
+    }
+
+    @Test
+    fun `'canConfirm' should return false when New option already has a token`() {
+        val definition = createAttestationConfirmationDefinition()
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            attestOnIntentConfirmation = true
+        )
+        definition.bootstrap(paymentMethodMetadata)
+
+        val optionWithToken = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
+            createParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
+                radarOptions = RadarOptionsFactory.create(
+                    hCaptchaToken = null
+                )
+            )
+        )
+
+        val result = definition.canConfirm(
+            confirmationOption = optionWithToken,
+            confirmationArgs = CONFIRMATION_PARAMETERS
+        )
+
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `'canConfirm' should return false when Saved option already has a token`() {
+        val definition = createAttestationConfirmationDefinition()
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            attestOnIntentConfirmation = true
+        )
+        definition.bootstrap(paymentMethodMetadata)
+
+        val optionWithToken = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
+            attestationToken = "existing_token"
+        )
+
+        val result = definition.canConfirm(
+            confirmationOption = optionWithToken,
+            confirmationArgs = CONFIRMATION_PARAMETERS
+        )
+
+        assertThat(result).isFalse()
     }
 
     private fun createAttestationConfirmationDefinition(

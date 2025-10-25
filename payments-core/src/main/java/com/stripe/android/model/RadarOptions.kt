@@ -7,7 +7,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class RadarOptions(
     private val hCaptchaToken: String?,
-    private val androidVerificationObject: AndroidVerificationObject?
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val androidVerificationObject: AndroidVerificationObject?
 ) : StripeParamsModel {
     override fun toParamMap(): Map<String, Any> {
         return hCaptchaToken?.let {
