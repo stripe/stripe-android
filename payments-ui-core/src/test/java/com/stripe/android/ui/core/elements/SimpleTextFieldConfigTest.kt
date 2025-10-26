@@ -128,4 +128,76 @@ class SimpleTextFieldConfigTest {
         assertThat(state.shouldShowError(hasFocus = true, isValidating = true)).isFalse()
         assertThat(state.shouldShowError(hasFocus = false, isValidating = true)).isFalse()
     }
+
+    // TextFilter tests
+
+    @Test
+    fun `test textFilter is applied when provided`() {
+        val textConfig = SimpleTextFieldConfig(
+            label = resolvableString("Name"),
+            keyboard = KeyboardType.Text,
+            textFilter = { text -> text.replace("X", "") }
+        )
+
+        assertThat(textConfig.filter("AXBXC")).isEqualTo("ABC")
+    }
+
+    @Test
+    fun `test textFilter is not applied when null`() {
+        val textConfig = SimpleTextFieldConfig(
+            label = resolvableString("Name"),
+            keyboard = KeyboardType.Text,
+            textFilter = null
+        )
+
+        assertThat(textConfig.filter("ABC")).isEqualTo("ABC")
+    }
+
+    @Test
+    fun `test textFilter is applied after keyboard filter for number keyboard`() {
+        val textConfig = SimpleTextFieldConfig(
+            label = resolvableString("Phone"),
+            keyboard = KeyboardType.Number,
+            textFilter = { text -> text.replace("5", "") }
+        )
+
+        // First filters to digits: "abc1235" -> "1235"
+        // Then applies textFilter: "1235" -> "123"
+        assertThat(textConfig.filter("abc1235")).isEqualTo("123")
+    }
+
+    @Test
+    fun `test textFilter removes unwanted characters`() {
+        val textConfig = SimpleTextFieldConfig(
+            label = resolvableString("Address"),
+            keyboard = KeyboardType.Text,
+            textFilter = { text -> text.filter { it.isLetterOrDigit() || it.isWhitespace() } }
+        )
+
+        assertThat(textConfig.filter("123 Main St!@#")).isEqualTo("123 Main St")
+    }
+
+    @Test
+    fun `test textFilter with empty input`() {
+        val textConfig = SimpleTextFieldConfig(
+            label = resolvableString("Name"),
+            keyboard = KeyboardType.Text,
+            textFilter = { text -> text.uppercase() }
+        )
+
+        assertThat(textConfig.filter("")).isEqualTo("")
+    }
+
+    @Test
+    fun `test complex textFilter transformation`() {
+        val textConfig = SimpleTextFieldConfig(
+            label = resolvableString("Name"),
+            keyboard = KeyboardType.Text,
+            textFilter = { text ->
+                text.filter { it.isLetter() || it.isWhitespace() }.trim()
+            }
+        )
+
+        assertThat(textConfig.filter("  John123 Doe456  ")).isEqualTo("John Doe")
+    }
 }
