@@ -7,6 +7,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.elements.AddressTextFilter
 import com.stripe.android.uicore.elements.AdministrativeAreaConfig
 import com.stripe.android.uicore.elements.AdministrativeAreaElement
 import com.stripe.android.uicore.elements.DropdownFieldController
@@ -320,6 +321,7 @@ private fun FieldType.toConfig(
             capitalization = capitalization,
             keyboard = keyboardType,
             optional = optional,
+            textFilter = AddressTextFilter()
         )
     }
 }

@@ -15,6 +15,7 @@ open class SimpleTextFieldConfig(
     override val keyboard: KeyboardType = KeyboardType.Text,
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null),
     override val optional: Boolean = false,
+    private val textFilter: TextFilter? = null,
 ) : TextFieldConfig {
     override val debugLabel: String = "generic_text"
     override val visualTransformation: VisualTransformation? = null
@@ -38,14 +39,15 @@ open class SimpleTextFieldConfig(
         override fun isBlank(): Boolean = input.isBlank()
     }
 
-    override fun filter(userTyped: String): String =
-        if (
-            setOf(KeyboardType.Number, KeyboardType.NumberPassword).contains(keyboard)
-        ) {
-            userTyped.filter { it.isDigit() }
-        } else {
-            userTyped
+    override fun filter(userTyped: String): String {
+        val preFiltered = when {
+            setOf(KeyboardType.Number, KeyboardType.NumberPassword).contains(keyboard) -> {
+                userTyped.filter { it.isDigit() }
+            }
+            else -> userTyped
         }
+        return textFilter?.filter(preFiltered) ?: preFiltered
+    }
 
     override fun convertToRaw(displayName: String) = displayName
 
