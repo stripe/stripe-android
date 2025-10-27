@@ -5,6 +5,7 @@ import com.stripe.android.attestation.AttestationActivityContract
 import com.stripe.android.attestation.AttestationActivityResult
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -24,8 +25,12 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.RadarOptionsFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultLauncher
+import com.stripe.attestation.IntegrityRequestManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import kotlin.coroutines.CoroutineContext
 
 internal class AttestationConfirmationDefinitionTest {
 
@@ -506,13 +511,52 @@ internal class AttestationConfirmationDefinitionTest {
         assertThat(result).isFalse()
     }
 
+    @Test
+    fun `'bootstrap' should call prepare on IntegrityRequestManager when attestation is enabled`() = runTest {
+        val fakeIntegrityRequestManager = FakeIntegrityRequestManager()
+        val definition = createAttestationConfirmationDefinition(
+            integrityRequestManager = fakeIntegrityRequestManager
+        )
+
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            attestOnIntentConfirmation = true
+        )
+
+        definition.bootstrap(paymentMethodMetadata)
+
+        fakeIntegrityRequestManager.awaitPrepareCall()
+        fakeIntegrityRequestManager.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `'bootstrap' should not call prepare on IntegrityRequestManager when attestation is disabled`() {
+        val fakeIntegrityRequestManager = FakeIntegrityRequestManager()
+        val definition = createAttestationConfirmationDefinition(
+            integrityRequestManager = fakeIntegrityRequestManager
+        )
+
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            attestOnIntentConfirmation = false
+        )
+
+        definition.bootstrap(paymentMethodMetadata)
+
+        fakeIntegrityRequestManager.ensureAllEventsConsumed()
+    }
+
     private fun createAttestationConfirmationDefinition(
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
+        coroutineScope: CoroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+        workContext: CoroutineContext = UnconfinedTestDispatcher(),
         publishableKey: String = launcherArgs.publishableKey,
         productUsage: Set<String> = launcherArgs.productUsage
     ): AttestationConfirmationDefinition {
         return AttestationConfirmationDefinition(
             errorReporter = errorReporter,
+            integrityRequestManager = integrityRequestManager,
+            coroutineScope = coroutineScope,
+            workContext = workContext,
             publishableKeyProvider = { publishableKey },
             productUsage = productUsage,
         )

@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.attestation.AttestationActivityContract
 import com.stripe.android.attestation.AttestationActivityResult
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -16,11 +17,18 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.attestation.IntegrityRequestManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.coroutines.CoroutineContext
 
 internal class AttestationConfirmationDefinition @Inject constructor(
     private val errorReporter: ErrorReporter,
+    private val integrityRequestManager: IntegrityRequestManager,
+    @AttestationScope private val coroutineScope: CoroutineScope,
+    @IOContext private val workContext: CoroutineContext,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : ConfirmationDefinition<
@@ -39,6 +47,10 @@ internal class AttestationConfirmationDefinition @Inject constructor(
 
     override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
         attestOnIntentConfirmation = paymentMethodMetadata.attestOnIntentConfirmation
+        if (attestOnIntentConfirmation.not()) return
+        coroutineScope.launch(workContext) {
+            integrityRequestManager.prepare()
+        }
     }
 
     override fun canConfirm(
