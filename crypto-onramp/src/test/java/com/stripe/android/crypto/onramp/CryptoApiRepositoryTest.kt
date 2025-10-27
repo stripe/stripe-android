@@ -9,6 +9,7 @@ import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.DateOfBirth
 import com.stripe.android.crypto.onramp.model.KycInfo
+import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
 import com.stripe.android.networking.StripeRepository
@@ -204,7 +205,11 @@ class CryptoApiRepositoryTest {
                         "last_name": "User",
                         "id_number_last4": "7777",
                         "id_type": "social_security_number",
-                        "dob": "1975-03-01",
+                        "dob": {
+                            "day": 1,
+                            "month": 3,
+                            "year": 1975
+                        },
                         "address": {
                             "line1": "123 Main St",
                             "line2": "Apt 4B",
@@ -241,7 +246,7 @@ class CryptoApiRepositoryTest {
             assertThat(result.getOrThrow().lastName).isEqualTo("User")
             assertThat(result.getOrThrow().idNumberLastFour).isEqualTo("7777")
             assertThat(result.getOrThrow().idType).isEqualTo("social_security_number")
-            assertThat(result.getOrThrow().dateOfBirth).isEqualTo("1975-03-01")
+            assertThat(result.getOrThrow().dateOfBirth).isEqualTo(DateOfBirth(day = 1, month = 3, year = 1975))
             assertThat(result.getOrThrow().address.line1).isEqualTo("123 Main St")
             assertThat(result.getOrThrow().address.line2).isEqualTo("Apt 4B")
             assertThat(result.getOrThrow().address.postalCode).isEqualTo("32801")
@@ -290,10 +295,10 @@ class CryptoApiRepositoryTest {
                 .thenReturn(stripeResponse)
 
             val result = cryptoApiRepository.refreshKycData(
-                KycInfo(
+                RefreshKycInfo(
                     firstName = "Test",
                     lastName = "User",
-                    idNumber = "999-88-7777",
+                    idNumberLastFour = "7777",
                     dateOfBirth = DateOfBirth(day = 1, month = 3, year = 1975),
                     address = PaymentSheet.Address(city = "Orlando", state = "FL")
                 ),
@@ -347,10 +352,10 @@ class CryptoApiRepositoryTest {
                 .thenReturn(stripeResponse)
 
             val result = cryptoApiRepository.refreshKycData(
-                KycInfo(
+                RefreshKycInfo(
                     firstName = "Test",
                     lastName = "User",
-                    idNumber = "999-88-7777",
+                    idNumberLastFour = "7777",
                     dateOfBirth = DateOfBirth(day = 1, month = 3, year = 1975),
                     address = PaymentSheet.Address(city = "Orlando", state = "FL")
                 ),

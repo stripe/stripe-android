@@ -21,7 +21,7 @@ internal data class KycRetrieveResponse(
     @SerialName("id_type")
     val idType: String?,
     @SerialName("dob")
-    val dateOfBirth: String,
+    val dateOfBirth: DateOfBirth,
 
     @SerialName("address")
     @Serializable(with = PaymentSheetAddressSerializer::class)

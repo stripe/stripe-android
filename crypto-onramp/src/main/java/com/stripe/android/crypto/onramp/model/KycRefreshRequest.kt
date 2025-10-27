@@ -40,14 +40,14 @@ internal data class KycRefreshRequest(
         /**
          * Converts SDK KycInfo model to an internal API refresh request model.
          */
-        fun fromKycInfo(
-            kycInfo: KycInfo,
+        fun fromRefreshKycInfo(
+            kycInfo: RefreshKycInfo,
             credentials: CryptoCustomerRequestParams.Credentials
         ): KycRefreshRequest {
             return KycRefreshRequest(
                 firstName = kycInfo.firstName,
                 lastName = kycInfo.lastName,
-                idNumberLastFour = kycInfo.idNumber?.takeLast(4),
+                idNumberLastFour = kycInfo.idNumberLastFour,
                 idType = SOCIAL_SECURITY_NUMBER,
                 dateOfBirth = kycInfo.dateOfBirth,
                 city = kycInfo.address.city,

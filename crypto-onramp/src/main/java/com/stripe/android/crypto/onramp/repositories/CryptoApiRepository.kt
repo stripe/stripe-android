@@ -23,6 +23,7 @@ import com.stripe.android.crypto.onramp.model.KycCollectionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRefreshRequest
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
+import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.link.LinkController
@@ -117,10 +118,10 @@ internal class CryptoApiRepository @Inject constructor(
     }
 
     suspend fun refreshKycData(
-        kycInfo: KycInfo,
+        kycInfo: RefreshKycInfo,
         consumerSessionClientSecret: String
     ): Result<Unit> {
-        val apiRequest = KycRefreshRequest.fromKycInfo(
+        val apiRequest = KycRefreshRequest.fromRefreshKycInfo(
             kycInfo = kycInfo,
             credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret)
         )
