@@ -383,11 +383,12 @@ internal class IdentityViewModel(
         errorCause.removeObserver(errorCauseObServer)
     }
 
-    // Store camera lens model for document uploads
+    // Store camera metadata for document uploads
     private var currentCameraLensModel: String? = null
     private var currentExposureIso: Float? = null
     private var currentFocalLength: Float? = null
     private var currentExposureDuration: Long? = null
+    private var currentIsVirtualCamera: Boolean? = null
 
     // Store camera lens model for selfie uploads
     private var selfieCameraLensModel: String? = null
@@ -409,6 +410,10 @@ internal class IdentityViewModel(
 
     fun setCameraExposureDuration(exposureDuration: Long?) {
         currentExposureDuration = exposureDuration
+    }
+
+    fun setIsVirtualCamera(isVirtual: Boolean?) {
+        currentIsVirtualCamera = isVirtual
     }
 
     /**
@@ -1594,7 +1599,8 @@ internal class IdentityViewModel(
                             cameraLensModel = currentCameraLensModel,
                             exposureIso = currentExposureIso,
                             focalLength = currentFocalLength,
-                            exposureDuration = currentExposureDuration
+                            exposureDuration = currentExposureDuration,
+                            isVirtualCamera = currentIsVirtualCamera
                         )
                     } else {
                         CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
@@ -1603,7 +1609,8 @@ internal class IdentityViewModel(
                             cameraLensModel = currentCameraLensModel,
                             exposureIso = currentExposureIso,
                             focalLength = currentFocalLength,
-                            exposureDuration = currentExposureDuration
+                            exposureDuration = currentExposureDuration,
+                            isVirtualCamera = currentIsVirtualCamera
                         )
                     },
                     fromRoute = route,
@@ -1645,7 +1652,9 @@ internal class IdentityViewModel(
                                     uploadMethod = requireNotNull(front.uploadMethod),
                                     cameraLensModel = currentCameraLensModel,
                                     exposureIso = currentExposureIso,
-                                    focalLength = currentFocalLength
+                                    focalLength = currentFocalLength,
+                                    exposureDuration = currentExposureDuration,
+                                    isVirtualCamera = currentIsVirtualCamera
                                 )
                             ),
                             fromRoute = DocumentUploadDestination.ROUTE.route
@@ -1671,7 +1680,9 @@ internal class IdentityViewModel(
                                     uploadMethod = requireNotNull(back.uploadMethod),
                                     cameraLensModel = currentCameraLensModel,
                                     exposureIso = currentExposureIso,
-                                    focalLength = currentFocalLength
+                                    focalLength = currentFocalLength,
+                                    exposureDuration = currentExposureDuration,
+                                    isVirtualCamera = currentIsVirtualCamera
                                 )
                             ),
                             fromRoute = DocumentUploadDestination.ROUTE.route

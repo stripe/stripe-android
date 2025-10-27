@@ -82,7 +82,8 @@ internal data class CollectedDataParam(
             cameraLensModel: String? = null,
             exposureIso: Float? = null,
             focalLength: Float? = null,
-            exposureDuration: Long? = null
+            exposureDuration: Long? = null,
+            isVirtualCamera: Boolean? = null
         ): CollectedDataParam =
             CollectedDataParam(
                 idDocumentFront = DocumentUploadParam(
@@ -104,7 +105,8 @@ internal data class CollectedDataParam(
                     cameraLensModel = cameraLensModel,
                     exposureIso = exposureIso,
                     focalLength = focalLength,
-                    exposureDuration = exposureDuration
+                    exposureDuration = exposureDuration,
+                    isVirtualCamera = isVirtualCamera
                 )
             )
 
@@ -114,7 +116,8 @@ internal data class CollectedDataParam(
             cameraLensModel: String? = null,
             exposureIso: Float? = null,
             focalLength: Float? = null,
-            exposureDuration: Long? = null
+            exposureDuration: Long? = null,
+            isVirtualCamera: Boolean? = null
         ): CollectedDataParam =
             CollectedDataParam(
                 idDocumentBack = DocumentUploadParam(
@@ -136,7 +139,8 @@ internal data class CollectedDataParam(
                     cameraLensModel = cameraLensModel,
                     exposureIso = exposureIso,
                     focalLength = focalLength,
-                    exposureDuration = exposureDuration
+                    exposureDuration = exposureDuration,
+                    isVirtualCamera = isVirtualCamera
                 )
             )
 
