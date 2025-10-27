@@ -45,6 +45,7 @@ internal class PaymentSheetTestRunnerContext(
 
 internal fun runPaymentSheetTest(
     networkRule: NetworkRule,
+    isLiveMode: Boolean = false,
     integrationType: IntegrationType = IntegrationType.Compose,
     builder: PaymentSheet.Builder.() -> Unit = {},
     successTimeoutSeconds: Long = 5L,
@@ -63,7 +64,13 @@ internal fun runPaymentSheetTest(
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
+            PaymentConfiguration.init(it,
+                if (isLiveMode) {
+                    "pk_live_123"
+                } else {
+                    "pk_test_123"
+                }
+            )
             LinkStore(it.applicationContext).clear()
         }
 
