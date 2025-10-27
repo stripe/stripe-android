@@ -7,6 +7,8 @@ import com.google.android.play.core.integrity.StandardIntegrityManager
 import com.google.android.play.core.integrity.StandardIntegrityManager.PrepareIntegrityTokenRequest
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenProvider
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenRequest
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface IntegrityRequestManager {
@@ -34,28 +36,31 @@ interface IntegrityRequestManager {
 class IntegrityStandardRequestManager(
     private val cloudProjectNumber: Long,
     private val logError: (String, Throwable) -> Unit,
-    private val factory: StandardIntegrityManagerFactory
+    private val factory: StandardIntegrityManagerFactory,
+    private val mutex: Mutex = Mutex()
 ) : IntegrityRequestManager {
 
     private val standardIntegrityManager: StandardIntegrityManager by lazy { factory.create() }
     private var integrityTokenProvider: StandardIntegrityTokenProvider? = null
 
     override suspend fun prepare(): Result<Unit> = runCatching {
-        if (integrityTokenProvider != null) {
-            Log.d("Integrity", "Integrity token already prepared - instance: $standardIntegrityManager")
-            return Result.success(Unit)
-        }
-        Log.d("Integrity", "Preparing integrity token provider - instance: $standardIntegrityManager")
-        val finishedTask: Task<StandardIntegrityTokenProvider> = standardIntegrityManager
-            .prepareIntegrityToken(
-                PrepareIntegrityTokenRequest.builder()
-                    .setCloudProjectNumber(cloudProjectNumber)
-                    .build()
-            ).awaitTask()
+        mutex.withLock {
+            if (integrityTokenProvider != null) {
+                Log.d("Integrity", "Integrity token already prepared - instance: $standardIntegrityManager")
+                return Result.success(Unit)
+            }
+            Log.d("Integrity", "Preparing integrity token provider - instance: $standardIntegrityManager")
+            val finishedTask: Task<StandardIntegrityTokenProvider> = standardIntegrityManager
+                .prepareIntegrityToken(
+                    PrepareIntegrityTokenRequest.builder()
+                        .setCloudProjectNumber(cloudProjectNumber)
+                        .build()
+                ).awaitTask()
 
-        finishedTask.toResult()
-            .onSuccess { integrityTokenProvider = it }
-            .getOrThrow()
+            finishedTask.toResult()
+                .onSuccess { integrityTokenProvider = it }
+                .getOrThrow()
+        }
     }
         .map {}
         .recoverCatching {
