@@ -106,7 +106,23 @@ internal class MessagingElementActivity : AppCompatActivity() {
             onValueChange = {
                 viewModel.updateConfigState(config.copy(paymentMethods = it.split(",")))
             },
-            label = { Text("Payment Methods") }
+            label = { Text("paymentMethods") }
+        )
+
+        TextField(
+            value = config.publishableKey,
+            onValueChange = {
+                viewModel.updateConfigState(config.copy(publishableKey = it))
+            },
+            label = { Text("publishableKey") }
+        )
+
+        TextField(
+            value = config.stripeAccountId ?: "",
+            onValueChange = {
+                viewModel.updateConfigState(config.copy(stripeAccountId = it))
+            },
+            label = { Text("stripeAccountID") }
         )
     }
 

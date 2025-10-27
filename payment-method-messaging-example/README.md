@@ -6,7 +6,14 @@
 1. Clone the `stripe-android` repository.
 2. Open the project in Android Studio.
 
-### Configure the app
+### Optional: Configure publishable key and stripe account ID
+#### UI
+1. Enter your publishable key/stripe account ID through the playground UI
+
+#### Settings
+1. Add your publishable key/stripe account ID to `Settings.kt`
+
+#### Gradle
 1. If it doesn't exist, create a `gradle.properties` in a location defined in the
    [Gradle Build Environment docs](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties).
    For example, the default location on macOS is `~/.gradle/gradle.properties`.
@@ -21,5 +28,5 @@ STRIPE_ACCOUNT_ID=
 ```
 
 ### Run
-1. Select the `payment-method-messaing-example` configuration.
+1. Select the `payment-method-messaging-example` configuration.
 2. Run the app.

@@ -32,15 +32,12 @@ class Settings(context: Context) {
 
     private companion object {
         /**
-         * Note: only necessary if not configured via `gradle.properties`.
-         *
          * Set to publishable key from https://dashboard.stripe.com/test/apikeys
          */
-        private const val PUBLISHABLE_KEY = "pk_test_your_key_goes_here"
+        private const val PUBLISHABLE_KEY = "pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCRep" +
+            "rfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"
 
         /**
-         * Note: only necessary if not configured via `gradle.properties`.
-         *
          * Optionally, set to a Connect Account id to use for API requests to test Connect
          *
          * See https://dashboard.stripe.com/test/connect/accounts/overview
