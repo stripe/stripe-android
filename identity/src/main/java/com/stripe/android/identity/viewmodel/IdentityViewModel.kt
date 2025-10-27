@@ -383,8 +383,12 @@ internal class IdentityViewModel(
         errorCause.removeObserver(errorCauseObServer)
     }
 
-    // Store camera lens model for document uploads
+    // Store camera metadata for document uploads
     private var currentCameraLensModel: String? = null
+    private var currentExposureIso: Float? = null
+    private var currentFocalLength: Float? = null
+    private var currentExposureDuration: Long? = null
+    private var currentIsVirtualCamera: Boolean? = null
 
     // Store camera lens model for selfie uploads
     private var selfieCameraLensModel: String? = null
@@ -396,12 +400,27 @@ internal class IdentityViewModel(
         currentCameraLensModel = cameraLensModel
     }
 
+    fun setCameraExposureIso(exposureIso: Float?) {
+        currentExposureIso = exposureIso
+    }
+
+    fun setCameraFocalLength(focalLength: Float?) {
+        currentFocalLength = focalLength
+    }
+
+    fun setCameraExposureDuration(exposureDuration: Long?) {
+        currentExposureDuration = exposureDuration
+    }
+
+    fun setIsVirtualCamera(isVirtual: Boolean?) {
+        currentIsVirtualCamera = isVirtual
+    }
+
     /**
      * Set the camera lens model for selfie uploads.
      */
     fun setSelfieCameraLensModel(cameraManager: IdentityCameraManager?) {
         selfieCameraLensModel = cameraManager?.getCameraLensModel()
-        Log.d(TAG, "Selfie camera lens model set to: $selfieCameraLensModel")
     }
 
     /**
@@ -1577,13 +1596,21 @@ internal class IdentityViewModel(
                         CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
                             frontHighResResult = requireNotNull(uploadedState.highResResult.data),
                             frontLowResResult = requireNotNull(uploadedState.lowResResult.data),
-                            cameraLensModel = currentCameraLensModel
+                            cameraLensModel = currentCameraLensModel,
+                            exposureIso = currentExposureIso,
+                            focalLength = currentFocalLength,
+                            exposureDuration = currentExposureDuration,
+                            isVirtualCamera = currentIsVirtualCamera
                         )
                     } else {
                         CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
                             backHighResResult = requireNotNull(uploadedState.highResResult.data),
                             backLowResResult = requireNotNull(uploadedState.lowResResult.data),
-                            cameraLensModel = currentCameraLensModel
+                            cameraLensModel = currentCameraLensModel,
+                            exposureIso = currentExposureIso,
+                            focalLength = currentFocalLength,
+                            exposureDuration = currentExposureDuration,
+                            isVirtualCamera = currentIsVirtualCamera
                         )
                     },
                     fromRoute = route,
@@ -1622,7 +1649,12 @@ internal class IdentityViewModel(
                                     highResImage = requireNotNull(front.uploadedStripeFile.id) {
                                         "front uploaded file id is null"
                                     },
-                                    uploadMethod = requireNotNull(front.uploadMethod)
+                                    uploadMethod = requireNotNull(front.uploadMethod),
+                                    cameraLensModel = currentCameraLensModel,
+                                    exposureIso = currentExposureIso,
+                                    focalLength = currentFocalLength,
+                                    exposureDuration = currentExposureDuration,
+                                    isVirtualCamera = currentIsVirtualCamera
                                 )
                             ),
                             fromRoute = DocumentUploadDestination.ROUTE.route
@@ -1645,7 +1677,12 @@ internal class IdentityViewModel(
                                     highResImage = requireNotNull(back.uploadedStripeFile.id) {
                                         "back uploaded file id is null"
                                     },
-                                    uploadMethod = requireNotNull(back.uploadMethod)
+                                    uploadMethod = requireNotNull(back.uploadMethod),
+                                    cameraLensModel = currentCameraLensModel,
+                                    exposureIso = currentExposureIso,
+                                    focalLength = currentFocalLength,
+                                    exposureDuration = currentExposureDuration,
+                                    isVirtualCamera = currentIsVirtualCamera
                                 )
                             ),
                             fromRoute = DocumentUploadDestination.ROUTE.route
