@@ -50,6 +50,26 @@ internal class TestBacs : BasePlaygroundTest() {
         )
     }
 
+    @Test
+    fun testBacsWhenConfirmedInCustomFlow() {
+        testDriver.confirmCustomAndBuy(
+            testParameters = createTestParameters(AuthorizeAction.Bacs.Confirm),
+            populateCustomLpmFields = {
+                populateBacs()
+            },
+        )
+    }
+
+    @Test
+    fun testBacsWhenCancelledInCustomFlow() {
+        testDriver.confirmCustomAndBuy(
+            testParameters = createTestParameters(AuthorizeAction.Bacs.ModifyDetails),
+            populateCustomLpmFields = {
+                populateBacs()
+            },
+        )
+    }
+
     private fun createTestParameters(
         bacsAuthAction: AuthorizeAction.Bacs
     ): TestParameters {
