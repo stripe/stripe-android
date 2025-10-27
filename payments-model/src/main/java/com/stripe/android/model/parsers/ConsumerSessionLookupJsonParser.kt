@@ -27,6 +27,7 @@ class ConsumerSessionLookupJsonParser : ModelJsonParser<ConsumerSessionLookup> {
         }
         val consentUi = optString(json, FIELD_CONSENT_UI)
             ?.let { format.decodeFromString<ConsentUi>(it) }
+        val suggestedEmail = optString(json, FIELD_SUGGESTED_EMAIL)
         return ConsumerSessionLookup(
             exists = exists,
             consumerSession = consumerSession,
@@ -34,6 +35,7 @@ class ConsumerSessionLookupJsonParser : ModelJsonParser<ConsumerSessionLookup> {
             publishableKey = publishableKey,
             displayablePaymentDetails = displayablePaymentDetails,
             consentUi = consentUi,
+            suggestedEmail = suggestedEmail,
         )
     }
 
@@ -43,5 +45,6 @@ class ConsumerSessionLookupJsonParser : ModelJsonParser<ConsumerSessionLookup> {
         private const val FIELD_PUBLISHABLE_KEY = "publishable_key"
         private const val FIELD_DISPLAYABLE_PAYMENT_DETAILS = "displayable_payment_details"
         private const val FIELD_CONSENT_UI = "consent_ui"
+        private const val FIELD_SUGGESTED_EMAIL = "suggested_email"
     }
 }

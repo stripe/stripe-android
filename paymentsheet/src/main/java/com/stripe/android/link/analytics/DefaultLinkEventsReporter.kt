@@ -63,6 +63,10 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.SignUpFailure, params)
     }
 
+    override fun onEmailSuggestionAccepted() {
+        fireEvent(LinkEvent.EmailSuggestionAccepted)
+    }
+
     override fun onAccountLookupFailure(error: Throwable) {
         val params = mapOf(FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage).plus(
             ErrorReporter.getAdditionalParamsFromError(error)
