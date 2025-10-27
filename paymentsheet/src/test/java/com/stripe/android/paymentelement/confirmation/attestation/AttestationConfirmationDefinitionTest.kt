@@ -544,6 +544,31 @@ internal class AttestationConfirmationDefinitionTest {
         fakeIntegrityRequestManager.ensureAllEventsConsumed()
     }
 
+    @Test
+    fun `'bootstrap' should report error when IntegrityRequestManager prepare fails`() = runTest {
+        val fakeErrorReporter = FakeErrorReporter()
+        val fakeIntegrityRequestManager = FakeIntegrityRequestManager().apply {
+            prepareResult = Result.failure(RuntimeException("Preparation failed"))
+        }
+        val definition = createAttestationConfirmationDefinition(
+            errorReporter = fakeErrorReporter,
+            integrityRequestManager = fakeIntegrityRequestManager
+        )
+
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            attestOnIntentConfirmation = true
+        )
+
+        definition.bootstrap(paymentMethodMetadata)
+        fakeIntegrityRequestManager.awaitPrepareCall()
+
+        val call = fakeErrorReporter.awaitCall()
+        assertThat(call.errorEvent).isEqualTo(
+            ErrorReporter.UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE
+        )
+        assertThat(call.stripeException?.message).isEqualTo("Preparation failed")
+    }
+
     private fun createAttestationConfirmationDefinition(
         errorReporter: ErrorReporter = FakeErrorReporter(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),

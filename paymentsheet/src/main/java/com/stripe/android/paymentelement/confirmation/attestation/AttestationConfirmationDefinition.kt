@@ -49,7 +49,12 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         attestOnIntentConfirmation = paymentMethodMetadata.attestOnIntentConfirmation
         if (attestOnIntentConfirmation.not()) return
         coroutineScope.launch(workContext) {
-            integrityRequestManager.prepare()
+            integrityRequestManager.prepare().onFailure { error ->
+                errorReporter.report(
+                    ErrorReporter.UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE,
+                    stripeException = StripeException.create(error)
+                )
+            }
         }
     }
 
