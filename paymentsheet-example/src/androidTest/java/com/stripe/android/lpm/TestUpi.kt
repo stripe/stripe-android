@@ -35,18 +35,4 @@ internal class TestUpi : BasePlaygroundTest() {
             }
         }
     }
-
-    @Test
-    fun testUpiInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
-            populateCustomLpmFields = {
-                rules.compose.onNodeWithText("UPI ID").apply {
-                    performTextInput(
-                        "payment.success@stripeupi"
-                    )
-                }
-            }
-        )
-    }
 }

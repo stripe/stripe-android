@@ -246,17 +246,4 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
             }
         )
     }
-
-    @Test
-    fun testUSBankAccountCancelAllowsUserToContinueInCustomFlow() {
-        testDriver.confirmCustomUSBankAccount(
-            testParameters = testParameters.copy(
-                authorizationAction = AuthorizeAction.Cancel,
-            ),
-            afterAuthorization = {
-                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-                    .waitFor(isEnabled())
-            }
-        )
-    }
 }

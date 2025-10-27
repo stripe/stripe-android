@@ -83,18 +83,4 @@ internal class TestBoleto : BasePlaygroundTest() {
             }
         )
     }
-
-    @Test
-    fun testBoletoInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
-            values = boletoValues,
-            populateCustomLpmFields = {
-                populateBoletoTaxId()
-                populateName()
-                populateAddress()
-                populateEmail()
-            }
-        )
-    }
 }

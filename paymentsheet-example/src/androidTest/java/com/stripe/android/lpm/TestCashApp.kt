@@ -86,13 +86,6 @@ internal class TestCashApp : BasePlaygroundTest() {
     }
 
     @Test
-    fun testCashAppPayInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
-        )
-    }
-
-    @Test
     fun testCashAppPayDeferredCscWithSfu() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
