@@ -45,6 +45,11 @@ class IntegrityStandardRequestManager(
 
     override suspend fun prepare(): Result<Unit> = runCatching {
         mutex.withLock {
+            // The mutex ensures only one coroutine executes this block at a time, but multiple
+            // calls can still queue up waiting for the lock. The if-check prevents redundant work
+            // by ensuring that once the first call completes and sets integrityTokenProvider, all
+            // subsequent calls (that were queued) will see it's already initialized and return
+            // early without re-executing the expensive prepareIntegrityToken() operation.
             if (integrityTokenProvider != null) {
                 Log.d("Integrity", "Integrity token already prepared - instance: $standardIntegrityManager")
                 return Result.success(Unit)
