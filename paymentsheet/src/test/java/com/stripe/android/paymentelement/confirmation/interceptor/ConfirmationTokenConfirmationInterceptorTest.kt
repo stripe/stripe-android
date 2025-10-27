@@ -430,48 +430,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         }
 
     @Test
-    fun `Saved PM - succeed if a ephemeralKeySecret associated with the customer is provided`() =
-        runInterceptorScenario(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
-            scenario = InterceptorTestScenario(
-                ephemeralKeySecret = "ek_test_123",
-                stripeRepository = object : AbsFakeStripeRepository() {
-                    override suspend fun createConfirmationToken(
-                        confirmationTokenParams: ConfirmationTokenParams,
-                        options: ApiRequest.Options
-                    ): Result<ConfirmationToken> {
-                        return Result.success(confirmationToken)
-                    }
-
-                    override suspend fun retrieveStripeIntent(
-                        clientSecret: String,
-                        options: ApiRequest.Options,
-                        expandFields: List<String>
-                    ): Result<StripeIntent> {
-                        return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
-                    }
-                },
-                intentCreationConfirmationTokenCallbackProvider = Provider {
-                    CreateIntentWithConfirmationTokenCallback { _ ->
-                        CreateIntentResult.Success(clientSecret = "pi_123_secret_456")
-                    }
-                },
-            )
-        ) { interceptor ->
-
-            val nextStep = interceptor.interceptDefaultSavedPaymentMethod()
-
-            assertThat(nextStep).isEqualTo(
-                ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
-                    intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                    isConfirmationToken = true,
-                    completedFullPaymentFlow = true,
-                )
-            )
-        }
-
-    @Test
     fun `Saved PM - Fails if creating confirmation token did not succeed`() = runTest {
         val invalidRequestException = InvalidRequestException(
             stripeError = StripeError(

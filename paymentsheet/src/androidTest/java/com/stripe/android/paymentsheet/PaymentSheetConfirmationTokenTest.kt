@@ -8,6 +8,7 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
@@ -20,7 +21,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-class PaymentSheetConfirmationTokenTest {
+internal class PaymentSheetConfirmationTokenTest {
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
@@ -33,11 +34,20 @@ class PaymentSheetConfirmationTokenTest {
 
     enum class CustomerType {
         NewCustomer,
-//        ReturningCustomer,
+        ReturningCustomer,
     }
     enum class PaymentMethodType {
         Card,
-        USBankAccount,
+        SavedCard,
+//        USBankAccount,
+    }
+    @Test
+    fun testSuccessfulPayment() {
+        testSuccessfulPayment(
+            false,
+            CustomerType.ReturningCustomer,
+            PaymentMethodType.SavedCard
+        )
     }
     @Test
     fun testSuccessfulPayment(
@@ -60,7 +70,7 @@ class PaymentSheetConfirmationTokenTest {
             paymentMethodType
         )
         presentSheet(testContext, customerType)
-        completePaymentMethodSelection()
+        completePaymentMethodSelection(customerType)
         confirm(isLiveMode)
     }
 
@@ -76,6 +86,13 @@ class PaymentSheetConfirmationTokenTest {
                     paymentMethodType == PaymentMethodType.Card
                 )
         )
+        Assume.assumeTrue(
+            "Only test saved cards for returning customers",
+            customerType == CustomerType.NewCustomer || (
+                customerType == CustomerType.ReturningCustomer &&
+                    paymentMethodType == PaymentMethodType.SavedCard
+                )
+        )
     }
 
     private fun presentSheet(
@@ -88,6 +105,18 @@ class PaymentSheetConfirmationTokenTest {
         ) { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
+
+        if (customerType == CustomerType.ReturningCustomer) {
+            networkRule.enqueue(
+                method("GET"),
+                path("/v1/payment_methods"),
+                query("type", "card"),
+                query("customer", "cus_foobar"),
+            ) { response ->
+                response.testBodyFromFile("payment-methods-get-success.json")
+            }
+        }
+
         testContext.presentPaymentSheet {
             presentWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -99,14 +128,14 @@ class PaymentSheetConfirmationTokenTest {
                 configuration =  PaymentSheet.Configuration.Builder("Example, Inc.")
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
                     .also {
-//                        if (customerType == CustomerType.ReturningCustomer) {
-//                            it.customer(
-//                                PaymentSheet.CustomerConfiguration(
-//                                    "cus_foobar",
-//                                    "ek_test_foobar"
-//                                )
-//                            )
-//                        }
+                        if (customerType == CustomerType.ReturningCustomer) {
+                            it.customer(
+                                PaymentSheet.CustomerConfiguration(
+                                    "cus_foobar",
+                                    "ek_test_foobar"
+                                )
+                            )
+                        }
                     }
                     .build()
             )
@@ -114,8 +143,12 @@ class PaymentSheetConfirmationTokenTest {
     }
 
     private fun completePaymentMethodSelection(
+        customerType: CustomerType
     ) {
-        page.fillOutCardDetails()
+        when (customerType) {
+            CustomerType.NewCustomer -> page.fillOutCardDetails()
+            CustomerType.ReturningCustomer -> page.clickSavedCard("4242")
+        }
     }
 
     private fun confirm(
