@@ -15,7 +15,7 @@ open class SimpleTextFieldConfig(
     override val keyboard: KeyboardType = KeyboardType.Text,
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null),
     override val optional: Boolean = false,
-    private val textFilter: TextFilter? = null,
+    internal val textFilter: TextFilter? = null,
 ) : TextFieldConfig {
     override val debugLabel: String = "generic_text"
     override val visualTransformation: VisualTransformation? = null
