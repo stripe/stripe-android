@@ -52,6 +52,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        isConfirmationToken: Boolean,
         result: AttestationActivityResult
     ): ConfirmationDefinition.Result {
         return when (result) {
@@ -100,6 +101,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
                 ),
                 receivesResultInProcess = false,
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
             )
         }
 
