@@ -81,6 +81,7 @@ internal class OnrampActivity : ComponentActivity() {
         val callbacks = OnrampCallbacks(
             authenticateUserCallback = viewModel::onAuthenticateUserResult,
             verifyIdentityCallback = viewModel::onVerifyIdentityResult,
+            verifyKycCallback = viewModel::onVerifyKycResult,
             checkoutCallback = viewModel::onCheckoutResult,
             collectPaymentCallback = viewModel::onCollectPaymentResult,
             authorizeCallback = viewModel::onAuthorizeResult

@@ -21,6 +21,7 @@ import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
@@ -107,6 +108,12 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    fun verifyKycInfo(updatedAddress: PaymentSheet.Address? = null) {
+        coroutineScope.launch {
+
         }
     }
 

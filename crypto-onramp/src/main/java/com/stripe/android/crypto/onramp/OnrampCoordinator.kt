@@ -21,7 +21,9 @@ import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
+import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.paymentsheet.PaymentSheet
 import javax.inject.Inject
 
 /**
@@ -173,6 +175,19 @@ class OnrampCoordinator @Inject internal constructor(
          */
         fun verifyIdentity() {
             coordinator.verifyIdentity()
+        }
+
+        /**
+         * Presents UI to verify KYC information for the current Link user.
+         * Requires an authenticated Link user with KYC info attached.
+         *
+         * @param updatedAddress An optional updated address. Specify this parameter if the
+         * user has elected to change the address after a prior call to this API returned
+         * `OnrampVerifyKycInfoResult.UpdateAddress`. Otherwise, specify `nil` to show the user’s existing
+         * KYC information on the presented flow.
+         */
+        fun verifyKycInfo(updatedAddress: PaymentSheet.Address? = null) {
+            coordinator.verifyKycInfo(updatedAddress)
         }
 
         /**
