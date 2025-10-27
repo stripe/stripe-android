@@ -156,6 +156,7 @@ workflows:
   run-connections-e2e-payments-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-payments
+      - BUILD_VARIANT: debug
     before_run:
       - _build-connections
       - _run-connections-e2e-tests
@@ -166,6 +167,7 @@ workflows:
   run-connections-e2e-data-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-data
+      - BUILD_VARIANT: debug
     before_run:
       - _build-connections
       - _run-connections-e2e-tests
@@ -176,6 +178,7 @@ workflows:
   run-connections-e2e-token-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-token
+      - BUILD_VARIANT: debug
     before_run:
       - _build-connections
       - _run-connections-e2e-tests
