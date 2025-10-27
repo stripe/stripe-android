@@ -12,7 +12,6 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
-        buildConfigField "boolean", "IS_NIGHTLY_BUILD", "$gradle.ext.isNightlyBuild"
         buildConfigField "boolean", "IS_BROWSERSTACK_BUILD", "$gradle.ext.isBrowserstackBuild"
     }
 

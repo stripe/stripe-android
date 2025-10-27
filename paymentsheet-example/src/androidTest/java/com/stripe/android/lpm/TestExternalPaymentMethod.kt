@@ -18,7 +18,6 @@ internal class TestExternalPaymentMethod : BasePlaygroundTest() {
 
     private val testParameters = TestParameters.create(
         paymentMethodCode = externalFawryCode,
-        executeInNightlyRun = true,
     ) { settings ->
         settings[ExternalPaymentMethodSettingsDefinition] = ExternalPaymentMethodType.Fawry
         settings[PaymentMethodOrderSettingsDefinition] = externalFawryCode

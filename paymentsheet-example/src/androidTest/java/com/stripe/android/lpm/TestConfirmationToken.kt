@@ -49,7 +49,6 @@ internal class TestConfirmationToken : BasePlaygroundTest() {
         additionalSettings: (PlaygroundSettings) -> Unit = {}
     ) = TestParameters.create(
         paymentMethodCode = paymentMethodCode,
-        executeInNightlyRun = true,
     ) { settings ->
         settings[CustomerSessionSettingsDefinition] = true
         settings[CustomerSessionSaveSettingsDefinition] = true
