@@ -5,6 +5,7 @@ apply plugin: 'checkstyle'
 apply plugin: 'dev.drewhamilton.poko'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+apply plugin: 'dev.drewhamilton.poko'
 
 dependencies {
     api project(":stripe-core")
