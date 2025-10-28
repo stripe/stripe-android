@@ -64,7 +64,8 @@ internal fun runPaymentSheetTest(
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            PaymentConfiguration.init(it,
+            PaymentConfiguration.init(
+                it,
                 if (isLiveMode) {
                     "pk_live_123"
                 } else {

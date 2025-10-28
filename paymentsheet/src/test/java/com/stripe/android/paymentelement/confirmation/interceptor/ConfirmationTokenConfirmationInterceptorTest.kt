@@ -380,6 +380,76 @@ class ConfirmationTokenConfirmationInterceptorTest {
     }
 
     @Test
+    fun `Includes clientContext in test mode`() = runTest {
+        val observedParams = mutableListOf<ConfirmationTokenParams>()
+
+        val interceptor = createIntentConfirmationInterceptor(
+            initializationMode = DEFAULT_DEFERRED_INTENT,
+            publishableKeyProvider = { "pk_test_123" },
+            stripeRepository = object : AbsFakeStripeRepository() {
+                override suspend fun createConfirmationToken(
+                    confirmationTokenParams: ConfirmationTokenParams,
+                    options: ApiRequest.Options
+                ): Result<ConfirmationToken> {
+                    observedParams += confirmationTokenParams
+                    return Result.success(confirmationToken)
+                }
+
+                override suspend fun retrieveStripeIntent(
+                    clientSecret: String,
+                    options: ApiRequest.Options,
+                    expandFields: List<String>
+                ): Result<StripeIntent> {
+                    return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+                }
+            },
+            intentCreationConfirmationTokenCallbackProvider = Provider {
+                succeedingCreateIntentWithConfirmationTokenCallback(confirmationToken)
+            },
+        )
+
+        interceptor.interceptDefaultNewPaymentMethod()
+
+        assertThat(observedParams).hasSize(1)
+        assertThat(observedParams[0].clientContext).isNotNull()
+    }
+
+    @Test
+    fun `Does not include clientContext in live mode`() = runTest {
+        val observedParams = mutableListOf<ConfirmationTokenParams>()
+
+        val interceptor = createIntentConfirmationInterceptor(
+            initializationMode = DEFAULT_DEFERRED_INTENT,
+            publishableKeyProvider = { "pk_live_123" },
+            stripeRepository = object : AbsFakeStripeRepository() {
+                override suspend fun createConfirmationToken(
+                    confirmationTokenParams: ConfirmationTokenParams,
+                    options: ApiRequest.Options
+                ): Result<ConfirmationToken> {
+                    observedParams += confirmationTokenParams
+                    return Result.success(confirmationToken)
+                }
+
+                override suspend fun retrieveStripeIntent(
+                    clientSecret: String,
+                    options: ApiRequest.Options,
+                    expandFields: List<String>
+                ): Result<StripeIntent> {
+                    return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+                }
+            },
+            intentCreationConfirmationTokenCallbackProvider = Provider {
+                succeedingCreateIntentWithConfirmationTokenCallback(confirmationToken)
+            },
+        )
+
+        interceptor.interceptDefaultNewPaymentMethod()
+
+        assertThat(observedParams).hasSize(1)
+        assertThat(observedParams[0].clientContext).isNull()
+    }
+
+    @Test
     fun `Saved PM - succeed without ephemeralKeySecret if the payment method is not attached`() =
         runInterceptorScenario(
             initializationMode = DEFAULT_DEFERRED_INTENT,
@@ -418,6 +488,48 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 ),
                 shippingValues = null,
             )
+
+            assertThat(nextStep).isEqualTo(
+                ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
+                    intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    isConfirmationToken = true,
+                    completedFullPaymentFlow = true,
+                )
+            )
+        }
+
+    @Test
+    fun `Saved PM - succeed if a ephemeralKeySecret associated with the customer is provided`() =
+        runInterceptorScenario(
+            initializationMode = DEFAULT_DEFERRED_INTENT,
+            scenario = InterceptorTestScenario(
+                ephemeralKeySecret = "ek_test_123",
+                stripeRepository = object : AbsFakeStripeRepository() {
+                    override suspend fun createConfirmationToken(
+                        confirmationTokenParams: ConfirmationTokenParams,
+                        options: ApiRequest.Options
+                    ): Result<ConfirmationToken> {
+                        return Result.success(confirmationToken)
+                    }
+
+                    override suspend fun retrieveStripeIntent(
+                        clientSecret: String,
+                        options: ApiRequest.Options,
+                        expandFields: List<String>
+                    ): Result<StripeIntent> {
+                        return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+                    }
+                },
+                intentCreationConfirmationTokenCallbackProvider = Provider {
+                    CreateIntentWithConfirmationTokenCallback { _ ->
+                        CreateIntentResult.Success(clientSecret = "pi_123_secret_456")
+                    }
+                },
+            )
+        ) { interceptor ->
+
+            val nextStep = interceptor.interceptDefaultSavedPaymentMethod()
 
             assertThat(nextStep).isEqualTo(
                 ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
@@ -712,6 +824,118 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
         assertThat(observedParams).hasSize(1)
         assertThat(observedParams[0].mandateDataParams).isNull()
+    }
+
+    @Test
+    fun `Includes cvc when requireCvcRecollection is true and cvc is provided`() = runTest {
+        val observedParams = mutableListOf<ConfirmationTokenParams>()
+
+        val interceptor = createIntentConfirmationInterceptor(
+            ephemeralKeySecret = "ek_test_123",
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                    ),
+                    requireCvcRecollection = true
+                )
+            ),
+            stripeRepository = object : AbsFakeStripeRepository() {
+                override suspend fun createConfirmationToken(
+                    confirmationTokenParams: ConfirmationTokenParams,
+                    options: ApiRequest.Options
+                ): Result<ConfirmationToken> {
+                    observedParams += confirmationTokenParams
+                    return Result.success(confirmationToken)
+                }
+
+                override suspend fun retrieveStripeIntent(
+                    clientSecret: String,
+                    options: ApiRequest.Options,
+                    expandFields: List<String>
+                ): Result<StripeIntent> {
+                    return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+                }
+            },
+            intentCreationConfirmationTokenCallbackProvider = Provider {
+                CreateIntentWithConfirmationTokenCallback { _ ->
+                    CreateIntentResult.Success("pi_123_secret_456")
+                }
+            },
+        )
+
+        val confirmationOption = PaymentMethodConfirmationOption.Saved(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            optionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
+            passiveCaptchaParams = null,
+            hCaptchaToken = null,
+        )
+
+        interceptor.intercept(
+            intent = PaymentIntentFactory.create(),
+            confirmationOption = confirmationOption,
+            shippingValues = null,
+        )
+
+        assertThat(observedParams).hasSize(1)
+        assertThat(observedParams[0].cvc).isEqualTo("123")
+    }
+
+    @Test
+    fun `Excludes cvc when requireCvcRecollection is false`() = runTest {
+        val observedParams = mutableListOf<ConfirmationTokenParams>()
+
+        val interceptor = createIntentConfirmationInterceptor(
+            ephemeralKeySecret = "ek_test_123",
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                    ),
+                    requireCvcRecollection = false
+                )
+            ),
+            stripeRepository = object : AbsFakeStripeRepository() {
+                override suspend fun createConfirmationToken(
+                    confirmationTokenParams: ConfirmationTokenParams,
+                    options: ApiRequest.Options
+                ): Result<ConfirmationToken> {
+                    observedParams += confirmationTokenParams
+                    return Result.success(confirmationToken)
+                }
+
+                override suspend fun retrieveStripeIntent(
+                    clientSecret: String,
+                    options: ApiRequest.Options,
+                    expandFields: List<String>
+                ): Result<StripeIntent> {
+                    return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+                }
+            },
+            intentCreationConfirmationTokenCallbackProvider = Provider {
+                CreateIntentWithConfirmationTokenCallback { _ ->
+                    CreateIntentResult.Success("pi_123_secret_456")
+                }
+            },
+        )
+
+        val confirmationOption = PaymentMethodConfirmationOption.Saved(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            optionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
+            passiveCaptchaParams = null,
+            hCaptchaToken = null,
+        )
+
+        interceptor.intercept(
+            intent = PaymentIntentFactory.create(),
+            confirmationOption = confirmationOption,
+            shippingValues = null,
+        )
+
+        assertThat(observedParams).hasSize(1)
+        assertThat(observedParams[0].cvc).isNull()
     }
 
     @Test

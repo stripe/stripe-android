@@ -34,43 +34,39 @@ internal class PaymentSheetConfirmationTokenTest {
         NewCustomer,
         ReturningCustomer,
     }
+
     enum class PaymentMethodType {
         Card,
         CashAppWithSetupFutureUsage,
         SavedCard,
         SavedCardWithCvcRecollection,
     }
-    @Test
-    fun testSuccessfulPayment() {
-        testSuccessfulPayment(
-            false,
-            CustomerType.NewCustomer,
-            PaymentMethodType.CashAppWithSetupFutureUsage,
-        )
-    }
+
     @Test
     fun testSuccessfulPayment(
         @TestParameter("false", "true") isLiveMode: Boolean,
         @TestParameter customerType: CustomerType,
         @TestParameter paymentMethodType: PaymentMethodType,
-    ) = runPaymentSheetTest(
-        networkRule = networkRule,
-        isLiveMode = isLiveMode,
-        builder = {
-            createIntentCallback { _ ->
-                CreateIntentResult.Success("pi_example_secret_example")
-            }
-        },
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
+    ) {
         verifyTestCombination(
             isLiveMode,
             customerType,
             paymentMethodType
         )
-        presentSheet(testContext, customerType, paymentMethodType)
-        completePaymentMethodSelection(customerType, paymentMethodType)
-        confirm(isLiveMode, paymentMethodType)
+        runPaymentSheetTest(
+            networkRule = networkRule,
+            isLiveMode = isLiveMode,
+            builder = {
+                createIntentCallback { _ ->
+                    CreateIntentResult.Success("pi_example_secret_example")
+                }
+            },
+            resultCallback = ::assertCompleted,
+        ) { testContext ->
+            presentSheet(testContext, customerType, paymentMethodType)
+            completePaymentMethodSelection(customerType, paymentMethodType)
+            confirm(isLiveMode, paymentMethodType)
+        }
     }
 
     private fun verifyTestCombination(
@@ -87,16 +83,15 @@ internal class PaymentSheetConfirmationTokenTest {
         )
         Assume.assumeFalse(
             "Only test saved cards with returning customers",
-            customerType == CustomerType.NewCustomer
-                && (
-                paymentMethodType == PaymentMethodType.SavedCard
-                    || paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection
+            customerType == CustomerType.NewCustomer && (
+                paymentMethodType == PaymentMethodType.SavedCard ||
+                    paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection
                 )
         )
         Assume.assumeFalse(
             "Only test Cash App setup future usage with new customers",
-            customerType == CustomerType.ReturningCustomer
-                && paymentMethodType == PaymentMethodType.CashAppWithSetupFutureUsage
+            customerType == CustomerType.ReturningCustomer &&
+                paymentMethodType == PaymentMethodType.CashAppWithSetupFutureUsage
         )
     }
 
@@ -147,7 +142,7 @@ internal class PaymentSheetConfirmationTokenTest {
                     ),
                     requireCvcRecollection = paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection
                 ),
-                configuration =  PaymentSheet.Configuration.Builder("Example, Inc.")
+                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
                     .also {
                         if (customerType == CustomerType.ReturningCustomer) {
@@ -206,7 +201,6 @@ internal class PaymentSheetConfirmationTokenTest {
             clientContext(isLiveMode),
             cvcRecollection(paymentMethodType),
             mandateDataAndSetupFutureUsage(paymentMethodType),
-            clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
             response.testBodyFromFile("confirmation-token-create-with-new-card.json")
         }
@@ -229,7 +223,7 @@ internal class PaymentSheetConfirmationTokenTest {
     private fun clientContext(isLiveMode: Boolean): RequestMatcher {
         // The client_context param is only sent in test mode when creating a confirmation token
         return if (isLiveMode) {
-            not( bodyPart(urlEncode("client_context[mode]"), ".+".toRegex()))
+            not(bodyPart(urlEncode("client_context[mode]"), ".+".toRegex()))
         } else {
             // we only verify client context is not null here
             bodyPart(urlEncode("client_context[mode]"), "payment")

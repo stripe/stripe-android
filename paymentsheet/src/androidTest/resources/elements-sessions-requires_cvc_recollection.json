@@ -242,6 +242,5 @@
   "shipping_address_settings": {
     "autocomplete_allowed": true
   },
-  "unactivated_payment_method_types": [],
-  "config_id": "e961790f-43ed-4fcc-a534-74eeca28d042"
+  "unactivated_payment_method_types": []
 }
