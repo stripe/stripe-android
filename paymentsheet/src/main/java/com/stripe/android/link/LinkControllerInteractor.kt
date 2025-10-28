@@ -705,7 +705,10 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
 internal fun ConsumerPaymentDetails.PaymentDetails.getIconDrawableRes(isDarkTheme: Boolean): Int {
     return when (this) {
         is ConsumerPaymentDetails.BankAccount ->
-            getIconDrawableRes(PaymentMethodPreviewDetails.BankAccount(bankIconCode, bankAccountName, last4), isDarkTheme)
+            getIconDrawableRes(
+                PaymentMethodPreviewDetails.BankAccount(bankIconCode, bankAccountName, last4),
+                isDarkTheme
+            )
         is ConsumerPaymentDetails.Card ->
             getIconDrawableRes(PaymentMethodPreviewDetails.Card(brand, funding, last4), isDarkTheme)
         is ConsumerPaymentDetails.Passthrough ->
