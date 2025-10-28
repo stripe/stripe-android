@@ -37,7 +37,7 @@ internal object PaymentMethodWithLinkDetailsJsonParser : ModelJsonParser<Payment
             }
             is ConsumerPaymentDetails.BankAccount -> {
                 LinkPaymentDetails.BankAccount(
-                    bankName = consumerPaymentDetails.bankName,
+                    bankName = consumerPaymentDetails.bankAccountName,
                     last4 = consumerPaymentDetails.last4,
                 )
             }
