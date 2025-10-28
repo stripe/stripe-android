@@ -62,6 +62,21 @@ class PaymentMethodMessageJsonParserTest {
     }
 
     @Test
+    fun `returns null if learn more url present but empty multi partner`() {
+        val invalidMessage = PaymentMethodMessageFixtures.MULTI_PARTNER_JSON.deepCopy()
+        val learnMore = invalidMessage
+            .getJSONObject("content")
+            .getJSONObject("learn_more")
+
+        learnMore.remove("url")
+        learnMore.put("url", "")
+
+        val message = PaymentMethodMessageJsonParser().parse(invalidMessage)
+        assertThat(message?.singlePartner).isNull()
+        assertThat(message?.multiPartner).isNull()
+    }
+
+    @Test
     fun `returns null if promotion missing multi partner`() {
         val invalidMessage = PaymentMethodMessageFixtures.MULTI_PARTNER_JSON.deepCopy()
         invalidMessage
@@ -112,7 +127,24 @@ class PaymentMethodMessageJsonParserTest {
     }
 
     @Test
-    fun `returns null if single partner images missing and multi partner invalid`() {
+    fun `falls back to multi partner if single partner learn more url present but empty`() {
+        val invalidMessage = PaymentMethodMessageFixtures.SINGLE_PARTNER_JSON.deepCopy()
+        val learnMore = invalidMessage
+            .getJSONArray("payment_plan_groups")
+            .getJSONObject(0)
+            .getJSONObject("content")
+            .getJSONObject("learn_more")
+
+        learnMore.remove("url")
+        learnMore.put("url", "")
+
+        val message = PaymentMethodMessageJsonParser().parse(invalidMessage)
+        assertThat(message?.singlePartner).isNull()
+        assertThat(message?.multiPartner).isNotNull()
+    }
+
+    @Test
+    fun `returns null if single partner images missing and multi partner promotion missing`() {
         val invalidMessage = PaymentMethodMessageFixtures.SINGLE_PARTNER_JSON.deepCopy()
         invalidMessage
             .getJSONArray("payment_plan_groups")

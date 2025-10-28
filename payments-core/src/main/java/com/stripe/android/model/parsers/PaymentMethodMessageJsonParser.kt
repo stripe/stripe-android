@@ -43,8 +43,7 @@ internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMes
         if (paymentPlanGroups?.length() != 1) return null
         val paymentPlanGroup = paymentPlanGroups.get(0) as? JSONObject ?: return null
         val content = paymentPlanGroup.optJSONObject(FIELD_CONTENT) ?: return null
-        val inlinePartnerPromotion = content.optJSONObject(FIELD_INLINE_PARTNER_PROMOTION)
-        val message = inlinePartnerPromotion?.optString(FIELD_MESSAGE) ?: return null
+        val inlinePartnerPromotion = getInlinePartnerPromotion(content) ?: return null
         val learnMore = getLearnMore(content) ?: return null
 
         val imagesMap = getImages(content.optJSONArray(FIELD_IMAGES))
@@ -55,7 +54,7 @@ internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMes
         val flatImage = getImage(imagesMap[FIELD_FLAT_THEME_PNG]) ?: return null
 
         return PaymentMethodMessageSinglePartner(
-            inlinePartnerPromotion = message,
+            inlinePartnerPromotion = inlinePartnerPromotion,
             lightImage = lightImage,
             darkImage = darkImage,
             flatImage = flatImage,
@@ -66,6 +65,11 @@ internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMes
     private fun getPromotion(json: JSONObject): String? {
         val promotion = json.optJSONObject(FIELD_PROMOTION)
         return promotion?.optString(FIELD_MESSAGE).takeIf { !it.isNullOrBlank() }
+    }
+
+    private fun getInlinePartnerPromotion(json: JSONObject): String? {
+        val inlinePartnerPromotion = json.optJSONObject(FIELD_INLINE_PARTNER_PROMOTION)
+        return inlinePartnerPromotion?.optString(FIELD_MESSAGE).takeIf { !it.isNullOrBlank() }
     }
 
     private fun getLearnMore(json: JSONObject): PaymentMethodMessageLearnMore? {
@@ -79,6 +83,10 @@ internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMes
         )
     }
 
+    /**
+     * Images are sent as an array of objects, each object containing dark, flat, and light PNG and SVG URLs
+     * for all payment methods (affirm, klarna, afterpay_clearpay) and image types (logo, icon).
+     */
     private fun getImages(json: JSONArray?): Map<String, List<PaymentMethodMessageImage>> {
         if (json == null) return emptyMap()
         val images = mutableMapOf<String, MutableList<PaymentMethodMessageImage>>(
@@ -88,14 +96,16 @@ internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMes
         )
 
         for (i in 0 until json.length()) {
-            val obj = json.optJSONObject(i) ?: continue
+            val obj = json.optJSONObject(i)
             val paymentMethodType = obj.optString(FIELD_PAYMENT_METHOD_TYPE)
             val role = obj.optString(FIELD_ROLE)
             val text = obj.optString(FIELD_TEXT)
 
+            if (role != IMAGE_TYPE_LOGO) continue
+
             listOf(FIELD_LIGHT_THEME_PNG, FIELD_DARK_THEME_PNG, FIELD_FLAT_THEME_PNG).forEach { key ->
                 val url = obj.optJSONObject(key)?.optString(FIELD_URL)
-                if (!url.isNullOrEmpty() && role == IMAGE_TYPE_LOGO) {
+                if (!url.isNullOrEmpty()) {
                     images[key]?.add(PaymentMethodMessageImage(role, url, paymentMethodType, text))
                 }
             }
