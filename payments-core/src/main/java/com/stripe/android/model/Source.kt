@@ -3,8 +3,6 @@ package com.stripe.android.model
 import androidx.annotation.Keep
 import androidx.annotation.StringDef
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.model.Source.Flow
-import com.stripe.android.model.Source.SourceType
 import com.stripe.android.model.parsers.SourceJsonParser
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
@@ -154,7 +152,7 @@ data class Source internal constructor(
 
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(
-        SourceType.ALIPAY, SourceType.CARD, SourceType.THREE_D_SECURE, SourceType.GIROPAY,
+        SourceType.ALIPAY, SourceType.CARD, SourceType.THREE_D_SECURE,
         SourceType.SEPA_DEBIT, SourceType.IDEAL, SourceType.SOFORT, SourceType.BANCONTACT,
         SourceType.P24, SourceType.EPS, SourceType.MULTIBANCO, SourceType.WECHAT, SourceType.KLARNA,
         SourceType.UNKNOWN
@@ -164,7 +162,6 @@ data class Source internal constructor(
             const val ALIPAY: String = "alipay"
             const val CARD: String = "card"
             const val THREE_D_SECURE: String = "three_d_secure"
-            const val GIROPAY: String = "giropay"
             const val SEPA_DEBIT: String = "sepa_debit"
             const val IDEAL: String = "ideal"
             const val SOFORT: String = "sofort"
@@ -436,7 +433,6 @@ data class Source internal constructor(
             return when (sourceType) {
                 SourceType.CARD -> SourceType.CARD
                 SourceType.THREE_D_SECURE -> SourceType.THREE_D_SECURE
-                SourceType.GIROPAY -> SourceType.GIROPAY
                 SourceType.SEPA_DEBIT -> SourceType.SEPA_DEBIT
                 SourceType.IDEAL -> SourceType.IDEAL
                 SourceType.SOFORT -> SourceType.SOFORT

@@ -68,7 +68,6 @@ class LpmRepositoryTest {
                     "sepa_debit",
                     "p24",
                     "eps",
-                    "giropay"
                 )
             ),
             """
@@ -85,7 +84,7 @@ class LpmRepositoryTest {
                   }
                 ]
             """.trimIndent()
-        ).verifyContainsTypes("sofort", "ideal", "bancontact", "p24", "eps", "giropay")
+        ).verifyContainsTypes("sofort", "ideal", "bancontact", "p24", "eps")
     }
 
     @Test
