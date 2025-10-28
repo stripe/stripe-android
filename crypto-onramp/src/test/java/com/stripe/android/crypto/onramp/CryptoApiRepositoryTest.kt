@@ -241,7 +241,6 @@ class CryptoApiRepositoryTest {
                 mapOf("consumer_session_client_secret" to "test-secret")
             )
 
-
             assertThat(result.getOrThrow().firstName).isEqualTo("Test")
             assertThat(result.getOrThrow().lastName).isEqualTo("User")
             assertThat(result.getOrThrow().idNumberLastFour).isEqualTo("7777")
