@@ -10,14 +10,12 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.connect.example.R
@@ -36,7 +34,7 @@ fun AppearanceView(
         navigationIcon = {
             IconButton(onClick = onDismiss) {
                 Icon(
-                    imageVector = Icons.Default.Close,
+                    painter = painterResource(R.drawable.ic_material_close),
                     contentDescription = stringResource(R.string.cancel)
                 )
             }
@@ -50,7 +48,7 @@ fun AppearanceView(
                 },
             ) {
                 Icon(
-                    imageVector = Icons.Default.Check,
+                    painter = painterResource(R.drawable.ic_material_check),
                     contentDescription = stringResource(R.string.save)
                 )
             }

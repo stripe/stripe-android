@@ -71,7 +71,6 @@ dependencies {
     implementation libs.androidx.workManager
     implementation libs.compose.activity
     implementation libs.compose.material
-    implementation libs.compose.materialIcons
     implementation libs.compose.liveData
     implementation libs.compose.ui
     implementation libs.compose.uiToolingPreview

@@ -146,8 +146,6 @@ ext.libs = [
                 foundation           : "androidx.compose.foundation:foundation:${versions.androidxCompose}",
                 liveData             : "androidx.compose.runtime:runtime-livedata:${versions.androidxComposeRuntime}",
                 material             : "androidx.compose.material:material:${versions.androidxCompose}",
-                materialIcons        : "androidx.compose.material:material-icons-core:${versions.androidxCompose}",
-                materialIconsExtended: "androidx.compose.material:material-icons-extended:${versions.androidxCompose}",
                 navigation           : "androidx.navigation:navigation-compose:${versions.androidxNavigation}",
                 runtime              : "androidx.compose.runtime:runtime:${versions.androidxComposeRuntime}",
                 ui                   : "androidx.compose.ui:ui:${versions.androidxComposeUi}",

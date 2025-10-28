@@ -28,8 +28,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -653,7 +651,7 @@ private fun EmailDetails(
 
         if (showMenu) {
             Icon(
-                imageVector = Icons.Default.MoreVert,
+                painter = painterResource(R.drawable.stripe_ic_material_more_vert),
                 contentDescription = stringResource(R.string.stripe_show_menu),
                 tint = LinkTheme.colors.iconSecondary,
                 modifier = Modifier

@@ -17,8 +17,6 @@ import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.uicore.R
 import com.stripe.android.uicore.strings.resolve
 
 @Composable
@@ -113,7 +112,7 @@ private fun Choice(
         Spacer(modifier = Modifier.weight(1f))
 
         Icon(
-            imageVector = Icons.Filled.Check,
+            painter = painterResource(R.drawable.stripe_ic_material_check),
             contentDescription = null,
             modifier = Modifier
                 .height(20.dp)

@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -28,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,6 +46,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.uicore.format.CurrencyFormatter
 import com.stripe.android.uicore.text.MiddleEllipsisText
+import com.stripe.android.uicore.R as StripeUiCoreR
 import java.util.Locale
 
 /**
@@ -113,7 +113,7 @@ internal fun AccountItem(
                 modifier = Modifier
                     .size(24.dp)
                     .alpha(if (selected) 1f else 0f),
-                imageVector = Icons.Default.Check,
+                painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_check),
                 tint = colors.primary,
                 contentDescription = "Selected"
             )
