@@ -1,5 +1,14 @@
 # Migration Guide
 
+## Migrating from versions < 25.0.0
+- The `stripecardscan` module has been removed:
+    * `CardScanSheet` class and its methods (`create()`, `present()`, `attachCardScanFragment()`, `removeCardScanFragment()`) have been removed
+    * `CardScanSheetResult` and its implementations (`Completed`, `Canceled`, `Failed`) have been removed
+    * `CardScanSheet.CardScanResultCallback` has been removed
+    * `ScannedCard` has been removed
+    * `CancellationReason` and its implementations (`Closed`, `Back`, `UserCannotScan`, `CameraPermissionDenied`) have been removed                                                                                                      
+- If you don't use PaymentSheet, you can use a product like [Google Payment Card Recognition API](https://developers.google.com/pay/payment-card-recognition/debit-credit-card-recognition)
+
 ## Migrating from versions < 21.24.0
 - The `stripecardscan` module has been deprecated and will be removed in a future release:
     * `CardScanSheet` class and its methods (`create()`, `present()`, `attachCardScanFragment()`, `removeCardScanFragment()`) have been deprecated
