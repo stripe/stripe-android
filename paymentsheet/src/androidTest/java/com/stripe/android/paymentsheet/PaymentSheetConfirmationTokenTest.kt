@@ -5,6 +5,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -35,6 +36,7 @@ internal class PaymentSheetConfirmationTokenTest {
     enum class PaymentMethodType {
         Card,
         SavedCard,
+        SavedCardWithCvcRecollection,
 //        USBankAccount,
     }
     @Test
@@ -42,7 +44,7 @@ internal class PaymentSheetConfirmationTokenTest {
         testSuccessfulPayment(
             false,
             CustomerType.ReturningCustomer,
-            PaymentMethodType.Card
+            PaymentMethodType.SavedCardWithCvcRecollection
         )
     }
     @Test
@@ -65,9 +67,9 @@ internal class PaymentSheetConfirmationTokenTest {
             customerType,
             paymentMethodType
         )
-        presentSheet(testContext, customerType)
+        presentSheet(testContext, customerType, paymentMethodType)
         completePaymentMethodSelection(customerType, paymentMethodType)
-        confirm(isLiveMode)
+        confirm(isLiveMode, paymentMethodType)
     }
 
     private fun verifyTestCombination(
@@ -84,19 +86,34 @@ internal class PaymentSheetConfirmationTokenTest {
         )
         Assume.assumeFalse(
             "Only test saved cards with returning customers",
-            customerType == CustomerType.NewCustomer && paymentMethodType == PaymentMethodType.SavedCard
+            customerType == CustomerType.NewCustomer
+                && (
+                paymentMethodType == PaymentMethodType.SavedCard
+                    || paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection
+                )
         )
     }
 
     private fun presentSheet(
         testContext: PaymentSheetTestRunnerContext,
-        customerType: CustomerType
+        customerType: CustomerType,
+        paymentMethodType: PaymentMethodType,
     ) {
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
+        if (paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection) {
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("GET"),
+                path("/v1/elements/sessions"),
+            ) { response ->
+                response.testBodyFromFile("elements-sessions-requires_cvc_recollection.json")
+            }
+        } else {
+            networkRule.enqueue(
+                method("GET"),
+                path("/v1/elements/sessions"),
+            ) { response ->
+                response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
+            }
         }
 
         if (customerType == CustomerType.ReturningCustomer) {
@@ -116,7 +133,8 @@ internal class PaymentSheetConfirmationTokenTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5099,
                         currency = "usd"
-                    )
+                    ),
+                    requireCvcRecollection = paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection
                 ),
                 configuration =  PaymentSheet.Configuration.Builder("Example, Inc.")
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
@@ -150,6 +168,9 @@ internal class PaymentSheetConfirmationTokenTest {
                     PaymentMethodType.SavedCard -> {
                         page.clickSavedCard("4242")
                     }
+                    PaymentMethodType.SavedCardWithCvcRecollection -> {
+                        page.fillCvcRecollection("123")
+                    }
                 }
             }
         }
@@ -157,11 +178,13 @@ internal class PaymentSheetConfirmationTokenTest {
 
     private fun confirm(
         isLiveMode: Boolean,
+        paymentMethodType: PaymentMethodType,
     ) {
         networkRule.enqueue(
             method("POST"),
             path("/v1/confirmation_tokens"),
             clientContext(isLiveMode),
+            cvcRecollection(paymentMethodType),
             clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
             response.testBodyFromFile("confirmation-token-create-with-new-card.json")
@@ -189,6 +212,22 @@ internal class PaymentSheetConfirmationTokenTest {
         } else {
             // we only verify client context is not null here
             bodyPart(urlEncode("client_context[mode]"), "payment")
+        }
+    }
+
+    private fun cvcRecollection(paymentMethodType: PaymentMethodType): RequestMatcher {
+        return if (paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection) {
+            bodyPart(
+                urlEncode("payment_method_options[card][cvc]"),
+                "123"
+            )
+        } else {
+            not(
+                bodyPart(
+                    urlEncode("payment_method_options[card][cvc]"),
+                    ".+".toRegex()
+                )
+            )
         }
     }
 }
