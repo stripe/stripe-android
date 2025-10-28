@@ -350,4 +350,33 @@ class AutocompleteViewModelTest {
         assertThat(viewModel.predictions.value).isEqualTo(null)
         assertThat(viewModel.textFieldController.rawFieldValue.value).isEqualTo("")
     }
+
+    @Test
+    fun `text field filters out emojis`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel()
+
+        whenever(mockClient.findAutocompletePredictions(any(), any(), any())).thenReturn(
+            Result.success(
+                FindAutocompletePredictionsResponse(
+                    listOf(
+                        AutocompletePrediction(
+                            SpannableString("primaryText"),
+                            SpannableString("secondaryText"),
+                            "placeId"
+                        )
+                    )
+                )
+            )
+        )
+
+        // Test that emojis are filtered out
+        viewModel.textFieldController.onValueChange("123 Main St 😀")
+        assertThat(viewModel.textFieldController.fieldValue.value).isEqualTo("123 Main St ")
+
+        viewModel.textFieldController.onValueChange("Building 🏢 Floor 5")
+        assertThat(viewModel.textFieldController.fieldValue.value).isEqualTo("Building  Floor 5")
+
+        viewModel.textFieldController.onValueChange("Weather ☀️ ⛈")
+        assertThat(viewModel.textFieldController.fieldValue.value).isEqualTo("Weather  ")
+    }
 }

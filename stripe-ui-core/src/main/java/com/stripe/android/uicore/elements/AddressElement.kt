@@ -48,6 +48,7 @@ class AddressElement(
             textFieldConfig = SimpleTextFieldConfig(
                 label = resolvableString(CoreR.string.stripe_address_label_full_name),
                 optional = addressInputMode.nameConfig == AddressFieldConfiguration.OPTIONAL,
+                allowsEmojis = false,
             ),
             initialValue = rawValuesMap[IdentifierSpec.Name]
         )
