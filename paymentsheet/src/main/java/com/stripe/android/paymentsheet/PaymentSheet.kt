@@ -45,6 +45,8 @@ import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
+import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -1409,7 +1411,7 @@ class PaymentSheet internal constructor(
 
                 @Parcelize
                 @Poko
-                class FlatWithRadio(
+                class FlatWithRadio internal constructor(
                     internal val separatorThicknessDp: Float,
                     internal val startSeparatorInsetDp: Float,
                     internal val endSeparatorInsetDp: Float,
@@ -1420,29 +1422,6 @@ class PaymentSheet internal constructor(
                     internal val colorsLight: Colors,
                     internal val colorsDark: Colors
                 ) : RowStyle() {
-                    constructor(
-                        context: Context,
-                        @DimenRes separatorThicknessRes: Int,
-                        @DimenRes startSeparatorInsetRes: Int,
-                        @DimenRes endSeparatorInsetRes: Int,
-                        topSeparatorEnabled: Boolean,
-                        bottomSeparatorEnabled: Boolean,
-                        @DimenRes additionalVerticalInsetsRes: Int,
-                        @DimenRes horizontalInsetsRes: Int,
-                        colorsLight: Colors,
-                        colorsDark: Colors
-                    ) : this(
-                        separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessRes),
-                        startSeparatorInsetDp = context.getRawValueFromDimenResource(startSeparatorInsetRes),
-                        endSeparatorInsetDp = context.getRawValueFromDimenResource(endSeparatorInsetRes),
-                        topSeparatorEnabled = topSeparatorEnabled,
-                        bottomSeparatorEnabled = bottomSeparatorEnabled,
-                        additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsRes),
-                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsRes),
-                        colorsLight = colorsLight,
-                        colorsDark = colorsDark
-                    )
-
                     override fun hasSeparators() = true
                     override fun startSeparatorHasDefaultInset() = true
                     internal fun getColors(isDark: Boolean): Colors = if (isDark) colorsDark else colorsLight
@@ -1594,7 +1573,7 @@ class PaymentSheet internal constructor(
 
                 @Parcelize
                 @Poko
-                class FlatWithCheckmark(
+                class FlatWithCheckmark internal constructor(
                     internal val separatorThicknessDp: Float,
                     internal val startSeparatorInsetDp: Float,
                     internal val endSeparatorInsetDp: Float,
@@ -1606,31 +1585,6 @@ class PaymentSheet internal constructor(
                     internal val colorsLight: Colors,
                     internal val colorsDark: Colors
                 ) : RowStyle() {
-                    constructor(
-                        context: Context,
-                        @DimenRes separatorThicknessRes: Int,
-                        @DimenRes startSeparatorInsetRes: Int,
-                        @DimenRes endSeparatorInsetRes: Int,
-                        topSeparatorEnabled: Boolean,
-                        bottomSeparatorEnabled: Boolean,
-                        @DimenRes checkmarkInsetRes: Int,
-                        @DimenRes additionalVerticalInsetsRes: Int,
-                        @DimenRes horizontalInsetsRes: Int,
-                        colorsLight: Colors,
-                        colorsDark: Colors
-                    ) : this(
-                        separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessRes),
-                        startSeparatorInsetDp = context.getRawValueFromDimenResource(startSeparatorInsetRes),
-                        endSeparatorInsetDp = context.getRawValueFromDimenResource(endSeparatorInsetRes),
-                        topSeparatorEnabled = topSeparatorEnabled,
-                        bottomSeparatorEnabled = bottomSeparatorEnabled,
-                        checkmarkInsetDp = context.getRawValueFromDimenResource(checkmarkInsetRes),
-                        additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsRes),
-                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsRes),
-                        colorsLight = colorsLight,
-                        colorsDark = colorsDark
-                    )
-
                     @Parcelize
                     @Poko
                     class Colors(
@@ -1782,19 +1736,10 @@ class PaymentSheet internal constructor(
 
                 @Parcelize
                 @Poko
-                class FloatingButton(
+                class FloatingButton internal constructor(
                     internal val spacingDp: Float,
                     internal val additionalInsetsDp: Float,
                 ) : RowStyle() {
-                    constructor(
-                        context: Context,
-                        @DimenRes spacingRes: Int,
-                        @DimenRes additionalInsetsRes: Int
-                    ) : this(
-                        spacingDp = context.getRawValueFromDimenResource(spacingRes),
-                        additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsRes)
-                    )
-
                     override fun hasSeparators() = false
                     override fun startSeparatorHasDefaultInset() = false
 
@@ -1848,7 +1793,7 @@ class PaymentSheet internal constructor(
                     @DrawableRes
                     internal val disclosureIconRes: Int
                 ) : RowStyle() {
-                    constructor(
+                    internal constructor(
                         context: Context,
                         @DimenRes separatorThicknessRes: Int,
                         @DimenRes startSeparatorInsetRes: Int,
