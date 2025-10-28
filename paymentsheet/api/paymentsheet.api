@@ -2706,8 +2706,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonSha
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> ()V
-	public fun <init> (Landroid/content/Context;Ljava/lang/Integer;Ljava/lang/Integer;)V
-	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)V
 	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)V
