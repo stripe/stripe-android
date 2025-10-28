@@ -48,6 +48,7 @@ constructor(
 ) : Parcelable
 
 @Parcelize
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PaymentMethodMessageMultiPartner
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
