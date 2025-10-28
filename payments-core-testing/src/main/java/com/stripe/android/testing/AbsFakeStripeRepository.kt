@@ -427,7 +427,6 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         currency: String,
         country: String,
         locale: String,
-        logoColor: String,
         requestOptions: ApiRequest.Options
     ): Result<PaymentMethodMessage> {
         TODO("Not yet implemented")
