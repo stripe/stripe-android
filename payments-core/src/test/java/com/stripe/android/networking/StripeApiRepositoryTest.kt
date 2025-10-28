@@ -2507,7 +2507,7 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
-    fun `getPaymentMethodMessaging() returns PaymentMethodMessage`() =
+    fun `retrievePaymentMethodMessage() sends all params`() =
         runTest {
             val stripeResponse = StripeResponse(
                 200,
@@ -2518,7 +2518,7 @@ internal class StripeApiRepositoryTest {
                 .thenReturn(stripeResponse)
 
             create().retrievePaymentMethodMessage(
-                paymentMethods = listOf("klarna", "afterpay_clearpay"),
+                paymentMethods = listOf("klarna", "afterpay_clearpay", "affirm"),
                 amount = 999,
                 currency = "usd",
                 country = "us",
@@ -2536,10 +2536,12 @@ internal class StripeApiRepositoryTest {
             with(params) {
                 assertThat(this["payment_methods[0]"]).isEqualTo("klarna")
                 assertThat(this["payment_methods[1]"]).isEqualTo("afterpay_clearpay")
+                assertThat(this["payment_methods[2]"]).isEqualTo("affirm")
                 assertThat(this["amount"]).isEqualTo(999)
                 assertThat(this["currency"]).isEqualTo("usd")
                 assertThat(this["country"]).isEqualTo("us")
                 assertThat(this["locale"]).isEqualTo("en-US")
+                assertThat(this["key"]).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
             }
         }
 
