@@ -32,7 +32,6 @@ constructor(
     private val sepaDebit: SepaDebit? = null,
     private val auBecsDebit: AuBecsDebit? = null,
     private val bacsDebit: BacsDebit? = null,
-    private val sofort: Sofort? = null,
     private val upi: Upi? = null,
     private val netbanking: Netbanking? = null,
     private val usBankAccount: USBankAccount? = null,
@@ -70,7 +69,6 @@ constructor(
         sepaDebit: SepaDebit? = this.sepaDebit,
         auBecsDebit: AuBecsDebit? = this.auBecsDebit,
         bacsDebit: BacsDebit? = this.bacsDebit,
-        sofort: Sofort? = this.sofort,
         upi: Upi? = this.upi,
         netbanking: Netbanking? = this.netbanking,
         usBankAccount: USBankAccount? = this.usBankAccount,
@@ -95,7 +93,6 @@ constructor(
             sepaDebit = sepaDebit,
             auBecsDebit = auBecsDebit,
             bacsDebit = bacsDebit,
-            sofort = sofort,
             upi = upi,
             netbanking = netbanking,
             usBankAccount = usBankAccount,
@@ -121,7 +118,6 @@ constructor(
         sepaDebit: SepaDebit? = null,
         auBecsDebit: AuBecsDebit? = null,
         bacsDebit: BacsDebit? = null,
-        sofort: Sofort? = null,
         upi: Upi? = null,
         netbanking: Netbanking? = null,
         usBankAccount: USBankAccount? = null,
@@ -145,7 +141,6 @@ constructor(
         sepaDebit,
         auBecsDebit,
         bacsDebit,
-        sofort,
         upi,
         netbanking,
         usBankAccount,
@@ -250,19 +245,6 @@ constructor(
     ) : this(
         type = PaymentMethod.Type.BacsDebit,
         bacsDebit = bacsDebit,
-        allowRedisplay = allowRedisplay,
-        billingDetails = billingDetails,
-        metadata = metadata
-    )
-
-    private constructor(
-        sofort: Sofort,
-        allowRedisplay: PaymentMethod.AllowRedisplay?,
-        billingDetails: PaymentMethod.BillingDetails?,
-        metadata: Map<String, String>?
-    ) : this(
-        type = PaymentMethod.Type.Sofort,
-        sofort = sofort,
         allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
         metadata = metadata
@@ -389,7 +371,6 @@ constructor(
                 PaymentMethod.Type.SepaDebit.code -> sepaDebit?.toParamMap()
                 PaymentMethod.Type.AuBecsDebit.code -> auBecsDebit?.toParamMap()
                 PaymentMethod.Type.BacsDebit.code -> bacsDebit?.toParamMap()
-                PaymentMethod.Type.Sofort.code -> sofort?.toParamMap()
                 PaymentMethod.Type.Upi.code -> upi?.toParamMap()
                 PaymentMethod.Type.Netbanking.code -> netbanking?.toParamMap()
                 PaymentMethod.Type.USBankAccount.code -> usBankAccount?.toParamMap()
@@ -662,22 +643,6 @@ constructor(
 
     @Parcelize
     @Poko
-    class Sofort(
-        internal var country: String
-    ) : StripeParamsModel, Parcelable {
-        override fun toParamMap(): Map<String, Any> {
-            return mapOf(
-                PARAM_COUNTRY to country.uppercase()
-            )
-        }
-
-        private companion object {
-            private const val PARAM_COUNTRY = "country"
-        }
-    }
-
-    @Parcelize
-    @Poko
     class Netbanking(
         internal var bank: String
     ) : StripeParamsModel, Parcelable {
@@ -933,20 +898,6 @@ constructor(
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(bacsDebit, allowRedisplay, billingDetails, metadata)
-        }
-
-        /**
-         * @return params for creating a [PaymentMethod.Type.Sofort] payment method
-         */
-        @JvmStatic
-        @JvmOverloads
-        fun create(
-            sofort: Sofort,
-            billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null,
-            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
-        ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(sofort, allowRedisplay, billingDetails, metadata)
         }
 
         @JvmStatic
