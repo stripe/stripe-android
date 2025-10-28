@@ -282,7 +282,7 @@ internal fun OnrampScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
         when (uiState.screen) {
             Screen.SeamlessSignIn -> {
