@@ -4,6 +4,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.RequestMatcher
+import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -35,16 +36,16 @@ internal class PaymentSheetConfirmationTokenTest {
     }
     enum class PaymentMethodType {
         Card,
+        CashAppWithSetupFutureUsage,
         SavedCard,
         SavedCardWithCvcRecollection,
-//        USBankAccount,
     }
     @Test
     fun testSuccessfulPayment() {
         testSuccessfulPayment(
             false,
-            CustomerType.ReturningCustomer,
-            PaymentMethodType.SavedCardWithCvcRecollection
+            CustomerType.NewCustomer,
+            PaymentMethodType.CashAppWithSetupFutureUsage,
         )
     }
     @Test
@@ -92,6 +93,11 @@ internal class PaymentSheetConfirmationTokenTest {
                     || paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection
                 )
         )
+        Assume.assumeFalse(
+            "Only test Cash App setup future usage with new customers",
+            customerType == CustomerType.ReturningCustomer
+                && paymentMethodType == PaymentMethodType.CashAppWithSetupFutureUsage
+        )
     }
 
     private fun presentSheet(
@@ -132,7 +138,12 @@ internal class PaymentSheetConfirmationTokenTest {
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5099,
-                        currency = "usd"
+                        currency = "usd",
+                        setupFutureUse = if (paymentMethodType == PaymentMethodType.CashAppWithSetupFutureUsage) {
+                            PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                        } else {
+                            null
+                        }
                     ),
                     requireCvcRecollection = paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection
                 ),
@@ -158,7 +169,13 @@ internal class PaymentSheetConfirmationTokenTest {
         paymentMethodType: PaymentMethodType,
     ) {
         when (customerType) {
-            CustomerType.NewCustomer -> page.fillOutCardDetails()
+            CustomerType.NewCustomer -> {
+                if (paymentMethodType == PaymentMethodType.CashAppWithSetupFutureUsage) {
+                    page.clickOnLpm("cashapp")
+                } else {
+                    page.fillOutCardDetails()
+                }
+            }
             CustomerType.ReturningCustomer -> {
                 when (paymentMethodType) {
                     PaymentMethodType.Card -> {
@@ -170,6 +187,9 @@ internal class PaymentSheetConfirmationTokenTest {
                     }
                     PaymentMethodType.SavedCardWithCvcRecollection -> {
                         page.fillCvcRecollection("123")
+                    }
+                    else -> {
+                        throw IllegalArgumentException("We do not test this payment method with returning customer")
                     }
                 }
             }
@@ -185,6 +205,7 @@ internal class PaymentSheetConfirmationTokenTest {
             path("/v1/confirmation_tokens"),
             clientContext(isLiveMode),
             cvcRecollection(paymentMethodType),
+            mandateDataAndSetupFutureUsage(paymentMethodType),
             clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
             response.testBodyFromFile("confirmation-token-create-with-new-card.json")
@@ -226,6 +247,36 @@ internal class PaymentSheetConfirmationTokenTest {
                 bodyPart(
                     urlEncode("payment_method_options[card][cvc]"),
                     ".+".toRegex()
+                )
+            )
+        }
+    }
+
+    private fun mandateDataAndSetupFutureUsage(paymentMethodType: PaymentMethodType): RequestMatcher {
+        return if (paymentMethodType == PaymentMethodType.CashAppWithSetupFutureUsage) {
+            RequestMatchers.composite(
+                bodyPart(
+                    urlEncode("mandate_data[customer_acceptance][type]"),
+                    "online"
+                ),
+                bodyPart(
+                    urlEncode("setup_future_usage"),
+                    "off_session"
+                ),
+            )
+        } else {
+            RequestMatchers.composite(
+                not(
+                    bodyPart(
+                        urlEncode("mandate_data[customer_acceptance][type]"),
+                        ".+".toRegex()
+                    )
+                ),
+                not(
+                    bodyPart(
+                        urlEncode("setup_future_usage"),
+                        ".+".toRegex()
+                    )
                 )
             )
         }
