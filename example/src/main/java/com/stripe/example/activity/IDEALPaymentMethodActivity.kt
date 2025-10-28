@@ -18,8 +18,6 @@ import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -27,11 +25,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.example.R
 
 class IDEALPaymentMethodActivity : StripeIntentActivity() {
     private val bankNameMap = mapOf(
@@ -98,7 +98,7 @@ class IDEALPaymentMethodActivity : StripeIntentActivity() {
                         enabled = false,
                         trailingIcon = {
                             Icon(
-                                Icons.Filled.ArrowDropDown,
+                                painter = painterResource(R.drawable.ic_arrow_drop_down),
                                 contentDescription = null,
                                 tint = MaterialTheme.colors.onBackground,
                                 modifier = Modifier.height(24.dp)

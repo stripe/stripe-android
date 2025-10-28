@@ -25,8 +25,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,6 +44,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -288,7 +287,7 @@ private fun SpinnerToCheckmark(
                     scaleX = checkmarkScale
                     scaleY = checkmarkScale
                 },
-                imageVector = Icons.Default.Check,
+                painter = painterResource(com.stripe.android.uicore.R.drawable.stripe_ic_material_check),
                 contentDescription = stringResource(id = R.string.stripe_success_pane_title),
                 tint = colors.primaryAccent,
             )

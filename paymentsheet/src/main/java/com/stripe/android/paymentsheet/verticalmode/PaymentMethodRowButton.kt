@@ -23,8 +23,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +50,7 @@ import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
 internal fun PaymentMethodRowButton(
@@ -262,7 +261,7 @@ private fun RowButtonCheckmarkOuterContent(
         iconContent = {
             if (isSelected) {
                 Icon(
-                    imageVector = Icons.Filled.Check,
+                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_check),
                     contentDescription = null,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)

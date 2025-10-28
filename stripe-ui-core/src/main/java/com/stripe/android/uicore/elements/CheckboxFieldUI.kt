@@ -11,8 +11,6 @@ import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
@@ -20,9 +18,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.R
+import androidx.compose.ui.R as ComposeR
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
@@ -32,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.R
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -76,9 +76,9 @@ internal fun CheckboxFieldUIView(
 ) {
     val accessibilityDescription = stringResource(
         if (isChecked) {
-            R.string.selected
+            ComposeR.string.selected
         } else {
-            R.string.not_selected
+            ComposeR.string.not_selected
         }
     )
 
@@ -146,7 +146,7 @@ private fun Error(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            Icons.Outlined.Info,
+            painter = painterResource(R.drawable.stripe_ic_material_info),
             contentDescription = null,
             modifier = Modifier.padding(end = 8.dp),
             tint = color
