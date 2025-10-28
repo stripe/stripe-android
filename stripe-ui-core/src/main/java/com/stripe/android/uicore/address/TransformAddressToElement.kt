@@ -320,6 +320,7 @@ private fun FieldType.toConfig(
             capitalization = capitalization,
             keyboard = keyboardType,
             optional = optional,
+            allowsEmojis = false,
         )
     }
 }

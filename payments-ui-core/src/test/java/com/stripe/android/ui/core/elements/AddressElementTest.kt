@@ -609,6 +609,40 @@ class AddressElementTest {
         }
     }
 
+    @Test
+    fun `name element filters out emojis`() = runTest {
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.AutocompleteCondensed(
+                googleApiKey = null,
+                autocompleteCountries = setOf(),
+                nameConfig = AddressFieldConfiguration.REQUIRED,
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                emailConfig = AddressFieldConfiguration.OPTIONAL,
+            ) { throw AssertionError("Not Expected") },
+            sameAsShippingElement = null,
+            shippingValuesMap = null
+        )
+
+        val nameElement = addressElement.fields.first()
+            .find { it.identifier == IdentifierSpec.Name } as? SimpleTextElement
+
+        assertThat(nameElement).isNotNull()
+
+        val nameController = nameElement?.controller as SimpleTextFieldController
+
+        // Test that emojis are filtered out
+        nameController.onValueChange("John 😀 Doe")
+        assertThat(nameController.fieldValue.first()).isEqualTo("John  Doe")
+
+        nameController.onValueChange("Jane Smith 🏠")
+        assertThat(nameController.fieldValue.first()).isEqualTo("Jane Smith ")
+
+        nameController.onValueChange("Bob ☀️ Jones")
+        assertThat(nameController.fieldValue.first()).isEqualTo("Bob  Jones")
+    }
+
     private fun createAddressElement(initialValues: Map<IdentifierSpec, String>): AddressElement {
         return AddressElement(
             IdentifierSpec.Generic("address"),
