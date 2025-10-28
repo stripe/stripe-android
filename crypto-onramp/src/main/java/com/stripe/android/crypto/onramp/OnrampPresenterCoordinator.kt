@@ -1,10 +1,25 @@
 package com.stripe.android.crypto.onramp
 
+import android.app.Activity
+import android.app.Dialog
 import android.content.ContentResolver
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.compose.ui.platform.ComposeView
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
@@ -15,6 +30,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.crypto.onramp.ui.KYCRefreshScreen
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.NoLinkAccountFoundException
@@ -26,6 +42,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.stripe.android.link.LinkAppearance
 
 @OnrampPresenterScope
 internal class OnrampPresenterCoordinator @Inject constructor(
@@ -57,7 +74,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private val currentLinkAccount: LinkController.LinkAccount?
         get() = interactor.state.value.linkControllerState?.internalLinkAccount
 
+    private val onrampActivityResultLauncher: ActivityResultLauncher<OnrampActivityContractArgs>
+
     init {
+        onrampActivityResultLauncher = activity.registerForActivityResult(OnrampActivityContract()) { result ->
+            // Handle the result (OnrampActivityContractResult)
+            // e.g. onrampCallbacks.verifyKycCallback.onResult(result)
+        }
+
         // Observe Link controller state
         lifecycleOwner.lifecycleScope.launch {
             linkControllerState.collect { state ->
@@ -112,9 +136,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 
     fun verifyKycInfo(updatedAddress: PaymentSheet.Address? = null) {
-        coroutineScope.launch {
-
-        }
+        onrampActivityResultLauncher.launch(OnrampActivityContractArgs(updatedAddress))
     }
 
     fun collectPaymentMethod(type: PaymentMethodType) {
@@ -266,3 +288,34 @@ private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType =
         PaymentMethodType.Card -> LinkController.PaymentMethodType.Card
         PaymentMethodType.BankAccount -> LinkController.PaymentMethodType.BankAccount
     }
+
+class KycFullScreenActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val address = intent.getParcelableExtra<PaymentSheet.Address>("updatedAddress")
+
+        setContent {
+            KYCRefreshScreen(LinkAppearance(), address)
+        }
+    }
+}
+data class OnrampActivityContractArgs(
+    val updatedAddress: PaymentSheet.Address?
+)
+
+data class OnrampActivityContractResult(
+    val success: Boolean
+)
+
+class OnrampActivityContract : ActivityResultContract<OnrampActivityContractArgs, OnrampActivityContractResult>() {
+    override fun createIntent(context: Context, input: OnrampActivityContractArgs): Intent {
+        return Intent(context, KycFullScreenActivity::class.java).apply {
+            putExtra("updatedAddress", input.updatedAddress)
+        }
+    }
+
+    override fun parseResult(resultCode: Int, intent: Intent?): OnrampActivityContractResult {
+        val success = resultCode == Activity.RESULT_OK
+        return OnrampActivityContractResult(success)
+    }
+}
