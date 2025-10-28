@@ -390,8 +390,11 @@ internal class IdentityViewModel(
     private var currentExposureDuration: Long? = null
     private var currentIsVirtualCamera: Boolean? = null
 
-    // Store camera lens model for selfie uploads
+    // Store camera lens/model + BEST-frame metadata for selfie uploads
     private var selfieCameraLensModel: String? = null
+    private var selfieBestExposureIso: Float? = null
+    private var selfieBestFocalLength: Float? = null
+    private var selfieBestExposureDuration: Long? = null
 
     /**
      * Set the camera lens model for subsequent uploads.
@@ -553,6 +556,15 @@ internal class IdentityViewModel(
             "FaceDetectorTransitioner incorrectly collected ${filteredFrames.size} frames " +
                 "instead of ${FaceDetectorTransitioner.NUM_FILTERED_FRAMES} frames"
         }
+
+        // Extract camera metadata from the exact BEST frame
+        val bestInput = filteredFrames[FaceDetectorTransitioner.INDEX_BEST].first
+        val bestIso = bestInput.cameraPreviewImage.exposureIso
+        val bestFocal = bestInput.cameraPreviewImage.focalLength
+        val bestExpMs = bestInput.cameraPreviewImage.exposureDurationNs?.let { it / NANOS_PER_MILLI }
+        selfieBestExposureIso = bestIso
+        selfieBestFocalLength = bestFocal
+        selfieBestExposureDuration = bestExpMs
 
         listOf(
             (FaceDetectorTransitioner.Selfie.FIRST),
@@ -1726,7 +1738,10 @@ internal class IdentityViewModel(
                                 faceScoreVariance = faceDetectorTransitioner.scoreVariance,
                                 bestFaceScore = faceDetectorTransitioner.bestFaceScore,
                                 numFrames = faceDetectorTransitioner.numFrames,
-                                bestCameraLensModel = selfieCameraLensModel
+                                bestCameraLensModel = selfieCameraLensModel,
+                                bestExposureIso = selfieBestExposureIso,
+                                bestFocalLength = selfieBestFocalLength,
+                                bestExposureDuration = selfieBestExposureDuration
                             ),
                             fromRoute = SelfieDestination.ROUTE.route
                         ) {
@@ -1871,6 +1886,7 @@ internal class IdentityViewModel(
         const val FRONT = "front"
         const val BACK = "back"
         const val BYTES_IN_KB = 1024
+        private const val NANOS_PER_MILLI: Long = 1_000_000
         private const val DOCUMENT_FRONT_UPLOAD_STATE = "document_front_upload_state"
         private const val DOCUMENT_BACK_UPLOAD_STATE = "document_back_upload_state"
         private const val SELFIE_UPLOAD_STATE = "selfie_upload_state"

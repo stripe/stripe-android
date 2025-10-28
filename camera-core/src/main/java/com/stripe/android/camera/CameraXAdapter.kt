@@ -419,13 +419,16 @@ class CameraXAdapter(
                     image.close()
                     sendImageToStream(
                         CameraPreviewImage(
-                            bitmap,
-                            Rect(
+                            image = bitmap,
+                            viewBounds = Rect(
                                 previewView.left,
                                 previewView.top,
                                 previewView.width,
                                 previewView.height
-                            )
+                            ),
+                            exposureIso = latestExposureIso,
+                            focalLength = getFocalLength(),
+                            exposureDurationNs = latestExposureDuration
                         )
                     )
                 }
