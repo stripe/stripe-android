@@ -23,6 +23,8 @@ internal data class KycRefreshRequest(
     val dateOfBirth: DateOfBirth,
     @SerialName("city")
     val city: String?,
+    @SerialName("state")
+    val state: String?,
     @SerialName("country")
     val country: String?,
     @SerialName("line1")
@@ -31,8 +33,6 @@ internal data class KycRefreshRequest(
     val line2: String?,
     @SerialName("zip")
     val postalCode: String?,
-    @SerialName("state")
-    val state: String?,
     @SerialName("credentials")
     val credentials: CryptoCustomerRequestParams.Credentials
 ) {
