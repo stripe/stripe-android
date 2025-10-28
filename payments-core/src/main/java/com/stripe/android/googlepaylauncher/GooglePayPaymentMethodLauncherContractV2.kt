@@ -33,7 +33,7 @@ class GooglePayPaymentMethodLauncherContractV2 :
     }
 
     /**
-     * Args for launching [GooglePayPaymentMethodLauncherContract] to create a [PaymentMethod].
+     * Args for launching [GooglePayPaymentMethodLauncherContractV2] to create a [PaymentMethod].
      *
      * @param config the [GooglePayPaymentMethodLauncher.Config] for this transaction
      * @param currencyCode ISO 4217 alphabetic currency code. (e.g. "USD", "EUR")
