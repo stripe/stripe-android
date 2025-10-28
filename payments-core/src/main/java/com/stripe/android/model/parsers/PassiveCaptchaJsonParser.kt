@@ -10,6 +10,7 @@ internal class PassiveCaptchaJsonParser : ModelJsonParser<PassiveCaptchaParams> 
         if (json.has(FIELD_SITE_KEY).not()) {
             return null
         }
+
         return PassiveCaptchaParams(
             siteKey = json.getString(FIELD_SITE_KEY),
             rqData = StripeJsonUtils.optString(json, FIELD_RQ_DATA)
