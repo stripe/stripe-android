@@ -20,9 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AppBarDefaults
@@ -48,6 +46,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -176,20 +176,19 @@ internal fun SeamlessSignInScreen(
             modifier = Modifier.size(128.dp)
         )
 
-        Row {
-            Text(
-                text = "Continue as",
-                fontSize = 20.sp
-            )
-
-            Spacer(modifier = Modifier.width(6.dp))
-
-            Text(
-                text = "$email?",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        Text(
+            text = buildAnnotatedString {
+                append("Continue as ")
+                val start = length
+                append("$email?")
+                addStyle(
+                    style = SpanStyle(fontWeight = FontWeight.Bold),
+                    start = start,
+                    end = length
+                )
+            },
+            fontSize = 20.sp
+        )
 
         Spacer(modifier = Modifier.height(48.dp))
 
@@ -300,8 +299,8 @@ internal fun OnrampScreen(
             Screen.SeamlessSignIn -> {
                 SeamlessSignInScreen(
                     email = uiState.email,
-                    onContinue = viewModel::seamlessSignInContinue
-                    onNotMe = viewModel::logout
+                    onContinue = viewModel::seamlessSignInContinue,
+                    onNotMe = viewModel::logOut
                 )
             }
             Screen.LoginSignup -> {
