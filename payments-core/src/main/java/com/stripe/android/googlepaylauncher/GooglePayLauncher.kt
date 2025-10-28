@@ -24,6 +24,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -34,7 +35,7 @@ import java.util.Locale
  * A drop-in class that presents a Google Pay sheet to collect customer payment details and use it
  * to confirm a [PaymentIntent] or [SetupIntent]. When successful, will return [Result.Completed].
  *
- * Use [GooglePayLauncherContract] for Jetpack Compose integrations.
+ * Use [rememberGooglePayLauncher] for Jetpack Compose integrations.
  *
  * See the [Google Pay integration guide](https://stripe.com/docs/google-pay) for more details.
  */
@@ -273,7 +274,8 @@ class GooglePayLauncher internal constructor(
     }
 
     @Parcelize
-    data class Config @JvmOverloads constructor(
+    @Poko
+    class Config @JvmOverloads constructor(
         val environment: GooglePayEnvironment,
         val merchantCountryCode: String,
         val merchantName: String,
@@ -311,7 +313,8 @@ class GooglePayLauncher internal constructor(
     }
 
     @Parcelize
-    data class BillingAddressConfig @JvmOverloads constructor(
+    @Poko
+    class BillingAddressConfig @JvmOverloads constructor(
         internal val isRequired: Boolean = false,
 
         /**
@@ -345,7 +348,8 @@ class GooglePayLauncher internal constructor(
         data object Completed : Result()
 
         @Parcelize
-        data class Failed(
+        @Poko
+        class Failed(
             val error: Throwable
         ) : Result()
 
@@ -364,30 +368,6 @@ class GooglePayLauncher internal constructor(
     companion object {
         internal const val PRODUCT_USAGE = "GooglePayLauncher"
         internal var HAS_SENT_INIT_ANALYTIC_EVENT: Boolean = false
-
-        /**
-         * Create a [GooglePayLauncher] used for Jetpack Compose.
-         *
-         * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
-         * [ActivityResultLauncher] into current activity, it should be called as part of Compose
-         * initialization path.
-         * The GooglePayLauncher created is remembered across recompositions. Recomposition will
-         * always return the value produced by composition.
-         */
-        @Deprecated(
-            message = "Use rememberGooglePayLauncher() instead",
-            replaceWith = ReplaceWith(
-                expression = "rememberGooglePayLauncher(config, readyCallback, resultCallback)",
-            ),
-        )
-        @Composable
-        fun rememberLauncher(
-            config: Config,
-            readyCallback: ReadyCallback,
-            resultCallback: ResultCallback
-        ): GooglePayLauncher {
-            return rememberGooglePayLauncher(config, readyCallback, resultCallback)
-        }
     }
 }
 

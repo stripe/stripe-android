@@ -7,6 +7,7 @@ import androidx.annotation.Size
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.model.Source.Companion.asSourceType
 import com.stripe.android.model.Source.SourceType
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 import org.json.JSONException
@@ -16,7 +17,8 @@ import org.json.JSONObject
  * Represents a grouping of parameters needed to create a [Source] object on the server.
  */
 @Parcelize
-data class SourceParams internal constructor(
+@Poko
+class SourceParams internal constructor(
     /**
      * The type of the source to create.
      */
@@ -194,7 +196,8 @@ data class SourceParams internal constructor(
     }
 
     @Parcelize
-    internal data class WeChatParams(
+    @Poko
+    internal class WeChatParams(
         private val appId: String? = null,
         private val statementDescriptor: String? = null
     ) : StripeParamsModel, Parcelable {
@@ -225,7 +228,8 @@ data class SourceParams internal constructor(
      * See [owner](https://stripe.com/docs/api/sources/create#create_source-owner).
      */
     @Parcelize
-    data class OwnerParams @JvmOverloads constructor(
+    @Poko
+    class OwnerParams @JvmOverloads constructor(
         internal var address: Address? = null,
         internal var email: String? = null,
         internal var name: String? = null,
@@ -629,36 +633,6 @@ data class SourceParams internal constructor(
         }
 
         /**
-         * Create Giropay Source params.
-         *
-         * @param amount A positive integer in the smallest currency unit representing the amount to
-         * charge the customer (e.g., 1099 for a €10.99 payment).
-         * @param name The full name of the account holder.
-         * @param returnUrl The URL the customer should be redirected to after the authorization
-         * process.
-         * @param statementDescriptor A custom statement descriptor for the payment (optional).
-         * @return a [SourceParams] object that can be used to create a Giropay source
-         *
-         * @see [Giropay Payments with Sources](https://stripe.com/docs/sources/giropay)
-         */
-        @JvmStatic
-        fun createGiropayParams(
-            @IntRange(from = 0) amount: Long,
-            name: String,
-            returnUrl: String,
-            statementDescriptor: String? = null
-        ): SourceParams {
-            return SourceParams(
-                SourceType.GIROPAY,
-                typeData = TypeData.Giropay(statementDescriptor),
-                currency = Source.EURO,
-                amount = amount,
-                owner = OwnerParams(name = name),
-                returnUrl = returnUrl
-            )
-        }
-
-        /**
          * Create iDEAL Source params.
          *
          * @param amount A positive integer in the smallest currency unit representing the amount to
@@ -795,35 +769,6 @@ data class SourceParams internal constructor(
         }
 
         /**
-         * Create SOFORT Source params.
-         *
-         * @param amount A positive integer in the smallest currency unit representing the amount to
-         * charge the customer (e.g., 1099 for a €10.99 payment).
-         * @param returnUrl The URL the customer should be redirected to after the authorization
-         * process.
-         * @param country The ISO-3166 2-letter country code of the customer’s bank.
-         * @param statementDescriptor A custom statement descriptor for the payment (optional).
-         * @return a [SourceParams] object that can be used to create a SOFORT source
-         *
-         * @see [SOFORT Payments with Sources](https://stripe.com/docs/sources/sofort)
-         */
-        @JvmStatic
-        fun createSofortParams(
-            @IntRange(from = 0) amount: Long,
-            returnUrl: String,
-            @Size(2) country: String,
-            statementDescriptor: String? = null
-        ): SourceParams {
-            return SourceParams(
-                SourceType.SOFORT,
-                typeData = TypeData.Sofort(country, statementDescriptor),
-                currency = Source.EURO,
-                amount = amount,
-                returnUrl = returnUrl
-            )
-        }
-
-        /**
          * Create 3D Secure Source params.
          *
          * @param amount A positive integer in the smallest currency unit representing the amount to
@@ -915,7 +860,8 @@ data class SourceParams internal constructor(
     }
 
     @Parcelize
-    internal data class ApiParams(
+    @Poko
+    internal class ApiParams(
         val value: Map<String, Any?> = emptyMap()
     ) : Parcelable {
         internal companion object : Parceler<ApiParams> {
@@ -957,7 +903,8 @@ data class SourceParams internal constructor(
         }
 
         @Parcelize
-        data class Card(
+        @Poko
+        class Card(
             /**
              * The [number] of this card
              */
@@ -1002,7 +949,8 @@ data class SourceParams internal constructor(
         }
 
         @Parcelize
-        data class Eps(
+        @Poko
+        class Eps(
             var statementDescriptor: String? = null
         ) : TypeData() {
             override val type: String get() = SourceType.EPS
@@ -1016,23 +964,8 @@ data class SourceParams internal constructor(
         }
 
         @Parcelize
-        data class Giropay(
-            var statementDescriptor: String? = null
-        ) : TypeData() {
-            override val type: String get() = SourceType.GIROPAY
-
-            override val params: List<Pair<String, String?>>
-                get() = listOf(
-                    PARAM_STATEMENT_DESCRIPTOR to statementDescriptor
-                )
-
-            private companion object {
-                private const val PARAM_STATEMENT_DESCRIPTOR = "statement_descriptor"
-            }
-        }
-
-        @Parcelize
-        data class Ideal(
+        @Poko
+        class Ideal(
             var statementDescriptor: String? = null,
             var bank: String? = null
         ) : TypeData() {
@@ -1051,7 +984,8 @@ data class SourceParams internal constructor(
         }
 
         @Parcelize
-        data class Masterpass(
+        @Poko
+        class Masterpass(
             var transactionId: String,
             var cartId: String
         ) : TypeData() {
@@ -1073,26 +1007,8 @@ data class SourceParams internal constructor(
         }
 
         @Parcelize
-        data class Sofort(
-            @Size(2) var country: String,
-            var statementDescriptor: String? = null
-        ) : TypeData() {
-            override val type: String get() = SourceType.SOFORT
-
-            override val params: List<Pair<String, String?>>
-                get() = listOf(
-                    PARAM_COUNTRY to country,
-                    PARAM_STATEMENT_DESCRIPTOR to statementDescriptor
-                )
-
-            private companion object {
-                private const val PARAM_COUNTRY = "country"
-                private const val PARAM_STATEMENT_DESCRIPTOR = "statement_descriptor"
-            }
-        }
-
-        @Parcelize
-        data class SepaDebit(
+        @Poko
+        class SepaDebit(
             var iban: String
         ) : TypeData() {
             override val type: String get() = SourceType.SEPA_DEBIT
@@ -1106,7 +1022,8 @@ data class SourceParams internal constructor(
         }
 
         @Parcelize
-        data class ThreeDSecure(
+        @Poko
+        class ThreeDSecure(
             var cardId: String
         ) : TypeData() {
             override val type: String get() = SourceType.THREE_D_SECURE
@@ -1120,7 +1037,8 @@ data class SourceParams internal constructor(
         }
 
         @Parcelize
-        data class VisaCheckout(
+        @Poko
+        class VisaCheckout(
             var callId: String
         ) : TypeData() {
             override val type: String get() = SourceType.CARD
@@ -1139,7 +1057,8 @@ data class SourceParams internal constructor(
         }
 
         @Parcelize
-        data class Bancontact(
+        @Poko
+        class Bancontact(
             var statementDescriptor: String? = null,
             var preferredLanguage: String? = null
         ) : TypeData() {

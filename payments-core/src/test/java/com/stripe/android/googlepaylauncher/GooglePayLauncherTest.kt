@@ -138,3 +138,23 @@ internal class GooglePayLauncherTest {
         )
     }
 }
+
+private fun GooglePayLauncher.Config.copy(
+    environment: GooglePayEnvironment = this.environment,
+    merchantCountryCode: String = this.merchantCountryCode,
+    merchantName: String = this.merchantName,
+    isEmailRequired: Boolean = this.isEmailRequired,
+    billingAddressConfig: GooglePayLauncher.BillingAddressConfig = this.billingAddressConfig,
+    existingPaymentMethodRequired: Boolean = this.existingPaymentMethodRequired,
+    allowCreditCards: Boolean = this.allowCreditCards
+): GooglePayLauncher.Config {
+    return GooglePayLauncher.Config(
+        environment = environment,
+        merchantCountryCode = merchantCountryCode,
+        merchantName = merchantName,
+        isEmailRequired = isEmailRequired,
+        billingAddressConfig = billingAddressConfig,
+        existingPaymentMethodRequired = existingPaymentMethodRequired,
+        allowCreditCards = allowCreditCards
+    )
+}

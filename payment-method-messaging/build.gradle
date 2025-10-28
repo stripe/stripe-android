@@ -21,7 +21,7 @@ android {
 
 dependencies {
     implementation project(":stripe-core")
-    implementation project(":payments-core")
+    api project(":payments-core")
     implementation project(":payments-ui-core")
     implementation project(":stripe-ui-core")
     implementation libs.androidx.annotation

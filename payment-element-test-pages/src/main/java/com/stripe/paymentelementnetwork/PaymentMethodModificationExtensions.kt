@@ -20,7 +20,14 @@ fun NetworkRule.setupPaymentMethodDetachResponse(
         method("POST"),
         path("/v1/payment_methods/$paymentMethodId/detach"),
     ) { response ->
-        response.setResponseCode(200)
+        response.setBody(
+            """
+            {
+            	"id": "$paymentMethodId",
+                "type": "card"
+            }
+            """.trimIndent()
+        )
     }
 }
 

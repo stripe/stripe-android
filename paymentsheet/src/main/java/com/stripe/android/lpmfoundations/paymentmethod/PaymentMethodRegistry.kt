@@ -16,7 +16,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.CashAppPayDef
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CryptoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.EpsDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.FpxDefinition
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.GiroPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.GrabPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.IdealDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.InstantDebitsDefinition
@@ -32,7 +31,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.PromptPayDefi
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.RevolutPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SatispayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SepaDebitDefinition
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.SofortDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SunbitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefinition
@@ -60,7 +58,6 @@ internal object PaymentMethodRegistry {
         CryptoDefinition,
         EpsDefinition,
         FpxDefinition,
-        GiroPayDefinition,
         GrabPayDefinition,
         IdealDefinition,
         InstantDebitsDefinition,
@@ -76,7 +73,6 @@ internal object PaymentMethodRegistry {
         RevolutPayDefinition,
         SatispayDefinition,
         SepaDebitDefinition,
-        SofortDefinition,
         SunbitDefinition,
         SwishDefinition,
         TwintDefinition,

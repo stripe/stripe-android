@@ -1,0 +1,5 @@
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="app_name">PaymentMethodMessaging Example</string>
+    <string name="payment_method_messaging_title">Payment Method Messaging Element</string>
+    <string name="payment_method_messaging_subtitle">Display BNPL promotions</string>
+</resources>

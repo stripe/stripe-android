@@ -42,8 +42,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activity.CreateCardTokenActivity" />
-        <activity android:name=".activity.CreateCardSourceActivity" />
         <activity android:name=".activity.CreateCardPaymentMethodActivity" />
         <activity android:name=".activity.GooglePayLauncherIntegrationActivity" />
         <activity android:name=".activity.GooglePayLauncherPlaygroundActivity" />
@@ -56,7 +54,6 @@
         <activity android:name=".activity.BecsDebitPaymentMethodActivity" />
         <activity android:name=".activity.BacsDebitPaymentMethodActivity" />
         <activity android:name=".activity.MultibancoActivity" />
-        <activity android:name=".activity.SofortPaymentMethodActivity" />
         <activity android:name=".activity.IDEALPaymentMethodActivity" />
         <activity android:name=".activity.UpiPaymentActivity" />
         <activity android:name=".activity.UpiWaitingActivity" />

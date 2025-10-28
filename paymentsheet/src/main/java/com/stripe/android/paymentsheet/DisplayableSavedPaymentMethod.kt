@@ -122,7 +122,7 @@ internal data class DisplayableSavedPaymentMethod private constructor(
     }
 
     fun isDefaultPaymentMethod(defaultPaymentMethodId: String?): Boolean {
-        return paymentMethod.id != null && paymentMethod.id == defaultPaymentMethodId
+        return paymentMethod.id == defaultPaymentMethodId
     }
 
     companion object {

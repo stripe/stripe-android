@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -11,7 +12,8 @@ import kotlinx.parcelize.Parcelize
  * [account tokens documentation](https://stripe.com/docs/connect/account-tokens) to learn more.
  */
 @Parcelize
-data class AccountParams internal constructor(
+@Poko
+class AccountParams internal constructor(
     /**
      * Whether the user described by the data in the token has been shown the
      * [Stripe Connected Account Agreement](https://stripe.com/docs/connect/account-tokens#stripe-connected-account-agreement).
@@ -64,7 +66,8 @@ data class AccountParams internal constructor(
          * [account.company](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company)
          */
         @Parcelize
-        data class Company(
+        @Poko
+        class Company(
             /**
              * The company’s primary address.
              *
@@ -196,7 +199,8 @@ data class AccountParams internal constructor(
                 )
 
             @Parcelize
-            data class Verification(
+            @Poko
+            class Verification(
                 /**
                  * A document verifying the business.
                  */
@@ -214,7 +218,8 @@ data class AccountParams internal constructor(
             }
 
             @Parcelize
-            data class Document @JvmOverloads constructor(
+            @Poko
+            class Document @JvmOverloads constructor(
                 /**
                  * The front of a document returned by a
                  * [file upload](https://stripe.com/docs/api/tokens/create_account#create_file)
@@ -454,7 +459,8 @@ data class AccountParams internal constructor(
          * [account.individual](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual)
          */
         @Parcelize
-        data class Individual(
+        @Poko
+        class Individual(
             /**
              * The individual’s primary address.
              *
@@ -610,7 +616,8 @@ data class AccountParams internal constructor(
                 )
 
             @Parcelize
-            data class Verification @JvmOverloads constructor(
+            @Poko
+            class Verification @JvmOverloads constructor(
                 /**
                  * An identifying document, either a passport or local ID card.
                  */
@@ -640,7 +647,8 @@ data class AccountParams internal constructor(
             }
 
             @Parcelize
-            data class Document @JvmOverloads constructor(
+            @Poko
+            class Document @JvmOverloads constructor(
                 /**
                  * The front of an ID returned by a
                  * [file upload](https://stripe.com/docs/api/tokens/create_account#create_file) with

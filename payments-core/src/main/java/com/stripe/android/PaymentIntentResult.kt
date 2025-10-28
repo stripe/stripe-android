@@ -2,6 +2,7 @@ package com.stripe.android
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentIntent
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -9,7 +10,8 @@ import kotlinx.parcelize.Parcelize
  * or handling of next actions via [Stripe.handleNextActionForPayment].
  */
 @Parcelize
-data class PaymentIntentResult
+@Poko
+class PaymentIntentResult
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
 constructor(
     override val intent: PaymentIntent,

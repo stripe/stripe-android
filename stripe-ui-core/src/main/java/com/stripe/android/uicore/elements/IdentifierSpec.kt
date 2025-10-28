@@ -37,6 +37,7 @@ data class IdentifierSpec(
 ) : Parcelable {
     constructor() : this("")
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun Generic(_value: String) = IdentifierSpec(_value)
 

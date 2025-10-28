@@ -132,7 +132,7 @@ internal class SavedPaymentMethodMutator(
     }
 
     fun removePaymentMethod(paymentMethod: PaymentMethod) {
-        val paymentMethodId = paymentMethod.id ?: return
+        val paymentMethodId = paymentMethod.id
 
         coroutineScope.launch(workContext) {
             removePaymentMethodInternal(paymentMethodId)
@@ -242,7 +242,7 @@ internal class SavedPaymentMethodMutator(
     }
 
     suspend fun removePaymentMethodInEditScreen(paymentMethod: PaymentMethod): Throwable? {
-        val paymentMethodId = paymentMethod.id!!
+        val paymentMethodId = paymentMethod.id
         val result = removePaymentMethodInternal(paymentMethodId)
 
         if (result.isSuccess) {
@@ -274,7 +274,7 @@ internal class SavedPaymentMethodMutator(
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
             ),
-            paymentMethodId = paymentMethod.id!!,
+            paymentMethodId = paymentMethod.id,
             params = PaymentMethodUpdateParams.createCard(
                 networks = cardUpdateParams.cardBrand?.let {
                     PaymentMethodUpdateParams.Card.Networks(
@@ -299,7 +299,7 @@ internal class SavedPaymentMethodMutator(
                             val savedId = savedMethod.id
                             val updatedId = updatedMethod.id
 
-                            if (updatedId != null && savedId != null && updatedId == savedId) {
+                            if (updatedId == savedId) {
                                 updatedMethod
                             } else {
                                 savedMethod

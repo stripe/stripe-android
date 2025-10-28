@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -10,7 +11,8 @@ import kotlinx.parcelize.Parcelize
  * or [confirming a SetupIntent](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-mandate_data)
  */
 @Parcelize
-data class MandateDataParams constructor(
+@Poko
+class MandateDataParams constructor(
     private val type: Type
 ) : StripeParamsModel, Parcelable {
     override fun toParamMap(): Map<String, Any> {
@@ -32,7 +34,8 @@ data class MandateDataParams constructor(
          * [mandate_data.customer_acceptance.online](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate_data-customer_acceptance-online)
          */
         @Parcelize
-        data class Online internal constructor(
+        @Poko
+        class Online internal constructor(
             /**
              * The IP address from which the Mandate was accepted by the customer.
              *
