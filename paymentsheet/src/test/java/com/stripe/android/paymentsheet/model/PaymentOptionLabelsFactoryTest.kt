@@ -45,7 +45,7 @@ class PaymentOptionLabelsFactoryTest {
             selection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION
         )
 
-        assertThat(labels.label).isEqualTo("Stripe Bank Account")
+        assertThat(labels.label).isEqualTo("Stripe Bank")
         assertThat(labels.sublabel).isEqualTo("···· 6789")
     }
 
