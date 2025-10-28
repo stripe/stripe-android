@@ -46,7 +46,8 @@ internal data class LinkAccount(
 
     @IgnoredOnParcel
     val isVerified: Boolean = consumerSession.containsVerifiedSMSSession() ||
-        consumerSession.isVerifiedForSignup() || consumerSession.isVerifiedWithLinkAuthToken()
+        consumerSession.isVerifiedForSignup() ||
+        consumerSession.isVerifiedWithLinkAuthToken()
 
     @IgnoredOnParcel
     val completedSignup: Boolean = consumerSession.isVerifiedForSignup()

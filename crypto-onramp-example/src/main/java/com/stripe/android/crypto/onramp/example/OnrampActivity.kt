@@ -194,7 +194,7 @@ internal fun SeamlessSignInScreen(
         Spacer(modifier = Modifier.height(48.dp))
 
         Button(
-            onClick = { onContinue() },
+            onClick = onContinue,
             modifier = Modifier.fillMaxWidth()
                 .padding(bottom = 16.dp)
         ) {
@@ -202,7 +202,7 @@ internal fun SeamlessSignInScreen(
         }
 
         Button(
-            onClick = { onNotMe() },
+            onClick = onNotMe,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Not me")
@@ -300,12 +300,8 @@ internal fun OnrampScreen(
             Screen.SeamlessSignIn -> {
                 SeamlessSignInScreen(
                     email = uiState.email,
-                    onContinue = {
-                        viewModel.seamlessSignInContinue()
-                    },
-                    onNotMe = {
-                        viewModel.logOut()
-                    }
+                    onContinue = viewModel::seamlessSignInContinue
+                    onNotMe = viewModel::logout
                 )
             }
             Screen.LoginSignup -> {
