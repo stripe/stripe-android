@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp.example
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
@@ -682,20 +683,21 @@ internal class OnrampViewModel(
     private val userDataKey = "onramp_user_data"
 
     private fun saveUserData(userData: OnrampUserData) {
-        val prefs = application.applicationContext.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
         val json = Json.encodeToString(userData)
-        prefs.edit { putString(userDataKey, json) }
+        getPrefs().edit { putString(userDataKey, json) }
     }
 
     private fun loadUserData(): OnrampUserData? {
-        val prefs = application.applicationContext.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
-        val json = prefs.getString(userDataKey, null) ?: return null
+        val json = getPrefs().getString(userDataKey, null) ?: return null
         return Json.decodeFromString(json)
     }
 
     private fun clearUserData() {
-        val prefs = application.applicationContext.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
-        prefs.edit { remove(userDataKey) }
+        getPrefs().edit { remove(userDataKey) }
+    }
+
+    private fun getPrefs(): SharedPreferences {
+        return application.applicationContext.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
     }
 
     class Factory : ViewModelProvider.Factory {
