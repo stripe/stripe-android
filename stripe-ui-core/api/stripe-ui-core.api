@@ -114,38 +114,6 @@ public synthetic class com/stripe/android/uicore/elements/IdentifierSpec$$serial
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 }
 
-public final class com/stripe/android/uicore/elements/IdentifierSpec$Companion {
-	public final fun Generic (Ljava/lang/String;)Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getBillingAddress ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getBlik ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getBlikCode ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getCardBrand ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getCardCvc ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getCardExpMonth ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getCardExpYear ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getCardNumber ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getCity ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getCountry ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getDependentLocality ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getEmail ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getLine1 ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getLine2 ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getName ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getOneLineAddress ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getPhone ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getPhoneNumberCountry ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getPostalCode ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getPreferredCardBrand ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getSameAsShipping ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getSaveForFutureUse ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getSetAsDefaultPaymentMethod ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getSortingCode ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getState ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getUpi ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun getVpa ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
 public final class com/stripe/android/uicore/elements/IdentifierSpec$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/uicore/elements/IdentifierSpec;
@@ -195,34 +163,5 @@ public final class com/stripe/android/uicore/image/ComposableSingletons$StripeIm
 	public fun <init> ()V
 	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
-}
-
-public final class com/stripe/android/uicore/text/EmbeddableImage$Bitmap : com/stripe/android/uicore/text/EmbeddableImage {
-	public static final field $stable I
-	public fun <init> (Landroid/graphics/Bitmap;)V
-	public final fun component1 ()Landroid/graphics/Bitmap;
-	public final fun copy (Landroid/graphics/Bitmap;)Lcom/stripe/android/uicore/text/EmbeddableImage$Bitmap;
-	public static synthetic fun copy$default (Lcom/stripe/android/uicore/text/EmbeddableImage$Bitmap;Landroid/graphics/Bitmap;ILjava/lang/Object;)Lcom/stripe/android/uicore/text/EmbeddableImage$Bitmap;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBitmap ()Landroid/graphics/Bitmap;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/uicore/text/EmbeddableImage$Drawable : com/stripe/android/uicore/text/EmbeddableImage {
-	public static final field $stable I
-	public fun <init> (IILandroidx/compose/ui/graphics/ColorFilter;)V
-	public synthetic fun <init> (IILandroidx/compose/ui/graphics/ColorFilter;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()I
-	public final fun component2 ()I
-	public final fun component3 ()Landroidx/compose/ui/graphics/ColorFilter;
-	public final fun copy (IILandroidx/compose/ui/graphics/ColorFilter;)Lcom/stripe/android/uicore/text/EmbeddableImage$Drawable;
-	public static synthetic fun copy$default (Lcom/stripe/android/uicore/text/EmbeddableImage$Drawable;IILandroidx/compose/ui/graphics/ColorFilter;ILjava/lang/Object;)Lcom/stripe/android/uicore/text/EmbeddableImage$Drawable;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getColorFilter ()Landroidx/compose/ui/graphics/ColorFilter;
-	public final fun getContentDescription ()I
-	public final fun getId ()I
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 

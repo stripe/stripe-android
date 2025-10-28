@@ -11,23 +11,6 @@ public final class com/stripe/android/cards/Bin$Creator : android/os/Parcelable$
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/cards/CardNumber$Companion {
-}
-
-public final class com/stripe/android/cards/CardNumber$Unvalidated : com/stripe/android/cards/CardNumber {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/cards/CardNumber$Unvalidated;
-	public static synthetic fun copy$default (Lcom/stripe/android/cards/CardNumber$Unvalidated;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/cards/CardNumber$Unvalidated;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBin ()Lcom/stripe/android/cards/Bin;
-	public final fun getLength ()I
-	public final fun getNormalized ()Ljava/lang/String;
-	public fun hashCode ()I
-	public final fun isMaxLength ()Z
-	public final fun isValidLuhn ()Z
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class com/stripe/android/model/AttachConsumerToLinkAccountSession$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/AttachConsumerToLinkAccountSession;
