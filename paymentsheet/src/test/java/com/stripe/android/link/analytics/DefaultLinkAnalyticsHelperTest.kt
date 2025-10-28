@@ -30,7 +30,7 @@ internal class DefaultLinkAnalyticsHelperTest {
         analyticsHelper.onLinkResult(
             linkActivityResult = LinkActivityResult.PaymentMethodObtained(
                 paymentMethod = PaymentMethod(
-                    id = null,
+                    id = "pm_123",
                     created = null,
                     liveMode = false,
                     code = null,
