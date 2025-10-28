@@ -29,8 +29,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     override val viewModel: PaymentSheetViewModel by viewModels { viewModelFactory }
 
-    private val starterArgs: PaymentSheetContractV2.Args? by lazy {
-        PaymentSheetContractV2.Args.fromIntent(intent)
+    private val starterArgs: PaymentSheetContract.Args? by lazy {
+        PaymentSheetContract.Args.fromIntent(intent)
     }
 
     @OptIn(ExperimentalMaterialApi::class)
@@ -80,7 +80,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
     }
 
-    private fun initializeArgs(): Result<PaymentSheetContractV2.Args?> {
+    private fun initializeArgs(): Result<PaymentSheetContract.Args?> {
         val starterArgs = this.starterArgs
 
         val result = if (starterArgs == null) {
@@ -103,7 +103,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override fun setActivityResult(result: PaymentSheetResult) {
         setResult(
             Activity.RESULT_OK,
-            Intent().putExtras(PaymentSheetContractV2.Result(result).toBundle())
+            Intent().putExtras(PaymentSheetContract.Result(result).toBundle())
         )
     }
 
