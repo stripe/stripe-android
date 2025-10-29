@@ -18,90 +18,83 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
 
     @Test
     fun `configure returns no content if single and multi partner null`() = runTest {
-        val result = configureCoordinator(ResultType.NO_CONTENT)
-
-        assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.NoContent::class.java)
         coordinator.messagingContent.test {
-            val content = awaitItem()
-            assertThat(content).isInstanceOf(PaymentMethodMessagingContent.NoContent::class.java)
+            assertThat(awaitItem()).isNull()
+
+            val result = configureCoordinator(ResultType.NO_CONTENT)
+            assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.NoContent::class.java)
+            assertThat(awaitItem()).isInstanceOf(PaymentMethodMessagingContent.NoContent::class.java)
         }
     }
 
     @Test
     fun `configure returns succeeded if single partner is not null`() = runTest {
-        val result = configureCoordinator(ResultType.SINGLE_PARTNER)
-
-        assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
         coordinator.messagingContent.test {
-            val content = awaitItem()
-            assertThat(content).isInstanceOf(PaymentMethodMessagingContent.SinglePartner::class.java)
+            assertThat(awaitItem()).isNull()
+
+            val result = configureCoordinator(ResultType.SINGLE_PARTNER)
+            assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
+            assertThat(awaitItem()).isInstanceOf(PaymentMethodMessagingContent.SinglePartner::class.java)
         }
     }
 
     @Test
     fun `configure returns succeeded if multi partner is not null`() = runTest {
-        val result = configureCoordinator(ResultType.MULTI_PARTNER)
 
-        assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
         coordinator.messagingContent.test {
-            val content = awaitItem()
-            assertThat(content).isInstanceOf(PaymentMethodMessagingContent.MultiPartner::class.java)
+            assertThat(awaitItem()).isNull()
+
+            val result = configureCoordinator(ResultType.MULTI_PARTNER)
+            assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
+            assertThat(awaitItem()).isInstanceOf(PaymentMethodMessagingContent.MultiPartner::class.java)
         }
     }
 
     @Test
     fun `configure returns failed if call fails`() = runTest {
-        val result = configureCoordinator(ResultType.FAILURE)
 
-        assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Failed::class.java)
-        assertThat((result as? PaymentMethodMessagingElement.ConfigureResult.Failed)?.error?.message).isEqualTo(
-            "Price must be non negative"
-        )
         coordinator.messagingContent.test {
-            val content = awaitItem()
-            assertThat(content).isNull()
+            assertThat(awaitItem()).isNull()
+
+            val result = configureCoordinator(ResultType.FAILURE)
+            assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Failed::class.java)
+            assertThat((result as? PaymentMethodMessagingElement.ConfigureResult.Failed)?.error?.message).isEqualTo(
+                "Price must be non negative"
+            )
+            expectNoEvents()
         }
     }
 
     @Test
     fun `sets content to null on failure`() = runTest {
-        val successfulResult = configureCoordinator(ResultType.MULTI_PARTNER)
-
-        assertThat(successfulResult).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
         coordinator.messagingContent.test {
-            val content = awaitItem()
-            assertThat(content).isInstanceOf(PaymentMethodMessagingContent.MultiPartner::class.java)
-        }
+            assertThat(awaitItem()).isNull()
 
-        val failedResult = configureCoordinator(ResultType.FAILURE)
+            val successfulResult = configureCoordinator(ResultType.MULTI_PARTNER)
+            assertThat(successfulResult)
+                .isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
+            assertThat(awaitItem()).isInstanceOf(PaymentMethodMessagingContent.MultiPartner::class.java)
 
-        assertThat(failedResult).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Failed::class.java)
-        assertThat((failedResult as? PaymentMethodMessagingElement.ConfigureResult.Failed)?.error?.message).isEqualTo(
-            "Price must be non negative"
-        )
-        coordinator.messagingContent.test {
-            val content = awaitItem()
-            assertThat(content).isNull()
+            val failedResult = configureCoordinator(ResultType.FAILURE)
+            assertThat(failedResult).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Failed::class.java)
+            assertThat(awaitItem()).isNull()
         }
     }
 
     @Test
     fun `updates messagingContent with new content`() = runTest {
-        val singlePartnerResult = configureCoordinator(ResultType.SINGLE_PARTNER)
-
-        assertThat(singlePartnerResult)
-            .isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
         coordinator.messagingContent.test {
-            val content = awaitItem()
-            assertThat(content).isInstanceOf(PaymentMethodMessagingContent.SinglePartner::class.java)
-        }
+            assertThat(awaitItem()).isNull()
 
-        val multiPartnerResult = configureCoordinator(ResultType.MULTI_PARTNER)
+            val singlePartnerResult = configureCoordinator(ResultType.SINGLE_PARTNER)
+            assertThat(singlePartnerResult)
+                .isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
+            assertThat(awaitItem()).isInstanceOf(PaymentMethodMessagingContent.SinglePartner::class.java)
 
-        assertThat(multiPartnerResult).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
-        coordinator.messagingContent.test {
-            val content = awaitItem()
-            assertThat(content).isInstanceOf(PaymentMethodMessagingContent.MultiPartner::class.java)
+            val multiPartnerResult = configureCoordinator(ResultType.MULTI_PARTNER)
+            assertThat(multiPartnerResult)
+                .isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
+            assertThat(awaitItem()).isInstanceOf(PaymentMethodMessagingContent.MultiPartner::class.java)
         }
     }
 
