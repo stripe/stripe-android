@@ -58,8 +58,8 @@ internal interface IntentConfirmationModule {
             @Named(STATUS_BAR_COLOR) @ColorInt statusBarColor: Int?,
             paymentConfigurationProvider: Provider<PaymentConfiguration>,
         ): ConfirmationDefinition<*, *, *, *> {
-            return IntentConfirmationDefinition(
-                intentConfirmationInterceptorFactory = interceptorFactory,
+            return IntentConfirmationDefinition.getInstance(
+                interceptorFactory = interceptorFactory,
                 paymentLauncherFactory = { hostActivityLauncher ->
                     stripePaymentLauncherAssistedFactory.create(
                         publishableKey = { paymentConfigurationProvider.get().publishableKey },

@@ -166,4 +166,23 @@ internal class IntentConfirmationDefinition(
 
         data class Confirm(val confirmNextParams: ConfirmStripeIntentParams) : Args
     }
+
+    internal companion object {
+        @Volatile
+        private var instance: IntentConfirmationDefinition? = null
+
+        fun getInstance(
+            interceptorFactory: IntentConfirmationInterceptor.Factory,
+            paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract. Args>) -> PaymentLauncher,
+        ): IntentConfirmationDefinition {
+            return instance ?: synchronized(this) {
+                IntentConfirmationDefinition(
+                    intentConfirmationInterceptorFactory = interceptorFactory,
+                    paymentLauncherFactory = paymentLauncherFactory,
+                ).also {
+                    instance = it
+                }
+            }
+        }
+    }
 }
