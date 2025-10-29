@@ -30,6 +30,7 @@ dependencies {
     implementation libs.compose.material
     implementation libs.compose.navigation
     implementation libs.compose.ui
+    implementation libs.compose.materialIcons
     implementation libs.dagger
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
