@@ -76,6 +76,9 @@ internal open class FakeLinkAccountManager(
 
     override var cachedShippingAddresses: ConsumerShippingAddresses? = null
 
+    val _suggestedEmail = MutableStateFlow<String?>(null)
+    override val suggestedEmail: StateFlow<String?> = _suggestedEmail.asStateFlow()
+
     var lookupConsumerByAuthIntentResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
     var lookupConsumerByLinkAuthTokenResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
     var startVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)

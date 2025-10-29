@@ -29,7 +29,6 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "card",
         authorizationAction = null,
-        executeInNightlyRun = true,
     ).copyPlaygroundSettings { settings ->
         settings[CustomerSettingsDefinition] = CustomerType.NEW
         settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.CreateAndAttach

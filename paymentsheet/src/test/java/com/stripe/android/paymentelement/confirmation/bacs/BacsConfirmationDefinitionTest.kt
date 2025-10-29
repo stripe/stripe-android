@@ -96,6 +96,7 @@ class BacsConfirmationDefinitionTest {
             confirmationOption = createBacsConfirmationOption(),
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
             result = BacsMandateConfirmationResult.Confirmed,
         )
 
@@ -126,6 +127,7 @@ class BacsConfirmationDefinitionTest {
                 confirmationOption = createBacsConfirmationOption(),
                 confirmationArgs = CONFIRMATION_PARAMETERS,
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
                 result = BacsMandateConfirmationResult.Cancelled,
             )
 
@@ -145,6 +147,7 @@ class BacsConfirmationDefinitionTest {
                 confirmationOption = createBacsConfirmationOption(),
                 confirmationArgs = CONFIRMATION_PARAMETERS,
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
                 result = BacsMandateConfirmationResult.ModifyDetails,
             )
 

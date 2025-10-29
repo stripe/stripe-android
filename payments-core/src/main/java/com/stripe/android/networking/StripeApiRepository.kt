@@ -1491,24 +1491,22 @@ class StripeApiRepository @JvmOverloads internal constructor(
         paymentMethods: List<String>,
         amount: Int,
         currency: String,
-        country: String,
+        country: String?,
         locale: String,
-        logoColor: String,
         requestOptions: ApiRequest.Options
     ): Result<PaymentMethodMessage> {
         return fetchStripeModelResult(
             apiRequestFactory.createGet(
-                url = "https://ppm.stripe.com/content",
+                url = "https://ppm.stripe.com/config",
                 options = requestOptions,
-                params = mapOf<String, Any>(
+                params = mapOf<String, Any?>(
                     "amount" to amount,
-                    "client" to "android",
                     "country" to country,
                     "currency" to currency,
                     "locale" to locale,
-                    "logo_color" to logoColor,
+                    "key" to requestOptions.apiKey
                 ) + paymentMethods.mapIndexed { index, paymentMethod ->
-                    Pair("payment_methods[$index]", paymentMethod)
+                    "payment_methods[$index]" to paymentMethod
                 }
             ),
             PaymentMethodMessageJsonParser()

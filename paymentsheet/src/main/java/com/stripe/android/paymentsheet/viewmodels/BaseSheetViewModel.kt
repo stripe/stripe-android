@@ -223,6 +223,12 @@ internal abstract class BaseSheetViewModel(
 
     abstract fun onError(error: ResolvableString? = null)
 
+    override fun onCleared() {
+        super.onCleared()
+        newPaymentSelection = null
+        savedStateHandle.set<PaymentSelection?>(SAVE_SELECTION, null)
+    }
+
     companion object {
         internal const val SAVE_SELECTION = "selection"
         internal const val SAVE_PROCESSING = "processing"

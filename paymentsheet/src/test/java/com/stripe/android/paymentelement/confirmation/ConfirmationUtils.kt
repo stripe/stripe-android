@@ -107,6 +107,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                 createIntentCallback: CreateIntentWithConfirmationTokenCallback,
                 customerId: String?,
                 ephemeralKeySecret: String?,
+                clientAttributionMetadata: ClientAttributionMetadata?,
             ): ConfirmationTokenConfirmationInterceptor {
                 return ConfirmationTokenConfirmationInterceptor(
                     intentConfiguration = intentConfiguration,
@@ -117,6 +118,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     stripeRepository = stripeRepository,
                     requestOptions = requestOptions,
                     userFacingLogger = FakeUserFacingLogger(),
+                    clientAttributionMetadata = clientAttributionMetadata,
                 )
             }
         },

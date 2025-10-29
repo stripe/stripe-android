@@ -131,11 +131,6 @@ class SimpleConfirmationActivity : StripeIntentActivity() {
             R.drawable.ic_brandicon__eps,
             PaymentMethodCreateParams.Companion::createEps
         ),
-        Giropay(
-            "de",
-            R.drawable.ic_brandicon__giropay,
-            PaymentMethodCreateParams.Companion::createGiropay
-        ),
         GrabPay(
             "sg",
             R.drawable.ic_brandicon_grabpay,

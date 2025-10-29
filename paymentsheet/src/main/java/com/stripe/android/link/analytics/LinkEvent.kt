@@ -28,6 +28,10 @@ internal sealed class LinkEvent : AnalyticsEvent {
         override val eventName = "link.signup.failure.invalidSessionState"
     }
 
+    object EmailSuggestionAccepted : LinkEvent() {
+        override val eventName = "link.email_suggestion.accepted"
+    }
+
     object AccountLookupFailure : LinkEvent() {
         override val eventName = "link.account_lookup.failure"
     }

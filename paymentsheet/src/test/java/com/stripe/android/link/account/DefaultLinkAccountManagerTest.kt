@@ -409,6 +409,7 @@ class DefaultLinkAccountManagerTest {
                 userEmail: String,
                 stripeIntent: StripeIntent,
                 consumerSessionClientSecret: String,
+                clientAttributionMetadata: ClientAttributionMetadata,
             ): Result<LinkPaymentDetails.New> {
                 val details = result.first()
                 if (result.size > 1) {
@@ -718,7 +719,11 @@ class DefaultLinkAccountManagerTest {
         linkRepository.updatePaymentDetailsResult = Result.failure(error)
 
         val result = accountManager.updatePaymentDetails(
-            updateParams = ConsumerPaymentDetailsUpdateParams("")
+            updateParams = ConsumerPaymentDetailsUpdateParams(
+                "",
+                clientAttributionMetadataParams =
+                PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.toParamMap(),
+            )
         )
 
         assertThat(result.exceptionOrNull()).isEqualTo(error)
@@ -733,7 +738,13 @@ class DefaultLinkAccountManagerTest {
 
         linkRepository.updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
 
-        val result = accountManager.updatePaymentDetails(ConsumerPaymentDetailsUpdateParams(""))
+        val result = accountManager.updatePaymentDetails(
+            ConsumerPaymentDetailsUpdateParams(
+                "",
+                clientAttributionMetadataParams =
+                PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.toParamMap(),
+            )
+        )
 
         assertThat(result.getOrNull()).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS)
     }

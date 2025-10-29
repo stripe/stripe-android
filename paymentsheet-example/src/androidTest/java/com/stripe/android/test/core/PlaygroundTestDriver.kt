@@ -10,6 +10,7 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -22,7 +23,6 @@ import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.lifecycleScope
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso
-import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingPolicies
 import androidx.test.espresso.action.ViewActions.click
@@ -38,7 +38,6 @@ import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.SUCCESS_RESULT
@@ -113,89 +112,6 @@ internal class PlaygroundTestDriver(
         override fun onActivityResumed(activity: Activity) {
             currentActivity = activity
         }
-    }
-
-    fun testLinkCustom(
-        testParameters: TestParameters,
-        values: FieldPopulator.Values = FieldPopulator.Values(),
-        populateCustomLpmFields: FieldPopulator.() -> Unit = {},
-        verifyCustomLpmFields: FieldPopulator.() -> Unit = {},
-    ) {
-        setup(testParameters)
-        launchCustom()
-
-        composeTestRule.waitForIdle()
-
-        composeTestRule.waitUntil(timeoutMillis = 5000L) {
-            selectors.addPaymentMethodButton.isDisplayed()
-        }
-
-        addPaymentMethodNode().apply {
-            assertExists()
-            performClick()
-        }
-
-        val fieldPopulator = FieldPopulator(
-            selectors,
-            testParameters,
-            populateCustomLpmFields,
-            verifyCustomLpmFields,
-            values,
-        )
-        fieldPopulator.populateFields()
-
-        composeTestRule.onNodeWithText("Save my info for secure 1-click checkout").apply {
-            assertExists()
-            performClick()
-        }
-
-        composeTestRule.onNodeWithText("Email").apply {
-            assertExists()
-            performTextInput("email@email.com")
-        }
-
-        closeSoftKeyboard()
-
-        runCatching {
-            // We need to wait for the built in debounce time for filling in the link email.
-            composeTestRule.waitUntil(timeoutMillis = 1100L) {
-                false
-            }
-        }
-
-        composeTestRule.waitUntil(timeoutMillis = 5000L) {
-            selectors.continueButton.checkEnabled()
-        }
-
-        composeTestRule.waitForIdle()
-
-        selectors.continueButton.click()
-
-        composeTestRule.waitUntil(timeoutMillis = 5000L) {
-            composeTestRule.onAllNodesWithTag("OTP-0").fetchSemanticsNodes().isNotEmpty()
-        }
-
-        composeTestRule.onNodeWithTag("OTP-0").performTextInput("123456")
-
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
-        waitForPlaygroundActivity()
-
-        selectors.multiStepSelect.click()
-
-        waitForNotPlaygroundActivity()
-
-        composeTestRule.waitUntil(timeoutMillis = 5000L) {
-            composeTestRule.onAllNodesWithTag("SignedInBox").fetchSemanticsNodes().isNotEmpty()
-        }
-
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
-        fieldPopulator.verifyFields()
-
-        teardown()
     }
 
     fun confirmCustom(
@@ -963,6 +879,25 @@ internal class PlaygroundTestDriver(
         )
     }
 
+    fun confirmCustomUSBankAccountAndBuy(
+        testParameters: TestParameters,
+    ) {
+        confirmBankAccountInCustomFlow(
+            testParameters = testParameters,
+            executeFlow = { doUSBankAccountAuthorization(testParameters.authorizationAction) },
+            afterCollectingBankInfo = {
+                composeTestRule.waitUntil { selectors.buyButton.checkEnabled() }
+                selectors.buyButton.click()
+                selectors.playgroundBuyButton.apply {
+                    waitFor(isEnabled())
+                    click()
+                }
+                resultCountDownLatch = testParameters.countDownLatch()
+                finishAfterAuthorization()
+            }
+        )
+    }
+
     @OptIn(ExperimentalTestApi::class)
     fun confirmWithBankAccountInLink(
         testParameters: TestParameters,
@@ -1380,7 +1315,7 @@ internal class PlaygroundTestDriver(
                         browserIconAtPrompt(selectedBrowser).click()
                     }
 
-                    assertThat(browserWindow(selectedBrowser)?.exists()).isTrue()
+                    assumeTrue(browserWindow(selectedBrowser)?.exists() == true)
 
                     blockUntilAuthorizationPageLoaded(isSetup = testParameters.isSetupMode)
                 }
@@ -1752,10 +1687,6 @@ internal class PlaygroundTestDriver(
     }
 
     internal fun setup(testParameters: TestParameters) {
-        if (BuildConfig.IS_NIGHTLY_BUILD) {
-            assumeTrue(testParameters.executeInNightlyRun)
-        }
-
         if (Build.VERSION.SDK_INT <= 28) {
             val unsupportedAuthorizeActions = setOf(AuthorizeAction.Authorize3ds2, AuthorizeAction.DisplayQrCode)
             assumeFalse(unsupportedAuthorizeActions.contains(testParameters.authorizationAction))

@@ -1,6 +1,4 @@
 gradle.ext.isCi = System.getenv().containsKey("CI") && System.getenv("CI").contains("true")
 println "Running on CI: ${gradle.ext.isCi}"
-gradle.ext.isNightlyBuild = project.hasProperty("IS_NIGHTLY_BUILD") && project.IS_NIGHTLY_BUILD.contains("true")
-println "IS_NIGHTLY_BUILD: ${gradle.ext.isNightlyBuild}"
 gradle.ext.isBrowserstackBuild = project.hasProperty("IS_BROWSERSTACK_BUILD") && project.IS_BROWSERSTACK_BUILD.contains("true")
 println "IS_BROWSERSTACK_BUILD: ${gradle.ext.isBrowserstackBuild}"

@@ -68,6 +68,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                             createIntentCallback = deferredIntentCallback.callback,
                             customerId = customerId,
                             ephemeralKeySecret = ephemeralKeySecret,
+                            clientAttributionMetadata = clientAttributionMetadata,
                         )
                     }
                     is DeferredIntentCallback.PaymentMethod -> {

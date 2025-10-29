@@ -39,7 +39,6 @@ import org.junit.runner.RunWith
 internal class TestUSBankAccount : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "us_bank_account",
-        executeInNightlyRun = true,
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.US
         settings[CurrencySettingsDefinition] = Currency.USD
@@ -158,8 +157,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                 .copyPlaygroundSettings {
                     it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
                     it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable)] = true
-                }
-                .copy(executeInNightlyRun = false),
+                },
             afterAuthorization = { _, _ ->
                 ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
                     .waitFor(isEnabled())
@@ -241,22 +239,8 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                     it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable)] = true
                 }.copy(
                     authorizationAction = AuthorizeAction.Cancel,
-                    executeInNightlyRun = false
                 ),
             afterAuthorization = { _, _ ->
-                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-                    .waitFor(isEnabled())
-            }
-        )
-    }
-
-    @Test
-    fun testUSBankAccountCancelAllowsUserToContinueInCustomFlow() {
-        testDriver.confirmCustomUSBankAccount(
-            testParameters = testParameters.copy(
-                authorizationAction = AuthorizeAction.Cancel,
-            ),
-            afterAuthorization = {
                 ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
                     .waitFor(isEnabled())
             }

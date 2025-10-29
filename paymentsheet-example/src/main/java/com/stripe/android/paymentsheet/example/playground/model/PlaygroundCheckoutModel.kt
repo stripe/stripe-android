@@ -50,6 +50,8 @@ class CheckoutRequest private constructor(
     val paymentMethodSetAsDefaultFeature: FeatureState?,
     @SerialName("payment_method_options_setup_future_usage")
     val paymentMethodOptionsSetupFutureUsage: Map<String, String>?,
+    @SerialName("is_confirmation_token")
+    val isConfirmationToken: Boolean?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -86,6 +88,7 @@ class CheckoutRequest private constructor(
         private var paymentMethodOverrideRedisplay: AllowRedisplayFilter? = null
         private var paymentMethodOptionsSetupFutureUsage: Map<String, String>? = null
         private var overridePaymentMethodOptionsSetupFutureUsage: Map<String, String>? = null
+        private var isConfirmationToken: Boolean? = null
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -171,6 +174,10 @@ class CheckoutRequest private constructor(
             this.overridePaymentMethodOptionsSetupFutureUsage = valuesMap
         }
 
+        fun isConfirmationToken(isConfirmationToken: Boolean?) = apply {
+            this.isConfirmationToken = isConfirmationToken
+        }
+
         fun build(): CheckoutRequest {
             return CheckoutRequest(
                 initialization = initialization,
@@ -196,7 +203,8 @@ class CheckoutRequest private constructor(
                 paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
                 paymentMethodOverrideRedisplay = paymentMethodOverrideRedisplay,
                 paymentMethodOptionsSetupFutureUsage = overridePaymentMethodOptionsSetupFutureUsage
-                    ?: paymentMethodOptionsSetupFutureUsage
+                    ?: paymentMethodOptionsSetupFutureUsage,
+                isConfirmationToken = isConfirmationToken
             )
         }
     }

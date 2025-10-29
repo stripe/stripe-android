@@ -21,7 +21,7 @@ android {
 
 dependencies {
     implementation project(":stripe-core")
-    implementation project(":payments-core")
+    api project(":payments-core")
     implementation project(":payments-ui-core")
     implementation project(":stripe-ui-core")
     implementation libs.androidx.annotation
@@ -36,6 +36,7 @@ dependencies {
 
     ksp libs.daggerCompiler
 
+    testImplementation project(':payments-core-testing')
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.junitKtx

@@ -28,6 +28,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -871,6 +872,76 @@ internal class SignUpViewModelTest {
             ),
             redactedFormattedPhoneNumber = ""
         )
+    }
+
+    @Test
+    fun `When lookup returns suggested email then state is updated`() = runTest(dispatcher) {
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.lookupResult = Result.success(null)
+
+        val viewModel = createViewModel(
+            prefilledEmail = null,
+            linkAccountManager = linkAccountManager
+        )
+
+        // Simulate suggested email from LinkAccountManager
+        linkAccountManager._suggestedEmail.value = "user@example.com"
+        runCurrent()
+
+        assertThat(viewModel.state.value.suggestedEmail).isEqualTo("user@example.com")
+    }
+
+    @Test
+    fun `When onSuggestedEmailClick is called then email is updated and lookup triggered`() = runTest(dispatcher) {
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.lookupResult = Result.success(null)
+
+        val viewModel = createViewModel(
+            prefilledEmail = null,
+            linkAccountManager = linkAccountManager
+        )
+
+        viewModel.emailController.onRawValueChange("user@example.con")
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+        // Verify initial lookup was called
+        assertThat(linkAccountManager.lookupCalls).hasSize(1)
+        assertThat(linkAccountManager.lookupCalls[0].email).isEqualTo("user@example.con")
+
+        // Click suggested email
+        viewModel.onSuggestedEmailClick("user@example.com")
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+        // Verify email was updated and new lookup was triggered
+        assertThat(viewModel.emailController.fieldValue.value).isEqualTo("user@example.com")
+        assertThat(linkAccountManager.lookupCalls).hasSize(2)
+        assertThat(linkAccountManager.lookupCalls[1].email).isEqualTo("user@example.com")
+    }
+
+    @Test
+    fun `When email changes suggested email is cleared`() = runTest(dispatcher) {
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.lookupResult = Result.success(null)
+
+        val viewModel = createViewModel(
+            prefilledEmail = null,
+            linkAccountManager = linkAccountManager
+        )
+
+        // Set suggested email
+        linkAccountManager._suggestedEmail.value = "user@example.com"
+        runCurrent()
+        assertThat(viewModel.state.value.suggestedEmail).isEqualTo("user@example.com")
+
+        // Change email to trigger new lookup
+        viewModel.emailController.onRawValueChange("different@email.com")
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+        // Simulate manager clearing suggestion after new lookup (like real implementation does)
+        linkAccountManager._suggestedEmail.value = null
+        runCurrent()
+
+        assertThat(viewModel.state.value.suggestedEmail).isNull()
     }
 
     private val SignUpViewModel.contentState: SignUpScreenState

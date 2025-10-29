@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -30,6 +31,7 @@ import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.RadarOptionsFactory
 import kotlinx.coroutines.test.runTest
 import javax.inject.Provider
 
@@ -160,9 +162,20 @@ internal fun stripeRepositoryReturning(
 }
 
 internal fun assertRadarOptionsEquals(confirmParams: ConfirmStripeIntentParams?, expectedToken: String) {
-    assertThat(confirmParams?.radarOptions()?.hCaptchaToken).isEqualTo(expectedToken)
+    assertThat(confirmParams?.radarOptions())
+        .isEqualTo(
+            RadarOptionsFactory.create(
+                hCaptchaToken = expectedToken,
+                verificationObject = AndroidVerificationObject(null)
+            )
+        )
 }
 
 internal fun assertRadarOptionsIsNull(confirmParams: ConfirmStripeIntentParams?) {
-    assertThat(confirmParams?.radarOptions()?.hCaptchaToken).isNull()
+    assertThat(confirmParams?.radarOptions()).isEqualTo(
+        RadarOptionsFactory.create(
+            hCaptchaToken = null,
+            verificationObject = AndroidVerificationObject(null)
+        )
+    )
 }

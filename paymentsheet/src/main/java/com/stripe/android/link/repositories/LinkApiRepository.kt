@@ -220,6 +220,7 @@ internal class LinkApiRepository @Inject constructor(
         userEmail: String,
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): Result<LinkPaymentDetails.New> = withContext(workContext) {
         consumersApiService.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
@@ -237,7 +238,8 @@ internal class LinkApiRepository @Inject constructor(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = consumerSessionClientSecret,
                 extraParams = extraParams,
-                allowRedisplay = paymentMethodCreateParams.allowRedisplay
+                allowRedisplay = paymentMethodCreateParams.allowRedisplay,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
 
             LinkPaymentDetails.New(
@@ -316,7 +318,8 @@ internal class LinkApiRepository @Inject constructor(
                 paymentMethodCreateParams = PaymentMethodCreateParams.createLink(
                     paymentDetailsId = paymentMethodId,
                     consumerSessionClientSecret = consumerSessionClientSecret,
-                    extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
+                    extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
+                    clientAttributionMetadata = clientAttributionMetadata,
                 ),
             )
         }
@@ -365,12 +368,14 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun createPaymentMethod(
         consumerSessionClientSecret: String,
         paymentMethod: LinkPaymentMethod,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): Result<PaymentMethod> = withContext(workContext) {
         val params = createPaymentMethodCreateParams(
             selectedPaymentDetails = paymentMethod.details,
             consumerSessionClientSecret = consumerSessionClientSecret,
             cvc = paymentMethod.collectedCvc,
             billingPhone = paymentMethod.billingPhone,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
         stripeRepository.createPaymentMethod(
             paymentMethodCreateParams = params,

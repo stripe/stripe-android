@@ -532,9 +532,9 @@ internal class VerticalModePaymentSheetActivityTest {
         networkSetup()
 
         ActivityScenario.launch<PaymentSheetActivity>(
-            PaymentSheetContractV2().createIntent(
+            PaymentSheetContract().createIntent(
                 ApplicationProvider.getApplicationContext(),
-                PaymentSheetContractV2.Args(
+                PaymentSheetContract.Args(
                     initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                         clientSecret = "pi_1234_secret_5678",
                     ),

@@ -62,22 +62,11 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
-    internal val SOFORT = PaymentMethodCreateParams.create(
-        sofort = PaymentMethodCreateParams.Sofort(
-            country = "DE"
-        ),
-        billingDetails = BILLING_DETAILS
-    )
-
     internal val P24 = PaymentMethodCreateParams.createP24(
         billingDetails = BILLING_DETAILS
     )
 
     internal val BANCONTACT = PaymentMethodCreateParams.createBancontact(
-        billingDetails = BILLING_DETAILS
-    )
-
-    internal val GIROPAY = PaymentMethodCreateParams.createGiropay(
         billingDetails = BILLING_DETAILS
     )
 

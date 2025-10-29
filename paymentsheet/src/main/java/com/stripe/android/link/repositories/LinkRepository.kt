@@ -111,6 +111,7 @@ internal interface LinkRepository {
         userEmail: String,
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): Result<LinkPaymentDetails.New>
 
     suspend fun createBankAccountPaymentDetails(
@@ -140,7 +141,8 @@ internal interface LinkRepository {
 
     suspend fun createPaymentMethod(
         consumerSessionClientSecret: String,
-        paymentMethod: LinkPaymentMethod
+        paymentMethod: LinkPaymentMethod,
+        clientAttributionMetadata: ClientAttributionMetadata
     ): Result<PaymentMethod>
 
     suspend fun logOut(
