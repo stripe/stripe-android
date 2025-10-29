@@ -7,6 +7,8 @@
   <string name="stripe_account_picker_error_no_payment_method_desc_singular">Chúng tôi tìm thấy %1$s%2$s tài khoản nhưng bạn chỉ có thể liên kết các tài khoản vãng lai hoặc tài khoản tiết kiệm với %3$s. Vui lòng thử chọn ngân hàng khác.</string>
   <string name="stripe_account_picker_error_no_payment_method_title">Không có tài khoản thanh toán khả dụng</string>
   <string name="stripe_account_picker_multiselect_account">Chọn tài khoản</string>
+  <!-- The title of the loading screen that appears when a user just logged into their bank account, and now is waiting for their bank accounts to load. Once the bank accounts are loaded, user will be able to pick the bank account they want to to use for things like payments. -->
+  <string name="stripe_account_picker_retrieving_accounts">Đang truy xuất tài khoản...</string>
   <!-- Account picker -->
   <string name="stripe_account_picker_singleselect_account">Chọn một tài khoản</string>
   <string name="stripe_accounts_error_desc_manualentry">Vui lòng nhập thông tin ngân hàng của bạn theo cách thủ công hoặc chọn một ngân hàng khác.</string>

@@ -7,6 +7,8 @@
   <string name="stripe_account_picker_error_no_payment_method_desc_singular">Našli sme %1$s%2$s účet, ale môžete prepojiť len bežné alebo sporiace účty s %3$s. Skúste vybrať inú banku.</string>
   <string name="stripe_account_picker_error_no_payment_method_title">Nie sú k dispozícii žiadne platobné účty</string>
   <string name="stripe_account_picker_multiselect_account">Vybrať účty</string>
+  <!-- The title of the loading screen that appears when a user just logged into their bank account, and now is waiting for their bank accounts to load. Once the bank accounts are loaded, user will be able to pick the bank account they want to to use for things like payments. -->
+  <string name="stripe_account_picker_retrieving_accounts">Načítavanie účtov...</string>
   <!-- Account picker -->
   <string name="stripe_account_picker_singleselect_account">Vybrať účet</string>
   <string name="stripe_accounts_error_desc_manualentry">Zadajte bankové údaje manuálne alebo vyberte inú banku.</string>

@@ -7,6 +7,8 @@
   <string name="stripe_account_picker_error_no_payment_method_desc_singular">Am găsit %1$s %2$s cont, dar puteți conecta doar conturi curente sau de economii la %3$s. Încercați să selectați o altă bancă.</string>
   <string name="stripe_account_picker_error_no_payment_method_title">Niciun cont de plată disponibil</string>
   <string name="stripe_account_picker_multiselect_account">Selectare conturi</string>
+  <!-- The title of the loading screen that appears when a user just logged into their bank account, and now is waiting for their bank accounts to load. Once the bank accounts are loaded, user will be able to pick the bank account they want to to use for things like payments. -->
+  <string name="stripe_account_picker_retrieving_accounts">Se recuperează conturile...</string>
   <!-- Account picker -->
   <string name="stripe_account_picker_singleselect_account">Selectați un cont</string>
   <string name="stripe_accounts_error_desc_manualentry">Vă rugăm să introduceți detaliile dvs. bancare manual sau să selectați o altă bancă.</string>

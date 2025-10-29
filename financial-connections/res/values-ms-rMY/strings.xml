@@ -7,6 +7,8 @@
   <string name="stripe_account_picker_error_no_payment_method_desc_singular">Kami menemui %1$s %2$s akaun tetapi anda hanya boleh memautkan akaun semasa atau simpanan kepada %3$s. Sila cuba pilih bank yang lain.</string>
   <string name="stripe_account_picker_error_no_payment_method_title">Tiada akaun pembayaran tersedia</string>
   <string name="stripe_account_picker_multiselect_account">Pilih akaun</string>
+  <!-- The title of the loading screen that appears when a user just logged into their bank account, and now is waiting for their bank accounts to load. Once the bank accounts are loaded, user will be able to pick the bank account they want to to use for things like payments. -->
+  <string name="stripe_account_picker_retrieving_accounts">Akaun sedang didapatkan kembali...</string>
   <!-- Account picker -->
   <string name="stripe_account_picker_singleselect_account">Pilih akaun</string>
   <string name="stripe_accounts_error_desc_manualentry">Sila masukkan butiran bank anda secara manual atau pilih bank yang lain.</string>
