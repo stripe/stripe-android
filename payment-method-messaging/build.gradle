@@ -36,6 +36,7 @@ dependencies {
 
     ksp libs.daggerCompiler
 
+    testImplementation project(':payments-core-testing')
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.junitKtx
