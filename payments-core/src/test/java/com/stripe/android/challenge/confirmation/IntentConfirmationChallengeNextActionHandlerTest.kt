@@ -1,8 +1,6 @@
 package com.stripe.android.challenge.confirmation
 
 import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.ActivityResultCaller
-import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
@@ -14,19 +12,17 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -39,35 +35,38 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
         on { lifecycleOwner } doReturn TestLifecycleOwner(initialState = Lifecycle.State.RESUMED)
     }
 
-    private val mockActivityResultLauncher =
-        mock<ActivityResultLauncher<IntentConfirmationChallengeActivityContract.Args>>()
-
-    private val argsCaptor: KArgumentCaptor<IntentConfirmationChallengeActivityContract.Args> = argumentCaptor()
-
     @Test
     fun `performNextActionOnResumed uses Modern starter when launcher is set`() = runTest {
-        val handler = IntentConfirmationChallengeNextActionHandler(
-            publishableKeyProvider = { publishableKey },
-            productUsageTokens = productUsageTokens,
-            uiContext = testDispatcher
-        )
+        DummyActivityResultCaller.test {
+            val handler = IntentConfirmationChallengeNextActionHandler(
+                publishableKeyProvider = { publishableKey },
+                productUsageTokens = productUsageTokens,
+                uiContext = testDispatcher
+            )
 
-        handler.intentConfirmationChallengeActivityContractNextActionLauncher = mockActivityResultLauncher
+            val resultCallback = mutableListOf<PaymentFlowResult.Unvalidated>()
+            handler.onNewActivityResultCaller(
+                activityResultCaller = activityResultCaller,
+                activityResultCallback = { result -> resultCallback.add(result) }
+            )
 
-        val paymentIntent = createTestPaymentIntent()
+            // Wait for registration to complete
+            awaitRegisterCall()
+            awaitNextRegisteredLauncher()
 
-        handler.performNextAction(
-            host,
-            paymentIntent,
-            REQUEST_OPTIONS
-        )
+            val paymentIntent = createTestPaymentIntent()
 
-        verify(mockActivityResultLauncher).launch(argsCaptor.capture())
+            handler.performNextAction(
+                host,
+                paymentIntent,
+                REQUEST_OPTIONS
+            )
 
-        val capturedArgs = argsCaptor.firstValue
-        assertThat(capturedArgs.publishableKey).isEqualTo(publishableKey)
-        assertThat(capturedArgs.productUsage).isEqualTo(productUsageTokens)
-        assertThat(capturedArgs.intent).isEqualTo(paymentIntent)
+            val launchArgs = awaitLaunchCall() as IntentConfirmationChallengeActivityContract.Args
+            assertThat(launchArgs.publishableKey).isEqualTo(publishableKey)
+            assertThat(launchArgs.productUsage).isEqualTo(productUsageTokens)
+            assertThat(launchArgs.intent).isEqualTo(paymentIntent)
+        }
     }
 
     @Test
@@ -96,111 +95,98 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
         )
     }
 
+    @Suppress("UNCHECKED_CAST")
     @Test
-    fun `onNewActivityResultCaller registers for activity result and handles Success`() {
-        val handler = IntentConfirmationChallengeNextActionHandler(
-            publishableKeyProvider = { publishableKey },
-            productUsageTokens = productUsageTokens,
-            uiContext = testDispatcher
-        )
-
-        val mockActivityResultCaller = mock<ActivityResultCaller>()
-        val mockCallback = mock<ActivityResultCallback<PaymentFlowResult.Unvalidated>>()
-        val resultCaptor: KArgumentCaptor<PaymentFlowResult.Unvalidated> = argumentCaptor()
-
-        val successResult = IntentConfirmationChallengeActivityResult.Success(
-            clientSecret = "pi_test_secret"
-        )
-
-        // Set up the mock to capture the callback and invoke it with successResult
-        whenever(
-            mockActivityResultCaller.registerForActivityResult(
-                any<IntentConfirmationChallengeActivityContract>(),
-                any()
+    fun `onNewActivityResultCaller registers for activity result and handles Success`() = runTest {
+        DummyActivityResultCaller.test {
+            val handler = IntentConfirmationChallengeNextActionHandler(
+                publishableKeyProvider = { publishableKey },
+                productUsageTokens = productUsageTokens,
+                uiContext = testDispatcher
             )
-        ).thenAnswer { invocation ->
-            @Suppress("UNCHECKED_CAST")
-            val callback = invocation.getArgument<ActivityResultCallback<IntentConfirmationChallengeActivityResult>>(1)
-            // Invoke the callback immediately with our test result
+
+            val resultCallback = mutableListOf<PaymentFlowResult.Unvalidated>()
+            handler.onNewActivityResultCaller(
+                activityResultCaller = activityResultCaller,
+                activityResultCallback = { result -> resultCallback.add(result) }
+            )
+
+            val registerCall = awaitRegisterCall()
+            awaitNextRegisteredLauncher()
+            assertThat(registerCall.contract).isInstanceOf(IntentConfirmationChallengeActivityContract::class.java)
+
+            // Simulate successful result
+            val successResult = IntentConfirmationChallengeActivityResult.Success(
+                clientSecret = "pi_test_secret"
+            )
+            val callback = registerCall.callback as ActivityResultCallback<IntentConfirmationChallengeActivityResult>
             callback.onActivityResult(successResult)
-            mockActivityResultLauncher
+
+            assertThat(resultCallback).hasSize(1)
+            val capturedResult = resultCallback[0]
+            assertThat(capturedResult.clientSecret).isEqualTo("pi_test_secret")
+            assertThat(capturedResult.flowOutcome).isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
+            assertThat(capturedResult.exception).isNull()
         }
-
-        handler.onNewActivityResultCaller(mockActivityResultCaller, mockCallback)
-
-        verify(mockCallback).onActivityResult(resultCaptor.capture())
-
-        val capturedResult = resultCaptor.firstValue
-        assertThat(capturedResult.clientSecret).isEqualTo("pi_test_secret")
-        assertThat(capturedResult.flowOutcome).isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
-        assertThat(capturedResult.exception).isNull()
     }
 
+    @Suppress("UNCHECKED_CAST")
     @Test
-    fun `onNewActivityResultCaller registers for activity result and handles Failed`() {
-        val handler = IntentConfirmationChallengeNextActionHandler(
-            publishableKeyProvider = { publishableKey },
-            productUsageTokens = productUsageTokens,
-            uiContext = testDispatcher
-        )
-
-        val mockActivityResultCaller = mock<ActivityResultCaller>()
-        val mockCallback = mock<ActivityResultCallback<PaymentFlowResult.Unvalidated>>()
-        val resultCaptor: KArgumentCaptor<PaymentFlowResult.Unvalidated> = argumentCaptor()
-
-        val testError = Throwable("Test error")
-        val failedResult = IntentConfirmationChallengeActivityResult.Failed(
-            error = testError
-        )
-
-        // Set up the mock to capture the callback and invoke it with failedResult
-        whenever(
-            mockActivityResultCaller.registerForActivityResult(
-                any<IntentConfirmationChallengeActivityContract>(),
-                any()
+    fun `onNewActivityResultCaller registers for activity result and handles Failed`() = runTest {
+        DummyActivityResultCaller.test {
+            val handler = IntentConfirmationChallengeNextActionHandler(
+                publishableKeyProvider = { publishableKey },
+                productUsageTokens = productUsageTokens,
+                uiContext = testDispatcher
             )
-        ).thenAnswer { invocation ->
-            @Suppress("UNCHECKED_CAST")
-            val callback = invocation.getArgument<ActivityResultCallback<IntentConfirmationChallengeActivityResult>>(1)
-            // Invoke the callback immediately with our test result
+
+            val resultCallback = mutableListOf<PaymentFlowResult.Unvalidated>()
+            handler.onNewActivityResultCaller(
+                activityResultCaller = activityResultCaller,
+                activityResultCallback = { result -> resultCallback.add(result) }
+            )
+
+            val registerCall = awaitRegisterCall()
+            awaitNextRegisteredLauncher()
+            assertThat(registerCall.contract).isInstanceOf(IntentConfirmationChallengeActivityContract::class.java)
+
+            // Simulate failed result
+            val testError = Throwable("Test error")
+            val failedResult = IntentConfirmationChallengeActivityResult.Failed(
+                error = testError
+            )
+            val callback = registerCall.callback as ActivityResultCallback<IntentConfirmationChallengeActivityResult>
             callback.onActivityResult(failedResult)
-            mockActivityResultLauncher
+
+            assertThat(resultCallback).hasSize(1)
+            val capturedResult = resultCallback[0]
+            assertThat(capturedResult.flowOutcome).isEqualTo(StripeIntentResult.Outcome.FAILED)
+            assertThat(capturedResult.exception).isInstanceOf(StripeException::class.java)
+            assertThat(capturedResult.exception?.message).isEqualTo("Test error")
         }
-
-        handler.onNewActivityResultCaller(mockActivityResultCaller, mockCallback)
-
-        verify(mockCallback).onActivityResult(resultCaptor.capture())
-
-        val capturedResult = resultCaptor.firstValue
-        assertThat(capturedResult.flowOutcome).isEqualTo(StripeIntentResult.Outcome.FAILED)
-        assertThat(capturedResult.exception).isInstanceOf(StripeException::class.java)
-        assertThat(capturedResult.exception?.message).isEqualTo("Test error")
     }
 
     @Test
-    fun `onNewActivityResultCaller sets the launcher on handler`() {
-        val handler = IntentConfirmationChallengeNextActionHandler(
-            publishableKeyProvider = { publishableKey },
-            productUsageTokens = productUsageTokens,
-            uiContext = testDispatcher
-        )
-
-        val mockActivityResultCaller = mock<ActivityResultCaller>()
-        val mockCallback = mock<ActivityResultCallback<PaymentFlowResult.Unvalidated>>()
-
-        whenever(
-            mockActivityResultCaller.registerForActivityResult(
-                any<IntentConfirmationChallengeActivityContract>(),
-                any()
+    fun `onNewActivityResultCaller sets the launcher on handler`() = runTest {
+        DummyActivityResultCaller.test {
+            val handler = IntentConfirmationChallengeNextActionHandler(
+                publishableKeyProvider = { publishableKey },
+                productUsageTokens = productUsageTokens,
+                uiContext = testDispatcher
             )
-        ).thenReturn(mockActivityResultLauncher)
 
-        assertThat(handler.intentConfirmationChallengeActivityContractNextActionLauncher).isNull()
+            assertThat(handler.intentConfirmationChallengeActivityContractNextActionLauncher).isNull()
 
-        handler.onNewActivityResultCaller(mockActivityResultCaller, mockCallback)
+            handler.onNewActivityResultCaller(
+                activityResultCaller = activityResultCaller,
+                activityResultCallback = {}
+            )
 
-        assertThat(handler.intentConfirmationChallengeActivityContractNextActionLauncher)
-            .isEqualTo(mockActivityResultLauncher)
+            awaitRegisterCall()
+            val launcher = awaitNextRegisteredLauncher()
+            assertThat(handler.intentConfirmationChallengeActivityContractNextActionLauncher)
+                .isEqualTo(launcher)
+        }
     }
 
     private fun createTestPaymentIntent(): PaymentIntent {

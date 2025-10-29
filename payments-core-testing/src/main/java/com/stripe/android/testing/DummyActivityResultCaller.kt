@@ -1,4 +1,4 @@
-package com.stripe.android.utils
+package com.stripe.android.testing
 
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
