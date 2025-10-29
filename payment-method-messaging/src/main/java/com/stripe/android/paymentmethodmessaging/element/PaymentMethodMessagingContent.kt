@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
@@ -156,6 +157,16 @@ private fun Images(
                 imageLoader = imageLoader,
                 contentDescription = messagingImage.text,
                 contentScale = ContentScale.Fit,
+                loadingContent = {
+                    Text(
+                        text = messagingImage.text,
+                        style = appearance.font?.toTextStyle(appearance) ?: MaterialTheme.typography.body1
+                    ) },
+                errorContent = {
+                    Text(
+                        text = messagingImage.text,
+                        style = appearance.font?.toTextStyle(appearance) ?: MaterialTheme.typography.body1
+                    ) },
                 modifier = Modifier.align(Alignment.CenterVertically).height(iconHeight.dp)
             )
             if (index != imageList.lastIndex) Spacer(Modifier.width(8.dp))
@@ -188,7 +199,7 @@ private fun TextWithLogo(
         ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Normal)
 
     Text(
-        text = label.buildInlineLogoAnnotatedStringWithInfoIcon(),
+        text = label.buildInlineLogoAnnotatedStringWithInfoIcon(image),
         style = style,
         inlineContent = mapOf(
             INLINE_IMAGE_KEY to InlineTextContent(
@@ -202,7 +213,17 @@ private fun TextWithLogo(
                     url = image.url,
                     imageLoader = imageLoader,
                     contentDescription = image.text,
-                    errorContent = { Text(image.text) },
+                    disableAnimations = true,
+//                    loadingContent = {
+//                        Text(
+//                            text = image.text,
+//                            style = appearance.font?.toTextStyle(appearance) ?: MaterialTheme.typography.body1
+//                        ) },
+//                    errorContent = {
+//                        Text(
+//                            text = image.text,
+//                            style = appearance.font?.toTextStyle(appearance) ?: MaterialTheme.typography.body1
+//                        ) },
                     modifier = Modifier.fillMaxSize()
                 )
             },
@@ -220,7 +241,7 @@ private fun TextWithLogo(
 }
 
 @Composable
-private fun String.buildInlineLogoAnnotatedStringWithInfoIcon(): AnnotatedString = buildAnnotatedString {
+private fun String.buildInlineLogoAnnotatedStringWithInfoIcon(image: PaymentMethodMessageImage): AnnotatedString = buildAnnotatedString {
     val parts = split(INLINE_IMAGE_KEY)
     val preLogoString = parts.getOrNull(0)
     val postLogoString = parts.getOrNull(1)

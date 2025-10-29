@@ -2,8 +2,10 @@
 
 package com.stripe.android.paymentmethodmessaging.element
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalInspectionMode
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodMessageImage
 import com.stripe.android.model.PaymentMethodMessageLearnMore
@@ -33,7 +35,9 @@ class SinglePartnerContentScreenshotTest {
                     message = "Buy stuff in increments with {partner}"
                 )
             )
-            content.Content(PaymentMethodMessagingElement.Appearance().build())
+            CompositionLocalProvider(LocalInspectionMode provides true) {
+                content.Content(PaymentMethodMessagingElement.Appearance().build())
+            }
         }
     }
 
