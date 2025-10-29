@@ -397,7 +397,6 @@ interface StripeRepository {
         currency: String,
         country: String,
         locale: String,
-        logoColor: String,
         requestOptions: ApiRequest.Options
     ): Result<PaymentMethodMessage>
 
