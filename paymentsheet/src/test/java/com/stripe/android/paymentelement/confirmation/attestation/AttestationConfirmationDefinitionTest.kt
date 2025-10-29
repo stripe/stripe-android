@@ -589,53 +589,56 @@ internal class AttestationConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'bootstrap' should call prepareSucceeded on eventsReporter when IntegrityRequestManager prepare succeeds`() = runTest {
-        val fakeEventsReporter = FakeAttestationAnalyticsEventsReporter()
-        val fakeIntegrityRequestManager = FakeIntegrityRequestManager()
-        val definition = createAttestationConfirmationDefinition(
-            eventsReporter = fakeEventsReporter,
-            integrityRequestManager = fakeIntegrityRequestManager
-        )
+    fun `'bootstrap' should call prepareSucceeded on eventsReporter when IntegrityRequestManager prepare succeeds`() =
+        runTest {
+            val fakeEventsReporter = FakeAttestationAnalyticsEventsReporter()
+            val fakeIntegrityRequestManager = FakeIntegrityRequestManager()
+            val definition = createAttestationConfirmationDefinition(
+                eventsReporter = fakeEventsReporter,
+                integrityRequestManager = fakeIntegrityRequestManager
+            )
 
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            attestOnIntentConfirmation = true
-        )
+            val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                attestOnIntentConfirmation = true
+            )
 
-        definition.bootstrap(paymentMethodMetadata)
-        fakeIntegrityRequestManager.awaitPrepareCall()
+            definition.bootstrap(paymentMethodMetadata)
+            fakeIntegrityRequestManager.awaitPrepareCall()
 
-        val prepareCall = fakeEventsReporter.awaitCall()
-        assertThat(prepareCall).isEqualTo(FakeAttestationAnalyticsEventsReporter.Call.Prepare)
+            val prepareCall = fakeEventsReporter.awaitCall()
+            assertThat(prepareCall).isEqualTo(FakeAttestationAnalyticsEventsReporter.Call.Prepare)
 
-        val prepareSucceededCall = fakeEventsReporter.awaitCall()
-        assertThat(prepareSucceededCall).isEqualTo(FakeAttestationAnalyticsEventsReporter.Call.PrepareSucceeded)
-    }
+            val prepareSucceededCall = fakeEventsReporter.awaitCall()
+            assertThat(prepareSucceededCall).isEqualTo(FakeAttestationAnalyticsEventsReporter.Call.PrepareSucceeded)
+        }
 
     @Test
-    fun `'bootstrap' should call prepareFailed on eventsReporter when IntegrityRequestManager prepare fails`() = runTest {
-        val fakeEventsReporter = FakeAttestationAnalyticsEventsReporter()
-        val exception = RuntimeException("Preparation failed")
-        val fakeIntegrityRequestManager = FakeIntegrityRequestManager().apply {
-            prepareResult = Result.failure(exception)
+    fun `'bootstrap' should call prepareFailed on eventsReporter when IntegrityRequestManager prepare fails`() =
+        runTest {
+            val fakeEventsReporter = FakeAttestationAnalyticsEventsReporter()
+            val exception = RuntimeException("Preparation failed")
+            val fakeIntegrityRequestManager = FakeIntegrityRequestManager().apply {
+                prepareResult = Result.failure(exception)
+            }
+            val definition = createAttestationConfirmationDefinition(
+                eventsReporter = fakeEventsReporter,
+                integrityRequestManager = fakeIntegrityRequestManager
+            )
+
+            val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                attestOnIntentConfirmation = true
+            )
+
+            definition.bootstrap(paymentMethodMetadata)
+            fakeIntegrityRequestManager.awaitPrepareCall()
+
+            val prepareCall = fakeEventsReporter.awaitCall()
+            assertThat(prepareCall).isEqualTo(FakeAttestationAnalyticsEventsReporter.Call.Prepare)
+
+            val prepareFailedCall = fakeEventsReporter.awaitCall()
+            assertThat(prepareFailedCall)
+                .isEqualTo(FakeAttestationAnalyticsEventsReporter.Call.PrepareFailed(exception))
         }
-        val definition = createAttestationConfirmationDefinition(
-            eventsReporter = fakeEventsReporter,
-            integrityRequestManager = fakeIntegrityRequestManager
-        )
-
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            attestOnIntentConfirmation = true
-        )
-
-        definition.bootstrap(paymentMethodMetadata)
-        fakeIntegrityRequestManager.awaitPrepareCall()
-
-        val prepareCall = fakeEventsReporter.awaitCall()
-        assertThat(prepareCall).isEqualTo(FakeAttestationAnalyticsEventsReporter.Call.Prepare)
-
-        val prepareFailedCall = fakeEventsReporter.awaitCall()
-        assertThat(prepareFailedCall).isEqualTo(FakeAttestationAnalyticsEventsReporter.Call.PrepareFailed(exception))
-    }
 
     @Test
     fun `'bootstrap' should not call eventsReporter when attestation is disabled`() {

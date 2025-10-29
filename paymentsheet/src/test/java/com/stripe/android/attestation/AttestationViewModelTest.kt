@@ -82,7 +82,8 @@ internal class AttestationViewModelTest {
 
     private fun createViewModel(
         integrityRequestManager: FakeIntegrityRequestManager,
-        attestationAnalyticsEventsReporter: FakeAttestationAnalyticsEventsReporter = FakeAttestationAnalyticsEventsReporter()
+        attestationAnalyticsEventsReporter: FakeAttestationAnalyticsEventsReporter =
+            FakeAttestationAnalyticsEventsReporter()
     ) = AttestationViewModel(
         integrityRequestManager = integrityRequestManager,
         workContext = testDispatcher,
