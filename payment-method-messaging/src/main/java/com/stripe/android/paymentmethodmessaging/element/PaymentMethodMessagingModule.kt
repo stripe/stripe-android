@@ -51,11 +51,16 @@ internal object PaymentMethodMessagingModule {
     }
 
     @Provides
+    fun providesLearnMoreActivityLauncher(): LearnMoreActivityLauncher = DefaultLearnMoreActivityLauncher()
+
+    @Provides
     fun providesPaymentMethodMessagingCoordinator(
         stripeRepository: StripeRepository,
-        paymentConfiguration: PaymentConfiguration
+        paymentConfiguration: PaymentConfiguration,
+        learnMoreActivityLauncher: LearnMoreActivityLauncher
     ): PaymentMethodMessagingCoordinator = DefaultPaymentMethodMessagingCoordinator(
         stripeRepository,
-        paymentConfiguration
+        paymentConfiguration,
+        learnMoreActivityLauncher
     )
 }

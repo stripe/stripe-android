@@ -25,6 +25,7 @@ dependencies {
     implementation project(":payments-ui-core")
     implementation project(":stripe-ui-core")
     implementation libs.androidx.annotation
+    implementation libs.androidx.appCompat
     implementation libs.androidx.browser
     implementation libs.compose.foundation
     implementation libs.compose.material

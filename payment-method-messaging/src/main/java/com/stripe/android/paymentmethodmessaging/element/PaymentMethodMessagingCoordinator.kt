@@ -18,7 +18,8 @@ internal interface PaymentMethodMessagingCoordinator {
 
 internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val paymentConfiguration: PaymentConfiguration
+    private val paymentConfiguration: PaymentConfiguration,
+    private val learnMoreActivityLauncher: LearnMoreActivityLauncher
 ) : PaymentMethodMessagingCoordinator {
 
     private val _messagingContent = MutableStateFlow<PaymentMethodMessagingContent?>(null)
@@ -43,7 +44,9 @@ internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
             return PaymentMethodMessagingElement.ConfigureResult.Failed(it)
         }
 
-        val content = PaymentMethodMessagingContent.get(paymentMethodMessage)
+        val content = PaymentMethodMessagingContent.get(paymentMethodMessage) { context, args ->
+            learnMoreActivityLauncher.launchLearnMoreActivity(context, args)
+        }
         _messagingContent.value = content
 
         return when (content) {
