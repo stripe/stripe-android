@@ -21,6 +21,9 @@ import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
 import com.stripe.android.crypto.onramp.model.KycCollectionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
+import com.stripe.android.crypto.onramp.model.KycRefreshRequest
+import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
+import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.link.LinkController
@@ -97,6 +100,34 @@ internal class CryptoApiRepository @Inject constructor(
 
         return executePost(
             collectKycDataUrl,
+            Json.encodeToJsonElement(apiRequest).jsonObject,
+            Unit.serializer()
+        )
+    }
+
+    suspend fun retrieveKycInfo(
+        consumerSessionClientSecret: String
+    ): Result<KycRetrieveResponse> {
+        val params = CryptoCustomerRequestParams(CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret))
+
+        return executePost(
+            retrieveKycInfoUrl,
+            Json.encodeToJsonElement(params).jsonObject,
+            KycRetrieveResponse.serializer()
+        )
+    }
+
+    suspend fun refreshKycData(
+        kycInfo: RefreshKycInfo,
+        consumerSessionClientSecret: String
+    ): Result<Unit> {
+        val apiRequest = KycRefreshRequest.fromRefreshKycInfo(
+            kycInfo = kycInfo,
+            credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret)
+        )
+
+        return executePost(
+            refreshConsumerPersonUrl,
             Json.encodeToJsonElement(apiRequest).jsonObject,
             Unit.serializer()
         )
@@ -303,6 +334,16 @@ internal class CryptoApiRepository @Inject constructor(
          * @return `https://api.stripe.com/v1/crypto/internal/onramp_session`
          */
         internal val getOnrampSessionUrl: String = getApiUrl("crypto/internal/onramp_session")
+
+        /**
+         * @return `https://api.stripe.com/v1/crypto/internal/kyc_data_retrieve`
+         */
+        internal val retrieveKycInfoUrl: String = getApiUrl("crypto/internal/kyc_data_retrieve")
+
+        /**
+         * @return `https://api.stripe.com/v1/crypto/internal/refresh_consumer_person`
+         */
+        internal val refreshConsumerPersonUrl: String = getApiUrl("crypto/internal/refresh_consumer_person")
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"
