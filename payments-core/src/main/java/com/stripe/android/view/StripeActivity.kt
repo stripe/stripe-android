@@ -9,8 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.stripe.android.R
 import com.stripe.android.databinding.StripeActivityBinding
-import com.stripe.android.uicore.R as StripeUiCoreR
 import androidx.appcompat.R as AppCompatR
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 /**
  * Provides a toolbar, save button, and loading states for the save button.

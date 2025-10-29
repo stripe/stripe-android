@@ -69,10 +69,10 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
-import com.stripe.android.uicore.R as StripeUiCoreR
 import com.stripe.android.uicore.text.MiddleEllipsisText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 private const val ENTER_TRANSITION_DURATION_MS = 1000
 private const val SLIDE_IN_ANIMATION_FRACTION = 4
