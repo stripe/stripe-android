@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.common.ConnectSdkExampleTheme
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
 fun SettingsSectionHeader(
@@ -184,7 +185,7 @@ fun <T> SettingsDropdownField(
                             if (option == selectedOption) {
                                 Icon(
                                     modifier = Modifier.size(iconSize),
-                                    painter = painterResource(R.drawable.ic_material_check),
+                                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
                                     tint = MaterialTheme.colors.onSurface,
                                     contentDescription = null,
                                 )

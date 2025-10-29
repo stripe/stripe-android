@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
 fun AppearanceView(
@@ -34,7 +35,7 @@ fun AppearanceView(
         navigationIcon = {
             IconButton(onClick = onDismiss) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_material_close),
+                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_close),
                     contentDescription = stringResource(R.string.cancel)
                 )
             }
@@ -48,7 +49,7 @@ fun AppearanceView(
                 },
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_material_check),
+                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
                     contentDescription = stringResource(R.string.save)
                 )
             }

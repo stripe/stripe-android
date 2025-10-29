@@ -16,8 +16,6 @@ import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
@@ -45,6 +44,7 @@ import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.navigation.rememberKeyboardController
 import kotlinx.coroutines.launch
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 internal sealed class PaymentMethodMessagingContent {
 
@@ -285,7 +285,7 @@ private fun PaymentMethodMessagingElement.Appearance.Font.State.toTextStyle(): T
 @Composable
 private fun InfoIcon(appearance: PaymentMethodMessagingElement.Appearance.State) {
     Icon(
-        imageVector = Icons.Outlined.Info,
+        painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_info),
         contentDescription = null,
         tint = Color(appearance.colors.infoIconColor),
         modifier = Modifier.fillMaxSize().padding(start = 4.dp)

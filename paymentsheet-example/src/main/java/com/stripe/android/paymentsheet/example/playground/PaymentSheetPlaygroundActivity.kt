@@ -91,6 +91,7 @@ import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 @OptIn(
     ExperimentalCustomPaymentMethodsApi::class,
@@ -807,7 +808,7 @@ private fun SearchSettingsField(
             @Composable {
                 IconButton(onClick = { onQueryChanged("") }) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_close),
+                        painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_close),
                         contentDescription = null,
                     )
                 }
