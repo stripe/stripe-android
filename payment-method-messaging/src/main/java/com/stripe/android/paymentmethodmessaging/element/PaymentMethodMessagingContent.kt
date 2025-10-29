@@ -201,7 +201,6 @@ private fun TextWithLogo(
                     url = image.url,
                     imageLoader = imageLoader,
                     contentDescription = image.text,
-                    errorContent = { Text(image.text) },
                     modifier = Modifier.fillMaxSize()
                 )
             },
