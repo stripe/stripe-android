@@ -112,6 +112,7 @@ internal interface ConfirmationDefinition<
         confirmationOption: TConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        isConfirmationToken: Boolean,
         result: TLauncherResult,
     ): Result
 
@@ -143,6 +144,11 @@ internal interface ConfirmationDefinition<
              * DO NOT USE OUTSIDE OF INTENT CONFIRMATION
              */
             val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+            /**
+             * Indicates if the result was from a confirmation token flow
+             * DO NOT USE OUTSIDE OF INTENT CONFIRMATION
+             */
+            val isConfirmationToken: Boolean,
             /**
              * Indicates if the full payment flow was completed by the handler. Can be used to decide if internal
              * product state needs to be reset. Useful for confirmation flows that are handed off to merchants to
@@ -207,6 +213,10 @@ internal interface ConfirmationDefinition<
              */
             val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
             /**
+             * DO NOT USE OUTSIDE OF INTENT CONFIRMATION
+             */
+            val isConfirmationToken: Boolean,
+            /**
              * Indicates if the full payment flow was completed by the handler. Can be used to decide if internal
              * product state needs to be reset. Useful for confirmation flows that are handed off to merchants to
              * complete and require no action by Stripe flows afterwards.
@@ -256,6 +266,10 @@ internal interface ConfirmationDefinition<
              * DO NOT USE OUTSIDE OF INTENT CONFIRMATION
              */
             val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+            /**
+             * DO NOT USE OUTSIDE OF INTENT CONFIRMATION
+             */
+            val isConfirmationToken: Boolean,
         ) : Action<TLauncherArgs>
     }
 }

@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.util.Size
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
+import com.stripe.android.camera.CameraXAdapter
 import com.stripe.android.camera.scanui.CameraView
 
 /**
@@ -29,6 +30,13 @@ internal abstract class IdentityCameraManager {
 
     fun requireCameraView() = requireNotNull(cameraView)
     fun requireCameraAdapter() = requireNotNull(cameraAdapter)
+
+    /**
+     * Get the camera lens model if available.
+     */
+    fun getCameraLensModel(): String? {
+        return (cameraAdapter as? CameraXAdapter)?.getCameraLensModel()
+    }
 
     /**
      * Initialize [cameraAdapter] when a new [CameraView] is created from compose.

@@ -148,7 +148,9 @@ internal class DefaultCreateLinkState @Inject constructor(
             add(LinkSignupDisabledReason.SignupOptInFeatureNoEmailProvided)
         }
 
-        if (linkStore.hasUsedLink()) {
+        if (linkStore.hasUsedLink() && elementsSession.stripeIntent.isLiveMode) {
+            // In live mode, we only show the signup if the customer hasn't used Link in the merchant app before.
+            // In test mode, we continue to show it to make testing easier.
             add(LinkSignupDisabledReason.LinkUsedBefore)
         }
     }

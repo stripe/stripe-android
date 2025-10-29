@@ -64,6 +64,8 @@ internal class OnrampViewModel(
     private val _authorizeEvent = MutableStateFlow<AuthorizeEvent?>(null)
     val authorizeEvent: StateFlow<AuthorizeEvent?> = _authorizeEvent.asStateFlow()
 
+    private val minPasswordLength = 8
+
     private fun handleError(error: Throwable, onNonAuthError: () -> Unit = {}) {
         if (error.isLinkAuthorizationError()) {
             _message.value = "Session expired. Reauthorizing..."
@@ -110,12 +112,82 @@ internal class OnrampViewModel(
             )
 
             onrampCoordinator.configure(configuration = configuration)
-            // Set initial state to EmailInput after configuration
-            _uiState.update { it.copy(screen = Screen.EmailInput) }
+            // Set initial state to LoginSignup after configuration
+            _uiState.update { it.copy(screen = Screen.LoginSignup) }
         }
     }
 
-    fun checkIfLinkUser(email: String) = viewModelScope.launch {
+    fun registerUser(email: String, password: String) = viewModelScope.launch {
+        if (email.isBlank()) {
+            _message.value = "Please enter an email address"
+            return@launch
+        }
+
+        if (password.length < minPasswordLength) {
+            _message.value = "Please enter a valid password (at least 8 characters)"
+            return@launch
+        }
+
+        val currentEmail = email.trim()
+        _uiState.update { it.copy(screen = Screen.Loading, email = currentEmail, loadingMessage = "Registering...") }
+
+        val result = testBackendRepository.signUp(currentEmail, password, false)
+        when (result) {
+            is Result.Success -> {
+                val response = result.value
+                if (response.success) {
+                    _message.value = "Sign up successful!"
+
+                    _uiState.update { it.copy(authToken = response.token) }
+                    checkIfLinkUser(currentEmail)
+                } else {
+                    _message.value = "Sign up failed: Unknown Error"
+                    _uiState.update { it.copy(screen = Screen.LoginSignup, loadingMessage = null) }
+                }
+            }
+            is Result.Failure -> {
+                _message.value = "Sign up failed: ${result.error.message}"
+                _uiState.update { it.copy(screen = Screen.LoginSignup, loadingMessage = null) }
+            }
+        }
+    }
+
+    fun loginUser(email: String, password: String) = viewModelScope.launch {
+        if (email.isBlank()) {
+            _message.value = "Please enter an email address"
+            return@launch
+        }
+
+        if (password.length < minPasswordLength) {
+            _message.value = "Please enter a valid password (at least 8 characters)"
+            return@launch
+        }
+
+        val currentEmail = email.trim()
+        _uiState.update { it.copy(screen = Screen.Loading, email = currentEmail, loadingMessage = "Logging in...") }
+
+        val result = testBackendRepository.logIn(currentEmail, password, false)
+        when (result) {
+            is Result.Success -> {
+                val response = result.value
+                if (response.success) {
+                    _message.value = "Log in successful!"
+
+                    _uiState.update { it.copy(authToken = response.token) }
+                    checkIfLinkUser(currentEmail)
+                } else {
+                    _message.value = "Log in failed: Unknown Error"
+                    _uiState.update { it.copy(screen = Screen.LoginSignup, loadingMessage = null) }
+                }
+            }
+            is Result.Failure -> {
+                _message.value = "Log in failed: ${result.error.message}"
+                _uiState.update { it.copy(screen = Screen.LoginSignup, loadingMessage = null) }
+            }
+        }
+    }
+
+    private fun checkIfLinkUser(email: String) = viewModelScope.launch {
         if (email.isBlank()) {
             _message.value = "Please enter an email address"
             return@launch
@@ -137,13 +209,13 @@ internal class OnrampViewModel(
             }
             is OnrampHasLinkAccountResult.Failed -> {
                 _message.value = "Lookup failed: ${result.error.message}"
-                _uiState.update { it.copy(screen = Screen.EmailInput) }
+                _uiState.update { it.copy(screen = Screen.LoginSignup) }
             }
         }
     }
 
-    fun onBackToEmailInput() {
-        _uiState.update { OnrampUiState(screen = Screen.EmailInput) }
+    fun onBackToLoginSignup() {
+        _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
     }
 
     fun clearMessage() {
@@ -156,8 +228,7 @@ internal class OnrampViewModel(
                 _message.value = "Authentication successful! You can now perform authenticated operations."
                 _uiState.update {
                     it.copy(
-                        screen = Screen.AuthenticatedOperations,
-                        customerId = result.customerId
+                        screen = Screen.AuthenticatedOperations
                     )
                 }
             }
@@ -166,7 +237,7 @@ internal class OnrampViewModel(
             }
             is OnrampAuthenticateResult.Failed -> {
                 _message.value = "Authentication failed: ${result.error.message}"
-                _uiState.update { it.copy(screen = Screen.EmailInput) }
+                _uiState.update { it.copy(screen = Screen.LoginSignup) }
             }
         }
     }
@@ -182,7 +253,7 @@ internal class OnrampViewModel(
             }
             is OnrampVerifyIdentityResult.Failed -> {
                 _message.value = "Identity Verification failed: ${result.error.message}"
-                _uiState.update { it.copy(screen = Screen.EmailInput) }
+                _uiState.update { it.copy(screen = Screen.LoginSignup) }
             }
         }
     }
@@ -219,7 +290,6 @@ internal class OnrampViewModel(
                 _uiState.update {
                     it.copy(
                         screen = Screen.AuthenticatedOperations,
-                        customerId = result.customerId,
                         linkAuthIntentId = null,
                         consentedLinkAuthIntentIds = it.consentedLinkAuthIntentIds + it.linkAuthIntentId!!
                     )
@@ -297,7 +367,7 @@ internal class OnrampViewModel(
                 }
                 is OnrampRegisterLinkUserResult.Failed -> {
                     _message.value = "Registration failed: ${result.error.message}"
-                    _uiState.update { it.copy(screen = Screen.EmailInput) }
+                    _uiState.update { it.copy(screen = Screen.LoginSignup) }
                 }
             }
         }
@@ -402,13 +472,11 @@ internal class OnrampViewModel(
         val currentState = _uiState.value
         val paymentToken = currentState.cryptoPaymentToken
         val walletAddress = currentState.walletAddress
-        val customerId = currentState.customerId
         val network = currentState.network
         val authToken = currentState.authToken
 
         // Check what's missing and provide helpful guidance
         val validParams = validateOnrampSessionParams(
-            customerId = customerId,
             walletAddress = walletAddress,
             currentState = currentState,
             paymentToken = paymentToken,
@@ -424,7 +492,6 @@ internal class OnrampViewModel(
             val result = testBackendRepository.createOnrampSession(
                 paymentToken = paymentToken!!,
                 walletAddress = walletAddress!!,
-                cryptoCustomerId = customerId!!,
                 authToken = authToken!!,
                 destinationNetwork = destinationNetwork
             )
@@ -474,14 +541,12 @@ internal class OnrampViewModel(
     }
 
     private fun validateOnrampSessionParams(
-        customerId: String?,
         walletAddress: String?,
         currentState: OnrampUiState,
         paymentToken: String?,
         authToken: String?
     ): Boolean {
         val missingItems = mutableListOf<String>()
-        if (customerId.isNullOrBlank()) missingItems.add("customer authentication")
         if (walletAddress.isNullOrBlank()) missingItems.add("wallet address registration")
         if (currentState.selectedPaymentData == null) missingItems.add("payment method selection")
         if (paymentToken.isNullOrBlank()) missingItems.add("crypto payment token creation")
@@ -503,22 +568,30 @@ internal class OnrampViewModel(
     }
 
     suspend fun createLinkAuthIntent(oauthScopes: String): String? {
-        val currentState = _uiState.value
-        val email = currentState.email
         return createAuthIntentForUser(
-            email = email,
             oauthScopes = oauthScopes
         )
     }
 
-    private suspend fun createAuthIntentForUser(email: String, oauthScopes: String): String? {
-        val result = testBackendRepository.createAuthIntent(email = email, oauthScopes = oauthScopes)
+    private suspend fun createAuthIntentForUser(oauthScopes: String): String? {
+        val tokenWithoutLAI = _uiState.value.authToken
+        if (tokenWithoutLAI == null) {
+            _message.value = "No auth token found, please log in again"
+            _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
+            return null
+        }
+
+        val result = testBackendRepository.create(
+            oauthScopes,
+            tokenWithoutLAI = tokenWithoutLAI
+        )
+
         when (result) {
             is Result.Success -> {
                 val response = result.value
                 _uiState.update { it.copy(authToken = response.token) }
                 _message.value = "Auth intent created successfully"
-                return response.data.id
+                return response.authIntentId
             }
             is Result.Failure -> {
                 _message.value = "Failed to create auth intent: ${result.error.message}"
@@ -535,7 +608,7 @@ internal class OnrampViewModel(
             when (result) {
                 is OnrampLogOutResult.Completed -> {
                     _message.value = "Successfully logged out"
-                    _uiState.update { OnrampUiState(screen = Screen.EmailInput) }
+                    _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
                 }
                 is OnrampLogOutResult.Failed -> {
                     _message.value = "Logout failed: ${result.error.message}"
@@ -562,7 +635,6 @@ data class OnrampUiState(
     val email: String = "",
     val linkAuthIntentId: String? = null,
     val consentedLinkAuthIntentIds: List<String> = emptyList(),
-    val customerId: String? = null,
     val selectedPaymentData: PaymentMethodDisplayData? = null,
     val cryptoPaymentToken: String? = null,
     val walletAddress: String? = null,
@@ -573,7 +645,7 @@ data class OnrampUiState(
 )
 
 enum class Screen {
-    EmailInput,
+    LoginSignup,
     Loading,
     Registration,
     Authentication,

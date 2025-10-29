@@ -16,6 +16,7 @@ data class ConfirmationTokenParams(
     val setAsDefaultPaymentMethod: Boolean? = null,
     val cvc: String? = null,
     val clientContext: ConfirmationTokenClientContextParams? = null,
+    val clientAttributionMetadata: ClientAttributionMetadata? = null,
 ) : StripeParamsModel, Parcelable {
     override fun toParamMap(): Map<String, Any> {
         return buildMap {
@@ -28,6 +29,7 @@ data class ConfirmationTokenParams(
             setAsDefaultPaymentMethod?.let { put(PARAM_SET_AS_DEFAULT_PAYMENT_METHOD, it) }
             cvc?.let { put(PARAM_PAYMENT_METHOD_OPTIONS, mapOf("card" to mapOf("cvc" to it))) }
             clientContext?.let { put(PARAM_CLIENT_CONTEXT, it.toParamMap()) }
+            clientAttributionMetadata?.let { put(PARAM_CLIENT_ATTRIBUTION_METADATA, it.toParamMap()) }
         }
     }
 
@@ -40,6 +42,7 @@ data class ConfirmationTokenParams(
         const val PARAM_SET_AS_DEFAULT_PAYMENT_METHOD = "set_as_default_payment_method"
         const val PARAM_PAYMENT_METHOD_OPTIONS = "payment_method_options"
         const val PARAM_CLIENT_CONTEXT = "client_context"
+        const val PARAM_CLIENT_ATTRIBUTION_METADATA = "client_attribution_metadata"
     }
 }
 

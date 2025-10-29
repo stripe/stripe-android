@@ -5,15 +5,19 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
+import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration
 import com.stripe.android.uicore.utils.AnimationConstants
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -35,6 +39,23 @@ class AddressLauncher internal constructor(
     ) : this(
         application = activity.application,
         activityResultLauncher = activity.registerForActivityResult(
+            AddressElementActivityContract
+        ) {
+            callback.onAddressLauncherResult(it)
+        },
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ReactNativeSdkInternal
+    constructor(
+        activity: ComponentActivity,
+        signal: UnregisterSignal,
+        callback: AddressLauncherResultCallback
+    ) : this(
+        application = activity.application,
+        activityResultLauncher = registerForReactNativeActivityResult(
+            activity,
+            signal,
             AddressElementActivityContract
         ) {
             callback.onAddressLauncherResult(it)
@@ -80,15 +101,16 @@ class AddressLauncher internal constructor(
 
     /** Configuration for [AddressLauncher] **/
     @Parcelize
-    data class Configuration internal constructor(
-        val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
-        val address: AddressDetails? = null,
-        val allowedCountries: Set<String> = emptySet(),
-        val buttonTitle: String? = null,
-        val additionalFields: AdditionalFieldsConfiguration? = null,
-        val title: String? = null,
-        val googlePlacesApiKey: String? = null,
-        val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+    @Poko
+    class Configuration internal constructor(
+        internal val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+        internal val address: AddressDetails? = null,
+        internal val allowedCountries: Set<String> = emptySet(),
+        internal val buttonTitle: String? = null,
+        internal val additionalFields: AdditionalFieldsConfiguration? = null,
+        internal val title: String? = null,
+        internal val googlePlacesApiKey: String? = null,
+        internal val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
         internal val billingAddress: PaymentSheet.BillingDetails?,
     ) : Parcelable {
         @JvmOverloads
@@ -212,9 +234,10 @@ class AddressLauncher internal constructor(
      * checkbox is not displayed. Defaults to null
      */
     @Parcelize
-    data class AdditionalFieldsConfiguration(
-        val phone: FieldConfiguration = FieldConfiguration.HIDDEN,
-        val checkboxLabel: String? = null,
+    @Poko
+    class AdditionalFieldsConfiguration(
+        internal val phone: FieldConfiguration = FieldConfiguration.HIDDEN,
+        internal val checkboxLabel: String? = null,
     ) : Parcelable {
         @Parcelize
         enum class FieldConfiguration : Parcelable {

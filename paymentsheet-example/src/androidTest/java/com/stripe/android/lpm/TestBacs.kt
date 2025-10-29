@@ -76,7 +76,6 @@ internal class TestBacs : BasePlaygroundTest() {
         return TestParameters.create(
             paymentMethodCode = "bacs_debit",
             authorizationAction = bacsAuthAction,
-            executeInNightlyRun = true,
         ) { settings ->
             settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
                 PaymentMethod.Type.Card,

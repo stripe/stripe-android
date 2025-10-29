@@ -175,10 +175,11 @@ class CvcRecollectionConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
+            deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
             result = CvcRecollectionResult.Confirmed(
                 cvc = "444",
             ),
-            deferredIntentConfirmationType = null,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.NextStep>()
@@ -209,10 +210,11 @@ class CvcRecollectionConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
+            deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
             result = CvcRecollectionResult.Confirmed(
                 cvc = "555",
             ),
-            deferredIntentConfirmationType = null,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.NextStep>()
@@ -240,8 +242,9 @@ class CvcRecollectionConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            result = CvcRecollectionResult.Cancelled,
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
+            result = CvcRecollectionResult.Cancelled,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Canceled>()

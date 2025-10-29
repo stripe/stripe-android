@@ -600,7 +600,7 @@ internal class FormViewModelTest {
             )
 
             val args = COMPOSE_FRAGMENT_ARGS.copy(
-                PaymentMethod.Type.Sofort.code,
+                PaymentMethod.Type.PayPal.code,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 billingDetails = PaymentSheet.BillingDetails(),
             )

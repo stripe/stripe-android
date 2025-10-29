@@ -8,6 +8,7 @@ internal interface LinkEventsReporter {
     fun onSignupStarted(isInline: Boolean = false)
     fun onSignupCompleted(isInline: Boolean = false)
     fun onSignupFailure(isInline: Boolean = false, error: Throwable)
+    fun onEmailSuggestionAccepted()
     fun onAccountLookupFailure(error: Throwable)
     fun onAccountRefreshFailure(error: Throwable)
 

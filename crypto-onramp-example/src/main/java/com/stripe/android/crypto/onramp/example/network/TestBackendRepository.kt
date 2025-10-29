@@ -19,7 +19,7 @@ import com.github.kittinunf.result.Result as ApiResult
 
 class TestBackendRepository {
 
-    private val baseUrl = "https://crypto-onramp-example.stripedemos.com"
+    private val baseUrl = "https://crypto-onramp-example.stripedemos.com/v1"
 
     private val manager = FuelManager()
         .addRequestInterceptor(LogRequestInterceptor)
@@ -30,28 +30,9 @@ class TestBackendRepository {
         ignoreUnknownKeys = true
     }
 
-    suspend fun createAuthIntent(
-        email: String,
-        oauthScopes: String,
-    ): ApiResult<CreateAuthIntentResponse, FuelError> {
-        return withContext(Dispatchers.IO) {
-            val request = CreateAuthIntentRequest(
-                email = email,
-                oauthScopes = oauthScopes,
-            )
-            val requestBody = json.encodeToString(CreateAuthIntentRequest.serializer(), request)
-
-            manager.post("$baseUrl/auth_intent/create")
-                .jsonBody(requestBody)
-                .suspendable()
-                .awaitModel(CreateAuthIntentResponse.serializer(), json)
-        }
-    }
-
     suspend fun createOnrampSession(
         paymentToken: String,
         walletAddress: String,
-        cryptoCustomerId: String,
         authToken: String,
         destinationNetwork: String = "ethereum",
         sourceAmount: Double = 10.0,
@@ -68,7 +49,6 @@ class TestBackendRepository {
                 destinationCurrency = destinationCurrency,
                 destinationNetwork = destinationNetwork,
                 walletAddress = walletAddress,
-                cryptoCustomerId = cryptoCustomerId,
                 customerIpAddress = customerIpAddress
             )
 

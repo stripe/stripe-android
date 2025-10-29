@@ -28,7 +28,6 @@
     <string name="klarna_source_example">Klarna Source Example</string>
     <string name="bacs_debit_example">BACS Debit Confirmation Example</string>
     <string name="becs_debit_example">BECS Debit Confirmation Example</string>
-    <string name="sofort_example">SOFORT Confirmation Example</string>
     <string name="upi_example">UPI Confirmation Example</string>
     <string name="netbanking_example">Netbanking Confirmation Example</string>
     <string name="manual_us_bank_account_example">"Manual US Bank Account Example"</string>
@@ -120,7 +119,6 @@
 
     <string name="confirm_with_bacs_debit">Confirm with BACS Debit</string>
 
-    <string name="confirm_with_sofort">Confirm with SOFORT</string>
     <string name="confirm_with_netbanking">Confirm with NetBanking</string>
     <string name="connect_example">Connect Example</string>
     <string name="simple_payment_method_example">Simple PaymentMethod Confirmation Example</string>

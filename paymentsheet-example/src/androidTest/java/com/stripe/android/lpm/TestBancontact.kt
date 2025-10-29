@@ -48,11 +48,4 @@ internal class TestBancontact : BasePlaygroundTest() {
             },
         )
     }
-
-    @Test
-    fun testBancontactInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
-        )
-    }
 }

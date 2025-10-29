@@ -138,10 +138,6 @@ internal class OnrampActivity : ComponentActivity() {
                                 }
                             }
                         },
-                        onAuthorize = { linkAuthIntentId ->
-                            viewModel.onAuthorize(linkAuthIntentId)
-                            onrampPresenter.authorize(linkAuthIntentId)
-                        },
                         onRegisterWalletAddress = { address, network ->
                             viewModel.registerWalletAddress(address, network)
                         },
@@ -162,12 +158,55 @@ internal class OnrampActivity : ComponentActivity() {
 }
 
 @Composable
+internal fun LoginSignupScreen(
+    onRegister: (email: String, password: String) -> Unit,
+    onLogin: (email: String, password: String) -> Unit
+) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    Column {
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email Address") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        )
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        )
+
+        Button(
+            onClick = { onLogin(email, password) },
+            modifier = Modifier.fillMaxWidth()
+                .padding(bottom = 16.dp)
+        ) {
+            Text("Login")
+        }
+
+        Button(
+            onClick = { onRegister(email, password) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Register")
+        }
+    }
+}
+
+@Composable
 @Suppress("LongMethod")
 internal fun OnrampScreen(
     viewModel: OnrampViewModel,
     modifier: Modifier = Modifier,
     onAuthenticateUser: (oauthScopes: String?) -> Unit,
-    onAuthorize: (linkAuthIntentId: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
@@ -177,8 +216,8 @@ internal fun OnrampScreen(
     val message by viewModel.message.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    BackHandler(enabled = uiState.screen != Screen.EmailInput) {
-        viewModel.onBackToEmailInput()
+    BackHandler(enabled = uiState.screen != Screen.LoginSignup) {
+        viewModel.onBackToLoginSignup()
     }
 
     // Show toast messages
@@ -196,12 +235,10 @@ internal fun OnrampScreen(
             .padding(16.dp)
     ) {
         when (uiState.screen) {
-            Screen.EmailInput -> {
-                EmailInputScreen(
-                    onCheckUser = { email ->
-                        viewModel.checkIfLinkUser(email)
-                    },
-                    onAuthorize = onAuthorize
+            Screen.LoginSignup -> {
+                LoginSignupScreen(
+                    onRegister = viewModel::registerUser,
+                    onLogin = viewModel::loginUser
                 )
             }
             Screen.Loading -> {
@@ -220,7 +257,7 @@ internal fun OnrampScreen(
                         viewModel.registerNewLinkUser(userInfo)
                     },
                     onBack = {
-                        viewModel.onBackToEmailInput()
+                        viewModel.onBackToLoginSignup()
                     }
                 )
             }
@@ -232,14 +269,13 @@ internal fun OnrampScreen(
                         viewModel.updatePhoneNumber(phoneNumber)
                     },
                     onBack = {
-                        viewModel.onBackToEmailInput()
+                        viewModel.onBackToLoginSignup()
                     }
                 )
             }
             Screen.AuthenticatedOperations -> {
                 AuthenticatedOperationsScreen(
                     email = uiState.email,
-                    customerId = uiState.customerId ?: "",
                     consentedLinkAuthIntentIds = uiState.consentedLinkAuthIntentIds,
                     onrampSessionResponse = uiState.onrampSession,
                     selectedPaymentData = uiState.selectedPaymentData,
@@ -253,41 +289,11 @@ internal fun OnrampScreen(
                     onPerformCheckout = { viewModel.performCheckout() },
                     onLogOut = { viewModel.logOut() },
                     onBack = {
-                        viewModel.onBackToEmailInput()
+                        viewModel.onBackToLoginSignup()
                     }
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun EmailInputScreen(
-    onCheckUser: (String) -> Unit,
-    onAuthorize: (String) -> Unit
-) {
-    var email by remember { mutableStateOf("") }
-
-    Column {
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email Address") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        )
-
-        Button(
-            onClick = { onCheckUser(email) },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Check if Link User Exists")
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        AuthorizeSection(onAuthorize = onAuthorize)
     }
 }
 
@@ -488,7 +494,6 @@ fun AuthenticateSection(
 @Suppress("LongMethod")
 private fun AuthenticatedOperationsScreen(
     email: String,
-    customerId: String,
     consentedLinkAuthIntentIds: List<String>,
     onrampSessionResponse: OnrampSessionResponse?,
     selectedPaymentData: PaymentMethodDisplayData?,
@@ -523,11 +528,6 @@ private fun AuthenticatedOperationsScreen(
 
         Text(
             text = "Email: $email",
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        Text(
-            text = "Customer ID: $customerId",
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
@@ -848,33 +848,6 @@ private fun StartVerificationScreen(
                 .padding(bottom = 24.dp)
         ) {
             Text("Start Identity Verification")
-        }
-    }
-}
-
-@Composable
-private fun AuthorizeSection(
-    onAuthorize: (String) -> Unit
-) {
-    var linkAuthIntentId by remember { mutableStateOf("") }
-
-    Column {
-        OutlinedTextField(
-            value = linkAuthIntentId,
-            onValueChange = { linkAuthIntentId = it },
-            label = { Text("LinkAuthIntent ID") },
-            placeholder = { Text("lai_...") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        )
-
-        Button(
-            onClick = { onAuthorize(linkAuthIntentId) },
-            enabled = linkAuthIntentId.isNotBlank(),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Authorize")
         }
     }
 }

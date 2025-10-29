@@ -1,13 +1,15 @@
 package com.stripe.android.model
 
 import com.stripe.android.core.model.StripeModel
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
  * Model for a Stripe Customer object
  */
 @Parcelize
-data class Customer internal constructor(
+@Poko
+class Customer internal constructor(
     val id: String?,
     val defaultSource: String?,
     val shippingInformation: ShippingInformation?,

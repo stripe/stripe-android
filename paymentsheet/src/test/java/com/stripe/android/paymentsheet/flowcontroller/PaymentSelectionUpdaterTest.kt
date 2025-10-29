@@ -52,12 +52,12 @@ class PaymentSelectionUpdaterTest {
     @Test
     fun `Can use existing payment selection if it's still supported`() {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
-            label = "Sofort".resolvableString,
+            label = "Klarna".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_klarna,
             iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
-            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.SOFORT,
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
@@ -66,7 +66,7 @@ class PaymentSelectionUpdaterTest {
             allowsDelayedPaymentMethods = true,
         )
         val newState = mockPaymentSheetStateWithPaymentIntent(
-            paymentMethodTypes = listOf("card", "sofort"),
+            paymentMethodTypes = listOf("card", "paypal"),
             config = newConfig
         )
 
@@ -534,7 +534,6 @@ class PaymentSelectionUpdaterTest {
                 sharedDataSpecs = listOf(
                     SharedDataSpec("card"),
                     SharedDataSpec("paypal"),
-                    SharedDataSpec("sofort"),
                 ),
                 linkState = LinkState(
                     configuration = mock(),

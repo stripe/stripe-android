@@ -16,6 +16,7 @@ internal data class SignUpScreenState(
     val signUpState: SignUpState = InputtingPrimaryField,
     val isSubmitting: Boolean = false,
     val errorMessage: ResolvableString? = null,
+    val suggestedEmail: String? = null,
 ) {
     val canEditForm: Boolean
         get() = !isSubmitting

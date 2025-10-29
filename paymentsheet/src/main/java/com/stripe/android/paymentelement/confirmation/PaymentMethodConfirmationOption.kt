@@ -26,6 +26,7 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         val originatedFromWallet: Boolean = false,
         override val passiveCaptchaParams: PassiveCaptchaParams?,
         val hCaptchaToken: String? = null,
+        val attestationToken: String? = null,
     ) : PaymentMethodConfirmationOption {
         override fun updatedForDeferredIntent(
             intentConfiguration: PaymentSheet.IntentConfiguration,

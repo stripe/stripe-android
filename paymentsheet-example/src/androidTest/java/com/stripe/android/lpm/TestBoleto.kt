@@ -23,7 +23,6 @@ import org.junit.runner.RunWith
 internal class TestBoleto : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "boleto",
-        executeInNightlyRun = true,
     ) { settings ->
         settings[CustomerSettingsDefinition] = CustomerType.GUEST
         settings[CountrySettingsDefinition] = Country.BR
@@ -75,20 +74,6 @@ internal class TestBoleto : BasePlaygroundTest() {
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             },
-            values = boletoValues,
-            populateCustomLpmFields = {
-                populateBoletoTaxId()
-                populateName()
-                populateAddress()
-                populateEmail()
-            }
-        )
-    }
-
-    @Test
-    fun testBoletoInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
             values = boletoValues,
             populateCustomLpmFields = {
                 populateBoletoTaxId()

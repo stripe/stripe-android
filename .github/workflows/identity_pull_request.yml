@@ -6,6 +6,8 @@ jobs:
   build-base:
     name: Build base
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,6 +26,8 @@ jobs:
   build-pr:
     name: Build PR
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
@@ -85,6 +89,8 @@ jobs:
   # Use emerge tools to analyze the example app size
   apk-size-analysis:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup

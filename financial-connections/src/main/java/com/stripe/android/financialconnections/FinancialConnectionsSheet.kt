@@ -6,6 +6,8 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForTokenLauncher
@@ -79,6 +81,24 @@ class FinancialConnectionsSheet internal constructor(
             )
         }
 
+        @JvmStatic
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ReactNativeSdkInternal
+        fun create(
+            activity: ComponentActivity,
+            signal: UnregisterSignal,
+            callback: FinancialConnectionsSheetResultCallback
+        ): FinancialConnectionsSheet {
+            return FinancialConnectionsSheet(
+                FinancialConnectionsSheetForDataLauncher(
+                    activity = activity,
+                    signal = signal,
+                    callback = callback,
+                    intentBuilder = intentBuilder(activity)
+                )
+            )
+        }
+
         /**
          * Constructor to be used when launching the payment sheet from a Fragment.
          *
@@ -113,6 +133,24 @@ class FinancialConnectionsSheet internal constructor(
             return FinancialConnectionsSheet(
                 FinancialConnectionsSheetForTokenLauncher(
                     activity = activity,
+                    callback = callback,
+                    intentBuilder = intentBuilder(activity)
+                )
+            )
+        }
+
+        @JvmStatic
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ReactNativeSdkInternal
+        fun createForBankAccountToken(
+            activity: ComponentActivity,
+            signal: UnregisterSignal,
+            callback: FinancialConnectionsSheetResultForTokenCallback
+        ): FinancialConnectionsSheet {
+            return FinancialConnectionsSheet(
+                FinancialConnectionsSheetForTokenLauncher(
+                    activity = activity,
+                    signal = signal,
                     callback = callback,
                     intentBuilder = intentBuilder(activity)
                 )

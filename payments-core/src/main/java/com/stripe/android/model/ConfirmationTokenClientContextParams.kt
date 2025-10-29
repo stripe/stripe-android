@@ -68,21 +68,30 @@ data class ConfirmationTokenClientContextParams(
         paymentMethodOptions: PaymentMethodOptionsParams?,
         requireCvcRecollection: Boolean?,
     ): Map<String, Any>? {
-        if (paymentMethodOptions?.type == null) return null
+        val options = mutableMapOf<String, Any>()
 
-        val valueMap = buildMap {
-            putNonEmptySfu(paymentMethodOptions.setupFutureUsage())
+        // Add setup_future_usage for the payment method type if present
+        paymentMethodOptions?.let { pmo ->
+            val sfu = pmo.setupFutureUsage()
+            if (sfu != null) {
+                val pmOptions = mutableMapOf<String, Any>()
+                pmOptions.putNonEmptySfu(sfu)
 
-            if (paymentMethodOptions.type == PaymentMethod.Type.Card) {
-                requireCvcRecollection?.let {
-                    put(PARAM_REQUIRE_CVC_RECOLLECTION, it)
+                if (pmOptions.isNotEmpty()) {
+                    options[pmo.type.code] = pmOptions
                 }
             }
-        }.takeIf { it.isNotEmpty() }
-
-        return valueMap?.let {
-            mapOf(paymentMethodOptions.type.code to it)
         }
+
+        // Add require_cvc_recollection under card options if needed
+        if (requireCvcRecollection == true) {
+            @Suppress("UNCHECKED_CAST")
+            val cardOptions = (options["card"] as? MutableMap<String, Any>) ?: mutableMapOf()
+            cardOptions[PARAM_REQUIRE_CVC_RECOLLECTION] = true
+            options["card"] = cardOptions
+        }
+
+        return options.takeIf { it.isNotEmpty() }
     }
 
     private companion object {
