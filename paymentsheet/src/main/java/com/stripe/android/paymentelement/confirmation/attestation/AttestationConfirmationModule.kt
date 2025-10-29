@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.attestation
 
+import com.stripe.android.attestation.analytics.AttestationAnalyticsModule
 import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import dagger.Binds
@@ -10,7 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 
-@Module(includes = [PaymentsIntegrityModule::class])
+@Module(includes = [PaymentsIntegrityModule::class, AttestationAnalyticsModule::class])
 internal interface AttestationConfirmationModule {
     @JvmSuppressWildcards
     @Binds
