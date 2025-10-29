@@ -1,6 +1,7 @@
-package com.stripe.android.challenge
+package com.stripe.android.challenge.passive.warmer.activity
 
 import android.content.Context
+import com.stripe.android.challenge.passive.PassiveChallengeModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -23,8 +24,8 @@ import javax.inject.Singleton
         CoroutineContextModule::class
     ]
 )
-internal interface PassiveChallengeComponent {
-    val passiveChallengeViewModel: PassiveChallengeViewModel
+internal interface PassiveChallengeWarmerActivityComponent {
+    val passiveChallengeWarmerViewModel: PassiveChallengeWarmerViewModel
 
     @Component.Builder
     interface Builder {
@@ -42,6 +43,6 @@ internal interface PassiveChallengeComponent {
         @BindsInstance
         fun passiveCaptchaParams(passiveCaptchaParams: PassiveCaptchaParams): Builder
 
-        fun build(): PassiveChallengeComponent
+        fun build(): PassiveChallengeWarmerActivityComponent
     }
 }

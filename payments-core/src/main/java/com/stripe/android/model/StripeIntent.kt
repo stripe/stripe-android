@@ -329,6 +329,10 @@ sealed interface StripeIntent : StripeModel {
                     val keyId: String?
                 ) : Parcelable
             }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @Parcelize
+            data object IntentConfirmationChallenge : SdkData()
         }
 
         @Parcelize

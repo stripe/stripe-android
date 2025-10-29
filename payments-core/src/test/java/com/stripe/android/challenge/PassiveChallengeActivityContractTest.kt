@@ -6,6 +6,10 @@ import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.challenge.passive.PassiveChallengeActivity
+import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
+import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
+import com.stripe.android.challenge.passive.PassiveChallengeArgs
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PassiveCaptchaParams
 import org.junit.Test

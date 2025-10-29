@@ -1,8 +1,8 @@
-package com.stripe.android.challenge.warmer
+package com.stripe.android.challenge.passive.warmer
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerContract
+import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerContract
 import com.stripe.android.model.PassiveCaptchaParams
 
 internal class DefaultPassiveChallengeWarmer : PassiveChallengeWarmer {

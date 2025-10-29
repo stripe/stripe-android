@@ -1,4 +1,4 @@
-package com.stripe.android.challenge
+package com.stripe.android.challenge.passive
 
 import android.content.Context
 import android.content.Intent

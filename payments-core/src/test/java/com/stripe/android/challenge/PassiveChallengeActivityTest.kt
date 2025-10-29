@@ -8,6 +8,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.challenge.passive.PassiveChallengeActivity
+import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
+import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
+import com.stripe.android.challenge.passive.PassiveChallengeArgs
+import com.stripe.android.challenge.passive.PassiveChallengeViewModel
 import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PassiveCaptchaParams

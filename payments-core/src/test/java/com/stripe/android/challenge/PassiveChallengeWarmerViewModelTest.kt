@@ -3,8 +3,8 @@ package com.stripe.android.challenge
 import androidx.fragment.app.FragmentActivity
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerCompleted
-import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerViewModel
+import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerCompleted
+import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerViewModel
 import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.testing.CoroutineTestRule

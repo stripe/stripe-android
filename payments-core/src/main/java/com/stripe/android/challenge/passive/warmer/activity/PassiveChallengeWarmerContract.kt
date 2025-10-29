@@ -1,4 +1,4 @@
-package com.stripe.android.challenge.warmer.activity
+package com.stripe.android.challenge.passive.warmer.activity
 
 import android.content.Context
 import android.content.Intent

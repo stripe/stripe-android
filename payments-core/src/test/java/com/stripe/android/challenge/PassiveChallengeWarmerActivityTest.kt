@@ -8,11 +8,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerActivity
-import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerArgs
-import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerCompleted
-import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerContract
-import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerViewModel
+import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerActivity
+import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerArgs
+import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerCompleted
+import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerContract
+import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerViewModel
 import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PassiveCaptchaParams

@@ -4,8 +4,9 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerCompleted
-import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerContract
+import com.stripe.android.challenge.passive.warmer.DefaultPassiveChallengeWarmer
+import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerCompleted
+import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerContract
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest

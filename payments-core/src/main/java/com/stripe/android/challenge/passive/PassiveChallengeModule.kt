@@ -1,4 +1,4 @@
-package com.stripe.android.challenge
+package com.stripe.android.challenge.passive
 
 import com.stripe.android.BuildConfig
 import com.stripe.android.core.injection.ENABLE_LOGGING

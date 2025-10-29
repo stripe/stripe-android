@@ -12,8 +12,8 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.challenge.PassiveChallengeActivityContract
-import com.stripe.android.challenge.PassiveChallengeActivityResult
+import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
+import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler

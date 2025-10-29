@@ -1,4 +1,4 @@
-package com.stripe.android.challenge
+package com.stripe.android.challenge.passive
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo

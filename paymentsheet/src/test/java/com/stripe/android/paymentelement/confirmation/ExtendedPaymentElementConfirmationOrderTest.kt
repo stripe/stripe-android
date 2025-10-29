@@ -7,8 +7,8 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.attestation.AttestationActivityContract
-import com.stripe.android.challenge.PassiveChallengeActivityContract
-import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerContract
+import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
+import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerContract
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityContract

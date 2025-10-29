@@ -1,4 +1,4 @@
-package com.stripe.android.challenge.warmer
+package com.stripe.android.challenge.passive.warmer
 
 import androidx.annotation.RestrictTo
 import dagger.Module

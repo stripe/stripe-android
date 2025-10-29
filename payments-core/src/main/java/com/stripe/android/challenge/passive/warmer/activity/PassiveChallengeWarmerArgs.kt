@@ -1,11 +1,11 @@
-package com.stripe.android.challenge
+package com.stripe.android.challenge.passive.warmer.activity
 
 import android.os.Parcelable
 import com.stripe.android.model.PassiveCaptchaParams
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class PassiveChallengeArgs(
+internal data class PassiveChallengeWarmerArgs(
     val passiveCaptchaParams: PassiveCaptchaParams,
     val publishableKey: String,
     val productUsage: List<String>
