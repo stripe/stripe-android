@@ -40,6 +40,7 @@ internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
         )
 
         val paymentMethodMessage = result.getOrElse {
+            _messagingContent.value = null
             return PaymentMethodMessagingElement.ConfigureResult.Failed(it)
         }
 
