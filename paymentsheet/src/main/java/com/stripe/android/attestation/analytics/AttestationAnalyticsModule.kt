@@ -8,7 +8,6 @@ import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.Module
 import dagger.Provides
 
-@AttestationAnalyticsScope
 @Module(
     includes = [
         StripeRepositoryModule::class,
