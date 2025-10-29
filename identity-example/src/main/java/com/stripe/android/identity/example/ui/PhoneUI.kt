@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.identity.example.PhoneOTPCheck
 import com.stripe.android.identity.example.R
-import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
 internal fun PhoneUI(
@@ -109,7 +108,7 @@ private fun OtpCheckSelectUI(
             enabled = false,
             trailingIcon = {
                 Icon(
-                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_arrow_drop_down),
+                    painter = painterResource(R.drawable.ic_material_arrow_drop_down),
                     contentDescription = null
                 )
             },
