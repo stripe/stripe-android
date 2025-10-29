@@ -6,9 +6,11 @@ import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.utils.collectAsState
 import java.util.Locale
 import javax.inject.Inject
 
@@ -33,7 +35,8 @@ class PaymentMethodMessagingElement @Inject internal constructor(
      */
     @Composable
     fun Content(appearance: Appearance = Appearance()) {
-        appearance.build()
+        val content by messagingCoordinator.messagingContent.collectAsState()
+        content?.Content(appearance.build())
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
