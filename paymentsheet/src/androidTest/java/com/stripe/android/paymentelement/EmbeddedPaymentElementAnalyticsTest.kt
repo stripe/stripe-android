@@ -85,7 +85,10 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", ""),
-            query("visible_payment_methods", Uri.encode("link,card,afterpay_clearpay,klarna,cashapp,alipay")),
+            query(
+                "visible_payment_methods",
+                Uri.encode("link,card,afterpay_clearpay,klarna,cashapp,affirm,alipay")
+            ),
         )
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
