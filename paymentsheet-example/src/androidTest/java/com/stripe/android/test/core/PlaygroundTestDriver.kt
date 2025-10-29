@@ -337,9 +337,9 @@ internal class PlaygroundTestDriver(
         pressCustomerSheetSave()
 
         if (financialConnectionsLiteEnabled) {
-            executeUsBankAccountLiteFlow()
+            executeUsBankAccountLiteFlow(networkingEnabled = false)
         } else {
-            executeUsBankAccountFlow()
+            executeUsBankAccountFlow(networkingEnabled = false)
         }
 
         waitForCustomerSheetSaveButton()
@@ -1544,7 +1544,7 @@ internal class PlaygroundTestDriver(
         Espresso.pressBack()
     }
 
-    private fun executeUsBankAccountLiteFlow() {
+    private fun executeUsBankAccountLiteFlow(networkingEnabled: Boolean) {
         while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_LITE_ACTIVITY) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
@@ -1561,16 +1561,18 @@ internal class PlaygroundTestDriver(
             .withElementByTestId(testId = "select-button")
             .perform(webClick())
 
-        onWebView()
-            .withElementByTestId("link-not-now-button")
-            .perform(webClick())
+        if (networkingEnabled) {
+            onWebView()
+                .withElementByTestId("link-not-now-button")
+                .perform(webClick())
+        }
 
         onWebView()
             .withElementByTestId("done-button")
             .perform(webClick())
     }
 
-    private fun executeUsBankAccountFlow() {
+    private fun executeUsBankAccountFlow(networkingEnabled: Boolean) {
         while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
@@ -1589,7 +1591,10 @@ internal class PlaygroundTestDriver(
         // after web view verification.
         clickButton("Connect account", composeCanDetach = true)
 
-        clickButton("Not now")
+        if (networkingEnabled) {
+            clickButton("Not now")
+        }
+
         clickButtonWithTag("done_button")
     }
 
@@ -1617,7 +1622,7 @@ internal class PlaygroundTestDriver(
         if (authAction == AuthorizeAction.Cancel) {
             cancelAchFlowOnLaunch()
         } else {
-            executeUsBankAccountFlow()
+            executeUsBankAccountFlow(networkingEnabled = true)
         }
     }
 
@@ -1625,7 +1630,7 @@ internal class PlaygroundTestDriver(
         if (authAction == AuthorizeAction.Cancel) {
             cancelAchLiteFlowOnLaunch()
         } else {
-            executeUsBankAccountLiteFlow()
+            executeUsBankAccountLiteFlow(networkingEnabled = true)
         }
     }
 
