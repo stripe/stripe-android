@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.Reusable
 import dagger.multibindings.IntoSet
 import javax.inject.Named
 import javax.inject.Provider
@@ -51,6 +52,7 @@ internal interface IntentConfirmationModule {
 
         @JvmSuppressWildcards
         @Provides
+        @Reusable
         @IntoSet
         fun providesIntentConfirmationDefinition(
             interceptorFactory: IntentConfirmationInterceptor.Factory,
