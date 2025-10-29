@@ -94,7 +94,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
         testContext.validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
-            query("hidden_payment_methods", Uri.encode("cashapp,alipay")),
+            query("hidden_payment_methods", Uri.encode("cashapp,affirm,alipay")),
             query("visible_payment_methods", Uri.encode("link,card,afterpay_clearpay,klarna")),
         )
 
@@ -173,7 +173,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
         testContext.validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
-            query("hidden_payment_methods", Uri.encode("cashapp,alipay")),
+            query("hidden_payment_methods", Uri.encode("cashapp,affirm,alipay")),
             query("visible_payment_methods", Uri.encode("card,afterpay_clearpay,klarna")),
         )
 
