@@ -3068,7 +3068,6 @@ class PaymentSheet internal constructor(
         )
 
         companion object {
-            @ExperimentalCustomerSessionApi
             fun createWithCustomerSession(
                 id: String,
                 clientSecret: String

@@ -18,7 +18,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentmethodoptions.setupfutureusage.toJsonObjectString
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -292,7 +291,6 @@ internal class ElementsSessionRepositoryTest {
         assertThat(session.getOrNull()?.stripeIntent?.paymentMethodTypes).isEqualTo(expectedPaymentMethodTypes)
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `Verify customer session client secret is passed to 'StripeRepository'`() = runTest {
         whenever(
@@ -345,7 +343,6 @@ internal class ElementsSessionRepositoryTest {
         )
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `Verify legacy customer ephemeral key is passed to 'StripeRepository'`() = runTest {
         whenever(

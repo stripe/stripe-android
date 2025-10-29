@@ -37,7 +37,6 @@ import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalCustomerSessionApi::class)
 @RunWith(RobolectricTestRunner::class)
 internal class CustomerSessionPaymentSheetActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()

@@ -61,7 +61,6 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -145,7 +144,6 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     @OptIn(
-        ExperimentalCustomerSessionApi::class,
         ExperimentalAnalyticEventCallbackApi::class,
     )
     @Suppress("LongMethod")

@@ -7,7 +7,6 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.testing.PaymentMethodFactory
@@ -53,7 +52,6 @@ internal object DefaultPaymentMethodsUtils {
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     fun launch(
         testContext: ProductIntegrationTestRunnerContext,
         composeTestRule: ComposeTestRule,

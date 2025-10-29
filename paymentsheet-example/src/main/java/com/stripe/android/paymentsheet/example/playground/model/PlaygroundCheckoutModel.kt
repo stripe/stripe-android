@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.example.playground.model
 
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -227,7 +226,6 @@ data class CheckoutResponse(
     @SerialName("paymentMethodTypes")
     val paymentMethodTypes: String? = null,
 ) {
-    @OptIn(ExperimentalCustomerSessionApi::class)
     fun makeCustomerConfig(
         customerKeyType: CheckoutRequest.CustomerKeyType?
     ) = customerId?.let { id ->

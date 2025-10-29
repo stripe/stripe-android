@@ -32,7 +32,6 @@ import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOptio
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
 import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationOption
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
@@ -524,7 +523,6 @@ class ConfirmationHandlerOptionKtxTest {
         ).isNull()
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `On ShopPay selection with config with shopPay config, should return expected option`() {
         assertThat(
