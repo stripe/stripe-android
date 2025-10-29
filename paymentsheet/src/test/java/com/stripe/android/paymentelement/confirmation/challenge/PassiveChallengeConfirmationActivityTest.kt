@@ -249,7 +249,7 @@ internal class PassiveChallengeConfirmationActivityTest {
         )
 
         const val PASSIVE_CHALLENGE_ACTIVITY_NAME =
-            "com.stripe.android.challenge.PassiveChallengeActivity"
+            "com.stripe.android.challenge.passive.PassiveChallengeActivity"
 
         const val PAYMENT_CONFIRMATION_LAUNCHER_ACTIVITY_NAME =
             "com.stripe.android.payments.paymentlauncher.PaymentLauncherConfirmationActivity"
