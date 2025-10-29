@@ -26,7 +26,12 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
     fun `configure returns no content if single and multi partner null`() = runTest {
         whenever(
             repository.retrievePaymentMethodMessage(
-                any(), any(), any(), any(), any(), any()
+                paymentMethods = any(),
+                amount = any(),
+                currency = any(),
+                country = any(),
+                locale = any(),
+                requestOptions = any()
             )
         ).thenReturn(
             Result.success(
@@ -53,7 +58,12 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
     fun `configure returns succeeded if single partner is not null`() = runTest {
         whenever(
             repository.retrievePaymentMethodMessage(
-                any(), any(), any(), any(), any(), any()
+                paymentMethods = any(),
+                amount = any(),
+                currency = any(),
+                country = any(),
+                locale = any(),
+                requestOptions = any()
             )
         ).thenReturn(
             Result.success(
@@ -80,7 +90,12 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
     fun `configure returns succeeded if multi partner is not null`() = runTest {
         whenever(
             repository.retrievePaymentMethodMessage(
-                any(), any(), any(), any(), any(), any()
+                paymentMethods = any(),
+                amount = any(),
+                currency = any(),
+                country = any(),
+                locale = any(),
+                requestOptions = any()
             )
         ).thenReturn(
             Result.success(
