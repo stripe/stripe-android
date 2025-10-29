@@ -21,8 +21,10 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
+import com.stripe.android.testing.NoOpCardScanEventsReporter
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
@@ -124,6 +126,7 @@ internal class VerticalModeFormUITest {
 
         composeRule.setContent {
             CompositionLocalProvider(
+                LocalCardScanEventsReporter provides NoOpCardScanEventsReporter,
                 LocalCardNumberCompletedEventReporter provides { },
                 LocalCardBrandDisallowedReporter provides { }
             ) {

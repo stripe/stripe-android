@@ -551,15 +551,6 @@ internal class PlaygroundSettings private constructor(
                 listOf(PlaygroundConfigurationData.IntegrationType.LinkController)
             ),
             TermsDisplaySettingsDefinition,
-            FeatureFlagSettingsDefinition(
-                FeatureFlags.cardScanGooglePayMigration,
-                listOf(
-                    PlaygroundConfigurationData.IntegrationType.PaymentSheet,
-                    PlaygroundConfigurationData.IntegrationType.FlowController,
-                    PlaygroundConfigurationData.IntegrationType.Embedded,
-                    PlaygroundConfigurationData.IntegrationType.CustomerSheet,
-                )
-            ),
             PassiveCaptchaDefinition,
             AttestationOnIntentConfirmationDefinition,
             EnablePromptPaySettingsDefinition,
