@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -177,7 +178,8 @@ private fun CardBrand.getDayIcon(): Int {
 }
 
 @DrawableRes
-internal fun getLinkIcon(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun getLinkIcon(
     showNightIcon: Boolean? = null,
     iconOnly: Boolean = false,
 ): Int {

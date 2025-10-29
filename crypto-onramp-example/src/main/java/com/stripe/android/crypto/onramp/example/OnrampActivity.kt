@@ -150,6 +150,9 @@ internal class OnrampActivity : ComponentActivity() {
                         },
                         onCreatePaymentToken = {
                             viewModel.createCryptoPaymentToken()
+                        },
+                        onVerifyKyc = {
+                            onrampPresenter.verifyKycInfo()
                         }
                     )
                 }
@@ -212,6 +215,7 @@ internal fun OnrampScreen(
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
     onCreatePaymentToken: () -> Unit,
+    onVerifyKyc: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -283,6 +287,7 @@ internal fun OnrampScreen(
                     onAuthenticate = onAuthenticateUser,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
+                    onVerifyKyc = onVerifyKyc,
                     onStartVerification = onStartVerification,
                     onCollectPayment = onCollectPayment,
                     onCreatePaymentToken = onCreatePaymentToken,
@@ -501,6 +506,7 @@ private fun AuthenticatedOperationsScreen(
     onAuthenticate: (oauthScopes: String?) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
+    onVerifyKyc: () -> Unit,
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
     onCreatePaymentToken: () -> Unit,
@@ -679,6 +685,15 @@ private fun AuthenticatedOperationsScreen(
             onSsnChange = { ssn = it },
             onCollectKYC = { kycInfo -> onCollectKYC(kycInfo) }
         )
+
+        Button(
+            onClick = { onVerifyKyc() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Text("Verify KYC Info")
+        }
 
         StartVerificationScreen {
             onStartVerification()
