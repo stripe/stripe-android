@@ -91,13 +91,13 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
             keyboardController.hide()
 
             val params = when (viewBinding.spinner.selectedItemPosition) {
-                0 -> viewBinding.cardInputWidget.cardParams
-                1 -> viewBinding.cardMultilineWidget.cardParams
-                2 -> viewBinding.cardFormView.cardParams
+                0 -> viewBinding.cardInputWidget.paymentMethodCreateParams
+                1 -> viewBinding.cardMultilineWidget.paymentMethodCreateParams
+                2 -> viewBinding.cardFormView.paymentMethodCreateParams
                 else -> error("no widget in this position")
             }
 
-            createPaymentMethod(PaymentMethodCreateParams.createCard(params!!))
+            createPaymentMethod(params!!)
         }
     }
 

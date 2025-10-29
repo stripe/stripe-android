@@ -103,8 +103,8 @@ class FieldValuesToParamsMapConverterTest {
                         true
                     )
                 ),
-                PaymentMethod.Type.Sofort.code,
-                PaymentMethod.Type.Sofort.requiresMandate,
+                PaymentMethod.Type.PayPal.code,
+                PaymentMethod.Type.PayPal.requiresMandate,
                 clientAttributionMetadata = clientAttributionMetadata
             )
 
@@ -112,7 +112,7 @@ class FieldValuesToParamsMapConverterTest {
         assertThat(paramsMap).hasSize(3)
         assertThat(paramsMap).containsEntry(
             "type",
-            "sofort"
+            "paypal"
         )
         assertThat(paramsMap).containsEntry("billing_details", paymentMethodParams.billingDetails!!.toParamMap())
         assertThat(paramsMap).containsEntry("client_attribution_metadata", clientAttributionMetadata.toParamMap())
@@ -129,8 +129,8 @@ class FieldValuesToParamsMapConverterTest {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(
                 emptyMap(),
-                PaymentMethod.Type.Sofort.code,
-                PaymentMethod.Type.Sofort.requiresMandate,
+                PaymentMethod.Type.PayPal.code,
+                PaymentMethod.Type.PayPal.requiresMandate,
                 clientAttributionMetadata = ClientAttributionMetadata(
                     elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
                     paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
@@ -146,8 +146,8 @@ class FieldValuesToParamsMapConverterTest {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(
                 emptyMap(),
-                PaymentMethod.Type.Sofort.code,
-                PaymentMethod.Type.Sofort.requiresMandate,
+                PaymentMethod.Type.PayPal.code,
+                PaymentMethod.Type.PayPal.requiresMandate,
                 clientAttributionMetadata = clientAttributionMetadata
             )
 

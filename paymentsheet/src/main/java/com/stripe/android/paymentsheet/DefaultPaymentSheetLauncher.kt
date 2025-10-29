@@ -24,7 +24,7 @@ import org.jetbrains.annotations.TestOnly
  * able to pass in an activity.
  */
 internal class DefaultPaymentSheetLauncher(
-    private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContractV2.Args>,
+    private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContract.Args>,
     private val activity: Activity,
     private val lifecycleOwner: LifecycleOwner,
     private val application: Application,
@@ -48,7 +48,7 @@ internal class DefaultPaymentSheetLauncher(
         callback: PaymentSheetResultCallback
     ) : this(
         activityResultLauncher = activity.registerForActivityResult(
-            PaymentSheetContractV2()
+            PaymentSheetContract()
         ) {
             callback.onPaymentSheetResult(it)
         },
@@ -68,7 +68,7 @@ internal class DefaultPaymentSheetLauncher(
         activityResultLauncher = registerForReactNativeActivityResult(
             activity,
             signal,
-            PaymentSheetContractV2(),
+            PaymentSheetContract(),
         ) {
             callback.onPaymentSheetResult(it)
         },
@@ -83,7 +83,7 @@ internal class DefaultPaymentSheetLauncher(
         callback: PaymentSheetResultCallback
     ) : this(
         activityResultLauncher = fragment.registerForActivityResult(
-            PaymentSheetContractV2()
+            PaymentSheetContract()
         ) {
             callback.onPaymentSheetResult(it)
         },
@@ -100,7 +100,7 @@ internal class DefaultPaymentSheetLauncher(
         callback: PaymentSheetResultCallback
     ) : this(
         activityResultLauncher = fragment.registerForActivityResult(
-            PaymentSheetContractV2(),
+            PaymentSheetContract(),
             registry
         ) {
             callback.onPaymentSheetResult(it)
@@ -115,7 +115,7 @@ internal class DefaultPaymentSheetLauncher(
         mode: PaymentElementLoader.InitializationMode,
         configuration: PaymentSheet.Configuration?
     ) {
-        val args = PaymentSheetContractV2.Args(
+        val args = PaymentSheetContract.Args(
             initializationMode = mode,
             config = configuration ?: PaymentSheet.Configuration.default(activity),
             statusBarColor = StatusBarCompat.color(activity),

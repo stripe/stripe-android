@@ -28,7 +28,6 @@ import kotlin.test.assertNull
 class DefaultPaymentNextActionHandlerRegistryTest {
     private val noOpIntentAuthenticator = mock<NoOpIntentNextActionHandler>()
     private val sourceAuthenticator = mock<SourceNextActionHandler>()
-    private val threeDs1lAuthenticator = mock<PaymentNextActionHandler<StripeIntent>>()
     private val threeDs2lAuthenticator = mock<PaymentNextActionHandler<StripeIntent>>()
     private val redirectToUrlAuthenticator = mock<PaymentNextActionHandler<StripeIntent>>()
     private val alipayRedirectAuthenticator = mock<PaymentNextActionHandler<StripeIntent>>()
@@ -38,7 +37,6 @@ class DefaultPaymentNextActionHandlerRegistryTest {
         noOpIntentNextActionHandler = noOpIntentAuthenticator,
         sourceNextActionHandler = sourceAuthenticator,
         paymentNextActionHandlers = mapOf(
-            NextActionData.SdkData.Use3DS1::class.java to threeDs1lAuthenticator,
             NextActionData.SdkData.Use3DS2::class.java to threeDs2lAuthenticator,
             NextActionData.RedirectToUrl::class.java to redirectToUrlAuthenticator,
             NextActionData.AlipayRedirect::class.java to alipayRedirectAuthenticator,
@@ -51,7 +49,6 @@ class DefaultPaymentNextActionHandlerRegistryTest {
     private val allAuthenticators = setOf(
         noOpIntentAuthenticator,
         sourceAuthenticator,
-        threeDs1lAuthenticator,
         threeDs2lAuthenticator,
         redirectToUrlAuthenticator,
         alipayRedirectAuthenticator,
@@ -65,11 +62,6 @@ class DefaultPaymentNextActionHandlerRegistryTest {
 
     @Test
     fun `verify StripeIntent with nextAction gets the correct PaymentAuthenticator`() {
-        verifyIntentWithType(
-            mock<NextActionData.SdkData.Use3DS1>(),
-            threeDs1lAuthenticator
-        )
-
         verifyIntentWithType(
             mock<NextActionData.SdkData.Use3DS2>(),
             threeDs2lAuthenticator

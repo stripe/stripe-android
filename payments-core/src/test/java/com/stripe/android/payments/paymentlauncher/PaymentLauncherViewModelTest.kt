@@ -69,7 +69,6 @@ class PaymentLauncherViewModelTest {
         DefaultReturnUrl.create(ApplicationProvider.getApplicationContext())
     private val apiRequestOptions = mock<ApiRequest.Options>()
     private val authHost = mock<AuthActivityStarterHost>()
-    private val threeDs1IntentReturnUrlMap = mock<MutableMap<String, String>>()
     private val paymentIntentFlowResultProcessor = mock<PaymentIntentFlowResultProcessor>()
     private val setupIntentFlowResultProcessor = mock<SetupIntentFlowResultProcessor>()
 
@@ -121,7 +120,6 @@ class PaymentLauncherViewModelTest {
             nextActionHandlerRegistry,
             defaultReturnUrl,
             { apiRequestOptions },
-            threeDs1IntentReturnUrlMap,
             { paymentIntentFlowResultProcessor },
             { setupIntentFlowResultProcessor },
             analyticsRequestExecutor,

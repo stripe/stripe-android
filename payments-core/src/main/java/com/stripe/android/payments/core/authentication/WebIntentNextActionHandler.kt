@@ -32,7 +32,6 @@ internal class WebIntentNextActionHandler @Inject constructor(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @UIContext private val uiContext: CoroutineContext,
-    private val threeDs1IntentReturnUrlMap: MutableMap<String, String>,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(IS_INSTANT_APP) private val isInstantApp: Boolean,
     private val defaultReturnUrl: DefaultReturnUrl,
@@ -45,10 +44,6 @@ internal class WebIntentNextActionHandler @Inject constructor(
         requestOptions: ApiRequest.Options
     ) {
         val webAuthParams = when (val nextActionData = actionable.nextActionData) {
-            // can only triggered when `use_stripe_sdk=true`
-            is StripeIntent.NextActionData.SdkData.Use3DS1 -> {
-                nextActionData.webAuthParams(actionable)
-            }
             // can only triggered when `use_stripe_sdk=false`
             is StripeIntent.NextActionData.RedirectToUrl -> {
                 nextActionData.webAuthParams(actionable)
@@ -116,22 +111,6 @@ internal class WebIntentNextActionHandler @Inject constructor(
                 referrer = referrer,
                 forceInAppWebView = forceInAppWebView,
             )
-        )
-    }
-
-    private fun StripeIntent.NextActionData.SdkData.Use3DS1.webAuthParams(actionable: StripeIntent): WebAuthParams {
-        analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(
-                PaymentAnalyticsEvent.Auth3ds1Sdk
-            )
-        )
-        return WebAuthParams(
-            authUrl = url,
-            returnUrl = actionable.id?.let {
-                threeDs1IntentReturnUrlMap.remove(it)
-            },
-            // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
-            shouldCancelSource = true
         )
     }
 

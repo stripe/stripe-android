@@ -21,13 +21,14 @@ internal fun effectiveBillingDetails(
 ): PaymentSheet.BillingDetails {
     val billingConfig = configuration.billingDetailsCollectionConfiguration
     val defaultBillingDetails = configuration.defaultBillingDetails
-        ?: PaymentSheet.BillingDetails()
-    return defaultBillingDetails.copy(
-        email = defaultBillingDetails.email
+    return PaymentSheet.BillingDetails(
+        email = defaultBillingDetails?.email
             ?: linkAccount.email.takeIf { billingConfig.collectsEmail },
-        phone = defaultBillingDetails.phone
+        phone = defaultBillingDetails?.phone
             ?: linkAccount.unredactedPhoneNumber.takeIf { billingConfig.collectsPhone },
         // Name and address cannot be supplemented from Link account data
+        name = defaultBillingDetails?.name,
+        address = defaultBillingDetails?.address
     )
 }
 

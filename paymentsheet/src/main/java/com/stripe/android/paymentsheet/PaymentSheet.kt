@@ -45,6 +45,8 @@ import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
+import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -700,7 +702,8 @@ class PaymentSheet internal constructor(
 
     /** Configuration for [PaymentSheet] **/
     @Parcelize
-    data class Configuration internal constructor(
+    @Poko
+    class Configuration internal constructor(
         /**
          * Your customer-facing business name.
          *
@@ -1269,7 +1272,8 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Appearance
+    @Poko
+    class Appearance
     @OptIn(AppearanceAPIAdditionsPreview::class)
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
@@ -1407,7 +1411,7 @@ class PaymentSheet internal constructor(
 
                 @Parcelize
                 @Poko
-                class FlatWithRadio(
+                class FlatWithRadio internal constructor(
                     internal val separatorThicknessDp: Float,
                     internal val startSeparatorInsetDp: Float,
                     internal val endSeparatorInsetDp: Float,
@@ -1418,29 +1422,6 @@ class PaymentSheet internal constructor(
                     internal val colorsLight: Colors,
                     internal val colorsDark: Colors
                 ) : RowStyle() {
-                    constructor(
-                        context: Context,
-                        @DimenRes separatorThicknessRes: Int,
-                        @DimenRes startSeparatorInsetRes: Int,
-                        @DimenRes endSeparatorInsetRes: Int,
-                        topSeparatorEnabled: Boolean,
-                        bottomSeparatorEnabled: Boolean,
-                        @DimenRes additionalVerticalInsetsRes: Int,
-                        @DimenRes horizontalInsetsRes: Int,
-                        colorsLight: Colors,
-                        colorsDark: Colors
-                    ) : this(
-                        separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessRes),
-                        startSeparatorInsetDp = context.getRawValueFromDimenResource(startSeparatorInsetRes),
-                        endSeparatorInsetDp = context.getRawValueFromDimenResource(endSeparatorInsetRes),
-                        topSeparatorEnabled = topSeparatorEnabled,
-                        bottomSeparatorEnabled = bottomSeparatorEnabled,
-                        additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsRes),
-                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsRes),
-                        colorsLight = colorsLight,
-                        colorsDark = colorsDark
-                    )
-
                     override fun hasSeparators() = true
                     override fun startSeparatorHasDefaultInset() = true
                     internal fun getColors(isDark: Boolean): Colors = if (isDark) colorsDark else colorsLight
@@ -1592,7 +1573,7 @@ class PaymentSheet internal constructor(
 
                 @Parcelize
                 @Poko
-                class FlatWithCheckmark(
+                class FlatWithCheckmark internal constructor(
                     internal val separatorThicknessDp: Float,
                     internal val startSeparatorInsetDp: Float,
                     internal val endSeparatorInsetDp: Float,
@@ -1604,31 +1585,6 @@ class PaymentSheet internal constructor(
                     internal val colorsLight: Colors,
                     internal val colorsDark: Colors
                 ) : RowStyle() {
-                    constructor(
-                        context: Context,
-                        @DimenRes separatorThicknessRes: Int,
-                        @DimenRes startSeparatorInsetRes: Int,
-                        @DimenRes endSeparatorInsetRes: Int,
-                        topSeparatorEnabled: Boolean,
-                        bottomSeparatorEnabled: Boolean,
-                        @DimenRes checkmarkInsetRes: Int,
-                        @DimenRes additionalVerticalInsetsRes: Int,
-                        @DimenRes horizontalInsetsRes: Int,
-                        colorsLight: Colors,
-                        colorsDark: Colors
-                    ) : this(
-                        separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessRes),
-                        startSeparatorInsetDp = context.getRawValueFromDimenResource(startSeparatorInsetRes),
-                        endSeparatorInsetDp = context.getRawValueFromDimenResource(endSeparatorInsetRes),
-                        topSeparatorEnabled = topSeparatorEnabled,
-                        bottomSeparatorEnabled = bottomSeparatorEnabled,
-                        checkmarkInsetDp = context.getRawValueFromDimenResource(checkmarkInsetRes),
-                        additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsRes),
-                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsRes),
-                        colorsLight = colorsLight,
-                        colorsDark = colorsDark
-                    )
-
                     @Parcelize
                     @Poko
                     class Colors(
@@ -1780,19 +1736,10 @@ class PaymentSheet internal constructor(
 
                 @Parcelize
                 @Poko
-                class FloatingButton(
+                class FloatingButton internal constructor(
                     internal val spacingDp: Float,
                     internal val additionalInsetsDp: Float,
                 ) : RowStyle() {
-                    constructor(
-                        context: Context,
-                        @DimenRes spacingRes: Int,
-                        @DimenRes additionalInsetsRes: Int
-                    ) : this(
-                        spacingDp = context.getRawValueFromDimenResource(spacingRes),
-                        additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsRes)
-                    )
-
                     override fun hasSeparators() = false
                     override fun startSeparatorHasDefaultInset() = false
 
@@ -1846,7 +1793,7 @@ class PaymentSheet internal constructor(
                     @DrawableRes
                     internal val disclosureIconRes: Int
                 ) : RowStyle() {
-                    constructor(
+                    internal constructor(
                         context: Context,
                         @DimenRes separatorThicknessRes: Int,
                         @DimenRes startSeparatorInsetRes: Int,
@@ -2150,7 +2097,8 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Colors(
+    @Poko
+    class Colors(
         /**
          * A primary color used throughout PaymentSheet.
          */
@@ -2286,7 +2234,8 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Shapes @AppearanceAPIAdditionsPreview constructor(
+    @Poko
+    class Shapes @AppearanceAPIAdditionsPreview constructor(
         /**
          * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
          */
@@ -2340,7 +2289,8 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Typography @AppearanceAPIAdditionsPreview constructor(
+    @Poko
+    class Typography @AppearanceAPIAdditionsPreview constructor(
         /**
          * The scale factor for all fonts in PaymentSheet, the default value is 1.0.
          * When this value increases fonts will increase in size and decrease when this value is lowered.
@@ -2379,7 +2329,8 @@ class PaymentSheet internal constructor(
 
         @AppearanceAPIAdditionsPreview
         @Parcelize
-        data class Custom(
+        @Poko
+        class Custom(
             /**
              * The font used for headlines (e.g., "Add your payment information")
              *
@@ -2390,7 +2341,8 @@ class PaymentSheet internal constructor(
 
         @AppearanceAPIAdditionsPreview
         @Parcelize
-        data class Font(
+        @Poko
+        class Font(
             /**
              * The font used in text. This should be a resource ID value.
              */
@@ -2448,7 +2400,8 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class PrimaryButton(
+    @Poko
+    class PrimaryButton(
         /**
          * Describes the colors used while the system is in light mode.
          */
@@ -2468,7 +2421,8 @@ class PaymentSheet internal constructor(
     ) : Parcelable
 
     @Parcelize
-    data class PrimaryButtonColors(
+    @Poko
+    class PrimaryButtonColors(
         /**
          * The background color of the primary button.
          * Note: If 'null', {@link Colors#primary} is used.
@@ -2553,7 +2507,8 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class PrimaryButtonShape(
+    @Poko
+    class PrimaryButtonShape(
         /**
          * The corner radius of the primary button.
          * Note: If 'null', {@link Shapes#cornerRadiusDp} is used.
@@ -2570,20 +2525,6 @@ class PaymentSheet internal constructor(
          */
         val heightDp: Float? = null
     ) : Parcelable {
-        @Deprecated("Use @DimenRes constructor")
-        constructor(
-            context: Context,
-            cornerRadiusDp: Int? = null,
-            borderStrokeWidthDp: Int? = null
-        ) : this(
-            cornerRadiusDp = cornerRadiusDp?.let {
-                context.getRawValueFromDimenResource(it)
-            },
-            borderStrokeWidthDp = borderStrokeWidthDp?.let {
-                context.getRawValueFromDimenResource(it)
-            }
-        )
-
         constructor(
             context: Context,
             @DimenRes cornerRadiusRes: Int? = null,
@@ -2603,7 +2544,8 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class PrimaryButtonTypography(
+    @Poko
+    class PrimaryButtonTypography(
         /**
          * The font used in the primary button.
          * Note: If 'null', Appearance.Typography.fontResId is used.
@@ -2687,7 +2629,8 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Address(
+    @Poko
+    class Address(
         /**
          * City, district, suburb, town, or village.
          * The value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
@@ -2741,7 +2684,8 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class BillingDetails(
+    @Poko
+    class BillingDetails(
         /**
          * The customer's billing address.
          */
@@ -2793,7 +2737,8 @@ class PaymentSheet internal constructor(
      * Configuration for how billing details are collected during checkout.
      */
     @Parcelize
-    data class BillingDetailsCollectionConfiguration(
+    @Poko
+    class BillingDetailsCollectionConfiguration(
         /**
          * How to collect the name field.
          */
@@ -2923,6 +2868,19 @@ class PaymentSheet internal constructor(
                 isRequired = collectsFullAddress || collectsPhone,
                 format = format,
                 isPhoneNumberRequired = collectsPhone,
+            )
+        }
+
+        internal fun copy(
+            name: CollectionMode = this.name,
+        ): BillingDetailsCollectionConfiguration {
+            return BillingDetailsCollectionConfiguration(
+                name = name,
+                phone = phone,
+                email = email,
+                address = address,
+                attachDefaultsToPaymentMethod = attachDefaultsToPaymentMethod,
+                allowedCountries = allowedCountries,
             )
         }
 
@@ -3125,7 +3083,8 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class CustomerConfiguration internal constructor(
+    @Poko
+    class CustomerConfiguration internal constructor(
         /**
          * The identifier of the Stripe Customer object.
          * See [Stripe's documentation](https://stripe.com/docs/api/customers/object#customer_object-id).
@@ -3181,7 +3140,8 @@ class PaymentSheet internal constructor(
      * for more information on button types.
      */
     @Parcelize
-    data class GooglePayConfiguration @JvmOverloads constructor(
+    @Poko
+    class GooglePayConfiguration @JvmOverloads constructor(
         val environment: Environment,
         val countryCode: String,
         val currencyCode: String? = null,

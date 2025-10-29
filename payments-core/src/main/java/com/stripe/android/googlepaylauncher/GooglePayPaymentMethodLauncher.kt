@@ -30,6 +30,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -40,7 +41,7 @@ import java.util.Locale
  * A drop-in class that presents a Google Pay sheet to collect a customer's payment details.
  * When successful, will return a [PaymentMethod] via [Result.Completed.paymentMethod].
  *
- * Use [GooglePayPaymentMethodLauncher] for Jetpack Compose integrations.
+ * Use [rememberGooglePayPaymentMethodLauncher] for Jetpack Compose integrations.
  *
  * See the [Google Pay integration guide](https://stripe.com/docs/google-pay) for more details.
  */
@@ -206,34 +207,6 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
      * @param transactionId A unique ID that identifies a transaction attempt. Merchants may use an
      * existing ID or generate a specific one for Google Pay transaction attempts.
      * This field is required when you send callbacks to the Google Transaction Events API.
-     */
-    @Deprecated(
-        message = "Use the present method that takes a Long as the amount instead.",
-        replaceWith = ReplaceWith(
-            expression = "present(currencyCode, amount.toLong(), transactionId)",
-        ),
-    )
-    @JvmOverloads
-    fun present(
-        currencyCode: String,
-        amount: Int,
-        transactionId: String? = null
-    ) {
-        present(currencyCode, amount.toLong(), transactionId)
-    }
-
-    /**
-     * Present the Google Pay UI.
-     *
-     * An [IllegalStateException] will be thrown if Google Pay is not available or ready for usage.
-     *
-     * @param currencyCode ISO 4217 alphabetic currency code. (e.g. "USD", "EUR")
-     * @param amount Amount intended to be collected. A positive integer representing how much to
-     * charge in the smallest currency unit (e.g., 100 cents to charge $1.00 or 100 to charge ¥100,
-     * a zero-decimal currency). If the amount is not yet known, use 0.
-     * @param transactionId A unique ID that identifies a transaction attempt. Merchants may use an
-     * existing ID or generate a specific one for Google Pay transaction attempts.
-     * This field is required when you send callbacks to the Google Transaction Events API.
      * @param label An optional label to display with the amount. Google Pay may or may not display
      * this label depending on its own internal logic. Defaults to a generic label if none is
      * provided.
@@ -280,7 +253,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     }
 
     @Parcelize
-    data class Config @JvmOverloads constructor(
+    @Poko
+    class Config @JvmOverloads constructor(
         val environment: GooglePayEnvironment,
         val merchantCountryCode: String,
         val merchantName: String,
@@ -318,7 +292,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     }
 
     @Parcelize
-    data class BillingAddressConfig @JvmOverloads constructor(
+    @Poko
+    class BillingAddressConfig @JvmOverloads constructor(
         val isRequired: Boolean = false,
 
         /**
@@ -354,7 +329,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
          * @param paymentMethod The resulting payment method.
          */
         @Parcelize
-        data class Completed(
+        @Poko
+        class Completed(
             val paymentMethod: PaymentMethod
         ) : Result()
 
@@ -365,7 +341,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
          * @param errorCode The failure [ErrorCode].
          */
         @Parcelize
-        data class Failed(
+        @Poko
+        class Failed(
             val error: Throwable,
             @ErrorCode val errorCode: Int
         ) : Result()
@@ -405,30 +382,6 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
 
         // Error executing a network call
         const val NETWORK_ERROR = 3
-
-        /**
-         * Create a [GooglePayPaymentMethodLauncher] used for Jetpack Compose.
-         *
-         * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
-         * [ActivityResultLauncher] into current activity, it should be called as part of Compose
-         * initialization path.
-         * The GooglePayPaymentMethodLauncher created is remembered across recompositions.
-         * Recomposition will always return the value produced by composition.
-         */
-        @Deprecated(
-            message = "Use rememberGooglePayPaymentMethodLauncher() instead",
-            replaceWith = ReplaceWith(
-                expression = "rememberGooglePayPaymentMethodLauncher(config, readyCallback, resultCallback)",
-            ),
-        )
-        @Composable
-        fun rememberLauncher(
-            config: Config,
-            readyCallback: ReadyCallback,
-            resultCallback: ResultCallback
-        ): GooglePayPaymentMethodLauncher {
-            return rememberGooglePayPaymentMethodLauncher(config, readyCallback, resultCallback)
-        }
     }
 }
 

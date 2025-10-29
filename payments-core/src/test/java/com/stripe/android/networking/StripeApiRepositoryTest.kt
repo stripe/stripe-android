@@ -63,6 +63,7 @@ import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.model.StripeFileFixtures
 import com.stripe.android.model.TokenFixtures
 import com.stripe.android.model.VerificationMethodParam
+import com.stripe.android.model.copy
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
@@ -2506,23 +2507,22 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
-    fun `getPaymentMethodMessaging() returns PaymentMethodMessage`() =
+    fun `retrievePaymentMethodMessage() sends all params`() =
         runTest {
             val stripeResponse = StripeResponse(
                 200,
-                PaymentMethodMessageFixtures.DEFAULT,
+                PaymentMethodMessageFixtures.MULTI_PARTNER_JSON.toString(),
                 emptyMap()
             )
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
             create().retrievePaymentMethodMessage(
-                paymentMethods = listOf("klarna", "afterpay"),
+                paymentMethods = listOf("klarna", "afterpay_clearpay", "affirm"),
                 amount = 999,
                 currency = "usd",
                 country = "us",
                 locale = Locale.getDefault().toLanguageTag(),
-                logoColor = "color",
                 requestOptions = DEFAULT_OPTIONS
             )
 
@@ -2531,16 +2531,17 @@ internal class StripeApiRepositoryTest {
             val request = apiRequestArgumentCaptor.firstValue
             val params = requireNotNull(request.params)
 
-            assertThat(request.baseUrl).isEqualTo("https://ppm.stripe.com/content")
+            assertThat(request.baseUrl).isEqualTo("https://ppm.stripe.com/config")
 
             with(params) {
                 assertThat(this["payment_methods[0]"]).isEqualTo("klarna")
-                assertThat(this["payment_methods[1]"]).isEqualTo("afterpay")
+                assertThat(this["payment_methods[1]"]).isEqualTo("afterpay_clearpay")
+                assertThat(this["payment_methods[2]"]).isEqualTo("affirm")
                 assertThat(this["amount"]).isEqualTo(999)
                 assertThat(this["currency"]).isEqualTo("usd")
                 assertThat(this["country"]).isEqualTo("us")
                 assertThat(this["locale"]).isEqualTo("en-US")
-                assertThat(this["logo_color"]).isEqualTo("color")
+                assertThat(this["key"]).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
             }
         }
 
