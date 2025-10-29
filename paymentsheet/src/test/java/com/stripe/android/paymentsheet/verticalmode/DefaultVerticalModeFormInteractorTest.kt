@@ -6,7 +6,6 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -204,7 +203,6 @@ internal class DefaultVerticalModeFormInteractorTest {
 
     @Test
     fun `automaticallyLaunchCardScan when card form and no create params`() {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
         testAutomaticallyLaunchCardScan(
             selectedPaymentMethodCode = "card",
             paymentSelection = null,
@@ -215,12 +213,10 @@ internal class DefaultVerticalModeFormInteractorTest {
 
             assertThat(controller.shouldAutomaticallyLaunchCardScan()).isTrue()
         }
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
     fun `do not automaticallyLaunchCardScan when card form and with paymentSelection`() {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
         testAutomaticallyLaunchCardScan(
             selectedPaymentMethodCode = "card",
             paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
@@ -231,7 +227,6 @@ internal class DefaultVerticalModeFormInteractorTest {
 
             assertThat(controller.shouldAutomaticallyLaunchCardScan()).isFalse()
         }
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     private fun testSetAsDefaultElements(
