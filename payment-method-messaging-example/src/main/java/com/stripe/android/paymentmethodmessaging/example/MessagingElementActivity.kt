@@ -6,17 +6,22 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
+import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,35 +46,42 @@ internal class MessagingElementActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            Column(
-                Modifier.padding(8.dp)
+            MaterialTheme(
+                colors = if (isSystemInDarkTheme()) darkColors() else lightColors()
             ) {
-                Text(
-                    text = "PaymentMethodMessagingElement",
-                    style = MaterialTheme.typography.h6
-                )
-
-                val appearanceSettings by viewModel.appearanceSetting.collectAsState()
-                val appearance = appearanceSettings.toAppearance()
-
-                Box(Modifier.padding(vertical = 8.dp)) {
-                    viewModel.paymentMethodMessagingElement.Content(appearance)
-                }
-
-                val config by viewModel.config.collectAsState()
-                ConfigurationSettings(config)
-
-                Button(
-                    onClick = {
-                        viewModel.configurePaymentMethodMessagingElement()
-                    },
-                    Modifier.fillMaxWidth()
+                Column(
+                    Modifier
+                        .padding(8.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
-                    Text("Configure")
-                }
+                    Text(
+                        text = "PaymentMethodMessagingElement",
+                        style = MaterialTheme.typography.h6,
+                        color = MaterialTheme.colors.onSurface
+                    )
 
-                val result by viewModel.configureResult.collectAsState()
-                ResultToast(result)
+                    val appearanceSettings by viewModel.appearanceSetting.collectAsState()
+                    val appearance = appearanceSettings.toAppearance()
+
+                    Box(Modifier.padding(vertical = 8.dp)) {
+                        viewModel.paymentMethodMessagingElement.Content(appearance)
+                    }
+
+                    val config by viewModel.config.collectAsState()
+                    ConfigurationSettings(config)
+
+                    Button(
+                        onClick = {
+                            viewModel.configurePaymentMethodMessagingElement()
+                        },
+                        Modifier.fillMaxWidth()
+                    ) {
+                        Text("Configure")
+                    }
+
+                    val result by viewModel.configureResult.collectAsState()
+                    ResultToast(result)
+                }
             }
         }
     }
@@ -192,7 +204,8 @@ internal class MessagingElementActivity : AppCompatActivity() {
         Text(
             text = "$label: " + itemToString(selectedItem),
             style = MaterialTheme.typography.h6,
-            modifier = Modifier.padding(4.dp).clickable { expanded = true }
+            modifier = Modifier.padding(4.dp).clickable { expanded = true },
+            color = MaterialTheme.colors.onSurface
         )
 
         DropdownMenu(
