@@ -33,15 +33,20 @@ internal fun LiveCaptureLaunchedEffect(
 ) {
     LaunchedEffect(scannerState) {
         if (scannerState is IdentityScanViewModel.State.Scanned) {
+            val scanResult = scannerState.result
+            // Capture selfie virtual camera flag while camera is still bound
+            if (scanResult.result is FaceDetectorOutput) {
+                identityViewModel.setSelfieIsVirtualCamera(cameraManager?.isVirtualCamera())
+            }
             identityScanViewModel.stopScan(lifecycleOwner)
 
-            val scanResult = scannerState.result
             // Set camera metadata right before uploading
             cameraManager?.getCameraLensModel()?.let { identityViewModel.setCameraLensModel(it) }
             cameraManager?.getExposureIso()?.let { identityViewModel.setCameraExposureIso(it) }
             cameraManager?.getFocalLength()?.let { identityViewModel.setCameraFocalLength(it) }
             cameraManager?.getExposureDuration()?.let { identityViewModel.setCameraExposureDuration(it) }
             identityViewModel.setIsVirtualCamera(cameraManager?.isVirtualCamera())
+
             identityViewModel.uploadScanResult(
                 scanResult,
                 verificationPage

@@ -428,7 +428,8 @@ class CameraXAdapter(
                             ),
                             exposureIso = latestExposureIso,
                             focalLength = getFocalLength(),
-                            exposureDurationNs = latestExposureDuration
+                            exposureDurationNs = latestExposureDuration,
+                            isVirtualCamera = this.isVirtualCamera()
                         )
                     )
                 }

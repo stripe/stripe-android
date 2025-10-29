@@ -58,6 +58,8 @@ data class CameraPreviewImage<ImageType>(
     val focalLength: Float? = null,
     // Exposure duration in nanoseconds (from Camera2), if available
     val exposureDurationNs: Long? = null,
+    // Whether this is a logical multi-camera (virtual camera) when known
+    val isVirtualCamera: Boolean? = null,
 )
 
 /**

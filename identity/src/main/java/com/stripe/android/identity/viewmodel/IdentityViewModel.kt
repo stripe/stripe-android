@@ -395,6 +395,7 @@ internal class IdentityViewModel(
     private var selfieBestExposureIso: Float? = null
     private var selfieBestFocalLength: Float? = null
     private var selfieBestExposureDuration: Long? = null
+    private var selfieBestIsVirtualCamera: Boolean? = null
 
     /**
      * Set the camera lens model for subsequent uploads.
@@ -424,6 +425,10 @@ internal class IdentityViewModel(
      */
     fun setSelfieCameraLensModel(cameraManager: IdentityCameraManager?) {
         selfieCameraLensModel = cameraManager?.getCameraLensModel()
+    }
+
+    fun setSelfieIsVirtualCamera(isVirtual: Boolean?) {
+        selfieBestIsVirtualCamera = isVirtual
     }
 
     /**
@@ -565,6 +570,7 @@ internal class IdentityViewModel(
         selfieBestExposureIso = bestIso
         selfieBestFocalLength = bestFocal
         selfieBestExposureDuration = bestExpMs
+        selfieBestIsVirtualCamera = bestInput.cameraPreviewImage.isVirtualCamera
 
         listOf(
             (FaceDetectorTransitioner.Selfie.FIRST),
