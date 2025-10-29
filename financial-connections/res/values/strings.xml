@@ -7,7 +7,7 @@
   <string name="stripe_account_picker_error_no_payment_method_desc_singular">We found %1$s %2$s account but you can only link checking or savings accounts to %3$s. Please try selecting another bank.</string>
   <string name="stripe_account_picker_error_no_payment_method_title">No payment accounts available</string>
   <string name="stripe_account_picker_multiselect_account">Select accounts</string>
-  <string name="stripe_account_picker_retrieving_accounts">Retrieving accounts</string>
+  <string name="stripe_account_picker_retrieving_accounts">Retrieving accounts...</string>
   <!-- Account picker -->
   <string name="stripe_account_picker_singleselect_account">Select an account</string>
   <string name="stripe_accounts_error_desc_manualentry">Please enter your bank details manually or select another bank.</string>
