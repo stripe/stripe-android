@@ -40,7 +40,6 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
 
     @Test
     fun `configure returns succeeded if multi partner is not null`() = runTest {
-
         coordinator.messagingContent.test {
             assertThat(awaitItem()).isNull()
 
@@ -52,7 +51,6 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
 
     @Test
     fun `configure returns failed if call fails`() = runTest {
-
         coordinator.messagingContent.test {
             assertThat(awaitItem()).isNull()
 
