@@ -2,17 +2,12 @@
 
 package com.stripe.android.paymentmethodmessaging.element
 
-import androidx.compose.runtime.Composable
-import com.stripe.android.model.PaymentMethodMessage
-import com.stripe.android.model.PaymentMethodMessageMultiPartner
-import com.stripe.android.model.PaymentMethodMessageSinglePartner
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
@@ -21,6 +16,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +34,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodMessageImage
+import com.stripe.android.model.PaymentMethodMessageMultiPartner
+import com.stripe.android.model.PaymentMethodMessageSinglePartner
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 
@@ -111,7 +110,7 @@ private fun MultiPartner(
     message: PaymentMethodMessageMultiPartner,
     appearance: PaymentMethodMessagingElement.Appearance.State
 ) {
-    val style = appearance.font?.toTextStyle(appearance)
+    val style = appearance.font?.toTextStyle()
         ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Normal)
     Column {
         Images(getImages(message, appearance.theme), appearance)
@@ -119,6 +118,7 @@ private fun MultiPartner(
             Text(
                 text = message.promotion.buildAnnotatedStringWithInfoIcon(),
                 style = style,
+                color = Color(appearance.colors.textColor),
                 inlineContent = mapOf(
                     INLINE_ICON_KEY to InlineTextContent(
                         placeholder = Placeholder(
@@ -183,12 +183,13 @@ private fun TextWithLogo(
     val imageLoader = remember {
         StripeImageLoader(context.applicationContext)
     }
-    val style = appearance.font?.toTextStyle(appearance)
+    val style = appearance.font?.toTextStyle()
         ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Normal)
 
     Text(
         text = label.buildInlineLogoAnnotatedStringWithInfoIcon(),
         style = style,
+        color = Color(appearance.colors.textColor),
         inlineContent = mapOf(
             INLINE_IMAGE_KEY to InlineTextContent(
                 placeholder = Placeholder(
@@ -239,15 +240,12 @@ private fun String.buildAnnotatedStringWithInfoIcon(): AnnotatedString = buildAn
     appendInlineContent(id = INLINE_ICON_KEY)
 }
 
-private fun PaymentMethodMessagingElement.Appearance.Font.State.toTextStyle(
-    appearance: PaymentMethodMessagingElement.Appearance.State
-): TextStyle {
+private fun PaymentMethodMessagingElement.Appearance.Font.State.toTextStyle(): TextStyle {
     return TextStyle(
         fontSize = fontSizeSp?.sp ?: DEFAULT_TEXT_SIZE.sp,
         fontWeight = fontWeight?.let { FontWeight(it) },
         fontFamily = fontFamily?.let { FontFamily(Font(it)) },
         letterSpacing = letterSpacingSp?.sp ?: TextUnit.Unspecified,
-        color = Color(appearance.colors.textColor)
     )
 }
 
