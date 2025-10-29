@@ -44,8 +44,6 @@ import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
-import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -335,7 +333,6 @@ class PaymentSheet internal constructor(
          * @throws IllegalStateException if CreateIntentCallback is already set.
          * Callbacks are mutually exclusive - only one should be configured.
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createIntentCallback(callback: CreateIntentWithConfirmationTokenCallback) = apply {
             callbacksBuilder.createIntentCallback(callback)
         }
@@ -3587,7 +3584,6 @@ class PaymentSheet internal constructor(
              * @throws IllegalStateException if CreateIntentCallback is already set.
              * Callbacks are mutually exclusive - only one should be configured.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun createIntentCallback(callback: CreateIntentWithConfirmationTokenCallback) = apply {
                 callbacksBuilder.createIntentCallback(callback)
             }

@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
@@ -21,7 +20,6 @@ import kotlinx.parcelize.Parcelize
  */
 @Poko
 @Parcelize
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ConfirmationToken internal constructor(
     /**
      * Unique identifier for the object.
@@ -83,7 +81,6 @@ class ConfirmationToken internal constructor(
      */
     @Poko
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class PaymentMethodPreview internal constructor(
         /**
          *  This field indicates whether this payment method can be shown again to its customer in a checkout flow.

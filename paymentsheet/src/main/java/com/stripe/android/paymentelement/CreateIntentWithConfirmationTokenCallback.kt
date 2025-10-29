@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.paymentsheet.CreateIntentResult
 
@@ -11,7 +10,6 @@ import com.stripe.android.paymentsheet.CreateIntentResult
  * This callback is called with the ConfirmationToken and allows merchants to process
  * the token on their server, then return a CreateIntentResult to continue the payment flow.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface CreateIntentWithConfirmationTokenCallback {
 
     /**
