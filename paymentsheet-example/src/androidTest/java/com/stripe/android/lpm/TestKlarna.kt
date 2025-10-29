@@ -17,7 +17,6 @@ import org.junit.runner.RunWith
 internal class TestKlarna : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "klarna",
-        executeInNightlyRun = true,
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.US
         settings[CurrencySettingsDefinition] = Currency.USD
@@ -25,32 +24,10 @@ internal class TestKlarna : BasePlaygroundTest() {
     }
 
     @Test
-    fun testKlarnaInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
-            verifyCustomLpmFields = {
-                verifyMandateFieldDoesNotExists()
-            },
-        )
-    }
-
-    @Test
     fun testKlarnaSetupFutureUsage() {
         testDriver.confirmCustom(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
-            },
-            verifyCustomLpmFields = {
-                verifyMandateFieldExists()
-            },
-        )
-    }
-
-    @Test
-    fun testKlarnaSetupIntentInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters.copyPlaygroundSettings { settings ->
-                settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             },
             verifyCustomLpmFields = {
                 verifyMandateFieldExists()

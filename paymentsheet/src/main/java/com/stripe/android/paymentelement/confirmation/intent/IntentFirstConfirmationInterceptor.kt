@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.RadarOptions
@@ -29,7 +30,8 @@ internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
             clientSecret = clientSecret,
             intent = intent,
             shippingValues = shippingValues,
-            isDeferred = false
+            isDeferred = false,
+            isConfirmationToken = false,
         ) {
             create(
                 confirmationOption.createParams,
@@ -50,18 +52,19 @@ internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
             intent = intent,
             shippingValues = shippingValues,
             isDeferred = false,
+            isConfirmationToken = false,
         ) {
             create(
                 paymentMethod = confirmationOption.paymentMethod,
                 optionsParams = confirmationOption.optionsParams,
                 extraParams = null,
                 intentConfigSetupFutureUsage = null,
-                radarOptions = confirmationOption.hCaptchaToken?.let {
-                    RadarOptions(
-                        hCaptchaToken = it,
-                        androidVerificationObject = null
+                radarOptions = RadarOptions(
+                    hCaptchaToken = confirmationOption.hCaptchaToken,
+                    androidVerificationObject = AndroidVerificationObject(
+                        androidVerificationToken = confirmationOption.attestationToken
                     )
-                },
+                ),
                 clientAttributionMetadata = clientAttributionMetadata,
             )
         }

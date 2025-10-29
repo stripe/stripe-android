@@ -120,6 +120,7 @@ apiValidation {
             "dokka-stripe",
             "stripe-test-e2e",
             "crypto-onramp-example",
+            "payment-method-messaging-example"
     ]
     nonPublicMarkers.add("androidx.annotation.RestrictTo")
     nonPublicMarkers.add("dagger.internal.DaggerGenerated")

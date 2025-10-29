@@ -155,8 +155,9 @@ class CustomPaymentMethodConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            result = InternalCustomPaymentMethodResult.Completed,
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
+            result = InternalCustomPaymentMethodResult.Completed,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Succeeded>()
@@ -164,6 +165,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
         val succeededResult = result.asSucceeded()
         assertThat(succeededResult.intent).isEqualTo(CONFIRMATION_PARAMETERS.intent)
         assertThat(succeededResult.deferredIntentConfirmationType).isNull()
+        assertThat(succeededResult.isConfirmationToken).isFalse()
         assertThat(succeededResult.completedFullPaymentFlow).isTrue()
     }
 
@@ -175,8 +177,9 @@ class CustomPaymentMethodConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            result = InternalCustomPaymentMethodResult.Failed(exception),
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
+            result = InternalCustomPaymentMethodResult.Failed(exception),
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Failed>()
@@ -195,8 +198,9 @@ class CustomPaymentMethodConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            result = InternalCustomPaymentMethodResult.Canceled,
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
+            result = InternalCustomPaymentMethodResult.Canceled,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Canceled>()

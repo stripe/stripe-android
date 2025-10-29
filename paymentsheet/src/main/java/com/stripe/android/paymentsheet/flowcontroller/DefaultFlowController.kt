@@ -629,6 +629,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
                         deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                        isConfirmationToken = result.isConfirmationToken,
                     )
                 }
 
@@ -760,7 +761,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 confirm()
             }
             SepaMandateResult.Canceled -> {
-                paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Canceled)
+                paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Canceled())
             }
         }
     }
@@ -775,6 +776,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
                         deferredIntentConfirmationType = deferredIntentConfirmationType,
+                        isConfirmationToken = false,
                     )
                 }
             }
@@ -793,8 +795,8 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     private fun PaymentResult.convertToPaymentSheetResult() = when (this) {
-        is PaymentResult.Completed -> PaymentSheetResult.Completed
-        is PaymentResult.Canceled -> PaymentSheetResult.Canceled
+        is PaymentResult.Completed -> PaymentSheetResult.Completed()
+        is PaymentResult.Canceled -> PaymentSheetResult.Canceled()
         is PaymentResult.Failed -> PaymentSheetResult.Failed(throwable)
     }
 

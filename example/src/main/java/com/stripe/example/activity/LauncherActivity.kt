@@ -45,16 +45,8 @@ class LauncherActivity : AppCompatActivity() {
                 CardBrandChoiceExampleActivity::class.java
             ),
             Item(
-                activity.getString(R.string.create_card_token),
-                CreateCardTokenActivity::class.java
-            ),
-            Item(
                 activity.getString(R.string.create_card_payment_method),
                 CreateCardPaymentMethodActivity::class.java
-            ),
-            Item(
-                activity.getString(R.string.create_card_source),
-                CreateCardSourceActivity::class.java
             ),
             Item(
                 activity.getString(R.string.googlepaylauncher_example),
@@ -112,10 +104,6 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 activity.getString(R.string.multibanco_example),
                 MultibancoActivity::class.java
-            ),
-            Item(
-                activity.getString(R.string.sofort_example),
-                SofortPaymentMethodActivity::class.java
             ),
             Item(
                 "iDEAL Payment Example",

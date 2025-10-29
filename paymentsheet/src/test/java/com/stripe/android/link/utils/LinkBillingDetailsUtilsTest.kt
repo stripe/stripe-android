@@ -31,17 +31,19 @@ class LinkBillingDetailsUtilsTest {
         )
     )
 
+    private val defaultAddress = PaymentSheet.Address(
+        line1 = "123 Main St",
+        city = "San Francisco",
+        state = "CA",
+        postalCode = "94105",
+        country = "US"
+    )
+
     private val defaultBillingDetails = PaymentSheet.BillingDetails(
         name = testName,
         email = "merchant@example.com",
         phone = "+0987654321",
-        address = PaymentSheet.Address(
-            line1 = "123 Main St",
-            city = "San Francisco",
-            state = "CA",
-            postalCode = "94105",
-            country = "US"
-        )
+        address = defaultAddress,
     )
 
     @Test
@@ -70,7 +72,11 @@ class LinkBillingDetailsUtilsTest {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 email = CollectionMode.Always
             ),
-            defaultBillingDetails = defaultBillingDetails.copy(email = null)
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                name = testName,
+                phone = "+0987654321",
+                address = defaultAddress,
+            )
         )
 
         val result = effectiveBillingDetails(configurationWithoutEmail, linkAccount)
@@ -98,7 +104,11 @@ class LinkBillingDetailsUtilsTest {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 phone = CollectionMode.Always
             ),
-            defaultBillingDetails = defaultBillingDetails.copy(phone = null)
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                name = testName,
+                email = "merchant@example.com",
+                address = defaultAddress,
+            )
         )
 
         val result = effectiveBillingDetails(configurationWithoutPhone, linkAccount)

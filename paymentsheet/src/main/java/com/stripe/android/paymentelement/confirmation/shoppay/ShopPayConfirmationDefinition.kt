@@ -29,6 +29,7 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
         confirmationOption: ShopPayConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        isConfirmationToken: Boolean,
         result: ShopPayActivityResult
     ): ConfirmationDefinition.Result {
         return when (result) {
@@ -41,6 +42,7 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
                 ConfirmationDefinition.Result.Succeeded(
                     intent = confirmationArgs.intent,
                     deferredIntentConfirmationType = deferredIntentConfirmationType,
+                    isConfirmationToken = isConfirmationToken,
                     // Shop Pay is handed off for `preparePaymentMethod` purposes
                     completedFullPaymentFlow = false,
                 )
@@ -89,6 +91,7 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
             launcherArguments = Unit,
             receivesResultInProcess = false,
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
         )
     }
 }

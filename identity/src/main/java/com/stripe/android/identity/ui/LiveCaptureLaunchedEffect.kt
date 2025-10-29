@@ -5,6 +5,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
+import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.navigation.CouldNotCaptureDestination
@@ -27,14 +28,18 @@ internal fun LiveCaptureLaunchedEffect(
     identityViewModel: IdentityViewModel,
     lifecycleOwner: LifecycleOwner,
     verificationPage: VerificationPage,
-    navController: NavController
-
+    navController: NavController,
+    cameraManager: IdentityCameraManager? = null
 ) {
     LaunchedEffect(scannerState) {
         if (scannerState is IdentityScanViewModel.State.Scanned) {
             identityScanViewModel.stopScan(lifecycleOwner)
 
             val scanResult = scannerState.result
+            // Set camera lens model right before uploading
+            cameraManager?.getCameraLensModel()?.let { model ->
+                identityViewModel.setCameraLensModel(model)
+            }
             identityViewModel.uploadScanResult(
                 scanResult,
                 verificationPage

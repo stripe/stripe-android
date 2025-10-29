@@ -285,6 +285,7 @@ class DefaultEventReporterTest {
         completeEventReporter.onPaymentSuccess(
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
         )
 
         verify(analyticsRequestExecutor).executeAsync(
@@ -315,6 +316,7 @@ class DefaultEventReporterTest {
                     walletType = PaymentSelection.Saved.WalletType.GooglePay,
                 ),
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
             )
 
             analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
@@ -345,12 +347,40 @@ class DefaultEventReporterTest {
                     walletType = PaymentSelection.Saved.WalletType.Link,
                 ),
                 deferredIntentConfirmationType = null,
+                isConfirmationToken = false,
             )
 
             verify(analyticsRequestExecutor).executeAsync(
                 argWhere { req ->
                     req.params["event"] == "mc_complete_payment_link_success" &&
                         req.params["duration"] == 0.123f
+                }
+            )
+        }
+
+    @Test
+    fun `onPaymentSuccess() with confirmation token should include isConfirmationToken in analytics`() =
+        runTest(testDispatcher) {
+            // Log initial event so that duration is tracked
+            val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+                simulateSuccessfulSetup()
+                onShowExistingPaymentOptions()
+            }
+            analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+
+            completeEventReporter.onPaymentSuccess(
+                paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                deferredIntentConfirmationType = null,
+                isConfirmationToken = true,
+            )
+
+            verify(analyticsRequestExecutor).executeAsync(
+                argWhere { req ->
+                    req.params["event"] == "mc_complete_payment_savedpm_success" &&
+                        req.params["is_confirmation_tokens"] == true &&
+                        req.params["duration"] == 1f &&
+                        req.params["currency"] == "usd" &&
+                        req.params["locale"] == "en_US"
                 }
             )
         }
@@ -1041,7 +1071,11 @@ class DefaultEventReporterTest {
         }
 
         val selection = mockUSBankAccountPaymentSelection(linkMode = LinkMode.LinkPaymentMethod)
-        completeEventReporter.onPaymentSuccess(selection, deferredIntentConfirmationType = null)
+        completeEventReporter.onPaymentSuccess(
+            paymentSelection = selection,
+            deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
+        )
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
@@ -1057,7 +1091,11 @@ class DefaultEventReporterTest {
         }
 
         val selection = mockUSBankAccountPaymentSelection(linkMode = LinkMode.LinkCardBrand)
-        completeEventReporter.onPaymentSuccess(selection, deferredIntentConfirmationType = null)
+        completeEventReporter.onPaymentSuccess(
+            paymentSelection = selection,
+            deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
+        )
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
@@ -1073,7 +1111,11 @@ class DefaultEventReporterTest {
         }
 
         val selection = mockUSBankAccountPaymentSelection(linkMode = null)
-        completeEventReporter.onPaymentSuccess(selection, deferredIntentConfirmationType = null)
+        completeEventReporter.onPaymentSuccess(
+            paymentSelection = selection,
+            deferredIntentConfirmationType = null,
+            isConfirmationToken = false,
+        )
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())

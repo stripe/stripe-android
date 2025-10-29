@@ -270,6 +270,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         INTENT_CONFIRMATION_HANDLER_PASSIVE_CHALLENGE_PARAMS_NULL(
             partialEventName = "intent_confirmation_handler.passive_challenge.params_null"
         ),
+        INTENT_CONFIRMATION_HANDLER_ATTESTATION_INVOKED_WHEN_DISABLED(
+            partialEventName = "intent_confirmation_handler.attestation.invoked_when_disabled"
+        ),
+        INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE(
+            partialEventName = "intent_confirmation_handler.attestation.failed_to_prepare"
+        ),
         HCAPTCHA_UNEXPECTED_FAILURE(
             partialEventName = "elements.captcha.passive.unexpected_failure"
         ),

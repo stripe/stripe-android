@@ -5,8 +5,10 @@ import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -390,6 +392,203 @@ internal class PaymentSheetAnalyticsTest {
             hasQueryParam("duration")
         )
 
+        page.clickPrimaryButton()
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentWithConfirmationToken() = runPaymentSheetTest(
+        networkRule = networkRule,
+        builder = {
+            createIntentCallback { _ ->
+                CreateIntentResult.Success("pi_example_secret_example")
+            }
+            analyticEventCallback(analyticEventRule)
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+
+        testContext.validateAnalyticsRequest(eventName = "mc_load_started")
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
+        }
+        testContext.validateAnalyticsRequest(eventName = "mc_load_succeeded")
+        testContext.validateAnalyticsRequest(
+            eventName = "mc_complete_init_default",
+            query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
+        )
+
+        testContext.presentPaymentSheet {
+            presentWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 5099,
+                        currency = "usd"
+                    )
+                ),
+                configuration = horizontalModeConfiguration
+            )
+        }
+        testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        testContext.validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
+        testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        testContext.validateAnalyticsRequest(eventName = "mc_initial_displayed_payment_methods")
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+
+        testContext.validateAnalyticsRequest(eventName = "mc_form_interacted")
+        testContext.validateAnalyticsRequest(eventName = "mc_card_number_completed")
+        testContext.validateAnalyticsRequest(eventName = "mc_form_completed")
+        page.fillOutCardDetails()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/confirmation_tokens"),
+            clientAttributionMetadataParamsForDeferredIntent(),
+        ) { response ->
+            response.testBodyFromFile("confirmation-token-create-with-new-card.json")
+        }
+        networkRule.enqueue(
+            path("/v1/payment_intents/pi_example"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
+        }
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            bodyPart("confirmation_token", "ctoken_example"),
+            bodyPart("return_url", urlEncode("stripesdk://payment_return_url/com.stripe.android.paymentsheet.test")),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+        testContext.validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
+        networkRule.validateAnalyticsRequest(
+            eventName = "stripe_android.confirmation_token_creation",
+            productUsage = setOf("PaymentSheet", "deferred-intent", "autopm")
+        )
+        testContext.validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
+        testContext.validateAnalyticsRequest(
+            eventName = "stripe_android.paymenthandler.confirm.started",
+            query("intent_id", "pi_example"),
+        )
+        testContext.validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
+        testContext.validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
+        testContext.validateAnalyticsRequest(
+            eventName = "stripe_android.paymenthandler.confirm.finished",
+            query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
+        )
+        testContext.validateAnalyticsRequest(
+            eventName = "mc_complete_payment_newpm_success",
+            query("is_confirmation_tokens", "true")
+        )
+        page.clickPrimaryButton()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentInFlowControllerWithConfirmationToken() = runFlowControllerTest(
+        networkRule = networkRule,
+        builder = {
+            createIntentCallback { _ ->
+                CreateIntentResult.Success("pi_example_secret_example")
+            }
+            analyticEventCallback(analyticEventRule)
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+
+        testContext.validateAnalyticsRequest(eventName = "mc_load_started")
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
+        }
+        testContext.validateAnalyticsRequest(eventName = "mc_load_succeeded")
+        testContext.validateAnalyticsRequest(
+            eventName = "mc_custom_init_default",
+            query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
+        )
+
+        testContext.configureFlowController {
+            configureWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 5099,
+                        currency = "usd"
+                    )
+                ),
+                configuration = horizontalModeConfiguration,
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    presentPaymentOptions()
+                }
+            )
+        }
+        testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        testContext.validateAnalyticsRequest(eventName = "mc_custom_paymentoption_newpm_select")
+        testContext.validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
+        testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        testContext.validateAnalyticsRequest(eventName = "mc_initial_displayed_payment_methods")
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+
+        testContext.validateAnalyticsRequest(eventName = "mc_form_interacted")
+        testContext.validateAnalyticsRequest(eventName = "mc_card_number_completed")
+        testContext.validateAnalyticsRequest(eventName = "mc_form_completed")
+        page.fillOutCardDetails()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/confirmation_tokens"),
+            clientAttributionMetadataParamsForDeferredIntent(),
+        ) { response ->
+            response.testBodyFromFile("confirmation-token-create-with-new-card.json")
+        }
+        networkRule.enqueue(
+            path("/v1/payment_intents/pi_example"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
+        }
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            bodyPart("confirmation_token", "ctoken_example"),
+            bodyPart("return_url", urlEncode("stripesdk://payment_return_url/com.stripe.android.paymentsheet.test")),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+        testContext.validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
+        networkRule.validateAnalyticsRequest(
+            eventName = "stripe_android.confirmation_token_creation",
+            productUsage = setOf("PaymentSheet.FlowController", "deferred-intent", "autopm")
+        )
+        testContext.validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
+        testContext.validateAnalyticsRequest(
+            eventName = "stripe_android.paymenthandler.confirm.started",
+            query("intent_id", "pi_example"),
+        )
+        testContext.validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
+        testContext.validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
+        testContext.validateAnalyticsRequest(
+            eventName = "stripe_android.paymenthandler.confirm.finished",
+            query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
+        )
+        testContext.validateAnalyticsRequest(
+            eventName = "mc_custom_payment_newpm_success",
+            query("is_confirmation_tokens", "true")
+        )
         page.clickPrimaryButton()
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))

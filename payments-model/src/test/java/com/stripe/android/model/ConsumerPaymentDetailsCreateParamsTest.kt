@@ -247,6 +247,11 @@ class ConsumerPaymentDetailsCreateParamsTest {
 
     @Test
     fun `ConsumerPaymentDetailsUpdateParams_toParamMap_withAllFields`() {
+        val clientAttributionMetadataParams = mapOf(
+            "merchant_integration_source" to "elements",
+            "merchant_integration_subtype" to "mobile",
+            "merchant_integration_version" to "stripe-android/21.28.2",
+        )
         val updateParams = ConsumerPaymentDetailsUpdateParams(
             id = "card_123",
             isDefault = true,
@@ -268,7 +273,8 @@ class ConsumerPaymentDetailsCreateParamsTest {
                         "state" to "ON"
                     )
                 )
-            )
+            ),
+            clientAttributionMetadataParams = clientAttributionMetadataParams,
         )
 
         val result = updateParams.toParamMap()
@@ -278,6 +284,7 @@ class ConsumerPaymentDetailsCreateParamsTest {
         assertThat(result).containsEntry("exp_year", 2026)
         assertThat(result).containsEntry("preferred_network", "visa")
         assertThat(result).containsKey("billing_address")
+        assertThat(result).containsEntry("client_attribution_metadata", clientAttributionMetadataParams)
 
         val billingAddress = result["billing_address"] as Map<*, *>
         assertThat(billingAddress).containsEntry("country_code", "CA")
@@ -293,7 +300,8 @@ class ConsumerPaymentDetailsCreateParamsTest {
         val updateParams = ConsumerPaymentDetailsUpdateParams(
             id = "card_123",
             isDefault = null,
-            cardPaymentMethodCreateParamsMap = null
+            cardPaymentMethodCreateParamsMap = null,
+            clientAttributionMetadataParams = emptyMap(),
         )
 
         val result = updateParams.toParamMap()
@@ -311,7 +319,8 @@ class ConsumerPaymentDetailsCreateParamsTest {
                     "exp_month" to 3,
                     "exp_year" to 2027
                 )
-            )
+            ),
+            clientAttributionMetadataParams = emptyMap(),
         )
 
         val result = updateParams.toParamMap()
@@ -333,7 +342,8 @@ class ConsumerPaymentDetailsCreateParamsTest {
                     "exp_month" to 3,
                     "exp_year" to 2027
                 )
-            )
+            ),
+            clientAttributionMetadataParams = emptyMap(),
         )
 
         val result = updateParams.toParamMap()

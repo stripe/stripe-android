@@ -35,7 +35,6 @@ internal class TestCard : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "card",
         authorizationAction = null,
-        executeInNightlyRun = true,
     ).copy(
         saveForFutureUseCheckboxVisible = true,
     )
@@ -91,19 +90,6 @@ internal class TestCard : BasePlaygroundTest() {
             populateCustomLpmFields = {
                 populateCardDetails()
             },
-        )
-    }
-
-    @Test
-    fun testCardInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters,
-            populateCustomLpmFields = {
-                populateCardDetails()
-            },
-            verifyCustomLpmFields = {
-                verifyCard()
-            }
         )
     }
 

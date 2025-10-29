@@ -431,6 +431,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         duration: Duration?,
         paymentSelection: PaymentSelection,
         currency: String?,
+        isConfirmationToken: Boolean?,
         override val isDeferred: Boolean,
         override val isSpt: Boolean,
         override val linkEnabled: Boolean,
@@ -448,6 +449,9 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = buildMap {
             put(FIELD_DURATION, duration?.asSeconds)
             put(FIELD_CURRENCY, currency)
+            isConfirmationToken?.let {
+                put(FIELD_IS_CONFIRMATION_TOKENS, isConfirmationToken)
+            }
             deferredIntentConfirmationType?.let { type ->
                 put(FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE, type.value)
             }
@@ -877,6 +881,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_IS_DECOUPLED = "is_decoupled"
         const val FIELD_IS_SPT = "is_spt"
         const val FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE = "deferred_intent_confirmation_type"
+        const val FIELD_IS_CONFIRMATION_TOKENS = "is_confirmation_tokens"
         const val FIELD_DURATION = "duration"
         const val FIELD_LINK_ENABLED = "link_enabled"
         const val FIELD_CURRENCY = "currency"

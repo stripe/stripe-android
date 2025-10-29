@@ -19,8 +19,6 @@ data class CreateOnrampSessionRequest(
     val destinationNetwork: String,
     @SerialName("wallet_address")
     val walletAddress: String,
-    @SerialName("crypto_customer_id")
-    val cryptoCustomerId: String,
     @SerialName("customer_ip_address")
     val customerIpAddress: String
 )

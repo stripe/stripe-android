@@ -190,9 +190,7 @@
     "p24",
     "google_pay",
     "eps",
-    "giropay",
     "sepa_debit",
-    "sofort",
     "bancontact",
     "ideal"
   ],
@@ -207,9 +205,7 @@
       "klarna",
       "p24",
       "eps",
-      "giropay",
       "sepa_debit",
-      "sofort",
       "bancontact",
       "ideal"
     ],
@@ -244,11 +240,9 @@
         "card",
         "bancontact",
         "eps",
-        "giropay",
         "ideal",
         "p24",
         "sepa_debit",
-        "sofort",
         "afterpay_clearpay",
         "klarna",
         "link",
@@ -445,22 +439,6 @@
         "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-eps-a79e75517cae239fc4ddfa2fbdb73b46.svg"
       },
       "type": "eps"
-    },
-    {
-      "async": false,
-      "fields": [
-        {
-          "api_path": {
-            "v1": "billing_details[name]"
-          },
-          "type": "name"
-        }
-      ],
-      "selector_icon": {
-        "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-giropay@3x-74f14911e865c99d67afe5699021d5bd.png",
-        "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-giropay-ac2e93b3fbd95f735b676064e6f47996.svg"
-      },
-      "type": "giropay"
     },
     {
       "async": false,
@@ -772,44 +750,6 @@
         "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-sepa-debit-e88864f53237730b8cd73f85cf8bbadf.svg"
       },
       "type": "sepa_debit"
-    },
-    {
-      "async": true,
-      "fields": [
-        {
-          "for": "name",
-          "type": "placeholder"
-        },
-        {
-          "for": "email",
-          "type": "placeholder"
-        },
-        {
-          "for": "phone",
-          "type": "placeholder"
-        },
-        {
-          "allowed_country_codes": ["AT", "BE", "DE", "ES", "IT", "NL"],
-          "api_path": {
-            "v1": "sofort[country]"
-          },
-          "type": "country"
-        },
-        {
-          "for": "billing_address_without_country",
-          "type": "placeholder"
-        },
-        {
-          "for": "sepa_mandate",
-          "type": "placeholder"
-        }
-      ],
-      "selector_icon": {
-        "dark_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-sofort_dark-ded76aa1c92357f1b78dab85ed5b6347.svg",
-        "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-klarna@3x-d8624aa9a5662d719a44d16b9fcca0be.png",
-        "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-sofort-c12d29b37f06a2d05dfb22ea9736104b.svg"
-      },
-      "type": "sofort"
     }
   ],
   "paypal_express_config": {
@@ -826,9 +766,7 @@
     "klarna",
     "p24",
     "eps",
-    "giropay",
     "sepa_debit",
-    "sofort",
     "bancontact",
     "ideal"
   ],

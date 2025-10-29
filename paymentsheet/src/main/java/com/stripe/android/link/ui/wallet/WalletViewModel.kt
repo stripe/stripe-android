@@ -325,7 +325,8 @@ internal class WalletViewModel(
             val updateParams = ConsumerPaymentDetailsUpdateParams(
                 id = paymentDetail.id,
                 isDefault = paymentDetail.isDefault,
-                cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap()
+                cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap(),
+                clientAttributionMetadataParams = configuration.clientAttributionMetadata.toParamMap(),
             )
             linkAccountManager.updatePaymentDetails(updateParams)
         }.fold(
@@ -452,7 +453,8 @@ internal class WalletViewModel(
             val updateParams = ConsumerPaymentDetailsUpdateParams(
                 id = item.id,
                 isDefault = true,
-                cardPaymentMethodCreateParamsMap = null
+                cardPaymentMethodCreateParamsMap = null,
+                clientAttributionMetadataParams = configuration.clientAttributionMetadata.toParamMap(),
             )
             linkAccountManager.updatePaymentDetails(updateParams)
                 .fold(

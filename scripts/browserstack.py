@@ -259,25 +259,13 @@ def executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams):
         )
         return None
 
-def executeTests(appUrl, testUrl, isNightly):
-    devices = []
-    if isNightly:
-        devices = [
-            "Google Pixel 10 Pro XL-16.0",
-            "Google Pixel 9 Pro-15.0",
-            "Google Pixel 8-14.0",
-            "Google Pixel 7-13.0",
-            "Samsung Galaxy S22-12.0",
-            "Google Pixel 5-11.0",
-            "Samsung Galaxy A10-9.0",
-        ]
-    else:
-        devices = [
-            "Samsung Galaxy S22-12.0",
-        ]
+def executeTests(appUrl, testUrl):
+    devices = [
+        "Samsung Galaxy S22-12.0",
+    ]
 
     # We only have 25 parallel runs, and we want multiple PRs to run at the same time.
-    numberOfShards = 2.0 if isNightly else 10.0
+    numberOfShards = 10.0
 
     addedParams = {
         "shards": {
@@ -392,9 +380,9 @@ def confirm(message):
     return answer == "y"
 
 
-def runTests(appUrl, testUrl, isNightly):
+def runTests(appUrl, testUrl):
     print("RUNNING all test cases")
-    buildId = executeTests(appUrl, testUrl, isNightly)
+    buildId = executeTests(appUrl, testUrl)
     exitStatus = 1
     if buildId != None:
         exitStatus = waitForBuildComplete(buildId)
@@ -512,7 +500,6 @@ if __name__ == "__main__":
         "--espresso",
         help="The espresso test suite resulting from ./gradlew assembleDebugAndroidTest",
     )
-    parser.add_argument("--is-nightly", action="store_true")
 
     parser.add_argument(
         "-u", "--upload", help="Upload a file to browserstack for app live testing"
@@ -577,7 +564,7 @@ if __name__ == "__main__":
             numRetries = int(args.num_retries) if args.num_retries is not None else 0
 
             exitStatus = 1
-            testResults = runTests(appUrl, testUrl, args.is_nightly)
+            testResults = runTests(appUrl, testUrl)
             print("-----------------")
             exitStatus = testResults["exitStatus"]
             updateObservabilityWithResults(testResults["buildId"])

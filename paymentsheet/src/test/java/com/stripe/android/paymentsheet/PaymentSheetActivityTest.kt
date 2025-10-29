@@ -167,11 +167,11 @@ internal class PaymentSheetActivityTest {
 
     private val cvcRecollectionHandler = FakeCvcRecollectionHandler()
 
-    private val contract = PaymentSheetContractV2()
+    private val contract = PaymentSheetContract()
 
     private val intent = contract.createIntent(
         context,
-        PaymentSheetContractV2.Args(
+        PaymentSheetContract.Args(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_1234_secret_5678",
             ),
@@ -565,7 +565,7 @@ internal class PaymentSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isEqualTo(
-            PaymentSheetResult.Canceled
+            PaymentSheetResult.Canceled()
         )
     }
 
@@ -786,6 +786,7 @@ internal class PaymentSheetActivityTest {
                 result = ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = null,
+                    isConfirmationToken = false,
                 )
             )
         }
@@ -797,7 +798,7 @@ internal class PaymentSheetActivityTest {
             scenario.getResult().resultData
         )
 
-        assertThat(result).isEqualTo(PaymentSheetResult.Completed)
+        assertThat(result).isEqualTo(PaymentSheetResult.Completed())
     }
 
     @Test
@@ -1023,7 +1024,7 @@ internal class PaymentSheetActivityTest {
             ephemeralKeySecret = "",
         )
 
-        val args = PaymentSheetContractV2.Args(
+        val args = PaymentSheetContract.Args(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "abc",
             ),
@@ -1050,7 +1051,7 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Handles invalid client secret correctly`() {
-        val args = PaymentSheetContractV2.Args(
+        val args = PaymentSheetContract.Args(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = ""),
             config = PaymentSheet.Configuration(
                 merchantDisplayName = "Some name",
@@ -1220,7 +1221,7 @@ internal class PaymentSheetActivityTest {
         isLinkAvailable: Boolean = false,
         linkPaymentLauncher: LinkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
         initialPaymentSelection: PaymentSelection? = paymentMethods.firstOrNull()?.let { PaymentSelection.Saved(it) },
-        args: PaymentSheetContractV2.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
     ): PaymentSheetViewModel = runBlocking {

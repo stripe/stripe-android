@@ -27,7 +27,6 @@ internal class TestCashApp : BasePlaygroundTest() {
 
     private val testParameters = TestParameters.create(
         paymentMethodCode = "cashapp",
-        executeInNightlyRun = true,
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.US
         settings[CurrencySettingsDefinition] = Currency.USD
@@ -83,13 +82,6 @@ internal class TestCashApp : BasePlaygroundTest() {
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             }
-        )
-    }
-
-    @Test
-    fun testCashAppPayInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
         )
     }
 

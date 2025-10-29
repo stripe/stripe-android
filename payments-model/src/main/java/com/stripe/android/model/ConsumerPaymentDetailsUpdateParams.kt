@@ -10,7 +10,8 @@ import kotlinx.parcelize.RawValue
 data class ConsumerPaymentDetailsUpdateParams(
     val id: String,
     val isDefault: Boolean? = null,
-    val cardPaymentMethodCreateParamsMap: Map<String, @RawValue Any>? = null
+    val cardPaymentMethodCreateParamsMap: Map<String, @RawValue Any>? = null,
+    val clientAttributionMetadataParams: Map<String, String>,
 ) : StripeParamsModel, Parcelable {
 
     override fun toParamMap(): Map<String, Any> {
@@ -24,6 +25,10 @@ data class ConsumerPaymentDetailsUpdateParams(
             params.addCardParams(map)
             params.addAddressParams(map)
             params.addEmailParam(map)
+        }
+
+        if (clientAttributionMetadataParams.isNotEmpty()) {
+            params[PARAM_CLIENT_ATTRIBUTION_METADATA] = clientAttributionMetadataParams
         }
 
         return params
@@ -49,5 +54,9 @@ data class ConsumerPaymentDetailsUpdateParams(
         val billingDetails = map["billing_details"] as? Map<*, *>
         val emailAddress = billingDetails?.get("email") as? String
         emailAddress?.let { this["billing_email_address"] = it }
+    }
+
+    private companion object {
+        const val PARAM_CLIENT_ATTRIBUTION_METADATA = "client_attribution_metadata"
     }
 }

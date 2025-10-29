@@ -102,6 +102,7 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
             ConfirmationDefinition.Action.Complete(
                 intent = intent,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                isConfirmationToken = false,
                 completedFullPaymentFlow = false,
             )
         } catch (@Suppress("TooGenericExceptionCaught") exception: Exception) {

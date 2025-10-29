@@ -102,7 +102,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                     val updateParams = ConsumerPaymentDetailsUpdateParams(
                         id = paymentDetailsId,
                         isDefault = state.value.isDefault,
-                        cardPaymentMethodCreateParamsMap = paymentUpdateParams.toApiParams().toParamMap()
+                        cardPaymentMethodCreateParamsMap = paymentUpdateParams.toApiParams().toParamMap(),
+                        clientAttributionMetadataParams = configuration.clientAttributionMetadata.toParamMap(),
                     )
                     val result = linkAccountManager.updatePaymentDetails(
                         updateParams = updateParams,
