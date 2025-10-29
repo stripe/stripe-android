@@ -14,7 +14,6 @@ import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext
-import org.jetbrains.annotations.VisibleForTesting
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
@@ -28,12 +27,7 @@ class IntentConfirmationChallengeNextActionHandler @Inject constructor(
     @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String>,
     @UIContext private val uiContext: CoroutineContext
 ) : PaymentNextActionHandler<StripeIntent>() {
-    /**
-     * [intentConfirmationChallengeActivityContractNextActionLauncher] is mutable and might be updated during
-     * through [onNewActivityResultCaller]
-     */
-    @VisibleForTesting
-    internal var intentConfirmationChallengeActivityContractNextActionLauncher:
+    private var intentConfirmationChallengeActivityContractNextActionLauncher:
         ActivityResultLauncher<IntentConfirmationChallengeActivityContract.Args>? = null
 
     private val intentConfirmationChallengeNextActionStarterFactory = { host: AuthActivityStarterHost ->

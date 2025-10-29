@@ -1,8 +1,12 @@
 package com.stripe.android.challenge.confirmation
 
+import android.app.Application
+import android.os.Bundle
 import androidx.activity.result.ActivityResultCallback
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.StripeIntentResult
@@ -18,11 +22,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -30,10 +29,6 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     private val productUsageTokens = setOf("TestToken")
-
-    private val host = mock<AuthActivityStarterHost> {
-        on { lifecycleOwner } doReturn TestLifecycleOwner(initialState = Lifecycle.State.RESUMED)
-    }
 
     @Test
     fun `performNextActionOnResumed uses Modern starter when launcher is set`() = runTest {
@@ -57,7 +52,7 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
             val paymentIntent = createTestPaymentIntent()
 
             handler.performNextAction(
-                host,
+                FakeAuthActivityStarterHost(),
                 paymentIntent,
                 REQUEST_OPTIONS
             )
@@ -76,9 +71,7 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
             productUsageTokens = productUsageTokens,
             uiContext = testDispatcher
         )
-
-        // Ensure launcher is null (default state)
-        handler.intentConfirmationChallengeActivityContractNextActionLauncher = null
+        val host = FakeAuthActivityStarterHost()
 
         val paymentIntent = createTestPaymentIntent()
 
@@ -88,11 +81,9 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
             REQUEST_OPTIONS
         )
 
-        verify(host).startActivityForResult(
-            target = eq(IntentConfirmationChallengeActivity::class.java),
-            extras = any(),
-            requestCode = any()
-        )
+        val startActivityForResultCall = host.calls.awaitItem()
+        assertThat(startActivityForResultCall.target).isEqualTo(IntentConfirmationChallengeActivity::class.java)
+        host.calls.ensureAllEventsConsumed()
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -175,23 +166,45 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
                 uiContext = testDispatcher
             )
 
-            assertThat(handler.intentConfirmationChallengeActivityContractNextActionLauncher).isNull()
-
             handler.onNewActivityResultCaller(
                 activityResultCaller = activityResultCaller,
                 activityResultCallback = {}
             )
 
             awaitRegisterCall()
-            val launcher = awaitNextRegisteredLauncher()
-            assertThat(handler.intentConfirmationChallengeActivityContractNextActionLauncher)
-                .isEqualTo(launcher)
+            awaitNextRegisteredLauncher()
         }
     }
 
     private fun createTestPaymentIntent(): PaymentIntent {
         return PaymentIntentFixtures.PI_SUCCEEDED.copy(
             nextActionData = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
+        )
+    }
+
+    private class FakeAuthActivityStarterHost : AuthActivityStarterHost {
+        val calls = Turbine<Call>()
+        override fun startActivityForResult(target: Class<*>, extras: Bundle, requestCode: Int) {
+            calls.add(
+                item = Call(
+                    target = target,
+                    extras = extras,
+                    requestCode = requestCode
+                )
+            )
+        }
+
+        override val statusBarColor: Int? = null
+        override val lifecycleOwner: LifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.RESUMED)
+        override val application: Application
+            get() {
+                throw NotImplementedError()
+            }
+
+        data class Call(
+            val target: Class<*>,
+            val extras: Bundle,
+            val requestCode: Int
         )
     }
 
