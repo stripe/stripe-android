@@ -136,7 +136,7 @@ constructor(
 
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null,
 
-    private val clientAttributionMetadata: ClientAttributionMetadata? = null,
+    val clientAttributionMetadata: ClientAttributionMetadata? = null,
 
     /**
      * ID of the ConfirmationToken used to confirm this PaymentIntent.

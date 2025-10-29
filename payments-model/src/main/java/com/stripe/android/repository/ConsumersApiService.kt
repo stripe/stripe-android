@@ -425,6 +425,7 @@ class ConsumersApiServiceImpl(
         requestSurface: String,
         requestOptions: ApiRequest.Options,
     ): Result<ConsumerPaymentDetails> {
+        assert(paymentDetailsCreateParams.toParamMap().containsKey("client_attribution_metadata"))
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,
@@ -453,6 +454,7 @@ class ConsumersApiServiceImpl(
         requestOptions: ApiRequest.Options,
         extraParams: Map<String, Any?>,
     ): Result<SharePaymentDetails> {
+        assert(extraParams.containsKey("client_attribution_metadata"))
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,

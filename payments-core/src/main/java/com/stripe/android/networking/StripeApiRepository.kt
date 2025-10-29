@@ -245,6 +245,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             fraudDetectionData
         )
 
+        assert(confirmPaymentIntentParams.clientAttributionMetadata != null)
+
         val paymentIntentId = runCatching {
             PaymentIntent.ClientSecret(confirmPaymentIntentParams.clientSecret).paymentIntentId
         }.getOrElse {
@@ -430,6 +432,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): Result<SetupIntent> {
+        assert(confirmSetupIntentParams.clientAttributionMetadata != null)
+
         val setupIntentId = runCatching {
             SetupIntent.ClientSecret(confirmSetupIntentParams.clientSecret).setupIntentId
         }.getOrElse {
@@ -590,6 +594,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
     ): Result<PaymentMethod> {
+        assert(paymentMethodCreateParams.clientAttributionMetadata != null)
+
         fireFraudDetectionDataRequest()
 
         return fetchStripeModelResult(
@@ -1216,6 +1222,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         extraParams: Map<String, *>?,
         requestOptions: ApiRequest.Options
     ): Result<PaymentMethod> {
+        assert(extraParams!!.containsKey("client_attribution_metadata"))
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = sharePaymentDetailsUrl,
