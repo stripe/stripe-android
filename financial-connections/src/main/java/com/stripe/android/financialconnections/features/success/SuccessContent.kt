@@ -69,6 +69,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
+import com.stripe.android.uicore.R as StripeUiCoreR
 import com.stripe.android.uicore.text.MiddleEllipsisText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -287,7 +288,7 @@ private fun SpinnerToCheckmark(
                     scaleX = checkmarkScale
                     scaleY = checkmarkScale
                 },
-                painter = painterResource(com.stripe.android.uicore.R.drawable.stripe_ic_material_check),
+                painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
                 contentDescription = stringResource(id = R.string.stripe_success_pane_title),
                 tint = colors.primaryAccent,
             )

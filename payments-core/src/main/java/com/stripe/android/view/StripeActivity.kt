@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.stripe.android.R
 import com.stripe.android.databinding.StripeActivityBinding
+import com.stripe.android.uicore.R as StripeUiCoreR
 import androidx.appcompat.R as AppCompatR
 
 /**
@@ -78,7 +79,7 @@ abstract class StripeActivity : AppCompatActivity() {
         val tintedIcon = stripeColorUtils.getTintedIconWithAttribute(
             theme,
             AppCompatR.attr.titleTextColor,
-            R.drawable.stripe_ic_checkmark
+            StripeUiCoreR.drawable.stripe_ic_checkmark
         )
         saveItem.icon = tintedIcon
         return super.onPrepareOptionsMenu(menu)

@@ -46,8 +46,8 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.uicore.format.CurrencyFormatter
 import com.stripe.android.uicore.text.MiddleEllipsisText
-import com.stripe.android.uicore.R as StripeUiCoreR
 import java.util.Locale
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 /**
  * A single account item in an account picker list.
@@ -113,7 +113,7 @@ internal fun AccountItem(
                 modifier = Modifier
                     .size(24.dp)
                     .alpha(if (selected) 1f else 0f),
-                painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_check),
+                painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
                 tint = colors.primary,
                 contentDescription = "Selected"
             )

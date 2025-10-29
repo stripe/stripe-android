@@ -112,7 +112,7 @@ private fun Choice(
         Spacer(modifier = Modifier.weight(1f))
 
         Icon(
-            painter = painterResource(R.drawable.stripe_ic_material_check),
+            painter = painterResource(R.drawable.stripe_ic_checkmark),
             contentDescription = null,
             modifier = Modifier
                 .height(20.dp)

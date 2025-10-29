@@ -261,7 +261,7 @@ private fun RowButtonCheckmarkOuterContent(
         iconContent = {
             if (isSelected) {
                 Icon(
-                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_check),
+                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
                     contentDescription = null,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
