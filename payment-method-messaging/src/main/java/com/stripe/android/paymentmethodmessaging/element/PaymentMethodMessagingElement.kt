@@ -14,7 +14,9 @@ import javax.inject.Inject
 
 @PaymentMethodMessagingElementPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class PaymentMethodMessagingElement @Inject internal constructor() {
+class PaymentMethodMessagingElement @Inject internal constructor(
+    private val messagingCoordinator: PaymentMethodMessagingCoordinator
+) {
 
     /**
      * Call this method to configure [PaymentMethodMessagingElement] or when the [Configuration] values
@@ -23,8 +25,7 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
     suspend fun configure(
         configuration: Configuration
     ): ConfigureResult {
-        configuration.build()
-        return ConfigureResult.NoContent()
+        return messagingCoordinator.configure(configuration.build())
     }
 
     /**
@@ -124,17 +125,17 @@ class PaymentMethodMessagingElement @Inject internal constructor() {
         }
 
         internal class State(
-            val amount: Long?,
-            val currency: String?,
-            val locale: String?,
+            val amount: Long,
+            val currency: String,
+            val locale: String,
             val countryCode: String?,
             val paymentMethodTypes: List<PaymentMethod.Type>?,
         )
 
         internal fun build(): State {
             return State(
-                amount = amount,
-                currency = currency,
+                amount = requireNotNull(amount) { "Configuration.amount must not be null" },
+                currency = requireNotNull(currency) { "Configuration.currency must not be null" },
                 locale = locale ?: Locale.getDefault().language,
                 countryCode = countryCode,
                 paymentMethodTypes = paymentMethodTypes,

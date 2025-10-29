@@ -1491,7 +1491,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         paymentMethods: List<String>,
         amount: Int,
         currency: String,
-        country: String,
+        country: String?,
         locale: String,
         requestOptions: ApiRequest.Options
     ): Result<PaymentMethodMessage> {
@@ -1499,7 +1499,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createGet(
                 url = "https://ppm.stripe.com/config",
                 options = requestOptions,
-                params = mapOf<String, Any>(
+                params = mapOf<String, Any?>(
                     "amount" to amount,
                     "country" to country,
                     "currency" to currency,
