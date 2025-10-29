@@ -5,11 +5,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.elements.AddressTextFilter
 import com.stripe.android.uicore.elements.AdministrativeAreaConfig
 import com.stripe.android.uicore.elements.AdministrativeAreaElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
+import com.stripe.android.uicore.elements.SimpleTextFieldConfig
+import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -118,6 +121,32 @@ class TransformAddressToElementTest {
             invalidNameType.forEach { println(it.type?.name) }
             assertThat(invalidNameType).isEmpty()
         }
+    }
+
+    @Test
+    fun `Address text fields have AddressTextFilter configured`() = runBlocking {
+        val usElements = AddressSchemaRegistry.get("US")!!.transformToElementList("US")
+
+        // Check that address line 1 has AddressTextFilter
+        val addressLine1Element = usElements[0] as SectionSingleFieldElement
+        val addressLine1Controller = addressLine1Element.controller as SimpleTextFieldController
+        val addressLine1Config = addressLine1Controller.textFieldConfig as SimpleTextFieldConfig
+
+        assertThat(addressLine1Config.textFilter).isInstanceOf(AddressTextFilter::class.java)
+
+        // Check that address line 2 has AddressTextFilter
+        val addressLine2Element = usElements[1] as SectionSingleFieldElement
+        val addressLine2Controller = addressLine2Element.controller as SimpleTextFieldController
+        val addressLine2Config = addressLine2Controller.textFieldConfig as SimpleTextFieldConfig
+
+        assertThat(addressLine2Config.textFilter).isInstanceOf(AddressTextFilter::class.java)
+
+        // Check that city has AddressTextFilter
+        val cityElement = (usElements[2] as RowElement).fields[0]
+        val cityController = cityElement.controller as SimpleTextFieldController
+        val cityConfig = cityController.textFieldConfig as SimpleTextFieldConfig
+
+        assertThat(cityConfig.textFilter).isInstanceOf(AddressTextFilter::class.java)
     }
 
     private suspend fun verifySimpleTextSpecInTextFieldController(
