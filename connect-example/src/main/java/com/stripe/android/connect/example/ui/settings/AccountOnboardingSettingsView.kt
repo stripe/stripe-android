@@ -28,6 +28,7 @@ import com.stripe.android.connect.example.data.SkipTermsOfService
 import com.stripe.android.connect.example.ui.common.BackIconButton
 import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 import com.stripe.android.connect.example.ui.common.ConnectSdkExampleTheme
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
 fun AccountOnboardingSettingsView(
@@ -96,7 +97,7 @@ private fun AccountOnboardingSettingsView(
                 },
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_material_check),
+                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
                     contentDescription = stringResource(R.string.save)
                 )
             }

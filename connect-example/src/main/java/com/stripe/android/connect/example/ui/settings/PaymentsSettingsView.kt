@@ -44,6 +44,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
 fun PaymentsSettingsView(
@@ -122,7 +123,7 @@ private fun PaymentsSettingsView(
                 },
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_material_check),
+                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
                     contentDescription = stringResource(R.string.save)
                 )
             }
@@ -266,7 +267,7 @@ private fun PaymentsSettingsView(
                 )
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_material_close),
+                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_close),
                     contentDescription = null,
                     modifier = Modifier.padding(end = 8.dp)
                 )
