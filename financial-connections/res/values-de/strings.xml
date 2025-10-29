@@ -7,6 +7,8 @@
   <string name="stripe_account_picker_error_no_payment_method_desc_singular">Wir haben %1$s %2$s Konto gefunden, aber Sie können nur Giro- oder Sparkonten mit %3$s verbinden. Bitte wählen Sie eine andere Bank.</string>
   <string name="stripe_account_picker_error_no_payment_method_title">Keine Zahlungskonten verfügbar</string>
   <string name="stripe_account_picker_multiselect_account">Konten auswählen</string>
+  <!-- The title of the loading screen that appears when a user just logged into their bank account, and now is waiting for their bank accounts to load. Once the bank accounts are loaded, user will be able to pick the bank account they want to to use for things like payments. -->
+  <string name="stripe_account_picker_retrieving_accounts">Konten werden abgerufen …</string>
   <!-- Account picker -->
   <string name="stripe_account_picker_singleselect_account">Konto auswählen</string>
   <string name="stripe_accounts_error_desc_manualentry">Bitte geben Sie Ihre Kontoverbindung manuell ein oder wählen Sie eine andere Bank.</string>

@@ -7,6 +7,8 @@
   <string name="stripe_account_picker_error_no_payment_method_desc_singular">Pronašli smo%1$s %2$s račune ali vi možete provjeriti samo putem poveznice ili bankovnog računa na %3$s. Pokušajte odabrati drugu banku.</string>
   <string name="stripe_account_picker_error_no_payment_method_title">Nema dostupnih računa za plaćanje</string>
   <string name="stripe_account_picker_multiselect_account">Odaberite račune</string>
+  <!-- The title of the loading screen that appears when a user just logged into their bank account, and now is waiting for their bank accounts to load. Once the bank accounts are loaded, user will be able to pick the bank account they want to to use for things like payments. -->
+  <string name="stripe_account_picker_retrieving_accounts">Dohvaćanje računa...</string>
   <!-- Account picker -->
   <string name="stripe_account_picker_singleselect_account">Odaberite račun</string>
   <string name="stripe_accounts_error_desc_manualentry">Unesite podatke o banci ručno ili pokušajte odabrati drugu banku.</string>

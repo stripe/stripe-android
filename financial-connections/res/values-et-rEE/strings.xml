@@ -7,6 +7,8 @@
   <string name="stripe_account_picker_error_no_payment_method_desc_singular">Leidsime %1$s %2$s konto, kuid üksusega %3$s saab ühendada ainult arveldus- või säästukontosid. Proovige valida mõni muu pank.</string>
   <string name="stripe_account_picker_error_no_payment_method_title">Sobivaid maksekontosid pole saadaval</string>
   <string name="stripe_account_picker_multiselect_account">Vali kontod</string>
+  <!-- The title of the loading screen that appears when a user just logged into their bank account, and now is waiting for their bank accounts to load. Once the bank accounts are loaded, user will be able to pick the bank account they want to to use for things like payments. -->
+  <string name="stripe_account_picker_retrieving_accounts">Kontode toomine ...</string>
   <!-- Account picker -->
   <string name="stripe_account_picker_singleselect_account">Vali konto</string>
   <string name="stripe_accounts_error_desc_manualentry">Palun sisestage oma pangaandmed käsitsi või valige mõni muu pank.</string>

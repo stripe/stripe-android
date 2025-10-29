@@ -7,6 +7,8 @@
   <string name="stripe_account_picker_error_no_payment_method_desc_singular">%1$s개의 %2$s계좌를 찾았지만, 당좌 예금이나 저축 예금 계좌는 %3$s에만 연결할 수 있습니다. 다른 은행을 선택하십시오.</string>
   <string name="stripe_account_picker_error_no_payment_method_title">사용 가능한 결제 계좌 없음</string>
   <string name="stripe_account_picker_multiselect_account">계좌 선택</string>
+  <!-- The title of the loading screen that appears when a user just logged into their bank account, and now is waiting for their bank accounts to load. Once the bank accounts are loaded, user will be able to pick the bank account they want to to use for things like payments. -->
+  <string name="stripe_account_picker_retrieving_accounts">계좌를 가져오는 중...</string>
   <!-- Account picker -->
   <string name="stripe_account_picker_singleselect_account">계좌 선택</string>
   <string name="stripe_accounts_error_desc_manualentry">수동으로 은행 세부사항을 입력하거나 다른 은행을 선택하십시오.</string>

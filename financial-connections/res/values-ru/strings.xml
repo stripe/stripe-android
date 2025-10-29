@@ -7,6 +7,8 @@
   <string name="stripe_account_picker_error_no_payment_method_desc_singular">Обнаружен счет (%1$s %2$s), но привязать к %3$s можно только счета следующих типов: текущий и сберегательный. Попробуйте выбрать другой банк.</string>
   <string name="stripe_account_picker_error_no_payment_method_title">Нет ни одного доступного счета для оплаты</string>
   <string name="stripe_account_picker_multiselect_account">Выберите счета</string>
+  <!-- The title of the loading screen that appears when a user just logged into their bank account, and now is waiting for their bank accounts to load. Once the bank accounts are loaded, user will be able to pick the bank account they want to to use for things like payments. -->
+  <string name="stripe_account_picker_retrieving_accounts">Идет получение счетов...</string>
   <!-- Account picker -->
   <string name="stripe_account_picker_singleselect_account">Выберите счет</string>
   <string name="stripe_accounts_error_desc_manualentry">Введите банковские реквизиты вручную или выберите другой банк.</string>

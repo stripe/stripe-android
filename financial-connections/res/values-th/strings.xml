@@ -7,6 +7,8 @@
   <string name="stripe_account_picker_error_no_payment_method_desc_singular">เราพบบัญชี %2$s %1$s บัญชี แต่คุณเชื่อมโยงได้เฉพาะบัญชีกระแสรายวันหรือบัญชีออมทรัพย์กับ %3$s โปรดลองเลือกธนาคารอื่น</string>
   <string name="stripe_account_picker_error_no_payment_method_title">ไม่มีบัญชีการชำระเงินที่พร้อมใช้งาน</string>
   <string name="stripe_account_picker_multiselect_account">เลือกบัญชี</string>
+  <!-- The title of the loading screen that appears when a user just logged into their bank account, and now is waiting for their bank accounts to load. Once the bank accounts are loaded, user will be able to pick the bank account they want to to use for things like payments. -->
+  <string name="stripe_account_picker_retrieving_accounts">กำลังดึงข้อมูลบัญชี...</string>
   <!-- Account picker -->
   <string name="stripe_account_picker_singleselect_account">เลือกบัญชี</string>
   <string name="stripe_accounts_error_desc_manualentry">โปรดป้อนข้อมูลธนาคารด้วยตัวเองหรือเลือกธนาคารอื่น</string>

@@ -7,6 +7,8 @@
   <string name="stripe_account_picker_error_no_payment_method_desc_singular">%1$s %2$s számlát találtunk, de a(z) %3$s csak folyószámlával vagy megtakarítási számlával kapcsolható össze. Próbáljon másik bankot választani.</string>
   <string name="stripe_account_picker_error_no_payment_method_title">Nem érhető el fizetési számla</string>
   <string name="stripe_account_picker_multiselect_account">Számlák kiválasztása</string>
+  <!-- The title of the loading screen that appears when a user just logged into their bank account, and now is waiting for their bank accounts to load. Once the bank accounts are loaded, user will be able to pick the bank account they want to to use for things like payments. -->
+  <string name="stripe_account_picker_retrieving_accounts">Számlák lekérése...</string>
   <!-- Account picker -->
   <string name="stripe_account_picker_singleselect_account">Számla kiválasztása</string>
   <string name="stripe_accounts_error_desc_manualentry">Adja meg a bankadatait kézzel, vagy válasszon másik bankot.</string>

@@ -7,6 +7,8 @@
   <string name="stripe_account_picker_error_no_payment_method_desc_singular">Encontramos %1$s cuenta %2$s, pero solo puedes vincular cuentas corrientes o de ahorros a %3$s. Prueba a seleccionar otro banco.</string>
   <string name="stripe_account_picker_error_no_payment_method_title">No hay cuentas de pago disponibles</string>
   <string name="stripe_account_picker_multiselect_account">Selecciona las cuentas</string>
+  <!-- The title of the loading screen that appears when a user just logged into their bank account, and now is waiting for their bank accounts to load. Once the bank accounts are loaded, user will be able to pick the bank account they want to to use for things like payments. -->
+  <string name="stripe_account_picker_retrieving_accounts">Recuperando cuentas…</string>
   <!-- Account picker -->
   <string name="stripe_account_picker_singleselect_account">Selecciona una cuenta</string>
   <string name="stripe_accounts_error_desc_manualentry">Introduce tus datos bancarios de forma manual o selecciona otro banco.</string>

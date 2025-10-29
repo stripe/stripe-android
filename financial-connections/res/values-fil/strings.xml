@@ -7,6 +7,8 @@
   <string name="stripe_account_picker_error_no_payment_method_desc_singular">May nakita akong %1$s %2$s mga account pero puwede ka lang mag-link ng mga checking o savings account sa %3$s. Subukang pumili ng ibang bangko.</string>
   <string name="stripe_account_picker_error_no_payment_method_title">Walang available na mga account ng pagbabayad</string>
   <string name="stripe_account_picker_multiselect_account">Pumili ng mga account</string>
+  <!-- The title of the loading screen that appears when a user just logged into their bank account, and now is waiting for their bank accounts to load. Once the bank accounts are loaded, user will be able to pick the bank account they want to to use for things like payments. -->
+  <string name="stripe_account_picker_retrieving_accounts">Nire-retrieve ang mga account...</string>
   <!-- Account picker -->
   <string name="stripe_account_picker_singleselect_account">Pumili ng account</string>
   <string name="stripe_accounts_error_desc_manualentry">Mangyaring manu-manong ilagay ang mga detalye ng iyong bangko o pumili ng ibang bangko.</string>
