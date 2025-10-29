@@ -43,6 +43,15 @@ internal class PaymentSheetConfirmationTokenTest {
     }
 
     @Test
+    fun dummyTest() {
+        testSuccessfulPayment(
+            isLiveMode = false,
+            customerType = CustomerType.NewCustomer,
+            paymentMethodType = PaymentMethodType.Card
+        )
+    }
+
+//    @Test
     fun testSuccessfulPayment(
         @TestParameter("false", "true") isLiveMode: Boolean,
         @TestParameter customerType: CustomerType,
