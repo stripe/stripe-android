@@ -436,6 +436,8 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         testContext.validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        // cardscan is not available in test mode
+        testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
         testContext.validateAnalyticsRequest(eventName = "mc_initial_displayed_payment_methods")
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
@@ -537,6 +539,8 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_custom_paymentoption_newpm_select")
         testContext.validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        // cardscan is not available in test mode
+        testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
         testContext.validateAnalyticsRequest(eventName = "mc_initial_displayed_payment_methods")
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
