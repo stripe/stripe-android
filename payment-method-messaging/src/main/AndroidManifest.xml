@@ -4,6 +4,7 @@
         <activity
             android:name=".element.LearnMoreActivity"
             android:theme="@style/StripeLearnMoreTheme"
-            android:exported="false"/>
+            android:exported="false"
+            android:launchMode="singleTop"/>
     </application>
 </manifest>
