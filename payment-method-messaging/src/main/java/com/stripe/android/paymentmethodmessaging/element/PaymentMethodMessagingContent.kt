@@ -61,7 +61,7 @@ internal sealed class PaymentMethodMessagingContent {
     }
 
     class MultiPartner(
-        private val message: PaymentMethodMessageMultiPartner,
+        private val message: PaymentMethodMessageMultiPartner
     ) : PaymentMethodMessagingContent() {
         @Composable
         override fun Content(appearance: PaymentMethodMessagingElement.Appearance.State) {
@@ -77,9 +77,7 @@ internal sealed class PaymentMethodMessagingContent {
     }
 
     companion object {
-        fun get(
-            message: PaymentMethodMessage,
-        ): PaymentMethodMessagingContent {
+        fun get(message: PaymentMethodMessage): PaymentMethodMessagingContent {
             val singlePartnerMessage = message.singlePartner
             val multiPartnerMessage = message.multiPartner
             return if (singlePartnerMessage != null) {
