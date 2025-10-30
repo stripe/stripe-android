@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -16,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
+import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
@@ -25,6 +25,7 @@ import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.ui.KYCRefreshScreen
 import com.stripe.android.identity.IdentityVerificationSheet
@@ -71,23 +72,53 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private val currentLinkAccount: LinkController.LinkAccount?
         get() = interactor.state.value.linkControllerState?.internalLinkAccount
 
-    private val onrampActivityResultLauncher: ActivityResultLauncher<OnrampActivityContractArgs>
-
-    init {
-        onrampActivityResultLauncher = activity.registerForActivityResult(OnrampActivityContract()) { result ->
-            Log.d("TWG", result.action.name)
+    private val onrampActivityResultLauncher: ActivityResultLauncher<OnrampActivityContractArgs> =
+        activity.registerForActivityResult(OnrampActivityContract()) { result ->
             when (result.action) {
                 KycRefreshScreenAction.Cancelled -> {
+                    onrampCallbacks.verifyKycCallback.onResult(
+                        OnrampVerifyKycInfoResult.Cancelled
+                    )
                 }
                 KycRefreshScreenAction.Edit -> {
+                    onrampCallbacks.verifyKycCallback.onResult(
+                        OnrampVerifyKycInfoResult.UpdateAddress
+                    )
                 }
                 KycRefreshScreenAction.Confirm -> {
+                    coroutineScope.launch {
+                        val secret = consumerSessionClientSecret()
+
+                        if (secret != null) {
+                            val result = cryptoApiRepository.refreshKycData(
+                                RefreshKycInfo(),
+                                secret
+                            )
+
+                            if (result.success) {
+                                onrampCallbacks.verifyKycCallback.onResult(
+                                    OnrampVerifyKycInfoResult.Confirmed
+                                )
+                            } else {
+                                onrampCallbacks.verifyKycCallback.onResult(
+                                    OnrampVerifyKycInfoResult.Failed(
+                                        result.exceptionOrNull() ?: Exception("Unknown error")
+                                    )
+                                )
+                            }
+                        } else {
+                            onrampCallbacks.verifyKycCallback.onResult(
+                                OnrampVerifyKycInfoResult.Failed(
+                                    MissingConsumerSecretException()
+                                )
+                            )
+                        }
+                    }
                 }
             }
-            // Handle the result (OnrampActivityContractResult)
-            // e.g. onrampCallbacks.verifyKycCallback.onResult(result)
         }
 
+    init {
         // Observe Link controller state
         lifecycleOwner.lifecycleScope.launch {
             linkControllerState.collect { state ->
