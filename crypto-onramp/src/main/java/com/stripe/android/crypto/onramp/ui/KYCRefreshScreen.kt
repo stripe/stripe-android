@@ -51,7 +51,7 @@ import com.stripe.android.paymentsheet.ui.getLinkIcon
 
 @Composable
 internal fun KYCRefreshScreen(
-    appearance: LinkAppearance,
+    appearance: LinkAppearance?,
     updatedAddress: PaymentSheet.Address? = null
 ) {
     var name by remember { mutableStateOf("Satoshi Nakamoto") }
@@ -60,57 +60,60 @@ internal fun KYCRefreshScreen(
     var address by remember { mutableStateOf("2930 E 2nd Ave, Denver, CO, United States of America, 80206") }
 
     OnrampTheme(appearance) {
-        Column(modifier = Modifier.padding(24.dp)) {
-            TopNavigationBar(
-                onClose = { /* Handle close action */ }
-            )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.background)
+        ) {
+            Column( modifier = Modifier.padding(24.dp)) {
+                TopNavigationBar(
+                    onClose = { /* Handle close action */ }
+                )
 
-            Text(
-                text = "Confirm your information",
-                style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colors.onSurface,
-                modifier = Modifier
-                    .padding(bottom = 24.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                elevation = 4.dp,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column {
-                    InfoRow(title = "Name", value = name)
-                    Divider()
-                    InfoRow(title = "Date of Birth", value = dob)
-                    Divider()
-                    InfoRow(title = "Last 4 digits of SSN", value = ssnLast4)
-                    Divider()
-                    InfoRow(title = "Address", value = address, icon = {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit Address"
-                        )
-                    }, onIconTap = { /* Handle edit action */ })
+                Text(
+                    text = "Confirm your information",
+                    style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colors.onSurface,
+                    modifier = Modifier
+                        .padding(bottom = 24.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = 4.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column {
+                        InfoRow(title = "Name", value = name)
+                        Divider()
+                        InfoRow(title = "Date of Birth", value = dob)
+                        Divider()
+                        InfoRow(title = "Last 4 digits of SSN", value = ssnLast4)
+                        Divider()
+                        InfoRow(title = "Address", value = address, icon = {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Edit Address"
+                            )
+                        }, onIconTap = { /* Handle edit action */ })
+                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.weight(1f))
 
-            val isDark = isSystemInDarkTheme()
-            val linkColors = if (isDark) appearance.darkColors else appearance.lightColors
-
-            Button(
-                onClick = { /* Handle confirm action */ },
-                shape = RoundedCornerShape(appearance.primaryButton.cornerRadiusDp?.dp ?: 16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = linkColors.primary,
-                    contentColor = linkColors.contentOnPrimary
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(appearance.primaryButton.heightDp?.dp ?: 56.dp)
-            ) {
-                Text("Confirm")
+                Button(
+                    onClick = { /* Handle confirm action */ },
+                    shape = RoundedCornerShape(appearance?.primaryButton?.cornerRadiusDp?.dp ?: 16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = MaterialTheme.colors.primary,
+                        contentColor = MaterialTheme.colors.onPrimary
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(appearance?.primaryButton?.heightDp?.dp ?: 56.dp)
+                ) {
+                    Text("Confirm")
+                }
             }
         }
     }
@@ -145,7 +148,7 @@ fun TopNavigationBar(
                 modifier = Modifier
                     .size(32.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colors.onSurface.copy(alpha = 0.05f))
+                    .background(MaterialTheme.colors.onSurface.copy(alpha = 0.08f))
             ) {
                 Icon(
                     imageVector = Icons.Filled.Close,
@@ -188,43 +191,50 @@ private fun InfoRow(title: String, value: String, icon: (@Composable () -> Unit)
 
 @Composable
 fun OnrampTheme(
-    linkAppearance: LinkAppearance,
+    linkAppearance: LinkAppearance?,
     content: @Composable () -> Unit,
 ) {
-    val isDark = when (linkAppearance.style) {
-        LinkAppearance.Style.ALWAYS_LIGHT -> false
-        LinkAppearance.Style.ALWAYS_DARK -> true
-        LinkAppearance.Style.AUTOMATIC -> isSystemInDarkTheme()
-    }
+    linkAppearance?.let {
+        val isDark = when (it.style) {
+            LinkAppearance.Style.ALWAYS_LIGHT -> false
+            LinkAppearance.Style.ALWAYS_DARK -> true
+            LinkAppearance.Style.AUTOMATIC -> isSystemInDarkTheme()
+        }
 
-    val baseContext = LocalContext.current
-    val inspectionMode = LocalInspectionMode.current
-    val styleContext = remember(baseContext, isDark, inspectionMode) {
-        val uiMode =
-            if (isDark) {
-                Configuration.UI_MODE_NIGHT_YES
-            } else {
-                Configuration.UI_MODE_NIGHT_NO
-            }
-        baseContext.withUiMode(uiMode, inspectionMode)
-    }
+        val baseContext = LocalContext.current
+        val inspectionMode = LocalInspectionMode.current
+        val styleContext = remember(baseContext, isDark, inspectionMode) {
+            val uiMode =
+                if (isDark) {
+                    Configuration.UI_MODE_NIGHT_YES
+                } else {
+                    Configuration.UI_MODE_NIGHT_NO
+                }
+            baseContext.withUiMode(uiMode, inspectionMode)
+        }
 
-    CompositionLocalProvider(
-        LocalContext provides styleContext,
-    ) {
         val colors = if (isDark) darkColors() else lightColors()
-        val linkColors = if (isDark) linkAppearance.darkColors else linkAppearance.lightColors
+        val linkColors = if (isDark) it.darkColors else it.lightColors
 
         val resolvedColors = colors.copy(
             primary = linkColors.primary,
             onPrimary = linkColors.contentOnPrimary,
         )
 
-        MaterialTheme(
-            colors = resolvedColors,
-            content = content
-        )
+        CompositionLocalProvider(
+            LocalContext provides styleContext,
+        ) {
+            MaterialTheme(
+                colors = resolvedColors,
+                content = content
+            )
+        }
+    } ?: run {
+        MaterialTheme {
+            content()
+        }
     }
+
 }
 
 //@Composable

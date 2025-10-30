@@ -1,25 +1,17 @@
 package com.stripe.android.crypto.onramp
 
 import android.app.Activity
-import android.app.Dialog
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
-import androidx.compose.ui.platform.ComposeView
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
@@ -136,7 +128,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 
     fun verifyKycInfo(updatedAddress: PaymentSheet.Address? = null) {
-        onrampActivityResultLauncher.launch(OnrampActivityContractArgs(updatedAddress))
+        onrampActivityResultLauncher.launch(OnrampActivityContractArgs(updatedAddress, appearance()))
     }
 
     fun collectPaymentMethod(type: PaymentMethodType) {
@@ -231,6 +223,9 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
+    private fun appearance(): LinkAppearance? =
+        interactor.state.value.configuration?.appearance
+
     private fun clientEmail(): String? =
         interactor.state.value.linkControllerState?.internalLinkAccount?.email
 
@@ -293,14 +288,16 @@ class KycFullScreenActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val address = intent.getParcelableExtra<PaymentSheet.Address>("updatedAddress")
+        val linkAppearance = intent.getParcelableExtra<LinkAppearance>("linkAppearance")
 
         setContent {
-            KYCRefreshScreen(LinkAppearance(), address)
+            KYCRefreshScreen(linkAppearance, address)
         }
     }
 }
 data class OnrampActivityContractArgs(
-    val updatedAddress: PaymentSheet.Address?
+    val updatedAddress: PaymentSheet.Address?,
+    val linkAppearance: LinkAppearance?
 )
 
 data class OnrampActivityContractResult(
@@ -311,6 +308,7 @@ class OnrampActivityContract : ActivityResultContract<OnrampActivityContractArgs
     override fun createIntent(context: Context, input: OnrampActivityContractArgs): Intent {
         return Intent(context, KycFullScreenActivity::class.java).apply {
             putExtra("updatedAddress", input.updatedAddress)
+            putExtra("linkAppearance", input.linkAppearance)
         }
     }
 
