@@ -2,6 +2,7 @@
 
 package com.stripe.android.paymentmethodmessaging.element
 
+import android.content.Context
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
@@ -18,7 +19,8 @@ internal interface PaymentMethodMessagingCoordinator {
 
 internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val paymentConfiguration: PaymentConfiguration
+    private val paymentConfiguration: PaymentConfiguration,
+    private val learnMoreActivityLauncher: LearnMoreActivityLauncher
 ) : PaymentMethodMessagingCoordinator {
 
     private val _messagingContent = MutableStateFlow<PaymentMethodMessagingContent?>(null)
@@ -44,7 +46,10 @@ internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
             return PaymentMethodMessagingElement.ConfigureResult.Failed(it)
         }
 
-        val content = PaymentMethodMessagingContent.get(paymentMethodMessage)
+        val content = PaymentMethodMessagingContent.get(
+            paymentMethodMessage,
+            this::launchLearnMoreActivity
+        )
         _messagingContent.value = content
 
         return when (content) {
@@ -52,5 +57,17 @@ internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
             is PaymentMethodMessagingContent.MultiPartner -> PaymentMethodMessagingElement.ConfigureResult.Succeeded()
             is PaymentMethodMessagingContent.NoContent -> PaymentMethodMessagingElement.ConfigureResult.NoContent()
         }
+    }
+
+    private fun launchLearnMoreActivity(
+        context: Context,
+        learnMoreUrl: String,
+        theme: PaymentMethodMessagingElement.Appearance.Theme
+    ) {
+        val url = LearnMoreActivityArgs.addThemeQueryParam(learnMoreUrl, theme)
+        val args = LearnMoreActivityArgs(
+            learnMoreUrl = url
+        )
+        learnMoreActivityLauncher.launchLearnMoreActivity(context, args)
     }
 }

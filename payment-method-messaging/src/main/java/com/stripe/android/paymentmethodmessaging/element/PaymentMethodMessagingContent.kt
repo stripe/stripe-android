@@ -2,6 +2,8 @@
 
 package com.stripe.android.paymentmethodmessaging.element
 
+import android.content.Context
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,6 +43,8 @@ import com.stripe.android.model.PaymentMethodMessageMultiPartner
 import com.stripe.android.model.PaymentMethodMessageSinglePartner
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.navigation.rememberKeyboardController
+import kotlinx.coroutines.launch
 
 internal sealed class PaymentMethodMessagingContent {
 
@@ -47,20 +52,27 @@ internal sealed class PaymentMethodMessagingContent {
     abstract fun Content(appearance: PaymentMethodMessagingElement.Appearance.State)
 
     class SinglePartner(
-        private val message: PaymentMethodMessageSinglePartner
+        private val message: PaymentMethodMessageSinglePartner,
+        private val onClick:
+        (context: Context, learnMoreUrl: String, theme: PaymentMethodMessagingElement.Appearance.Theme) -> Unit
     ) : PaymentMethodMessagingContent() {
         @Composable
         override fun Content(appearance: PaymentMethodMessagingElement.Appearance.State) {
-            SinglePartner(message, appearance)
+            SinglePartner(message, appearance, onClick)
         }
     }
 
     class MultiPartner(
-        private val message: PaymentMethodMessageMultiPartner
+        private val message: PaymentMethodMessageMultiPartner,
+        private val onClick: (
+            context: Context,
+            learnMoreUrl: String,
+            theme: PaymentMethodMessagingElement.Appearance.Theme
+        ) -> Unit
     ) : PaymentMethodMessagingContent() {
         @Composable
         override fun Content(appearance: PaymentMethodMessagingElement.Appearance.State) {
-            MultiPartner(message, appearance)
+            MultiPartner(message, appearance, onClick)
         }
     }
 
@@ -72,13 +84,16 @@ internal sealed class PaymentMethodMessagingContent {
     }
 
     companion object {
-        fun get(message: PaymentMethodMessage): PaymentMethodMessagingContent {
+        fun get(
+            message: PaymentMethodMessage,
+            onClick: (Context, String, PaymentMethodMessagingElement.Appearance.Theme) -> Unit
+        ): PaymentMethodMessagingContent {
             val singlePartnerMessage = message.singlePartner
             val multiPartnerMessage = message.multiPartner
             return if (singlePartnerMessage != null) {
-                SinglePartner(singlePartnerMessage)
+                SinglePartner(singlePartnerMessage, onClick)
             } else if (multiPartnerMessage != null) {
-                MultiPartner(multiPartnerMessage)
+                MultiPartner(multiPartnerMessage, onClick)
             } else {
                 NoContent
             }
@@ -89,14 +104,24 @@ internal sealed class PaymentMethodMessagingContent {
 @Composable
 private fun SinglePartner(
     message: PaymentMethodMessageSinglePartner,
-    appearance: PaymentMethodMessagingElement.Appearance.State
+    appearance: PaymentMethodMessagingElement.Appearance.State,
+    onClick: (Context, String, PaymentMethodMessagingElement.Appearance.Theme) -> Unit
 ) {
     val image = when (appearance.theme) {
         PaymentMethodMessagingElement.Appearance.Theme.LIGHT -> message.lightImage
         PaymentMethodMessagingElement.Appearance.Theme.DARK -> message.darkImage
         PaymentMethodMessagingElement.Appearance.Theme.FLAT -> message.flatImage
     }
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    val context = LocalContext.current
+    val keyboardController = rememberKeyboardController()
+    val scope = rememberCoroutineScope()
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clickable {
+            scope.launch { keyboardController.dismiss() }
+            onClick(context, message.learnMore.url, appearance.theme)
+        }
+    ) {
         TextWithLogo(
             label = message.inlinePartnerPromotion,
             image = image,
@@ -108,11 +133,22 @@ private fun SinglePartner(
 @Composable
 private fun MultiPartner(
     message: PaymentMethodMessageMultiPartner,
-    appearance: PaymentMethodMessagingElement.Appearance.State
+    appearance: PaymentMethodMessagingElement.Appearance.State,
+    onClick: (Context, String, PaymentMethodMessagingElement.Appearance.Theme) -> Unit
 ) {
     val style = appearance.font?.toTextStyle()
         ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Normal)
-    Column {
+
+    val context = LocalContext.current
+    val keyboardController = rememberKeyboardController()
+    val scope = rememberCoroutineScope()
+
+    Column(
+        modifier = Modifier.clickable {
+            scope.launch { keyboardController.dismiss() }
+            onClick(context, message.learnMore.url, appearance.theme)
+        }
+    ) {
         Images(getImages(message, appearance.theme), appearance)
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
