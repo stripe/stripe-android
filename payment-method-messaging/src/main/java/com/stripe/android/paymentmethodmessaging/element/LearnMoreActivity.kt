@@ -7,6 +7,7 @@ import android.webkit.WebViewClient
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
@@ -46,7 +47,8 @@ internal class LearnMoreActivity : AppCompatActivity() {
                                 settings.javaScriptEnabled = true
                                 loadUrl(termsArgs.learnMoreUrl)
                             }
-                        }
+                        },
+                        Modifier.testTag("pls")
                     )
                 }
             }

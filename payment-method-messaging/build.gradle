@@ -54,6 +54,7 @@ dependencies {
     testImplementation testLibs.androidx.composeUi
     testImplementation testLibs.espresso.intents
     testImplementation testLibs.hamcrest
+    testImplementation testLibs.espresso.web
 
     testImplementation testLibs.mockito.core
     testImplementation testLibs.mockito.inline
@@ -61,6 +62,23 @@ dependencies {
     testImplementation testLibs.kotlin.coroutines
 
     androidTestUtil testLibs.testOrchestrator
+
+    androidTestImplementation testLibs.androidx.composeUi
+    androidTestImplementation testLibs.androidx.coreKtx
+    androidTestImplementation testLibs.androidx.junit
+    androidTestImplementation testLibs.androidx.junitKtx
+    androidTestImplementation testLibs.androidx.testRules
+    androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.androidx.truth
+    androidTestImplementation testLibs.androidx.uiAutomator
+    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation testLibs.espresso.intents
+    androidTestImplementation testLibs.espresso.web
+    androidTestImplementation testLibs.mockito.core
+    androidTestImplementation testLibs.mockito.inline
+    androidTestImplementation testLibs.mockito.kotlin
+    androidTestImplementation testLibs.testParameterInjector
+    androidTestImplementation testLibs.truth
 }
 
 ext {

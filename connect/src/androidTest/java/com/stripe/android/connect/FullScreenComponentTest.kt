@@ -17,6 +17,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withParent
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.espresso.web.assertion.WebViewAssertions.webMatches
 import androidx.test.espresso.web.model.Atoms.castOrDie
+import androidx.test.espresso.web.model.Atoms.getCurrentUrl
 import androidx.test.espresso.web.model.Atoms.script
 import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
@@ -95,6 +96,7 @@ class FullScreenComponentTest {
 
     @Test
     fun testScrolling() {
+        onWebView().check(getCurrentUrl())
         checkDialogIsDisplayed()
         onWebView()
             // Verify we can scroll to bottom.
