@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,24 +36,30 @@ fun CardDetailsSectionElementUI(
     lastTextFieldIdentifier: IdentifierSpec?,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val options = ActivityOptionsCompat.makeCustomAnimation(
-        LocalContext.current,
+        context,
         AnimationConstants.FADE_IN,
         AnimationConstants.FADE_OUT,
     )
 
-    if (controller.shouldAutomaticallyLaunchCardScan()) {
-        val context = LocalContext.current
+    // Only create launcher if ActivityResultRegistry is available (e.g., not in screenshot tests)
+    val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
+    val cardScanLauncher = if (activityResultRegistryOwner != null) {
         val eventsReporter = LocalCardScanEventsReporter.current
-        val cardScanGoogleLauncher = rememberCardScanGoogleLauncher(
+        rememberCardScanGoogleLauncher(
             context = context,
             options = options,
             eventsReporter = eventsReporter,
         ) { controller.onCardScanResult(it) }
+    } else {
+        null
+    }
 
+    if (controller.shouldAutomaticallyLaunchCardScan() && cardScanLauncher != null) {
         SideEffect {
             controller.setHasAutomaticallyLaunchedCardScan()
-            cardScanGoogleLauncher.launch(context)
+            cardScanLauncher.launch(context)
         }
     }
 
@@ -72,8 +79,7 @@ fun CardDetailsSectionElementUI(
             )
             ScanCardButtonUI(
                 enabled = enabled,
-                launchOptions = options,
-                controller = controller
+                cardScanGoogleLauncher = cardScanLauncher
             )
         }
         SectionElementUI(

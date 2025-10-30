@@ -75,7 +75,7 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
 
         return InstantDebitsResult(
             encodedPaymentMethod = paymentMethod,
-            bankName = paymentDetails.bankName,
+            bankName = paymentDetails.bankAccountName,
             last4 = paymentDetails.last4,
             eligibleForIncentive = eligibleForIncentive,
         )

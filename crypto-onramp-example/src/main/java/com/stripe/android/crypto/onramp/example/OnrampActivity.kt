@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -43,11 +44,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.utils.FeatureFlags
@@ -162,27 +173,91 @@ internal class OnrampActivity : ComponentActivity() {
 }
 
 @Composable
+internal fun SeamlessSignInScreen(
+    email: String,
+    onContinue: () -> Unit,
+    onNotMe: () -> Unit
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Image(
+            painter = painterResource(id = android.R.drawable.ic_menu_myplaces),
+            contentDescription = "User Icon",
+            modifier = Modifier.size(128.dp)
+        )
+
+        Text(
+            text = buildAnnotatedString {
+                append("Continue as ")
+                val start = length
+                append("$email?")
+                addStyle(
+                    style = SpanStyle(fontWeight = FontWeight.Bold),
+                    start = start,
+                    end = length
+                )
+            },
+            fontSize = 20.sp
+        )
+
+        Spacer(modifier = Modifier.height(48.dp))
+
+        Button(
+            onClick = onContinue,
+            modifier = Modifier.fillMaxWidth()
+                .padding(bottom = 16.dp)
+        ) {
+            Text("Continue")
+        }
+
+        Button(
+            onClick = onNotMe,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Not me")
+        }
+    }
+}
+
+@Composable
 internal fun LoginSignupScreen(
     onRegister: (email: String, password: String) -> Unit,
     onLogin: (email: String, password: String) -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
 
     Column {
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email Address") },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
+                .onPreviewKeyEvent {
+                    if (it.key == Key.Tab) {
+                        focusManager.moveFocus(FocusDirection.Next)
+                        true
+                    } else {
+                        false
+                    }
+                }
         )
 
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
@@ -237,9 +312,16 @@ internal fun OnrampScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
         when (uiState.screen) {
+            Screen.SeamlessSignIn -> {
+                SeamlessSignInScreen(
+                    email = uiState.email,
+                    onContinue = viewModel::seamlessSignInContinue,
+                    onNotMe = viewModel::logOut
+                )
+            }
             Screen.LoginSignup -> {
                 LoginSignupScreen(
                     onRegister = viewModel::registerUser,
@@ -466,7 +548,7 @@ private fun AuthenticationScreen(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Back to Email Input")
+            Text("Back to Sign in")
         }
     }
 }
@@ -475,7 +557,7 @@ private fun AuthenticationScreen(
 fun AuthenticateSection(
     onAuthenticate: (oauthScopes: String?) -> Unit,
 ) {
-    var oauthScopes by remember { mutableStateOf("kyc.status:read,crypto:ramp") }
+    var oauthScopes by remember { mutableStateOf("kyc.status:read,crypto:ramp,auth.persist_login:read") }
     OutlinedTextField(
         value = oauthScopes,
         onValueChange = { oauthScopes = it },
@@ -770,7 +852,7 @@ private fun AuthenticatedOperationsScreen(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Back to Email Input")
+            Text("Back to Sign in")
         }
 
         Spacer(Modifier.height(24.dp))

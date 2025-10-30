@@ -1504,7 +1504,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     "country" to country,
                     "currency" to currency,
                     "locale" to locale,
-                    "key" to requestOptions.apiKey
+                    "key" to requestOptions.apiKey,
+                    "_stripe_account" to requestOptions.stripeAccount
                 ) + paymentMethods.mapIndexed { index, paymentMethod ->
                     "payment_methods[$index]" to paymentMethod
                 }

@@ -98,7 +98,7 @@ data class ConsumerPaymentDetails(
         override val last4: String,
         override val isDefault: Boolean,
         override val nickname: String?,
-        val bankName: String?,
+        val bankAccountName: String?,
         val bankIconCode: String?,
         override val billingAddress: BillingAddress?,
         override val billingEmailAddress: String?,

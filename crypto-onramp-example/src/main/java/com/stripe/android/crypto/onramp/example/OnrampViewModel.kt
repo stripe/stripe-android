@@ -1,7 +1,10 @@
 package com.stripe.android.crypto.onramp.example
 
 import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.compose.ui.graphics.Color
+import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -28,6 +31,7 @@ import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
@@ -39,10 +43,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 @Suppress("TooManyFunctions")
 internal class OnrampViewModel(
-    application: Application,
+    private val application: Application,
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
@@ -113,8 +119,12 @@ internal class OnrampViewModel(
             )
 
             onrampCoordinator.configure(configuration = configuration)
-            // Set initial state to LoginSignup after configuration
-            _uiState.update { it.copy(screen = Screen.LoginSignup) }
+
+            loadUserData()?.let { data ->
+                _uiState.update { it.copy(email = data.email, authToken = data.token, screen = Screen.SeamlessSignIn) }
+            } ?: run {
+                _uiState.update { it.copy(screen = Screen.LoginSignup) }
+            }
         }
     }
 
@@ -188,6 +198,39 @@ internal class OnrampViewModel(
         }
     }
 
+    fun seamlessSignInContinue() = viewModelScope.launch {
+        _uiState.value.authToken?.let {
+            val result = testBackendRepository.createLinkAuthToken(it)
+            when (result) {
+                is Result.Success -> {
+                    val latcs = result.value.linkAuthTokenClientSecret
+                    val authenticateResult = onrampCoordinator.authenticateUserWithToken(latcs)
+
+                    when (authenticateResult) {
+                        is OnrampTokenAuthenticationResult.Completed -> {
+                            _message.value = "Seamless sign-in successful!"
+                            _uiState.update { state -> state.copy(screen = Screen.AuthenticatedOperations) }
+                        }
+                        is OnrampTokenAuthenticationResult.Failed -> {
+                            clearUserData()
+                            _message.value = "Seamless sign-in failed: ${authenticateResult.error.message}"
+                            _uiState.update { state -> state.copy(screen = Screen.LoginSignup) }
+                        }
+                    }
+                }
+                is Result.Failure -> {
+                    clearUserData()
+                    _message.value = "Seamless sign-in failed: ${result.error.message}"
+                    _uiState.update { state -> state.copy(screen = Screen.LoginSignup) }
+                }
+            }
+        } ?: run {
+            clearUserData()
+            _message.value = "No auth token found, please log in again"
+            _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
+        }
+    }
+
     private fun checkIfLinkUser(email: String) = viewModelScope.launch {
         if (email.isBlank()) {
             _message.value = "Please enter an email address"
@@ -216,7 +259,13 @@ internal class OnrampViewModel(
     }
 
     fun onBackToLoginSignup() {
-        _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
+        loadUserData()?.let {
+            _uiState.update {
+                OnrampUiState(email = it.email, authToken = it.authToken, screen = Screen.SeamlessSignIn)
+            }
+        } ?: run {
+            _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
+        }
     }
 
     fun clearMessage() {
@@ -305,6 +354,14 @@ internal class OnrampViewModel(
         when (result) {
             is OnrampAuthorizeResult.Consented -> {
                 _message.value = "Authorization successful! User consented to scopes."
+
+                viewModelScope.launch {
+                    testBackendRepository.saveUser(
+                        result.customerId,
+                        tokenWithLAI = _uiState.value.authToken!!
+                    )
+                }
+
                 _uiState.update {
                     it.copy(
                         screen = Screen.AuthenticatedOperations,
@@ -609,6 +666,9 @@ internal class OnrampViewModel(
                 val response = result.value
                 _uiState.update { it.copy(authToken = response.token) }
                 _message.value = "Auth intent created successfully"
+
+                saveUserData(OnrampUserData(_uiState.value.email, response.token))
+
                 return response.authIntentId
             }
             is Result.Failure -> {
@@ -626,6 +686,7 @@ internal class OnrampViewModel(
             when (result) {
                 is OnrampLogOutResult.Completed -> {
                     _message.value = "Successfully logged out"
+                    clearUserData()
                     _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
                 }
                 is OnrampLogOutResult.Failed -> {
@@ -634,6 +695,27 @@ internal class OnrampViewModel(
                 }
             }
         }
+    }
+
+    private val prefsName = "onramp_prefs"
+    private val userDataKey = "onramp_user_data"
+
+    private fun saveUserData(userData: OnrampUserData) {
+        val json = Json.encodeToString(userData)
+        getPrefs().edit { putString(userDataKey, json) }
+    }
+
+    private fun loadUserData(): OnrampUserData? {
+        val json = getPrefs().getString(userDataKey, null) ?: return null
+        return Json.decodeFromString(json)
+    }
+
+    private fun clearUserData() {
+        getPrefs().edit { remove(userDataKey) }
+    }
+
+    private fun getPrefs(): SharedPreferences {
+        return application.applicationContext.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
     }
 
     class Factory : ViewModelProvider.Factory {
@@ -663,6 +745,7 @@ data class OnrampUiState(
 )
 
 enum class Screen {
+    SeamlessSignIn,
     LoginSignup,
     Loading,
     Registration,
@@ -677,3 +760,9 @@ data class CheckoutEvent(
 )
 
 data class AuthorizeEvent(val linkAuthIntentId: String)
+
+@Serializable
+data class OnrampUserData(
+    val email: String,
+    val token: String
+)

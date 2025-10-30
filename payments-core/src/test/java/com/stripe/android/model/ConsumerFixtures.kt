@@ -116,7 +116,7 @@ object ConsumerFixtures {
                   "id": "wAAACGA",
                   "bank_account_details": {
                     "bank_icon_code": null,
-                    "bank_name": "STRIPE TEST BANK",
+                    "bank_account_name": "STRIPE TEST BANK ACCOUNT",
                     "last4": "6789"
                   },
                   "billing_address": {
@@ -148,7 +148,7 @@ object ConsumerFixtures {
                   "id": "wAAACGA",
                   "bank_account_details": {
                     "bank_icon_code": null,
-                    "bank_name": null,
+                    "bank_account_name": null,
                     "last4": "6789"
                   },
                   "billing_address": {
@@ -240,7 +240,7 @@ object ConsumerFixtures {
                   "id": "wAAACGA",
                   "bank_account_details": {
                     "bank_icon_code": null,
-                    "bank_name": "STRIPE TEST BANK",
+                    "bank_account_name": "STRIPE TEST BANK ACCOUNT",
                     "last4": "6789"
                   },
                   "billing_address": {
