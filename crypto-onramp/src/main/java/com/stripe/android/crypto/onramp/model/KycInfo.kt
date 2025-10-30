@@ -16,13 +16,14 @@ data class KycInfo(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Parcelize
 data class RefreshKycInfo(
     val firstName: String,
     val lastName: String,
     val idNumberLastFour: String?,
     val dateOfBirth: DateOfBirth,
     val address: PaymentSheet.Address
-)
+) : Parcelable
 
 @Serializable
 @Parcelize

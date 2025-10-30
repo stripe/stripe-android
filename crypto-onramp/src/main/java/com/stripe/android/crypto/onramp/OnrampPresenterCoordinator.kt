@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -39,6 +40,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 @OnrampPresenterScope
@@ -74,35 +76,35 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private val onrampActivityResultLauncher: ActivityResultLauncher<OnrampActivityContractArgs> =
         activity.registerForActivityResult(OnrampActivityContract()) { result ->
-            when (result.action) {
-                KycRefreshScreenAction.Cancelled -> {
+            when (val action = result.action) {
+                is KycRefreshScreenAction.Cancelled -> {
                     onrampCallbacks.verifyKycCallback.onResult(
                         OnrampVerifyKycInfoResult.Cancelled
                     )
                 }
-                KycRefreshScreenAction.Edit -> {
+                is KycRefreshScreenAction.Edit -> {
                     onrampCallbacks.verifyKycCallback.onResult(
                         OnrampVerifyKycInfoResult.UpdateAddress
                     )
                 }
-                KycRefreshScreenAction.Confirm -> {
+                is KycRefreshScreenAction.Confirm -> {
                     coroutineScope.launch {
                         val secret = consumerSessionClientSecret()
 
                         if (secret != null) {
-                            val result = cryptoApiRepository.refreshKycData(
-                                RefreshKycInfo(),
+                            val refreshResult = cryptoApiRepository.refreshKycData(
+                                action.info,
                                 secret
                             )
 
-                            if (result.success) {
+                            if (refreshResult.isSuccess) {
                                 onrampCallbacks.verifyKycCallback.onResult(
                                     OnrampVerifyKycInfoResult.Confirmed
                                 )
                             } else {
                                 onrampCallbacks.verifyKycCallback.onResult(
                                     OnrampVerifyKycInfoResult.Failed(
-                                        result.exceptionOrNull() ?: Exception("Unknown error")
+                                        refreshResult.exceptionOrNull() ?: Exception("Unknown error")
                                     )
                                 )
                             }
@@ -177,8 +179,11 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             consumerSessionClientSecret()?.let {
                 val result = cryptoApiRepository.retrieveKycInfo(it)
                 if (result.isSuccess) {
+                    val kycInfo = result.getOrThrow().copy(
+                        address = updatedAddress ?: result.getOrThrow().address
+                    )
                     onrampActivityResultLauncher.launch(
-                        OnrampActivityContractArgs(updatedAddress, result.getOrThrow(), appearance())
+                        OnrampActivityContractArgs(kycInfo, appearance())
                     )
                 } else {
                     onrampCallbacks.verifyKycCallback.onResult(
@@ -351,8 +356,7 @@ private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType =
 class KycFullScreenActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val address = intent.getParcelableExtra<PaymentSheet.Address>("updatedAddress")
-        val kycInfo = intent.getParcelableExtra<KycRetrieveResponse>("kycInfo")
+        val kycInfo = intent.getParcelableExtra<KycRetrieveResponse>("kycInfo")!!
         val linkAppearance = intent.getParcelableExtra<LinkAppearance>("linkAppearance")
         enableEdgeToEdge()
 
@@ -360,7 +364,6 @@ class KycFullScreenActivity : ComponentActivity() {
             KYCRefreshScreen(
                 linkAppearance,
                 kycInfo,
-                address,
                 onClose = {
                     setResult(RESULT_CANCELED, createIntent(KycRefreshScreenAction.Cancelled))
                     finish()
@@ -370,7 +373,15 @@ class KycFullScreenActivity : ComponentActivity() {
                     finish()
                 },
                 onConfirm = {
-                    setResult(RESULT_OK, createIntent(KycRefreshScreenAction.Confirm))
+                    val refreshInfo = RefreshKycInfo(
+                        firstName = kycInfo.firstName,
+                        lastName = kycInfo.lastName,
+                        idNumberLastFour = kycInfo.idNumberLastFour,
+                        dateOfBirth = kycInfo.dateOfBirth,
+                        address = kycInfo.address
+                    )
+
+                    setResult(RESULT_OK, createIntent(KycRefreshScreenAction.Confirm(refreshInfo)))
                     finish()
                 }
             )
@@ -378,19 +389,19 @@ class KycFullScreenActivity : ComponentActivity() {
     }
 
     private fun createIntent(action: KycRefreshScreenAction): Intent {
-        return Intent().apply { putExtra("action", action.name) }
+        return Intent().apply { putExtra("action", action) }
     }
 }
 data class OnrampActivityContractArgs(
-    val updatedAddress: PaymentSheet.Address?,
     val kycRetrieveResponse: KycRetrieveResponse,
     val linkAppearance: LinkAppearance?
 )
 
-enum class KycRefreshScreenAction {
-    Cancelled,
-    Edit,
-    Confirm
+@Parcelize
+sealed class KycRefreshScreenAction : Parcelable {
+    object Cancelled : KycRefreshScreenAction()
+    object Edit : KycRefreshScreenAction()
+    data class Confirm(val info: RefreshKycInfo) : KycRefreshScreenAction()
 }
 
 data class OnrampActivityContractResult(
@@ -400,15 +411,13 @@ data class OnrampActivityContractResult(
 class OnrampActivityContract : ActivityResultContract<OnrampActivityContractArgs, OnrampActivityContractResult>() {
     override fun createIntent(context: Context, input: OnrampActivityContractArgs): Intent {
         return Intent(context, KycFullScreenActivity::class.java).apply {
-            putExtra("updatedAddress", input.updatedAddress)
             putExtra("linkAppearance", input.linkAppearance)
             putExtra("kycInfo", input.kycRetrieveResponse)
         }
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): OnrampActivityContractResult {
-        val actionName = intent?.getStringExtra("action")
-        val action = KycRefreshScreenAction.entries.find { it.name == actionName } ?: KycRefreshScreenAction.Cancelled
+        val action = intent?.getParcelableExtra<KycRefreshScreenAction>("action") ?: KycRefreshScreenAction.Cancelled
 
         return OnrampActivityContractResult(action)
     }

@@ -54,16 +54,15 @@ import com.stripe.android.paymentsheet.ui.getLinkIcon
 @Suppress("LongMethod", "UnusedParameter")
 internal fun KYCRefreshScreen(
     appearance: LinkAppearance?,
-    kycInfo: KycRetrieveResponse?,
-    updatedAddress: PaymentSheet.Address? = null,
+    kycInfo: KycRetrieveResponse,
     onClose: () -> Unit,
     onEdit: () -> Unit,
     onConfirm: () -> Unit
 ) {
-    val name = kycInfo?.firstName + kycInfo?.lastName
-    val dob = "${kycInfo?.dateOfBirth?.month}/${kycInfo?.dateOfBirth?.day}/${kycInfo?.dateOfBirth?.year}"
-    val ssnLast4 = kycInfo?.idNumberLastFour ?: ""
-    val address = updatedAddress?.formattedAddress() ?: kycInfo?.address?.formattedAddress() ?: ""
+    val name = kycInfo.firstName + kycInfo.lastName
+    val dob = "${kycInfo.dateOfBirth.month}/${kycInfo.dateOfBirth.day}/${kycInfo.dateOfBirth.year}"
+    val ssnLast4 = kycInfo.idNumberLastFour ?: ""
+    val address = kycInfo.address.formattedAddress()
 
     OnrampTheme(appearance) {
         Box(
