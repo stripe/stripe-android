@@ -96,11 +96,40 @@ internal class OnrampInteractor @Inject constructor(
             val result = linkController.authenticateWithToken(linkAuthTokenClientSecret)
         ) {
             is LinkController.AuthenticateWithTokenResult.Success -> {
-                analyticsService?.track(
-                    OnrampAnalyticsEvent.LinkUserAuthenticationWithTokenCompleted
-                )
+                val secret = consumerSessionClientSecret()
+                if (secret != null) {
+                    cryptoApiRepository.createCryptoCustomer(consumerSessionClientSecret = secret)
+                        .fold(
+                            onSuccess = { customerResponse ->
+                                _state.update { it.copy(cryptoCustomerId = customerResponse.id) }
 
-                OnrampTokenAuthenticationResult.Completed
+                                analyticsService?.track(
+                                    OnrampAnalyticsEvent.LinkUserAuthenticationWithTokenCompleted
+                                )
+
+                                OnrampTokenAuthenticationResult.Completed
+                            },
+                            onFailure = { error ->
+                                analyticsService?.track(
+                                    OnrampAnalyticsEvent.ErrorOccurred(
+                                        OnrampAnalyticsEvent.ErrorOccurred.Operation.AuthenticateUserWithAuthToken,
+                                        error,
+                                    )
+                                )
+
+                                OnrampTokenAuthenticationResult.Failed(error)
+                            }
+                        )
+                } else {
+                    val error = MissingConsumerSecretException()
+                    analyticsService?.track(
+                        OnrampAnalyticsEvent.ErrorOccurred(
+                            operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AuthenticateUserWithAuthToken,
+                            error = error,
+                        )
+                    )
+                    OnrampTokenAuthenticationResult.Failed(error)
+                }
             }
             is LinkController.AuthenticateWithTokenResult.Failed -> {
                 analyticsService?.track(
