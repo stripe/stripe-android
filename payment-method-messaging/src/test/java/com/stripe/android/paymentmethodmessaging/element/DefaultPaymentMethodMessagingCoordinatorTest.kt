@@ -14,7 +14,8 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
 
     private val repository: StripeRepository = FakeStripeRepository()
     private val paymentConfig = PaymentConfiguration(publishableKey = "key")
-    private val coordinator = DefaultPaymentMethodMessagingCoordinator(repository, paymentConfig)
+    private val launcher = DefaultLearnMoreActivityLauncher()
+    private val coordinator = DefaultPaymentMethodMessagingCoordinator(repository, paymentConfig, launcher)
 
     @Test
     fun `configure returns no content if single and multi partner null`() = runTest {

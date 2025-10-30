@@ -26,6 +26,7 @@ dependencies {
     implementation project(":payments-ui-core")
     implementation project(":stripe-ui-core")
     implementation libs.androidx.annotation
+    implementation libs.androidx.appCompat
     implementation libs.androidx.browser
     implementation libs.compose.foundation
     implementation libs.compose.material
@@ -49,10 +50,15 @@ dependencies {
     testImplementation testLibs.kotlin.coroutines
     testImplementation testLibs.kotlin.junit
     testImplementation testLibs.turbine
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.espresso.intents
+    testImplementation testLibs.hamcrest
 
     testImplementation testLibs.mockito.core
     testImplementation testLibs.mockito.inline
     testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.kotlin.coroutines
 
     androidTestUtil testLibs.testOrchestrator
 }
