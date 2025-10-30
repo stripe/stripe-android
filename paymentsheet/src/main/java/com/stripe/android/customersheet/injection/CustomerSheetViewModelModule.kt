@@ -167,7 +167,6 @@ internal interface CustomerSheetViewModelModule {
         fun savedPaymentSelection(): PaymentSelection? = savedPaymentSelection
 
         @Provides
-        @CustomerSheetViewModelScope
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
         }
