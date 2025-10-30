@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.29.2 - 2025-10-30
+
 ### PaymentSheet
 * [REMOVED][11841](https://github.com/stripe/stripe-android/pull/11841) Removed shipping address requirement to display Affirm in Payment Element
 
