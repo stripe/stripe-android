@@ -33,7 +33,6 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,6 +45,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.crypto.onramp.R
+import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ui.getLinkIcon
@@ -54,15 +54,16 @@ import com.stripe.android.paymentsheet.ui.getLinkIcon
 @Suppress("LongMethod", "UnusedParameter")
 internal fun KYCRefreshScreen(
     appearance: LinkAppearance?,
+    kycInfo: KycRetrieveResponse?,
     updatedAddress: PaymentSheet.Address? = null,
     onClose: () -> Unit,
     onEdit: () -> Unit,
     onConfirm: () -> Unit
 ) {
-    var name by remember { mutableStateOf("Satoshi Nakamoto") }
-    var dob by remember { mutableStateOf("10/06/1995") }
-    var ssnLast4 by remember { mutableStateOf("5678") }
-    var address by remember { mutableStateOf("2930 E 2nd Ave, Denver, CO, United States of America, 80206") }
+    val name = kycInfo?.firstName + kycInfo?.lastName
+    val dob = "${kycInfo?.dateOfBirth?.month}/${kycInfo?.dateOfBirth?.day}/${kycInfo?.dateOfBirth?.year}"
+    val ssnLast4 = kycInfo?.idNumberLastFour ?: ""
+    val address = updatedAddress?.formattedAddress() ?: kycInfo?.address?.formattedAddress() ?: ""
 
     OnrampTheme(appearance) {
         Box(
@@ -133,7 +134,7 @@ internal fun KYCRefreshScreen(
 }
 
 @Composable
-fun TopNavigationBar(
+private fun TopNavigationBar(
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -252,6 +253,20 @@ fun OnrampTheme(
             content()
         }
     }
+}
+
+private fun PaymentSheet.Address.formattedAddress(): String {
+    return listOf(
+        line1,
+        line2,
+        city,
+        state,
+        country,
+        postalCode
+    )
+        .map { it?.trim() }
+        .filter { !it.isNullOrEmpty() }
+        .joinToString(", ")
 }
 
 private fun Context.withUiMode(uiMode: Int, inspectionMode: Boolean): Context {
