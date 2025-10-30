@@ -1,15 +1,19 @@
 package com.stripe.android.paymentmethodmessaging.example
 
 import android.app.Application
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElement
+import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElement.Appearance.Theme
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElementPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @OptIn(PaymentMethodMessagingElementPreview::class)
@@ -17,12 +21,15 @@ internal class MessagingElementViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
 
-    val paymentMethodMessagingElement = PaymentMethodMessagingElement.create(getApplication())
+    var paymentMethodMessagingElement = PaymentMethodMessagingElement.create(getApplication())
     private val _configureResult = MutableStateFlow<PaymentMethodMessagingElement.ConfigureResult?>(null)
     val configureResult: StateFlow<PaymentMethodMessagingElement.ConfigureResult?> = _configureResult.asStateFlow()
 
     private val _config = MutableStateFlow(Config())
     val config: StateFlow<Config> = _config.asStateFlow()
+
+    private val _appearanceSettings = MutableStateFlow(AppearanceSettings())
+    val appearanceSetting: StateFlow<AppearanceSettings> = _appearanceSettings
 
     private val settings = Settings(getApplication())
 
@@ -49,14 +56,22 @@ internal class MessagingElementViewModel(
         _config.value = config
     }
 
+    fun updateAppearance(appearanceSettings: AppearanceSettings) {
+        _appearanceSettings.value = appearanceSettings
+    }
+
     private fun initPaymentConfig() {
-        val pk = _config.value.publishableKey.ifBlank {
-            settings.publishableKey
+        if (_config.value.publishableKey != settings.publishableKey
+            || _config.value.stripeAccountId != settings.stripeAccountId) {
+            val pk = _config.value.publishableKey.ifBlank {
+                settings.publishableKey
+            }
+            val accountId = _config.value.stripeAccountId?.ifBlank {
+                settings.stripeAccountId
+            }
+            paymentMethodMessagingElement = PaymentMethodMessagingElement.create(getApplication())
+            PaymentConfiguration.init(getApplication(), pk, accountId)
         }
-        val accountId = _config.value.stripeAccountId?.ifBlank {
-            settings.stripeAccountId
-        }
-        PaymentConfiguration.init(getApplication(), pk, accountId)
     }
 
     data class Config(
@@ -67,5 +82,44 @@ internal class MessagingElementViewModel(
         val paymentMethods: List<String> = listOf("affirm", "klarna", "afterpay_clearpay"),
         val publishableKey: String = "",
         val stripeAccountId: String? = ""
+    )
+
+    data class AppearanceSettings(
+        val fontSettings: FontSettings = FontSettings(),
+        val colorsSettings: ColorsSettings = ColorsSettings(),
+        val themeSettings: Theme = Theme.LIGHT
+    ) {
+        fun toAppearance(): PaymentMethodMessagingElement.Appearance {
+            val font = PaymentMethodMessagingElement.Appearance.Font()
+                .fontSizeSp(fontSettings.fontSize)
+                .fontFamily(fontSettings.fontFamily)
+                .letterSpacingSp(fontSettings.letterSpacing)
+                .fontWeight(fontSettings.fontWeight)
+            val colors = PaymentMethodMessagingElement.Appearance.Colors()
+                .textColor(colorsSettings.textColor.color.toArgb())
+                .infoIconColor(colorsSettings.iconColor.color.toArgb())
+            return PaymentMethodMessagingElement.Appearance()
+                .font(font)
+                .colors(colors)
+                .theme(themeSettings)
+        }
+    }
+
+    data class ColorsSettings(
+        val iconColor: ColorInfo = ColorInfo(Color.Black, "Black"),
+        val textColor: ColorInfo = ColorInfo(Color.Black, "Black")
+    )
+
+    data class ColorInfo(
+        val color: Color,
+        val name: String
+    )
+
+    data class FontSettings(
+        val fontFamily: Int? = null,
+        val fontSize: Float? = null,
+        val fontWeight: Int? = null,
+        val letterSpacing: Float? = null,
+        val label: String = "Normal"
     )
 }
