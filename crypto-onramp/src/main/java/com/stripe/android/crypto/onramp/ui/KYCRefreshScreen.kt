@@ -13,10 +13,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
@@ -30,7 +29,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.darkColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -47,15 +45,19 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stripe.android.crypto.onramp.R
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ui.getLinkIcon
 
 @Composable
+@Suppress("LongMethod", "UnusedParameter")
 internal fun KYCRefreshScreen(
     appearance: LinkAppearance?,
     updatedAddress: PaymentSheet.Address? = null,
-    onClose: () -> Unit = { }
+    onClose: () -> Unit,
+    onEdit: () -> Unit,
+    onConfirm: () -> Unit
 ) {
     var name by remember { mutableStateOf("Satoshi Nakamoto") }
     var dob by remember { mutableStateOf("10/06/1995") }
@@ -97,17 +99,20 @@ internal fun KYCRefreshScreen(
                         Divider()
                         InfoRow(title = "Address", value = address, icon = {
                             Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit Address"
+                                painter = painterResource(id = R.drawable.stripe_ic_kyc_verify_edit),
+                                contentDescription = "Edit Address",
+                                modifier = Modifier
+                                    .height(18.dp)
+                                    .width(18.dp)
                             )
-                        }, onIconTap = { /* Handle edit action */ })
+                        }, onIconTap = onEdit)
                     }
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
 
                 Button(
-                    onClick = { /* Handle confirm action */ },
+                    onClick = onConfirm,
                     shape = RoundedCornerShape(appearance?.primaryButton?.cornerRadiusDp?.dp ?: 16.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = MaterialTheme.colors.primary,

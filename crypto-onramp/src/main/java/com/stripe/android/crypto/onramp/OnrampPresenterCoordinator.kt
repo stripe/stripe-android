@@ -293,7 +293,13 @@ class KycFullScreenActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            KYCRefreshScreen(linkAppearance, address, onClose = { finish() })
+            KYCRefreshScreen(
+                linkAppearance,
+                address,
+                onClose = { finish() },
+                onEdit = { },
+                onConfirm = { }
+            )
         }
     }
 }
