@@ -23,13 +23,16 @@ internal data class LearnMoreActivityArgs(
             }
         }
 
-        fun addThemeQueryParam(url: String, theme: PaymentMethodMessagingElement.Appearance.Theme): String {
+        fun argsFromUrlAndTheme(
+            url: String,
+            theme: PaymentMethodMessagingElement.Appearance.Theme
+        ): LearnMoreActivityArgs {
             val themeParam = when (theme) {
                 PaymentMethodMessagingElement.Appearance.Theme.LIGHT -> "&theme=stripe"
                 PaymentMethodMessagingElement.Appearance.Theme.DARK -> "&theme=night"
                 PaymentMethodMessagingElement.Appearance.Theme.FLAT -> "&theme=flat"
             }
-            return url + themeParam
+            return LearnMoreActivityArgs(url + themeParam)
         }
     }
 }

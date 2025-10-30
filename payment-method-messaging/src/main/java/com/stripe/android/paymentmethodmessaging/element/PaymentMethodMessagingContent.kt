@@ -52,27 +52,20 @@ internal sealed class PaymentMethodMessagingContent {
     abstract fun Content(appearance: PaymentMethodMessagingElement.Appearance.State)
 
     class SinglePartner(
-        private val message: PaymentMethodMessageSinglePartner,
-        private val onClick:
-        (context: Context, learnMoreUrl: String, theme: PaymentMethodMessagingElement.Appearance.Theme) -> Unit
+        private val message: PaymentMethodMessageSinglePartner
     ) : PaymentMethodMessagingContent() {
         @Composable
         override fun Content(appearance: PaymentMethodMessagingElement.Appearance.State) {
-            SinglePartner(message, appearance, onClick)
+            SinglePartner(message, appearance)
         }
     }
 
     class MultiPartner(
         private val message: PaymentMethodMessageMultiPartner,
-        private val onClick: (
-            context: Context,
-            learnMoreUrl: String,
-            theme: PaymentMethodMessagingElement.Appearance.Theme
-        ) -> Unit
     ) : PaymentMethodMessagingContent() {
         @Composable
         override fun Content(appearance: PaymentMethodMessagingElement.Appearance.State) {
-            MultiPartner(message, appearance, onClick)
+            MultiPartner(message, appearance)
         }
     }
 
@@ -86,14 +79,13 @@ internal sealed class PaymentMethodMessagingContent {
     companion object {
         fun get(
             message: PaymentMethodMessage,
-            onClick: (Context, String, PaymentMethodMessagingElement.Appearance.Theme) -> Unit
         ): PaymentMethodMessagingContent {
             val singlePartnerMessage = message.singlePartner
             val multiPartnerMessage = message.multiPartner
             return if (singlePartnerMessage != null) {
-                SinglePartner(singlePartnerMessage, onClick)
+                SinglePartner(singlePartnerMessage)
             } else if (multiPartnerMessage != null) {
-                MultiPartner(multiPartnerMessage, onClick)
+                MultiPartner(multiPartnerMessage)
             } else {
                 NoContent
             }
@@ -104,8 +96,7 @@ internal sealed class PaymentMethodMessagingContent {
 @Composable
 private fun SinglePartner(
     message: PaymentMethodMessageSinglePartner,
-    appearance: PaymentMethodMessagingElement.Appearance.State,
-    onClick: (Context, String, PaymentMethodMessagingElement.Appearance.Theme) -> Unit
+    appearance: PaymentMethodMessagingElement.Appearance.State
 ) {
     val image = when (appearance.theme) {
         PaymentMethodMessagingElement.Appearance.Theme.LIGHT -> message.lightImage
@@ -119,7 +110,7 @@ private fun SinglePartner(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.clickable {
             scope.launch { keyboardController.dismiss() }
-            onClick(context, message.learnMore.url, appearance.theme)
+            launchLearnMore(context, message.learnMore.url, appearance.theme)
         }
     ) {
         TextWithLogo(
@@ -133,8 +124,7 @@ private fun SinglePartner(
 @Composable
 private fun MultiPartner(
     message: PaymentMethodMessageMultiPartner,
-    appearance: PaymentMethodMessagingElement.Appearance.State,
-    onClick: (Context, String, PaymentMethodMessagingElement.Appearance.Theme) -> Unit
+    appearance: PaymentMethodMessagingElement.Appearance.State
 ) {
     val style = appearance.font?.toTextStyle()
         ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Normal)
@@ -146,7 +136,7 @@ private fun MultiPartner(
     Column(
         modifier = Modifier.clickable {
             scope.launch { keyboardController.dismiss() }
-            onClick(context, message.learnMore.url, appearance.theme)
+            launchLearnMore(context, message.learnMore.url, appearance.theme)
         }
     ) {
         Images(getImages(message, appearance.theme), appearance)
@@ -169,6 +159,15 @@ private fun MultiPartner(
             )
         }
     }
+}
+
+private fun launchLearnMore(
+    context: Context,
+    learnMoreUrl: String,
+    theme: PaymentMethodMessagingElement.Appearance.Theme
+) {
+    val args = LearnMoreActivityArgs.argsFromUrlAndTheme(learnMoreUrl, theme)
+    context.startActivity(LearnMoreActivityArgs.createIntent(context, args))
 }
 
 @Composable

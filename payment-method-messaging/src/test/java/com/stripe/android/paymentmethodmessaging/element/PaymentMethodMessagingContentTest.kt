@@ -91,7 +91,6 @@ internal class PaymentMethodMessagingContentTest {
         val coordinator = DefaultPaymentMethodMessagingCoordinator(
             stripeRepository = FakeStripeRepository(),
             paymentConfiguration = PaymentConfiguration("key"),
-            learnMoreActivityLauncher = DefaultLearnMoreActivityLauncher()
         )
 
         Scenario(

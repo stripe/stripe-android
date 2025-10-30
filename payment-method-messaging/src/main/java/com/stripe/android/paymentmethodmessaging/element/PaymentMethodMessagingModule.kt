@@ -56,8 +56,5 @@ internal interface PaymentMethodMessagingModule {
         fun paymentConfiguration(application: Application): PaymentConfiguration {
             return PaymentConfiguration.getInstance(application)
         }
-
-        @Provides
-        fun providesLearnMoreActivityLauncher(): LearnMoreActivityLauncher = DefaultLearnMoreActivityLauncher()
     }
 }
