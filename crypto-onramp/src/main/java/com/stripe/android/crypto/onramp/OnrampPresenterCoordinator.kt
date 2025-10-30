@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.lifecycle.LifecycleOwner
@@ -24,6 +25,7 @@ import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.ui.KYCRefreshScreen
 import com.stripe.android.identity.IdentityVerificationSheet
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.model.PaymentIntent
@@ -34,7 +36,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.stripe.android.link.LinkAppearance
 
 @OnrampPresenterScope
 internal class OnrampPresenterCoordinator @Inject constructor(
@@ -289,6 +290,7 @@ class KycFullScreenActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val address = intent.getParcelableExtra<PaymentSheet.Address>("updatedAddress")
         val linkAppearance = intent.getParcelableExtra<LinkAppearance>("linkAppearance")
+        enableEdgeToEdge()
 
         setContent {
             KYCRefreshScreen(linkAppearance, address)

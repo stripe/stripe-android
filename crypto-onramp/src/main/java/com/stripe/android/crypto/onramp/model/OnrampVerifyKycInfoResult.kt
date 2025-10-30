@@ -18,7 +18,7 @@ sealed interface OnrampVerifyKycInfoResult {
     /**
      * The user indicated they need to update their address.
      */
-    data object UpdateAddress: OnrampVerifyKycInfoResult
+    data object UpdateAddress : OnrampVerifyKycInfoResult
 
     /**
      * The Kyc verification was cancelled.

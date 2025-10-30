@@ -4,50 +4,50 @@ import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
 import androidx.appcompat.view.ContextThemeWrapper
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.background
-import androidx.compose.material.Divider
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import com.stripe.android.link.LinkAppearance
-import com.stripe.android.paymentsheet.PaymentSheet
-import androidx.compose.material.Card
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.Icon
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Card
+import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.darkColors
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.lightColors
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.stripe.android.link.LinkAppearance
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ui.getLinkIcon
 
 @Composable
@@ -66,7 +66,7 @@ internal fun KYCRefreshScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colors.background)
         ) {
-            Column( modifier = Modifier.padding(24.dp)) {
+            Column(modifier = Modifier.padding(24.dp)) {
                 TopNavigationBar(
                     onClose = { /* Handle close action */ }
                 )
@@ -163,7 +163,12 @@ fun TopNavigationBar(
 }
 
 @Composable
-private fun InfoRow(title: String, value: String, icon: (@Composable () -> Unit)? = null, onIconTap: (() -> Unit)? = null) {
+private fun InfoRow(
+    title: String,
+    value: String,
+    icon: (@Composable () -> Unit)? = null,
+    onIconTap: (() -> Unit)? = null
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -235,14 +240,13 @@ fun OnrampTheme(
             content()
         }
     }
-
 }
 
-//@Composable
-//internal fun DefaultLinkTheme(
+// @Composable
+// internal fun DefaultLinkTheme(
 //    appearance: LinkAppearance? = LocalLinkAppearance.current,
 //    content: @Composable () -> Unit
-//) {
+// ) {
 //    val stripeImageLoader = runCatching { LocalStripeImageLoader.current }
 //        .getOrElse { StripeImageLoader(LocalContext.current) }
 //    val isDark = when (appearance?.style) {
@@ -304,7 +308,7 @@ fun OnrampTheme(
 //            content = content
 //        )
 //    }
-//}
+// }
 
 private fun Context.withUiMode(uiMode: Int, inspectionMode: Boolean): Context {
     if (uiMode == this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
