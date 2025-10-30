@@ -2523,7 +2523,10 @@ internal class StripeApiRepositoryTest {
                 currency = "usd",
                 country = "us",
                 locale = Locale.getDefault().toLanguageTag(),
-                requestOptions = DEFAULT_OPTIONS
+                requestOptions = ApiRequest.Options(
+                    apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                    stripeAccount = "accountId"
+                )
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -2542,6 +2545,7 @@ internal class StripeApiRepositoryTest {
                 assertThat(this["country"]).isEqualTo("us")
                 assertThat(this["locale"]).isEqualTo("en-US")
                 assertThat(this["key"]).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+                assertThat(this["_stripe_account"]).isEqualTo("accountId")
             }
         }
 
