@@ -69,7 +69,11 @@ internal fun KYCRefreshScreen(
                 .background(MaterialTheme.colors.background)
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
-                TopNavigationBar(onClose = onClose)
+                TopNavigationBar(
+                    onClose = onClose,
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                )
 
                 Text(
                     text = "Confirm your information",
