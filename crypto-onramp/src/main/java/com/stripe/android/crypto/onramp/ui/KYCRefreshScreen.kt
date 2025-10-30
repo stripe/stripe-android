@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -53,7 +54,8 @@ import com.stripe.android.paymentsheet.ui.getLinkIcon
 @Composable
 internal fun KYCRefreshScreen(
     appearance: LinkAppearance?,
-    updatedAddress: PaymentSheet.Address? = null
+    updatedAddress: PaymentSheet.Address? = null,
+    onClose: () -> Unit = { }
 ) {
     var name by remember { mutableStateOf("Satoshi Nakamoto") }
     var dob by remember { mutableStateOf("10/06/1995") }
@@ -67,9 +69,7 @@ internal fun KYCRefreshScreen(
                 .background(MaterialTheme.colors.background)
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
-                TopNavigationBar(
-                    onClose = { /* Handle close action */ }
-                )
+                TopNavigationBar(onClose = onClose)
 
                 Text(
                     text = "Confirm your information",
@@ -113,7 +113,10 @@ internal fun KYCRefreshScreen(
                         .fillMaxWidth()
                         .height(appearance?.primaryButton?.heightDp?.dp ?: 56.dp)
                 ) {
-                    Text("Confirm")
+                    Text(
+                        "Confirm",
+                        style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.SemiBold)
+                    )
                 }
             }
         }
@@ -128,7 +131,7 @@ fun TopNavigationBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 8.dp),
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -136,8 +139,8 @@ fun TopNavigationBar(
             contentDescription = "Link",
             tint = Color.Unspecified,
             modifier = Modifier
-                .height(56.dp)
-                .wrapContentWidth()
+                .height(72.dp)
+                .width(88.dp)
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -179,7 +182,7 @@ private fun InfoRow(
             Text(
                 text = title,
                 style = MaterialTheme.typography.subtitle2,
-                color = MaterialTheme.colors.onBackground
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
             )
             Text(
                 text = value,
@@ -241,74 +244,6 @@ fun OnrampTheme(
         }
     }
 }
-
-// @Composable
-// internal fun DefaultLinkTheme(
-//    appearance: LinkAppearance? = LocalLinkAppearance.current,
-//    content: @Composable () -> Unit
-// ) {
-//    val stripeImageLoader = runCatching { LocalStripeImageLoader.current }
-//        .getOrElse { StripeImageLoader(LocalContext.current) }
-//    val isDark = when (appearance?.style) {
-//        LinkAppearance.Style.ALWAYS_LIGHT -> false
-//        LinkAppearance.Style.ALWAYS_DARK -> true
-//        LinkAppearance.Style.AUTOMATIC, null -> isSystemInDarkTheme()
-//    }
-//
-//    // Colors
-//    val defaultColors = LinkThemeConfig.colors(isDark)
-//    val resolvedColors = appearance
-//        ?.let {
-//            val overrides = if (isDark) it.darkColors else it.lightColors
-//            defaultColors.copy(
-//                textBrand = overrides.primary,
-//                onButtonBrand = overrides.contentOnPrimary,
-//                buttonBrand = overrides.primary,
-//                borderSelected = overrides.borderSelected
-//            )
-//        }
-//        ?: defaultColors
-//
-//    // Shapes
-//    val defaultLinkShapes = LinkShapes()
-//    val linkShapes = appearance
-//        ?.let {
-//            defaultLinkShapes.copy(
-//                primaryButton = it.primaryButton.cornerRadiusDp
-//                    ?.let { radius -> RoundedCornerShape(radius.dp) }
-//                    ?: defaultLinkShapes.primaryButton,
-//                primaryButtonHeight = it.primaryButton.heightDp?.dp
-//                    ?: defaultLinkShapes.primaryButtonHeight,
-//            )
-//        }
-//        ?: defaultLinkShapes
-//
-//    // Set context configuration so the correct resources are loaded.
-//    val baseContext = LocalContext.current
-//    val inspectionMode = LocalInspectionMode.current
-//    val styleContext = remember(baseContext, isDark, inspectionMode) {
-//        val uiMode =
-//            if (isDark) {
-//                Configuration.UI_MODE_NIGHT_YES
-//            } else {
-//                Configuration.UI_MODE_NIGHT_NO
-//            }
-//        baseContext.withUiMode(uiMode, inspectionMode)
-//    }
-//
-//    CompositionLocalProvider(
-//        LocalContext provides styleContext,
-//        LocalLinkColors provides resolvedColors,
-//        LocalLinkTypography provides linkTypography,
-//        LocalLinkShapes provides linkShapes,
-//        LocalStripeImageLoader provides stripeImageLoader,
-//    ) {
-//        MaterialTheme(
-//            colors = debugColors(),
-//            content = content
-//        )
-//    }
-// }
 
 private fun Context.withUiMode(uiMode: Int, inspectionMode: Boolean): Context {
     if (uiMode == this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
