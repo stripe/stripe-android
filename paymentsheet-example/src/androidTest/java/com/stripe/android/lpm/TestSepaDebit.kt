@@ -96,7 +96,7 @@ internal class TestSepaDebit : BasePlaygroundTest() {
         )
 
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
@@ -124,7 +124,7 @@ internal class TestSepaDebit : BasePlaygroundTest() {
         }
 
         testDriver.confirmCustomWithDefaultSavedPaymentMethod(
-            customerId = playgroundState?.asPaymentState()?.customerConfig?.id,
+            customerId = playgroundState?.customerId(),
             testParameters = testParameters,
             afterBuyAction = {
                 ComposeButton(rules.compose, hasTestTag("SEPA_MANDATE_CONTINUE_BUTTON"))
@@ -149,7 +149,7 @@ internal class TestSepaDebit : BasePlaygroundTest() {
         }
 
         testDriver.confirmCustomWithDefaultSavedPaymentMethod(
-            customerId = playgroundState?.asPaymentState()?.customerConfig?.id,
+            customerId = playgroundState?.customerId(),
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.multiStepSelect.click()
