@@ -77,7 +77,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                     ConsumerPaymentDetails.BankAccount(
                         id = "wAAACGA",
                         last4 = "6789",
-                        bankName = "STRIPE TEST BANK",
+                        bankAccountName = "STRIPE TEST BANK ACCOUNT",
                         bankIconCode = null,
                         isDefault = true,
                         nickname = null,
@@ -107,7 +107,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                     ConsumerPaymentDetails.BankAccount(
                         id = "wAAACGA",
                         last4 = "6789",
-                        bankName = null,
+                        bankAccountName = null,
                         bankIconCode = null,
                         isDefault = false,
                         nickname = null,
@@ -180,7 +180,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                     ConsumerPaymentDetails.BankAccount(
                         id = "wAAACGA",
                         last4 = "6789",
-                        bankName = "STRIPE TEST BANK",
+                        bankAccountName = "STRIPE TEST BANK ACCOUNT",
                         bankIconCode = null,
                         isDefault = false,
                         nickname = null,

@@ -246,7 +246,7 @@ class RealCreateInstantDebitsResultTest {
             paymentDetails = listOf(
                 ConsumerPaymentDetails.BankAccount(
                     id = "ba_1234",
-                    bankName = "Stripe Bank",
+                    bankAccountName = "Stripe Bank Account",
                     last4 = "4242",
                     bankIconCode = null,
                     isDefault = false,

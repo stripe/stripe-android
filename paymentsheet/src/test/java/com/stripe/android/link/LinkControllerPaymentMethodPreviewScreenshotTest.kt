@@ -34,13 +34,13 @@ class LinkControllerPaymentMethodPreviewScreenshotTest {
                 TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
                     .copy(brand = CardBrand.MasterCard),
                 TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
-                    .copy(bankName = "Chase"),
+                    .copy(bankAccountName = "Chase Checking Account"),
                 TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
-                    .copy(bankName = "Bank of America"),
+                    .copy(bankAccountName = "Bank of America Checking Account"),
                 TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
-                    .copy(bankName = null, bankIconCode = "pnc"),
+                    .copy(bankAccountName = null, bankIconCode = "pnc"),
                 TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
-                    .copy(bankName = "Foobar"),
+                    .copy(bankAccountName = "Foobar Savings Account"),
                 // Should never be passthrough.
                 TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
             )

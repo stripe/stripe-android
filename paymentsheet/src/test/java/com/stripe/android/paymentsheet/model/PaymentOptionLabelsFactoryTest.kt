@@ -162,7 +162,7 @@ class PaymentOptionLabelsFactoryTest {
         )
 
         assertThat(labels.label).isEqualTo("Link")
-        assertThat(labels.sublabel).isEqualTo("Stripe Test Bank •••• 4242")
+        assertThat(labels.sublabel).isEqualTo("Stripe Test Bank Account •••• 4242")
     }
 
     @Test

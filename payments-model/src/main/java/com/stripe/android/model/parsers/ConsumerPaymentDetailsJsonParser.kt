@@ -17,7 +17,7 @@ private const val FIELD_CARD_DETAILS = "card_details"
 private const val FIELD_CARD_LAST_4 = "last4"
 private const val FIELD_BANK_ACCOUNT_DETAILS = "bank_account_details"
 private const val FIELD_BANK_ACCOUNT_LAST_4 = "last4"
-private const val FIELD_BANK_ACCOUNT_BANK_NAME = "bank_name"
+private const val FIELD_BANK_ACCOUNT_BANK_ACCOUNT_NAME = "bank_account_name"
 
 private const val FIELD_BILLING_ADDRESS = "billing_address"
 private const val FIELD_BILLING_EMAIL_ADDRESS = "billing_email_address"
@@ -90,7 +90,7 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
                     ConsumerPaymentDetails.BankAccount(
                         id = id,
                         last4 = bankAccountDetails.getString(FIELD_BANK_ACCOUNT_LAST_4),
-                        bankName = optString(bankAccountDetails, FIELD_BANK_ACCOUNT_BANK_NAME),
+                        bankAccountName = optString(bankAccountDetails, FIELD_BANK_ACCOUNT_BANK_ACCOUNT_NAME),
                         bankIconCode = optString(bankAccountDetails, FIELD_BANK_ACCOUNT_BANK_ICON_CODE),
                         isDefault = isDefault,
                         nickname = nickname,
