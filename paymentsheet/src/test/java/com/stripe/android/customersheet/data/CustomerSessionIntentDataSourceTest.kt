@@ -4,11 +4,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.utils.FakeCustomerSessionProvider
 import com.stripe.android.isInstanceOf
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
-@OptIn(ExperimentalCustomerSessionApi::class)
 class CustomerSessionIntentDataSourceTest {
     @Test
     fun `on can create setup intents, should return true`() {
