@@ -3108,7 +3108,7 @@ class PaymentSheet internal constructor(
         internal val currencyCode: String? = null,
         internal val amount: Long? = null,
         internal val label: String? = null,
-        internal val buttonType: ButtonType = ButtonType.Pay
+        internal val buttonType: ButtonType = ButtonType.Pay,
         internal val additionalEnabledNetworks: List<String> = emptyList()
     ) : Parcelable {
 
