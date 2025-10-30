@@ -22,7 +22,7 @@ internal class LearnMoreActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val termsArgs = args
-        if (termsArgs == null) {
+        if (termsArgs == null || termsArgs.learnMoreUrl.isBlank()) {
             finish()
             return
         }

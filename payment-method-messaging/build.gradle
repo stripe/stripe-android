@@ -61,6 +61,14 @@ dependencies {
     testImplementation testLibs.kotlin.coroutines
 
     androidTestUtil testLibs.testOrchestrator
+
+    androidTestImplementation testLibs.androidx.junit
+    androidTestImplementation testLibs.androidx.junitKtx
+    androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation testLibs.espresso.intents
+    androidTestImplementation testLibs.espresso.web
+    androidTestImplementation testLibs.truth
 }
 
 ext {
