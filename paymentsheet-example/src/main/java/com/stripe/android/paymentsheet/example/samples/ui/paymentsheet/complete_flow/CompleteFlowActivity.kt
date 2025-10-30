@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.material.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -72,7 +73,12 @@ internal class CompleteFlowActivity : AppCompatActivity() {
                         ),
                     isLoading = uiState.isProcessing,
                     cartState = uiState.cartState,
+                    isEditable = true,
+                    onQuantityChanged = viewModel::updateQuantity
                 ) {
+                    Text("More ways to pay!")
+                    // TODO: Add PMME Content here
+
                     BuyButton(
                         buyButtonEnabled = !uiState.isProcessing,
                         onClick = viewModel::checkout,

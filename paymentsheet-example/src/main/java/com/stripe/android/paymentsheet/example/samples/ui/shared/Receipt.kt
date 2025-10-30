@@ -101,8 +101,6 @@ fun Receipt(
                     .fillMaxWidth(1f)
                     .padding(vertical = PADDING)
             ) {
-                ReceiptRow(stringResource(R.string.subtotal), cartState.formattedSubtotal)
-                ReceiptRow(stringResource(R.string.sales_tax), cartState.formattedTax)
                 Divider(
                     modifier = Modifier
                         .fillMaxWidth()
