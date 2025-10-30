@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [REMOVED][11841](https://github.com/stripe/stripe-android/pull/11841) Removed shipping address requirement to display Affirm in Payment Element
+
 ## 21.29.1 - 2025-10-28
 * [ADDED][11735](https://github.com/stripe/stripe-android/pull/11735) Added email typo detection and one-tap correction during the Link signup flow
 
