@@ -1,13 +1,118 @@
 # Migration Guide
 
-## Migrating from versions < 25.0.0
+## Migrating from versions < 22.0.0
+SDK v22 introduces breaking changes organized into four categories:
+
+### 1. Deprecated and Removed Features
+Features that are deprecated at Stripe or in the SDK. You must migrate away or stop using them.
+
+**Removed Payment Methods:**
+- **Sofort**: Removed. Migrate to SEPA Debit or other EU payment methods. See [this page]((https://docs.stripe.com/payments/sofort/replace) for more information.
+- **Giropay**: Removed. Use alternative payment methods. See [this page](https://support.stripe.com/questions/availability-of-giropay-june-2024-update) for more information.
+
+**Removed APIs:**
+- **CardParams**: Legacy `CardParams` removed from `CardWidget`. Use `PaymentMethodCreateParams` instead.
+    ```kotlin
+    // before
+    val cardParams = cardWidget.cardParams
+  
+    // after
+    val params = cardWidget.paymentMethodCreateParams
+    ```
+- **Deprecated Google Pay APIs**: `GooglePayPaymentMethodLauncherContract` and `rememberLauncher()` removed. Use GooglePayPaymentMethodLauncher directly or `rememberGooglePayPaymentMethodLauncher`, `rememberGooglePayLauncher` for compose.
+    ```kotlin
+    // before
+    rememberLauncher(config, readyCallback, resultCallback)
+    GooglePayPaymentMethodLauncherContract.Args(config, currency, amount)
+
+    // after
+    // for activity
+    GooglePayPaymentMethodLauncher(activity, config, readyCallback, resultCallback)
+    GooglePayLauncher(activity, config, readyCallback, resultCallback)
+    // for fragment
+    GooglePayPaymentMethodLauncher(fragment, config, readyCallback, resultCallback)
+    GooglePayPaymentLauncher(fragment, config, readyCallback, resultCallback)
+    // for compose
+    rememberGooglePayPaymentMethodLauncher(config, readyCallback, resultCallback)
+    rememberGooglePayLauncher(config, readyCallback, resultCallback)
+    ```
+- `PrimaryButtonShape` deprecated constructor removed (public @DimenRes constructor remains)
+    ```kotlin
+    // before
+    val shape = PrimaryButtonShape(
+        context = context,
+        cornerRadiusDp = 8,
+        borderStrokeWidthDp = 2)
+
+    // after
+    // Use @DimenRes constructor
+    val shape = PrimaryButtonShape(
+        context = context,
+        cornerRadiusRes = R.dimen.button_corner_radius,
+        borderStrokeWidthRes = R.dimen.button_border_width,
+        heightRes = R.dimen.button_height
+    )
+    ```
+- **3D Secure 1**: Removed. All authentication now uses 3DS2 automatically (no code changes required).
+- **@ExperimentalPaymentSheetDecouplingApi**: Annotation removed as APIs are now stable. Remove `@OptIn` annotations.
+
+### 2. Internal APIs
+APIs that are no longer publicly exposed. If you need access to any of these internalized APIs, please [open a GitHub issue](https://github.com/stripe/stripe-android/issues/new) describing your use case so we can evaluate making them public again.
+
+**Remove accidentally exposed APIs**
+- Most PaymentSheet properties
+- Various class constructors (PaymentSheetContract, etc. - these types weren't intended for merchant use)
+- `Appearance.Embedded.RowStyle` constructors (use builder)
+- `primaryButtonColor` from Configuration (use `Appearance` API)
+- Some constructors were made internal (ie `PaymentSheetResult`). We don't expect merchants to create these, they should only be created from the Stripe SDK
+
+### 3. CardScan Module Removal
+All CardScan modules have been completely removed. CardScan feature in our UI surfaces has migrated to [Google Pay Card Recognition](https://developers.google.com/pay/payment-card-recognition/debit-credit-card-recognition), which is now the default. 
+Opt-in by [requesting production access](https://developers.google.com/pay/api/android/guides/test-and-deploy/request-prod-access) to the Google Pay API using the [Google Pay & Wallet Console](https://pay.google.com/business/console?utm_source=devsite&utm_medium=devsite&utm_campaign=devsite)
+
 - The `stripecardscan` module has been removed:
     * `CardScanSheet` class and its methods (`create()`, `present()`, `attachCardScanFragment()`, `removeCardScanFragment()`) have been removed
     * `CardScanSheetResult` and its implementations (`Completed`, `Canceled`, `Failed`) have been removed
     * `CardScanSheet.CardScanResultCallback` has been removed
     * `ScannedCard` has been removed
     * `CancellationReason` and its implementations (`Closed`, `Back`, `UserCannotScan`, `CameraPermissionDenied`) have been removed                                                                                                      
-- If you don't use PaymentSheet, you can use a product like [Google Payment Card Recognition API](https://developers.google.com/pay/payment-card-recognition/debit-credit-card-recognition)
+- If you don't use PaymentSheet, you can integrate [Google Payment Card Recognition API](https://developers.google.com/pay/payment-card-recognition/debit-credit-card-recognition) directly into your app.
+
+### 4. Other Breaking Changes
+**Data Class Removal**
+All public classes are no longer data classes for better binary compatibility. If you have a use case that requires `copy()` or destructuring that isn't covered by our builder APIs, please [open a GitHub issue](https://github.com/stripe/stripe-android/issues/new) describing your use case.
+```kotlin
+// before
+// Using copy()
+val newConfig = config.copy(merchantDisplayName = "New Name")
+// Using destructuring
+val (id, type, card) = paymentMethod
+
+// after
+// Use builder pattern
+val newConfig = PaymentSheet.Configuration.Builder()
+    .merchantDisplayName("New Name")
+    .customer(config.customer)
+    .build()
+// Access properties directly
+val id = paymentMethod.id
+val type = paymentMethod.type
+val card = paymentMethod.card
+```
+
+**PaymentMethod.id Non-Nullable**
+`PaymentMethod.id` is now non-nullable:
+```kotlin
+// before
+// Null checks required
+val id: String? = paymentMethod.id
+paymentMethod.id?.let { id -> processPayment(id) }
+
+// after
+// Direct access, no null checks
+val id: String = paymentMethod.id
+processPayment(paymentMethod.id)
+```
 
 ## Migrating from versions < 21.24.0
 - The `stripecardscan` module has been deprecated and will be removed in a future release:
