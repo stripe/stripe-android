@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,12 +55,17 @@ internal class MessagingElementActivity : AppCompatActivity() {
                 val appearanceSettings by viewModel.appearanceSetting.collectAsState()
                 val appearance = appearanceSettings.toAppearance()
 
-                Box(Modifier.padding(vertical = 8.dp)) {
+                Box(
+                    Modifier
+                        .padding(vertical = 8.dp)
+                        .background(getBackgroundColor(appearanceSettings.themeSettings))
+                ) {
                     viewModel.paymentMethodMessagingElement.Content(appearance)
                 }
 
                 val config by viewModel.config.collectAsState()
                 ConfigurationSettings(config)
+                Appearance(appearanceSettings)
 
                 Button(
                     onClick = {
@@ -86,7 +92,7 @@ internal class MessagingElementActivity : AppCompatActivity() {
                 }
             },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            label = { Text("amount") }
+            label = { Text("amount") },
         )
 
         TextField(
@@ -121,14 +127,6 @@ internal class MessagingElementActivity : AppCompatActivity() {
             label = { Text("paymentMethods") }
         )
 
-//        TextField(
-//            value = config.publishableKey,
-//            onValueChange = {
-//                viewModel.updateConfigState(config.copy(publishableKey = it))
-//            },
-//            label = { Text("publishableKey") }
-//        )
-
         TextField(
             value = config.stripeAccountId ?: "",
             onValueChange = {
@@ -138,25 +136,28 @@ internal class MessagingElementActivity : AppCompatActivity() {
         )
 
         SettingsDropDown(
-            items = pkList,
+            items = PublishableKeySetting.pkList,
             selectedItem = config.publishableKey,
-            label = "Key",
+            label = "Publishable Key",
             itemToString = { it.label }
         ) {
             viewModel.updateConfigState(config.copy(publishableKey = it))
         }
+    }
 
-        val appearanceSettings by viewModel.appearanceSetting.collectAsState()
-
+    @Composable
+    private fun Appearance(appearanceSettings: AppearanceSettings) {
         SettingsDropDown(
             items = fontList(),
             selectedItem = appearanceSettings.fontSettings,
             label = "Font",
             itemToString = { it.label }
         ) {
-            viewModel.updateAppearance(appearanceSettings.copy(
-                fontSettings = it
-            ))
+            viewModel.updateAppearance(
+                appearanceSettings.copy(
+                    fontSettings = it
+                )
+            )
         }
 
         SettingsDropDown(
@@ -165,9 +166,11 @@ internal class MessagingElementActivity : AppCompatActivity() {
             label = "Text Color",
             itemToString = { it.name }
         ) {
-            viewModel.updateAppearance(appearanceSettings.copy(
-                colorsSettings = appearanceSettings.colorsSettings.copy(textColor = it)
-            ))
+            viewModel.updateAppearance(
+                appearanceSettings.copy(
+                    colorsSettings = appearanceSettings.colorsSettings.copy(textColor = it)
+                )
+            )
         }
 
         SettingsDropDown(
@@ -176,9 +179,11 @@ internal class MessagingElementActivity : AppCompatActivity() {
             label = "Icon Color",
             itemToString = { it.name }
         ) {
-            viewModel.updateAppearance(appearanceSettings.copy(
-                colorsSettings = appearanceSettings.colorsSettings.copy(iconColor = it)
-            ))
+            viewModel.updateAppearance(
+                appearanceSettings.copy(
+                    colorsSettings = appearanceSettings.colorsSettings.copy(iconColor = it)
+                )
+            )
         }
 
         SettingsDropDown(
@@ -194,7 +199,6 @@ internal class MessagingElementActivity : AppCompatActivity() {
             viewModel.updateAppearance(appearanceSettings.copy(themeSettings = it))
         }
     }
-
 
     @Composable
     private fun <T> SettingsDropDown(
@@ -262,6 +266,15 @@ internal class MessagingElementActivity : AppCompatActivity() {
     private fun colorList() = listOf(
         ColorInfo(Color.Red, "Red"),
         ColorInfo(Color.Blue, "Blue"),
-        ColorInfo(Color.Black, "Black")
+        ColorInfo(Color.Black, "Black"),
+        ColorInfo(Color.White, "White")
     )
+
+    private fun getBackgroundColor(theme: PaymentMethodMessagingElement.Appearance.Theme): Color {
+        return if (theme == PaymentMethodMessagingElement.Appearance.Theme.DARK) {
+            Color.Black
+        } else {
+            Color.White
+        }
+    }
 }

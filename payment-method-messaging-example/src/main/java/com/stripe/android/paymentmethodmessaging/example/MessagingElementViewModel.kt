@@ -76,7 +76,7 @@ internal class MessagingElementViewModel(
         val locale: String = "en",
         val countryCode: String = "US",
         val paymentMethods: List<String> = listOf("affirm", "klarna", "afterpay_clearpay"),
-        val publishableKey: PublishableKeySetting = pkList[0],
+        val publishableKey: PublishableKeySetting = PublishableKeySetting.US,
         val stripeAccountId: String? = ""
     )
 }
