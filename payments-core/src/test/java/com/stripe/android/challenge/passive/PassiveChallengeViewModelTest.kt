@@ -1,10 +1,9 @@
-package com.stripe.android.challenge
+package com.stripe.android.challenge.passive
 
 import androidx.fragment.app.FragmentActivity
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
-import com.stripe.android.challenge.passive.PassiveChallengeViewModel
+import com.stripe.android.hcaptcha.FakeHCaptchaService
 import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.testing.CoroutineTestRule

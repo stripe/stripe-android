@@ -1,8 +1,7 @@
-package com.stripe.android.challenge
+package com.stripe.android.hcaptcha
 
 import androidx.fragment.app.FragmentActivity
 import app.cash.turbine.Turbine
-import com.stripe.android.hcaptcha.HCaptchaService
 
 internal class FakeHCaptchaService : HCaptchaService {
     var result: HCaptchaService.Result? = null

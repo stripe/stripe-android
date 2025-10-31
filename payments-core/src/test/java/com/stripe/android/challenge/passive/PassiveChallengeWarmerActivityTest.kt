@@ -1,4 +1,4 @@
-package com.stripe.android.challenge
+package com.stripe.android.challenge.passive
 
 import android.content.Context
 import android.content.Intent
@@ -13,6 +13,7 @@ import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarm
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerCompleted
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerContract
 import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerViewModel
+import com.stripe.android.hcaptcha.FakeHCaptchaService
 import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PassiveCaptchaParams
