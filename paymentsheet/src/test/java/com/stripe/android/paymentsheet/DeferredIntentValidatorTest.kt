@@ -267,7 +267,7 @@ internal class DeferredIntentValidatorTest {
 
         val exception = assertFails {
             DeferredIntentValidator.validatePaymentMethod(
-                intent = PaymentIntentFactory.create(attachedUsBankAccount),
+                intent = PaymentIntentFactory.create(paymentMethod = attachedUsBankAccount),
                 paymentMethod = providedCard,
             )
         }
@@ -472,7 +472,7 @@ internal class DeferredIntentValidatorTest {
         val providedPaymentMethod = createPaymentMethod("pm_2", "fingerprint")
 
         val result = DeferredIntentValidator.validatePaymentMethod(
-            intent = PaymentIntentFactory.create(attachedPaymentMethod),
+            intent = PaymentIntentFactory.create(paymentMethod = attachedPaymentMethod),
             paymentMethod = providedPaymentMethod,
         )
 
@@ -487,7 +487,7 @@ internal class DeferredIntentValidatorTest {
 
         val exception = assertFails {
             DeferredIntentValidator.validatePaymentMethod(
-                intent = PaymentIntentFactory.create(attachedPaymentMethod),
+                intent = PaymentIntentFactory.create(paymentMethod = attachedPaymentMethod),
                 paymentMethod = providedPaymentMethod,
             )
         }
