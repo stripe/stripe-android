@@ -60,9 +60,8 @@ internal class MessagingElementViewModel(
         val accountId = _config.value.stripeAccountId?.ifBlank {
             settings.stripeAccountId
         }
+
         PaymentConfiguration.init(getApplication(), pk, accountId)
-        _configureResult.value = null
-        paymentMethodMessagingElement = PaymentMethodMessagingElement.create(getApplication())
     }
 
     data class Config(
