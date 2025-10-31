@@ -22,7 +22,7 @@ internal class DefaultAttestationAnalyticsEventsReporterTest {
 
         assertThat(loggedRequests).hasSize(1)
         val loggedParams = loggedRequests.first().params
-        assertThat(loggedParams["event"]).isEqualTo("elements.attestation.confirmation.prepare")
+        assertThat(loggedParams).containsEntry("event", "elements.attestation.confirmation.prepare")
     }
 
     @Test
@@ -36,9 +36,9 @@ internal class DefaultAttestationAnalyticsEventsReporterTest {
 
         assertThat(loggedRequests).hasSize(2)
         val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams["event"]).isEqualTo("elements.attestation.confirmation.prepare.failed")
-        assertThat(loggedParams["duration"]).isEqualTo(10)
-        assertThat(loggedParams["error_message"]).isEqualTo("Test error")
+        assertThat(loggedParams).containsEntry("event", "elements.attestation.confirmation.prepare.failed")
+        assertThat(loggedParams).containsEntry("duration", 10f)
+        assertThat(loggedParams).containsEntry("error_message", "Test error")
     }
 
     @Test
@@ -52,8 +52,8 @@ internal class DefaultAttestationAnalyticsEventsReporterTest {
 
         assertThat(loggedRequests).hasSize(2)
         val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams["event"]).isEqualTo("elements.attestation.confirmation.prepare.succeeded")
-        assertThat(loggedParams["duration"]).isEqualTo(15)
+        assertThat(loggedParams).containsEntry("event", "elements.attestation.confirmation.prepare.succeeded")
+        assertThat(loggedParams).containsEntry("duration", 15f)
     }
 
     @Test
@@ -64,7 +64,7 @@ internal class DefaultAttestationAnalyticsEventsReporterTest {
 
         assertThat(loggedRequests).hasSize(1)
         val loggedParams = loggedRequests.first().params
-        assertThat(loggedParams["event"]).isEqualTo("elements.attestation.confirmation.request_token")
+        assertThat(loggedParams).containsEntry("event", "elements.attestation.confirmation.request_token")
     }
 
     @Test
@@ -78,9 +78,8 @@ internal class DefaultAttestationAnalyticsEventsReporterTest {
 
         assertThat(loggedRequests).hasSize(2)
         val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams["event"])
-            .isEqualTo("elements.attestation.confirmation.request_token.succeeded")
-        assertThat(loggedParams["duration"]).isEqualTo(8)
+        assertThat(loggedParams).containsEntry("event", "elements.attestation.confirmation.request_token.succeeded")
+        assertThat(loggedParams).containsEntry("duration", 8f)
     }
 
     @Test
@@ -94,9 +93,9 @@ internal class DefaultAttestationAnalyticsEventsReporterTest {
 
         assertThat(loggedRequests).hasSize(2)
         val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams["event"]).isEqualTo("elements.attestation.confirmation.request_token.failed")
-        assertThat(loggedParams["duration"]).isEqualTo(12)
-        assertThat(loggedParams["error_message"]).isEqualTo("Request failed")
+        assertThat(loggedParams).containsEntry("event", "elements.attestation.confirmation.request_token.failed")
+        assertThat(loggedParams).containsEntry("duration", 12f)
+        assertThat(loggedParams).containsEntry("error_message", "Request failed")
     }
 
     private fun runScenario(

@@ -11,18 +11,26 @@ internal sealed interface AttestationAnalyticsEvent : AnalyticsEvent {
             get() = "elements.attestation.confirmation.prepare"
     }
 
-    class PrepareFailed(error: Throwable?) : AttestationAnalyticsEvent {
+    class PrepareFailed(
+        error: Throwable?,
+        duration: Float?
+    ) : AttestationAnalyticsEvent {
         override val eventName: String
             get() = "elements.attestation.confirmation.prepare.failed"
 
         override val params = mapOf(
-            FIELD_ERROR_MESSAGE to error?.message
+            FIELD_ERROR_MESSAGE to error?.message,
+            FIELD_DURATION to duration
         )
     }
 
-    data object PrepareSucceeded : AttestationAnalyticsEvent {
+    class PrepareSucceeded(duration: Float?) : AttestationAnalyticsEvent {
         override val eventName: String
             get() = "elements.attestation.confirmation.prepare.succeeded"
+
+        override val params = mapOf(
+            FIELD_DURATION to duration
+        )
     }
 
     data object RequestToken : AttestationAnalyticsEvent {
@@ -30,21 +38,30 @@ internal sealed interface AttestationAnalyticsEvent : AnalyticsEvent {
             get() = "elements.attestation.confirmation.request_token"
     }
 
-    data object RequestTokenSucceeded : AttestationAnalyticsEvent {
+    class RequestTokenSucceeded(duration: Float?) : AttestationAnalyticsEvent {
         override val eventName: String
             get() = "elements.attestation.confirmation.request_token.succeeded"
+
+        override val params = mapOf(
+            FIELD_DURATION to duration
+        )
     }
 
-    class RequestTokenFailed(error: Throwable?) : AttestationAnalyticsEvent {
+    class RequestTokenFailed(
+        error: Throwable?,
+        duration: Float?
+    ) : AttestationAnalyticsEvent {
         override val eventName: String
             get() = "elements.attestation.confirmation.request_token.failed"
 
         override val params = mapOf(
-            FIELD_ERROR_MESSAGE to error?.message
+            FIELD_ERROR_MESSAGE to error?.message,
+            FIELD_DURATION to duration
         )
     }
 
     companion object {
         private const val FIELD_ERROR_MESSAGE = "error_message"
+        private const val FIELD_DURATION = "duration"
     }
 }

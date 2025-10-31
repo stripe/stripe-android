@@ -21,17 +21,16 @@ internal class DefaultAttestationAnalyticsEventsReporter @Inject constructor(
     override fun prepareFailed(error: Throwable?) {
         val duration = durationProvider.end(DurationProvider.Key.PrepareAttestation)
         fireEvent(
-            event = AttestationAnalyticsEvent.PrepareFailed(error),
-            additionalParams = durationInMsFromStart(duration)
+            event = AttestationAnalyticsEvent.PrepareFailed(
+                error,
+                duration = durationInMs(duration)
+            )
         )
     }
 
     override fun prepareSucceeded() {
         val duration = durationProvider.end(DurationProvider.Key.PrepareAttestation)
-        fireEvent(
-            event = AttestationAnalyticsEvent.PrepareSucceeded,
-            additionalParams = durationInMsFromStart(duration)
-        )
+        fireEvent(AttestationAnalyticsEvent.PrepareSucceeded(durationInMs(duration)))
     }
 
     override fun requestToken() {
@@ -41,35 +40,27 @@ internal class DefaultAttestationAnalyticsEventsReporter @Inject constructor(
 
     override fun requestTokenSucceeded() {
         val duration = durationProvider.end(DurationProvider.Key.Attest)
-        fireEvent(
-            event = AttestationAnalyticsEvent.RequestTokenSucceeded,
-            additionalParams = durationInMsFromStart(duration)
-        )
+        fireEvent(AttestationAnalyticsEvent.RequestTokenSucceeded(durationInMs(duration)))
     }
 
     override fun requestTokenFailed(error: Throwable?) {
         val duration = durationProvider.end(DurationProvider.Key.Attest)
         fireEvent(
-            event = AttestationAnalyticsEvent.RequestTokenFailed(error),
-            additionalParams = durationInMsFromStart(duration)
-        )
-    }
-
-    private fun fireEvent(
-        event: AttestationAnalyticsEvent,
-        additionalParams: Map<String, Any> = emptyMap()
-    ) {
-        analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.createRequest(
-                event = event,
-                additionalParams = event.params + additionalParams
+            event = AttestationAnalyticsEvent.RequestTokenFailed(
+                error,
+                duration = durationInMs(duration)
             )
         )
     }
 
-    private fun durationInMsFromStart(duration: Duration?): Map<String, Float> {
-        return duration?.let {
-            mapOf("duration" to it.toDouble(DurationUnit.MILLISECONDS).toFloat())
-        } ?: emptyMap()
+    private fun fireEvent(event: AttestationAnalyticsEvent) {
+        analyticsRequestExecutor.executeAsync(
+            analyticsRequestFactory.createRequest(
+                event = event,
+                additionalParams = event.params
+            )
+        )
     }
+
+    private fun durationInMs(duration: Duration?) = duration?.toDouble(DurationUnit.MILLISECONDS)?.toFloat()
 }
