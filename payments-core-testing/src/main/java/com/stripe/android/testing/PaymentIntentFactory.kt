@@ -8,6 +8,7 @@ import com.stripe.android.model.StripeIntent
 object PaymentIntentFactory {
 
     fun create(
+        id: String? = "pi_12345",
         paymentMethod: PaymentMethod? = createCardPaymentMethod(),
         paymentMethodTypes: List<String> = listOf("card"),
         setupFutureUsage: StripeIntent.Usage? = null,
@@ -22,7 +23,7 @@ object PaymentIntentFactory {
         clientSecret = "secret",
         paymentMethod = paymentMethod,
         isLiveMode = false,
-        id = "pi_12345",
+        id = id,
         currency = "usd",
         countryCode = countryCode,
         paymentMethodTypes = paymentMethodTypes,
