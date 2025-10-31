@@ -174,6 +174,25 @@ enum class CardBrand(
         renderingOrder = 8
     ),
 
+    Interac(
+        "interac",
+        "Interac",
+        R.drawable.stripe_ic_interac,
+        pattern = Pattern.compile(
+            "^(4506|4519|4724|4536|500|5510|629449)[0-9]*$"
+        ),
+        partialPatterns = mapOf(
+            1 to Pattern.compile("^(4|5|6)$"),
+            2 to Pattern.compile("^(45|50|55|62)$"),
+            3 to Pattern.compile("^(450|451|472|453|500|551|629)$"),
+            4 to Pattern.compile("^(4506|4519|4724|4536|5510|6294)$"),
+            5 to Pattern.compile("^(62944)$"),
+            6 to Pattern.compile("^(629449)$")
+        ),
+        shouldRender = false,
+        renderingOrder = 9
+    ),
+
     Unknown(
         "unknown",
         "Unknown",

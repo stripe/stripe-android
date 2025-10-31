@@ -92,6 +92,7 @@ internal class MaskedCardView @JvmOverloads constructor(
                     CardBrand.MasterCard -> R.drawable.stripe_ic_mastercard_template_32
                     CardBrand.UnionPay -> R.drawable.stripe_ic_unionpay_template_32
                     CardBrand.CartesBancaires -> R.drawable.stripe_ic_cartebancaire_template_32
+                    CardBrand.Interac -> R.drawable.stripe_ic_interac_template_32
                     CardBrand.Unknown -> PaymentsModelR.drawable.stripe_ic_unknown
                 }
             )

@@ -3097,6 +3097,8 @@ class PaymentSheet internal constructor(
      * @param buttonType The Google Pay button type to use. Set to "Pay" by default. See
      * [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment)
      * for more information on button types.
+     * @param additionalEnabledNetworks An optional List<String> to signal GooglePay to
+     * display additional enabled networks (e.g. 'INTERAC')
      */
     @Parcelize
     @Poko
@@ -3106,7 +3108,8 @@ class PaymentSheet internal constructor(
         internal val currencyCode: String? = null,
         internal val amount: Long? = null,
         internal val label: String? = null,
-        internal val buttonType: ButtonType = ButtonType.Pay
+        internal val buttonType: ButtonType = ButtonType.Pay,
+        internal val additionalEnabledNetworks: List<String> = emptyList()
     ) : Parcelable {
 
         enum class Environment {

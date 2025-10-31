@@ -116,6 +116,7 @@ internal fun CardBrand.getCardBrandIconForVerticalMode(): Int = when (this) {
     CardBrand.MasterCard -> com.stripe.payments.model.R.drawable.stripe_ic_mastercard_unpadded
     CardBrand.UnionPay -> com.stripe.payments.model.R.drawable.stripe_ic_unionpay_unpadded
     CardBrand.CartesBancaires -> com.stripe.payments.model.R.drawable.stripe_ic_cartes_bancaires_unpadded
+    CardBrand.Interac -> com.stripe.payments.model.R.drawable.stripe_ic_interac_unpadded
     Unknown -> com.stripe.payments.model.R.drawable.stripe_ic_unknown_brand_unpadded
 }
 
@@ -142,6 +143,7 @@ private fun CardBrand.getCardBrandIconRef(): Int {
         CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard_ref
         CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay_ref
         CardBrand.CartesBancaires -> R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires_ref
+        CardBrand.Interac -> R.drawable.stripe_ic_paymentsheet_card_interac_ref
         Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown_ref
     }
 }
@@ -157,6 +159,7 @@ private fun CardBrand.getNightIcon(): Int {
         CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard_night
         CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay_night
         CardBrand.CartesBancaires -> R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires_night
+        CardBrand.Interac -> R.drawable.stripe_ic_paymentsheet_card_interac_night
         Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown_night
     }
 }
@@ -172,6 +175,7 @@ private fun CardBrand.getDayIcon(): Int {
         CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard_day
         CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay_day
         CardBrand.CartesBancaires -> R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires_day
+        CardBrand.Interac -> R.drawable.stripe_ic_paymentsheet_card_interac_day
         Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown_day
     }
 }
