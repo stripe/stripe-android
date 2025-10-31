@@ -964,47 +964,6 @@ class CustomerSheetViewModelTest {
         }
 
     @Test
-    fun `When payment method cannot be attached with setup intent, error message is visible`() = runTest(testDispatcher) {
-        val viewModel = createViewModel(
-            workContext = testDispatcher,
-            isGooglePayAvailable = false,
-            customerPaymentMethods = listOf(),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = true,
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.success("invalid setup intent")
-                },
-            ),
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                retrieveSetupIntent = Result.failure(
-                    IllegalArgumentException("Invalid setup intent")
-                ),
-            ),
-        )
-
-        viewModel.handleViewAction(
-            CustomerSheetViewAction.OnFormFieldValuesCompleted(
-                formFieldValues = TEST_FORM_VALUES,
-            )
-        )
-
-        viewModel.viewState.test {
-            var viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.errorMessage).isNull()
-
-            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-
-            assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
-
-            viewState = awaitViewState()
-            assertThat(viewState.errorMessage).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-            assertThat(viewState.enabled).isTrue()
-            assertThat(viewState.isProcessing).isFalse()
-        }
-    }
-
-    @Test
     fun `When setup intent provider error, error message is visible`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,

@@ -1015,15 +1015,7 @@ internal class CustomerSheetViewModel(
     private suspend fun attachWithSetupIntent(paymentMethod: PaymentMethod) {
         awaitIntentDataSource().retrieveSetupIntentClientSecret()
             .mapCatching { clientSecret ->
-                val intent = stripeRepository.retrieveSetupIntent(
-                    clientSecret = clientSecret,
-                    options = ApiRequest.Options(
-                        apiKey = paymentConfigurationProvider.get().publishableKey,
-                        stripeAccount = paymentConfigurationProvider.get().stripeAccountId,
-                    ),
-                ).getOrThrow()
-
-                handleStripeIntent(intent, clientSecret, paymentMethod)
+                handleStripeIntent(clientSecret, paymentMethod)
             }.onFailure { cause, displayMessage ->
                 eventReporter.onAttachPaymentMethodFailed(
                     style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
@@ -1048,19 +1040,18 @@ internal class CustomerSheetViewModel(
     }
 
     private suspend fun handleStripeIntent(
-        stripeIntent: StripeIntent,
         clientSecret: String,
         paymentMethod: PaymentMethod
     ) {
-        val metadata = customerState.value.metadata
+        val metadata = requireNotNull(customerState.value.metadata)
         confirmationHandler.start(
             arguments = ConfirmationHandler.Args(
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = paymentMethod,
                     optionsParams = null,
-                    passiveCaptchaParams = metadata?.passiveCaptchaParams,
+                    passiveCaptchaParams = metadata.passiveCaptchaParams,
                 ),
-                intent = stripeIntent,
+                intent = metadata.stripeIntent,
                 initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                     clientSecret = clientSecret
                 ),
