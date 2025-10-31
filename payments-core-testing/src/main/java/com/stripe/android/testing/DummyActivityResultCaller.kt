@@ -115,3 +115,19 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
         }
     }
 }
+
+/**
+ * Type-safe helper to cast [ActivityResultCallback] from wildcard type to specific type.
+ * Centralizes the unchecked cast warning in one place.
+ *
+ * Usage:
+ * ```
+ * val registerCall = awaitRegisterCall()
+ * val callback = registerCall.callback.asCallbackFor<YourResultType>()
+ * callback.onActivityResult(yourResult)
+ * ```
+ */
+@Suppress("UNCHECKED_CAST")
+fun <T> ActivityResultCallback<*>.asCallbackFor(): ActivityResultCallback<T> {
+    return this as ActivityResultCallback<T>
+}

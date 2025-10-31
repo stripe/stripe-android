@@ -2,7 +2,6 @@ package com.stripe.android.challenge.confirmation
 
 import android.app.Application
 import android.os.Bundle
-import androidx.activity.result.ActivityResultCallback
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
@@ -17,6 +16,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.testing.DummyActivityResultCaller
+import com.stripe.android.testing.asCallbackFor
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -86,7 +86,6 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
         host.calls.ensureAllEventsConsumed()
     }
 
-    @Suppress("UNCHECKED_CAST")
     @Test
     fun `onNewActivityResultCaller registers for activity result and handles Success`() = runTest {
         DummyActivityResultCaller.test {
@@ -110,7 +109,7 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
             val successResult = IntentConfirmationChallengeActivityResult.Success(
                 clientSecret = "pi_test_secret"
             )
-            val callback = registerCall.callback as ActivityResultCallback<IntentConfirmationChallengeActivityResult>
+            val callback = registerCall.callback.asCallbackFor<IntentConfirmationChallengeActivityResult>()
             callback.onActivityResult(successResult)
 
             assertThat(resultCallback).hasSize(1)
@@ -121,7 +120,6 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
     @Test
     fun `onNewActivityResultCaller registers for activity result and handles Failed`() = runTest {
         DummyActivityResultCaller.test {
@@ -146,7 +144,7 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
             val failedResult = IntentConfirmationChallengeActivityResult.Failed(
                 error = testError
             )
-            val callback = registerCall.callback as ActivityResultCallback<IntentConfirmationChallengeActivityResult>
+            val callback = registerCall.callback.asCallbackFor<IntentConfirmationChallengeActivityResult>()
             callback.onActivityResult(failedResult)
 
             assertThat(resultCallback).hasSize(1)
