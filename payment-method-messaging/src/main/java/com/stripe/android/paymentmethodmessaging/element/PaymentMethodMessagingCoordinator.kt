@@ -8,6 +8,7 @@ import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
+import javax.inject.Provider
 
 internal interface PaymentMethodMessagingCoordinator {
     val messagingContent: StateFlow<PaymentMethodMessagingContent?>
@@ -18,7 +19,7 @@ internal interface PaymentMethodMessagingCoordinator {
 
 internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val paymentConfiguration: PaymentConfiguration
+    private val paymentConfiguration: Provider<PaymentConfiguration>
 ) : PaymentMethodMessagingCoordinator {
 
     private val _messagingContent = MutableStateFlow<PaymentMethodMessagingContent?>(null)
@@ -34,8 +35,8 @@ internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
             locale = configuration.locale,
             country = configuration.countryCode,
             requestOptions = ApiRequest.Options(
-                apiKey = paymentConfiguration.publishableKey,
-                stripeAccount = paymentConfiguration.stripeAccountId
+                apiKey = paymentConfiguration.get().publishableKey,
+                stripeAccount = paymentConfiguration.get().stripeAccountId
             )
         )
 

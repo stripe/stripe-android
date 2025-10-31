@@ -13,7 +13,7 @@ import org.junit.Test
 internal class DefaultPaymentMethodMessagingCoordinatorTest {
 
     private val repository: StripeRepository = FakeStripeRepository()
-    private val paymentConfig = PaymentConfiguration(publishableKey = "key")
+    private val paymentConfig = { PaymentConfiguration(publishableKey = "key") }
     private val coordinator = DefaultPaymentMethodMessagingCoordinator(repository, paymentConfig)
 
     @Test
