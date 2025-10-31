@@ -115,7 +115,7 @@ internal class GooglePayTest {
 
             intendingGooglePayToBeLaunched(GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod))
             intendingPaymentConfirmationToBeLaunched(
-                InternalPaymentResult.Completed(PaymentIntentFactory.create(paymentMethod))
+                InternalPaymentResult.Completed(PaymentIntentFactory.create(paymentMethod = paymentMethod))
             )
 
             scenario.confirm()

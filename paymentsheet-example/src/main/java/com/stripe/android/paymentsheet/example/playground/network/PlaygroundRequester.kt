@@ -65,14 +65,11 @@ internal class PlaygroundRequester(
                 val updatedSettings = playgroundSettings.playgroundSettings()
                 val currentCustomerType = playgroundSettings[CustomerSettingsDefinition]
                 if (
-                    currentCustomerType == CustomerType.NEW &&
+                    (currentCustomerType == CustomerType.NEW || currentCustomerType == CustomerType.RETURNING) &&
                     customerId != null
                 ) {
                     println("Customer $customerId")
                     updatedSettings[CustomerSettingsDefinition] = CustomerType.Existing(customerId)
-                } else if (currentCustomerType == CustomerType.RETURNING) {
-                    // Reset to RETURNING to avoid persisting a specific customer ID
-                    updatedSettings[CustomerSettingsDefinition] = CustomerType.RETURNING
                 }
                 val updatedState = checkoutResponse.asPlaygroundState(
                     snapshot = updatedSettings.snapshot(),

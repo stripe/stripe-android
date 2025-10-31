@@ -2067,12 +2067,46 @@ public abstract interface class com/stripe/android/model/ConfirmStripeIntentPara
 public final class com/stripe/android/model/ConfirmStripeIntentParams$Companion {
 }
 
+public final class com/stripe/android/model/ConfirmationToken : com/stripe/android/core/model/StripeModel {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public final field created J
+	public final field expiresAt Ljava/lang/Long;
+	public final field id Ljava/lang/String;
+	public final field liveMode Z
+	public final field paymentIntentId Ljava/lang/String;
+	public final field paymentMethodPreview Lcom/stripe/android/model/ConfirmationToken$PaymentMethodPreview;
+	public final field returnUrl Ljava/lang/String;
+	public final field setupFutureUsage Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;
+	public final field setupIntentId Ljava/lang/String;
+	public final field shipping Lcom/stripe/android/model/ShippingInformation;
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
 public final class com/stripe/android/model/ConfirmationToken$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ConfirmationToken;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/ConfirmationToken;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/ConfirmationToken$PaymentMethodPreview : com/stripe/android/core/model/StripeModel {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public final field allowRedisplay Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;
+	public final field billingDetails Lcom/stripe/android/model/PaymentMethod$BillingDetails;
+	public final field customerId Ljava/lang/String;
+	public final field type Lcom/stripe/android/model/PaymentMethod$Type;
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/model/ConfirmationToken$PaymentMethodPreview$Creator : android/os/Parcelable$Creator {

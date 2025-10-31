@@ -66,7 +66,6 @@ class PaymentSheetConfigurationKtxTest {
         assertFailsWithEphemeralKeySecret("eeek_aldkfjalskdjflkasjbvdkjds")
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `'validate' should fail when customer client secret key is secret is blank`() {
         val configWithBlankCustomerSessionClientSecret = configuration.newBuilder()
@@ -86,7 +85,6 @@ class PaymentSheetConfigurationKtxTest {
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `'validate' should fail when provided argument has an ephemeral key secret format`() {
         val configWithEphemeralKeySecretAsCustomerSessionClientSecret = configuration.newBuilder()
@@ -106,7 +104,6 @@ class PaymentSheetConfigurationKtxTest {
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `'validate' should fail when provided argument is not a recognized customer session client secret format`() {
         val configWithInvalidCustomerSessionClientSecret = configuration.newBuilder()
