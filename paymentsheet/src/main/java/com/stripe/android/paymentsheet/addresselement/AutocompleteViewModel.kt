@@ -52,7 +52,8 @@ internal class AutocompleteViewModel @Inject constructor(
 
     private val config = SimpleTextFieldConfig(
         label = resolvableString(UiCoreR.string.stripe_address_label_address),
-        trailingIcon = MutableStateFlow(null)
+        trailingIcon = MutableStateFlow(null),
+        allowsEmojis = false,
     )
 
     val textFieldController = SimpleTextFieldController(config)
