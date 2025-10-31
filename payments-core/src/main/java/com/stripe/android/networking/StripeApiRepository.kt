@@ -252,6 +252,14 @@ class StripeApiRepository @JvmOverloads internal constructor(
             Log.e("ClientAttribution", "CAM missing: confirmPaymentIntentInternal")
         }
 
+        if (confirmPaymentIntentParams.paymentMethodCreateParams != null) {
+            if (confirmPaymentIntentParams.paymentMethodCreateParams.clientAttributionMetadata != null) {
+                Log.i("ClientAttribution", "CAM present: payment_method_data for confirmPaymentIntentInternal")
+            } else {
+                Log.i("ClientAttribution", "CAM missing: payment_method_data for confirmPaymentIntentInternal")
+            }
+        }
+
         val paymentIntentId = runCatching {
             PaymentIntent.ClientSecret(confirmPaymentIntentParams.clientSecret).paymentIntentId
         }.getOrElse {
@@ -441,6 +449,14 @@ class StripeApiRepository @JvmOverloads internal constructor(
             Log.i("ClientAttribution", "CAM present: confirmSetupIntentInternal")
         } else {
             Log.e("ClientAttribution", "CAM missing: confirmSetupIntentInternal")
+        }
+
+        if (confirmSetupIntentParams.paymentMethodCreateParams != null) {
+            if (confirmSetupIntentParams.paymentMethodCreateParams.clientAttributionMetadata != null) {
+                Log.i("ClientAttribution", "CAM present: payment_method_data for confirmSetupIntentInternal")
+            } else {
+                Log.i("ClientAttribution", "CAM missing: payment_method_data for confirmSetupIntentInternal")
+            }
         }
 
 
