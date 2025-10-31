@@ -47,13 +47,8 @@ internal class MessagingElementViewModel(
     }
 
     fun updateConfigState(config: Config) {
-        val oldKey = _config.value.publishableKey.key
-        val oldAccount = _config.value.stripeAccountId
         _config.value = config
-
-        if (config.stripeAccountId != oldAccount || config.publishableKey.key != oldKey) {
-            initPaymentConfig()
-        }
+        initPaymentConfig()
     }
 
     fun updateAppearance(appearanceSettings: AppearanceSettings) {
