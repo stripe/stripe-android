@@ -1748,7 +1748,8 @@ internal class IdentityViewModel(
                                 bestCameraLensModel = selfieCameraLensModel,
                                 bestExposureIso = selfieBestExposureIso,
                                 bestFocalLength = selfieBestFocalLength,
-                                bestExposureDuration = selfieBestExposureDuration
+                                bestExposureDuration = selfieBestExposureDuration,
+                                bestIsVirtualCamera = selfieBestIsVirtualCamera
                             ),
                             fromRoute = SelfieDestination.ROUTE.route
                         ) {
