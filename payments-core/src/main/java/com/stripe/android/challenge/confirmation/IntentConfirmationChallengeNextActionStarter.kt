@@ -7,6 +7,10 @@ import com.stripe.android.view.AuthActivityStarterHost
 internal interface IntentConfirmationChallengeNextActionStarter {
     fun start(args: IntentConfirmationChallengeActivityContract.Args)
 
+    /**
+     * Uses modern [ActivityResultLauncher] API (preferred).
+     * Used when [ActivityResultLauncher] is registered via Activity/Fragment.
+     */
     class Modern(
         private val launcher: ActivityResultLauncher<IntentConfirmationChallengeActivityContract.Args>
     ) : IntentConfirmationChallengeNextActionStarter {
@@ -15,6 +19,10 @@ internal interface IntentConfirmationChallengeNextActionStarter {
         }
     }
 
+    /**
+     * Uses legacy [android.app.Activity.startActivityForResult] API (fallback).
+     * Used when [ActivityResultLauncher] is not available.
+     */
     class Legacy(
         private val host: AuthActivityStarterHost
     ) : IntentConfirmationChallengeNextActionStarter {
