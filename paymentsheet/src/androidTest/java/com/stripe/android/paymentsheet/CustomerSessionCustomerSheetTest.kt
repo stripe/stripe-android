@@ -64,7 +64,6 @@ internal class CustomerSessionCustomerSheetTest {
         page.fillOutCardDetails()
 
         enqueuePaymentMethodCreation()
-        enqueueSetupIntentRetrieval()
         enqueueSetupIntentConfirmation()
 
         enqueueElementsSession(
@@ -112,7 +111,6 @@ internal class CustomerSessionCustomerSheetTest {
         page.changeCardBrandChoice()
 
         enqueueCbcPaymentMethodCreation()
-        enqueueSetupIntentRetrieval()
         enqueueSetupIntentConfirmation()
 
         enqueueElementsSession(
@@ -154,7 +152,6 @@ internal class CustomerSessionCustomerSheetTest {
         page.fillOutCardDetails()
 
         enqueuePaymentMethodCreation()
-        enqueueSetupIntentRetrieval()
         enqueueSetupIntentConfirmation()
 
         val paymentMethodId = "pm_12345"
@@ -336,15 +333,6 @@ internal class CustomerSessionCustomerSheetTest {
             clientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
-        }
-    }
-
-    private fun enqueueSetupIntentRetrieval() {
-        networkRule.enqueue(
-            retrieveSetupIntentRequest(),
-            retrieveSetupIntentParams(),
-        ) { response ->
-            response.testBodyFromFile("setup-intent-get.json")
         }
     }
 
