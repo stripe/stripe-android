@@ -30,8 +30,8 @@ Features that are deprecated at Stripe or in the SDK. You must migrate away or s
     GooglePayPaymentMethodLauncher(activity, config, readyCallback, resultCallback)
     GooglePayLauncher(activity, config, readyCallback, resultCallback)
     // for fragment
-    GooglePayPaymentMethodLauncher(activity, config, readyCallback, resultCallback)
-    GooglePayPaymentLauncher(activity, config, readyCallback, resultCallback)
+    GooglePayPaymentMethodLauncher(fragment, config, readyCallback, resultCallback)
+    GooglePayPaymentLauncher(fragment, config, readyCallback, resultCallback)
     // for compose
     rememberGooglePayPaymentMethodLauncher(config, readyCallback, resultCallback)
     rememberGooglePayLauncher(config, readyCallback, resultCallback)
