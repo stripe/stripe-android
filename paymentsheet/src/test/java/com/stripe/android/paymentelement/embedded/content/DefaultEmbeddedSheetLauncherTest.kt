@@ -19,10 +19,10 @@ import com.stripe.android.paymentelement.embedded.manage.ManageResult
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.DummyActivityResultCaller
+import com.stripe.android.testing.DummyActivityResultCaller.RegisterCall
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
-import com.stripe.android.utils.DummyActivityResultCaller
-import com.stripe.android.utils.DummyActivityResultCaller.RegisterCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest

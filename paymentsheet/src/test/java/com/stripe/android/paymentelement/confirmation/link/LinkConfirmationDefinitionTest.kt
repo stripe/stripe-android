@@ -25,8 +25,8 @@ import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.test.StandardTestDispatcher

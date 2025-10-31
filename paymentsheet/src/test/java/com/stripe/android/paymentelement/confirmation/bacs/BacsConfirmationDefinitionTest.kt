@@ -24,7 +24,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
-import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.testing.DummyActivityResultCaller
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 

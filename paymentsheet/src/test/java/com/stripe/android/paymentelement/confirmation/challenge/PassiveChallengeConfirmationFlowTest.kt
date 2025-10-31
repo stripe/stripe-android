@@ -1,7 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.challenge
 
-import com.stripe.android.challenge.PassiveChallengeActivityResult
-import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
+import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
+import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS

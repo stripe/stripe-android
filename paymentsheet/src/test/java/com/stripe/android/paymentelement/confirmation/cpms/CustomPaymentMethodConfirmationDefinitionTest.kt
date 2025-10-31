@@ -20,9 +20,9 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultLauncher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test

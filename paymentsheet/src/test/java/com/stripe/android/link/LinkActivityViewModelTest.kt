@@ -46,10 +46,10 @@ import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
-import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
