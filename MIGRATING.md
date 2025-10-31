@@ -7,8 +7,8 @@ SDK v22 introduces breaking changes organized into four categories:
 Features that are deprecated at Stripe or in the SDK. You must migrate away or stop using them.
 
 **Removed Payment Methods:**
-- **Sofort**: Removed (deprecated at Stripe). Migrate to SEPA Debit or other EU payment methods.
-- **Giropay**: Removed (deprecated at Stripe). Use alternative payment methods.
+- **Sofort**: Removed. Migrate to SEPA Debit or other EU payment methods. See [this page]((https://docs.stripe.com/payments/sofort/replace) for more information.
+- **Giropay**: Removed. Use alternative payment methods. See [this page](https://support.stripe.com/questions/availability-of-giropay-june-2024-update) for more information.
 
 **Removed APIs:**
 - **CardParams**: Legacy `CardParams` removed from `CardWidget`. Use `PaymentMethodCreateParams` instead.
