@@ -2,6 +2,7 @@ package com.stripe.android.networking
 
 import android.content.Context
 import android.net.http.HttpResponseCache
+import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.DefaultFraudDetectionDataRepository
@@ -245,7 +246,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
             fraudDetectionData
         )
 
-        assert(confirmPaymentIntentParams.clientAttributionMetadata != null)
+        if (confirmPaymentIntentParams.clientAttributionMetadata != null) {
+            Log.i("ClientAttribution", "CAM present: confirmPaymentIntentInternal")
+        } else {
+            Log.e("ClientAttribution", "CAM missing: confirmPaymentIntentInternal")
+        }
 
         val paymentIntentId = runCatching {
             PaymentIntent.ClientSecret(confirmPaymentIntentParams.clientSecret).paymentIntentId
@@ -432,7 +437,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): Result<SetupIntent> {
-        assert(confirmSetupIntentParams.clientAttributionMetadata != null)
+        if (confirmSetupIntentParams.clientAttributionMetadata != null) {
+            Log.i("ClientAttribution", "CAM present: confirmSetupIntentInternal")
+        } else {
+            Log.e("ClientAttribution", "CAM missing: confirmSetupIntentInternal")
+        }
+
 
         val setupIntentId = runCatching {
             SetupIntent.ClientSecret(confirmSetupIntentParams.clientSecret).setupIntentId
@@ -594,7 +604,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
     ): Result<PaymentMethod> {
-        assert(paymentMethodCreateParams.clientAttributionMetadata != null)
+        if (paymentMethodCreateParams.clientAttributionMetadata != null) {
+            Log.i("ClientAttribution", "CAM present: createPaymentMethod")
+        } else {
+            Log.e("ClientAttribution", "CAM missing: createPaymentMethod")
+        }
 
         fireFraudDetectionDataRequest()
 
@@ -699,6 +713,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
         confirmationTokenParams: ConfirmationTokenParams,
         options: ApiRequest.Options
     ): Result<ConfirmationToken> {
+        if (confirmationTokenParams.clientAttributionMetadata != null) {
+            Log.i("ClientAttribution", "CAM present: createConfirmationToken")
+        } else {
+            Log.e("ClientAttribution", "CAM missing: createConfirmationToken")
+        }
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 confirmationTokensUrl,
@@ -1222,7 +1241,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
         extraParams: Map<String, *>?,
         requestOptions: ApiRequest.Options
     ): Result<PaymentMethod> {
-        assert(extraParams!!.containsKey("client_attribution_metadata"))
+        if (extraParams?.containsKey("client_attribution_metadata") == true) {
+            Log.i("ClientAttribution", "CAM present: sharePaymentDetails (StripeApiRepository)")
+        } else {
+            Log.e("ClientAttribution", "CAM missing: sharePaymentDetails (StripeApiRepository)")
+        }
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = sharePaymentDetailsUrl,

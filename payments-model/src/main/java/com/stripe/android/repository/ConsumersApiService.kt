@@ -1,5 +1,6 @@
 package com.stripe.android.repository
 
+import android.util.Log
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -425,7 +426,12 @@ class ConsumersApiServiceImpl(
         requestSurface: String,
         requestOptions: ApiRequest.Options,
     ): Result<ConsumerPaymentDetails> {
-        assert(paymentDetailsCreateParams.toParamMap().containsKey("client_attribution_metadata"))
+        if (paymentDetailsCreateParams.toParamMap().containsKey("client_attribution_metadata")) {
+            Log.i("ClientAttribution", "CAM present: createPaymentDetails")
+        } else {
+            Log.e("ClientAttribution", "CAM missing: createPaymentDetails")
+        }
+
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,
@@ -454,7 +460,11 @@ class ConsumersApiServiceImpl(
         requestOptions: ApiRequest.Options,
         extraParams: Map<String, Any?>,
     ): Result<SharePaymentDetails> {
-        assert(extraParams.containsKey("client_attribution_metadata"))
+        if (extraParams.containsKey("client_attribution_metadata")) {
+            Log.i("ClientAttribution", "CAM present: sharePaymentDetails (ConsumersApiService)")
+        } else {
+            Log.e("ClientAttribution", "CAM missing: sharePaymentDetails (ConsumersApiService)")
+        }
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,
