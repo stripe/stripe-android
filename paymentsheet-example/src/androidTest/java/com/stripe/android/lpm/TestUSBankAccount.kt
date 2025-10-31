@@ -102,7 +102,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         )
 
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters.copy(
                 authorizationAction = null
             ),
@@ -134,7 +134,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         )
 
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters.copy(
                 authorizationAction = null
             ),
