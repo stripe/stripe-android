@@ -567,10 +567,11 @@ internal class IdentityViewModel(
         val bestIso = bestInput.cameraPreviewImage.exposureIso
         val bestFocal = bestInput.cameraPreviewImage.focalLength
         val bestExpMs = bestInput.cameraPreviewImage.exposureDurationNs?.let { it / NANOS_PER_MILLI }
+        val bestIsVirtual = bestInput.cameraPreviewImage.isVirtualCamera
         selfieBestExposureIso = bestIso
         selfieBestFocalLength = bestFocal
         selfieBestExposureDuration = bestExpMs
-        selfieBestIsVirtualCamera = bestInput.cameraPreviewImage.isVirtualCamera
+        selfieBestIsVirtualCamera = bestIsVirtual
 
         listOf(
             (FaceDetectorTransitioner.Selfie.FIRST),
