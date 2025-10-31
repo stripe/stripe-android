@@ -204,6 +204,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         GOOGLE_PAY_UNEXPECTED_CONFIRM_RESULT(
             partialEventName = "google_pay.confirm.unexpected_result"
         ),
+        GOOGLE_PAY_UNEXPECTED_STATUS_CODE(
+            partialEventName = "google_pay.confirm.unexpected_status_code"
+        ),
         GOOGLE_PAY_MISSING_INTENT_DATA(
             partialEventName = "google_pay.on_result.missing_data"
         ),
