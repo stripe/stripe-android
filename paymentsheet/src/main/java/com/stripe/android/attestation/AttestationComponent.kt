@@ -15,10 +15,12 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
+        AttestationModule::class,
         StripeRepositoryModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
-        PaymentsIntegrityModule::class
+        PaymentsIntegrityModule::class,
+        StripeRepositoryModule::class,
     ]
 )
 internal interface AttestationComponent {
