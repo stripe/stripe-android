@@ -9,6 +9,7 @@ import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheetResult
+import com.stripe.android.paymentsheet.example.samples.model.CartProduct
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
@@ -30,6 +31,16 @@ internal class CompleteFlowViewModel(
         value = CompleteFlowViewState(cartState = CartState.defaultWithHardcodedPrices),
     )
     val state: StateFlow<CompleteFlowViewState> = _state
+
+    // TODO: Initialize PMME initialize and configure PMME
+
+    fun updateQuantity(product: CartProduct.Id, quantity: Int) {
+        // TODO update PMME config
+        val newCartState = _state.value.cartState.updateQuantity(product, quantity)
+        _state.update {
+            it.copy(cartState = newCartState)
+        }
+    }
 
     fun checkout() {
         viewModelScope.launch(Dispatchers.IO) {
