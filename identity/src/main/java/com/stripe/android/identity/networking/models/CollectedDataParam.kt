@@ -79,7 +79,11 @@ internal data class CollectedDataParam(
         fun createFromFrontUploadedResultsForAutoCapture(
             frontHighResResult: UploadedResult,
             frontLowResResult: UploadedResult,
-            cameraLensModel: String? = null
+            cameraLensModel: String? = null,
+            exposureIso: Float? = null,
+            focalLength: Float? = null,
+            exposureDuration: Long? = null,
+            isVirtualCamera: Boolean? = null
         ): CollectedDataParam =
             CollectedDataParam(
                 idDocumentFront = DocumentUploadParam(
@@ -98,14 +102,22 @@ internal data class CollectedDataParam(
                         "front low res image id is null"
                     },
                     uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE,
-                    cameraLensModel = cameraLensModel
+                    cameraLensModel = cameraLensModel,
+                    exposureIso = exposureIso,
+                    focalLength = focalLength,
+                    exposureDuration = exposureDuration,
+                    isVirtualCamera = isVirtualCamera
                 )
             )
 
         fun createFromBackUploadedResultsForAutoCapture(
             backHighResResult: UploadedResult,
             backLowResResult: UploadedResult,
-            cameraLensModel: String? = null
+            cameraLensModel: String? = null,
+            exposureIso: Float? = null,
+            focalLength: Float? = null,
+            exposureDuration: Long? = null,
+            isVirtualCamera: Boolean? = null
         ): CollectedDataParam =
             CollectedDataParam(
                 idDocumentBack = DocumentUploadParam(
@@ -124,7 +136,11 @@ internal data class CollectedDataParam(
                         "back low res image id is null"
                     },
                     uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE,
-                    cameraLensModel = cameraLensModel
+                    cameraLensModel = cameraLensModel,
+                    exposureIso = exposureIso,
+                    focalLength = focalLength,
+                    exposureDuration = exposureDuration,
+                    isVirtualCamera = isVirtualCamera
                 )
             )
 
@@ -139,7 +155,11 @@ internal data class CollectedDataParam(
             bestFaceScore: Float,
             faceScoreVariance: Float,
             numFrames: Int,
-            bestCameraLensModel: String? = null
+            bestCameraLensModel: String? = null,
+            bestExposureIso: Float? = null,
+            bestFocalLength: Float? = null,
+            bestExposureDuration: Long? = null,
+            bestIsVirtualCamera: Boolean? = null,
         ) = CollectedDataParam(
             face = FaceUploadParam(
                 bestHighResImage = requireNotNull(bestHighResResult.uploadedStripeFile.id),
@@ -151,8 +171,12 @@ internal data class CollectedDataParam(
                 bestFaceScore = bestFaceScore,
                 faceScoreVariance = faceScoreVariance,
                 numFrames = numFrames,
+                bestExposureDuration = bestExposureDuration?.toInt(),
+                bestCameraLensModel = bestCameraLensModel,
+                bestFocalLength = bestFocalLength,
+                bestIsVirtualCamera = bestIsVirtualCamera,
+                bestExposureIso = bestExposureIso,
                 trainingConsent = trainingConsent,
-                bestCameraLensModel = bestCameraLensModel
             )
         )
 
