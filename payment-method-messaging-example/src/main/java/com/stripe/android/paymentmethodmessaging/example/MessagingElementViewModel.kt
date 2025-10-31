@@ -17,7 +17,7 @@ internal class MessagingElementViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
 
-    var paymentMethodMessagingElement = PaymentMethodMessagingElement.create(getApplication())
+    val paymentMethodMessagingElement = PaymentMethodMessagingElement.create(getApplication())
     private val _configureResult = MutableStateFlow<PaymentMethodMessagingElement.ConfigureResult?>(null)
     val configureResult: StateFlow<PaymentMethodMessagingElement.ConfigureResult?> = _configureResult.asStateFlow()
 
@@ -30,6 +30,8 @@ internal class MessagingElementViewModel(
         val pmTypes = config.value.paymentMethods.mapNotNull {
             PaymentMethod.Type.fromCode(it)
         }
+
+        initPaymentConfig()
 
         viewModelScope.launch {
             _configureResult.value = paymentMethodMessagingElement.configure(
@@ -44,13 +46,7 @@ internal class MessagingElementViewModel(
     }
 
     fun updateConfigState(config: Config) {
-        val oldKey = _config.value.publishableKey
-        val oldAccount = _config.value.stripeAccountId
         _config.value = config
-
-        if (config.stripeAccountId != oldAccount || config.publishableKey != oldKey) {
-            initPaymentConfig()
-        }
     }
 
     private fun initPaymentConfig() {
@@ -60,7 +56,6 @@ internal class MessagingElementViewModel(
         val accountId = _config.value.stripeAccountId?.ifBlank {
             settings.stripeAccountId
         }
-
         PaymentConfiguration.init(getApplication(), pk, accountId)
     }
 
