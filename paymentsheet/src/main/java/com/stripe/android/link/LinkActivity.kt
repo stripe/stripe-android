@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.R
 import com.stripe.android.core.Logger
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
@@ -130,18 +131,17 @@ internal class LinkActivity : ComponentActivity() {
         fadeOut()
     }
 
-    fun launchWebFlow(configuration: LinkConfiguration) {
+    fun launchWebFlow(configuration: LinkConfiguration, paymentMethodMetadata: PaymentMethodMetadata) {
         webLauncher?.launch(
             LinkActivityContract.Args(
                 configuration = configuration,
+                paymentMethodMetadata = paymentMethodMetadata,
                 linkExpressMode = LinkExpressMode.DISABLED,
                 linkAccountInfo = LinkAccountUpdate.Value(
                     account = null,
                     lastUpdateReason = null
                 ),
                 launchMode = LinkLaunchMode.Full,
-                passiveCaptchaParams = null,
-                attestOnIntentConfirmation = false,
             )
         )
     }

@@ -21,6 +21,7 @@ import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.NativeLinkArgs
 import com.stripe.android.link.TestFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -185,6 +186,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                         "native_link_args",
                         NativeLinkArgs(
                             configuration = TestFactory.LINK_CONFIGURATION,
+                            paymentMethodMetadata = PaymentMethodMetadataFactory.create(passiveCaptchaParams = null),
                             requestSurface = RequestSurface.PaymentElement,
                             publishableKey = PUBLISHABLE_KEY,
                             stripeAccountId = null,
@@ -192,8 +194,6 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                             linkAccountInfo = LinkAccountUpdate.Value(null),
                             paymentElementCallbackIdentifier = "ConfirmationTestIdentifier",
                             launchMode = LinkLaunchMode.Full,
-                            passiveCaptchaParams = null,
-                            attestOnIntentConfirmation = false,
                         )
                     )
                 )

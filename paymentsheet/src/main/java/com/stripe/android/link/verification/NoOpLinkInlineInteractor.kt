@@ -14,8 +14,6 @@ internal class NoOpLinkInlineInteractor : LinkInlineInteractor {
     override val state: StateFlow<LinkInlineState> = MutableStateFlow(
         value = LinkInlineState(
             verificationState = VerificationState.RenderButton,
-            passiveCaptchaParams = null,
-            attestOnIntentConfirmation = false,
         )
     )
     override val otpElement: OTPElement = OTPSpec.transform()

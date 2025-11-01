@@ -169,19 +169,19 @@ internal class LinkConfirmationDefinitionTest {
     @Test
     fun `'launch' should pass attestOnIntentConfirmation true when bootstrapped with true`() = test {
         val presentCall = launchWithAttestationFlag(attestOnIntentConfirmation = true)
-        assertThat(presentCall.attestOnIntentConfirmation).isTrue()
+        assertThat(presentCall.paymentMethodMetadata.attestOnIntentConfirmation).isTrue()
     }
 
     @Test
     fun `'launch' should pass attestOnIntentConfirmation false when bootstrapped with false`() = test {
         val presentCall = launchWithAttestationFlag(attestOnIntentConfirmation = false)
-        assertThat(presentCall.attestOnIntentConfirmation).isFalse()
+        assertThat(presentCall.paymentMethodMetadata.attestOnIntentConfirmation).isFalse()
     }
 
     @Test
     fun `'launch' should default attestOnIntentConfirmation to false when not bootstrapped`() = test {
         val presentCall = launchWithAttestationFlag(attestOnIntentConfirmation = null)
-        assertThat(presentCall.attestOnIntentConfirmation).isFalse()
+        assertThat(presentCall.paymentMethodMetadata.attestOnIntentConfirmation).isFalse()
     }
 
     @Test

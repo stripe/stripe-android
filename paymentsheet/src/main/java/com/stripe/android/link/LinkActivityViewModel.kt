@@ -35,6 +35,7 @@ import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOption
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.LinkAuthIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -69,6 +70,7 @@ internal class LinkActivityViewModel @Inject constructor(
     private val linkAccountHolder: LinkAccountHolder,
     val eventReporter: EventReporter,
     val linkConfiguration: LinkConfiguration,
+    private val paymentMethodMetadata: PaymentMethodMetadata,
     private val linkAttestationCheck: LinkAttestationCheck,
     val savedStateHandle: SavedStateHandle,
     @Named(LINK_EXPRESS_MODE) private val linkExpressMode: LinkExpressMode,
@@ -96,7 +98,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val linkAccount: LinkAccount?
         get() = linkAccountManager.linkAccountInfo.value.account
 
-    var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
+    var launchWebFlow: ((LinkConfiguration, PaymentMethodMetadata) -> Unit)? = null
 
     val canDismissSheet: Boolean
         get() = activityRetainedComponent.dismissalCoordinator.canDismiss
@@ -204,7 +206,7 @@ internal class LinkActivityViewModel @Inject constructor(
             is LinkLaunchMode.Confirmation,
             LinkLaunchMode.Full -> launchWebFlow?.let { launcher ->
                 navigate(LinkScreen.Loading, clearStack = true)
-                launcher.invoke(linkConfiguration)
+                launcher.invoke(linkConfiguration, paymentMethodMetadata)
             }
         }
     }
@@ -537,8 +539,7 @@ internal class LinkActivityViewModel @Inject constructor(
                 DaggerNativeLinkComponent
                     .builder()
                     .configuration(args.configuration)
-                    .passiveCaptchaParams(args.passiveCaptchaParams)
-                    .attestOnIntentConfirmation(args.attestOnIntentConfirmation)
+                    .paymentMethodMetadata(args.paymentMethodMetadata)
                     .requestSurface(args.requestSurface)
                     .publishableKeyProvider { args.publishableKey }
                     .stripeAccountIdProvider { args.stripeAccountId }

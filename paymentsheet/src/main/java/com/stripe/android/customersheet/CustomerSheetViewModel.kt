@@ -1051,12 +1051,11 @@ internal class CustomerSheetViewModel(
                     optionsParams = null,
                     passiveCaptchaParams = metadata.passiveCaptchaParams,
                 ),
-                intent = metadata.stripeIntent,
+                appearance = configuration.appearance,
                 initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                     clientSecret = clientSecret
                 ),
-                shippingDetails = null,
-                appearance = configuration.appearance,
+                paymentMethodMetadata = metadata,
             )
         )
 

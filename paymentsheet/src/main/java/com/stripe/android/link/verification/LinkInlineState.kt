@@ -3,7 +3,7 @@ package com.stripe.android.link.verification
 import android.os.Parcelable
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.verification.VerificationViewState
-import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -15,8 +15,6 @@ internal data class LinkInlineState(
      * Current verification state representing the different stages in the verification process.
      */
     val verificationState: VerificationState,
-    val passiveCaptchaParams: PassiveCaptchaParams?,
-    val attestOnIntentConfirmation: Boolean,
 ) : Parcelable
 
 /**
@@ -35,7 +33,8 @@ internal sealed class VerificationState : Parcelable {
     @Parcelize
     internal data class Render2FA(
         val viewState: VerificationViewState,
-        val linkConfiguration: LinkConfiguration
+        val linkConfiguration: LinkConfiguration,
+        val paymentMethodMetadata: PaymentMethodMetadata,
     ) : VerificationState()
 
     /**

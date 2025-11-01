@@ -8,6 +8,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
@@ -657,7 +658,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler = confirmationHandler,
             configuration = configuration,
             logger = logger,
-            passiveCaptchaParams = passiveCaptchaParams
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(passiveCaptchaParams = passiveCaptchaParams),
         )
         confirmationHandler.validate()
         return handler

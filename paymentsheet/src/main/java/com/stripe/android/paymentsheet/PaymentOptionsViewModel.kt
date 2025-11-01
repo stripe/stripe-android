@@ -303,12 +303,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
             )
             if (shouldShowLinkConfiguration) {
                 linkPaymentLauncher.present(
-                    configuration = linkState!!.configuration,
+                    configuration = linkState.configuration,
+                    paymentMethodMetadata = args.state.paymentMethodMetadata,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null),
                     linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                     linkExpressMode = LinkExpressMode.ENABLED,
-                    passiveCaptchaParams = args.state.paymentMethodMetadata.passiveCaptchaParams,
-                    attestOnIntentConfirmation = args.state.paymentMethodMetadata.attestOnIntentConfirmation,
                 )
             } else {
                 _paymentOptionsActivityResult.tryEmit(

@@ -505,6 +505,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch(workContext) {
+            val paymentMethodMetadata = awaitPaymentMethodMetadata()
+
             val confirmationOption = withContext(viewModelScope.coroutineContext) {
                 inProgressSelection = paymentSelection
 
@@ -512,21 +514,18 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     ?.toConfirmationOption(
                         configuration = config.asCommonConfiguration(),
                         linkConfiguration = linkHandler.linkConfiguration.value,
-                        passiveCaptchaParams = paymentMethodMetadata.value?.passiveCaptchaParams,
-                        clientAttributionMetadata = paymentMethodMetadata.value?.clientAttributionMetadata,
+                        passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams,
+                        clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
                     )
             }
 
             confirmationOption?.let { option ->
-                val stripeIntent = awaitStripeIntent()
-
                 confirmationHandler.start(
                     arguments = ConfirmationHandler.Args(
-                        intent = stripeIntent,
                         confirmationOption = option,
                         initializationMode = args.initializationMode,
                         appearance = config.appearance,
-                        shippingDetails = config.shippingDetails,
+                        paymentMethodMetadata = paymentMethodMetadata,
                     ),
                 )
             } ?: run {
@@ -699,8 +698,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         return listOf(target)
     }
 
-    private suspend fun awaitStripeIntent(): StripeIntent {
-        return paymentMethodMetadata.filterNotNull().first().stripeIntent
+    private suspend fun awaitPaymentMethodMetadata(): PaymentMethodMetadata {
+        return paymentMethodMetadata.filterNotNull().first()
     }
 
     internal fun getCvcRecollectionState(): PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState {

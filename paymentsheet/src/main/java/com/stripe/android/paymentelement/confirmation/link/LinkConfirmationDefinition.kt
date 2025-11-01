@@ -7,7 +7,6 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -21,15 +20,8 @@ internal class LinkConfirmationDefinition @Inject constructor(
 ) : ConfirmationDefinition<LinkConfirmationOption, LinkPaymentLauncher, Unit, LinkActivityResult> {
     override val key: String = "Link"
 
-    @Volatile
-    private var attestOnIntentConfirmation: Boolean = false
-
     override fun option(confirmationOption: ConfirmationHandler.Option): LinkConfirmationOption? {
         return confirmationOption as? LinkConfirmationOption
-    }
-
-    override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
-        this.attestOnIntentConfirmation = paymentMethodMetadata.attestOnIntentConfirmation
     }
 
     override fun createLauncher(
@@ -65,11 +57,10 @@ internal class LinkConfirmationDefinition @Inject constructor(
     ) {
         launcher.present(
             configuration = confirmationOption.configuration,
+            paymentMethodMetadata = confirmationArgs.paymentMethodMetadata,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             launchMode = confirmationOption.linkLaunchMode,
             linkExpressMode = confirmationOption.linkExpressMode,
-            passiveCaptchaParams = confirmationOption.passiveCaptchaParams,
-            attestOnIntentConfirmation = attestOnIntentConfirmation
         )
     }
 

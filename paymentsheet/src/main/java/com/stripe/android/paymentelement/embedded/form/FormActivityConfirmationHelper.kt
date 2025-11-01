@@ -84,11 +84,10 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
             clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
         ) ?: return null
         return ConfirmationHandler.Args(
-            intent = paymentMethodMetadata.stripeIntent,
             confirmationOption = confirmationOption,
             appearance = configuration.appearance,
             initializationMode = initializationMode,
-            shippingDetails = paymentMethodMetadata.shippingDetails
+            paymentMethodMetadata = paymentMethodMetadata,
         )
     }
 }

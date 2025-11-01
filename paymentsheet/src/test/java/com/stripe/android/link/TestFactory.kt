@@ -5,6 +5,7 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
@@ -25,7 +26,6 @@ import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.MobileFallbackWebviewParams
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -295,6 +295,7 @@ internal object TestFactory {
 
     val NATIVE_LINK_ARGS = NativeLinkArgs(
         configuration = LINK_CONFIGURATION,
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         requestSurface = RequestSurface.PaymentElement,
         publishableKey = "",
         stripeAccountId = "",
@@ -302,8 +303,6 @@ internal object TestFactory {
         linkAccountInfo = LinkAccountUpdate.Value(LINK_ACCOUNT),
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
         launchMode = LinkLaunchMode.Full,
-        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
-        attestOnIntentConfirmation = false,
     )
 
     val FINANCIAL_CONNECTIONS_CHECKING_ACCOUNT = FinancialConnectionsAccount(

@@ -22,7 +22,7 @@ import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.ui.oauth.OAuthConsentViewModelComponent
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
-import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
@@ -54,10 +54,6 @@ internal interface NativeLinkComponent {
     val linkAccountHolder: LinkAccountHolder
     val linkAccountManager: LinkAccountManager
     val configuration: LinkConfiguration
-    val passiveCaptchaParams: PassiveCaptchaParams?
-
-    @get:Named(ATTEST_ON_INTENT_CONFIRMATION)
-    val attestOnIntentConfirmation: Boolean
     val linkEventsReporter: LinkEventsReporter
     val errorReporter: ErrorReporter
     val logger: Logger
@@ -74,6 +70,7 @@ internal interface NativeLinkComponent {
     val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory
     val oAuthConsentViewModelComponentFactory: OAuthConsentViewModelComponent.Factory
     val webLinkAuthChannel: WebLinkAuthChannel
+    val paymentMethodMetadata: PaymentMethodMetadata
 
     @Component.Builder
     interface Builder {
@@ -81,12 +78,7 @@ internal interface NativeLinkComponent {
         fun configuration(configuration: LinkConfiguration): Builder
 
         @BindsInstance
-        fun passiveCaptchaParams(passiveCaptchaParams: PassiveCaptchaParams?): Builder
-
-        @BindsInstance
-        fun attestOnIntentConfirmation(
-            @Named(ATTEST_ON_INTENT_CONFIRMATION) attestOnIntentConfirmation: Boolean
-        ): Builder
+        fun paymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata): Builder
 
         @BindsInstance
         fun publishableKeyProvider(@Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String): Builder
