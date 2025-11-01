@@ -48,7 +48,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 paymentDetails = paymentDetails,
                 linkAccount = linkAccount,
                 cvc = cvc,
-                billingPhone = billingPhone
+                billingPhone = billingPhone,
+                paymentMethodMetadata = paymentMethodMetadata,
             )
         }
     }
@@ -64,7 +65,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 paymentDetails = paymentDetails,
                 linkAccount = linkAccount,
                 cvc = cvc,
-                billingPhone = billingPhone
+                billingPhone = billingPhone,
+                paymentMethodMetadata = paymentMethodMetadata,
             )
         }
     }
@@ -108,7 +110,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         paymentDetails: LinkPaymentDetails,
         linkAccount: LinkAccount,
         cvc: String?,
-        billingPhone: String?
+        billingPhone: String?,
+        paymentMethodMetadata: PaymentMethodMetadata,
     ): ConfirmationHandler.Args {
         return when (paymentDetails) {
             is LinkPaymentDetails.New -> {
@@ -116,13 +119,15 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     paymentDetails = paymentDetails.paymentDetails,
                     linkAccount = linkAccount,
                     cvc = cvc,
-                    billingPhone = billingPhone
+                    billingPhone = billingPhone,
+                    paymentMethodMetadata = paymentMethodMetadata,
                 )
             }
             is LinkPaymentDetails.Saved -> {
                 savedConfirmationArgs(
                     paymentDetails = paymentDetails,
-                    cvc = cvc
+                    cvc = cvc,
+                    paymentMethodMetadata = paymentMethodMetadata,
                 )
             }
         }
@@ -132,7 +137,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
         cvc: String?,
-        billingPhone: String?
+        billingPhone: String?,
+        paymentMethodMetadata: PaymentMethodMetadata,
     ): ConfirmationHandler.Args {
         val paymentMethodType = if (configuration.passthroughModeEnabled) {
             computeExpectedPaymentMethodType(configuration, paymentDetails)
@@ -169,11 +175,10 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         }
 
         return ConfirmationHandler.Args(
-            intent = configuration.stripeIntent,
             confirmationOption = confirmationOption,
             appearance = PaymentSheet.Appearance(),
             initializationMode = configuration.initializationMode,
-            shippingDetails = configuration.shippingDetails
+            paymentMethodMetadata = paymentMethodMetadata,
         )
     }
 
@@ -192,10 +197,10 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
 
     private fun savedConfirmationArgs(
         paymentDetails: LinkPaymentDetails.Saved,
-        cvc: String?
+        cvc: String?,
+        paymentMethodMetadata: PaymentMethodMetadata,
     ): ConfirmationHandler.Args {
         return ConfirmationHandler.Args(
-            intent = configuration.stripeIntent,
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethod.Builder()
                     .setId(paymentDetails.paymentDetails.paymentMethodId)
@@ -218,7 +223,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             ),
             appearance = PaymentSheet.Appearance(),
             initializationMode = configuration.initializationMode,
-            shippingDetails = configuration.shippingDetails
+            paymentMethodMetadata = paymentMethodMetadata,
         )
     }
 

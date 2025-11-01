@@ -548,15 +548,12 @@ internal class DefaultFlowController @Inject internal constructor(
             )
 
             confirmationOption?.let { option ->
-                val stripeIntent = requireNotNull(state.stripeIntent)
-
                 confirmationHandler.start(
                     arguments = ConfirmationHandler.Args(
                         confirmationOption = option,
-                        intent = stripeIntent,
                         initializationMode = initializationMode,
                         appearance = appearance,
-                        shippingDetails = state.config.shippingDetails,
+                        paymentMethodMetadata = state.paymentMethodMetadata,
                     )
                 )
             } ?: run {

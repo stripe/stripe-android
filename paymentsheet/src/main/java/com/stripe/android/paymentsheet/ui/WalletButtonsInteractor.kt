@@ -319,11 +319,10 @@ internal class DefaultWalletButtonsInteractor constructor(
         ) ?: return null
 
         return ConfirmationHandler.Args(
-            intent = arguments.paymentMethodMetadata.stripeIntent,
             confirmationOption = confirmationOption,
             initializationMode = arguments.initializationMode,
             appearance = arguments.appearance,
-            shippingDetails = arguments.configuration.shippingDetails,
+            paymentMethodMetadata = arguments.paymentMethodMetadata,
         )
     }
 

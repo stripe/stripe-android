@@ -60,11 +60,10 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
         ) ?: return null
 
         return ConfirmationHandler.Args(
-            intent = confirmationState.paymentMethodMetadata.stripeIntent,
             confirmationOption = confirmationOption,
             initializationMode = confirmationState.initializationMode,
             appearance = confirmationState.configuration.appearance,
-            shippingDetails = confirmationState.configuration.shippingDetails,
+            paymentMethodMetadata = confirmationState.paymentMethodMetadata,
         )
     }
 }
