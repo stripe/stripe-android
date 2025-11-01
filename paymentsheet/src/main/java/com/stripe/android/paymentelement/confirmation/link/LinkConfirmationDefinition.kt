@@ -22,14 +22,14 @@ internal class LinkConfirmationDefinition @Inject constructor(
     override val key: String = "Link"
 
     @Volatile
-    private var attestOnIntentConfirmation: Boolean = false
+    private var paymentMethodMetadata: PaymentMethodMetadata? = null
 
     override fun option(confirmationOption: ConfirmationHandler.Option): LinkConfirmationOption? {
         return confirmationOption as? LinkConfirmationOption
     }
 
     override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
-        this.attestOnIntentConfirmation = paymentMethodMetadata.attestOnIntentConfirmation
+        this.paymentMethodMetadata = paymentMethodMetadata
     }
 
     override fun createLauncher(
@@ -65,11 +65,10 @@ internal class LinkConfirmationDefinition @Inject constructor(
     ) {
         launcher.present(
             configuration = confirmationOption.configuration,
+            paymentMethodMetadata = requireNotNull(paymentMethodMetadata),
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             launchMode = confirmationOption.linkLaunchMode,
             linkExpressMode = confirmationOption.linkExpressMode,
-            passiveCaptchaParams = confirmationOption.passiveCaptchaParams,
-            attestOnIntentConfirmation = attestOnIntentConfirmation
         )
     }
 

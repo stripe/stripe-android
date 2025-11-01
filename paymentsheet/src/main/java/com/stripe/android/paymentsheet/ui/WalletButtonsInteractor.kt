@@ -267,11 +267,10 @@ internal class DefaultWalletButtonsInteractor constructor(
             // Launch Link payment selection instead of starting confirmation
             linkPaymentLauncher.present(
                 configuration = linkConfiguration,
+                paymentMethodMetadata = arguments.paymentMethodMetadata,
                 linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                 launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment?.details),
                 linkExpressMode = LinkExpressMode.ENABLED,
-                passiveCaptchaParams = arguments.paymentMethodMetadata.passiveCaptchaParams,
-                attestOnIntentConfirmation = arguments.paymentMethodMetadata.attestOnIntentConfirmation
             )
         } else {
             handleButtonPressed(
