@@ -10,6 +10,7 @@ import androidx.core.view.isVisible
 import com.stripe.android.R
 import com.stripe.android.databinding.StripeActivityBinding
 import androidx.appcompat.R as AppCompatR
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 /**
  * Provides a toolbar, save button, and loading states for the save button.
@@ -78,7 +79,7 @@ abstract class StripeActivity : AppCompatActivity() {
         val tintedIcon = stripeColorUtils.getTintedIconWithAttribute(
             theme,
             AppCompatR.attr.titleTextColor,
-            R.drawable.stripe_ic_checkmark
+            StripeUiCoreR.drawable.stripe_ic_checkmark
         )
         saveItem.icon = tintedIcon
         return super.onPrepareOptionsMenu(menu)

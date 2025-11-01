@@ -29,9 +29,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,6 +44,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -66,6 +64,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
+import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
@@ -92,6 +91,7 @@ import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 @OptIn(
     ExperimentalCustomPaymentMethodsApi::class,
@@ -798,7 +798,7 @@ private fun SearchSettingsField(
         ),
         leadingIcon = {
             Icon(
-                imageVector = Icons.Default.Search,
+                painter = painterResource(R.drawable.ic_search),
                 contentDescription = null,
             )
         },
@@ -808,7 +808,7 @@ private fun SearchSettingsField(
             @Composable {
                 IconButton(onClick = { onQueryChanged("") }) {
                     Icon(
-                        imageVector = Icons.Default.Close,
+                        painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_close),
                         contentDescription = null,
                     )
                 }

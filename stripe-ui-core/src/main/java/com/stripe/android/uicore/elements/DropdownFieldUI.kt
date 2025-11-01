@@ -22,8 +22,6 @@ import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -311,7 +309,7 @@ internal fun DropdownMenuItem(
 
         if (isSelected) {
             Icon(
-                Icons.Filled.Check,
+                painter = painterResource(R.drawable.stripe_ic_checkmark),
                 contentDescription = null,
                 modifier = Modifier
                     .height(24.dp),

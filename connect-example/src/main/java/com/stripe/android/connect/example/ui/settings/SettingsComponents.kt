@@ -16,10 +16,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,10 +23,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.common.ConnectSdkExampleTheme
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
 fun SettingsSectionHeader(
@@ -109,7 +108,7 @@ fun SettingsNavigationItem(
                 .size(36.dp)
                 .padding(start = 8.dp),
             contentDescription = null,
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            painter = painterResource(R.drawable.ic_material_keyboard_arrow_right),
         )
     }
 }
@@ -158,7 +157,7 @@ fun <T> SettingsDropdownField(
                     color = MaterialTheme.colors.onSurface,
                 )
                 Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
+                    painter = painterResource(R.drawable.ic_material_arrow_drop_down),
                     tint = MaterialTheme.colors.onSurface,
                     contentDescription = null,
                 )
@@ -186,7 +185,7 @@ fun <T> SettingsDropdownField(
                             if (option == selectedOption) {
                                 Icon(
                                     modifier = Modifier.size(iconSize),
-                                    imageVector = Icons.Default.Check,
+                                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
                                     tint = MaterialTheme.colors.onSurface,
                                     contentDescription = null,
                                 )
@@ -249,7 +248,7 @@ fun <T> SettingsMultiSelectField(
                     color = MaterialTheme.colors.onSurface,
                 )
                 Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
+                    painter = painterResource(R.drawable.ic_material_arrow_drop_down),
                     tint = MaterialTheme.colors.onSurface,
                     contentDescription = null,
                 )

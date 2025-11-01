@@ -14,9 +14,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
@@ -52,6 +49,7 @@ import com.stripe.android.uicore.navigation.KeyboardController
 import com.stripe.android.uicore.navigation.rememberKeyboardController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 private val LOGO_WIDTH = 50.dp
 private val LOGO_HEIGHT = 20.dp
@@ -149,7 +147,7 @@ private fun BackButton(
         },
     ) {
         Icon(
-            imageVector = Icons.Filled.ArrowBack,
+            painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_arrow_back),
             contentDescription = "Back icon",
             tint = FinancialConnectionsTheme.colors.icon,
             modifier = Modifier
@@ -174,7 +172,7 @@ private fun CloseButton(
         }
     ) {
         Icon(
-            imageVector = Icons.Filled.Close,
+            painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_close),
             contentDescription = "Close icon",
             tint = FinancialConnectionsTheme.colors.icon,
         )

@@ -25,8 +25,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,6 +44,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -73,6 +72,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.uicore.text.MiddleEllipsisText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 private const val ENTER_TRANSITION_DURATION_MS = 1000
 private const val SLIDE_IN_ANIMATION_FRACTION = 4
@@ -288,7 +288,7 @@ private fun SpinnerToCheckmark(
                     scaleX = checkmarkScale
                     scaleY = checkmarkScale
                 },
-                imageVector = Icons.Default.Check,
+                painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
                 contentDescription = stringResource(id = R.string.stripe_success_pane_title),
                 tint = colors.primaryAccent,
             )

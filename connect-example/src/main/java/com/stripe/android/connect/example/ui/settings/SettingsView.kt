@@ -16,9 +16,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,11 +24,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 import com.stripe.android.connect.example.ui.settings.SettingsViewModel.SettingsState.DemoMerchant
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
 @Suppress("LongMethod")
@@ -52,7 +51,7 @@ fun SettingsView(
         navigationIcon = {
             IconButton(onClick = onDismiss) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_arrow_back),
                     contentDescription = stringResource(R.string.cancel)
                 )
             }
@@ -68,7 +67,7 @@ fun SettingsView(
                 },
             ) {
                 Icon(
-                    imageVector = Icons.Default.Check,
+                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
                     contentDescription = stringResource(R.string.save)
                 )
             }
