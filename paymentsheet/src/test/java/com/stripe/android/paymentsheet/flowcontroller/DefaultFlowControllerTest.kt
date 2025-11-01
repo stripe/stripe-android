@@ -527,11 +527,10 @@ internal class DefaultFlowControllerTest {
 
         verify(flowControllerLinkPaymentLauncher).present(
             configuration = any(),
+            paymentMethodMetadata = any(),
             linkAccountInfo = anyOrNull(),
             launchMode = any(),
             linkExpressMode = any(),
-            passiveCaptchaParams = anyOrNull(),
-            attestOnIntentConfirmation = any(),
         )
 
         verify(paymentOptionActivityLauncher, never()).launch(any(), anyOrNull())
@@ -569,11 +568,10 @@ internal class DefaultFlowControllerTest {
         // Verify Link launcher was called for the first time
         verify(flowControllerLinkPaymentLauncher).present(
             configuration = any(),
+            paymentMethodMetadata = any(),
             linkAccountInfo = anyOrNull(),
             launchMode = any(),
             linkExpressMode = any(),
-            passiveCaptchaParams = anyOrNull(),
-            attestOnIntentConfirmation = any(),
         )
 
         // Simulate user dismissing 2FA with back press
@@ -593,11 +591,10 @@ internal class DefaultFlowControllerTest {
         // Verify Link launcher was NOT called the second time
         verify(flowControllerLinkPaymentLauncher, never()).present(
             configuration = any(),
+            paymentMethodMetadata = any(),
             linkAccountInfo = anyOrNull(),
             linkExpressMode = any(),
             launchMode = any(),
-            passiveCaptchaParams = any(),
-            attestOnIntentConfirmation = any(),
         )
 
         // Verify payment option launcher was called instead

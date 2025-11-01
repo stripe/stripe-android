@@ -14,7 +14,9 @@ import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.exceptions.AppAttestationException
 import com.stripe.android.link.exceptions.MissingConfigurationException
 import com.stripe.android.link.injection.LinkComponent
+import com.stripe.android.link.injection.LinkMetadata
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
@@ -120,7 +122,12 @@ class LinkControllerInteractorTest {
         val interactor = createInteractor()
 
         val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
-        linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
+        linkConfigurationLoader.linkConfigurationResult = Result.success(
+            LinkMetadata(
+                linkConfiguration = loadedConfiguration,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            )
+        )
 
         val controllerConfig =
             LinkController.Configuration.Builder(
@@ -155,7 +162,12 @@ class LinkControllerInteractorTest {
         }
 
         val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
-        linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
+        linkConfigurationLoader.linkConfigurationResult = Result.success(
+            LinkMetadata(
+                linkConfiguration = loadedConfiguration,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            )
+        )
 
         interactor.state(application).test {
             assertThat(awaitItem()).isNotEqualTo(LinkController.State())
@@ -981,7 +993,12 @@ class LinkControllerInteractorTest {
             merchantName = "Test",
             passthroughModeEnabled = passthroughModeEnabled
         )
-        linkConfigurationLoader.linkConfigurationResult = Result.success(linkConfiguration)
+        linkConfigurationLoader.linkConfigurationResult = Result.success(
+            LinkMetadata(
+                linkConfiguration = linkConfiguration,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            )
+        )
         interactor.configure(
             LinkController.Configuration.Builder("Test", ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
                 .apply { defaultBillingDetails?.let { defaultBillingDetails(it.getOrNull()) } }
@@ -1017,7 +1034,12 @@ class LinkControllerInteractorTest {
     ) {
         linkAttestationCheck.result = attestationResult
         val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
-        linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
+        linkConfigurationLoader.linkConfigurationResult = Result.success(
+            LinkMetadata(
+                linkConfiguration = loadedConfiguration,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            )
+        )
         interactor.configure(createControllerConfig())
     }
 
