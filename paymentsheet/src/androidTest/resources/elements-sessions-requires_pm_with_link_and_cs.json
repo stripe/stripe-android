@@ -30,7 +30,8 @@
     "link_only_for_payment_method_types_enabled": false,
     "link_passthrough_mode_enabled": true,
     "link_pay_button_element_enabled": false,
-    "link_session_storage_login_enabled": true
+    "link_session_storage_login_enabled": true,
+    "link_mode": "PASSTHROUGH"
   },
   "customer": {
     "payment_methods": [],

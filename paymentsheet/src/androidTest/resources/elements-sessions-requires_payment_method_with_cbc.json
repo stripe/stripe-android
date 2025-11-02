@@ -173,7 +173,8 @@
     "link_payment_element_uses_new_api_client": false,
     "link_popup_webview_option": "shared",
     "link_session_storage_login_enabled": true,
-    "link_show_bank_account_details_in_link_popup": false
+    "link_show_bank_account_details_in_link_popup": false,
+    "link_mode": "LINK_PAYMENT_METHOD"
   },
   "merchant_country": "FR",
   "merchant_currency": "eur",

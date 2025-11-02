@@ -756,7 +756,10 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Considers Link logged in if the account is verified`() = runTest {
-        val loader = createPaymentElementLoader(linkAccountState = AccountStatus.Verified(true, null))
+        val loader = createPaymentElementLoader(
+            linkAccountState = AccountStatus.Verified(true, null),
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
+        )
 
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
@@ -771,7 +774,10 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Considers Link as needing verification if the account needs verification`() = runTest {
-        val loader = createPaymentElementLoader(linkAccountState = AccountStatus.NeedsVerification())
+        val loader = createPaymentElementLoader(
+            linkAccountState = AccountStatus.NeedsVerification(),
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
+        )
 
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
@@ -786,7 +792,10 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Considers Link as needing verification if the account is being verified`() = runTest {
-        val loader = createPaymentElementLoader(linkAccountState = AccountStatus.VerificationStarted)
+        val loader = createPaymentElementLoader(
+            linkAccountState = AccountStatus.VerificationStarted,
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
+        )
 
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
@@ -801,7 +810,10 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Considers Link as logged out correctly`() = runTest {
-        val loader = createPaymentElementLoader(linkAccountState = AccountStatus.SignedOut)
+        val loader = createPaymentElementLoader(
+            linkAccountState = AccountStatus.SignedOut,
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
+        )
 
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
@@ -816,7 +828,9 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Populates Link configuration correctly from billing details`() = runTest {
-        val loader = createPaymentElementLoader()
+        val loader = createPaymentElementLoader(
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
+        )
 
         val billingDetails = PaymentSheet.BillingDetails(
             address = PaymentSheet.Address(country = "CA"),
@@ -847,7 +861,9 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Populates Link configuration with shipping details if checkbox is selected`() = runTest {
-        val loader = createPaymentElementLoader()
+        val loader = createPaymentElementLoader(
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
+        )
 
         val shippingDetails = AddressDetails(
             name = "Not Till",
@@ -873,7 +889,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
             linkSettings = ElementsSession.LinkSettings(
-                linkFundingSources = emptyList(),
+                linkFundingSources = listOf("card", "bank_account"),
                 linkPassthroughModeEnabled = true,
                 linkMode = LinkMode.Passthrough,
                 linkFlags = emptyMap(),
@@ -906,7 +922,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             linkSettings = ElementsSession.LinkSettings(
-                linkFundingSources = emptyList(),
+                linkFundingSources = listOf("card", "bank_account"),
                 linkPassthroughModeEnabled = false,
                 linkMode = LinkMode.LinkPaymentMethod,
                 linkFlags = mapOf(
@@ -961,6 +977,7 @@ internal class DefaultPaymentElementLoaderTest {
                 eligible = true,
                 preferredNetworks = listOf("cartes_bancaires"),
             ),
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
         )
 
         val result = loader.load(
@@ -984,6 +1001,7 @@ internal class DefaultPaymentElementLoaderTest {
                 eligible = false,
                 preferredNetworks = listOf("cartes_bancaires"),
             ),
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
         )
 
         val result = loader.load(
@@ -1147,6 +1165,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkFundingSources = listOf("card"),
             ),
             linkAccountState = AccountStatus.SignedOut,
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
         )
 
         val result = loader.load(
@@ -1164,6 +1183,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Enables Link inline signup if user has no account`() = runTest {
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
         )
 
         val result = loader.load(
@@ -1179,7 +1199,9 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Uses shipping address phone number if checkbox is selected`() = runTest {
-        val loader = createPaymentElementLoader()
+        val loader = createPaymentElementLoader(
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
+        )
 
         val billingDetails = PaymentSheet.BillingDetails(phone = "123-456-7890")
 
@@ -1214,7 +1236,8 @@ internal class DefaultPaymentElementLoaderTest {
             ),
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 setupFutureUsage = StripeIntent.Usage.OffSession,
-            )
+            ),
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
         )
 
         val result = loader.load(
@@ -1317,7 +1340,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Emits correct events when loading succeeds for non-deferred intent`() = runTest {
         val loader = createPaymentElementLoader(
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+            linkSettings = createLinkSettings(mode = LinkMode.LinkPaymentMethod),
         )
         val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret")
 
@@ -1385,7 +1408,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Emits correct events when loading succeeds for deferred intent`() = runTest {
         val loader = createPaymentElementLoader(
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+            linkSettings = createLinkSettings(mode = LinkMode.LinkPaymentMethod),
         )
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
             intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -1611,6 +1634,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Returns correct Link signup mode if not saving for future use`() = runTest {
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
         )
 
         val result = loader.load(
@@ -1630,6 +1654,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Returns correct Link signup mode if saving for future use`() = runTest {
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
         )
 
         val result = loader.load(
@@ -1657,7 +1682,8 @@ internal class DefaultPaymentElementLoaderTest {
             linkAccountState = AccountStatus.SignedOut,
             customer = createElementsSessionCustomer(
                 isPaymentMethodSaveEnabled = false,
-            )
+            ),
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
         )
 
         val result = loader.load(
@@ -1677,7 +1703,8 @@ internal class DefaultPaymentElementLoaderTest {
             linkAccountState = AccountStatus.SignedOut,
             customer = createElementsSessionCustomer(
                 isPaymentMethodSaveEnabled = true,
-            )
+            ),
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
         )
 
         val result = loader.load(
@@ -1696,7 +1723,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
             linkSettings = createLinkSettings(
-                passthroughModeEnabled = false,
+                mode = LinkMode.LinkPaymentMethod,
                 linkSignUpOptInFeatureEnabled = true
             )
         )
@@ -1723,7 +1750,7 @@ internal class DefaultPaymentElementLoaderTest {
             val loader = createPaymentElementLoader(
                 linkAccountState = AccountStatus.SignedOut,
                 linkSettings = createLinkSettings(
-                    passthroughModeEnabled = false,
+                    mode = LinkMode.LinkPaymentMethod,
                     linkSignUpOptInFeatureEnabled = true
                 )
             )
@@ -1764,7 +1791,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkStore = linkStore,
             stripeIntent = stripeIntent,
             linkSettings = createLinkSettings(
-                passthroughModeEnabled = false,
+                mode = LinkMode.LinkPaymentMethod,
                 linkSignUpOptInFeatureEnabled = true
             )
         )
@@ -1786,7 +1813,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
             linkSettings = createLinkSettings(
-                passthroughModeEnabled = false,
+                mode = LinkMode.LinkPaymentMethod,
                 linkSignUpOptInFeatureEnabled = true
             ).copy(disableLinkSignup = true)
         )
@@ -1806,22 +1833,22 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Returns correct Link enablement based on card brand filtering`() = runTest {
         testLinkEnablementWithCardBrandFiltering(
-            passthroughModeEnabled = false,
+            linkMode = LinkMode.LinkPaymentMethod,
             useNativeLink = true,
             expectedEnabled = true
         )
         testLinkEnablementWithCardBrandFiltering(
-            passthroughModeEnabled = true,
+            linkMode = LinkMode.Passthrough,
             useNativeLink = true,
             expectedEnabled = true
         )
         testLinkEnablementWithCardBrandFiltering(
-            passthroughModeEnabled = false,
+            linkMode = LinkMode.LinkPaymentMethod,
             useNativeLink = false,
             expectedEnabled = true
         )
         testLinkEnablementWithCardBrandFiltering(
-            passthroughModeEnabled = true,
+            linkMode = LinkMode.Passthrough,
             useNativeLink = false,
             expectedEnabled = false
         )
@@ -1899,12 +1926,12 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private suspend fun testLinkEnablementWithCardBrandFiltering(
-        passthroughModeEnabled: Boolean,
+        linkMode: LinkMode,
         useNativeLink: Boolean,
         expectedEnabled: Boolean,
     ) {
         val loader = createPaymentElementLoader(
-            linkSettings = createLinkSettings(passthroughModeEnabled = passthroughModeEnabled),
+            linkSettings = createLinkSettings(mode = linkMode),
             linkGate = FakeLinkGate().apply { setUseNativeLink(useNativeLink) }
         )
 
@@ -2598,7 +2625,8 @@ internal class DefaultPaymentElementLoaderTest {
                         ),
                     ),
                     defaultPaymentMethod = null,
-                )
+                ),
+                linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
             )
 
             loader.load(
@@ -2963,7 +2991,7 @@ internal class DefaultPaymentElementLoaderTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "link"),
             ),
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+            linkSettings = createLinkSettings(mode = LinkMode.LinkPaymentMethod),
         )
 
         loader.load(
@@ -3001,7 +3029,7 @@ internal class DefaultPaymentElementLoaderTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "link"),
             ),
-            linkSettings = createLinkSettings(passthroughModeEnabled = true),
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
         )
 
         loader.load(
@@ -3037,7 +3065,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Emits correct event when CVC recollection is required`() = runTest {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+            linkSettings = createLinkSettings(mode = LinkMode.LinkPaymentMethod),
         )
 
         loader.load(
@@ -3073,7 +3101,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Emits correct event when CVC recollection is required for deferred`() = runTest {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+            linkSettings = createLinkSettings(mode = LinkMode.LinkPaymentMethod),
         )
 
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
@@ -3119,7 +3147,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Emits correct event when CVC recollection is required on intent but not deferred config`() = runTest {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+            linkSettings = createLinkSettings(mode = LinkMode.LinkPaymentMethod),
         )
 
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
@@ -3284,7 +3312,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Allows Link if Link display is set to 'automatic'`() = runTest {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+            linkSettings = createLinkSettings(mode = LinkMode.LinkPaymentMethod),
         )
 
         val config = PaymentSheet.Configuration(
@@ -3312,6 +3340,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Emits correct load event if Link display is set to 'automatic'`() = runTest {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            linkSettings = createLinkSettings(mode = LinkMode.Passthrough),
         )
 
         val config = PaymentSheet.Configuration(
@@ -3387,7 +3416,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             linkSettings = createLinkSettings(
-                passthroughModeEnabled = false,
+                mode = LinkMode.LinkPaymentMethod,
                 useAttestationEndpoints = false,
             ),
             linkGate = linkGate,
@@ -3505,8 +3534,9 @@ internal class DefaultPaymentElementLoaderTest {
                 isLiveMode = true // In live mode, shouldWarmUpIntegrity depends on useAttestationEndpointsForLink
             ),
             linkSettings = createLinkSettings(
-                passthroughModeEnabled = false
-            ).copy(useAttestationEndpoints = true),
+                mode = LinkMode.LinkPaymentMethod,
+                useAttestationEndpoints = true,
+            ),
             integrityRequestManager = integrityRequestManager,
         )
 
@@ -3534,8 +3564,9 @@ internal class DefaultPaymentElementLoaderTest {
                 isLiveMode = true // In live mode, shouldWarmUpIntegrity depends on useAttestationEndpointsForLink
             ),
             linkSettings = createLinkSettings(
-                passthroughModeEnabled = false
-            ).copy(useAttestationEndpoints = false),
+                mode = LinkMode.LinkPaymentMethod,
+                useAttestationEndpoints = false,
+            ),
             integrityRequestManager = integrityRequestManager,
         )
 
@@ -3562,8 +3593,9 @@ internal class DefaultPaymentElementLoaderTest {
                 isLiveMode = false // In test mode, behavior depends on feature flag + useAttestationEndpointsForLink
             ),
             linkSettings = createLinkSettings(
-                passthroughModeEnabled = false
-            ).copy(useAttestationEndpoints = true),
+                mode = LinkMode.LinkPaymentMethod,
+                useAttestationEndpoints = true,
+            ),
             integrityRequestManager = integrityRequestManager,
         )
 
@@ -3821,7 +3853,7 @@ internal class DefaultPaymentElementLoaderTest {
         prefsRepository.savePaymentSelection(paymentSelection)
 
         val loader = createPaymentElementLoader(
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+            linkSettings = createLinkSettings(mode = LinkMode.LinkPaymentMethod),
         )
         val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret")
 
@@ -3866,14 +3898,14 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private fun createLinkSettings(
-        passthroughModeEnabled: Boolean,
+        mode: LinkMode,
         linkSignUpOptInFeatureEnabled: Boolean = false,
         useAttestationEndpoints: Boolean = false,
     ): ElementsSession.LinkSettings {
         return ElementsSession.LinkSettings(
             linkFundingSources = listOf("card", "bank"),
-            linkPassthroughModeEnabled = passthroughModeEnabled,
-            linkMode = if (passthroughModeEnabled) LinkMode.Passthrough else LinkMode.LinkPaymentMethod,
+            linkPassthroughModeEnabled = mode == LinkMode.Passthrough || mode == LinkMode.LinkCardBrand,
+            linkMode = mode,
             linkFlags = mapOf(),
             disableLinkSignup = false,
             linkConsumerIncentive = null,
