@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
@@ -244,7 +245,9 @@ class CustomPaymentMethodConfirmationDefinitionTest {
 
     companion object {
         private val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
-            intent = PaymentIntentFactory.create(),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFactory.create(),
+            ),
             confirmationOption = FakeConfirmationOption(),
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
@@ -252,7 +255,6 @@ class CustomPaymentMethodConfirmationDefinitionTest {
             appearance = PaymentSheet.Appearance.Builder()
                 .colorsDark(PaymentSheet.Colors.defaultLight)
                 .build(),
-            shippingDetails = null,
         )
 
         private val CUSTOM_PAYMENT_METHOD_TYPE = PaymentSheet.CustomPaymentMethod(

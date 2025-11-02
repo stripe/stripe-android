@@ -369,13 +369,16 @@ internal class LinkConfirmationDefinitionTest {
     ): RecordingLinkPaymentLauncher.PresentCall {
         val definition = createLinkConfirmationDefinition()
 
+        val paymentMethodMetadata = createMetadata(attestOnIntentConfirmation = attestOnIntentConfirmation ?: false)
         if (attestOnIntentConfirmation != null) {
-            definition.bootstrap(createMetadata(attestOnIntentConfirmation = attestOnIntentConfirmation))
+            definition.bootstrap(paymentMethodMetadata)
         }
 
         definition.launch(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationArgs = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = paymentMethodMetadata,
+            ),
             launcher = launcherScenario.launcher,
             arguments = Unit,
         )

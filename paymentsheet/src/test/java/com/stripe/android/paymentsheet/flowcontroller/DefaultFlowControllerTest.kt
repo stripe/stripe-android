@@ -2302,8 +2302,6 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `On confirm existing payment method & PI, should send expected params to handler`() = confirmationTest {
-        val flowController = createFlowController()
-
         val shippingDetails = AddressDetails(
             name = "John Doe",
             phoneNumber = "11234567890",
@@ -2316,6 +2314,8 @@ internal class DefaultFlowControllerTest {
                 postalCode = "99899",
             )
         )
+
+        val flowController = createFlowController(shippingDetails = shippingDetails)
 
         flowController.configureWithPaymentIntent(
             paymentIntentClientSecret = "pi_123",
@@ -2353,7 +2353,7 @@ internal class DefaultFlowControllerTest {
                 passiveCaptchaParams = null
             )
         )
-        assertThat(arguments.shippingDetails).isEqualTo(shippingDetails)
+        assertThat(arguments.paymentMethodMetadata.shippingDetails).isEqualTo(shippingDetails)
     }
 
     @Test
@@ -2402,7 +2402,7 @@ internal class DefaultFlowControllerTest {
                 passiveCaptchaParams = null
             )
         )
-        assertThat(arguments.shippingDetails).isNull()
+        assertThat(arguments.paymentMethodMetadata.shippingDetails).isNull()
     }
 
     @Test
@@ -2536,6 +2536,7 @@ internal class DefaultFlowControllerTest {
             loginState = LinkState.LoginState.LoggedIn,
             signupMode = null,
         ),
+        shippingDetails: AddressDetails? = null,
         viewModel: FlowControllerViewModel = createViewModel(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this@DefaultFlowControllerTest.eventReporter,
@@ -2550,6 +2551,7 @@ internal class DefaultFlowControllerTest {
                 linkState = linkState,
                 passiveCaptchaParams = passiveCaptchaParams,
                 clientAttributionMetadata = clientAttributionMetadata,
+                shippingDetails = shippingDetails,
             ),
             viewModel,
             errorReporter,

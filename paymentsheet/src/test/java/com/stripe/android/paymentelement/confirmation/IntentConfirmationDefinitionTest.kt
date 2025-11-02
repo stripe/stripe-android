@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -107,7 +108,7 @@ class IntentConfirmationDefinitionTest {
             assertThat(result.paymentMethod).isEqualTo(confirmationOption.paymentMethod)
             assertThat(result.paymentMethodOptionsParams).isEqualTo(confirmationOption.optionsParams)
             assertThat(result.shippingValues).isEqualTo(
-                CONFIRMATION_PARAMETERS.shippingDetails?.toConfirmPaymentIntentShipping()
+                CONFIRMATION_PARAMETERS.paymentMethodMetadata.shippingDetails?.toConfirmPaymentIntentShipping()
             )
         }
 
@@ -342,9 +343,7 @@ class IntentConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
-                intent = PaymentIntentFixtures.PI_SUCCEEDED,
-            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             isConfirmationToken = false,
             result = InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED),
@@ -465,12 +464,17 @@ class IntentConfirmationDefinitionTest {
 
         private val CONFIRMATION_PARAMETERS =
             com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS.copy(
-                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                shippingDetails = AddressDetails(name = "John Doe")
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                    shippingDetails = AddressDetails(name = "John Doe")
+                ),
             )
 
         private val CONFIRMATION_PARAMETERS_WITH_SI = CONFIRMATION_PARAMETERS.copy(
-            intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+                shippingDetails = AddressDetails(name = "John Doe")
+            ),
         )
     }
 }

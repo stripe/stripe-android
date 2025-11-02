@@ -264,8 +264,10 @@ internal class AttestationConfirmationActivityTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"
             ),
-            shippingDetails = AddressDetails(),
-            intent = PAYMENT_INTENT,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                shippingDetails = AddressDetails(),
+                stripeIntent = PAYMENT_INTENT,
+            ),
             appearance = PaymentSheet.Appearance(),
         )
 
@@ -274,8 +276,10 @@ internal class AttestationConfirmationActivityTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"
             ),
-            shippingDetails = AddressDetails(),
-            intent = PAYMENT_INTENT,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                shippingDetails = AddressDetails(),
+                stripeIntent = PAYMENT_INTENT,
+            ),
             appearance = PaymentSheet.Appearance(),
         )
 

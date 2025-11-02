@@ -21,7 +21,7 @@ import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.NativeLinkArgs
 import com.stripe.android.link.TestFactory
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -101,8 +101,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                 ConfirmationHandler.Args(
                     confirmationOption = LINK_CONFIRMATION_OPTION,
                     appearance = CONFIRMATION_PARAMETERS.appearance,
-                    intent = CONFIRMATION_PARAMETERS.intent,
-                    shippingDetails = CONFIRMATION_PARAMETERS.shippingDetails,
+                    paymentMethodMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata,
                     initializationMode = CONFIRMATION_PARAMETERS.initializationMode,
                 )
             )
@@ -111,7 +110,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
 
             assertThat(confirmingWithLink.option).isEqualTo(LINK_CONFIRMATION_OPTION)
 
-            intendedLinkToBeLaunched()
+            intendedLinkToBeLaunched(CONFIRMATION_PARAMETERS.paymentMethodMetadata)
 
             val confirmingWithSavedPaymentMethod = awaitItem().assertConfirming()
 
@@ -177,7 +176,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
         )
     }
 
-    private fun intendedLinkToBeLaunched() {
+    private fun intendedLinkToBeLaunched(paymentMethodMetadata: PaymentMethodMetadata) {
         if (FeatureFlags.nativeLinkEnabled.isEnabled) {
             intended(
                 allOf(
@@ -186,7 +185,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                         "native_link_args",
                         NativeLinkArgs(
                             configuration = TestFactory.LINK_CONFIGURATION,
-                            paymentMethodMetadata = PaymentMethodMetadataFactory.create(passiveCaptchaParams = null),
+                            paymentMethodMetadata = paymentMethodMetadata,
                             requestSurface = RequestSurface.PaymentElement,
                             publishableKey = PUBLISHABLE_KEY,
                             stripeAccountId = null,

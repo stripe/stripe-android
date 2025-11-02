@@ -627,7 +627,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             )
         )
         assertThat(option.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
-        assertThat(shippingDetails).isEqualTo(configuration.shippingDetails)
+        assertThat(paymentMethodMetadata.shippingDetails).isEqualTo(configuration.shippingDetails)
         assertThat(initializationMode).isEqualTo(configuration.initializationMode)
     }
 
@@ -644,22 +644,28 @@ internal class DefaultLinkConfirmationHandlerTest {
 
         val optionsCard = option.optionsParams as? PaymentMethodOptionsParams.Card
         assertThat(optionsCard?.cvc).isEqualTo(cvc)
-        assertThat(shippingDetails).isEqualTo(configuration.shippingDetails)
+        assertThat(paymentMethodMetadata.shippingDetails).isEqualTo(configuration.shippingDetails)
         assertThat(initializationMode).isEqualTo(configuration.initializationMode)
     }
 
-    private fun createHandler(
+    private suspend fun createHandler(
         configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         logger: Logger = FakeLogger(),
         confirmationHandler: FakeConfirmationHandler = FakeConfirmationHandler(),
         passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS
     ): DefaultLinkConfirmationHandler {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            passiveCaptchaParams = passiveCaptchaParams,
+            stripeIntent = configuration.stripeIntent,
+        )
         val handler = DefaultLinkConfirmationHandler(
             confirmationHandler = confirmationHandler,
             configuration = configuration,
             logger = logger,
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(passiveCaptchaParams = passiveCaptchaParams),
+            paymentMethodMetadata = paymentMethodMetadata,
         )
+        assertThat(confirmationHandler.bootstrapTurbine.awaitItem().paymentMethodMetadata)
+            .isEqualTo(paymentMethodMetadata)
         confirmationHandler.validate()
         return handler
     }

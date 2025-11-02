@@ -158,7 +158,9 @@ internal class LinkPaymentLauncherTest {
 
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    attestOnIntentConfirmation = attestOnIntentConfirmation
+                ),
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 linkExpressMode = LinkExpressMode.ENABLED,
                 launchMode = LinkLaunchMode.Full,

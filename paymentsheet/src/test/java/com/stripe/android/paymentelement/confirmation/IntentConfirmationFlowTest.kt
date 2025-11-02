@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.FakeStripeRepository
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -326,12 +327,14 @@ internal class IntentConfirmationFlowTest {
     ): ConfirmationHandler.Args {
         return ConfirmationHandler.Args(
             initializationMode = initializationMode,
-            intent = intent,
-            confirmationOption = FakeConfirmationOption(),
-            shippingDetails = AddressDetails(
-                name = "John Doe",
-                phoneNumber = "1234567890"
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = intent,
+                shippingDetails = AddressDetails(
+                    name = "John Doe",
+                    phoneNumber = "1234567890"
+                ),
             ),
+            confirmationOption = FakeConfirmationOption(),
             appearance = PaymentSheet.Appearance(),
         )
     }
@@ -377,10 +380,12 @@ internal class IntentConfirmationFlowTest {
                 )
             ),
             confirmationOption = FakeConfirmationOption(),
-            intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-            shippingDetails = AddressDetails(
-                name = "John Doe",
-                phoneNumber = "1234567890"
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+                shippingDetails = AddressDetails(
+                    name = "John Doe",
+                    phoneNumber = "1234567890"
+                ),
             ),
             appearance = PaymentSheet.Appearance(),
         )
