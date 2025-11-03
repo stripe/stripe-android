@@ -1318,4 +1318,45 @@ internal class FlowControllerTest {
         page.assertMandateIsMissing()
         testContext.markTestSucceeded()
     }
+
+    @Test
+    fun testOBO_PassedToElementsSessionCall(
+        @TestParameter integrationType: IntegrationType,
+    ) = runFlowControllerTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        val oboMerchantID = "acct_connected_1234"
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+            query(urlEncode("deferred_intent[on_behalf_of]"), oboMerchantID)
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+
+        testContext.configureFlowController {
+            configureWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 5099,
+                        currency = "usd",
+                    ),
+                    onBehalfOf = oboMerchantID
+                ),
+                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                    .build(),
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    presentPaymentOptions()
+                }
+            )
+        }
+
+        testContext.markTestSucceeded()
+    }
 }

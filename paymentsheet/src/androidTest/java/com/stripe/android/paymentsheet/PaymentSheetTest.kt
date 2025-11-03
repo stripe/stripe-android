@@ -797,4 +797,39 @@ internal class PaymentSheetTest {
             )
         }
     }
+
+    @Test
+    fun testOBO_PassedToElementsSessionCall() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        val oboMerchantID = "acct_connected_1234"
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+            query(urlEncode("deferred_intent[on_behalf_of]"), oboMerchantID)
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 5000,
+                        currency = "USD"
+                    ),
+                    onBehalfOf = oboMerchantID
+                ),
+                configuration = defaultConfiguration,
+            )
+        }
+
+        val c = 'a'
+        c.isISOControl()
+
+        testContext.markTestSucceeded()
+    }
 }
