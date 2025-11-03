@@ -10,6 +10,7 @@ sealed class CardNumber {
     /**
      * A representation of a partial or full card number that hasn't been validated.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Unvalidated constructor(
         private val denormalized: String
     ) : CardNumber() {
@@ -107,6 +108,7 @@ sealed class CardNumber {
         val value: String
     ) : CardNumber()
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun getSpacePositions(panLength: Int) = SPACE_POSITIONS[panLength]

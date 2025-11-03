@@ -15,6 +15,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PassiveCaptchaParamsFactory
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -33,9 +34,10 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
+import com.stripe.android.testing.DummyActivityResultCaller
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
-import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultLauncher
 import kotlinx.coroutines.test.runTest
 import kotlinx.parcelize.Parcelize
@@ -253,6 +255,7 @@ class GooglePayConfirmationDefinitionTest {
                 clientSecret = "pi_123_secret_123",
             ),
             merchantCurrencyCode = null,
+            intent = PaymentIntentFactory.create(),
             test = ::assertLaunchAction,
         )
 
@@ -278,6 +281,7 @@ class GooglePayConfirmationDefinitionTest {
                 ),
             ),
             merchantCurrencyCode = null,
+            intent = PaymentIntentFactory.create(id = null),
             test = ::assertLaunchAction,
         )
 
@@ -526,6 +530,7 @@ class GooglePayConfirmationDefinitionTest {
     private fun runActionTest(
         initializationMode: PaymentElementLoader.InitializationMode,
         merchantCurrencyCode: String?,
+        intent: StripeIntent = SetupIntentFactory.create(),
         test: (scenario: ActionScenario) -> Unit,
     ) = runTest {
         val userFacingLogger = FakeUserFacingLogger()
@@ -539,7 +544,7 @@ class GooglePayConfirmationDefinitionTest {
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS.copy(
                 initializationMode = initializationMode,
-                intent = SetupIntentFactory.create(),
+                intent = intent,
             ),
         )
 

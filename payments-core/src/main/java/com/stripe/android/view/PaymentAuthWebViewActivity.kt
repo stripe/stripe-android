@@ -134,12 +134,15 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             setResult(
                 Activity.RESULT_OK,
                 createResultIntent(
-                    viewModel.paymentResult
-                        .copy(
-                            exception = StripeException.create(error),
-                            flowOutcome = StripeIntentResult.Outcome.FAILED,
-                            canCancelSource = true
-                        )
+                    PaymentFlowResult.Unvalidated(
+                        clientSecret = viewModel.paymentResult.clientSecret,
+                        flowOutcome = StripeIntentResult.Outcome.FAILED,
+                        exception = StripeException.create(error),
+                        canCancelSource = true,
+                        sourceId = viewModel.paymentResult.sourceId,
+                        source = viewModel.paymentResult.source,
+                        stripeAccountId = viewModel.paymentResult.stripeAccountId
+                    )
                 )
             )
         } else {

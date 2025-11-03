@@ -44,9 +44,9 @@ import com.stripe.android.paymentelement.confirmation.asSaved
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.flow.Flow

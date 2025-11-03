@@ -1,10 +1,12 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class Networks(
+@Poko
+class Networks(
     /**
      * The customer’s preferred card network for co-branded cards. Supports cartes_bancaires, mastercard, or visa.
      * Selection of a network that does not apply to the card will be stored as invalid_preference on the card.

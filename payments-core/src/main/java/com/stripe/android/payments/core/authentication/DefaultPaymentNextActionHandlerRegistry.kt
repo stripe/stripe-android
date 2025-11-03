@@ -124,7 +124,6 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
             enableLogging: Boolean,
             workContext: CoroutineContext,
             uiContext: CoroutineContext,
-            threeDs1IntentReturnUrlMap: MutableMap<String, String>,
             publishableKeyProvider: () -> String,
             productUsage: Set<String>,
             isInstantApp: Boolean,
@@ -136,7 +135,6 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
                 .enableLogging(enableLogging)
                 .workContext(workContext)
                 .uiContext(uiContext)
-                .threeDs1IntentReturnUrlMap(threeDs1IntentReturnUrlMap)
                 .publishableKeyProvider(publishableKeyProvider)
                 .productUsage(productUsage)
                 .isInstantApp(isInstantApp)

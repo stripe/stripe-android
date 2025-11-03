@@ -3,6 +3,7 @@ package com.stripe.android.payments.core.injection
 import android.content.Context
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.PaymentRelayStarter
+import com.stripe.android.challenge.confirmation.IntentConfirmationChallengeNextActionHandler
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.NextActionData
 import com.stripe.android.payments.DefaultReturnUrl
@@ -26,13 +27,6 @@ import javax.inject.Singleton
 @Module
 @SuppressWarnings("UnnecessaryAbstractClass")
 internal abstract class NextActionHandlerModule {
-    @IntentAuthenticatorMap
-    @Binds
-    @IntoMap
-    @IntentAuthenticatorKey(NextActionData.SdkData.Use3DS1::class)
-    abstract fun binds3DS1NextActionHandler(
-        webIntentNextActionHandler: WebIntentNextActionHandler
-    ): PaymentNextActionHandler<StripeIntent>
 
     @IntentAuthenticatorMap
     @Binds
@@ -100,6 +94,14 @@ internal abstract class NextActionHandlerModule {
 
     @Binds
     abstract fun bindsRedirectResolver(impl: RealRedirectResolver): RedirectResolver
+
+    @IntentAuthenticatorMap
+    @Binds
+    @IntoMap
+    @IntentAuthenticatorKey(NextActionData.SdkData.IntentConfirmationChallenge::class)
+    abstract fun bindsIntentConfirmationChallengeNextActionHandler(
+        intentConfirmationChallengeNextActionHandler: IntentConfirmationChallengeNextActionHandler
+    ): PaymentNextActionHandler<StripeIntent>
 
     companion object {
         @Provides

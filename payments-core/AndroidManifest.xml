@@ -68,12 +68,17 @@
             android:exported="false" />
 
         <activity
-            android:name=".challenge.PassiveChallengeActivity"
+            android:name=".challenge.passive.PassiveChallengeActivity"
             android:theme="@style/StripeTransparentTheme"
             android:exported="false" />
 
         <activity
-            android:name=".challenge.warmer.activity.PassiveChallengeWarmerActivity"
+            android:name=".challenge.passive.warmer.activity.PassiveChallengeWarmerActivity"
+            android:theme="@style/StripeTransparentTheme"
+            android:exported="false" />
+
+        <activity
+            android:name=".challenge.confirmation.IntentConfirmationChallengeActivity"
             android:theme="@style/StripeTransparentTheme"
             android:exported="false" />
     </application>

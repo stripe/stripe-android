@@ -47,7 +47,6 @@ sentry {
 
 dependencies {
     implementation project(':payments')
-    implementation project(':stripecardscan')
     implementation project(':financial-connections')
 
     implementation libs.androidx.activity

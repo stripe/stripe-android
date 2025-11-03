@@ -5,10 +5,12 @@ import android.content.SharedPreferences
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.ApiKeyValidator
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class PaymentConfiguration
+@Poko
+class PaymentConfiguration
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     val publishableKey: String,

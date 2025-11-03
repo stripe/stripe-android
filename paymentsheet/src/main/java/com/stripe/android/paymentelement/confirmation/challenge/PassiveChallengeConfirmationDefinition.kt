@@ -2,9 +2,9 @@ package com.stripe.android.paymentelement.confirmation.challenge
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import com.stripe.android.challenge.PassiveChallengeActivityContract
-import com.stripe.android.challenge.PassiveChallengeActivityResult
-import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
+import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
+import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
+import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.strings.resolvableString

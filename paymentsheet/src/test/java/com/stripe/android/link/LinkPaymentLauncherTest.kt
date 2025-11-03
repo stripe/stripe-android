@@ -12,7 +12,7 @@ import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultRegistry
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.test.runTest

@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -11,72 +12,73 @@ import kotlinx.parcelize.Parcelize
  * See [Create a person token](https://stripe.com/docs/api/tokens/create_person)
  */
 @Parcelize
-data class PersonTokenParams(
+@Poko
+class PersonTokenParams(
     /**
-     * The person’s address.
+     * The person's address.
      *
      * [person.address](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-address)
      */
     val address: Address? = null,
 
     /**
-     * The Kana variation of the person’s address (Japan only).
+     * The Kana variation of the person's address (Japan only).
      *
      * [person.address_kana](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-address_kana)
      */
     val addressKana: AddressJapanParams? = null,
 
     /**
-     * The Kanji variation of the person’s address (Japan only).
+     * The Kanji variation of the person's address (Japan only).
      *
      * [person.address_kanji](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-address_kanji)
      */
     val addressKanji: AddressJapanParams? = null,
 
     /**
-     * The person’s date of birth.
+     * The person's date of birth.
      *
      * [person.dob](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-dob)
      */
     val dateOfBirth: DateOfBirth? = null,
 
     /**
-     * The person’s email address.
+     * The person's email address.
      *
      * [person.email](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-email)
      */
     val email: String? = null,
 
     /**
-     * The person’s first name.
+     * The person's first name.
      *
      * [person.first_name](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-first_name)
      */
     val firstName: String? = null,
 
     /**
-     * The Kana variation of the person’s first name (Japan only).
+     * The Kana variation of the person's first name (Japan only).
      *
      * [person.first_name_kana](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-first_name_kana)
      */
     val firstNameKana: String? = null,
 
     /**
-     * The Kanji variation of the person’s first name (Japan only).
+     * The Kanji variation of the person's first name (Japan only).
      *
      * [person.first_name_kanji](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-first_name_kanji)
      */
     val firstNameKanji: String? = null,
 
     /**
-     * The person’s gender (International regulations require either “male” or “female”).
+     * The person's gender (International regulations require either "male" or "female").
      *
      * [person.gender](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-gender)
      */
     val gender: String? = null,
 
     /**
-     * The person’s ID number, as appropriate for their country. For example, a social security
+     * The person's ID number, as appropriate for their country. For example, a social security
      * number in the U.S., social insurance number in Canada, etc. Instead of the number itself,
      * you can also provide a PII token.
      *
@@ -85,28 +87,28 @@ data class PersonTokenParams(
     val idNumber: String? = null,
 
     /**
-     * The person’s last name.
+     * The person's last name.
      *
      * [person.last_name](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-last_name)
      */
     val lastName: String? = null,
 
     /**
-     * The Kana variation of the person’s last name (Japan only).
+     * The Kana variation of the person's last name (Japan only).
      *
      * [person.last_name_kana](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-last_name_kana)
      */
     val lastNameKana: String? = null,
 
     /**
-     * The Kanji variation of the person’s last name (Japan only).
+     * The Kanji variation of the person's last name (Japan only).
      *
      * [person.last_name_kanji](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-last_name_kanji)
      */
     val lastNameKanji: String? = null,
 
     /**
-     * The person’s maiden name.
+     * The person's maiden name.
      *
      * [person.maiden_name](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-maiden_name)
      */
@@ -123,28 +125,28 @@ data class PersonTokenParams(
     val metadata: Map<String, String>? = null,
 
     /**
-     * The person’s phone number.
+     * The person's phone number.
      *
      * [person.phone](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-phone)
      */
     val phone: String? = null,
 
     /**
-     * The relationship that this person has with the account’s legal entity.
+     * The relationship that this person has with the account's legal entity.
      *
      * [person.relationship](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-relationship)
      */
     val relationship: Relationship? = null,
 
     /**
-     * The last 4 digits of the person’s social security number.
+     * The last 4 digits of the person's social security number.
      *
      * [person.ssn_last_4](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-ssn_last_4)
      */
     val ssnLast4: String? = null,
 
     /**
-     * The person’s verification status.
+     * The person's verification status.
      *
      * [person.verification](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-verification)
      */
@@ -178,14 +180,15 @@ data class PersonTokenParams(
         }
 
     /**
-     * The relationship that this person has with the account’s legal entity.
+     * The relationship that this person has with the account's legal entity.
      *
      * [person.relationship](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-relationship)
      */
     @Parcelize
-    data class Relationship(
+    @Poko
+    class Relationship(
         /**
-         * Whether the person is a director of the account’s legal entity. Currently only required
+         * Whether the person is a director of the account's legal entity. Currently only required
          * for accounts in the EU. Directors are typically members of the governing board of the
          * company, or responsible for ensuring the company meets its regulatory obligations.
          *
@@ -202,14 +205,14 @@ data class PersonTokenParams(
         val executive: Boolean? = null,
 
         /**
-         * Whether the person is an owner of the account’s legal entity.
+         * Whether the person is an owner of the account's legal entity.
          *
          * [person.relationship.owner](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-relationship-owner)
          */
         val owner: Boolean? = null,
 
         /**
-         * The percent owned by the person of the account’s legal entity.
+         * The percent owned by the person of the account's legal entity.
          *
          * [person.relationship.representative](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-relationship-representative)
          */
@@ -227,7 +230,7 @@ data class PersonTokenParams(
         val representative: Boolean? = null,
 
         /**
-         * The person’s title (e.g., CEO, Support Engineer).
+         * The person's title (e.g., CEO, Support Engineer).
          *
          * [person.relationship.title](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-relationship-title)
          */
@@ -303,12 +306,13 @@ data class PersonTokenParams(
     }
 
     /**
-     * The person’s verification status.
+     * The person's verification status.
      *
      * [person.verification](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-verification)
      */
     @Parcelize
-    data class Verification @JvmOverloads constructor(
+    @Poko
+    class Verification @JvmOverloads constructor(
         /**
          * An identifying document, either a passport or local ID card.
          *
@@ -341,7 +345,8 @@ data class PersonTokenParams(
     }
 
     @Parcelize
-    data class Document @JvmOverloads constructor(
+    @Poko
+    class Document @JvmOverloads constructor(
         /**
          * The front of an ID returned by a
          * [file upload](https://stripe.com/docs/api/tokens/create_person#create_file) with a

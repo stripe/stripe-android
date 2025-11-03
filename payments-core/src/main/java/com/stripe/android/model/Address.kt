@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.AddressJsonParser
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 
@@ -12,7 +13,8 @@ import org.json.JSONObject
  * object in the Source api.
  */
 @Parcelize
-data class Address(
+@Poko
+class Address(
     val city: String? = null,
     val country: String? = null, // two-character country code
     val line1: String? = null,
@@ -39,6 +41,25 @@ data class Address(
 
     internal fun isFilledOut(): Boolean {
         return city != null || country != null || line1 != null || line2 != null || postalCode != null || state != null
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun copy(
+        city: String? = this.city,
+        country: String? = this.country,
+        line1: String? = this.line1,
+        line2: String? = this.line2,
+        postalCode: String? = this.postalCode,
+        state: String? = this.state
+    ): Address {
+        return Address(
+            city = city,
+            country = country,
+            line1 = line1,
+            line2 = line2,
+            postalCode = postalCode,
+            state = state
+        )
     }
 
     class Builder {

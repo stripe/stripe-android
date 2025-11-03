@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import android.content.res.ColorStateList
 import android.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.model.CountryCode
@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.StripeThemeDefaults
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.robolectric.RobolectricTestRunner
@@ -51,12 +52,12 @@ class PaymentSelectionUpdaterTest {
     @Test
     fun `Can use existing payment selection if it's still supported`() {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
-            label = "Sofort".resolvableString,
+            label = "Klarna".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_klarna,
             iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
-            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.SOFORT,
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
@@ -65,7 +66,7 @@ class PaymentSelectionUpdaterTest {
             allowsDelayedPaymentMethods = true,
         )
         val newState = mockPaymentSheetStateWithPaymentIntent(
-            paymentMethodTypes = listOf("card", "sofort"),
+            paymentMethodTypes = listOf("card", "paypal"),
             config = newConfig
         )
 
@@ -353,10 +354,21 @@ class PaymentSelectionUpdaterTest {
                     label = "Some product",
                     buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
                 )
-            ).primaryButtonColor(ColorStateList.valueOf(Color.BLACK))
-            .appearance(
+            ).appearance(
                 PaymentSheet.Appearance(
-                    colorsLight = PaymentSheet.Colors.defaultDark
+                    colorsLight = PaymentSheet.Colors.defaultDark,
+                    primaryButton = PaymentSheet.PrimaryButton(
+                        colorsLight = PaymentSheet.PrimaryButtonColors(
+                            background = Color.BLACK,
+                            onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                            border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
+                        ),
+                        colorsDark = PaymentSheet.PrimaryButtonColors(
+                            background = Color.BLACK,
+                            onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+                            border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
+                        )
+                    ),
                 )
             )
             .build()
@@ -522,7 +534,6 @@ class PaymentSelectionUpdaterTest {
                 sharedDataSpecs = listOf(
                     SharedDataSpec("card"),
                     SharedDataSpec("paypal"),
-                    SharedDataSpec("sofort"),
                 ),
                 linkState = LinkState(
                     configuration = mock(),

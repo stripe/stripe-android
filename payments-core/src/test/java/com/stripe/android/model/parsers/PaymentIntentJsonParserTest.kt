@@ -101,17 +101,6 @@ class PaymentIntentJsonParserTest {
     }
 
     @Test
-    fun parse_with3ds1Action_shouldCreateExpectedNextActionData() {
-        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_3DS1
-        assertThat(paymentIntent.nextActionData)
-            .isEqualTo(
-                StripeIntent.NextActionData.SdkData.Use3DS1(
-                    "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW"
-                )
-            )
-    }
-
-    @Test
     fun parse_with3ds2Action_shouldCreateExpectedNextActionData() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
         assertThat(paymentIntent.nextActionData)

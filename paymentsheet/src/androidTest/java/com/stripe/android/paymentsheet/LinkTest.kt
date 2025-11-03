@@ -1079,7 +1079,6 @@ internal class LinkTest {
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun testSuccessfulCardPaymentWithCustomerSessionInPassthroughMode() = runProductIntegrationTest(
         networkRule = networkRule,

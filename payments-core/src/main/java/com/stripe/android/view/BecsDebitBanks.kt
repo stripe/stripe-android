@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.util.Scanner
@@ -30,7 +31,8 @@ class BecsDebitBanks(
     }
 
     @Parcelize
-    data class Bank(
+    @Poko
+    class Bank(
         val prefix: String,
         val name: String
     ) : Parcelable

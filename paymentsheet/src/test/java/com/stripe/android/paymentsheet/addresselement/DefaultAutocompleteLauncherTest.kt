@@ -8,7 +8,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.testing.DummyActivityResultCaller
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test

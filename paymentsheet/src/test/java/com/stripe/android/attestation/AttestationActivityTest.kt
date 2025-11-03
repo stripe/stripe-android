@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReporter
+import com.stripe.android.attestation.analytics.FakeAttestationAnalyticsEventsReporter
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.testing.CoroutineTestRule
@@ -132,14 +134,16 @@ internal class AttestationActivityTest {
     }
 
     private fun createTestViewModelFactory(
-        integrityRequestManager: FakeIntegrityRequestManager
+        integrityRequestManager: FakeIntegrityRequestManager,
+        eventsReporter: AttestationAnalyticsEventsReporter = FakeAttestationAnalyticsEventsReporter()
     ): ViewModelProvider.Factory {
         return object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return AttestationViewModel(
                     integrityRequestManager = integrityRequestManager,
-                    workContext = testDispatcher
+                    workContext = testDispatcher,
+                    attestationAnalyticsEventsReporter = eventsReporter
                 ) as T
             }
         }

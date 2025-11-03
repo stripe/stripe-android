@@ -15,6 +15,8 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.utils.DefaultDurationProvider
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.customersheet.CustomerSheetLoader
@@ -163,6 +165,11 @@ internal interface CustomerSheetViewModelModule {
 
         @Provides
         fun savedPaymentSelection(): PaymentSelection? = savedPaymentSelection
+
+        @Provides
+        fun provideDurationProvider(): DurationProvider {
+            return DefaultDurationProvider.instance
+        }
 
         private val savedPaymentSelection: PaymentSelection? = null
     }

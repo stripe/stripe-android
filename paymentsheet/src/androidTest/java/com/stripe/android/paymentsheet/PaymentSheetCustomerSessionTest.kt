@@ -220,7 +220,6 @@ class PaymentSheetCustomerSessionTest {
         page.clickOnSaveForFutureUsage()
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     private fun PaymentSheetTestRunnerContext.presentWithPaymentIntent() {
         presentPaymentSheet {
             presentWithPaymentIntent(
@@ -236,7 +235,6 @@ class PaymentSheetCustomerSessionTest {
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     private fun PaymentSheetTestRunnerContext.presentWithSetupIntent() {
         presentPaymentSheet {
             presentWithSetupIntent(

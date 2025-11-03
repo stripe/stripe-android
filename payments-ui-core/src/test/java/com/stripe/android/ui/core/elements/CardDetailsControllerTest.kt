@@ -1,12 +1,11 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.appcompat.view.ContextThemeWrapper
+import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.model.CardBrand
-import com.stripe.android.stripecardscan.R
 import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cardscan.ScannedCard
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -22,8 +21,7 @@ import com.stripe.android.uicore.R as UiCoreR
 @RunWith(RobolectricTestRunner::class)
 class CardDetailsControllerTest {
 
-    private val context =
-        ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeCardScanDefaultTheme)
+    private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Test
     fun `Verify the first field in error is returned in error flow`() = runTest {

@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 sealed class PaymentMethodOptionsParams(
@@ -24,7 +25,8 @@ sealed class PaymentMethodOptionsParams(
     }
 
     @Parcelize
-    data class Card
+    @Poko
+    class Card
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         var cvc: String? = null,
@@ -50,6 +52,21 @@ sealed class PaymentMethodOptionsParams(
                 PARAM_NETWORK to network,
                 PARAM_MOTO to moto,
                 PARAM_SETUP_FUTURE_USAGE to setupFutureUsage?.code
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun copy(
+            cvc: String? = this.cvc,
+            network: String? = this.network,
+            setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = this.setupFutureUsage,
+            moto: Boolean? = this.moto
+        ): Card {
+            return Card(
+                cvc = cvc,
+                network = network,
+                setupFutureUsage = setupFutureUsage,
+                moto = moto
             )
         }
 
@@ -79,10 +96,20 @@ sealed class PaymentMethodOptionsParams(
     }
 
     @Parcelize
-    data class Blik @JvmOverloads constructor(
+    @Poko
+    class Blik @JvmOverloads constructor(
         var code: String,
         var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.Blik) {
+        internal fun copy(
+            setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = this.setupFutureUsage
+        ): Blik {
+            return Blik(
+                code = code,
+                setupFutureUsage = setupFutureUsage,
+            )
+        }
+
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
                 PARAM_CODE to code,
@@ -132,10 +159,20 @@ sealed class PaymentMethodOptionsParams(
     }
 
     @Parcelize
-    data class WeChatPay @JvmOverloads constructor(
+    @Poko
+    class WeChatPay @JvmOverloads constructor(
         var appId: String,
         var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.WeChatPay) {
+        internal fun copy(
+            setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = this.setupFutureUsage
+        ): WeChatPay {
+            return WeChatPay(
+                appId = appId,
+                setupFutureUsage = setupFutureUsage,
+            )
+        }
+
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
                 PARAM_CLIENT to "android",
@@ -170,9 +207,18 @@ sealed class PaymentMethodOptionsParams(
     }
 
     @Parcelize
-    data class USBankAccount(
+    @Poko
+    class USBankAccount(
         var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.USBankAccount) {
+        internal fun copy(
+            setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = this.setupFutureUsage
+        ): USBankAccount {
+            return USBankAccount(
+                setupFutureUsage = setupFutureUsage,
+            )
+        }
+
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
                 PARAM_SETUP_FUTURE_USAGE to setupFutureUsage?.code

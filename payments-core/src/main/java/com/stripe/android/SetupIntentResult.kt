@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import com.stripe.android.model.SetupIntent
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -8,7 +9,8 @@ import kotlinx.parcelize.Parcelize
  * or handling of next actions via [Stripe.handleNextActionForSetupIntent].
  */
 @Parcelize
-data class SetupIntentResult internal constructor(
+@Poko
+class SetupIntentResult internal constructor(
     override val intent: SetupIntent,
     @Outcome private val outcomeFromFlow: Int = 0,
     override val failureMessage: String? = null

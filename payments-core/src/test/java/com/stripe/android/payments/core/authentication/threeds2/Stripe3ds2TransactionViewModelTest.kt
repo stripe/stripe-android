@@ -15,6 +15,7 @@ import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.copy
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl

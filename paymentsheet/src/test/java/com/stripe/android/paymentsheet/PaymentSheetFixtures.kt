@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet
 
-import android.content.res.ColorStateList
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.toColorInt
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
@@ -56,7 +54,6 @@ internal object PaymentSheetFixtures {
             "ek_123"
         ),
         googlePay = ConfigFixtures.GOOGLE_PAY,
-        primaryButtonColor = ColorStateList.valueOf(Color.Black.toArgb()),
         defaultBillingDetails = PaymentSheet.BillingDetails(name = "Skyler"),
         allowsDelayedPaymentMethods = true,
         allowsPaymentMethodsRequiringShippingAddress = true,
@@ -202,7 +199,7 @@ internal object PaymentSheetFixtures {
     }
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
-        get() = PaymentSheetContractV2.Args(
+        get() = PaymentSheetContract.Args(
             initializationMode = PaymentElementLoader.InitializationMode.SetupIntent("seti_1234_secret_1234"),
             config = CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
@@ -210,7 +207,7 @@ internal object PaymentSheetFixtures {
         )
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY
-        get() = PaymentSheetContractV2.Args(
+        get() = PaymentSheetContract.Args(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
@@ -220,7 +217,7 @@ internal object PaymentSheetFixtures {
         )
 
     internal val ARGS_CUSTOMER_WITHOUT_GOOGLEPAY
-        get() = PaymentSheetContractV2.Args(
+        get() = PaymentSheetContract.Args(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
@@ -237,7 +234,7 @@ internal object PaymentSheetFixtures {
         )
 
     internal val ARGS_DEFERRED_INTENT
-        get() = PaymentSheetContractV2.Args(
+        get() = PaymentSheetContract.Args(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
@@ -290,11 +287,11 @@ internal object PaymentSheetFixtures {
         ] 
     """.trimIndent()
 
-    internal val BILLING_DETAILS_FORM_DETAILS = BILLING_DETAILS.copy(
-        email = null,
-        name = null,
-        phone = null
-    )
+    internal val BILLING_DETAILS_FORM_DETAILS = BILLING_DETAILS.toBuilder()
+        .setEmail(null)
+        .setName(null)
+        .setPhone(null)
+        .build()
 
     internal fun billingDetailsFormState(
         line1: FormFieldEntry? = FormFieldEntry("1234 Main Street", isComplete = true),

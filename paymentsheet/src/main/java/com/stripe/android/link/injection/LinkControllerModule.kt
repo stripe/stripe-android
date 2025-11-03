@@ -15,7 +15,6 @@ import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
-import com.stripe.android.ui.core.di.CardScanModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.Binds
 import dagger.Module
@@ -34,7 +33,6 @@ import javax.inject.Singleton
         ResourceRepositoryModule::class,
         ApplicationIdModule::class,
         MobileSessionIdModule::class,
-        CardScanModule::class,
         LinkHoldbackExposureModule::class,
         PaymentsIntegrityModule::class,
     ],

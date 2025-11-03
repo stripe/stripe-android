@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import com.stripe.android.core.model.StripeModel
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -11,7 +12,8 @@ import kotlinx.parcelize.Parcelize
  * for more details on ephemeral keys.
  */
 @Parcelize
-data class EphemeralKey internal constructor(
+@Poko
+class EphemeralKey internal constructor(
     /**
      * Represents a customer id or issuing card id, depending on the context
      */

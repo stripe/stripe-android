@@ -10,7 +10,6 @@ import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
 import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMethod
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent
@@ -963,47 +962,6 @@ class CustomerSheetViewModelTest {
             assertThat(errorReporter.getLoggedErrors())
                 .contains(ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_FAILURE.eventName)
         }
-
-    @Test
-    fun `When payment method cannot be attached with setup intent, error message is visible`() = runTest(testDispatcher) {
-        val viewModel = createViewModel(
-            workContext = testDispatcher,
-            isGooglePayAvailable = false,
-            customerPaymentMethods = listOf(),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = true,
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.success("invalid setup intent")
-                },
-            ),
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                retrieveSetupIntent = Result.failure(
-                    IllegalArgumentException("Invalid setup intent")
-                ),
-            ),
-        )
-
-        viewModel.handleViewAction(
-            CustomerSheetViewAction.OnFormFieldValuesCompleted(
-                formFieldValues = TEST_FORM_VALUES,
-            )
-        )
-
-        viewModel.viewState.test {
-            var viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.errorMessage).isNull()
-
-            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-
-            assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
-
-            viewState = awaitViewState()
-            assertThat(viewState.errorMessage).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-            assertThat(viewState.enabled).isTrue()
-            assertThat(viewState.isProcessing).isFalse()
-        }
-    }
 
     @Test
     fun `When setup intent provider error, error message is visible`() = runTest(testDispatcher) {
@@ -3615,8 +3573,6 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `init emits CustomerSheetViewState#AddPaymentMethod shouldAutomaticallyLaunchCardScan true when no payment methods available`() = runTest(testDispatcher) {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             configuration = CustomerSheet.Configuration(
@@ -3639,13 +3595,10 @@ class CustomerSheetViewModelTest {
             val controller = (formElements[0] as CardDetailsSectionElement).controller
             assertThat(controller.shouldAutomaticallyLaunchCardScan()).isTrue()
         }
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
     fun `When CustomerViewAction#OnAddCardPressed, shouldAutomaticallyLaunchCardScan true`() = runTest(testDispatcher) {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             configuration = CustomerSheet.Configuration(
@@ -3667,12 +3620,10 @@ class CustomerSheetViewModelTest {
             val controller = (formElements[0] as CardDetailsSectionElement).controller
             assertThat(controller.shouldAutomaticallyLaunchCardScan()).isTrue()
         }
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
     fun `When switching payment methods, don't show card scan more than once`() = runTest(testDispatcher) {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
         val viewModel = createViewModel(
             workContext = testDispatcher,
             customerPaymentMethods = listOf(),
@@ -3716,13 +3667,10 @@ class CustomerSheetViewModelTest {
             assertThat(secondCardFormController).isNotNull()
             assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isFalse()
         }
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
     fun `After confirming a card, the card scan should be shown when trying to add another card`() = runTest(testDispatcher) {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             intentDataSource = FakeCustomerSheetIntentDataSource(
@@ -3778,13 +3726,10 @@ class CustomerSheetViewModelTest {
             assertThat(secondCardFormController).isNotNull()
             assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
         }
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
     fun `After leaving card form, the card scan should be shown when trying to add another card`() = runTest(testDispatcher) {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             intentDataSource = FakeCustomerSheetIntentDataSource(
@@ -3828,7 +3773,6 @@ class CustomerSheetViewModelTest {
             assertThat(secondCardFormController).isNotNull()
             assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
         }
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test

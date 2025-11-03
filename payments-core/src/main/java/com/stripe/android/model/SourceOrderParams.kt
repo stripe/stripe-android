@@ -1,25 +1,25 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
-import com.stripe.android.model.SourceOrderParams.Item.Type
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
- * Information about the items and shipping associated with the source. Required for transactional
- * credit (for example Klarna) sources before you can charge it.
+ * Source order parameters.
  *
- * [API reference](https://stripe.com/docs/api/sources/create#create_source-source_order)
+ * See [Source Orders](https://stripe.com/docs/sources/redirect#source-orders).
  */
 @Parcelize
-data class SourceOrderParams @JvmOverloads constructor(
+@Poko
+class SourceOrderParams @JvmOverloads constructor(
     /**
      * List of items constituting the order.
      */
-    val items: List<Item>? = null,
+    val items: List<Item>,
 
     /**
-     * Shipping address for the order. Required if any of the SKUs are for products that have
-     * `shippable` set to true.
+     * The shipping address for the order. A dictionary containing the fields defined in the
+     * [Address](https://stripe.com/docs/api#address_object) API reference.
      */
     val shipping: Shipping? = null
 ) : StripeParamsModel, Parcelable {
@@ -40,7 +40,8 @@ data class SourceOrderParams @JvmOverloads constructor(
      * [API reference](https://stripe.com/docs/api/sources/create#create_source-source_order-items)
      */
     @Parcelize
-    data class Item(
+    @Poko
+    class Item(
         /**
          * Optional. The type of this order item.
          * Must be [Type.Sku], [Type.Tax], or [Type.Shipping].
@@ -113,13 +114,14 @@ data class SourceOrderParams @JvmOverloads constructor(
     }
 
     /**
-     * Shipping address for the order.
-     * Required if any of the SKUs are for products that have `shippable` set to true.
+     * Shipping address for the order. Required if any of the SKUs are for products that have
+     * `shippable` set to true.
      *
      * [API reference](https://stripe.com/docs/api/sources/create#create_source-source_order-shipping)
      */
     @Parcelize
-    data class Shipping(
+    @Poko
+    class Shipping(
         /**
          * Required. Shipping address.
          */

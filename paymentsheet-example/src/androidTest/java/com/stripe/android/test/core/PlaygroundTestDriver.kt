@@ -932,7 +932,7 @@ internal class PlaygroundTestDriver(
 
         // We might have more than one bank account
         composeTestRule
-            .onAllNodesWithText("Payment Success")
+            .onAllNodesWithText("Success")
             .onFirst()
             .performScrollTo()
             .performClick()

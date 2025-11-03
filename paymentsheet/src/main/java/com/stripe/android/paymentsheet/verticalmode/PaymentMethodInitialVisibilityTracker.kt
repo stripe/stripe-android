@@ -1,8 +1,11 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -27,8 +30,14 @@ internal class PaymentMethodInitialVisibilityTracker(
     private val renderedLpmCallback: (List<String>, List<String>) -> Unit,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) {
+    private data class CoordinateSnapshot(
+        val positionInWindow: Offset,
+        val size: IntSize,
+        val boundsInWindow: Rect
+    )
+
     private val visibilityMap = mutableMapOf<String, Boolean>()
-    private val previousCoordinates = mutableMapOf<String, LayoutCoordinates>()
+    private val previousCoordinateSnapshots = mutableMapOf<String, CoordinateSnapshot>()
     private val coordinateStabilityMap = mutableMapOf<String, Boolean>()
     private var hasDispatched = false
 
@@ -54,23 +63,41 @@ internal class PaymentMethodInitialVisibilityTracker(
      */
     fun updateVisibility(itemCode: String, coordinates: LayoutCoordinates) {
         if (itemCode !in expectedItems || expectedItems.isEmpty()) return
-        if (!coordinates.isAttached) return
         if (hasDispatched) return // Only dispatch once per tracker instance
 
-        val newVisibility = calculateVisibility(coordinates)
-        val previousCoordinatesForItem = previousCoordinates[itemCode]
+        /**
+         * Capture only the relevant fields from [LayoutCoordinates] when we know the coordinates are attached.
+         * Whether previous coordinates is/isn't attached or not is irrelevant, we only need to know
+         * the previous coordinate's boundsInWindow, positionInWindow, and size.
+         *
+         * When implemented, [LayoutCoordinates.isAttached] provides a getter to a var, so we cannot rely on being able
+         * to call `positionInWindow` and `boundsInWindow` of saved [LayoutCoordinates].
+         */
+        val coordinateSnapshot: CoordinateSnapshot
+        if (coordinates.isAttached) {
+            coordinateSnapshot = CoordinateSnapshot(
+                positionInWindow = coordinates.positionInWindow(),
+                size = coordinates.size,
+                boundsInWindow = coordinates.boundsInWindow(),
+            )
+        } else {
+            return
+        }
+
+        val newVisibility = calculateVisibility(coordinateSnapshot)
+        val previousCoordinatesForItem = previousCoordinateSnapshots[itemCode]
 
         // Check if coordinates are stable (haven't changed)
         // Compare position, size, and window bounds to detect any layout changes
         // All three must match exactly to consider coordinates stable
         val coordinatesAreStable = previousCoordinatesForItem?.let { prev ->
-            prev.positionInWindow() == coordinates.positionInWindow() &&
-                prev.size == coordinates.size &&
-                prev.boundsInWindow() == coordinates.boundsInWindow()
+            prev.positionInWindow == coordinateSnapshot.positionInWindow &&
+                prev.size == coordinateSnapshot.size &&
+                prev.boundsInWindow == coordinateSnapshot.boundsInWindow
         } ?: false // First time seeing this item, so not stable yet
 
         // Update our tracking
-        this.previousCoordinates[itemCode] = coordinates
+        this.previousCoordinateSnapshots[itemCode] = coordinateSnapshot
         val wasVisibilityStable = visibilityMap[itemCode] == newVisibility
         visibilityMap[itemCode] = newVisibility
 
@@ -86,8 +113,8 @@ internal class PaymentMethodInitialVisibilityTracker(
     }
 
     @Suppress("MagicNumber")
-    private fun calculateVisibility(coordinates: LayoutCoordinates): Boolean {
-        val bounds = coordinates.boundsInWindow()
+    private fun calculateVisibility(coordinates: CoordinateSnapshot): Boolean {
+        val bounds = coordinates.boundsInWindow
 
         // Check if completely out of bounds (hidden)
         @Suppress("ComplexCondition")
@@ -147,7 +174,7 @@ internal class PaymentMethodInitialVisibilityTracker(
 
     fun reset() {
         coordinateStabilityMap.clear()
-        previousCoordinates.clear()
+        previousCoordinateSnapshots.clear()
         visibilityMap.clear()
         hasDispatched = false
         dispatchEventJob?.cancel()

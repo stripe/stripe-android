@@ -10,25 +10,6 @@ import com.stripe.android.uicore.R as UiCoreR
 @RunWith(RobolectricTestRunner::class)
 class LpmSerializerTest {
 
-    /**
-     * Sofort is a little unique as it has a specific list of valid
-     * countries, and the api path must be sofort\[country\]
-     */
-    @Test
-    fun `Verify sofort country spec parsed correctly`() {
-        val inputStream = SharedDataSpecParcelerTest::class.java.classLoader!!.getResourceAsStream("lpms.json")
-        val serializedString = inputStream.bufferedReader().use { it.readText() }
-
-        val result = LpmSerializer.deserializeList(serializedString).getOrThrow()
-
-        val countrySpec = result.first { it.type == "sofort" }.fields[3] as CountrySpec
-
-        assertThat(countrySpec.apiPath.v1).isEqualTo("sofort[country]")
-        assertThat(countrySpec.allowedCountryCodes).isEqualTo(
-            setOf("AT", "BE", "DE", "ES", "IT", "NL")
-        )
-    }
-
     @Test
     fun `Verify a DropdownSpec in lpms_json parses correctly`() {
         val inputStream = SharedDataSpecParcelerTest::class.java.classLoader!!.getResourceAsStream("lpms.json")

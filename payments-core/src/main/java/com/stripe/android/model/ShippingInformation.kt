@@ -1,13 +1,15 @@
 package com.stripe.android.model
 
 import com.stripe.android.core.model.StripeModel
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
  * Model representing a shipping address object
  */
 @Parcelize
-data class ShippingInformation constructor(
+@Poko
+class ShippingInformation constructor(
     val address: Address? = null,
     val name: String? = null,
     val phone: String? = null

@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
-import com.stripe.android.ui.core.di.CardScanModule
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -46,7 +45,6 @@ import javax.inject.Singleton
         FormActivityViewModelModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         GooglePayLauncherModule::class,
-        CardScanModule::class,
         EmbeddedLinkExtrasModule::class
     ]
 )

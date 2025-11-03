@@ -1,9 +1,9 @@
 package com.stripe.android.paymentelement.confirmation.challenge
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.challenge.PassiveChallengeActivityContract
-import com.stripe.android.challenge.PassiveChallengeActivityResult
-import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
+import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
+import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
+import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -22,8 +22,8 @@ import com.stripe.android.paymentelement.confirmation.asFail
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultLauncher
 import com.stripe.android.utils.FakePassiveChallengeWarmer
 import kotlinx.coroutines.test.runTest

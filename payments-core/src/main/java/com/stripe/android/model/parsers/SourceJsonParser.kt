@@ -297,10 +297,8 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
             return when (sourceType) {
                 Source.SourceType.CARD -> Source.SourceType.CARD
                 Source.SourceType.THREE_D_SECURE -> Source.SourceType.THREE_D_SECURE
-                Source.SourceType.GIROPAY -> Source.SourceType.GIROPAY
                 Source.SourceType.SEPA_DEBIT -> Source.SourceType.SEPA_DEBIT
                 Source.SourceType.IDEAL -> Source.SourceType.IDEAL
-                Source.SourceType.SOFORT -> Source.SourceType.SOFORT
                 Source.SourceType.BANCONTACT -> Source.SourceType.BANCONTACT
                 Source.SourceType.ALIPAY -> Source.SourceType.ALIPAY
                 Source.SourceType.EPS -> Source.SourceType.EPS

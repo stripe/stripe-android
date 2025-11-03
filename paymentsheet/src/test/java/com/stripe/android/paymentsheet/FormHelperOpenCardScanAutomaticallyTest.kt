@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentLauncher
@@ -126,8 +125,6 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
         ),
         block: (List<FormElement>) -> Unit,
     ) {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
-
         val defaultFormHelper = DefaultFormHelper.create(
             viewModel = viewModel,
             paymentMethodMetadata = paymentMethodMetadata,
@@ -137,7 +134,6 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
         val formElements = defaultFormHelper.formElementsForCode(PaymentMethod.Type.Card.code)
 
         block(formElements)
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     private fun createPaymentOptionsViewModel(

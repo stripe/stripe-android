@@ -133,7 +133,7 @@ internal fun internalRememberPaymentSheet(
     val onResult by rememberUpdatedState(newValue = paymentResultCallback::onPaymentSheetResult)
 
     val activityResultLauncher = rememberLauncherForActivityResult(
-        contract = PaymentSheetContractV2(),
+        contract = PaymentSheetContract(),
         onResult = onResult,
     )
 

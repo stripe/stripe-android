@@ -9,8 +9,8 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Param
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.test.runTest
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit

@@ -28,8 +28,8 @@ class SavedPaymentMethodsExtensionTest {
     }
 
     @Test
-    fun `shouldShowDefaultBadge is false when defaultPaymentMethodId is null and paymentMethod id null`() {
-        val actual = testSetup(null, null)
+    fun `shouldShowDefaultBadge is false when defaultPaymentMethodId is null`() {
+        val actual = testSetup(paymentMethodId = "pm_123", null)
         assertEquals(actual.shouldShowDefaultBadge, false)
     }
 
@@ -39,7 +39,7 @@ class SavedPaymentMethodsExtensionTest {
         assertEquals(actual.shouldShowDefaultBadge, true)
     }
 
-    private fun testSetup(paymentMethodId: String?, defaultPaymentMethodId: String?): DisplayableSavedPaymentMethod {
+    private fun testSetup(paymentMethodId: String, defaultPaymentMethodId: String?): DisplayableSavedPaymentMethod {
         val resolvableString = "acbde123".resolvableString
 
         val paymentMethod = PaymentMethodFactory.card(paymentMethodId)

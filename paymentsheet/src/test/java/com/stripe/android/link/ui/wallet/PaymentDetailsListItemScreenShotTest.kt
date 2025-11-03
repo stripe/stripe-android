@@ -197,7 +197,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                 details = ConsumerPaymentDetails.BankAccount(
                     id = "wAAACGA",
                     last4 = "6789",
-                    bankName = "STRIPE TEST BANK",
+                    bankAccountName = "STRIPE TEST BANK ACCOUNT",
                     bankIconCode = null,
                     isDefault = false,
                     nickname = null,
@@ -219,7 +219,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                 details = ConsumerPaymentDetails.BankAccount(
                     id = "wAAACGA",
                     last4 = "6789",
-                    bankName = "Chase",
+                    bankAccountName = "Chase Checking Account",
                     bankIconCode = "morganchase",
                     isDefault = false,
                     nickname = null,

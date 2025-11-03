@@ -17,7 +17,7 @@ internal object AddressElementActivityContract :
     @Suppress("DEPRECATION")
     override fun parseResult(resultCode: Int, intent: Intent?): AddressLauncherResult =
         intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.addressOptionsResult
-            ?: AddressLauncherResult.Canceled
+            ?: AddressLauncherResult.Canceled()
 
     /**
      * Arguments for launching [AddressElementActivity] to collect an address.

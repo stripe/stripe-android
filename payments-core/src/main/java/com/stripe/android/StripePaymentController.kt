@@ -90,12 +90,6 @@ constructor(
         } ?: PaymentRelayStarter.Legacy(host)
     }
 
-    /**
-     * A map between 3ds1 [StripeIntent] ids to its corresponding returnUrl.
-     * An entry will be removed once the [StripeIntent] is confirmed.
-     */
-    private val threeDs1IntentReturnUrlMap = mutableMapOf<String, String>()
-
     private val nextActionHandlerRegistry: PaymentNextActionHandlerRegistry =
         DefaultPaymentNextActionHandlerRegistry.createInstance(
             context = context,
@@ -103,7 +97,6 @@ constructor(
             enableLogging = enableLogging,
             workContext = workContext,
             uiContext = uiContext,
-            threeDs1IntentReturnUrlMap = threeDs1IntentReturnUrlMap,
             publishableKeyProvider = publishableKeyProvider,
             productUsage = paymentAnalyticsRequestFactory.defaultProductUsageTokens,
             isInstantApp = isInstantApp,
@@ -168,13 +161,6 @@ constructor(
 
         result.fold(
             onSuccess = { intent ->
-                intent.nextActionData?.let {
-                    if (it is StripeIntent.NextActionData.SdkData.Use3DS1) {
-                        intent.id?.let { intentId ->
-                            threeDs1IntentReturnUrlMap[intentId] = returnUrl.orEmpty()
-                        }
-                    }
-                }
                 handleNextAction(
                     host,
                     intent,

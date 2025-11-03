@@ -203,7 +203,7 @@ class PaymentOptionFactoryTest {
                 iconResource = R.drawable.stripe_ic_paymentsheet_card_unknown_ref,
                 iconResourceNight = null,
                 label = "Test Payment Method".resolvableString,
-                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.SOFORT.copy(
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL.copy(
                     billingDetails = PAYMENT_METHOD_BILLING_DETAILS
                 ),
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,

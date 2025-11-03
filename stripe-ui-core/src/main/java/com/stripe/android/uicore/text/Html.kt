@@ -61,12 +61,14 @@ private const val LINK_TAG = "URL"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class EmbeddableImage {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Drawable(
         @DrawableRes val id: Int,
         @StringRes val contentDescription: Int,
         val colorFilter: androidx.compose.ui.graphics.ColorFilter? = null
     ) : EmbeddableImage()
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Bitmap(
         val bitmap: android.graphics.Bitmap
     ) : EmbeddableImage()

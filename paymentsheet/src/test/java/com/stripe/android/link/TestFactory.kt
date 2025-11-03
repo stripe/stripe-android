@@ -142,7 +142,7 @@ internal object TestFactory {
         id = "csmrpd_124",
         last4 = "4242",
         isDefault = false,
-        bankName = "Stripe Test Bank",
+        bankAccountName = "Stripe Test Bank Account",
         bankIconCode = null,
         nickname = null,
         billingAddress = null,

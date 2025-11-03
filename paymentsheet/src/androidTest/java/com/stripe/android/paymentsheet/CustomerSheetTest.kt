@@ -302,13 +302,6 @@ internal class CustomerSheetTest {
         }
 
         networkRule.enqueue(
-            retrieveSetupIntentRequest(),
-            retrieveSetupIntentParams(),
-        ) { response ->
-            response.testBodyFromFile("setup-intent-get.json")
-        }
-
-        networkRule.enqueue(
             confirmSetupIntentRequest(),
             confirmSetupIntentParams()
         ) { response ->

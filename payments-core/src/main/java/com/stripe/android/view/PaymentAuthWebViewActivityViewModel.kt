@@ -62,13 +62,18 @@ internal class PaymentAuthWebViewActivityViewModel(
         @JvmSynthetic
         get() {
             return Intent().putExtras(
-                paymentResult.copy(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = paymentResult.clientSecret,
                     flowOutcome = if (args.shouldCancelIntentOnUserNavigation) {
                         StripeIntentResult.Outcome.CANCELED
                     } else {
                         StripeIntentResult.Outcome.UNKNOWN
                     },
-                    canCancelSource = args.shouldCancelSource
+                    exception = paymentResult.exception,
+                    canCancelSource = args.shouldCancelSource,
+                    sourceId = paymentResult.sourceId,
+                    source = paymentResult.source,
+                    stripeAccountId = paymentResult.stripeAccountId
                 ).toBundle()
             )
         }

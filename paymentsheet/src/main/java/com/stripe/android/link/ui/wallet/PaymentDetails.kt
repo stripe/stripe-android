@@ -202,7 +202,7 @@ private fun PaymentDetailsListItemPreview() {
         isDefault = false,
         bankIconCode = null,
         nickname = null,
-        bankName = "Bank of America",
+        bankAccountName = "Bank of America Checking Account",
         billingAddress = null,
         billingEmailAddress = null
     )
