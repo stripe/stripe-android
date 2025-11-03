@@ -311,16 +311,16 @@ internal class OnrampViewModel(
     fun onVerifyKycResult(result: OnrampVerifyKycInfoResult) {
         when (result) {
             is OnrampVerifyKycInfoResult.Confirmed -> {
-
+                _message.value = "KYC Verification Completed"
             }
             is OnrampVerifyKycInfoResult.UpdateAddress -> {
-
+                _message.value = "KYC Verification Requires Address Update"
             }
             is OnrampVerifyKycInfoResult.Cancelled -> {
-
+                _message.value = "KYC Verification Cancelled"
             }
             is OnrampVerifyKycInfoResult.Failed -> {
-
+                _message.value = "KYC Verification Failed: ${result.error.message}"
             }
         }
     }
