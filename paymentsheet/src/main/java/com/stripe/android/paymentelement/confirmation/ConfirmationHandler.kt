@@ -7,7 +7,6 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -71,11 +70,6 @@ internal interface ConfirmationHandler {
          * The confirmation option used to in order to potentially confirm the intent
          */
         val confirmationOption: Option,
-
-        /**
-         * Appearance values to be used when styling the launched activities
-         */
-        val appearance: PaymentSheet.Appearance,
 
         /**
          * The mode that a Payment Element product was initialized with

@@ -175,7 +175,6 @@ internal class CustomPaymentMethodConfirmationActivityTest {
                 stripeIntent = PAYMENT_INTENT,
                 shippingDetails = AddressDetails(),
             ),
-            appearance = PaymentSheet.Appearance(),
         )
 
         const val CPM_ACTIVITY_NAME =

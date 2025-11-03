@@ -22,7 +22,6 @@ import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationOption
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import javax.inject.Inject
 
@@ -174,7 +173,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
 
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
-            appearance = PaymentSheet.Appearance(),
             initializationMode = configuration.initializationMode,
             paymentMethodMetadata = paymentMethodMetadata,
         )
@@ -218,7 +216,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     }
                 ),
             ),
-            appearance = PaymentSheet.Appearance(),
             initializationMode = configuration.initializationMode,
             paymentMethodMetadata = paymentMethodMetadata,
         )

@@ -79,6 +79,7 @@ internal data class PaymentMethodMetadata(
     val openCardScanAutomatically: Boolean,
     val clientAttributionMetadata: ClientAttributionMetadata,
     val attestOnIntentConfirmation: Boolean,
+    val appearance: PaymentSheet.Appearance,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -366,7 +367,8 @@ internal data class PaymentMethodMetadata(
                 passiveCaptchaParams = elementsSession.passiveCaptchaParams,
                 openCardScanAutomatically = configuration.opensCardScannerAutomatically,
                 clientAttributionMetadata = clientAttributionMetadata,
-                attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation
+                attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation,
+                appearance = configuration.appearance,
             )
         }
 
@@ -427,6 +429,7 @@ internal data class PaymentMethodMetadata(
                     paymentIntentCreationFlow = null,
                 ),
                 attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation,
+                appearance = configuration.appearance,
             )
         }
     }

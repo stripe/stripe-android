@@ -37,6 +37,7 @@ internal data class CommonConfiguration(
     val walletButtons: PaymentSheet.WalletButtonsConfiguration?,
     val opensCardScannerAutomatically: Boolean,
     val userOverrideCountry: String?,
+    val appearance: PaymentSheet.Appearance,
 ) : Parcelable {
 
     fun validate(isLiveMode: Boolean) {
@@ -170,6 +171,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     walletButtons = walletButtons,
     opensCardScannerAutomatically = opensCardScannerAutomatically,
     userOverrideCountry = userOverrideCountry,
+    appearance = appearance,
 )
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -194,6 +196,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     walletButtons = null,
     opensCardScannerAutomatically = opensCardScannerAutomatically,
     userOverrideCountry = userOverrideCountry,
+    appearance = appearance,
 )
 
 internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -225,6 +228,7 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
     walletButtons = null,
     opensCardScannerAutomatically = false,
     userOverrideCountry = null,
+    appearance = PaymentSheet.Appearance(),
 )
 
 private fun String.isEKClientSecretValid(): Boolean {

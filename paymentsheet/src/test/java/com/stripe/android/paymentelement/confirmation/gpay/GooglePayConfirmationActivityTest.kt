@@ -288,7 +288,6 @@ internal class GooglePayConfirmationActivityTest {
                 stripeIntent = PAYMENT_INTENT,
                 shippingDetails = AddressDetails(),
             ),
-            appearance = PaymentSheet.Appearance(),
         )
 
         const val GOOGLE_PAY_ACTIVITY_NAME =

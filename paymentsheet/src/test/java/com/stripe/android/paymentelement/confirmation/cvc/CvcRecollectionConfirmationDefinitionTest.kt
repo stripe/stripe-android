@@ -14,7 +14,6 @@ import com.stripe.android.paymentelement.confirmation.asCanceled
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncher
@@ -161,7 +160,7 @@ class CvcRecollectionConfirmationDefinitionTest {
 
         val launchCall = launcherScenario.awaitLaunchCall()
 
-        assertThat(launchCall.appearance).isEqualTo(CONFIRMATION_PARAMETERS.appearance)
+        assertThat(launchCall.appearance).isEqualTo(CONFIRMATION_PARAMETERS.paymentMethodMetadata.appearance)
         assertThat(launchCall.data.brand).isEqualTo(option.paymentMethod.card?.brand)
         assertThat(launchCall.data.lastFour).isEqualTo(option.paymentMethod.card?.last4)
         assertThat(launchCall.isLiveMode).isEqualTo(CONFIRMATION_PARAMETERS.intent.isLiveMode)
@@ -312,10 +311,6 @@ class CvcRecollectionConfirmationDefinitionTest {
 
     companion object {
         private val CONFIRMATION_PARAMETERS =
-            com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS.copy(
-                appearance = PaymentSheet.Appearance.Builder()
-                    .colorsDark(PaymentSheet.Colors.defaultLight)
-                    .build(),
-            )
+            com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
     }
 }

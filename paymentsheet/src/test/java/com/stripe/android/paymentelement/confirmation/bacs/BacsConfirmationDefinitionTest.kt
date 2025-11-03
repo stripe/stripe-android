@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
@@ -250,7 +251,11 @@ class BacsConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = createBacsConfirmationOption(),
-            confirmationArgs = CONFIRMATION_PARAMETERS.copy(appearance = appearance),
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    appearance = appearance
+                )
+            ),
             arguments = bacsMandateData,
             launcher = launcher,
         )
