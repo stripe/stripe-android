@@ -198,6 +198,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                                 androidVerificationObject = null,
                             )
                         },
+                        clientAttributionMetadata = clientAttributionMetadata,
                     )
                 }
             }
