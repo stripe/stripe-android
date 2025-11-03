@@ -91,6 +91,7 @@ internal class FaceDetectorTransitioner(
             val savedFrames = requireNotNull(selfieFrameSaver.getSavedFrames()[SELFIES]) {
                 "No frames saved"
             }
+            
             require(savedFrames.size == numFrames) {
                 "Not enough frames saved, score variance not calculated"
             }
