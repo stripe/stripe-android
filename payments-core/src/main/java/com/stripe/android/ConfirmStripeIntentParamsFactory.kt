@@ -142,6 +142,7 @@ internal class ConfirmPaymentIntentParamsFactory(
             confirmationTokenId = confirmationTokenId,
             clientSecret = clientSecret,
             radarOptions = radarOptions,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 }
