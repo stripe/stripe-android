@@ -331,7 +331,6 @@ internal class IntentConfirmationFlowTest {
                 ),
             ),
             confirmationOption = FakeConfirmationOption(),
-            appearance = PaymentSheet.Appearance(),
         )
     }
 
@@ -382,7 +381,6 @@ internal class IntentConfirmationFlowTest {
                     phoneNumber = "1234567890"
                 ),
             ),
-            appearance = PaymentSheet.Appearance(),
         )
     }
 }

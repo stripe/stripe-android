@@ -1050,7 +1050,6 @@ internal class CustomerSheetViewModel(
                     paymentMethod = paymentMethod,
                     optionsParams = null,
                 ),
-                appearance = configuration.appearance,
                 initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                     clientSecret = clientSecret
                 ),

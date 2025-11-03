@@ -498,13 +498,11 @@ internal class DefaultFlowController @Inject internal constructor(
             null -> confirmPaymentSelection(
                 paymentSelection = paymentSelection,
                 state = state.paymentSheetState,
-                appearance = state.config.appearance,
                 initializationMode = initializationMode,
             )
             is PaymentSelection.Saved -> confirmSavedPaymentMethod(
                 paymentSelection = paymentSelection,
                 state = state.paymentSheetState,
-                appearance = state.config.appearance,
                 initializationMode = initializationMode,
             )
         }
@@ -513,7 +511,6 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun confirmSavedPaymentMethod(
         paymentSelection: PaymentSelection.Saved,
         state: PaymentSheetState.Full,
-        appearance: PaymentSheet.Appearance,
         initializationMode: PaymentElementLoader.InitializationMode,
     ) {
         if (paymentSelection.paymentMethod.type == PaymentMethod.Type.SepaDebit &&
@@ -528,7 +525,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 )
             )
         } else {
-            confirmPaymentSelection(paymentSelection, state, appearance, initializationMode)
+            confirmPaymentSelection(paymentSelection, state, initializationMode)
         }
     }
 
@@ -536,7 +533,6 @@ internal class DefaultFlowController @Inject internal constructor(
     fun confirmPaymentSelection(
         paymentSelection: PaymentSelection?,
         state: PaymentSheetState.Full,
-        appearance: PaymentSheet.Appearance,
         initializationMode: PaymentElementLoader.InitializationMode,
     ) {
         viewModelScope.launch {
@@ -550,7 +546,6 @@ internal class DefaultFlowController @Inject internal constructor(
                     arguments = ConfirmationHandler.Args(
                         confirmationOption = option,
                         initializationMode = initializationMode,
-                        appearance = appearance,
                         paymentMethodMetadata = state.paymentMethodMetadata,
                     )
                 )

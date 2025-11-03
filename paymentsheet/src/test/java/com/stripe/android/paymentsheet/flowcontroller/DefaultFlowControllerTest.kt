@@ -872,7 +872,6 @@ internal class DefaultFlowControllerTest {
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             ),
-            appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             initializationMode = INITIALIZATION_MODE,
         )
 
@@ -905,7 +904,6 @@ internal class DefaultFlowControllerTest {
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             ),
-            appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             initializationMode = INITIALIZATION_MODE,
         )
 
@@ -944,7 +942,6 @@ internal class DefaultFlowControllerTest {
                     validationError = null,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 ),
-                appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
                 initializationMode = INITIALIZATION_MODE,
             )
 
@@ -969,7 +966,6 @@ internal class DefaultFlowControllerTest {
         flowController.confirmPaymentSelection(
             paymentSelection = null,
             state = PAYMENT_SHEET_STATE_FULL,
-            appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             initializationMode = INITIALIZATION_MODE,
         )
 
@@ -992,7 +988,6 @@ internal class DefaultFlowControllerTest {
         flowController.confirmPaymentSelection(
             paymentSelection = PaymentSelection.Link(),
             state = PAYMENT_SHEET_STATE_FULL,
-            appearance = PaymentSheetFixtures.CONFIG_CUSTOMER.appearance,
             initializationMode = INITIALIZATION_MODE,
         )
 
@@ -2023,7 +2018,6 @@ internal class DefaultFlowControllerTest {
                 optionsParams = selection.paymentMethodOptionsParams,
             )
         )
-        assertThat(arguments.appearance).isEqualTo(appearance)
     }
 
     @Test

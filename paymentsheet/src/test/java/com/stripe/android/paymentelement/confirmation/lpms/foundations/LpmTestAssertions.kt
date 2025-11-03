@@ -23,7 +23,6 @@ import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
-import com.stripe.android.paymentsheet.PaymentSheet
 import kotlin.test.fail
 
 internal suspend fun assertIntentConfirmed(
@@ -50,7 +49,6 @@ internal suspend fun assertIntentConfirmed(
                     shippingDetails = params.shippingDetails,
                 ),
                 initializationMode = params.initializationMode,
-                appearance = PaymentSheet.Appearance.Builder().build(),
             )
         )
 

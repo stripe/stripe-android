@@ -69,7 +69,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
     ) {
         launcher.launch(
             data = arguments,
-            appearance = confirmationArgs.appearance
+            appearance = confirmationArgs.paymentMethodMetadata.appearance
         )
     }
 

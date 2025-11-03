@@ -681,13 +681,7 @@ class GooglePayConfirmationDefinitionTest {
             ),
         )
 
-        private val APPEARANCE = PaymentSheet.Appearance.Builder()
-            .colorsDark(PaymentSheet.Colors.defaultLight)
-            .build()
-
         private val CONFIRMATION_PARAMETERS =
-            com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS.copy(
-                appearance = APPEARANCE
-            )
+            com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
     }
 }

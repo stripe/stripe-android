@@ -83,7 +83,6 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
         ) ?: return null
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
-            appearance = configuration.appearance,
             initializationMode = initializationMode,
             paymentMethodMetadata = paymentMethodMetadata,
         )

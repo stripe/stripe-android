@@ -8,7 +8,6 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentIntentFactory
@@ -205,5 +204,4 @@ internal val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
         clientSecret = "pi_123_secret_123",
     ),
     confirmationOption = FakeConfirmationOption(),
-    appearance = PaymentSheet.Appearance()
 )

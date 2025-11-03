@@ -1175,6 +1175,7 @@ internal class PaymentMethodMetadataTest {
             openCardScanAutomatically = false,
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             attestOnIntentConfirmation = false,
+            appearance = configuration.appearance,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1259,6 +1260,7 @@ internal class PaymentMethodMetadataTest {
                 paymentIntentCreationFlow = null,
             ),
             attestOnIntentConfirmation = false,
+            appearance = configuration.appearance,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }

@@ -26,7 +26,6 @@ import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.paymentelement.confirmation.paymentElementConfirmationTest
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -266,7 +265,6 @@ internal class AttestationConfirmationActivityTest {
                 shippingDetails = AddressDetails(),
                 stripeIntent = PAYMENT_INTENT,
             ),
-            appearance = PaymentSheet.Appearance(),
         )
 
         private val CONFIRMATION_ARGUMENTS_SAVED = ConfirmationHandler.Args(
@@ -278,7 +276,6 @@ internal class AttestationConfirmationActivityTest {
                 shippingDetails = AddressDetails(),
                 stripeIntent = PAYMENT_INTENT,
             ),
-            appearance = PaymentSheet.Appearance(),
         )
 
         const val ATTESTATION_ACTIVITY_NAME =

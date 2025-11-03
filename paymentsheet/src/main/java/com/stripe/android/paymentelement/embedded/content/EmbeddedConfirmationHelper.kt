@@ -60,7 +60,6 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
             initializationMode = confirmationState.initializationMode,
-            appearance = confirmationState.configuration.appearance,
             paymentMethodMetadata = confirmationState.paymentMethodMetadata,
         )
     }

@@ -102,7 +102,6 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
             confirmationHandler.start(
                 ConfirmationHandler.Args(
                     confirmationOption = LINK_CONFIRMATION_OPTION,
-                    appearance = CONFIRMATION_PARAMETERS.appearance,
                     paymentMethodMetadata = paymentMethodMetadata,
                     initializationMode = CONFIRMATION_PARAMETERS.initializationMode,
                 )

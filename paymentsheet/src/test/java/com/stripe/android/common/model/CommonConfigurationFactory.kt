@@ -29,6 +29,7 @@ internal object CommonConfigurationFactory {
         walletButtons: PaymentSheet.WalletButtonsConfiguration? = null,
         opensCardScannerAutomatically: Boolean = false,
         userOverrideCountry: String? = null,
+        appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = merchantDisplayName,
         customer = customer,
@@ -51,5 +52,6 @@ internal object CommonConfigurationFactory {
         walletButtons = walletButtons,
         opensCardScannerAutomatically = opensCardScannerAutomatically,
         userOverrideCountry = userOverrideCountry,
+        appearance = appearance,
     )
 }

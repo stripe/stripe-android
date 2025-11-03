@@ -11,7 +11,6 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertCanceled
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.paymentelement.embedded.FakeEmbeddedConfirmationSaver
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentIntentFactory
@@ -49,7 +48,6 @@ class EmbeddedConfirmationStarterTest {
                 )
             ),
             confirmationOption = FakeConfirmationOption(),
-            appearance = PaymentSheet.Appearance(),
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),
@@ -61,7 +59,6 @@ class EmbeddedConfirmationStarterTest {
 
         assertThat(startCall.confirmationOption).isEqualTo(arguments.confirmationOption)
         assertThat(startCall.intent).isEqualTo(arguments.intent)
-        assertThat(startCall.appearance).isEqualTo(arguments.appearance)
         assertThat(startCall.initializationMode).isEqualTo(arguments.initializationMode)
         assertThat(startCall.paymentMethodMetadata).isEqualTo(arguments.paymentMethodMetadata)
     }
