@@ -138,7 +138,7 @@ class SimpleTextFieldConfigTest {
         )
 
         // Test miscellaneous symbols
-        assertThat(textConfig.filter("Weather ☀️ ⛈")).isEqualTo("Weather  ")
+        assertThat(textConfig.filter("Weather ☀️ ⛈ 1")).isEqualTo("Weather   1")
 
         // Test emoticons
         assertThat(textConfig.filter("Happy 😀 Face")).isEqualTo("Happy  Face")
