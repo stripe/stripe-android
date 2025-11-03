@@ -5,13 +5,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.paymentsheet.ui.KYCRefreshScreen
 import kotlinx.parcelize.Parcelize
-import androidx.activity.compose.setContent
 
 class VerifyKycInfoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,7 +68,10 @@ data class VerifyKycActivityContractResult(
     val action: KycRefreshScreenAction
 )
 
-class VerifyKycInfoActivityContract : ActivityResultContract<VerifyKycActivityContractArgs, VerifyKycActivityContractResult>() {
+class VerifyKycInfoActivityContract : ActivityResultContract<
+    VerifyKycActivityContractArgs,
+    VerifyKycActivityContractResult
+    >() {
     override fun createIntent(context: Context, input: VerifyKycActivityContractArgs): Intent {
         return Intent(context, VerifyKycInfoActivity::class.java).apply {
             putExtra("linkAppearance", input.linkAppearance)
