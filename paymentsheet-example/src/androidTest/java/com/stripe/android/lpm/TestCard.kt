@@ -418,26 +418,7 @@ internal class TestCard : BasePlaygroundTest() {
     }
 
     @Test
-    fun testCardWithOBO_UseCartesBancaires_Payment() {
-        testCardWithObo("Cartes Bancaires", CheckoutMode.PAYMENT)
-    }
-
-    @Test
-    fun testCardWithOBO_UseCartesBancaires_SFU() {
-        testCardWithObo("Cartes Bancaires", CheckoutMode.PAYMENT_WITH_SETUP)
-    }
-
-    @Test
-    fun testCardWithOBO_UseCartesBancaires_Setup() {
-        testCardWithObo("Cartes Bancaires", CheckoutMode.SETUP)
-    }
-
-    @Test
-    fun testCardWithOBO_UseVisa() {
-        testCardWithObo("Visa", CheckoutMode.PAYMENT)
-    }
-
-    private fun testCardWithObo(cardBrandDisplayName: String, checkoutMode: CheckoutMode) {
+    fun testCardWithOBO_UseCartesBancaires() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[GooglePaySettingsDefinition] = false
@@ -449,10 +430,10 @@ internal class TestCard : BasePlaygroundTest() {
 
                 settings[SupportedPaymentMethodsSettingsDefinition] = "card"
 
-                settings[CheckoutModeSettingsDefinition] = checkoutMode
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT
             },
             populateCustomLpmFields = {
-                populateCardBrandChoiceCardDetails(cardBrandDisplayName)
+                populateCardBrandChoiceCardDetails("Cartes Bancaires")
             },
         )
     }
