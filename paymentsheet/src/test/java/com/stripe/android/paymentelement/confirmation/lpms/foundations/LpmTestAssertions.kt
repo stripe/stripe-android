@@ -10,6 +10,7 @@ import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -45,10 +46,12 @@ internal suspend fun assertIntentConfirmed(
         activity.confirmationHandler.start(
             ConfirmationHandler.Args(
                 confirmationOption = option,
-                intent = params.intent,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = params.intent,
+                    shippingDetails = params.shippingDetails,
+                ),
                 initializationMode = params.initializationMode,
                 appearance = PaymentSheet.Appearance.Builder().build(),
-                shippingDetails = params.shippingDetails,
             )
         )
 

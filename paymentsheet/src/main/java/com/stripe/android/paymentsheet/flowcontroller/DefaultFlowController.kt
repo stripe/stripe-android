@@ -292,13 +292,12 @@ internal class DefaultFlowController @Inject internal constructor(
                 val paymentMethodMetadata = state.paymentSheetState.paymentMethodMetadata
                 flowControllerLinkLauncher.present(
                     configuration = linkConfiguration,
+                    paymentMethodMetadata = paymentMethodMetadata,
                     linkAccountInfo = linkAccountInfo,
                     linkExpressMode = LinkExpressMode.ENABLED,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(
                         selectedPayment = (paymentSelection as? Link)?.selectedPayment?.details
                     ),
-                    passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams,
-                    attestOnIntentConfirmation = paymentMethodMetadata.attestOnIntentConfirmation,
                 )
             } else {
                 showPaymentOptionList(state, paymentSelection)
@@ -549,15 +548,12 @@ internal class DefaultFlowController @Inject internal constructor(
             )
 
             confirmationOption?.let { option ->
-                val stripeIntent = requireNotNull(state.stripeIntent)
-
                 confirmationHandler.start(
                     arguments = ConfirmationHandler.Args(
                         confirmationOption = option,
-                        intent = stripeIntent,
                         initializationMode = initializationMode,
                         appearance = appearance,
-                        shippingDetails = state.config.shippingDetails,
+                        paymentMethodMetadata = state.paymentMethodMetadata,
                     )
                 )
             } ?: run {

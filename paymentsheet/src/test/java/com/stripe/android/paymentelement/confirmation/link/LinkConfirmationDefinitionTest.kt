@@ -169,19 +169,19 @@ internal class LinkConfirmationDefinitionTest {
     @Test
     fun `'launch' should pass attestOnIntentConfirmation true when bootstrapped with true`() = test {
         val presentCall = launchWithAttestationFlag(attestOnIntentConfirmation = true)
-        assertThat(presentCall.attestOnIntentConfirmation).isTrue()
+        assertThat(presentCall.paymentMethodMetadata.attestOnIntentConfirmation).isTrue()
     }
 
     @Test
     fun `'launch' should pass attestOnIntentConfirmation false when bootstrapped with false`() = test {
         val presentCall = launchWithAttestationFlag(attestOnIntentConfirmation = false)
-        assertThat(presentCall.attestOnIntentConfirmation).isFalse()
+        assertThat(presentCall.paymentMethodMetadata.attestOnIntentConfirmation).isFalse()
     }
 
     @Test
     fun `'launch' should default attestOnIntentConfirmation to false when not bootstrapped`() = test {
         val presentCall = launchWithAttestationFlag(attestOnIntentConfirmation = null)
-        assertThat(presentCall.attestOnIntentConfirmation).isFalse()
+        assertThat(presentCall.paymentMethodMetadata.attestOnIntentConfirmation).isFalse()
     }
 
     @Test
@@ -369,13 +369,16 @@ internal class LinkConfirmationDefinitionTest {
     ): RecordingLinkPaymentLauncher.PresentCall {
         val definition = createLinkConfirmationDefinition()
 
+        val paymentMethodMetadata = createMetadata(attestOnIntentConfirmation = attestOnIntentConfirmation ?: false)
         if (attestOnIntentConfirmation != null) {
-            definition.bootstrap(createMetadata(attestOnIntentConfirmation = attestOnIntentConfirmation))
+            definition.bootstrap(paymentMethodMetadata)
         }
 
         definition.launch(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationArgs = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = paymentMethodMetadata,
+            ),
             launcher = launcherScenario.launcher,
             arguments = Unit,
         )

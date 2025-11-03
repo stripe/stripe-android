@@ -8,6 +8,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
@@ -626,7 +627,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             )
         )
         assertThat(option.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
-        assertThat(shippingDetails).isEqualTo(configuration.shippingDetails)
+        assertThat(paymentMethodMetadata.shippingDetails).isEqualTo(configuration.shippingDetails)
         assertThat(initializationMode).isEqualTo(configuration.initializationMode)
     }
 
@@ -643,22 +644,28 @@ internal class DefaultLinkConfirmationHandlerTest {
 
         val optionsCard = option.optionsParams as? PaymentMethodOptionsParams.Card
         assertThat(optionsCard?.cvc).isEqualTo(cvc)
-        assertThat(shippingDetails).isEqualTo(configuration.shippingDetails)
+        assertThat(paymentMethodMetadata.shippingDetails).isEqualTo(configuration.shippingDetails)
         assertThat(initializationMode).isEqualTo(configuration.initializationMode)
     }
 
-    private fun createHandler(
+    private suspend fun createHandler(
         configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         logger: Logger = FakeLogger(),
         confirmationHandler: FakeConfirmationHandler = FakeConfirmationHandler(),
         passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS
     ): DefaultLinkConfirmationHandler {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            passiveCaptchaParams = passiveCaptchaParams,
+            stripeIntent = configuration.stripeIntent,
+        )
         val handler = DefaultLinkConfirmationHandler(
             confirmationHandler = confirmationHandler,
             configuration = configuration,
             logger = logger,
-            passiveCaptchaParams = passiveCaptchaParams
+            paymentMethodMetadata = paymentMethodMetadata,
         )
+        assertThat(confirmationHandler.bootstrapTurbine.awaitItem().paymentMethodMetadata)
+            .isEqualTo(paymentMethodMetadata)
         confirmationHandler.validate()
         return handler
     }

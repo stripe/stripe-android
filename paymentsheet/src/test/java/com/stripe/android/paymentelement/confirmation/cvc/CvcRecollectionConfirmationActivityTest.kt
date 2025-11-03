@@ -12,6 +12,7 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
@@ -97,7 +98,13 @@ internal class CvcRecollectionConfirmationActivityTest {
         confirmationHandler.state.test {
             awaitItem().assertIdle()
 
-            confirmationHandler.start(CONFIRMATION_ARGUMENTS.copy(intent = paymentIntent))
+            confirmationHandler.start(
+                CONFIRMATION_ARGUMENTS.copy(
+                    paymentMethodMetadata = CONFIRMATION_ARGUMENTS.paymentMethodMetadata.copy(
+                        stripeIntent = paymentIntent
+                    )
+                )
+            )
 
             val confirmingWithSavedOption = awaitItem().assertConfirming()
 
@@ -178,8 +185,10 @@ internal class CvcRecollectionConfirmationActivityTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"
             ),
-            shippingDetails = AddressDetails(),
-            intent = PAYMENT_INTENT,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PAYMENT_INTENT,
+                shippingDetails = AddressDetails(),
+            ),
             appearance = PaymentSheet.Appearance(),
         )
 

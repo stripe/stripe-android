@@ -25,6 +25,7 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.wallet.displayName
 import com.stripe.android.link.ui.wallet.makeFallbackCardName
 import com.stripe.android.link.utils.isLinkAuthorizationError
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.EmailSource
@@ -118,17 +119,17 @@ internal class LinkControllerInteractor @Inject constructor(
             stripeAccountId = configuration.stripeAccountId,
         )
         return linkConfigurationLoader.load(configuration)
-            .flatMapCatching { config ->
+            .flatMapCatching { linkMetadata ->
                 val component = linkComponentBuilderProvider.get()
-                    .configuration(config)
+                    .configuration(linkMetadata.linkConfiguration)
                     .build()
                 component.linkAttestationCheck.invoke()
                     .toResult()
-                    .map { component }
+                    .map { Pair(component, linkMetadata.paymentMethodMetadata) }
             }
             .fold(
-                onSuccess = { component ->
-                    updateState { it.copy(linkComponent = component) }
+                onSuccess = { (component, paymentMethodMetadata) ->
+                    updateState { it.copy(linkComponent = component, paymentMethodMetadata = paymentMethodMetadata) }
                     LinkController.ConfigureResult.Success
                 },
                 onFailure = { error ->
@@ -548,11 +549,10 @@ internal class LinkControllerInteractor @Inject constructor(
                 launcher.launch(
                     LinkActivityContract.Args(
                         configuration = configuration,
+                        paymentMethodMetadata = requireNotNull(_state.value.paymentMethodMetadata),
                         linkExpressMode = LinkExpressMode.ENABLED,
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         launchMode = launchMode,
-                        passiveCaptchaParams = null,
-                        attestOnIntentConfirmation = false,
                     )
                 )
             }
@@ -622,6 +622,7 @@ internal class LinkControllerInteractor @Inject constructor(
 
     internal data class State(
         val linkComponent: LinkComponent? = null,
+        val paymentMethodMetadata: PaymentMethodMetadata? = null,
         val emailInput: String? = null,
         val selectedPaymentMethod: LinkPaymentMethod? = null,
         val createdPaymentMethod: PaymentMethod? = null,

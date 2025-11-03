@@ -9,7 +9,6 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
-import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
@@ -33,7 +32,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
@@ -1751,48 +1749,6 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `Passes eligible CBC along to Link`() {
-        val linkConfiguration = LinkTestUtils.createLinkConfiguration(
-            cardBrandChoice = LinkConfiguration.CardBrandChoice(
-                eligible = true,
-                preferredNetworks = listOf("cartes_bancaires"),
-            )
-        )
-
-        val metadata = PaymentMethodMetadata.createForNativeLink(
-            configuration = linkConfiguration,
-            linkAccount = linkAccount(),
-            passiveCaptchaParams = null,
-            attestOnIntentConfirmation = false
-        )
-
-        assertThat(metadata.cbcEligibility).isEqualTo(
-            CardBrandChoiceEligibility.Eligible(
-                preferredNetworks = listOf(CardBrand.CartesBancaires)
-            )
-        )
-    }
-
-    @Test
-    fun `Passes ineligible CBC along to Link`() {
-        val linkConfiguration = LinkTestUtils.createLinkConfiguration(
-            cardBrandChoice = LinkConfiguration.CardBrandChoice(
-                eligible = false,
-                preferredNetworks = emptyList(),
-            )
-        )
-
-        val metadata = PaymentMethodMetadata.createForNativeLink(
-            configuration = linkConfiguration,
-            linkAccount = linkAccount(),
-            passiveCaptchaParams = null,
-            attestOnIntentConfirmation = false,
-        )
-
-        assertThat(metadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
-    }
-
-    @Test
     fun `requiresMandate returns true for PMO SFU`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -2101,51 +2057,6 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `Passes CBF along to Link`() {
-        val linkConfiguration = LinkTestUtils.createLinkConfiguration(
-            cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
-        )
-
-        val metadata = PaymentMethodMetadata.createForNativeLink(
-            configuration = linkConfiguration,
-            linkAccount = linkAccount(),
-            passiveCaptchaParams = null,
-            attestOnIntentConfirmation = false
-        )
-
-        assertThat(metadata.cardBrandFilter).isEqualTo(linkConfiguration.cardBrandFilter)
-    }
-
-    @Test
-    fun `Passes passiveCaptchaParams along to Link`() {
-        val linkConfiguration = LinkTestUtils.createLinkConfiguration(
-            cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
-        )
-
-        val metadata = PaymentMethodMetadata.createForNativeLink(
-            configuration = linkConfiguration,
-            linkAccount = linkAccount(),
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
-            attestOnIntentConfirmation = false
-        )
-
-        assertThat(metadata.passiveCaptchaParams)
-            .isEqualTo(PassiveCaptchaParamsFactory.passiveCaptchaParams())
-    }
-
-    @Test
-    fun `createForNativeLink passes attestOnIntentConfirmation true correctly`() {
-        val metadata = createNativeLinkMetadata(attestOnIntentConfirmation = true)
-        assertThat(metadata.attestOnIntentConfirmation).isTrue()
-    }
-
-    @Test
-    fun `createForNativeLink passes attestOnIntentConfirmation false correctly`() {
-        val metadata = createNativeLinkMetadata(attestOnIntentConfirmation = false)
-        assertThat(metadata.attestOnIntentConfirmation).isFalse()
-    }
-
-    @Test
     fun `createForPaymentElement reads attestOnIntentConfirmation from elements session when true`() {
         val metadata = createPaymentElementMetadata(attestOnIntentConfirmationFlag = true)
         assertThat(metadata.attestOnIntentConfirmation).isTrue()
@@ -2173,15 +2084,6 @@ internal class PaymentMethodMetadataTest {
     fun `createForCustomerSheet reads attestOnIntentConfirmation from elements session when false`() {
         val metadata = createCustomerSheetMetadata(attestOnIntentConfirmationFlag = false)
         assertThat(metadata.attestOnIntentConfirmation).isFalse()
-    }
-
-    private fun createNativeLinkMetadata(attestOnIntentConfirmation: Boolean): PaymentMethodMetadata {
-        return PaymentMethodMetadata.createForNativeLink(
-            configuration = LinkTestUtils.createLinkConfiguration(),
-            linkAccount = linkAccount(),
-            passiveCaptchaParams = null,
-            attestOnIntentConfirmation = attestOnIntentConfirmation
-        )
     }
 
     private fun createPaymentElementMetadata(attestOnIntentConfirmationFlag: Boolean?): PaymentMethodMetadata {
@@ -2281,10 +2183,6 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
         )
     }
-
-    private fun linkAccount() = LinkAccount(
-        consumerSession = TestFactory.CONSUMER_SESSION
-    )
 
     private fun createBillingDetailsCollectionConfiguration() =
         PaymentSheet.BillingDetailsCollectionConfiguration(

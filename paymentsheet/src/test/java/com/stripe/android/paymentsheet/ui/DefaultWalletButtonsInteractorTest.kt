@@ -461,7 +461,7 @@ class DefaultWalletButtonsInteractorTest {
             )
 
             val call = presentCalls.awaitItem()
-            assertThat(call.attestOnIntentConfirmation).isEqualTo(attestOnIntentConfirmation)
+            assertThat(call.paymentMethodMetadata.attestOnIntentConfirmation).isEqualTo(attestOnIntentConfirmation)
         }
     }
 

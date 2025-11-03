@@ -16,6 +16,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
@@ -289,8 +290,10 @@ internal class GooglePayConfirmationActivityTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"
             ),
-            shippingDetails = AddressDetails(),
-            intent = PAYMENT_INTENT,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PAYMENT_INTENT,
+                shippingDetails = AddressDetails(),
+            ),
             appearance = PaymentSheet.Appearance(),
         )
 

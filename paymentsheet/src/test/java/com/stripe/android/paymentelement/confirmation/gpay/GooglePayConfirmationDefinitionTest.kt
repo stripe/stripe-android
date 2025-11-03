@@ -12,6 +12,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PassiveCaptchaParamsFactory
@@ -440,7 +441,9 @@ class GooglePayConfirmationDefinitionTest {
                     ),
                 ),
                 confirmationArgs = CONFIRMATION_PARAMETERS.copy(
-                    intent = PAYMENT_INTENT.copy(currency = "CAD"),
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        stripeIntent = PAYMENT_INTENT.copy(currency = "CAD")
+                    ),
                 ),
                 arguments = Unit,
                 launcher = launcher,
@@ -474,7 +477,9 @@ class GooglePayConfirmationDefinitionTest {
                     ),
                 ),
                 confirmationArgs = CONFIRMATION_PARAMETERS.copy(
-                    intent = PAYMENT_INTENT.copy(currency = "CAD"),
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        stripeIntent = PAYMENT_INTENT.copy(currency = "CAD")
+                    ),
                 ),
                 arguments = Unit,
                 launcher = launcher,
@@ -509,7 +514,9 @@ class GooglePayConfirmationDefinitionTest {
                     ),
                 ),
                 confirmationArgs = CONFIRMATION_PARAMETERS.copy(
-                    intent = SetupIntentFactory.create(),
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        stripeIntent = SetupIntentFactory.create(),
+                    ),
                 ),
                 arguments = Unit,
                 launcher = launcher,
@@ -544,7 +551,9 @@ class GooglePayConfirmationDefinitionTest {
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS.copy(
                 initializationMode = initializationMode,
-                intent = intent,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = intent
+                ),
             ),
         )
 

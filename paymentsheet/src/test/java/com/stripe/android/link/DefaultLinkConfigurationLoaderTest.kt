@@ -55,7 +55,7 @@ internal class DefaultLinkConfigurationLoaderTest {
 
         val result = loader.load(configuration)
         assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()).isEqualTo(linkConfiguration)
+        assertThat(result.getOrNull()?.linkConfiguration).isEqualTo(linkConfiguration)
     }
 
     @Test

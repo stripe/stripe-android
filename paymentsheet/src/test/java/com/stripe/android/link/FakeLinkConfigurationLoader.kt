@@ -1,14 +1,20 @@
 package com.stripe.android.link
 
+import com.stripe.android.link.injection.LinkMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+
 internal class FakeLinkConfigurationLoader : LinkConfigurationLoader {
     var shouldUpdateResult: Boolean = false
 
-    var linkConfigurationResult: Result<LinkConfiguration> =
+    var linkConfigurationResult: Result<LinkMetadata> =
         Result.success(
-            TestFactory.LINK_CONFIGURATION.copy(customerInfo = TestFactory.LINK_EMPTY_CUSTOMER_INFO)
+            LinkMetadata(
+                TestFactory.LINK_CONFIGURATION.copy(customerInfo = TestFactory.LINK_EMPTY_CUSTOMER_INFO),
+                PaymentMethodMetadataFactory.create()
+            )
         )
 
-    override suspend fun load(configuration: LinkController.Configuration): Result<LinkConfiguration> {
+    override suspend fun load(configuration: LinkController.Configuration): Result<LinkMetadata> {
         if (!shouldUpdateResult) {
             return linkConfigurationResult
         }
@@ -23,9 +29,11 @@ internal class FakeLinkConfigurationLoader : LinkConfigurationLoader {
         }
         return linkConfigurationResult.map {
             it.copy(
-                customerInfo = customerInfo ?: it.customerInfo,
-                defaultBillingDetails = configuration.defaultBillingDetails,
-                billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration
+                linkConfiguration = it.linkConfiguration.copy(
+                    customerInfo = customerInfo ?: it.linkConfiguration.customerInfo,
+                    defaultBillingDetails = configuration.defaultBillingDetails,
+                    billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration
+                )
             )
         }
     }

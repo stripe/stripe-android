@@ -72,7 +72,6 @@ import org.junit.After
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -239,11 +238,10 @@ internal class PaymentOptionsViewModelTest {
 
         verify(linkPaymentLauncher).present(
             configuration = any(),
+            paymentMethodMetadata = any(),
             linkAccountInfo = eq(LinkAccountUpdate.Value(unverifiedAccount)),
             launchMode = eq(LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)),
             linkExpressMode = eq(LinkExpressMode.ENABLED),
-            passiveCaptchaParams = anyOrNull(),
-            attestOnIntentConfirmation = eq(false),
         )
     }
 
@@ -279,11 +277,10 @@ internal class PaymentOptionsViewModelTest {
         // Ensure LinkPaymentLauncher.present is never called
         verify(linkPaymentLauncher, never()).present(
             configuration = any(),
+            paymentMethodMetadata = any(),
             linkAccountInfo = any(),
             launchMode = any(),
             linkExpressMode = any(),
-            passiveCaptchaParams = any(),
-            attestOnIntentConfirmation = any(),
         )
     }
 

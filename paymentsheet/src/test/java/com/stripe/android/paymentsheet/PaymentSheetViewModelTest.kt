@@ -596,6 +596,7 @@ internal class PaymentSheetViewModelTest {
         )
         val viewModel = createViewModel(
             stripeIntent = stripeIntent,
+            shippingDetails = shippingAddress,
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
                     .shippingDetails(shippingAddress)
@@ -629,7 +630,7 @@ internal class PaymentSheetViewModelTest {
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
-        assertThat(arguments.shippingDetails).isEqualTo(shippingAddress)
+        assertThat(arguments.paymentMethodMetadata.shippingDetails).isEqualTo(shippingAddress)
     }
 
     @Test
@@ -3793,6 +3794,7 @@ internal class PaymentSheetViewModelTest {
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         passiveCaptchaParams: PassiveCaptchaParams? = null,
         clientAttributionMetadata: ClientAttributionMetadata? = null,
+        shippingDetails: AddressDetails? = null,
         paymentElementLoader: PaymentElementLoader = FakePaymentElementLoader(
             stripeIntent = stripeIntent,
             shouldFail = shouldFailLoad,
@@ -3804,6 +3806,7 @@ internal class PaymentSheetViewModelTest {
             validationError = validationError,
             passiveCaptchaParams = passiveCaptchaParams,
             clientAttributionMetadata = clientAttributionMetadata,
+            shippingDetails = shippingDetails,
         ),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this@PaymentSheetViewModelTest.eventReporter,
