@@ -134,7 +134,10 @@ internal class ShopPayConfirmationDefinitionTest {
                             externalId = "external_123"
                         )
                     )
-                )
+                ),
+                paymentMethodMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.copy(
+                    sellerBusinessName = "My business, Inc.",
+                ),
             ),
             launcher = launcher,
             arguments = Unit,

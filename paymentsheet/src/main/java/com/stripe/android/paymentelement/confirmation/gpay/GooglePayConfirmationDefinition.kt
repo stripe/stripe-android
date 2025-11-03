@@ -15,7 +15,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.CoroutineScope
@@ -157,7 +156,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                     else -> GooglePayEnvironment.Test
                 },
                 merchantCountryCode = config.merchantCountryCode,
-                merchantName = confirmationArgs.initializationMode.sellerBusinessName
+                merchantName = confirmationArgs.paymentMethodMetadata.sellerBusinessName
                     ?: config.merchantName,
                 isEmailRequired = config.billingDetailsCollectionConfiguration.collectsEmail,
                 billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
