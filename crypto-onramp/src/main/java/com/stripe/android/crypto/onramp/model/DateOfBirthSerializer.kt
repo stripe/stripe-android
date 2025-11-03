@@ -1,9 +1,7 @@
 package com.stripe.android.crypto.onramp.model
 
 import com.stripe.android.model.DateOfBirth
-import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder

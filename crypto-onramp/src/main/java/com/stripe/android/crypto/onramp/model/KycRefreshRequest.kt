@@ -1,9 +1,9 @@
 package com.stripe.android.crypto.onramp.model
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.DateOfBirth
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import com.stripe.android.model.DateOfBirth
 
 /**
  * Internal API request model for KYC refreshing.

@@ -38,15 +38,6 @@ import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface VerifyKYCInfo {
-    val firstName: String
-    val lastName: String
-    val dateOfBirth: DateOfBirth
-    val idNumberLastFour: String?
-    val address: PaymentSheet.Address
-}
-
 @Composable
 @Suppress("LongMethod")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -129,6 +120,15 @@ fun KYCRefreshScreen(
             }
         }
     }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface VerifyKYCInfo {
+    val firstName: String
+    val lastName: String
+    val dateOfBirth: DateOfBirth
+    val idNumberLastFour: String?
+    val address: PaymentSheet.Address
 }
 
 @Composable

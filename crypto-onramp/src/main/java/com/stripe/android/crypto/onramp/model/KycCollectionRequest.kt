@@ -1,7 +1,7 @@
 package com.stripe.android.crypto.onramp.model
 
-import com.stripe.android.model.DateOfBirth
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.DateOfBirth
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
