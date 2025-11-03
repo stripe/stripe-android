@@ -28,7 +28,7 @@ import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
-import com.stripe.android.crypto.onramp.ui.KYCRefreshScreen
+import com.stripe.android.paymentsheet.ui.KYCRefreshScreen
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
@@ -377,6 +377,7 @@ class KycFullScreenActivity : ComponentActivity() {
                         firstName = kycInfo.firstName,
                         lastName = kycInfo.lastName,
                         idNumberLastFour = kycInfo.idNumberLastFour,
+                        idType = kycInfo.idType,
                         dateOfBirth = kycInfo.dateOfBirth,
                         address = kycInfo.address
                     )

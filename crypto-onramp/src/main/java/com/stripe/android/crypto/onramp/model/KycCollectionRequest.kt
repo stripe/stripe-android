@@ -1,5 +1,6 @@
 package com.stripe.android.crypto.onramp.model
 
+import com.stripe.android.model.DateOfBirth
 import androidx.annotation.RestrictTo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -20,6 +21,7 @@ internal data class KycCollectionRequest(
     @SerialName("id_type")
     val idType: String?,
     @SerialName("dob")
+    @Serializable(with = DateOfBirthSerializer::class)
     val dateOfBirth: DateOfBirth,
     @SerialName("city")
     val city: String?,

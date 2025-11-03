@@ -1,8 +1,9 @@
-package com.stripe.android.crypto.onramp.ui
+package com.stripe.android.paymentsheet.ui
 
 import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
+import androidx.annotation.RestrictTo
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -44,17 +45,28 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.stripe.android.crypto.onramp.R
-import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.link.LinkAppearance
+import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ui.getLinkIcon
+import com.stripe.android.paymentsheet.R
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface KycRetrieveResponseProtocol {
+    val firstName: String
+    val lastName: String
+    val dateOfBirth: DateOfBirth
+    val idNumberLastFour: String?
+    val idType: String?
+    val address: PaymentSheet.Address
+}
 
 @Composable
 @Suppress("LongMethod", "UnusedParameter")
-internal fun KYCRefreshScreen(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun KYCRefreshScreen(
     appearance: LinkAppearance?,
-    kycInfo: KycRetrieveResponse,
+    kycInfo: KycRetrieveResponseProtocol,
     onClose: () -> Unit,
     onEdit: () -> Unit,
     onConfirm: () -> Unit
@@ -208,7 +220,7 @@ private fun InfoRow(
 }
 
 @Composable
-fun OnrampTheme(
+private fun OnrampTheme(
     linkAppearance: LinkAppearance?,
     content: @Composable () -> Unit,
 ) {

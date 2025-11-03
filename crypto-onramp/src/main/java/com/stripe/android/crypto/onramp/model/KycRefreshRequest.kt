@@ -3,6 +3,7 @@ package com.stripe.android.crypto.onramp.model
 import androidx.annotation.RestrictTo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import com.stripe.android.model.DateOfBirth
 
 /**
  * Internal API request model for KYC refreshing.
@@ -20,6 +21,7 @@ internal data class KycRefreshRequest(
     @SerialName("id_type")
     val idType: String?,
     @SerialName("dob")
+    @Serializable(with = DateOfBirthSerializer::class)
     val dateOfBirth: DateOfBirth,
     @SerialName("city")
     val city: String?,

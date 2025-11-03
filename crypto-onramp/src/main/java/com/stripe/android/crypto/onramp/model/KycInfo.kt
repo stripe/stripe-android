@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
+import com.stripe.android.model.DateOfBirth
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class KycInfo(
@@ -21,15 +22,7 @@ data class RefreshKycInfo(
     val firstName: String,
     val lastName: String,
     val idNumberLastFour: String?,
+    val idType: String?,
     val dateOfBirth: DateOfBirth,
     val address: PaymentSheet.Address
-) : Parcelable
-
-@Serializable
-@Parcelize
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class DateOfBirth(
-    val day: Int,
-    val month: Int,
-    val year: Int
 ) : Parcelable

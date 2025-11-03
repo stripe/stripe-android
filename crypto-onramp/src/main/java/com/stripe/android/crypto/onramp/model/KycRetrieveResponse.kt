@@ -2,7 +2,9 @@ package com.stripe.android.crypto.onramp.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.ui.KycRetrieveResponseProtocol
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -16,17 +18,18 @@ import kotlinx.serialization.Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class KycRetrieveResponse(
     @SerialName("first_name")
-    val firstName: String,
+    override val firstName: String,
     @SerialName("last_name")
-    val lastName: String,
+    override val lastName: String,
     @SerialName("id_number_last4")
-    val idNumberLastFour: String?,
+    override val idNumberLastFour: String?,
     @SerialName("id_type")
-    val idType: String?,
+    override val idType: String?,
     @SerialName("dob")
-    val dateOfBirth: DateOfBirth,
+    @Serializable(with = DateOfBirthSerializer::class)
+    override val dateOfBirth: DateOfBirth,
 
     @SerialName("address")
     @Serializable(with = PaymentSheetAddressSerializer::class)
-    val address: PaymentSheet.Address
-) : Parcelable
+    override val address: PaymentSheet.Address
+) : Parcelable, KycRetrieveResponseProtocol
