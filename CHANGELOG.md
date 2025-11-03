@@ -4,6 +4,13 @@
 
 ## 22.0.0 - 2025-11-03
 
+This major version introduces many small breaking changes. Please see [MIGRATING.md](MIGRATING.md) to help you migrate.
+
+### PaymentSheet
+
+* [Added] CustomerSessions is now generally available.
+* [Added] ConfirmationTokens is now generally available.
+
 ## 21.29.0 - 2025-10-20
 * [Added] Added support for `onBehalfOf` to CustomerSheet.IntentConfiguration. This parameter makes CustomerSheet use a connected account to determine the payment method that users see and whether CardBrandChoice is enabled. For more information, see the [SetupIntent docs](https://docs.stripe.com/api/setup_intents/object#setup_intent_object-on_behalf_of).
 
