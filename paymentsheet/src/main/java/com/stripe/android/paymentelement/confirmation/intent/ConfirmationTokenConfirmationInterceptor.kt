@@ -55,7 +55,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             confirmationTokenParams = prepareConfirmationTokenParams(
                 confirmationOption,
                 shippingValues,
-                clientAttributionMetadata,
             ),
             options = requestOptions,
         ).fold(
@@ -89,7 +88,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             confirmationTokenParams = prepareConfirmationTokenParams(
                 confirmationOption,
                 shippingValues,
-                clientAttributionMetadata,
             ),
             options = if (paymentMethod.customerId != null) {
                 requestOptions.copy(
@@ -214,7 +212,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     private fun prepareConfirmationTokenParams(
         confirmationOption: PaymentMethodConfirmationOption,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        clientAttributionMetadata: ClientAttributionMetadata?,
     ): ConfirmationTokenParams {
         val confirmationOption = confirmationOption.updatedForDeferredIntent(intentConfiguration)
         return ConfirmationTokenParams(
@@ -247,7 +244,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     confirmationOption.optionsParams
                 )
             },
-            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 
