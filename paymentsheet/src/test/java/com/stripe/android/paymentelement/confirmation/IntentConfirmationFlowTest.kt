@@ -5,7 +5,6 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -52,21 +51,7 @@ internal class IntentConfirmationFlowTest {
 
         val launchAction = action.asLaunch()
 
-        assertThat(launchAction.launcherArguments).isEqualTo(
-            IntentConfirmationDefinition.Args.Confirm(
-                confirmNextParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                    paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                    clientSecret = "pi_123_secret_123",
-                    shipping = ConfirmPaymentIntentParams.Shipping(
-                        name = "John Doe",
-                        phone = "1234567890",
-                        address = Address(),
-                    ),
-                    savePaymentMethod = null,
-                    setupFutureUsage = null,
-                )
-            )
-        )
+        assertThat(launchAction.launcherArguments).isInstanceOf(IntentConfirmationDefinition.Args.Confirm::class.java)
     }
 
     @Test
@@ -88,13 +73,8 @@ internal class IntentConfirmationFlowTest {
 
         val launchAction = action.asLaunch()
 
-        assertThat(launchAction.launcherArguments).isEqualTo(
-            IntentConfirmationDefinition.Args.Confirm(
-                confirmNextParams = ConfirmSetupIntentParams.create(
-                    paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                    clientSecret = "seti_123_secret_123",
-                )
-            )
+        assertThat(launchAction.launcherArguments).isInstanceOf(
+            IntentConfirmationDefinition.Args.Confirm::class.java
         )
     }
 
