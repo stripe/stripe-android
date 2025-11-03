@@ -20,14 +20,7 @@ dependencies {
     implementation libs.kotlin.serialization
 
     api libs.compose.ui
-    implementation libs.compose.runtime
-    implementation libs.compose.uiViewBinding
-    implementation libs.compose.foundation
-    implementation libs.compose.material
-    implementation libs.compose.materialIcons
     implementation libs.compose.activity
-    implementation libs.compose.navigation
-    implementation libs.accompanist.systemUiController
 
     implementation libs.dagger
 
