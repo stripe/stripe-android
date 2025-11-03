@@ -9,18 +9,27 @@ public final class com/stripe/android/crypto/onramp/model/CryptoNetwork$Companio
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/crypto/onramp/model/DateOfBirth$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/model/DateOfBirth$$serializer;
+public synthetic class com/stripe/android/crypto/onramp/model/KycRetrieveResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/crypto/onramp/model/DateOfBirth;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/crypto/onramp/model/DateOfBirth;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 }
 
-public final class com/stripe/android/crypto/onramp/model/DateOfBirth$Companion {
+public final class com/stripe/android/crypto/onramp/model/KycRetrieveResponse$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/crypto/onramp/model/KycRetrieveResponse$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/crypto/onramp/model/LinkUserInfo$Creator : android/os/Parcelable$Creator {
@@ -36,6 +45,54 @@ public final class com/stripe/android/crypto/onramp/model/OnrampConfiguration$Cr
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult$Cancelled : com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult$Cancelled;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult$UpdateAddress : com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult$UpdateAddress;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/RefreshKycInfo$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/model/RefreshKycInfo;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/crypto/onramp/model/RefreshKycInfo;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Cancelled$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Cancelled;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Cancelled;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Confirm$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Confirm;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Confirm;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Edit$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Edit;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/crypto/onramp/ui/KycRefreshScreenAction$Edit;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

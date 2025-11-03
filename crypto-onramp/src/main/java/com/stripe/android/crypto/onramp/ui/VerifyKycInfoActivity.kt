@@ -13,7 +13,7 @@ import com.stripe.android.link.LinkAppearance
 import com.stripe.android.paymentsheet.ui.KYCRefreshScreen
 import kotlinx.parcelize.Parcelize
 
-class VerifyKycInfoActivity : ComponentActivity() {
+internal class VerifyKycInfoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val kycInfo = intent.getParcelableExtra<KycRetrieveResponse>("kycInfo")!!
@@ -52,23 +52,24 @@ class VerifyKycInfoActivity : ComponentActivity() {
         return Intent().apply { putExtra("action", action) }
     }
 }
-data class VerifyKycActivityContractArgs(
+
+internal data class VerifyKycActivityContractArgs(
     val kycRetrieveResponse: KycRetrieveResponse,
     val linkAppearance: LinkAppearance?
 )
 
 @Parcelize
-sealed class KycRefreshScreenAction : Parcelable {
+internal sealed class KycRefreshScreenAction : Parcelable {
     data object Cancelled : KycRefreshScreenAction()
     data object Edit : KycRefreshScreenAction()
     data class Confirm(val info: RefreshKycInfo) : KycRefreshScreenAction()
 }
 
-data class VerifyKycActivityContractResult(
+internal data class VerifyKycActivityContractResult(
     val action: KycRefreshScreenAction
 )
 
-class VerifyKycInfoActivityContract : ActivityResultContract<
+internal class VerifyKycInfoActivityContract : ActivityResultContract<
     VerifyKycActivityContractArgs,
     VerifyKycActivityContractResult
     >() {
