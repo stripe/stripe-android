@@ -24,7 +24,4 @@ internal class FakeConfirmationChallengeBridgeHandler : ConfirmationChallengeBri
 
     @JavascriptInterface
     override fun onError(errorMessage: String) = Unit
-
-    @JavascriptInterface
-    override fun logConsole(logData: String) = Unit
 }

@@ -18,7 +18,4 @@ internal interface ConfirmationChallengeBridgeHandler {
 
     @JavascriptInterface
     fun onError(errorMessage: String)
-
-    @JavascriptInterface
-    fun logConsole(logData: String)
 }

@@ -136,61 +136,12 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
         }
     }
 
-    @Test
-    fun `logConsole with valid JSON logs message`() {
-        val logger = FakeLogger()
-        val handler = createHandler(logger = logger)
-        val logData = """{"level": "error", "message": "Test error message"}"""
-
-        handler.logConsole(logData)
-
-        assertThat(logger.debugLogs).hasSize(1)
-        assertThat(logger.debugLogs.first()).isEqualTo("❌ [ConfirmationChallenge] Console ERROR: Test error message")
-    }
-
-    @Test
-    fun `logConsole with warning level logs message`() {
-        val logger = FakeLogger()
-        val handler = createHandler(logger = logger)
-        val logData = """{"level": "warn", "message": "Test warning"}"""
-
-        handler.logConsole(logData)
-
-        assertThat(logger.debugLogs).hasSize(1)
-        assertThat(logger.debugLogs.first()).isEqualTo("⚠️ [ConfirmationChallenge] Console WARN: Test warning")
-    }
-
-    @Test
-    fun `logConsole with info level logs message`() {
-        val logger = FakeLogger()
-        val handler = createHandler(logger = logger)
-        val logData = """{"level": "info", "message": "Test info"}"""
-
-        handler.logConsole(logData)
-
-        assertThat(logger.debugLogs).hasSize(1)
-        assertThat(logger.debugLogs.first()).isEqualTo("📝 [ConfirmationChallenge] Console INFO: Test info")
-    }
-
-    @Test
-    fun `logConsole with invalid JSON falls back to raw message`() {
-        val logger = FakeLogger()
-        val handler = createHandler(logger = logger)
-        val invalidLogData = "not valid json"
-
-        handler.logConsole(invalidLogData)
-
-        assertThat(logger.debugLogs).hasSize(1)
-        assertThat(logger.debugLogs.first()).isEqualTo("📝 [ConfirmationChallenge] Console: not valid json")
-    }
-
     private fun createHandler(
         args: IntentConfirmationChallengeArgs = testArgs,
-        logger: FakeLogger = FakeLogger()
     ): DefaultConfirmationChallengeBridgeHandler {
         return DefaultConfirmationChallengeBridgeHandler(
             args = args,
-            logger = logger
+            logger = FakeLogger()
         )
     }
 }

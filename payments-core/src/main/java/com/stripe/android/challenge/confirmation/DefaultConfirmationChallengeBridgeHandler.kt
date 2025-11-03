@@ -54,7 +54,7 @@ internal class DefaultConfirmationChallengeBridgeHandler @Inject constructor(
 
     @JavascriptInterface
     override fun onError(errorMessage: String) {
-        logMessage("Error from bridge: $errorMessage", emoji = "❌")
+        logMessage("Error from bridge: $errorMessage")
         _event.tryEmit(
             ConfirmationChallengeBridgeEvent.Error(
                 cause = Exception(errorMessage)
@@ -62,26 +62,7 @@ internal class DefaultConfirmationChallengeBridgeHandler @Inject constructor(
         )
     }
 
-    @JavascriptInterface
-    override fun logConsole(logData: String) {
-        runCatching {
-            val jsonObject = JSONObject(logData)
-            val level = jsonObject.optString("level", "log")
-            val message = jsonObject.optString("message", logData)
-
-            val emoji = when (level.lowercase()) {
-                "error" -> "❌"
-                "warn" -> "⚠️"
-                else -> "📝"
-            }
-
-            logMessage("Console ${level.uppercase()}: $message", emoji)
-        }.onFailure {
-            logMessage("Console: $logData")
-        }
-    }
-
-    private fun logMessage(message: String, emoji: String = "📝") {
-        logger.debug("$emoji [ConfirmationChallenge] $message")
+    private fun logMessage(message: String) {
+        logger.debug("[ConfirmationChallenge] $message")
     }
 }
