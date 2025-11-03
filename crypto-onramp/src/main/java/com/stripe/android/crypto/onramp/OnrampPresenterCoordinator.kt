@@ -1,15 +1,9 @@
 package com.stripe.android.crypto.onramp
 
 import android.content.ContentResolver
-import android.content.Context
-import android.content.Intent
 import android.net.Uri
-import android.os.Bundle
-import android.os.Parcelable
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.exception.APIException
@@ -17,7 +11,6 @@ import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
-import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
@@ -25,8 +18,10 @@ import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
-import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
+import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
+import com.stripe.android.crypto.onramp.ui.VerifyKycActivityContractArgs
+import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
@@ -35,11 +30,9 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.ui.KYCRefreshScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 @OnrampPresenterScope
@@ -73,8 +66,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private val currentLinkAccount: LinkController.LinkAccount?
         get() = interactor.state.value.linkControllerState?.internalLinkAccount
 
-    private val onrampActivityResultLauncher: ActivityResultLauncher<OnrampActivityContractArgs> =
-        activity.registerForActivityResult(OnrampActivityContract()) { result ->
+    private val onrampActivityResultLauncher: ActivityResultLauncher<VerifyKycActivityContractArgs> =
+        activity.registerForActivityResult(VerifyKycInfoActivityContract()) { result ->
             when (val action = result.action) {
                 is KycRefreshScreenAction.Cancelled -> {
                     onrampCallbacks.verifyKycCallback.onResult(
@@ -182,7 +175,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                         address = updatedAddress ?: result.getOrThrow().address
                     )
                     onrampActivityResultLauncher.launch(
-                        OnrampActivityContractArgs(kycInfo, appearance())
+                        VerifyKycActivityContractArgs(kycInfo, appearance())
                     )
                 } else {
                     onrampCallbacks.verifyKycCallback.onResult(
@@ -351,73 +344,3 @@ private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType =
         PaymentMethodType.Card -> LinkController.PaymentMethodType.Card
         PaymentMethodType.BankAccount -> LinkController.PaymentMethodType.BankAccount
     }
-
-class KycFullScreenActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val kycInfo = intent.getParcelableExtra<KycRetrieveResponse>("kycInfo")!!
-        val linkAppearance = intent.getParcelableExtra<LinkAppearance>("linkAppearance")
-
-        setContent {
-            KYCRefreshScreen(
-                linkAppearance,
-                kycInfo,
-                onClose = {
-                    setResult(RESULT_CANCELED, createIntent(KycRefreshScreenAction.Cancelled))
-                    finish()
-                },
-                onEdit = {
-                    setResult(RESULT_OK, createIntent(KycRefreshScreenAction.Edit))
-                    finish()
-                },
-                onConfirm = {
-                    val refreshInfo = RefreshKycInfo(
-                        firstName = kycInfo.firstName,
-                        lastName = kycInfo.lastName,
-                        idNumberLastFour = kycInfo.idNumberLastFour,
-                        idType = kycInfo.idType,
-                        dateOfBirth = kycInfo.dateOfBirth,
-                        address = kycInfo.address
-                    )
-
-                    setResult(RESULT_OK, createIntent(KycRefreshScreenAction.Confirm(refreshInfo)))
-                    finish()
-                }
-            )
-        }
-    }
-
-    private fun createIntent(action: KycRefreshScreenAction): Intent {
-        return Intent().apply { putExtra("action", action) }
-    }
-}
-data class OnrampActivityContractArgs(
-    val kycRetrieveResponse: KycRetrieveResponse,
-    val linkAppearance: LinkAppearance?
-)
-
-@Parcelize
-sealed class KycRefreshScreenAction : Parcelable {
-    data object Cancelled : KycRefreshScreenAction()
-    data object Edit : KycRefreshScreenAction()
-    data class Confirm(val info: RefreshKycInfo) : KycRefreshScreenAction()
-}
-
-data class OnrampActivityContractResult(
-    val action: KycRefreshScreenAction
-)
-
-class OnrampActivityContract : ActivityResultContract<OnrampActivityContractArgs, OnrampActivityContractResult>() {
-    override fun createIntent(context: Context, input: OnrampActivityContractArgs): Intent {
-        return Intent(context, KycFullScreenActivity::class.java).apply {
-            putExtra("linkAppearance", input.linkAppearance)
-            putExtra("kycInfo", input.kycRetrieveResponse)
-        }
-    }
-
-    override fun parseResult(resultCode: Int, intent: Intent?): OnrampActivityContractResult {
-        val action = intent?.getParcelableExtra<KycRefreshScreenAction>("action") ?: KycRefreshScreenAction.Cancelled
-
-        return OnrampActivityContractResult(action)
-    }
-}
