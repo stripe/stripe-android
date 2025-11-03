@@ -31,12 +31,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 
 @Composable
 @Suppress("LongMethod")
@@ -52,70 +54,76 @@ fun KYCRefreshScreen(
     val dob = "%02d/%02d/%d".format(kycInfo.dateOfBirth.month, kycInfo.dateOfBirth.day, kycInfo.dateOfBirth.year)
     val ssnLast4 = kycInfo.idNumberLastFour ?: ""
     val address = kycInfo.address.formattedAddress()
+    val sheetState = rememberStripeBottomSheetState()
 
-    DefaultLinkTheme(appearance = appearance) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(LinkTheme.colors.surfacePrimary)
-        ) {
-            Column(modifier = Modifier.padding(24.dp)) {
-                TopNavigationBar(
-                    onClose = onClose,
-                    modifier = Modifier
-                        .padding(bottom = 8.dp)
-                )
-
-                Text(
-                    text = "Confirm your information",
-                    style = LinkTheme.typography.title,
-                    color = LinkTheme.colors.textPrimary,
-                    modifier = Modifier
-                        .padding(bottom = 24.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    backgroundColor = LinkTheme.colors.surfaceSecondary,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column {
-                        InfoRow(title = "Name", value = name)
-                        Divider(color = LinkTheme.colors.textPrimary.copy(alpha = 0.12f))
-                        InfoRow(title = "Date of Birth", value = dob)
-                        Divider(color = LinkTheme.colors.textPrimary.copy(alpha = 0.12f))
-                        InfoRow(title = "Last 4 digits of SSN", value = ssnLast4)
-                        Divider(color = LinkTheme.colors.textPrimary.copy(alpha = 0.12f))
-                        InfoRow(title = "Address", value = address, icon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.stripe_ic_kyc_verify_edit_ref),
-                                contentDescription = "Edit Address",
-                                tint = Color.Unspecified,
-                                modifier = Modifier
-                                    .height(18.dp)
-                                    .width(18.dp)
-                            )
-                        }, onIconTap = onEdit)
-                    }
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Button(
-                    onClick = onConfirm,
-                    shape = LinkTheme.shapes.primaryButton,
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = LinkTheme.colors.buttonBrand,
-                        contentColor = LinkTheme.colors.onButtonBrand,
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(LinkTheme.shapes.primaryButtonHeight)
-                ) {
-                    Text(
-                        "Confirm",
-                        style = LinkTheme.typography.body.copy(fontWeight = FontWeight.SemiBold)
+    ElementsBottomSheetLayout(
+        state = sheetState,
+        onDismissed = onClose
+    ) {
+        DefaultLinkTheme(appearance = appearance) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(LinkTheme.colors.surfacePrimary)
+            ) {
+                Column(modifier = Modifier.padding(24.dp)) {
+                    TopNavigationBar(
+                        onClose = onClose,
+                        modifier = Modifier
+                            .padding(bottom = 8.dp)
                     )
+
+                    Text(
+                        text = "Confirm your information",
+                        style = LinkTheme.typography.title,
+                        color = LinkTheme.colors.textPrimary,
+                        modifier = Modifier
+                            .padding(bottom = 24.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        backgroundColor = LinkTheme.colors.surfaceSecondary,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column {
+                            InfoRow(title = "Name", value = name)
+                            Divider(color = LinkTheme.colors.textPrimary.copy(alpha = 0.12f))
+                            InfoRow(title = "Date of Birth", value = dob)
+                            Divider(color = LinkTheme.colors.textPrimary.copy(alpha = 0.12f))
+                            InfoRow(title = "Last 4 digits of SSN", value = ssnLast4)
+                            Divider(color = LinkTheme.colors.textPrimary.copy(alpha = 0.12f))
+                            InfoRow(title = "Address", value = address, icon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.stripe_ic_kyc_verify_edit_ref),
+                                    contentDescription = "Edit Address",
+                                    tint = Color.Unspecified,
+                                    modifier = Modifier
+                                        .height(18.dp)
+                                        .width(18.dp)
+                                )
+                            }, onIconTap = onEdit)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Button(
+                        onClick = onConfirm,
+                        shape = LinkTheme.shapes.primaryButton,
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = LinkTheme.colors.buttonBrand,
+                            contentColor = LinkTheme.colors.onButtonBrand,
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(LinkTheme.shapes.primaryButtonHeight)
+                    ) {
+                        Text(
+                            "Confirm",
+                            style = LinkTheme.typography.body.copy(fontWeight = FontWeight.SemiBold)
+                        )
+                    }
                 }
             }
         }
