@@ -100,7 +100,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             },
             transactionId = intent.id,
             label = config.customLabel,
-            clientAttributionMetadata = confirmationOption.clientAttributionMetadata,
+            clientAttributionMetadata = confirmationArgs.paymentMethodMetadata.clientAttributionMetadata,
         )
     }
 
@@ -117,7 +117,6 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                     paymentMethod = result.paymentMethod,
                     optionsParams = null,
                     originatedFromWallet = true,
-                    passiveCaptchaParams = confirmationOption.passiveCaptchaParams,
                 )
 
                 ConfirmationDefinition.Result.NextStep(

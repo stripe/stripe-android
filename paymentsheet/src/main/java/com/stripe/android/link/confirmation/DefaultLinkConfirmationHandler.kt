@@ -155,7 +155,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 cvc = cvc,
                 billingPhone = billingPhone,
                 allowRedisplay = allowRedisplay,
-                passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams,
             )
         } else {
             PaymentMethodConfirmationOption.New(
@@ -170,7 +169,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 extraParams = null,
                 optionsParams = null,
                 shouldSave = false,
-                passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams,
             )
         }
 
@@ -219,7 +217,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                         configuration.passthroughModeEnabled.not()
                     }
                 ),
-                passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams,
             ),
             appearance = PaymentSheet.Appearance(),
             initializationMode = configuration.initializationMode,

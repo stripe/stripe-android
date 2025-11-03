@@ -156,7 +156,6 @@ class PaymentMethodOptionsSetupFutureUsageConfirmationInterceptorTest {
                     optionsParams = PaymentMethodOptionsParams.Card(),
                     extraParams = null,
                     shouldSave = false,
-                    passiveCaptchaParams = null
                 ),
                 intent = PaymentIntentFactory.create(),
                 shippingValues = null,
@@ -224,7 +223,6 @@ class PaymentMethodOptionsSetupFutureUsageConfirmationInterceptorTest {
                     ),
                     extraParams = null,
                     shouldSave = false,
-                    passiveCaptchaParams = null
                 ),
                 intent = PaymentIntentFactory.create(),
                 shippingValues = null,

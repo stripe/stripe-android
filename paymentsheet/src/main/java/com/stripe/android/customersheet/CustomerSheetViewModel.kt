@@ -1049,7 +1049,6 @@ internal class CustomerSheetViewModel(
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = paymentMethod,
                     optionsParams = null,
-                    passiveCaptchaParams = metadata.passiveCaptchaParams,
                 ),
                 appearance = configuration.appearance,
                 initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(

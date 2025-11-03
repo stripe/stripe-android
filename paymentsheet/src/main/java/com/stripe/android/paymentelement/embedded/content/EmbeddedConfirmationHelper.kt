@@ -55,8 +55,6 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
         val confirmationOption = confirmationState.selection?.toConfirmationOption(
             configuration = confirmationState.configuration.asCommonConfiguration(),
             linkConfiguration = confirmationState.paymentMethodMetadata.linkState?.configuration,
-            passiveCaptchaParams = confirmationState.paymentMethodMetadata.passiveCaptchaParams,
-            clientAttributionMetadata = confirmationState.paymentMethodMetadata.clientAttributionMetadata,
         ) ?: return null
 
         return ConfirmationHandler.Args(

@@ -85,7 +85,6 @@ internal class LinkConfirmationDefinition @Inject constructor(
                         paymentMethod = result.paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
-                        passiveCaptchaParams = confirmationOption.passiveCaptchaParams,
                     ),
                     arguments = confirmationArgs,
                 )

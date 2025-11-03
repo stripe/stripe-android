@@ -5,7 +5,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
@@ -72,7 +71,7 @@ class GooglePayConfirmationFlowTest {
                     amount = 1000L,
                     transactionId = "pi_12345",
                     label = null,
-                    clientAttributionMetadata = GOOGLE_PAY_CONFIRMATION_OPTION.clientAttributionMetadata,
+                    clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
                 )
             }
         }
@@ -92,7 +91,6 @@ class GooglePayConfirmationFlowTest {
                 paymentMethod = PAYMENT_METHOD,
                 optionsParams = null,
                 originatedFromWallet = true,
-                passiveCaptchaParams = null,
             ),
             arguments = CONFIRMATION_PARAMETERS,
         )
@@ -112,8 +110,6 @@ class GooglePayConfirmationFlowTest {
                 ),
                 cardBrandFilter = DefaultCardBrandFilter,
             ),
-            passiveCaptchaParams = null,
-            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
         )
 
         private val PAYMENT_METHOD = PaymentMethodFactory.card()

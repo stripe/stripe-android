@@ -626,7 +626,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 clientAttributionMetadata = configuration.clientAttributionMetadata,
             )
         )
-        assertThat(option.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
+        assertThat(paymentMethodMetadata.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
         assertThat(paymentMethodMetadata.shippingDetails).isEqualTo(configuration.shippingDetails)
         assertThat(initializationMode).isEqualTo(configuration.initializationMode)
     }
@@ -640,7 +640,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         assertThat(intent).isEqualTo(configuration.stripeIntent)
         val option = confirmationOption as PaymentMethodConfirmationOption.Saved
         assertThat(option.paymentMethod.id).isEqualTo(paymentDetails.paymentDetails.paymentMethodId)
-        assertThat(option.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
+        assertThat(paymentMethodMetadata.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
 
         val optionsCard = option.optionsParams as? PaymentMethodOptionsParams.Card
         assertThat(optionsCard?.cvc).isEqualTo(cvc)

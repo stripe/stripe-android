@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -196,7 +197,10 @@ internal fun ConfirmationHandler.Result?.assertCanceled(): ConfirmationHandler.R
 internal val PAYMENT_INTENT = PaymentIntentFactory.create()
 
 internal val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
-    paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = PAYMENT_INTENT),
+    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+        stripeIntent = PAYMENT_INTENT,
+        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+    ),
     initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
         clientSecret = "pi_123_secret_123",
     ),

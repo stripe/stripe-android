@@ -514,8 +514,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     ?.toConfirmationOption(
                         configuration = config.asCommonConfiguration(),
                         linkConfiguration = linkHandler.linkConfiguration.value,
-                        passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams,
-                        clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
                     )
             }
 
