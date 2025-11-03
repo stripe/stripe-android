@@ -22,7 +22,7 @@ import kotlin.coroutines.CoroutineContext
  * [PaymentNextActionHandler] for handling [StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge]
  * through a JavaScript-based WebView implementation.
  */
-class IntentConfirmationChallengeNextActionHandler @Inject constructor(
+internal class IntentConfirmationChallengeNextActionHandler @Inject constructor(
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String>,
     @UIContext private val uiContext: CoroutineContext
