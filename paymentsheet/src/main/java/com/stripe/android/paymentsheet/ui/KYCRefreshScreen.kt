@@ -22,33 +22,29 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.darkColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.LinkAppearance
+import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.link.ui.PrimaryButtonTag
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.ui.getLinkIcon
 import com.stripe.android.paymentsheet.R
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -62,7 +58,7 @@ interface KycRetrieveResponseProtocol {
 }
 
 @Composable
-@Suppress("LongMethod", "UnusedParameter")
+@Suppress("LongMethod")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun KYCRefreshScreen(
     appearance: LinkAppearance?,
@@ -76,11 +72,11 @@ fun KYCRefreshScreen(
     val ssnLast4 = kycInfo.idNumberLastFour ?: ""
     val address = kycInfo.address.formattedAddress()
 
-    OnrampTheme(appearance) {
+    DefaultLinkTheme(appearance = appearance) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colors.background)
+                .background(LinkTheme.colors.surfacePrimary)
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
                 TopNavigationBar(
@@ -91,24 +87,24 @@ fun KYCRefreshScreen(
 
                 Text(
                     text = "Confirm your information",
-                    style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colors.onSurface,
+                    style = LinkTheme.typography.title.copy(fontWeight = FontWeight.Bold),
+                    color = LinkTheme.colors.textPrimary,
                     modifier = Modifier
                         .padding(bottom = 24.dp)
                         .align(Alignment.CenterHorizontally)
                 )
                 Card(
                     shape = RoundedCornerShape(16.dp),
-                    elevation = 4.dp,
+                    backgroundColor = LinkTheme.colors.surfaceSecondary,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column {
                         InfoRow(title = "Name", value = name)
-                        Divider()
+                        Divider(color = LinkTheme.colors.textPrimary.copy(alpha = 0.12f))
                         InfoRow(title = "Date of Birth", value = dob)
-                        Divider()
+                        Divider(color = LinkTheme.colors.textPrimary.copy(alpha = 0.12f))
                         InfoRow(title = "Last 4 digits of SSN", value = ssnLast4)
-                        Divider()
+                        Divider(color = LinkTheme.colors.textPrimary.copy(alpha = 0.12f))
                         InfoRow(title = "Address", value = address, icon = {
                             Icon(
                                 painter = painterResource(id = R.drawable.stripe_ic_kyc_verify_edit),
@@ -125,18 +121,18 @@ fun KYCRefreshScreen(
 
                 Button(
                     onClick = onConfirm,
-                    shape = RoundedCornerShape(appearance?.primaryButton?.cornerRadiusDp?.dp ?: 16.dp),
+                    shape = LinkTheme.shapes.primaryButton,
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = MaterialTheme.colors.primary,
-                        contentColor = MaterialTheme.colors.onPrimary
+                        backgroundColor = LinkTheme.colors.buttonBrand,
+                        contentColor = LinkTheme.colors.onButtonBrand,
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(appearance?.primaryButton?.heightDp?.dp ?: 56.dp)
+                        .height(LinkTheme.shapes.primaryButtonHeight)
                 ) {
                     Text(
                         "Confirm",
-                        style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.SemiBold)
+                        style = LinkTheme.typography.body.copy(fontWeight = FontWeight.SemiBold)
                     )
                 }
             }
@@ -173,12 +169,12 @@ private fun TopNavigationBar(
                 modifier = Modifier
                     .size(32.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colors.onSurface.copy(alpha = 0.08f))
+                    .background(LinkTheme.colors.textPrimary.copy(alpha = 0.15f))
             ) {
                 Icon(
                     imageVector = Icons.Filled.Close,
                     contentDescription = "Close",
-                    tint = MaterialTheme.colors.onSurface,
+                    tint = LinkTheme.colors.textPrimary,
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
@@ -202,66 +198,19 @@ private fun InfoRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.subtitle2,
-                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                style = LinkTheme.typography.caption,
+                color = LinkTheme.colors.textSecondary
             )
             Text(
                 text = value,
-                style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onSurface
+                style = LinkTheme.typography.body,
+                color = LinkTheme.colors.textPrimary
             )
         }
         icon?.let {
             IconButton(onClick = onIconTap ?: {}) {
                 it()
             }
-        }
-    }
-}
-
-@Composable
-private fun OnrampTheme(
-    linkAppearance: LinkAppearance?,
-    content: @Composable () -> Unit,
-) {
-    linkAppearance?.let {
-        val isDark = when (it.style) {
-            LinkAppearance.Style.ALWAYS_LIGHT -> false
-            LinkAppearance.Style.ALWAYS_DARK -> true
-            LinkAppearance.Style.AUTOMATIC -> isSystemInDarkTheme()
-        }
-
-        val baseContext = LocalContext.current
-        val inspectionMode = LocalInspectionMode.current
-        val styleContext = remember(baseContext, isDark, inspectionMode) {
-            val uiMode =
-                if (isDark) {
-                    Configuration.UI_MODE_NIGHT_YES
-                } else {
-                    Configuration.UI_MODE_NIGHT_NO
-                }
-            baseContext.withUiMode(uiMode, inspectionMode)
-        }
-
-        val colors = if (isDark) darkColors() else lightColors()
-        val linkColors = if (isDark) it.darkColors else it.lightColors
-
-        val resolvedColors = colors.copy(
-            primary = linkColors.primary,
-            onPrimary = linkColors.contentOnPrimary,
-        )
-
-        CompositionLocalProvider(
-            LocalContext provides styleContext,
-        ) {
-            MaterialTheme(
-                colors = resolvedColors,
-                content = content
-            )
-        }
-    } ?: run {
-        MaterialTheme {
-            content()
         }
     }
 }
@@ -278,30 +227,4 @@ private fun PaymentSheet.Address.formattedAddress(): String {
         .map { it?.trim() }
         .filter { !it.isNullOrEmpty() }
         .joinToString(", ")
-}
-
-private fun Context.withUiMode(uiMode: Int, inspectionMode: Boolean): Context {
-    if (uiMode == this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-        return this
-    }
-    val config = Configuration(resources.configuration).apply {
-        this.uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or uiMode
-    }
-    return object : ContextThemeWrapper(this, theme) {
-        override fun getResources(): Resources? {
-            @Suppress("DEPRECATION")
-            if (inspectionMode) {
-                // Workaround NPE thrown in BridgeContext#createConfigurationContext() when getting resources.
-                val baseResources = this@withUiMode.resources
-                return Resources(
-                    baseResources.assets,
-                    baseResources.displayMetrics,
-                    config
-                )
-            }
-            return super.getResources()
-        }
-    }.apply {
-        applyOverrideConfiguration(config)
-    }
 }
