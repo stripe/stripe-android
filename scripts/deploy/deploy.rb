@@ -11,6 +11,7 @@ require_relative 'translations'
 require_relative 'update_dokka'
 require_relative 'update_pay_server_docs'
 require_relative 'update_version_numbers'
+require_relative 'update_zoolander_config'
 require_relative 'validate_version_number'
 require_relative 'version_bump_pr_steps'
 
@@ -84,6 +85,7 @@ steps = [
     # Do docs updates
     method(:generate_dokka),
     method(:update_pay_server_docs),
+    method(:update_zoolander_config),
 ]
 
 execute_steps(steps, @step_index)
@@ -96,4 +98,5 @@ if (@is_dry_run)
     revert_version_bump_changes()
     revert_dokka_changes()
     delete_pay_server_branch()
+    delete_zoolander_branch()
 end
