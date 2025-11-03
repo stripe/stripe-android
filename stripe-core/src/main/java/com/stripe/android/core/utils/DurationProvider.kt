@@ -20,7 +20,9 @@ interface DurationProvider {
         CardScan,
         Captcha,
         CaptchaAttach,
-        PaymentLauncher
+        PaymentLauncher,
+        PrepareAttestation,
+        Attest
     }
 }
 

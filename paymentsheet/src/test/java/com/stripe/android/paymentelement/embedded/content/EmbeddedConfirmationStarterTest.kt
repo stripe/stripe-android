@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.content
 import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -10,11 +11,10 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertCanceled
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.paymentelement.embedded.FakeEmbeddedConfirmationSaver
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -42,15 +42,15 @@ class EmbeddedConfirmationStarterTest {
     @Test
     fun `on confirm, should call 'start' on confirmation handler`() = test {
         val arguments = ConfirmationHandler.Args(
-            intent = PaymentIntentFactory.create(
-                paymentMethod = PaymentMethodFactory.card(random = true),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFactory.create(
+                    paymentMethod = PaymentMethodFactory.card(random = true),
+                )
             ),
             confirmationOption = FakeConfirmationOption(),
-            appearance = PaymentSheet.Appearance(),
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),
-            shippingDetails = null,
         )
 
         confirmationStarter.start(arguments)
@@ -59,9 +59,8 @@ class EmbeddedConfirmationStarterTest {
 
         assertThat(startCall.confirmationOption).isEqualTo(arguments.confirmationOption)
         assertThat(startCall.intent).isEqualTo(arguments.intent)
-        assertThat(startCall.appearance).isEqualTo(arguments.appearance)
         assertThat(startCall.initializationMode).isEqualTo(arguments.initializationMode)
-        assertThat(startCall.shippingDetails).isEqualTo(arguments.shippingDetails)
+        assertThat(startCall.paymentMethodMetadata).isEqualTo(arguments.paymentMethodMetadata)
     }
 
     @Test

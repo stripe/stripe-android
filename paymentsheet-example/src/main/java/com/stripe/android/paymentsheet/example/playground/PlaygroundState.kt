@@ -213,6 +213,10 @@ internal sealed interface PlaygroundState : Parcelable {
         return this as? Customer
     }
 
+    fun customerId(): String? {
+        return (snapshot[CustomerSettingsDefinition] as? CustomerType.Existing)?.value
+    }
+
     companion object {
         fun CheckoutResponse.asPlaygroundState(
             snapshot: PlaygroundSettings.Snapshot,

@@ -44,8 +44,6 @@ import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
-import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -335,7 +333,6 @@ class PaymentSheet internal constructor(
          * @throws IllegalStateException if CreateIntentCallback is already set.
          * Callbacks are mutually exclusive - only one should be configured.
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createIntentCallback(callback: CreateIntentWithConfirmationTokenCallback) = apply {
             callbacksBuilder.createIntentCallback(callback)
         }
@@ -3052,7 +3049,7 @@ class PaymentSheet internal constructor(
          * The identifier of the Stripe Customer object.
          * See [Stripe's documentation](https://stripe.com/docs/api/customers/object#customer_object-id).
          */
-        val id: String,
+        internal val id: String,
 
         /**
          * A short-lived token that allows the SDK to access a Customer's payment methods.
@@ -3071,7 +3068,6 @@ class PaymentSheet internal constructor(
         )
 
         companion object {
-            @ExperimentalCustomerSessionApi
             fun createWithCustomerSession(
                 id: String,
                 clientSecret: String
@@ -3101,6 +3097,8 @@ class PaymentSheet internal constructor(
      * @param buttonType The Google Pay button type to use. Set to "Pay" by default. See
      * [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment)
      * for more information on button types.
+     * @param additionalEnabledNetworks An optional List<String> to signal GooglePay to
+     * display additional enabled networks (e.g. 'INTERAC')
      */
     @Parcelize
     @Poko
@@ -3110,7 +3108,8 @@ class PaymentSheet internal constructor(
         internal val currencyCode: String? = null,
         internal val amount: Long? = null,
         internal val label: String? = null,
-        internal val buttonType: ButtonType = ButtonType.Pay
+        internal val buttonType: ButtonType = ButtonType.Pay,
+        internal val additionalEnabledNetworks: List<String> = emptyList()
     ) : Parcelable {
 
         enum class Environment {
@@ -3587,7 +3586,6 @@ class PaymentSheet internal constructor(
              * @throws IllegalStateException if CreateIntentCallback is already set.
              * Callbacks are mutually exclusive - only one should be configured.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun createIntentCallback(callback: CreateIntentWithConfirmationTokenCallback) = apply {
                 callbacksBuilder.createIntentCallback(callback)
             }

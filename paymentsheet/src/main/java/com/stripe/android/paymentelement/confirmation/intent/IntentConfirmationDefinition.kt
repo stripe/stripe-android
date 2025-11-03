@@ -3,8 +3,6 @@ package com.stripe.android.paymentelement.confirmation.intent
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -30,36 +28,22 @@ internal class IntentConfirmationDefinition(
     > {
     override val key: String = "IntentConfirmation"
 
-    @Volatile
-    private var customerId: String? = null
-
-    @Volatile
-    private var ephemeralKeySecret: String? = null
-
-    @Volatile
-    private var clientAttributionMetadata: ClientAttributionMetadata? = null
-
     override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption? {
         return confirmationOption as? PaymentMethodConfirmationOption
-    }
-
-    override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
-        customerId = paymentMethodMetadata.customerMetadata?.id
-        ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.ephemeralKeySecret
-        clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata
     }
 
     override suspend fun action(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<Args> {
+        val paymentMethodMetadata = confirmationArgs.paymentMethodMetadata
         val interceptor: IntentConfirmationInterceptor
         try {
             interceptor = intentConfirmationInterceptorFactory.create(
                 initializationMode = confirmationArgs.initializationMode,
-                customerId = customerId,
-                ephemeralKeySecret = ephemeralKeySecret,
-                clientAttributionMetadata = clientAttributionMetadata,
+                customerId = paymentMethodMetadata.customerMetadata?.id,
+                ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.ephemeralKeySecret,
+                clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
             )
         } catch (e: DeferredIntentCallbackNotFoundException) {
             return ConfirmationDefinition.Action.Fail(
@@ -73,13 +57,15 @@ internal class IntentConfirmationDefinition(
                 interceptor.intercept(
                     intent = confirmationArgs.intent,
                     confirmationOption = confirmationOption,
-                    shippingValues = confirmationArgs.shippingDetails?.toConfirmPaymentIntentShipping(),
+                    shippingValues = confirmationArgs.paymentMethodMetadata
+                        .shippingDetails?.toConfirmPaymentIntentShipping(),
                 )
             is PaymentMethodConfirmationOption.Saved ->
                 interceptor.intercept(
                     intent = confirmationArgs.intent,
                     confirmationOption = confirmationOption,
-                    shippingValues = confirmationArgs.shippingDetails?.toConfirmPaymentIntentShipping(),
+                    shippingValues = confirmationArgs.paymentMethodMetadata
+                        .shippingDetails?.toConfirmPaymentIntentShipping(),
                 )
         }
     }

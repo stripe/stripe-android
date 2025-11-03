@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.attestation.AttestationActivityContract
 import com.stripe.android.attestation.AttestationActivityResult
+import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReporter
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -29,6 +30,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     private val integrityRequestManager: IntegrityRequestManager,
     @AttestationScope private val coroutineScope: CoroutineScope,
     @IOContext private val workContext: CoroutineContext,
+    private val attestationAnalyticsEventsReporter: AttestationAnalyticsEventsReporter,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : ConfirmationDefinition<
@@ -49,12 +51,17 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         attestOnIntentConfirmation = paymentMethodMetadata.attestOnIntentConfirmation
         if (attestOnIntentConfirmation.not()) return
         coroutineScope.launch(workContext) {
-            integrityRequestManager.prepare().onFailure { error ->
-                errorReporter.report(
-                    ErrorReporter.UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE,
-                    stripeException = StripeException.create(error)
-                )
-            }
+            attestationAnalyticsEventsReporter.prepare()
+            integrityRequestManager.prepare()
+                .onSuccess {
+                    attestationAnalyticsEventsReporter.prepareSucceeded()
+                }.onFailure { error ->
+                    attestationAnalyticsEventsReporter.prepareFailed(error)
+                    errorReporter.report(
+                        ErrorReporter.UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE,
+                        stripeException = StripeException.create(error)
+                    )
+                }
         }
     }
 

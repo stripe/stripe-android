@@ -1106,7 +1106,6 @@ internal class FlowControllerTest {
         testContext.markTestSucceeded()
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun testWalletButtonsShown() = runFlowControllerTest(
         networkRule = networkRule,
@@ -1179,7 +1178,7 @@ internal class FlowControllerTest {
         testContext.markTestSucceeded()
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class, WalletButtonsPreview::class)
+    @OptIn(WalletButtonsPreview::class)
     @Test
     fun testWalletsShownInExpectedScreensWhenFilteringWalletButtons() = runFlowControllerTest(
         networkRule = networkRule,

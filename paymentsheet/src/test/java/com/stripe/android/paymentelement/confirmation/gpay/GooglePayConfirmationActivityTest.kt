@@ -16,7 +16,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
@@ -80,7 +80,6 @@ internal class GooglePayConfirmationActivityTest {
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
-                        passiveCaptchaParams = null,
                     )
                 )
 
@@ -154,7 +153,6 @@ internal class GooglePayConfirmationActivityTest {
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
-                        passiveCaptchaParams = null,
                     )
                 )
 
@@ -215,7 +213,6 @@ internal class GooglePayConfirmationActivityTest {
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
-                        passiveCaptchaParams = null,
                     )
                 )
 
@@ -280,8 +277,6 @@ internal class GooglePayConfirmationActivityTest {
                     .BillingDetailsCollectionConfiguration(),
                 cardBrandFilter = DefaultCardBrandFilter,
             ),
-            passiveCaptchaParams = null,
-            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
@@ -289,9 +284,10 @@ internal class GooglePayConfirmationActivityTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"
             ),
-            shippingDetails = AddressDetails(),
-            intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PAYMENT_INTENT,
+                shippingDetails = AddressDetails(),
+            ),
         )
 
         const val GOOGLE_PAY_ACTIVITY_NAME =

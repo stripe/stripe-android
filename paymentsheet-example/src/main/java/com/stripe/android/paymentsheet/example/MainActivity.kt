@@ -20,14 +20,13 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -43,6 +42,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_fl
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 private const val SurfaceOverlayOpacity = 0.12f
 
@@ -257,7 +257,7 @@ private fun MenuItemRow(item: MenuItem) {
                 ),
                 leadingIcon = {
                     Icon(
-                        imageVector = Icons.Default.Info,
+                        painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_info),
                         contentDescription = null,
                     )
                 },

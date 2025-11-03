@@ -74,7 +74,6 @@ internal suspend fun IntentConfirmationInterceptor.interceptDefaultNewPaymentMet
         optionsParams = null,
         extraParams = null,
         shouldSave = false,
-        passiveCaptchaParams = null
     ),
     shippingValues = null,
 )
@@ -85,7 +84,6 @@ internal suspend fun IntentConfirmationInterceptor.interceptDefaultSavedPaymentM
     confirmationOption = PaymentMethodConfirmationOption.Saved(
         paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
         optionsParams = null,
-        passiveCaptchaParams = null,
         hCaptchaToken = null,
     ),
     shippingValues = null,

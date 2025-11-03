@@ -82,7 +82,7 @@ internal class TestConfirmationToken : BasePlaygroundTest() {
         )
 
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(

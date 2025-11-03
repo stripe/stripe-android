@@ -23,7 +23,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.DisplayablePaymentDetails
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
@@ -326,7 +325,6 @@ class DefaultWalletButtonsInteractorTest {
                     LinkConfirmationOption(
                         linkExpressMode = LinkExpressMode.DISABLED,
                         configuration = mock(),
-                        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
                     )
                 )
             }
@@ -461,7 +459,7 @@ class DefaultWalletButtonsInteractorTest {
             )
 
             val call = presentCalls.awaitItem()
-            assertThat(call.attestOnIntentConfirmation).isEqualTo(attestOnIntentConfirmation)
+            assertThat(call.paymentMethodMetadata.attestOnIntentConfirmation).isEqualTo(attestOnIntentConfirmation)
         }
     }
 
@@ -577,8 +575,6 @@ class DefaultWalletButtonsInteractorTest {
                         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                         cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance)
                     ),
-                    passiveCaptchaParams = null,
-                    clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                 )
             )
         }
@@ -885,7 +881,6 @@ class DefaultWalletButtonsInteractorTest {
                     LinkConfirmationOption(
                         linkExpressMode = LinkExpressMode.DISABLED,
                         configuration = mock(),
-                        passiveCaptchaParams = null
                     )
                 )
             }

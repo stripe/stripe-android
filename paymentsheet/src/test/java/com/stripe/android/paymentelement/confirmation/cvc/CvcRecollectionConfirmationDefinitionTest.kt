@@ -3,7 +3,6 @@ package com.stripe.android.paymentelement.confirmation.cvc
 import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -15,7 +14,6 @@ import com.stripe.android.paymentelement.confirmation.asCanceled
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncher
@@ -23,7 +21,7 @@ import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionL
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
-import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.testing.DummyActivityResultCaller
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -162,7 +160,7 @@ class CvcRecollectionConfirmationDefinitionTest {
 
         val launchCall = launcherScenario.awaitLaunchCall()
 
-        assertThat(launchCall.appearance).isEqualTo(CONFIRMATION_PARAMETERS.appearance)
+        assertThat(launchCall.appearance).isEqualTo(CONFIRMATION_PARAMETERS.paymentMethodMetadata.appearance)
         assertThat(launchCall.data.brand).isEqualTo(option.paymentMethod.card?.brand)
         assertThat(launchCall.data.lastFour).isEqualTo(option.paymentMethod.card?.last4)
         assertThat(launchCall.isLiveMode).isEqualTo(CONFIRMATION_PARAMETERS.intent.isLiveMode)
@@ -298,7 +296,6 @@ class CvcRecollectionConfirmationDefinitionTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = optionsParams,
             originatedFromWallet = originatedFromWallet,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
         )
     }
 
@@ -314,10 +311,6 @@ class CvcRecollectionConfirmationDefinitionTest {
 
     companion object {
         private val CONFIRMATION_PARAMETERS =
-            com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS.copy(
-                appearance = PaymentSheet.Appearance.Builder()
-                    .colorsDark(PaymentSheet.Colors.defaultLight)
-                    .build(),
-            )
+            com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
     }
 }

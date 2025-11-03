@@ -200,14 +200,8 @@ internal class DefaultConfirmationHandler(
                 removeIsAwaitingForResult()
 
                 coroutineScope.launch {
-                    val parameters = result.arguments
-
                     confirm(
-                        arguments = ConfirmationHandler.Args(
-                            intent = parameters.intent,
-                            shippingDetails = parameters.shippingDetails,
-                            appearance = parameters.appearance,
-                            initializationMode = parameters.initializationMode,
+                        arguments = result.arguments.copy(
                             confirmationOption = result.confirmationOption,
                         )
                     )

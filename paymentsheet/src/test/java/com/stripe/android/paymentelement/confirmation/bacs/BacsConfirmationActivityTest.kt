@@ -12,6 +12,7 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -25,7 +26,6 @@ import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.paymentelement.confirmation.paymentElementConfirmationTest
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
@@ -77,7 +77,6 @@ internal class BacsConfirmationActivityTest {
                         optionsParams = CONFIRMATION_OPTION.optionsParams,
                         shouldSave = false,
                         extraParams = null,
-                        passiveCaptchaParams = null
                     )
                 )
 
@@ -192,7 +191,6 @@ internal class BacsConfirmationActivityTest {
                 )
             ),
             optionsParams = null,
-            passiveCaptchaParams = null
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
@@ -200,9 +198,10 @@ internal class BacsConfirmationActivityTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"
             ),
-            shippingDetails = AddressDetails(),
-            intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PAYMENT_INTENT,
+                shippingDetails = AddressDetails(),
+            ),
         )
 
         const val BACS_ACTIVITY_NAME =

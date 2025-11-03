@@ -302,7 +302,6 @@ class DeferredIntentConfirmationInterceptorTest {
                     optionsParams = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                     ).takeIf { input },
-                    passiveCaptchaParams = null,
                     hCaptchaToken = null,
                 ),
                 shippingValues = null,
@@ -398,7 +397,6 @@ class DeferredIntentConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                passiveCaptchaParams = null,
                 hCaptchaToken = hCaptchaToken,
                 attestationToken = attestationToken,
             ),
@@ -448,7 +446,6 @@ class DeferredIntentConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                passiveCaptchaParams = null,
                 hCaptchaToken = hCaptchaToken,
                 attestationToken = null,
             ),
@@ -495,7 +492,6 @@ class DeferredIntentConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                passiveCaptchaParams = null,
                 hCaptchaToken = null,
                 attestationToken = null,
             ),
@@ -546,7 +542,6 @@ class DeferredIntentConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                passiveCaptchaParams = null,
                 hCaptchaToken = null,
                 attestationToken = attestationToken,
             ),

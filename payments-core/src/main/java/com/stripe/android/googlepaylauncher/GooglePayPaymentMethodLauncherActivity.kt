@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.api.CommonStatusCodes
+import com.google.android.gms.common.api.Status
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.contract.ApiTaskResult
 import com.google.android.gms.wallet.contract.TaskResultContracts.GetPaymentDataResult
@@ -128,13 +129,7 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
                 val statusMessage = status.statusMessage.orEmpty()
                 val statusCode = status.statusCode.toString()
 
-                errorReporter.report(
-                    ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_FAILED,
-                    additionalNonPiiParams = mapOf(
-                        "status_message" to statusMessage,
-                        "status_code" to statusCode,
-                    )
-                )
+                sendErrorEvents(statusMessage, statusCode, status)
 
                 viewModel.updateResult(
                     GooglePayPaymentMethodLauncher.Result.Failed(
@@ -145,6 +140,28 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
                     )
                 )
             }
+        }
+    }
+
+    @Suppress("MagicNumber")
+    private fun sendErrorEvents(
+        statusMessage: String,
+        statusCode: String,
+        status: Status
+    ) {
+        errorReporter.report(
+            ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_FAILED,
+            additionalNonPiiParams = mapOf(
+                "status_message" to statusMessage,
+                "status_code" to statusCode,
+            )
+        )
+
+        if (!listOf(8, 10, 17, 20, 405, 409, 412).contains(status.statusCode)) {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_UNEXPECTED_STATUS_CODE,
+                additionalNonPiiParams = mapOf("status_code" to statusCode)
+            )
         }
     }
 

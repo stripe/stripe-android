@@ -57,6 +57,7 @@ internal object PaymentMethodMetadataFactory {
         openCardScanAutomatically: Boolean = false,
         clientAttributionMetadata: ClientAttributionMetadata? = null,
         attestOnIntentConfirmation: Boolean = false,
+        appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -100,6 +101,7 @@ internal object PaymentMethodMetadataFactory {
             clientAttributionMetadata =
             clientAttributionMetadata ?: PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             attestOnIntentConfirmation = attestOnIntentConfirmation,
+            appearance = appearance,
         )
     }
 

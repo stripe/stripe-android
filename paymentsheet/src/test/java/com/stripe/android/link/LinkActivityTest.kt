@@ -23,6 +23,7 @@ import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.utils.TestNavigationManager
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -155,6 +156,7 @@ internal class LinkActivityTest {
                 linkAttestationCheck = FakeLinkAttestationCheck(),
                 savedStateHandle = SavedStateHandle(),
                 linkConfiguration = TestFactory.LINK_CONFIGURATION,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 linkExpressMode = linkExpressMode,
                 navigationManager = TestNavigationManager(),
                 linkLaunchMode = LinkLaunchMode.Full,

@@ -26,7 +26,6 @@ import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.paymentelement.confirmation.paymentElementConfirmationTest
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -248,14 +247,12 @@ internal class AttestationConfirmationActivityTest {
             optionsParams = null,
             extraParams = null,
             shouldSave = false,
-            passiveCaptchaParams = null,
         )
 
         private val SAVED_CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFactory.card(),
             optionsParams = null,
             originatedFromWallet = false,
-            passiveCaptchaParams = null,
             hCaptchaToken = null,
         )
 
@@ -264,9 +261,10 @@ internal class AttestationConfirmationActivityTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"
             ),
-            shippingDetails = AddressDetails(),
-            intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                shippingDetails = AddressDetails(),
+                stripeIntent = PAYMENT_INTENT,
+            ),
         )
 
         private val CONFIRMATION_ARGUMENTS_SAVED = ConfirmationHandler.Args(
@@ -274,9 +272,10 @@ internal class AttestationConfirmationActivityTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"
             ),
-            shippingDetails = AddressDetails(),
-            intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                shippingDetails = AddressDetails(),
+                stripeIntent = PAYMENT_INTENT,
+            ),
         )
 
         const val ATTESTATION_ACTIVITY_NAME =

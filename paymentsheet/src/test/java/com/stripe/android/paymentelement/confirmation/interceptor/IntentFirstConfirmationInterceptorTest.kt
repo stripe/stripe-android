@@ -33,7 +33,6 @@ class IntentFirstConfirmationInterceptorTest {
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = paymentMethod,
                     optionsParams = null,
-                    passiveCaptchaParams = null,
                     hCaptchaToken = null,
                 ),
                 shippingValues = null,
@@ -59,7 +58,6 @@ class IntentFirstConfirmationInterceptorTest {
                     optionsParams = null,
                     extraParams = null,
                     shouldSave = false,
-                    passiveCaptchaParams = null
                 ),
                 shippingValues = null,
             )
@@ -81,7 +79,6 @@ class IntentFirstConfirmationInterceptorTest {
                     optionsParams = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                     ),
-                    passiveCaptchaParams = null
                 ),
                 shippingValues = null,
             )
@@ -133,7 +130,6 @@ class IntentFirstConfirmationInterceptorTest {
                     optionsParams = null,
                     extraParams = null,
                     shouldSave = false,
-                    passiveCaptchaParams = null
                 ),
                 intent = PaymentIntentFactory.create(),
                 shippingValues = null,
@@ -172,7 +168,6 @@ class IntentFirstConfirmationInterceptorTest {
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     hCaptchaToken = hCaptchaToken,
-                    passiveCaptchaParams = null
                 ),
                 shippingValues = null,
             )
@@ -204,7 +199,6 @@ class IntentFirstConfirmationInterceptorTest {
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
                 hCaptchaToken = hCaptchaToken,
-                passiveCaptchaParams = null
             ),
             shippingValues = null,
         )
@@ -226,7 +220,6 @@ class IntentFirstConfirmationInterceptorTest {
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
                 hCaptchaToken = hCaptchaToken,
-                passiveCaptchaParams = null
             ),
             shippingValues = null,
         )

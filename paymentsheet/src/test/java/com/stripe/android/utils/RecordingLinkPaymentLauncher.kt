@@ -9,7 +9,7 @@ import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doAnswer
@@ -42,17 +42,24 @@ internal object RecordingLinkPaymentLauncher {
                 unregisterCalls.add(Unit)
             }
 
-            on { present(any(), anyOrNull(), any(), any(), anyOrNull(), any()) } doAnswer { invocation ->
+            on {
+                present(
+                    configuration = any(),
+                    paymentMethodMetadata = any(),
+                    linkAccountInfo = anyOrNull(),
+                    launchMode = any(),
+                    linkExpressMode = any(),
+                )
+            } doAnswer { invocation ->
                 val arguments = invocation.arguments
 
                 presentCalls.add(
                     PresentCall(
                         configuration = arguments[0] as LinkConfiguration,
-                        linkAccount = arguments[1] as? LinkAccount,
-                        launchMode = arguments[2] as LinkLaunchMode,
-                        linkExpressMode = arguments[3] as LinkExpressMode,
-                        passiveCaptchaParams = arguments[4] as? PassiveCaptchaParams,
-                        attestOnIntentConfirmation = arguments[5] as Boolean,
+                        paymentMethodMetadata = arguments[1] as PaymentMethodMetadata,
+                        linkAccount = arguments[2] as? LinkAccount,
+                        launchMode = arguments[3] as LinkLaunchMode,
+                        linkExpressMode = arguments[4] as LinkExpressMode,
                     )
                 )
             }
@@ -86,10 +93,9 @@ internal object RecordingLinkPaymentLauncher {
 
     data class PresentCall(
         val configuration: LinkConfiguration,
+        val paymentMethodMetadata: PaymentMethodMetadata,
         val linkAccount: LinkAccount?,
         val launchMode: LinkLaunchMode,
         val linkExpressMode: LinkExpressMode,
-        val passiveCaptchaParams: PassiveCaptchaParams?,
-        val attestOnIntentConfirmation: Boolean,
     )
 }

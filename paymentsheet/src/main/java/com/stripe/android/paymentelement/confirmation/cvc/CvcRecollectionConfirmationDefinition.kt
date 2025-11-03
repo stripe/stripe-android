@@ -73,7 +73,7 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
         handler.launch(confirmationOption.paymentMethod) { recollectionData ->
             launcher.launch(
                 data = recollectionData,
-                appearance = confirmationArgs.appearance,
+                appearance = confirmationArgs.paymentMethodMetadata.appearance,
                 isLiveMode = confirmationArgs.intent.isLiveMode,
             )
         }

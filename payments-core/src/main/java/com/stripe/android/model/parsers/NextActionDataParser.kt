@@ -185,6 +185,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
                     optString(json, FIELD_THREE_D_SECURE_2_INTENT),
                     optString(json, FIELD_PUBLISHABLE_KEY)
                 )
+                TYPE_INTENT_CONFIRMATION_CHALLENGE -> StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
                 else -> null
             }
         }
@@ -214,6 +215,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             private const val FIELD_TYPE = "type"
 
             private const val TYPE_3DS2 = "stripe_3ds2_fingerprint"
+            private const val TYPE_INTENT_CONFIRMATION_CHALLENGE = "intent_confirmation_challenge"
 
             private const val FIELD_THREE_D_SECURE_2_SOURCE = "three_d_secure_2_source"
             private const val FIELD_DIRECTORY_SERVER_NAME = "directory_server_name"
