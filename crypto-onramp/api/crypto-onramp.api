@@ -48,22 +48,6 @@ public final class com/stripe/android/crypto/onramp/model/OnrampConfiguration$Cr
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult$Cancelled : com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult$Cancelled;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult$UpdateAddress : com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoResult$UpdateAddress;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class com/stripe/android/crypto/onramp/model/RefreshKycInfo$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/model/RefreshKycInfo;

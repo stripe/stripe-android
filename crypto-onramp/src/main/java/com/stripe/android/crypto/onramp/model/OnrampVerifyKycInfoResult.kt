@@ -18,11 +18,13 @@ sealed interface OnrampVerifyKycInfoResult {
     /**
      * The user indicated they need to update their address.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data object UpdateAddress : OnrampVerifyKycInfoResult
 
     /**
      * The Kyc verification was cancelled.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data object Cancelled : OnrampVerifyKycInfoResult
 
     /**
