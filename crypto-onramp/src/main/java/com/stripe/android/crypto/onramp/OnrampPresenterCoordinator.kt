@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.lifecycle.LifecycleOwner
@@ -358,7 +357,6 @@ class KycFullScreenActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val kycInfo = intent.getParcelableExtra<KycRetrieveResponse>("kycInfo")!!
         val linkAppearance = intent.getParcelableExtra<LinkAppearance>("linkAppearance")
-        enableEdgeToEdge()
 
         setContent {
             KYCRefreshScreen(
@@ -400,8 +398,8 @@ data class OnrampActivityContractArgs(
 
 @Parcelize
 sealed class KycRefreshScreenAction : Parcelable {
-    object Cancelled : KycRefreshScreenAction()
-    object Edit : KycRefreshScreenAction()
+    data object Cancelled : KycRefreshScreenAction()
+    data object Edit : KycRefreshScreenAction()
     data class Confirm(val info: RefreshKycInfo) : KycRefreshScreenAction()
 }
 
