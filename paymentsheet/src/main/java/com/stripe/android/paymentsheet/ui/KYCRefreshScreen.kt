@@ -1,12 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.content.Context
-import android.content.res.Configuration
-import android.content.res.Resources
 import androidx.annotation.RestrictTo
-import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -34,26 +28,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.link.ui.PrimaryButtonState
-import com.stripe.android.link.ui.PrimaryButtonTag
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface KycRetrieveResponseProtocol {
+interface VerifyKYCInfo {
     val firstName: String
     val lastName: String
     val dateOfBirth: DateOfBirth
     val idNumberLastFour: String?
-    val idType: String?
     val address: PaymentSheet.Address
 }
 
@@ -62,13 +52,13 @@ interface KycRetrieveResponseProtocol {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun KYCRefreshScreen(
     appearance: LinkAppearance?,
-    kycInfo: KycRetrieveResponseProtocol,
+    kycInfo: VerifyKYCInfo,
     onClose: () -> Unit,
     onEdit: () -> Unit,
     onConfirm: () -> Unit
 ) {
-    val name = kycInfo.firstName + kycInfo.lastName
-    val dob = "${kycInfo.dateOfBirth.month}/${kycInfo.dateOfBirth.day}/${kycInfo.dateOfBirth.year}"
+    val name = "${kycInfo.firstName} ${kycInfo.lastName}"
+    val dob = "%02d/%02d/%d".format(kycInfo.dateOfBirth.month, kycInfo.dateOfBirth.day, kycInfo.dateOfBirth.year)
     val ssnLast4 = kycInfo.idNumberLastFour ?: ""
     val address = kycInfo.address.formattedAddress()
 
@@ -87,7 +77,7 @@ fun KYCRefreshScreen(
 
                 Text(
                     text = "Confirm your information",
-                    style = LinkTheme.typography.title.copy(fontWeight = FontWeight.Bold),
+                    style = LinkTheme.typography.title,
                     color = LinkTheme.colors.textPrimary,
                     modifier = Modifier
                         .padding(bottom = 24.dp)
@@ -107,8 +97,9 @@ fun KYCRefreshScreen(
                         Divider(color = LinkTheme.colors.textPrimary.copy(alpha = 0.12f))
                         InfoRow(title = "Address", value = address, icon = {
                             Icon(
-                                painter = painterResource(id = R.drawable.stripe_ic_kyc_verify_edit),
+                                painter = painterResource(id = R.drawable.stripe_ic_kyc_verify_edit_ref),
                                 contentDescription = "Edit Address",
+                                tint = Color.Unspecified,
                                 modifier = Modifier
                                     .height(18.dp)
                                     .width(18.dp)
@@ -167,15 +158,16 @@ private fun TopNavigationBar(
         ) {
             Box(
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(36.dp)
                     .clip(CircleShape)
-                    .background(LinkTheme.colors.textPrimary.copy(alpha = 0.15f))
+                    .background(LinkTheme.colors.textPrimary.copy(alpha = 0.12f))
             ) {
                 Icon(
                     imageVector = Icons.Filled.Close,
                     contentDescription = "Close",
                     tint = LinkTheme.colors.textPrimary,
                     modifier = Modifier.align(Alignment.Center)
+                        .size(22.dp)
                 )
             }
         }

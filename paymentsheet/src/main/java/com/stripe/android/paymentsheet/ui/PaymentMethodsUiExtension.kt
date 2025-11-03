@@ -178,8 +178,7 @@ private fun CardBrand.getDayIcon(): Int {
 }
 
 @DrawableRes
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun getLinkIcon(
+internal fun getLinkIcon(
     showNightIcon: Boolean? = null,
     iconOnly: Boolean = false,
 ): Int {
