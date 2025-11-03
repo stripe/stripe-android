@@ -17,7 +17,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
@@ -81,7 +80,6 @@ internal class GooglePayConfirmationActivityTest {
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
-                        passiveCaptchaParams = null,
                     )
                 )
 
@@ -155,7 +153,6 @@ internal class GooglePayConfirmationActivityTest {
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
-                        passiveCaptchaParams = null,
                     )
                 )
 
@@ -216,7 +213,6 @@ internal class GooglePayConfirmationActivityTest {
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
-                        passiveCaptchaParams = null,
                     )
                 )
 
@@ -281,8 +277,6 @@ internal class GooglePayConfirmationActivityTest {
                     .BillingDetailsCollectionConfiguration(),
                 cardBrandFilter = DefaultCardBrandFilter,
             ),
-            passiveCaptchaParams = null,
-            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(

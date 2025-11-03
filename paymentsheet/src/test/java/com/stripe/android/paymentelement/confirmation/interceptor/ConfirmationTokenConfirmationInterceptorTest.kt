@@ -483,7 +483,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = PaymentMethodFixtures.AU_BECS_DEBIT,
                     optionsParams = null,
-                    passiveCaptchaParams = null,
                     hCaptchaToken = null,
                 ),
                 shippingValues = null,
@@ -669,7 +668,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
             optionsParams = null,
             extraParams = null,
             shouldSave = false,
-            passiveCaptchaParams = null,
         )
 
         interceptor.intercept(
@@ -717,7 +715,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
             optionsParams = null,
             extraParams = null,
             shouldSave = false,
-            passiveCaptchaParams = null,
         )
 
         interceptor.intercept(
@@ -764,7 +761,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
             optionsParams = null,
-            passiveCaptchaParams = null,
             hCaptchaToken = null,
         )
 
@@ -812,7 +808,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = null,
-            passiveCaptchaParams = null,
             hCaptchaToken = null,
         )
 
@@ -868,7 +863,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
-            passiveCaptchaParams = null,
             hCaptchaToken = null,
         )
 
@@ -924,7 +918,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
-            passiveCaptchaParams = null,
             hCaptchaToken = null,
         )
 
@@ -981,7 +974,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
-            passiveCaptchaParams = null,
             hCaptchaToken = null,
         )
 
@@ -1060,7 +1052,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 optionsParams = null,
                 extraParams = PaymentMethodExtraParams.Card(setAsDefault = true),
                 shouldSave = true,
-                passiveCaptchaParams = null,
             )
 
             interceptor.intercept(
@@ -1093,7 +1084,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
             val confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = null,
                 hCaptchaToken = "test_token",
             )
 
@@ -1116,7 +1106,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
             val confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = null,
                 hCaptchaToken = null,
             )
 
@@ -1204,7 +1193,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                     ),
                     extraParams = null,
                     shouldSave = true,
-                    passiveCaptchaParams = null,
                 )
                 interceptor.intercept(
                     intent = PaymentIntentFactory.create(),

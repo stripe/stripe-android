@@ -682,14 +682,12 @@ internal class AttestationConfirmationDefinitionTest {
             optionsParams = null,
             extraParams = null,
             shouldSave = false,
-            passiveCaptchaParams = null,
         )
 
         private val PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PAYMENT_INTENT.paymentMethod!!,
             optionsParams = null,
             originatedFromWallet = false,
-            passiveCaptchaParams = null,
             hCaptchaToken = null,
         )
 

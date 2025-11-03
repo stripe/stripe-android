@@ -20,7 +20,6 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkExpressMode
-import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
@@ -31,14 +30,12 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PassiveCaptchaParams
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -349,7 +346,7 @@ internal class PaymentSheetViewModelTest {
             paramsCaptor.capture()
         )
 
-        assertThat(idCaptor.firstValue).isEqualTo(firstPaymentMethod.id!!)
+        assertThat(idCaptor.firstValue).isEqualTo(firstPaymentMethod.id)
 
         assertThat(
             paramsCaptor.firstValue.toParamMap()
@@ -441,7 +438,6 @@ internal class PaymentSheetViewModelTest {
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = optionsParams,
                 originatedFromWallet = false,
-                passiveCaptchaParams = null
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -516,7 +512,6 @@ internal class PaymentSheetViewModelTest {
                 paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT,
                 optionsParams = optionsParams,
                 originatedFromWallet = false,
-                passiveCaptchaParams = null
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -543,8 +538,7 @@ internal class PaymentSheetViewModelTest {
                 PaymentMethodConfirmationOption.Saved(
                     paymentMethod = SEPA_DEBIT_PAYMENT_METHOD,
                     optionsParams = null,
-                    originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    originatedFromWallet = false
                 )
             )
             assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -579,7 +573,6 @@ internal class PaymentSheetViewModelTest {
                 ),
                 extraParams = null,
                 shouldSave = true,
-                passiveCaptchaParams = null
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -626,7 +619,6 @@ internal class PaymentSheetViewModelTest {
                 optionsParams = optionsParams,
                 extraParams = null,
                 shouldSave = true,
-                passiveCaptchaParams = null
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -979,8 +971,7 @@ internal class PaymentSheetViewModelTest {
             assertThat(arguments.confirmationOption).isEqualTo(
                 LinkConfirmationOption(
                     linkExpressMode = LinkExpressMode.DISABLED,
-                    configuration = TestFactory.LINK_CONFIGURATION,
-                    passiveCaptchaParams = null
+                    configuration = TestFactory.LINK_CONFIGURATION
                 )
             )
 
@@ -1018,7 +1009,6 @@ internal class PaymentSheetViewModelTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = null
             )
         )
 
@@ -1060,7 +1050,7 @@ internal class PaymentSheetViewModelTest {
                     isLinkAvailable = true
                 )
             ).isEqualTo(
-                SavedSelection.PaymentMethod(selection.paymentMethod.id.orEmpty())
+                SavedSelection.PaymentMethod(selection.paymentMethod.id)
             )
 
             resultTurbine.cancel()
@@ -1090,7 +1080,6 @@ internal class PaymentSheetViewModelTest {
                 optionsParams = null,
                 extraParams = null,
                 shouldSave = true,
-                passiveCaptchaParams = null
             )
         )
 
@@ -1152,7 +1141,6 @@ internal class PaymentSheetViewModelTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = null
             )
         )
 
@@ -1631,8 +1619,7 @@ internal class PaymentSheetViewModelTest {
             assertThat(arguments.confirmationOption).isEqualTo(
                 LinkConfirmationOption(
                     configuration = TestFactory.LINK_CONFIGURATION,
-                    linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
-                    passiveCaptchaParams = null
+                    linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK
                 )
             )
 
@@ -2134,8 +2121,7 @@ internal class PaymentSheetViewModelTest {
                 PaymentMethodConfirmationOption.Saved(
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
-                    originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    originatedFromWallet = false
                 )
             )
 
@@ -2174,8 +2160,7 @@ internal class PaymentSheetViewModelTest {
                 PaymentMethodConfirmationOption.Saved(
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
-                    originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    originatedFromWallet = false
                 )
             )
 
@@ -2274,7 +2259,6 @@ internal class PaymentSheetViewModelTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                passiveCaptchaParams = null
             )
         )
 
@@ -2310,8 +2294,7 @@ internal class PaymentSheetViewModelTest {
                 PaymentMethodConfirmationOption.Saved(
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
-                    originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    originatedFromWallet = false
                 )
             )
 
@@ -2347,8 +2330,7 @@ internal class PaymentSheetViewModelTest {
                 PaymentMethodConfirmationOption.Saved(
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
-                    originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    originatedFromWallet = false
                 )
             )
 
@@ -2384,8 +2366,7 @@ internal class PaymentSheetViewModelTest {
                 PaymentMethodConfirmationOption.Saved(
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
-                    originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    originatedFromWallet = false
                 )
             )
 
@@ -2491,28 +2472,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Launches Google Pay with correct client attribution metadata`() = confirmationTest {
-        val expectedClientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA
-        val args = ARGS_CUSTOMER_WITH_GOOGLEPAY
-
-        val viewModel = createViewModel(
-            args = args,
-            isGooglePayReady = true,
-            clientAttributionMetadata = expectedClientAttributionMetadata,
-        )
-
-        viewModel.checkoutWithGooglePay()
-
-        val arguments = startTurbine.awaitItem()
-
-        assertThat(arguments.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
-
-        val googlePayConfirmationOption = arguments.confirmationOption as GooglePayConfirmationOption
-
-        assertThat(googlePayConfirmationOption.clientAttributionMetadata).isEqualTo(expectedClientAttributionMetadata)
-    }
-
-    @Test
     fun `Launches Google Pay with custom label and amount if provided for setup intent`() = confirmationTest {
         val expectedLabel = "My custom label"
         val expectedAmount = 1234L
@@ -2563,7 +2522,6 @@ internal class PaymentSheetViewModelTest {
             BacsConfirmationOption(
                 createParams = bacsPaymentSelection.paymentMethodCreateParams,
                 optionsParams = bacsPaymentSelection.paymentMethodOptionsParams,
-                passiveCaptchaParams = null
             )
         )
     }
@@ -2734,8 +2692,6 @@ internal class PaymentSheetViewModelTest {
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
-                passiveCaptchaParams = null,
-                clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             )
         )
 
@@ -2780,8 +2736,6 @@ internal class PaymentSheetViewModelTest {
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
-                passiveCaptchaParams = null,
-                clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             )
         )
 
@@ -2819,7 +2773,6 @@ internal class PaymentSheetViewModelTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = null
             )
         )
 
@@ -2858,7 +2811,6 @@ internal class PaymentSheetViewModelTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = null
             )
         )
 
@@ -2897,7 +2849,6 @@ internal class PaymentSheetViewModelTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = null
             )
         )
 
@@ -2936,7 +2887,6 @@ internal class PaymentSheetViewModelTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = null
             )
         )
 
@@ -3272,125 +3222,6 @@ internal class PaymentSheetViewModelTest {
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
                 originatedFromWallet = false,
-                passiveCaptchaParams = null
-            )
-        )
-    }
-
-    @Test
-    fun `confirmation with saved card pm should include passive captcha params when available`() = confirmationTest {
-        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
-        val optionsParams = PaymentMethodOptionsParams.Card(
-            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
-        )
-
-        testPassiveCaptchaParams(
-            paymentSelection = PaymentSelection.Saved(
-                paymentMethod = CARD_PAYMENT_METHOD,
-            ),
-            optionsParams = optionsParams,
-            expectedConfirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = CARD_PAYMENT_METHOD,
-                optionsParams = optionsParams,
-                originatedFromWallet = false,
-                passiveCaptchaParams = passiveCaptchaParams
-            )
-        )
-    }
-
-    @Test
-    fun `confirmation with USBankAccount pm should include passive captcha params when available`() = confirmationTest {
-        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
-        val optionsParams = PaymentMethodOptionsParams.USBankAccount(
-            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
-        )
-
-        testPassiveCaptchaParams(
-            paymentSelection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION,
-            optionsParams = optionsParams,
-            expectedConfirmationOption = PaymentMethodConfirmationOption.New(
-                createParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
-                optionsParams = optionsParams,
-                extraParams = null,
-                shouldSave = false,
-                passiveCaptchaParams = passiveCaptchaParams
-            )
-        )
-    }
-
-    @Test
-    fun `confirmation with LinkInline pm should include passive captcha params when available`() = confirmationTest {
-        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
-
-        testPassiveCaptchaParams(
-            paymentSelection = PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION,
-            expectedConfirmationOption = LinkInlineSignupConfirmationOption(
-                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                optionsParams = null,
-                extraParams = null,
-                saveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest,
-                linkConfiguration = LINK_CONFIG,
-                userInput = PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION.input,
-                passiveCaptchaParams = passiveCaptchaParams
-            ),
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-            paymentElementLoader = FakePaymentElementLoader(
-                stripeIntent = PAYMENT_INTENT,
-                linkState = LinkState(
-                    configuration = LINK_CONFIG,
-                    loginState = LinkState.LoginState.LoggedOut,
-                    signupMode = null,
-                ),
-                passiveCaptchaParams = passiveCaptchaParams
-            )
-        )
-    }
-
-    @Test
-    fun `confirmation with New pm should include passive captcha params when available`() = confirmationTest {
-        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
-        val optionsParams = PaymentMethodOptionsParams.Card(
-            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
-        )
-
-        testPassiveCaptchaParams(
-            paymentSelection = PaymentSelection.New.Card(
-                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                brand = CardBrand.Visa,
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-            ),
-            optionsParams = optionsParams,
-            expectedConfirmationOption = PaymentMethodConfirmationOption.New(
-                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                optionsParams = optionsParams,
-                extraParams = null,
-                shouldSave = false,
-                passiveCaptchaParams = passiveCaptchaParams
-            )
-        )
-    }
-
-    @Test
-    fun `confirmation with Link pm should include passive captcha params when available`() = confirmationTest {
-        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
-
-        testPassiveCaptchaParams(
-            paymentSelection = PaymentSelection.Link(),
-            expectedConfirmationOption = LinkConfirmationOption(
-                configuration = LINK_CONFIG,
-                linkExpressMode = LinkExpressMode.DISABLED,
-                linkLaunchMode = LinkLaunchMode.Full,
-                passiveCaptchaParams = passiveCaptchaParams
-            ),
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-            paymentElementLoader = FakePaymentElementLoader(
-                stripeIntent = PAYMENT_INTENT,
-                linkState = LinkState(
-                    configuration = LINK_CONFIG,
-                    loginState = LinkState.LoginState.LoggedOut,
-                    signupMode = null,
-                ),
-                passiveCaptchaParams = passiveCaptchaParams
             )
         )
     }
@@ -3737,7 +3568,6 @@ internal class PaymentSheetViewModelTest {
                 createParams = createParams,
                 optionsParams = null,
                 extraParams = null,
-                passiveCaptchaParams = null
             )
         )
 
@@ -3762,7 +3592,7 @@ internal class PaymentSheetViewModelTest {
                     isLinkAvailable = true
                 )
             ).isEqualTo(
-                SavedSelection.PaymentMethod(savedSelection.paymentMethod.id.orEmpty())
+                SavedSelection.PaymentMethod(savedSelection.paymentMethod.id)
             )
         } else {
             assertThat(prefsRepository.paymentSelectionArgs).isEmpty()
@@ -4033,44 +3863,6 @@ internal class PaymentSheetViewModelTest {
                 bootstrapTurbine.awaitItem()
             }
         }
-    }
-
-    private suspend fun FakeConfirmationHandler.Scenario.testPassiveCaptchaParams(
-        paymentSelection: PaymentSelection,
-        optionsParams: PaymentMethodOptionsParams? = null,
-        expectedConfirmationOption: ConfirmationHandler.Option,
-        linkConfigurationCoordinator: LinkConfigurationCoordinator =
-            this@PaymentSheetViewModelTest.linkConfigurationCoordinator,
-        paymentElementLoader: PaymentElementLoader? = null
-    ) {
-        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
-        val stripeIntent = PAYMENT_INTENT
-        val viewModel = createViewModel(
-            stripeIntent = stripeIntent,
-            linkConfigurationCoordinator = linkConfigurationCoordinator,
-            paymentElementLoader = paymentElementLoader ?: FakePaymentElementLoader(
-                stripeIntent = stripeIntent,
-                passiveCaptchaParams = passiveCaptchaParams
-            )
-        )
-
-        val finalPaymentSelection = if (optionsParams != null) {
-            when (paymentSelection) {
-                is PaymentSelection.Saved -> paymentSelection.copy(paymentMethodOptionsParams = optionsParams)
-                is PaymentSelection.New.USBankAccount ->
-                    paymentSelection.copy(paymentMethodOptionsParams = optionsParams)
-                is PaymentSelection.New.Card -> paymentSelection.copy(paymentMethodOptionsParams = optionsParams)
-                else -> paymentSelection
-            }
-        } else {
-            paymentSelection
-        }
-
-        viewModel.updateSelection(finalPaymentSelection)
-        viewModel.checkout()
-
-        val arguments = startTurbine.awaitItem()
-        assertThat(arguments.confirmationOption).isEqualTo(expectedConfirmationOption)
     }
 
     private fun getPaymentMethodOptionJsonStringWithCvcRecollectionValue(enabled: Boolean): String {

@@ -15,7 +15,6 @@ class PaymentMethodConfirmationOptionTest {
         val option = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = null,
-            passiveCaptchaParams = null,
         )
 
         assertThat(option.shouldSaveAsDefault()).isFalse()
@@ -28,7 +27,6 @@ class PaymentMethodConfirmationOptionTest {
             optionsParams = null,
             extraParams = null,
             shouldSave = false,
-            passiveCaptchaParams = null,
         )
 
         assertThat(option.shouldSaveAsDefault()).isFalse()
@@ -41,7 +39,6 @@ class PaymentMethodConfirmationOptionTest {
             optionsParams = null,
             extraParams = PaymentMethodExtraParams.Card(setAsDefault = true),
             shouldSave = true,
-            passiveCaptchaParams = null,
         )
 
         assertThat(option.shouldSaveAsDefault()).isTrue()
@@ -54,7 +51,6 @@ class PaymentMethodConfirmationOptionTest {
             optionsParams = null,
             extraParams = PaymentMethodExtraParams.Card(setAsDefault = false),
             shouldSave = true,
-            passiveCaptchaParams = null,
         )
 
         assertThat(option.shouldSaveAsDefault()).isFalse()
@@ -67,7 +63,6 @@ class PaymentMethodConfirmationOptionTest {
             optionsParams = null,
             extraParams = PaymentMethodExtraParams.Card(setAsDefault = null),
             shouldSave = true,
-            passiveCaptchaParams = null,
         )
 
         assertThat(option.shouldSaveAsDefault()).isFalse()
@@ -80,7 +75,6 @@ class PaymentMethodConfirmationOptionTest {
             optionsParams = null,
             extraParams = PaymentMethodExtraParams.USBankAccount(setAsDefault = true),
             shouldSave = true,
-            passiveCaptchaParams = null,
         )
 
         assertThat(option.shouldSaveAsDefault()).isTrue()
@@ -93,7 +87,6 @@ class PaymentMethodConfirmationOptionTest {
             optionsParams = null,
             extraParams = PaymentMethodExtraParams.USBankAccount(setAsDefault = false),
             shouldSave = true,
-            passiveCaptchaParams = null,
         )
 
         assertThat(option.shouldSaveAsDefault()).isFalse()
@@ -110,7 +103,6 @@ class PaymentMethodConfirmationOptionTest {
             optionsParams = null,
             extraParams = PaymentMethodExtraParams.Link(setAsDefault = true),
             shouldSave = true,
-            passiveCaptchaParams = null,
         )
 
         assertThat(option.shouldSaveAsDefault()).isTrue()
@@ -127,7 +119,6 @@ class PaymentMethodConfirmationOptionTest {
             optionsParams = null,
             extraParams = PaymentMethodExtraParams.Link(setAsDefault = false),
             shouldSave = true,
-            passiveCaptchaParams = null,
         )
 
         assertThat(option.shouldSaveAsDefault()).isFalse()
@@ -140,7 +131,6 @@ class PaymentMethodConfirmationOptionTest {
             optionsParams = null,
             extraParams = PaymentMethodExtraParams.SepaDebit(setAsDefault = true),
             shouldSave = true,
-            passiveCaptchaParams = null,
         )
 
         assertThat(option.shouldSaveAsDefault()).isTrue()
@@ -153,7 +143,6 @@ class PaymentMethodConfirmationOptionTest {
             optionsParams = null,
             extraParams = PaymentMethodExtraParams.SepaDebit(setAsDefault = false),
             shouldSave = true,
-            passiveCaptchaParams = null,
         )
 
         assertThat(option.shouldSaveAsDefault()).isFalse()

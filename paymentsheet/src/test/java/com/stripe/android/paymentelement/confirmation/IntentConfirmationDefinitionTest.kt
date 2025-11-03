@@ -71,7 +71,6 @@ class IntentConfirmationDefinitionTest {
                     optionsParams = null,
                     shouldSave = true,
                     extraParams = null,
-                    passiveCaptchaParams = null
                 ),
                 confirmationArgs = CONFIRMATION_PARAMETERS,
             )
@@ -459,7 +458,6 @@ class IntentConfirmationDefinitionTest {
             optionsParams = PaymentMethodOptionsParams.Card(
                 cvc = "505",
             ),
-            passiveCaptchaParams = null
         )
 
         private val CONFIRMATION_PARAMETERS =

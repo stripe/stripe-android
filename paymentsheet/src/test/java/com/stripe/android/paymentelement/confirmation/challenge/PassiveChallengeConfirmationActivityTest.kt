@@ -82,7 +82,7 @@ internal class PassiveChallengeConfirmationActivityTest {
                         optionsParams = CONFIRMATION_OPTION.optionsParams,
                         shouldSave = false,
                         extraParams = null,
-                        passiveCaptchaParams = null
+                        passiveChallengeComplete = true,
                     )
                 )
 
@@ -124,7 +124,7 @@ internal class PassiveChallengeConfirmationActivityTest {
                         optionsParams = CONFIRMATION_OPTION.optionsParams,
                         shouldSave = false,
                         extraParams = null,
-                        passiveCaptchaParams = null
+                        passiveChallengeComplete = true,
                     )
                 )
 
@@ -170,8 +170,8 @@ internal class PassiveChallengeConfirmationActivityTest {
                             paymentMethod = SAVED_CONFIRMATION_OPTION.paymentMethod,
                             optionsParams = SAVED_CONFIRMATION_OPTION.optionsParams,
                             originatedFromWallet = false,
-                            passiveCaptchaParams = null,
-                            hCaptchaToken = "test_token"
+                            hCaptchaToken = "test_token",
+                            passiveChallengeComplete = true,
                         )
                     )
 
@@ -221,21 +221,17 @@ internal class PassiveChallengeConfirmationActivityTest {
 
         val PAYMENT_METHOD = PaymentMethodFactory.card()
 
-        val PASSIVE_CAPTCHA_PARAMS = PassiveCaptchaParamsFactory.passiveCaptchaParams()
-
         val CONFIRMATION_OPTION = PaymentMethodConfirmationOption.New(
             createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             optionsParams = null,
             extraParams = null,
             shouldSave = false,
-            passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS
         )
 
         val SAVED_CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PAYMENT_METHOD,
             optionsParams = null,
             originatedFromWallet = false,
-            passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
             hCaptchaToken = null
         )
 
@@ -247,6 +243,7 @@ internal class PassiveChallengeConfirmationActivityTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PAYMENT_INTENT,
                 shippingDetails = AddressDetails(),
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             ),
             appearance = PaymentSheet.Appearance(),
         )

@@ -97,11 +97,13 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
         confirmationHandler.state.test {
             awaitItem().assertIdle()
 
+            val paymentMethodMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.copy(passiveCaptchaParams = null)
+
             confirmationHandler.start(
                 ConfirmationHandler.Args(
                     confirmationOption = LINK_CONFIRMATION_OPTION,
                     appearance = CONFIRMATION_PARAMETERS.appearance,
-                    paymentMethodMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata,
+                    paymentMethodMetadata = paymentMethodMetadata,
                     initializationMode = CONFIRMATION_PARAMETERS.initializationMode,
                 )
             )
@@ -110,7 +112,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
 
             assertThat(confirmingWithLink.option).isEqualTo(LINK_CONFIRMATION_OPTION)
 
-            intendedLinkToBeLaunched(CONFIRMATION_PARAMETERS.paymentMethodMetadata)
+            intendedLinkToBeLaunched(paymentMethodMetadata)
 
             val confirmingWithSavedPaymentMethod = awaitItem().assertConfirming()
 
@@ -120,7 +122,6 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
-                        passiveCaptchaParams = null
                     )
                 )
 
@@ -227,7 +228,6 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
         val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
             linkExpressMode = LinkExpressMode.ENABLED,
-            passiveCaptchaParams = null
         )
 
         const val LINK_COMPLETE_CODE = 49871

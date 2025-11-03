@@ -2,7 +2,6 @@ package com.stripe.android.paymentelement.confirmation.challenge
 
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -46,7 +45,7 @@ internal class PassiveChallengeConfirmationFlowTest {
                 optionsParams = NEW_CONFIRMATION_OPTION.optionsParams,
                 shouldSave = false,
                 extraParams = null,
-                passiveCaptchaParams = null
+                passiveChallengeComplete = true,
             ),
             arguments = CONFIRMATION_PARAMETERS,
         ),
@@ -63,7 +62,7 @@ internal class PassiveChallengeConfirmationFlowTest {
                 paymentMethod = SAVED_CONFIRMATION_OPTION.paymentMethod,
                 optionsParams = SAVED_CONFIRMATION_OPTION.optionsParams,
                 originatedFromWallet = false,
-                passiveCaptchaParams = null,
+                passiveChallengeComplete = true,
                 hCaptchaToken = "test_token"
             ),
             arguments = CONFIRMATION_PARAMETERS,
@@ -82,7 +81,7 @@ internal class PassiveChallengeConfirmationFlowTest {
                 optionsParams = NEW_CONFIRMATION_OPTION.optionsParams,
                 shouldSave = false,
                 extraParams = null,
-                passiveCaptchaParams = null
+                passiveChallengeComplete = true,
             ),
             arguments = CONFIRMATION_PARAMETERS,
         ),
@@ -99,7 +98,7 @@ internal class PassiveChallengeConfirmationFlowTest {
                 paymentMethod = SAVED_CONFIRMATION_OPTION.paymentMethod,
                 optionsParams = SAVED_CONFIRMATION_OPTION.optionsParams,
                 originatedFromWallet = false,
-                passiveCaptchaParams = null,
+                passiveChallengeComplete = true,
                 hCaptchaToken = null
             ),
             arguments = CONFIRMATION_PARAMETERS,
@@ -109,21 +108,17 @@ internal class PassiveChallengeConfirmationFlowTest {
     private companion object {
         private val PAYMENT_METHOD = PaymentMethodFactory.card()
 
-        private val PASSIVE_CAPTCHA_PARAMS = PassiveCaptchaParamsFactory.passiveCaptchaParams()
-
         private val NEW_CONFIRMATION_OPTION = PaymentMethodConfirmationOption.New(
             createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             optionsParams = null,
             extraParams = null,
             shouldSave = false,
-            passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
         )
 
         private val SAVED_CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PAYMENT_METHOD,
             optionsParams = null,
             originatedFromWallet = false,
-            passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
             hCaptchaToken = null,
         )
     }
