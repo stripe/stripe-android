@@ -36,7 +36,7 @@ import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
-import com.stripe.android.crypto.onramp.ui.VerifyKycActivityContractResult
+import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
@@ -599,7 +599,7 @@ internal class OnrampInteractor @Inject constructor(
     }
 
     suspend fun handleVerifyKycResult(
-        result: VerifyKycActivityContractResult,
+        result: VerifyKycActivityResult,
     ): OnrampVerifyKycInfoResult = when (val action = result.action) {
         is KycRefreshScreenAction.Cancelled -> {
             OnrampVerifyKycInfoResult.Cancelled

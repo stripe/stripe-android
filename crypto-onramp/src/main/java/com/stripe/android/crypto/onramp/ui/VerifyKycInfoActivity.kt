@@ -7,28 +7,33 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.core.os.BundleCompat
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.paymentsheet.ui.KYCRefreshScreen
+import com.stripe.android.paymentsheet.ui.VerifyKYCInfo
 import kotlinx.parcelize.Parcelize
 
 internal class VerifyKycInfoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val kycInfo = intent.getParcelableExtra<KycRetrieveResponse>("kycInfo")!!
-        val linkAppearance = intent.getParcelableExtra<LinkAppearance>("linkAppearance")
+
+        val args = intent.getParcelableExtra(VerifyKycInfoActivity.EXTRA_ARGS, VerifyKycArgs::class.java)
+            ?: error("Missing VerifyKycArgs")
+        val kycInfo = args.kycRetrieveResponse
+        val linkAppearance = args.appearance
 
         setContent {
             KYCRefreshScreen(
-                linkAppearance,
-                kycInfo,
+                appearance = linkAppearance,
+                kycInfo = kycInfo.toVerifyKYCInfo(),
                 onClose = {
-                    setResult(RESULT_CANCELED, createIntent(KycRefreshScreenAction.Cancelled))
+                    setResult(RESULT_CANCELED, createResultIntent(KycRefreshScreenAction.Cancelled))
                     finish()
                 },
                 onEdit = {
-                    setResult(RESULT_OK, createIntent(KycRefreshScreenAction.Edit))
+                    setResult(RESULT_OK, createResultIntent(KycRefreshScreenAction.Edit))
                     finish()
                 },
                 onConfirm = {
@@ -41,48 +46,82 @@ internal class VerifyKycInfoActivity : ComponentActivity() {
                         address = kycInfo.address
                     )
 
-                    setResult(RESULT_OK, createIntent(KycRefreshScreenAction.Confirm(refreshInfo)))
+                    setResult(RESULT_OK, createResultIntent(KycRefreshScreenAction.Confirm(refreshInfo)))
                     finish()
                 }
             )
         }
     }
 
-    private fun createIntent(action: KycRefreshScreenAction): Intent {
-        return Intent().apply { putExtra("action", action) }
+    private fun createResultIntent(action: KycRefreshScreenAction): Intent {
+        return Intent().apply { putExtra(ACTION_ARG, action) }
+    }
+
+    companion object {
+        private const val EXTRA_ARGS = "verify_kyc_args"
+        internal const val ACTION_ARG = "action"
+
+        internal fun createIntent(
+            context: Context,
+            args: VerifyKycArgs
+        ): Intent {
+            return Intent(context, VerifyKycInfoActivity::class.java)
+                .putExtra(EXTRA_ARGS, args)
+        }
     }
 }
 
-internal data class VerifyKycActivityContractArgs(
+internal data class VerifyKycActivityArgs(
     val kycRetrieveResponse: KycRetrieveResponse,
     val linkAppearance: LinkAppearance?
 )
 
 @Parcelize
-internal sealed class KycRefreshScreenAction : Parcelable {
-    data object Cancelled : KycRefreshScreenAction()
-    data object Edit : KycRefreshScreenAction()
-    data class Confirm(val info: RefreshKycInfo) : KycRefreshScreenAction()
+internal sealed interface KycRefreshScreenAction : Parcelable {
+    data object Cancelled : KycRefreshScreenAction
+    data object Edit : KycRefreshScreenAction
+    data class Confirm(val info: RefreshKycInfo) : KycRefreshScreenAction
 }
 
-internal data class VerifyKycActivityContractResult(
+internal data class VerifyKycActivityResult(
     val action: KycRefreshScreenAction
 )
 
 internal class VerifyKycInfoActivityContract : ActivityResultContract<
-    VerifyKycActivityContractArgs,
-    VerifyKycActivityContractResult
+    VerifyKycActivityArgs,
+    VerifyKycActivityResult
     >() {
-    override fun createIntent(context: Context, input: VerifyKycActivityContractArgs): Intent {
-        return Intent(context, VerifyKycInfoActivity::class.java).apply {
-            putExtra("linkAppearance", input.linkAppearance)
-            putExtra("kycInfo", input.kycRetrieveResponse)
-        }
+    override fun createIntent(context: Context, input: VerifyKycActivityArgs): Intent {
+        return VerifyKycInfoActivity.createIntent(
+            context = context,
+            args = VerifyKycArgs(
+                kycRetrieveResponse = input.kycRetrieveResponse,
+                appearance = input.linkAppearance
+            )
+        )
     }
 
-    override fun parseResult(resultCode: Int, intent: Intent?): VerifyKycActivityContractResult {
-        val action = intent?.getParcelableExtra<KycRefreshScreenAction>("action") ?: KycRefreshScreenAction.Cancelled
+    override fun parseResult(resultCode: Int, intent: Intent?): VerifyKycActivityResult {
+        val action = intent?.extras?.let {
+            BundleCompat.getParcelable(it, VerifyKycInfoActivity.ACTION_ARG, KycRefreshScreenAction::class.java)
+        } ?: KycRefreshScreenAction.Cancelled
 
-        return VerifyKycActivityContractResult(action)
+        return VerifyKycActivityResult(action)
+    }
+}
+
+@Parcelize
+internal data class VerifyKycArgs(
+    val kycRetrieveResponse: KycRetrieveResponse,
+    val appearance: LinkAppearance?,
+) : Parcelable
+
+private fun KycRetrieveResponse.toVerifyKYCInfo(): VerifyKYCInfo {
+    return object : VerifyKYCInfo {
+        override val firstName = this@toVerifyKYCInfo.firstName
+        override val lastName = this@toVerifyKYCInfo.lastName
+        override val idNumberLastFour = this@toVerifyKYCInfo.idNumberLastFour
+        override val dateOfBirth = this@toVerifyKYCInfo.dateOfBirth
+        override val address = this@toVerifyKYCInfo.address
     }
 }

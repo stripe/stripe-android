@@ -18,11 +18,10 @@ import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
-import com.stripe.android.crypto.onramp.ui.VerifyKycActivityContractArgs
-import com.stripe.android.crypto.onramp.ui.VerifyKycActivityContractResult
+import com.stripe.android.crypto.onramp.ui.VerifyKycActivityArgs
+import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
 import com.stripe.android.identity.IdentityVerificationSheet
-import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.model.PaymentIntent
@@ -64,7 +63,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private val currentLinkAccount: LinkController.LinkAccount?
         get() = interactor.state.value.linkControllerState?.internalLinkAccount
 
-    private val verifyKycResultLauncher: ActivityResultLauncher<VerifyKycActivityContractArgs> =
+    private val verifyKycResultLauncher: ActivityResultLauncher<VerifyKycActivityArgs> =
         activity.registerForActivityResult(
             contract = VerifyKycInfoActivityContract(),
             callback = ::handleVerifyKycResult
@@ -137,7 +136,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             when (val verification = interactor.startKycVerification(updatedAddress)) {
                 is OnrampStartKycVerificationResult.Completed -> {
                     verifyKycResultLauncher.launch(
-                        VerifyKycActivityContractArgs(verification.response, verification.appearance)
+                        VerifyKycActivityArgs(verification.response, verification.appearance)
                     )
                 }
                 is OnrampStartKycVerificationResult.Failed -> {
@@ -241,7 +240,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    private fun handleVerifyKycResult(result: VerifyKycActivityContractResult) {
+    private fun handleVerifyKycResult(result: VerifyKycActivityResult) {
         coroutineScope.launch {
             onrampCallbacks.verifyKycCallback.onResult(
                 interactor.handleVerifyKycResult(result)
