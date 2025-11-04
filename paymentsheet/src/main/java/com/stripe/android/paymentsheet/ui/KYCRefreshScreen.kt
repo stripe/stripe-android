@@ -21,8 +21,6 @@ import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -171,11 +169,11 @@ private fun TopNavigationBar(
                     .background(LinkTheme.colors.textPrimary.copy(alpha = 0.12f))
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Close,
+                    painter = painterResource(R.drawable.stripe_ic_paymentsheet_close),
                     contentDescription = "Close",
                     tint = LinkTheme.colors.textPrimary,
                     modifier = Modifier.align(Alignment.Center)
-                        .size(22.dp)
+                        .size(12.dp)
                 )
             }
         }
