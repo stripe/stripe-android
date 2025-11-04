@@ -32,6 +32,7 @@ import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -39,6 +40,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -76,10 +78,6 @@ import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.launch
-import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 
 internal class OnrampActivity : ComponentActivity() {
 
@@ -157,7 +155,10 @@ internal class OnrampActivity : ComponentActivity() {
                         },
                         sheetGesturesEnabled = false,
                         sheetState = rememberModalBottomSheetState(
-                            if (showAddressModal == true) ModalBottomSheetValue.Expanded else ModalBottomSheetValue.Hidden
+                            if (showAddressModal == true)
+                                ModalBottomSheetValue.Expanded
+                            else
+                                ModalBottomSheetValue.Hidden
                         )
                     ) {
                         OnrampScreen(
@@ -215,7 +216,7 @@ fun AddressForm(
         )
     }
 
-    var values by remember { mutableStateOf(mapOf(*fields.map { it.first to "" }.toTypedArray())) }
+    var values by remember { mutableStateOf(fields.associate { it.first to "" }) }
 
     Column(
         modifier = Modifier
