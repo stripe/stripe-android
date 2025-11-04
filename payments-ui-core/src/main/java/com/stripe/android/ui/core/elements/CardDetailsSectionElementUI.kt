@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -37,11 +38,7 @@ fun CardDetailsSectionElementUI(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val options = ActivityOptionsCompat.makeCustomAnimation(
-        context,
-        AnimationConstants.FADE_IN,
-        AnimationConstants.FADE_OUT,
-    )
+    val options = rememberActivityOptions()
 
     // Only create launcher if ActivityResultRegistry is available (e.g., not in screenshot tests)
     val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
@@ -95,6 +92,19 @@ fun CardDetailsSectionElementUI(
             ),
             hiddenIdentifiers = hiddenIdentifiers,
             lastTextFieldIdentifier = lastTextFieldIdentifier
+        )
+    }
+}
+
+@Composable
+private fun rememberActivityOptions(): ActivityOptionsCompat {
+    val context = LocalContext.current
+
+    return remember(context) {
+        ActivityOptionsCompat.makeCustomAnimation(
+            context,
+            AnimationConstants.FADE_IN,
+            AnimationConstants.FADE_OUT,
         )
     }
 }

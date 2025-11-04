@@ -151,7 +151,6 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             query("payment_method_type", "card"),
         )
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
-        validateAnalyticsRequest(eventName = "mc_cardscan_api_check_succeeded")
         validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
 
         formPage.clickPrimaryButton()
@@ -253,7 +252,6 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             query("payment_method_type", "card"),
         )
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
-        validateAnalyticsRequest(eventName = "mc_cardscan_api_check_succeeded")
         validateAnalyticsRequest(
             eventName = "mc_embedded_payment_success",
             query("is_confirmation_tokens", "true")

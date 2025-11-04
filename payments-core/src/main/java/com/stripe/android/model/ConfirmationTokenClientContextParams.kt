@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.utils.putNonEmptySfu
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
