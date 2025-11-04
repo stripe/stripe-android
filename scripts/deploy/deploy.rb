@@ -85,6 +85,8 @@ steps = [
     # Do docs updates
     method(:generate_dokka),
     method(:update_pay_server_docs),
+
+    # Add newest bindings_version to zoolander
     method(:update_zoolander_config),
 ]
 

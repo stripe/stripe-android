@@ -23,30 +23,33 @@ def update_zoolander_config()
         config = YAML.load_file(config_file)
 
         # Find the stripe-mobile-payments-sdk-legacy client
-        legacy_client = config.find { |client| client['client_id'] == 'stripe-mobile-payments-sdk-legacy' }
+        clients = config['client_configs'] || []
+        mobile_sdk_client = clients.find { |client| client['client_id'] == 'stripe-mobile-payments-sdk-legacy' }
 
-        if legacy_client.nil?
+        if mobile_sdk_client.nil?
             raise "Could not find stripe-mobile-payments-sdk-legacy client in config"
         end
 
         # Check if version is already in bindings_version list
-        bindings_version = legacy_client['bindings_version'] || []
+        metrics_tags = mobile_sdk_client['metrics_tags']
+        bindings_version_yaml = metrics_tags.find{ |metric_tag| metric_tag['name'] == 'bindings_version'}
+        bindings_versions = bindings_version_yaml['values']
 
-        if bindings_version.include?(@version)
+        if bindings_versions.include?(@version)
             rputs "Version #{@version} is already in the bindings_version list. No changes needed."
             return
         end
 
         # Add version to the top of the list
-        bindings_version.unshift(@version)
-        legacy_client['bindings_version'] = bindings_version
+        bindings_versions.unshift(@version)
+        bindings_version_yaml['values'] = bindings_versions
 
         # Write the updated YAML back to file
         File.write(config_file, YAML.dump(config))
 
-        execute_or_fail("git -C ../zoolander add #{config_file}")
+        execute_or_fail("git -C ../zoolander add src/resources/com/stripe/dscore/analyticseventlogger/server/rpcserver/client_config.yaml")
         switch_to_new_branch(zoolander_branch, "master", repo: "../zoolander")
-        execute_or_fail("git -C ../zoolander add #{config_file}")
+        execute_or_fail("git -C ../zoolander add src/resources/com/stripe/dscore/analyticseventlogger/server/rpcserver/client_config.yaml")
         execute_or_fail("git -C ../zoolander commit -m \"Update Android Payments SDK bindings_version to #{@version}\"")
     rescue
         execute("git -C ../zoolander restore src")
