@@ -123,7 +123,23 @@ dependencies {
 
 android {
     defaultConfig {
-        testApplicationId "com.stripe.android.paymentsheet.test"
+        testApplicationId "com.stripe.android.paymentsheet.example"
+    }
+
+    signingConfigs {
+        config {
+            keyAlias 'example'
+            keyPassword 'Stripe12345'
+            // Generated with: `echo y | keytool -genkeypair -dname "cn=Stripe Developer, ou=Stripe, o=Stripe, c=US" -alias example -keypass Stripe12345 -keystore stripe-example.keystore -storepass Stripe12345 -keyalg RSA -keysize 2048 -validity 20000`
+            storeFile rootProject.file('stripe-example.keystore')
+            storePassword 'Stripe12345'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.config
+        }
     }
 
     buildFeatures {
