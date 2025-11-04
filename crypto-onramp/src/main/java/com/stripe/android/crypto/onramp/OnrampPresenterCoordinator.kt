@@ -10,7 +10,6 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
-import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
@@ -19,9 +18,8 @@ import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
-import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
-import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityContractArgs
+import com.stripe.android.crypto.onramp.ui.VerifyKycActivityContractResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkAppearance
@@ -42,7 +40,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     linkController: LinkController,
     lifecycleOwner: LifecycleOwner,
     private val activity: ComponentActivity,
-    private val cryptoApiRepository: CryptoApiRepository,
     private val onrampCallbacks: OnrampCallbacks,
     private val coroutineScope: CoroutineScope,
 ) {
@@ -67,51 +64,11 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private val currentLinkAccount: LinkController.LinkAccount?
         get() = interactor.state.value.linkControllerState?.internalLinkAccount
 
-    private val onrampActivityResultLauncher: ActivityResultLauncher<VerifyKycActivityContractArgs> =
-        activity.registerForActivityResult(VerifyKycInfoActivityContract()) { result ->
-            when (val action = result.action) {
-                is KycRefreshScreenAction.Cancelled -> {
-                    onrampCallbacks.verifyKycCallback.onResult(
-                        OnrampVerifyKycInfoResult.Cancelled
-                    )
-                }
-                is KycRefreshScreenAction.Edit -> {
-                    onrampCallbacks.verifyKycCallback.onResult(
-                        OnrampVerifyKycInfoResult.UpdateAddress
-                    )
-                }
-                is KycRefreshScreenAction.Confirm -> {
-                    coroutineScope.launch {
-                        val secret = consumerSessionClientSecret()
-
-                        if (secret != null) {
-                            val refreshResult = cryptoApiRepository.refreshKycData(
-                                action.info,
-                                secret
-                            )
-
-                            if (refreshResult.isSuccess) {
-                                onrampCallbacks.verifyKycCallback.onResult(
-                                    OnrampVerifyKycInfoResult.Confirmed
-                                )
-                            } else {
-                                onrampCallbacks.verifyKycCallback.onResult(
-                                    OnrampVerifyKycInfoResult.Failed(
-                                        refreshResult.exceptionOrNull() ?: Exception("Unknown error")
-                                    )
-                                )
-                            }
-                        } else {
-                            onrampCallbacks.verifyKycCallback.onResult(
-                                OnrampVerifyKycInfoResult.Failed(
-                                    MissingConsumerSecretException()
-                                )
-                            )
-                        }
-                    }
-                }
-            }
-        }
+    private val verifyKycResultLauncher: ActivityResultLauncher<VerifyKycActivityContractArgs> =
+        activity.registerForActivityResult(
+            contract = VerifyKycInfoActivityContract(),
+            callback = ::handleVerifyKycResult
+        )
 
     init {
         // Observe Link controller state
@@ -133,7 +90,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    onrampActivityResultLauncher.unregister()
+                    verifyKycResultLauncher.unregister()
                 }
             }
         )
@@ -177,20 +134,15 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     fun verifyKycInfo(updatedAddress: PaymentSheet.Address? = null) {
         coroutineScope.launch {
-            consumerSessionClientSecret()?.let {
-                val result = cryptoApiRepository.retrieveKycInfo(it)
-                if (result.isSuccess) {
-                    val kycInfo = result.getOrThrow().copy(
-                        address = updatedAddress ?: result.getOrThrow().address
+            when (val verification = interactor.startKycVerification(updatedAddress)) {
+                is OnrampStartKycVerificationResult.Completed -> {
+                    verifyKycResultLauncher.launch(
+                        VerifyKycActivityContractArgs(verification.response, verification.appearance)
                     )
-                    onrampActivityResultLauncher.launch(
-                        VerifyKycActivityContractArgs(kycInfo, appearance())
-                    )
-                } else {
+                }
+                is OnrampStartKycVerificationResult.Failed -> {
                     onrampCallbacks.verifyKycCallback.onResult(
-                        OnrampVerifyKycInfoResult.Failed(
-                            result.exceptionOrNull() ?: Exception("Unknown error")
-                        )
+                        OnrampVerifyKycInfoResult.Failed(verification.error)
                     )
                 }
             }
@@ -227,10 +179,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             interactor.startCheckout(onrampSessionId, checkoutHandler)
         }
     }
-
-    private fun consumerSessionClientSecret(): String? =
-        currentLinkAccount?.consumerSessionClientSecret
-            ?: linkControllerState.value.internalLinkAccount?.consumerSessionClientSecret
 
     /**
      * Handles checkout state changes from the interactor.
@@ -293,8 +241,13 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    private fun appearance(): LinkAppearance? =
-        interactor.state.value.configuration?.appearance
+    private fun handleVerifyKycResult(result: VerifyKycActivityContractResult) {
+        coroutineScope.launch {
+            onrampCallbacks.verifyKycCallback.onResult(
+                interactor.handleVerifyKycResult(result)
+            )
+        }
+    }
 
     private fun clientEmail(): String? =
         interactor.state.value.linkControllerState?.internalLinkAccount?.email

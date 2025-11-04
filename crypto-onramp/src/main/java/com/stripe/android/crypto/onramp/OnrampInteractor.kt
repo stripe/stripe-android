@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp
 
 import android.app.Application
 import android.content.Context
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.crypto.onramp.CheckoutState.Status
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
@@ -12,6 +13,7 @@ import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
+import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
@@ -29,15 +31,20 @@ import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
+import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
+import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
+import com.stripe.android.crypto.onramp.ui.VerifyKycActivityContractResult
 import com.stripe.android.identity.IdentityVerificationSheet
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkController.ConfigureResult
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -339,6 +346,38 @@ internal class OnrampInteractor @Inject constructor(
             )
     }
 
+    suspend fun startKycVerification(updatedAddress: PaymentSheet.Address?): OnrampStartKycVerificationResult {
+        val secret = consumerSessionClientSecret()
+
+        if (secret == null) {
+            val error = MissingConsumerSecretException()
+            analyticsService?.track(
+                OnrampAnalyticsEvent.ErrorOccurred(
+                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.VerifyIdentity, // VerifyKYC
+                    error = error,
+                )
+            )
+            return OnrampStartKycVerificationResult.Failed(error)
+        }
+
+        return cryptoApiRepository.retrieveKycInfo(secret)
+            .fold(
+                onSuccess = { result ->
+                    val kycInfo = result.copy(
+                        address = updatedAddress ?: result.address
+                    )
+
+                    OnrampStartKycVerificationResult.Completed(
+                        response = kycInfo,
+                        appearance = state.value.configuration?.appearance
+                    )
+                },
+                onFailure = { error ->
+                    OnrampStartKycVerificationResult.Failed(error)
+                }
+            )
+    }
+
     @Suppress("LongMethod")
     suspend fun createCryptoPaymentToken(): OnrampCreateCryptoPaymentTokenResult {
         val cryptoCustomerId = _state.value.cryptoCustomerId
@@ -557,6 +596,40 @@ internal class OnrampInteractor @Inject constructor(
         }
         is LinkController.PresentPaymentMethodsResult.Canceled ->
             OnrampCollectPaymentMethodResult.Cancelled()
+    }
+
+    suspend fun handleVerifyKycResult(
+        result: VerifyKycActivityContractResult,
+    ): OnrampVerifyKycInfoResult = when (val action = result.action) {
+        is KycRefreshScreenAction.Cancelled -> {
+            OnrampVerifyKycInfoResult.Cancelled
+        }
+        is KycRefreshScreenAction.Edit -> {
+            OnrampVerifyKycInfoResult.UpdateAddress
+        }
+        is KycRefreshScreenAction.Confirm -> {
+            val secret = consumerSessionClientSecret()
+
+            if (secret != null) {
+                val refreshResult = cryptoApiRepository.refreshKycData(
+                    kycInfo = action.info,
+                    consumerSessionClientSecret = secret
+                )
+
+                refreshResult.fold(
+                    onSuccess = { OnrampVerifyKycInfoResult.Confirmed },
+                    onFailure = {
+                        OnrampVerifyKycInfoResult.Failed(
+                            refreshResult.exceptionOrNull() ?: Exception("Unknown error")
+                        )
+                    }
+                )
+            } else {
+                OnrampVerifyKycInfoResult.Failed(
+                    MissingConsumerSecretException()
+                )
+            }
+        }
     }
 
     private fun consumerSessionClientSecret(): String? =
@@ -825,3 +898,24 @@ internal data class PlatformKeyCache(
     val publishableKey: String,
     val cryptoCustomerId: String?
 )
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+internal sealed interface OnrampStartKycVerificationResult {
+    /**
+     * Starting KYC verification completed successfully.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class Completed internal constructor(
+        val response: KycRetrieveResponse,
+        val appearance: LinkAppearance?
+    ) : OnrampStartKycVerificationResult
+
+    /**
+     * Starting KYC verification failed due to an error.
+     * @param error The error that caused the failure.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class Failed internal constructor(
+        val error: Throwable
+    ) : OnrampStartKycVerificationResult
+}
