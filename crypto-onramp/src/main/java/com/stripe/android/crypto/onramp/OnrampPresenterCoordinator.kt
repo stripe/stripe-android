@@ -91,21 +91,25 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                             )
 
                             if (refreshResult.isSuccess) {
+                                interactor.onKycVerificationCompleted()
+
                                 onrampCallbacks.verifyKycCallback.onResult(
                                     OnrampVerifyKycInfoResult.Confirmed
                                 )
                             } else {
+                                val error = refreshResult.exceptionOrNull() ?: Exception("Unknown error")
+                                interactor.onKycVerificationError(error)
+
                                 onrampCallbacks.verifyKycCallback.onResult(
-                                    OnrampVerifyKycInfoResult.Failed(
-                                        refreshResult.exceptionOrNull() ?: Exception("Unknown error")
-                                    )
+                                    OnrampVerifyKycInfoResult.Failed(error)
                                 )
                             }
                         } else {
+                            val error = MissingConsumerSecretException()
+                            interactor.onKycVerificationError(error)
+
                             onrampCallbacks.verifyKycCallback.onResult(
-                                OnrampVerifyKycInfoResult.Failed(
-                                    MissingConsumerSecretException()
-                                )
+                                OnrampVerifyKycInfoResult.Failed(error)
                             )
                         }
                     }
@@ -180,6 +184,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             consumerSessionClientSecret()?.let {
                 val result = cryptoApiRepository.retrieveKycInfo(it)
                 if (result.isSuccess) {
+                    interactor.onKycVerification()
+
                     val kycInfo = result.getOrThrow().copy(
                         address = updatedAddress ?: result.getOrThrow().address
                     )
@@ -187,9 +193,13 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                         VerifyKycActivityContractArgs(kycInfo, appearance())
                     )
                 } else {
+                    val error = result.exceptionOrNull() ?: Exception("Unknown error")
+
+                    interactor.onKycVerificationError(error)
+
                     onrampCallbacks.verifyKycCallback.onResult(
                         OnrampVerifyKycInfoResult.Failed(
-                            result.exceptionOrNull() ?: Exception("Unknown error")
+                            error
                         )
                     )
                 }

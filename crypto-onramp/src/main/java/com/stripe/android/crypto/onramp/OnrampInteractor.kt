@@ -580,6 +580,23 @@ internal class OnrampInteractor @Inject constructor(
         analyticsService?.track(OnrampAnalyticsEvent.LinkUserAuthenticationStarted)
     }
 
+    fun onKycVerification() {
+        analyticsService?.track(OnrampAnalyticsEvent.KycVerificationStarted)
+    }
+
+    fun onKycVerificationCompleted() {
+        analyticsService?.track(OnrampAnalyticsEvent.KycVerificationCompleted)
+    }
+
+    fun onKycVerificationError(error: Throwable) {
+        analyticsService?.track(
+            OnrampAnalyticsEvent.ErrorOccurred(
+                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.VerifyKyc,
+                error = error,
+            )
+        )
+    }
+
     fun onCollectPaymentMethod(type: PaymentMethodType) {
         _state.update { it.copy(collectingPaymentMethodType = type) }
         analyticsService?.track(
