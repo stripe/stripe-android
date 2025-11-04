@@ -1,7 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers
@@ -19,9 +17,7 @@ import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import org.junit.Assume
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(TestParameterInjector::class)
 internal class PaymentSheetConfirmationTokenTest {
     @get:Rule
     val testRules: TestRules = TestRules.create()
@@ -43,10 +39,37 @@ internal class PaymentSheetConfirmationTokenTest {
     }
 
     @Test
+    fun testSuccessfulPayment_withClientContext() = testSuccessfulPayment(
+        isLiveMode = false,
+        customerType = CustomerType.NewCustomer,
+        paymentMethodType = PaymentMethodType.Card,
+    )
+
+    @Test
+    fun testSuccessfulPayment_withSavedCard() = testSuccessfulPayment(
+        isLiveMode = true,
+        customerType = CustomerType.ReturningCustomer,
+        paymentMethodType = PaymentMethodType.SavedCard,
+    )
+
+    @Test
+    fun testSuccessfulPayment_withCashAppAndSetupFutureUsage() = testSuccessfulPayment(
+        isLiveMode = true,
+        customerType = CustomerType.NewCustomer,
+        paymentMethodType = PaymentMethodType.CashAppWithSetupFutureUsage,
+    )
+
+    @Test
+    fun testSuccessfulPayment_withSavedCardAndCvcRecollection() = testSuccessfulPayment(
+        isLiveMode = true,
+        customerType = CustomerType.ReturningCustomer,
+        paymentMethodType = PaymentMethodType.SavedCardWithCvcRecollection,
+    )
+
     fun testSuccessfulPayment(
-        @TestParameter("false", "true") isLiveMode: Boolean,
-        @TestParameter customerType: CustomerType,
-        @TestParameter paymentMethodType: PaymentMethodType,
+        isLiveMode: Boolean,
+        customerType: CustomerType,
+        paymentMethodType: PaymentMethodType,
     ) {
         verifyTestCombination(
             isLiveMode,
@@ -76,7 +99,7 @@ internal class PaymentSheetConfirmationTokenTest {
     ) {
         Assume.assumeTrue(
             "Only need to verify client context is sent for test mode in any confirmation flow",
-            !isLiveMode || (
+            isLiveMode || (
                 customerType == CustomerType.NewCustomer &&
                     paymentMethodType == PaymentMethodType.Card
                 )
