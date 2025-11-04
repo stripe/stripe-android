@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.exception.APIException
@@ -128,6 +129,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 .distinctUntilChangedBy { it.checkoutState }
                 .collect { it.checkoutState?.let(::handleCheckoutStateChange) }
         }
+
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    onrampActivityResultLauncher.unregister()
+                }
+            }
+        )
     }
 
     fun authenticateUser() {
