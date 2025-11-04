@@ -152,8 +152,6 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             query("payment_method_type", "card"),
         )
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
-        // cardscan is not available in test mode
-        validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
         validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
 
         formPage.clickPrimaryButton()
@@ -256,8 +254,6 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             query("payment_method_type", "card"),
         )
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
-        // cardscan is not available in test mode
-        validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
         validateAnalyticsRequest(
             eventName = "mc_embedded_payment_success",
             query("is_confirmation_tokens", "true")

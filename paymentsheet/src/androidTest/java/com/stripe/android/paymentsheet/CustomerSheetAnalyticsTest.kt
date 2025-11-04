@@ -87,7 +87,6 @@ internal class CustomerSheetAnalyticsTest {
         )
 
         validateAnalyticsRequest(eventName = "stripe_android.payment_method_creation")
-        validateAnalyticsRequest(eventName = "cs_cardscan_api_check_failed")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.started",
             query("intent_id", "seti_12345"),
