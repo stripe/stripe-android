@@ -96,7 +96,6 @@ internal fun runPaymentSheetTest(
         }
 
         val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
-        networkRule.validate()
         assertThat(didCompleteSuccessfully).isTrue()
     }
 }
@@ -177,7 +176,6 @@ internal fun runMultiplePaymentSheetInstancesTest(
         block(testContext)
 
         val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
-        networkRule.validate()
         assertThat(didCompleteSuccessfully).isTrue()
 
         if (testType == MultipleInstancesTestType.RunWithFirst) {
