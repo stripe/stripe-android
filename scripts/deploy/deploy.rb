@@ -100,5 +100,4 @@ if (@is_dry_run)
     revert_version_bump_changes()
     revert_dokka_changes()
     delete_pay_server_branch()
-    delete_zoolander_branch()
 end
