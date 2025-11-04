@@ -4,7 +4,6 @@ import app.cash.turbine.test
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -17,9 +16,7 @@ import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.TestRules
-import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse

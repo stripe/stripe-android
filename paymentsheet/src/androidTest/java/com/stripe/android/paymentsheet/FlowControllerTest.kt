@@ -1337,7 +1337,6 @@ internal class FlowControllerTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-
         testContext.configureFlowController {
             configureWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
