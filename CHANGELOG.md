@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 22.1.15 - 2025-11-03
+
 ## 22.0.0 - 2025-11-03
 
 This major version introduces many small breaking changes. Please see [MIGRATING.md](MIGRATING.md) to help you migrate.
