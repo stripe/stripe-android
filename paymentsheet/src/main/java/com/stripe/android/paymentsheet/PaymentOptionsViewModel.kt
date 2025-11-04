@@ -26,7 +26,6 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
@@ -80,10 +79,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
-        isProcessingPayment = args.state.stripeIntent is PaymentIntent,
         currentScreenFlow = navigationHandler.currentScreen,
         buttonsEnabledFlow = buttonsEnabled,
-        amountFlow = stateFlowOf(args.state.paymentMethodMetadata.amount()),
+        paymentMethodMetadataFlow = stateFlowOf(args.state.paymentMethodMetadata),
         selectionFlow = selection,
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
         cvcCompleteFlow = cvcRecollectionCompleteFlow,
@@ -303,12 +301,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
             )
             if (shouldShowLinkConfiguration) {
                 linkPaymentLauncher.present(
-                    configuration = linkState!!.configuration,
+                    configuration = linkState.configuration,
+                    paymentMethodMetadata = args.state.paymentMethodMetadata,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null),
                     linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                     linkExpressMode = LinkExpressMode.ENABLED,
-                    passiveCaptchaParams = args.state.paymentMethodMetadata.passiveCaptchaParams,
-                    attestOnIntentConfirmation = args.state.paymentMethodMetadata.attestOnIntentConfirmation,
                 )
             } else {
                 _paymentOptionsActivityResult.tryEmit(

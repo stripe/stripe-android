@@ -35,9 +35,10 @@ import com.stripe.android.link.model.LinkAuthIntentInfo
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.TestNavigationManager
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.LinkAuthIntent
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -46,10 +47,10 @@ import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
-import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -145,6 +146,7 @@ internal class LinkActivityViewModelTest {
     fun `initializer creates ViewModel when args are valid`() {
         val mockArgs = NativeLinkArgs(
             configuration = TestFactory.LINK_CONFIGURATION,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             requestSurface = RequestSurface.PaymentElement,
             publishableKey = "pk_123",
             stripeAccountId = null,
@@ -155,8 +157,6 @@ internal class LinkActivityViewModelTest {
             ),
             paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
             launchMode = LinkLaunchMode.Full,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
-            attestOnIntentConfirmation = false,
         )
         val savedStateHandle = SavedStateHandle()
         val factory = LinkActivityViewModel.factory(savedStateHandle)
@@ -494,7 +494,7 @@ internal class LinkActivityViewModelTest {
 
         val vm = createViewModel(
             linkAttestationCheck = linkAttestationCheck,
-            launchWeb = { config ->
+            launchWeb = { config, _ ->
                 launchWebConfig = config
             }
         )
@@ -514,7 +514,7 @@ internal class LinkActivityViewModelTest {
 
             val vm = createViewModel(
                 linkAttestationCheck = linkAttestationCheck,
-                launchWeb = { config ->
+                launchWeb = { config, _ ->
                     launchWebConfig = config
                 }
             )
@@ -965,7 +965,7 @@ internal class LinkActivityViewModelTest {
             linkAccountManager = linkAccountManager,
             linkAccountHolder = linkAccountHolder,
             linkExpressMode = LinkExpressMode.DISABLED,
-            launchWeb = { config ->
+            launchWeb = { config, _ ->
                 launchWebConfig = config
             },
         )
@@ -998,7 +998,7 @@ internal class LinkActivityViewModelTest {
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
-        launchWeb: (LinkConfiguration) -> Unit = {},
+        launchWeb: (LinkConfiguration, PaymentMethodMetadata) -> Unit = { _, _ -> },
         autocompleteLauncher: AutocompleteActivityLauncher = TestAutocompleteLauncher.noOp(),
         linkConfiguration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory = mock(),
@@ -1011,6 +1011,7 @@ internal class LinkActivityViewModelTest {
             confirmationHandlerFactory = { confirmationHandler },
             linkAttestationCheck = linkAttestationCheck,
             linkConfiguration = linkConfiguration,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             linkExpressMode = linkExpressMode,
             navigationManager = navigationManager,
             savedStateHandle = savedStateHandle,

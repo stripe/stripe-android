@@ -13,6 +13,15 @@ data class KycInfo(
     val address: PaymentSheet.Address
 )
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class RefreshKycInfo(
+    val firstName: String,
+    val lastName: String,
+    val idNumberLastFour: String?,
+    val dateOfBirth: DateOfBirth,
+    val address: PaymentSheet.Address
+)
+
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class DateOfBirth(

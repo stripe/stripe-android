@@ -4,12 +4,13 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.link.injection.LinkMetadata
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
 internal interface LinkConfigurationLoader {
-    suspend fun load(configuration: LinkController.Configuration): Result<LinkConfiguration>
+    suspend fun load(configuration: LinkController.Configuration): Result<LinkMetadata>
 }
 
 internal class DefaultLinkConfigurationLoader @Inject constructor(
@@ -19,7 +20,7 @@ internal class DefaultLinkConfigurationLoader @Inject constructor(
 ) : LinkConfigurationLoader {
     private val tag = "LinkConfigurationLoader"
 
-    override suspend fun load(configuration: LinkController.Configuration): Result<LinkConfiguration> {
+    override suspend fun load(configuration: LinkController.Configuration): Result<LinkMetadata> {
         return paymentElementLoader.load(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 PaymentSheet.IntentConfiguration(
@@ -40,7 +41,10 @@ internal class DefaultLinkConfigurationLoader @Inject constructor(
                 check(linkGateFactory.create(config).useNativeLink) {
                     "Native Link is not available"
                 }
-                config
+                LinkMetadata(
+                    linkConfiguration = config,
+                    paymentMethodMetadata = state.paymentMethodMetadata,
+                )
             } catch (e: Throwable) {
                 throw LinkUnavailableException(e)
             }

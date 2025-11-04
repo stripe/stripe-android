@@ -4,7 +4,7 @@ import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
-import com.stripe.android.model.PassiveCaptchaParamsFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
@@ -24,7 +24,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
-import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.testing.DummyActivityResultCaller
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -114,7 +114,6 @@ class BacsConfirmationDefinitionTest {
 
         assertThat(newPaymentMethodOption.createParams).isEqualTo(bacsConfirmationOption.createParams)
         assertThat(newPaymentMethodOption.optionsParams).isEqualTo(bacsConfirmationOption.optionsParams)
-        assertThat(newPaymentMethodOption.passiveCaptchaParams).isEqualTo(bacsConfirmationOption.passiveCaptchaParams)
         assertThat(newPaymentMethodOption.shouldSave).isFalse()
     }
 
@@ -252,7 +251,11 @@ class BacsConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = createBacsConfirmationOption(),
-            confirmationArgs = CONFIRMATION_PARAMETERS.copy(appearance = appearance),
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    appearance = appearance
+                )
+            ),
             arguments = bacsMandateData,
             launcher = launcher,
         )
@@ -288,7 +291,6 @@ class BacsConfirmationDefinitionTest {
                 )
             ),
             optionsParams = null,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
         )
     }
 

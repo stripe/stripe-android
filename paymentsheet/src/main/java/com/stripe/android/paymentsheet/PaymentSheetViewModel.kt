@@ -106,10 +106,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
-        isProcessingPayment = isProcessingPaymentIntent,
         currentScreenFlow = navigationHandler.currentScreen,
         buttonsEnabledFlow = buttonsEnabled,
-        amountFlow = paymentMethodMetadata.mapAsStateFlow { it?.amount() },
+        paymentMethodMetadataFlow = paymentMethodMetadata,
         selectionFlow = selection,
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
         cvcCompleteFlow = cvcRecollectionCompleteFlow,
@@ -134,9 +133,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         mapViewStateToCheckoutIdentifier(viewState, CheckoutIdentifier.SheetBottomBuy)
     }
 
-    internal val isProcessingPaymentIntent
-        get() = args.initializationMode.isProcessingPayment
-
     private var inProgressSelection: PaymentSelection?
         get() = savedStateHandle[IN_PROGRESS_SELECTION]
         set(value) {
@@ -151,9 +147,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override var newPaymentSelection: NewPaymentOptionSelection? = null
 
     @VisibleForTesting
-    internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
-        args.googlePayConfig?.let { config ->
-            if (config.currencyCode == null && !isProcessingPaymentIntent) {
+    internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?
+        get() = args.googlePayConfig?.let { config ->
+            if (config.currencyCode == null && paymentMethodMetadata.value?.stripeIntent is SetupIntent) {
                 logger.warning(
                     "GooglePayConfiguration.currencyCode is required in order to use " +
                         "Google Pay when processing a Setup Intent"
@@ -171,6 +167,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     merchantName = this.config.merchantDisplayName,
                     isEmailRequired = args.config.billingDetailsCollectionConfiguration.collectsEmail,
                     billingAddressConfig = args.config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
+                    additionalEnabledNetworks = args.config.googlePay?.additionalEnabledNetworks ?: emptyList()
                 )
             }
         }
@@ -504,6 +501,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch(workContext) {
+            val paymentMethodMetadata = awaitPaymentMethodMetadata()
+
             val confirmationOption = withContext(viewModelScope.coroutineContext) {
                 inProgressSelection = paymentSelection
 
@@ -511,21 +510,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     ?.toConfirmationOption(
                         configuration = config.asCommonConfiguration(),
                         linkConfiguration = linkHandler.linkConfiguration.value,
-                        passiveCaptchaParams = paymentMethodMetadata.value?.passiveCaptchaParams,
-                        clientAttributionMetadata = paymentMethodMetadata.value?.clientAttributionMetadata,
                     )
             }
 
             confirmationOption?.let { option ->
-                val stripeIntent = awaitStripeIntent()
-
                 confirmationHandler.start(
                     arguments = ConfirmationHandler.Args(
-                        intent = stripeIntent,
                         confirmationOption = option,
                         initializationMode = args.initializationMode,
-                        appearance = config.appearance,
-                        shippingDetails = config.shippingDetails,
+                        paymentMethodMetadata = paymentMethodMetadata,
                     ),
                 )
             } ?: run {
@@ -698,8 +691,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         return listOf(target)
     }
 
-    private suspend fun awaitStripeIntent(): StripeIntent {
-        return paymentMethodMetadata.filterNotNull().first().stripeIntent
+    private suspend fun awaitPaymentMethodMetadata(): PaymentMethodMetadata {
+        return paymentMethodMetadata.filterNotNull().first()
     }
 
     internal fun getCvcRecollectionState(): PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState {
@@ -759,15 +752,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         const val IN_PROGRESS_SELECTION = "IN_PROGRESS_PAYMENT_SELECTION"
     }
 }
-
-private val PaymentElementLoader.InitializationMode.isProcessingPayment: Boolean
-    get() = when (this) {
-        is PaymentElementLoader.InitializationMode.PaymentIntent -> true
-        is PaymentElementLoader.InitializationMode.SetupIntent -> false
-        is PaymentElementLoader.InitializationMode.DeferredIntent -> {
-            intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
-        }
-    }
 
 private val ConfirmationHandler.State.contentVisible: Boolean
     get() = when (this) {

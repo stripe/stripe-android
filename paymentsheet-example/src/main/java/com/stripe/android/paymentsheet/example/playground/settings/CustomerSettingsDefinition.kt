@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
@@ -61,7 +60,6 @@ internal object CustomerSettingsDefinition :
         configurationBuilder.customer(playgroundState.customerConfig)
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     override fun configure(
         value: CustomerType,
         configurationBuilder: PaymentSheet.Configuration.Builder,

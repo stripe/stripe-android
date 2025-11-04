@@ -2,7 +2,7 @@ package com.stripe.android.utils
 
 import androidx.activity.result.ActivityResultCaller
 import app.cash.turbine.Turbine
-import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
+import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
 import com.stripe.android.model.PassiveCaptchaParams
 
 class FakePassiveChallengeWarmer : PassiveChallengeWarmer {

@@ -6,7 +6,6 @@ import com.stripe.android.customersheet.utils.FakeCustomerSessionProvider
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -20,7 +19,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.coroutines.coroutineContext
 
-@OptIn(ExperimentalCustomerSessionApi::class)
 class DefaultCustomerSessionElementsSessionManagerTest {
     @Test
     fun `on fetch elements session, should set parameters properly & report successful load`() = runTest {

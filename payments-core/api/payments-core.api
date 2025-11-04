@@ -146,8 +146,8 @@ public final class com/stripe/android/GooglePayJsonFactory {
 	public static final field $stable I
 	public fun <init> (Landroid/content/Context;Z)V
 	public synthetic fun <init> (Landroid/content/Context;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (Lcom/stripe/android/GooglePayConfig;Z)V
-	public synthetic fun <init> (Lcom/stripe/android/GooglePayConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/GooglePayConfig;ZLjava/util/List;)V
+	public synthetic fun <init> (Lcom/stripe/android/GooglePayConfig;ZLjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun createIsReadyToPayRequest ()Lorg/json/JSONObject;
 	public final fun createIsReadyToPayRequest (Lcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters;)Lorg/json/JSONObject;
 	public final fun createIsReadyToPayRequest (Lcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters;Ljava/lang/Boolean;)Lorg/json/JSONObject;
@@ -893,43 +893,67 @@ public abstract interface class com/stripe/android/cards/CardAccountRangeReposit
 	public abstract fun createWithStripeRepository (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;)Lcom/stripe/android/cards/CardAccountRangeRepository;
 }
 
-public final class com/stripe/android/challenge/PassiveChallengeActivityResult$Failed$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/challenge/confirmation/IntentConfirmationChallengeActivityResult$Failed$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/PassiveChallengeActivityResult$Failed;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/confirmation/IntentConfirmationChallengeActivityResult$Failed;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/challenge/PassiveChallengeActivityResult$Failed;
+	public final fun newArray (I)[Lcom/stripe/android/challenge/confirmation/IntentConfirmationChallengeActivityResult$Failed;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/challenge/PassiveChallengeActivityResult$Success$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/challenge/confirmation/IntentConfirmationChallengeActivityResult$Success$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/PassiveChallengeActivityResult$Success;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/confirmation/IntentConfirmationChallengeActivityResult$Success;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/challenge/PassiveChallengeActivityResult$Success;
+	public final fun newArray (I)[Lcom/stripe/android/challenge/confirmation/IntentConfirmationChallengeActivityResult$Success;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/challenge/PassiveChallengeArgs$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/challenge/confirmation/IntentConfirmationChallengeArgs$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/PassiveChallengeArgs;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/confirmation/IntentConfirmationChallengeArgs;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/challenge/PassiveChallengeArgs;
+	public final fun newArray (I)[Lcom/stripe/android/challenge/confirmation/IntentConfirmationChallengeArgs;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/challenge/warmer/activity/PassiveChallengeWarmerArgs$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/challenge/passive/PassiveChallengeActivityResult$Failed$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/warmer/activity/PassiveChallengeWarmerArgs;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/passive/PassiveChallengeActivityResult$Failed;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/challenge/warmer/activity/PassiveChallengeWarmerArgs;
+	public final fun newArray (I)[Lcom/stripe/android/challenge/passive/PassiveChallengeActivityResult$Failed;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/challenge/warmer/activity/PassiveChallengeWarmerCompleted$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/challenge/passive/PassiveChallengeActivityResult$Success$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/warmer/activity/PassiveChallengeWarmerCompleted;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/passive/PassiveChallengeActivityResult$Success;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/challenge/warmer/activity/PassiveChallengeWarmerCompleted;
+	public final fun newArray (I)[Lcom/stripe/android/challenge/passive/PassiveChallengeActivityResult$Success;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/challenge/passive/PassiveChallengeArgs$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/passive/PassiveChallengeArgs;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/challenge/passive/PassiveChallengeArgs;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/challenge/passive/warmer/activity/PassiveChallengeWarmerArgs$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/passive/warmer/activity/PassiveChallengeWarmerArgs;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/challenge/passive/warmer/activity/PassiveChallengeWarmerArgs;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/challenge/passive/warmer/activity/PassiveChallengeWarmerCompleted$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/passive/warmer/activity/PassiveChallengeWarmerCompleted;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/challenge/passive/warmer/activity/PassiveChallengeWarmerCompleted;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -1015,7 +1039,8 @@ public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$Config
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;)V
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;Z)V
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZZ)V
-	public synthetic fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZZLjava/util/List;)V
+	public synthetic fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZZLjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAllowCreditCards ()Z
@@ -1224,7 +1249,8 @@ public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLa
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;)V
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;Z)V
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;ZZ)V
-	public synthetic fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;ZZLjava/util/List;)V
+	public synthetic fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;ZZLjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAllowCreditCards ()Z
@@ -2067,12 +2093,46 @@ public abstract interface class com/stripe/android/model/ConfirmStripeIntentPara
 public final class com/stripe/android/model/ConfirmStripeIntentParams$Companion {
 }
 
+public final class com/stripe/android/model/ConfirmationToken : com/stripe/android/core/model/StripeModel {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public final field created J
+	public final field expiresAt Ljava/lang/Long;
+	public final field id Ljava/lang/String;
+	public final field liveMode Z
+	public final field paymentIntentId Ljava/lang/String;
+	public final field paymentMethodPreview Lcom/stripe/android/model/ConfirmationToken$PaymentMethodPreview;
+	public final field returnUrl Ljava/lang/String;
+	public final field setupFutureUsage Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;
+	public final field setupIntentId Ljava/lang/String;
+	public final field shipping Lcom/stripe/android/model/ShippingInformation;
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
 public final class com/stripe/android/model/ConfirmationToken$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ConfirmationToken;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/ConfirmationToken;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/ConfirmationToken$PaymentMethodPreview : com/stripe/android/core/model/StripeModel {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public final field allowRedisplay Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;
+	public final field billingDetails Lcom/stripe/android/model/PaymentMethod$BillingDetails;
+	public final field customerId Ljava/lang/String;
+	public final field type Lcom/stripe/android/model/PaymentMethod$Type;
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/model/ConfirmationToken$PaymentMethodPreview$Creator : android/os/Parcelable$Creator {
@@ -4123,6 +4183,38 @@ public final class com/stripe/android/model/PaymentMethodMessage$Creator : andro
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/PaymentMethodMessageImage$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PaymentMethodMessageImage;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/PaymentMethodMessageImage;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/PaymentMethodMessageLearnMore$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PaymentMethodMessageLearnMore;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/PaymentMethodMessageLearnMore;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/PaymentMethodMessageMultiPartner$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PaymentMethodMessageMultiPartner;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/PaymentMethodMessageMultiPartner;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/PaymentMethodMessageSinglePartner$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PaymentMethodMessageSinglePartner;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/PaymentMethodMessageSinglePartner;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public abstract class com/stripe/android/model/PaymentMethodOptionsParams : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
 	public static final field $stable I
 	public synthetic fun <init> (Lcom/stripe/android/model/PaymentMethod$Type;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -5707,6 +5799,14 @@ public final class com/stripe/android/model/StripeIntent$NextActionData$Redirect
 
 public abstract class com/stripe/android/model/StripeIntent$NextActionData$SdkData : com/stripe/android/model/StripeIntent$NextActionData {
 	public static final field $stable I
+}
+
+public final class com/stripe/android/model/StripeIntent$NextActionData$SdkData$IntentConfirmationChallenge$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/StripeIntent$NextActionData$SdkData$IntentConfirmationChallenge;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/StripeIntent$NextActionData$SdkData$IntentConfirmationChallenge;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/model/StripeIntent$NextActionData$SdkData$Use3DS2 : com/stripe/android/model/StripeIntent$NextActionData$SdkData {

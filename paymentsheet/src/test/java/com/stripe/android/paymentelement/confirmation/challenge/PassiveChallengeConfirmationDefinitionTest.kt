@@ -1,9 +1,9 @@
 package com.stripe.android.paymentelement.confirmation.challenge
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.challenge.PassiveChallengeActivityContract
-import com.stripe.android.challenge.PassiveChallengeActivityResult
-import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
+import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
+import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
+import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -22,8 +22,8 @@ import com.stripe.android.paymentelement.confirmation.asFail
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultLauncher
 import com.stripe.android.utils.FakePassiveChallengeWarmer
 import kotlinx.coroutines.test.runTest
@@ -88,13 +88,12 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     @Test
     fun `'canConfirm' should return false when passiveCaptchaParams is null for New option`() {
         val definition = createPassiveChallengeConfirmationDefinition()
-        val optionWithoutCaptcha = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
-            passiveCaptchaParams = null
-        )
 
         val result = definition.canConfirm(
-            confirmationOption = optionWithoutCaptcha,
-            confirmationArgs = CONFIRMATION_PARAMETERS
+            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(passiveCaptchaParams = null)
+            )
         )
 
         assertThat(result).isFalse()
@@ -103,13 +102,12 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     @Test
     fun `'canConfirm' should return false when passiveCaptchaParams is null for Saved option`() {
         val definition = createPassiveChallengeConfirmationDefinition()
-        val optionWithoutCaptcha = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
-            passiveCaptchaParams = null
-        )
 
         val result = definition.canConfirm(
-            confirmationOption = optionWithoutCaptcha,
-            confirmationArgs = CONFIRMATION_PARAMETERS
+            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(passiveCaptchaParams = null)
+            )
         )
 
         assertThat(result).isFalse()
@@ -177,7 +175,8 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         val launchAction = action.asLaunch()
 
-        assertThat(launchAction.launcherArguments.passiveCaptchaParams).isEqualTo(PASSIVE_CAPTCHA_PARAMS)
+        assertThat(launchAction.launcherArguments.passiveCaptchaParams)
+            .isEqualTo(CONFIRMATION_PARAMETERS.paymentMethodMetadata.passiveCaptchaParams)
         assertThat(launchAction.receivesResultInProcess).isFalse()
         assertThat(launchAction.deferredIntentConfirmationType).isNull()
     }
@@ -185,13 +184,12 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     @Test
     fun `'action' should return 'Fail' action when passiveCaptchaParams is null`() = runTest {
         val definition = createPassiveChallengeConfirmationDefinition()
-        val optionWithoutCaptcha = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
-            passiveCaptchaParams = null
-        )
 
         val action = definition.action(
-            confirmationOption = optionWithoutCaptcha,
-            confirmationArgs = CONFIRMATION_PARAMETERS,
+            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(passiveCaptchaParams = null)
+            ),
         )
 
         assertThat(action)
@@ -209,13 +207,12 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     fun `'action' should report error when passiveCaptchaParams is null`() = runTest {
         val fakeErrorReporter = FakeErrorReporter()
         val definition = createPassiveChallengeConfirmationDefinition(fakeErrorReporter)
-        val optionWithoutCaptcha = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
-            passiveCaptchaParams = null
-        )
 
         definition.action(
-            confirmationOption = optionWithoutCaptcha,
-            confirmationArgs = CONFIRMATION_PARAMETERS,
+            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(passiveCaptchaParams = null)
+            )
         )
 
         val reportedErrors = fakeErrorReporter.getLoggedErrors()
@@ -238,15 +235,18 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-            confirmationArgs = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
+                )
+            ),
             launcher = launcher,
             arguments = launcherArgs,
         )
 
         val launchCall = launcher.calls.awaitItem()
 
-        assertThat(launchCall.input.passiveCaptchaParams)
-            .isEqualTo(PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.passiveCaptchaParams)
+        assertThat(launchCall.input.passiveCaptchaParams).isEqualTo(PASSIVE_CAPTCHA_PARAMS)
     }
 
     @Test
@@ -270,7 +270,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'toResult' should return 'NextStep' with passiveCaptchaParams removed for Success result with New option`() {
+    fun `'toResult' should return 'NextStep' with passiveChallengeComplete=true for Success result with New option`() {
         val definition = createPassiveChallengeConfirmationDefinition()
         val testToken = "test_token"
 
@@ -287,7 +287,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val nextStepResult = result.asNextStep()
 
         val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
-            passiveCaptchaParams = null,
+            passiveChallengeComplete = true,
             createParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
                 radarOptions = RadarOptions(
                     hCaptchaToken = testToken,
@@ -301,7 +301,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'toResult' should return 'NextStep' with passiveCaptchaParams removed for Success result with Saved option`() {
+    fun `'toResult' should return 'NextStep' for Success result with Saved option`() {
         val definition = createPassiveChallengeConfirmationDefinition()
         val testToken = "test_token"
 
@@ -318,7 +318,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val nextStepResult = result.asNextStep()
 
         val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
-            passiveCaptchaParams = null,
+            passiveChallengeComplete = true,
             hCaptchaToken = testToken
         )
 
@@ -327,7 +327,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'toResult' should return 'NextStep' with passiveCaptchaParams removed for Failed result with New option`() {
+    fun `'toResult' should return 'NextStep' with passiveChallengeComplete=true for Failed result with New option`() {
         val definition = createPassiveChallengeConfirmationDefinition()
         val exception = RuntimeException("Captcha failed")
 
@@ -344,13 +344,13 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val nextStepResult = result.asNextStep()
 
         assertThat(nextStepResult.confirmationOption).isEqualTo(
-            PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(passiveCaptchaParams = null)
+            PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(passiveChallengeComplete = true)
         )
         assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
     @Test
-    fun `'toResult' should return 'NextStep' with passiveCaptchaParams removed for Failed result with Saved option`() {
+    fun `'toResult' should return 'NextStep' with passiveChallengeComplete=true for Failed result with Saved option`() {
         val definition = createPassiveChallengeConfirmationDefinition()
         val exception = RuntimeException("Captcha failed")
 
@@ -367,7 +367,10 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val nextStepResult = result.asNextStep()
 
         assertThat(nextStepResult.confirmationOption).isEqualTo(
-            PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(passiveCaptchaParams = null, hCaptchaToken = null)
+            PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
+                passiveChallengeComplete = true,
+                hCaptchaToken = null
+            )
         )
         assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
     }
@@ -387,7 +390,8 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
             val launchAction = action.asLaunch()
 
-            assertThat(launchAction.launcherArguments.passiveCaptchaParams).isEqualTo(PASSIVE_CAPTCHA_PARAMS)
+            assertThat(launchAction.launcherArguments.passiveCaptchaParams)
+                .isEqualTo(CONFIRMATION_PARAMETERS.paymentMethodMetadata.passiveCaptchaParams)
             assertThat(launchAction.receivesResultInProcess).isFalse()
             assertThat(launchAction.deferredIntentConfirmationType).isNull()
         }
@@ -400,7 +404,11 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
-            confirmationArgs = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
+                )
+            ),
             launcher = launcher,
             arguments = launcherArgs,
         )
@@ -408,7 +416,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val launchCall = launcher.calls.awaitItem()
 
         assertThat(launchCall.input.passiveCaptchaParams)
-            .isEqualTo(PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.passiveCaptchaParams)
+            .isEqualTo(PASSIVE_CAPTCHA_PARAMS)
     }
 
     @Test
@@ -504,7 +512,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         // Verify that radarOptions is not set by checking equality with expected option
         val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
-            passiveCaptchaParams = null,
+            passiveChallengeComplete = true,
             createParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
                 radarOptions = null
             )
@@ -570,14 +578,12 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             optionsParams = null,
             extraParams = null,
             shouldSave = false,
-            passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
         )
 
         private val PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PAYMENT_INTENT.paymentMethod!!,
             optionsParams = null,
             originatedFromWallet = false,
-            passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
             hCaptchaToken = null,
         )
 

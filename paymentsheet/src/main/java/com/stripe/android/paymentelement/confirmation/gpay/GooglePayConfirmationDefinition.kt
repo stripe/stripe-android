@@ -15,10 +15,8 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
@@ -45,7 +43,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
     ): ConfirmationDefinition.Action<Unit> {
         if (
             confirmationOption.config.merchantCurrencyCode == null &&
-            !confirmationArgs.initializationMode.isProcessingPayment
+            confirmationArgs.intent !is PaymentIntent
         ) {
             val message = "GooglePayConfig.currencyCode is required in order to use " +
                 "Google Pay when processing a Setup Intent"
@@ -101,7 +99,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             },
             transactionId = intent.id,
             label = config.customLabel,
-            clientAttributionMetadata = confirmationOption.clientAttributionMetadata,
+            clientAttributionMetadata = confirmationArgs.paymentMethodMetadata.clientAttributionMetadata,
         )
     }
 
@@ -118,7 +116,6 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                     paymentMethod = result.paymentMethod,
                     optionsParams = null,
                     originatedFromWallet = true,
-                    passiveCaptchaParams = confirmationOption.passiveCaptchaParams,
                 )
 
                 ConfirmationDefinition.Result.NextStep(
@@ -159,10 +156,11 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                     else -> GooglePayEnvironment.Test
                 },
                 merchantCountryCode = config.merchantCountryCode,
-                merchantName = confirmationArgs.initializationMode.sellerBusinessName
+                merchantName = confirmationArgs.paymentMethodMetadata.sellerBusinessName
                     ?: config.merchantName,
                 isEmailRequired = config.billingDetailsCollectionConfiguration.collectsEmail,
                 billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
+                additionalEnabledNetworks = config.additionalEnabledNetworks
             ),
             readyCallback = {
                 // Do nothing since we are skipping the ready check below
@@ -176,13 +174,4 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
     private fun StripeIntent.asPaymentIntent(): PaymentIntent? {
         return this as? PaymentIntent
     }
-
-    private val PaymentElementLoader.InitializationMode.isProcessingPayment: Boolean
-        get() = when (this) {
-            is PaymentElementLoader.InitializationMode.PaymentIntent -> true
-            is PaymentElementLoader.InitializationMode.SetupIntent -> false
-            is PaymentElementLoader.InitializationMode.DeferredIntent -> {
-                intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
-            }
-        }
 }

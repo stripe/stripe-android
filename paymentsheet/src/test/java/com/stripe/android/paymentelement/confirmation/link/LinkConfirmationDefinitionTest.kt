@@ -12,7 +12,6 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -25,8 +24,8 @@ import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -169,19 +168,19 @@ internal class LinkConfirmationDefinitionTest {
     @Test
     fun `'launch' should pass attestOnIntentConfirmation true when bootstrapped with true`() = test {
         val presentCall = launchWithAttestationFlag(attestOnIntentConfirmation = true)
-        assertThat(presentCall.attestOnIntentConfirmation).isTrue()
+        assertThat(presentCall.paymentMethodMetadata.attestOnIntentConfirmation).isTrue()
     }
 
     @Test
     fun `'launch' should pass attestOnIntentConfirmation false when bootstrapped with false`() = test {
         val presentCall = launchWithAttestationFlag(attestOnIntentConfirmation = false)
-        assertThat(presentCall.attestOnIntentConfirmation).isFalse()
+        assertThat(presentCall.paymentMethodMetadata.attestOnIntentConfirmation).isFalse()
     }
 
     @Test
     fun `'launch' should default attestOnIntentConfirmation to false when not bootstrapped`() = test {
         val presentCall = launchWithAttestationFlag(attestOnIntentConfirmation = null)
-        assertThat(presentCall.attestOnIntentConfirmation).isFalse()
+        assertThat(presentCall.paymentMethodMetadata.attestOnIntentConfirmation).isFalse()
     }
 
     @Test
@@ -369,13 +368,16 @@ internal class LinkConfirmationDefinitionTest {
     ): RecordingLinkPaymentLauncher.PresentCall {
         val definition = createLinkConfirmationDefinition()
 
+        val paymentMethodMetadata = createMetadata(attestOnIntentConfirmation = attestOnIntentConfirmation ?: false)
         if (attestOnIntentConfirmation != null) {
-            definition.bootstrap(createMetadata(attestOnIntentConfirmation = attestOnIntentConfirmation))
+            definition.bootstrap(paymentMethodMetadata)
         }
 
         definition.launch(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationArgs = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = paymentMethodMetadata,
+            ),
             launcher = launcherScenario.launcher,
             arguments = Unit,
         )
@@ -392,7 +394,6 @@ internal class LinkConfirmationDefinitionTest {
         private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
             linkExpressMode = LinkExpressMode.ENABLED,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
         )
     }
 }

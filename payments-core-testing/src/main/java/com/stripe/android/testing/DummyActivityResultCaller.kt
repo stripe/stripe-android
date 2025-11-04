@@ -1,0 +1,133 @@
+package com.stripe.android.testing
+
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.core.app.ActivityOptionsCompat
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
+
+class DummyActivityResultCaller private constructor() : ActivityResultCaller {
+    private val registeredLaunchers = Turbine<ActivityResultLauncher<*>>()
+    private val registerCalls = Turbine<RegisterCall<*, *>>()
+    private val launchCalls = Turbine<Any?>()
+    private val unregisteredLaunchers = Turbine<ActivityResultLauncher<*>>()
+
+    override fun <I : Any?, O : Any?> registerForActivityResult(
+        contract: ActivityResultContract<I, O>,
+        callback: ActivityResultCallback<O>
+    ): ActivityResultLauncher<I> {
+        registerCalls.add(RegisterCall(contract, callback))
+
+        val launcher = object : ActivityResultLauncher<I>() {
+            override fun launch(input: I, options: ActivityOptionsCompat?) {
+                launchCalls.add(input)
+            }
+
+            override fun unregister() {
+                unregisteredLaunchers.add(this)
+            }
+
+            override val contract: ActivityResultContract<I, *>
+                get() = error("Not implemented")
+        }
+
+        registeredLaunchers.add(launcher)
+
+        return launcher
+    }
+
+    override fun <I : Any?, O : Any?> registerForActivityResult(
+        contract: ActivityResultContract<I, O>,
+        registry: ActivityResultRegistry,
+        callback: ActivityResultCallback<O>
+    ): ActivityResultLauncher<I> {
+        val launcher = object : ActivityResultLauncher<I>() {
+            override fun launch(input: I, options: ActivityOptionsCompat?) {
+                launchCalls.add(input)
+            }
+
+            override fun unregister() {
+                unregisteredLaunchers.add(this)
+            }
+
+            override val contract: ActivityResultContract<I, *>
+                get() = error("Not implemented")
+        }
+
+        registeredLaunchers.add(launcher)
+
+        return launcher
+    }
+
+    data class RegisterCall<I : Any?, O : Any?>(
+        val contract: ActivityResultContract<I, O>,
+        val callback: ActivityResultCallback<O>,
+    )
+
+    class Scenario(
+        val activityResultCaller: ActivityResultCaller,
+        private val registerCalls: ReceiveTurbine<RegisterCall<*, *>>,
+        private val unregisteredLaunchers: ReceiveTurbine<ActivityResultLauncher<*>>,
+        private val launchCalls: ReceiveTurbine<Any?>,
+        private val registeredLaunchers: ReceiveTurbine<ActivityResultLauncher<*>>,
+    ) {
+        suspend fun awaitNextRegisteredLauncher(): ActivityResultLauncher<*> {
+            return registeredLaunchers.awaitItem()
+        }
+
+        suspend fun awaitRegisterCall(): RegisterCall<*, *> {
+            return registerCalls.awaitItem()
+        }
+
+        suspend fun awaitNextUnregisteredLauncher(): ActivityResultLauncher<*> {
+            return unregisteredLaunchers.awaitItem()
+        }
+
+        suspend fun awaitLaunchCall(): Any? {
+            return launchCalls.awaitItem()
+        }
+    }
+
+    companion object {
+        suspend fun test(
+            block: suspend Scenario.() -> Unit
+        ) {
+            val activityResultCaller = DummyActivityResultCaller()
+            Scenario(
+                activityResultCaller = activityResultCaller,
+                registerCalls = activityResultCaller.registerCalls,
+                launchCalls = activityResultCaller.launchCalls,
+                registeredLaunchers = activityResultCaller.registeredLaunchers,
+                unregisteredLaunchers = activityResultCaller.unregisteredLaunchers
+            ).apply {
+                block(this)
+                activityResultCaller.registerCalls.ensureAllEventsConsumed()
+                activityResultCaller.launchCalls.ensureAllEventsConsumed()
+                activityResultCaller.registeredLaunchers.ensureAllEventsConsumed()
+            }
+        }
+
+        fun noOp(): ActivityResultCaller {
+            return DummyActivityResultCaller()
+        }
+    }
+}
+
+/**
+ * Type-safe helper to cast [ActivityResultCallback] from wildcard type to specific type.
+ * Centralizes the unchecked cast warning in one place.
+ *
+ * Usage:
+ * ```
+ * val registerCall = awaitRegisterCall()
+ * val callback = registerCall.callback.asCallbackFor<YourResultType>()
+ * callback.onActivityResult(yourResult)
+ * ```
+ */
+@Suppress("UNCHECKED_CAST")
+fun <T> ActivityResultCallback<*>.asCallbackFor(): ActivityResultCallback<T> {
+    return this as ActivityResultCallback<T>
+}

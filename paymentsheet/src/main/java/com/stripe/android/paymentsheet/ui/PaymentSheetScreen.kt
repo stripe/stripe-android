@@ -80,6 +80,7 @@ import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.getOuterFormInsets
+import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
@@ -488,11 +489,14 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
                 val binding = StripeFragmentPrimaryButtonContainerBinding.inflate(inflater, parent, attachToParent)
                 val primaryButton = binding.primaryButton
                 button = primaryButton
-                @Suppress("DEPRECATION")
                 primaryButton.setAppearanceConfiguration(
                     StripeTheme.primaryButtonStyle,
-                    tintList = viewModel.config.primaryButtonColor ?: ColorStateList.valueOf(
-                        StripeTheme.primaryButtonStyle.getBackgroundColor(context)
+                    tintList = ColorStateList.valueOf(
+                        if (context.isSystemDarkTheme()) {
+                            viewModel.config.appearance.primaryButton.colorsDark.background
+                        } else {
+                            viewModel.config.appearance.primaryButton.colorsLight.background
+                        } ?: StripeTheme.primaryButtonStyle.getBackgroundColor(context)
                     )
                 )
                 binding

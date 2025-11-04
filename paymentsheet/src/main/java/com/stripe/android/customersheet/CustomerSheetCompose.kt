@@ -6,7 +6,6 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.core.utils.StatusBarCompat
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.utils.rememberActivity
 
 /**
@@ -38,7 +37,6 @@ fun rememberCustomerSheet(
 * @param customerSessionProvider provider for providing customer session elements
 * @param callback Called with the result of the operation after [CustomerSheet] is dismissed
 */
-@ExperimentalCustomerSessionApi
 @Composable
 fun rememberCustomerSheet(
     customerSessionProvider: CustomerSheet.CustomerSessionProvider,

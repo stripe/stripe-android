@@ -11,5 +11,6 @@
     <drawable name="stripe_ic_paymentsheet_card_mastercard_ref">@drawable/stripe_ic_paymentsheet_card_mastercard_night</drawable>
     <drawable name="stripe_ic_paymentsheet_card_unionpay_ref">@drawable/stripe_ic_paymentsheet_card_unionpay_night</drawable>
     <drawable name="stripe_ic_paymentsheet_card_cartes_bancaires_ref">@drawable/stripe_ic_paymentsheet_card_cartes_bancaires_night</drawable>
+    <drawable name="stripe_ic_paymentsheet_card_interac_ref">@drawable/stripe_ic_paymentsheet_card_interac_night</drawable>
     <drawable name="stripe_ic_paymentsheet_card_unknown_ref">@drawable/stripe_ic_paymentsheet_card_unknown_night</drawable>
 </resources>

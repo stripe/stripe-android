@@ -10,8 +10,6 @@ import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.confirmSetupIntentParams
 import com.stripe.android.paymentsheet.confirmSetupIntentRequest
-import com.stripe.android.paymentsheet.retrieveSetupIntentParams
-import com.stripe.android.paymentsheet.retrieveSetupIntentRequest
 
 internal object CustomerSheetUtils {
     fun enqueueFetchRequests(
@@ -52,13 +50,6 @@ internal object CustomerSheetUtils {
                 }
             }
             CustomerSheetTestType.AttachToSetupIntent -> {
-                enqueue(
-                    retrieveSetupIntentRequest(),
-                    retrieveSetupIntentParams(),
-                ) { response ->
-                    response.testBodyFromFile("setup-intent-get.json")
-                }
-
                 enqueue(
                     confirmSetupIntentRequest(),
                     confirmSetupIntentParams()

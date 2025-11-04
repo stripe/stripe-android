@@ -92,7 +92,6 @@ class HCaptchaConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                passiveCaptchaParams = null,
                 hCaptchaToken = hCaptchaToken,
             ),
             shippingValues = null,
@@ -136,7 +135,6 @@ class HCaptchaConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                passiveCaptchaParams = null,
                 hCaptchaToken = hCaptchaToken,
             ),
             shippingValues = null,

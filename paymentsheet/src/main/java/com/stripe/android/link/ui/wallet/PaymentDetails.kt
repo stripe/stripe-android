@@ -18,8 +18,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -202,7 +200,7 @@ private fun PaymentDetailsListItemPreview() {
         isDefault = false,
         bankIconCode = null,
         nickname = null,
-        bankName = "Bank of America",
+        bankAccountName = "Bank of America Checking Account",
         billingAddress = null,
         billingEmailAddress = null
     )
@@ -280,7 +278,7 @@ private fun MenuAndLoader(
                 enabled = enabled
             ) {
                 Icon(
-                    imageVector = Icons.Filled.MoreVert,
+                    painter = painterResource(R.drawable.stripe_ic_material_more_vert),
                     contentDescription = stringResource(StripeR.string.stripe_edit),
                     tint = LinkTheme.colors.iconTertiary,
                     modifier = Modifier.size(24.dp)

@@ -10,7 +10,6 @@ import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
 import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMethod
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent
@@ -25,7 +24,6 @@ import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
@@ -36,7 +34,6 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.interceptor.FakeIntentConfirmationInterceptorFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -69,9 +66,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
-import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -963,47 +958,6 @@ class CustomerSheetViewModelTest {
             assertThat(errorReporter.getLoggedErrors())
                 .contains(ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_FAILURE.eventName)
         }
-
-    @Test
-    fun `When payment method cannot be attached with setup intent, error message is visible`() = runTest(testDispatcher) {
-        val viewModel = createViewModel(
-            workContext = testDispatcher,
-            isGooglePayAvailable = false,
-            customerPaymentMethods = listOf(),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = true,
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.success("invalid setup intent")
-                },
-            ),
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                retrieveSetupIntent = Result.failure(
-                    IllegalArgumentException("Invalid setup intent")
-                ),
-            ),
-        )
-
-        viewModel.handleViewAction(
-            CustomerSheetViewAction.OnFormFieldValuesCompleted(
-                formFieldValues = TEST_FORM_VALUES,
-            )
-        )
-
-        viewModel.viewState.test {
-            var viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.errorMessage).isNull()
-
-            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-
-            assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
-
-            viewState = awaitViewState()
-            assertThat(viewState.errorMessage).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-            assertThat(viewState.enabled).isTrue()
-            assertThat(viewState.isProcessing).isFalse()
-        }
-    }
 
     @Test
     fun `When setup intent provider error, error message is visible`() = runTest(testDispatcher) {
@@ -3248,64 +3202,6 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When starting confirmation, should pass passiveCaptchaParams when available`() = runTest(testDispatcher) {
-        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
-
-        val mockConfirmationHandler = mock<ConfirmationHandler>()
-        val confirmationHandlerFactory = ConfirmationHandler.Factory { mockConfirmationHandler }
-
-        val viewModel = createViewModel(
-            workContext = testDispatcher,
-            customerPaymentMethods = listOf(),
-            isGooglePayAvailable = false,
-            confirmationHandlerFactory = confirmationHandlerFactory,
-            customerSheetLoader = FakeCustomerSheetLoader(
-                customerPaymentMethods = emptyList(),
-                isGooglePayAvailable = false,
-                passiveCaptchaParams = passiveCaptchaParams
-            ),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = true,
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.success("seti_123")
-                }
-            ),
-            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
-                onAttachPaymentMethod = {
-                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
-                }
-            ),
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
-            ),
-        ).apply {
-            handleViewAction(
-                CustomerSheetViewAction.OnFormFieldValuesCompleted(
-                    formFieldValues = TEST_FORM_VALUES,
-                )
-            )
-        }
-
-        viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
-        }
-
-        viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-
-        verify(mockConfirmationHandler).start(any())
-
-        val captor = argumentCaptor<ConfirmationHandler.Args>()
-        verify(mockConfirmationHandler).start(captor.capture())
-
-        val capturedArgs = captor.firstValue
-        assertThat(capturedArgs.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
-
-        val savedOption = capturedArgs.confirmationOption as PaymentMethodConfirmationOption.Saved
-        assertThat(savedOption.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
-    }
-
-    @Test
     fun `When setting up with intent, should call 'IntentConfirmationInterceptor' with expected params`() =
         runTest(testDispatcher) {
             val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory()
@@ -3615,8 +3511,6 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `init emits CustomerSheetViewState#AddPaymentMethod shouldAutomaticallyLaunchCardScan true when no payment methods available`() = runTest(testDispatcher) {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             configuration = CustomerSheet.Configuration(
@@ -3639,13 +3533,10 @@ class CustomerSheetViewModelTest {
             val controller = (formElements[0] as CardDetailsSectionElement).controller
             assertThat(controller.shouldAutomaticallyLaunchCardScan()).isTrue()
         }
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
     fun `When CustomerViewAction#OnAddCardPressed, shouldAutomaticallyLaunchCardScan true`() = runTest(testDispatcher) {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             configuration = CustomerSheet.Configuration(
@@ -3667,12 +3558,10 @@ class CustomerSheetViewModelTest {
             val controller = (formElements[0] as CardDetailsSectionElement).controller
             assertThat(controller.shouldAutomaticallyLaunchCardScan()).isTrue()
         }
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
     fun `When switching payment methods, don't show card scan more than once`() = runTest(testDispatcher) {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
         val viewModel = createViewModel(
             workContext = testDispatcher,
             customerPaymentMethods = listOf(),
@@ -3716,13 +3605,10 @@ class CustomerSheetViewModelTest {
             assertThat(secondCardFormController).isNotNull()
             assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isFalse()
         }
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
     fun `After confirming a card, the card scan should be shown when trying to add another card`() = runTest(testDispatcher) {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             intentDataSource = FakeCustomerSheetIntentDataSource(
@@ -3778,13 +3664,10 @@ class CustomerSheetViewModelTest {
             assertThat(secondCardFormController).isNotNull()
             assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
         }
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
     fun `After leaving card form, the card scan should be shown when trying to add another card`() = runTest(testDispatcher) {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             intentDataSource = FakeCustomerSheetIntentDataSource(
@@ -3828,7 +3711,6 @@ class CustomerSheetViewModelTest {
             assertThat(secondCardFormController).isNotNull()
             assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
         }
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test

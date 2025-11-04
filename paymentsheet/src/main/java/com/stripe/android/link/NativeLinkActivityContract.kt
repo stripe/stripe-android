@@ -24,6 +24,7 @@ internal class NativeLinkActivityContract @Inject constructor(
             context = context,
             args = NativeLinkArgs(
                 configuration = input.configuration,
+                paymentMethodMetadata = input.paymentMethodMetadata,
                 requestSurface = requestSurface,
                 stripeAccountId = paymentConfiguration.stripeAccountId,
                 publishableKey = paymentConfiguration.publishableKey,
@@ -31,8 +32,6 @@ internal class NativeLinkActivityContract @Inject constructor(
                 launchMode = input.launchMode,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 linkAccountInfo = input.linkAccountInfo,
-                passiveCaptchaParams = input.passiveCaptchaParams,
-                attestOnIntentConfirmation = input.attestOnIntentConfirmation,
             )
         )
     }

@@ -18,7 +18,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.shoppay.ShopPayActivityContract
 import com.stripe.android.shoppay.ShopPayActivityResult
-import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultLauncher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -134,7 +134,10 @@ internal class ShopPayConfirmationDefinitionTest {
                             externalId = "external_123"
                         )
                     )
-                )
+                ),
+                paymentMethodMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.copy(
+                    sellerBusinessName = "My business, Inc.",
+                ),
             ),
             launcher = launcher,
             arguments = Unit,

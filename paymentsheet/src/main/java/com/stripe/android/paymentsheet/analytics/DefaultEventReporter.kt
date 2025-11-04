@@ -31,7 +31,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsState
-import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -49,7 +48,6 @@ internal class DefaultEventReporter @Inject internal constructor(
     private val durationProvider: DurationProvider,
     private val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>,
     @IOContext private val workContext: CoroutineContext,
-    private val isStripeCardScanAvailable: IsStripeCardScanAvailable,
     private val logger: UserFacingLogger,
 ) : EventReporter {
 
@@ -87,7 +85,6 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
-                isStripeCardScanAvailable = isStripeCardScanAvailable(),
                 isAnalyticEventCallbackSet = analyticEventCallbackProvider.get() != null,
             )
         )

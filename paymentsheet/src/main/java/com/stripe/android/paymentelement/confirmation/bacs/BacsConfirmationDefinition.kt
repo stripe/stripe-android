@@ -69,7 +69,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
     ) {
         launcher.launch(
             data = arguments,
-            appearance = confirmationArgs.appearance
+            appearance = confirmationArgs.paymentMethodMetadata.appearance
         )
     }
 
@@ -87,7 +87,6 @@ internal class BacsConfirmationDefinition @Inject constructor(
                     optionsParams = null,
                     extraParams = null,
                     shouldSave = false,
-                    passiveCaptchaParams = confirmationOption.passiveCaptchaParams,
                 )
 
                 ConfirmationDefinition.Result.NextStep(

@@ -246,7 +246,7 @@ internal class UpdateCardScreenshotTest(
                 countryCode = CountryCode.US,
                 postalCode = "42424"
             ),
-            bankName = "My Bank",
+            bankAccountName = "My Bank Account",
             bankIconCode = "bank_icon_code",
             billingEmailAddress = null
         )

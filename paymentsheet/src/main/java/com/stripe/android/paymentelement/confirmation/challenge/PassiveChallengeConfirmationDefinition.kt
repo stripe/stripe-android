@@ -2,9 +2,9 @@ package com.stripe.android.paymentelement.confirmation.challenge
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import com.stripe.android.challenge.PassiveChallengeActivityContract
-import com.stripe.android.challenge.PassiveChallengeActivityResult
-import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
+import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
+import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
+import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.strings.resolvableString
@@ -49,7 +49,8 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args
     ): Boolean {
-        return confirmationOption.passiveCaptchaParams != null
+        return confirmationArgs.paymentMethodMetadata.passiveCaptchaParams != null &&
+            !confirmationOption.passiveChallengeComplete
     }
 
     override fun toResult(
@@ -96,7 +97,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args
     ): ConfirmationDefinition.Action<PassiveChallengeActivityContract.Args> {
-        val passiveCaptchaParams = confirmationOption.passiveCaptchaParams
+        val passiveCaptchaParams = confirmationArgs.paymentMethodMetadata.passiveCaptchaParams
         if (passiveCaptchaParams != null) {
             return ConfirmationDefinition.Action.Launch(
                 launcherArguments = PassiveChallengeActivityContract.Args(
@@ -135,13 +136,13 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
                             )
                         }
                     ),
-                    passiveCaptchaParams = null
+                    passiveChallengeComplete = true,
                 )
             }
             is PaymentMethodConfirmationOption.Saved -> {
                 copy(
                     hCaptchaToken = token,
-                    passiveCaptchaParams = null
+                    passiveChallengeComplete = true,
                 )
             }
         }

@@ -40,7 +40,6 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import com.stripe.android.utils.AnalyticEventCallbackRule
 import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -823,7 +822,6 @@ class DefaultEventReporterTest {
             durationProvider = durationProvider,
             analyticEventCallbackProvider = analyticEventCallbackRule,
             workContext = testDispatcher,
-            isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(),
             logger = fakeUserFacingLogger,
         )
     }
@@ -1554,7 +1552,6 @@ class DefaultEventReporterTest {
             durationProvider = FakeDurationProvider(duration),
             analyticEventCallbackProvider = analyticEventCallbackRule,
             workContext = testDispatcher,
-            isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(),
             logger = fakeUserFacingLogger,
         )
 
@@ -1580,7 +1577,6 @@ class DefaultEventReporterTest {
             durationProvider = durationProvider,
             analyticEventCallbackProvider = analyticEventCallbackRule,
             workContext = testDispatcher,
-            isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(),
             logger = fakeUserFacingLogger,
         )
 
@@ -1667,11 +1663,5 @@ class DefaultEventReporterTest {
             ).takeIf { it.linkMode != null },
             screenState = mock(),
         )
-    }
-
-    private class FakeIsStripeCardScanAvailable(
-        private val value: Boolean = true
-    ) : IsStripeCardScanAvailable {
-        override fun invoke() = value
     }
 }

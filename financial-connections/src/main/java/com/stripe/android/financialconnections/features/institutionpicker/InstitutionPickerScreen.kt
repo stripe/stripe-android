@@ -25,8 +25,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -412,7 +410,7 @@ private fun ClearSearchButton(
             .padding(2.dp)
     ) {
         Icon(
-            imageVector = Icons.Filled.Clear,
+            painter = painterResource(R.drawable.stripe_ic_material_cancel),
             tint = colors.background,
             contentDescription = "Clear search",
         )

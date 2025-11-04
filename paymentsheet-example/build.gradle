@@ -47,7 +47,6 @@ sentry {
 
 dependencies {
     implementation project(':payments')
-    implementation project(':stripecardscan')
     implementation project(':financial-connections')
 
     implementation libs.androidx.activity
@@ -63,8 +62,6 @@ dependencies {
     implementation libs.compose.foundation
     implementation libs.compose.liveData
     implementation libs.compose.material
-    implementation libs.compose.materialIcons
-    implementation libs.compose.materialIconsExtended
     implementation libs.compose.ui
     implementation libs.compose.uiTooling
     implementation libs.compose.viewModels

@@ -123,6 +123,7 @@ public final class com/stripe/android/model/CardBrand : java/lang/Enum {
 	public static final field Companion Lcom/stripe/android/model/CardBrand$Companion;
 	public static final field DinersClub Lcom/stripe/android/model/CardBrand;
 	public static final field Discover Lcom/stripe/android/model/CardBrand;
+	public static final field Interac Lcom/stripe/android/model/CardBrand;
 	public static final field JCB Lcom/stripe/android/model/CardBrand;
 	public static final field MasterCard Lcom/stripe/android/model/CardBrand;
 	public static final field UnionPay Lcom/stripe/android/model/CardBrand;

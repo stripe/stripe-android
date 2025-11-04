@@ -38,7 +38,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     @Assisted private val createIntentCallback: CreateIntentWithConfirmationTokenCallback,
     @Assisted(CUSTOMER_ID) private val customerId: String?,
     @Assisted(EPHEMERAL_KEY_SECRET) private val ephemeralKeySecret: String?,
-    @Assisted private val clientAttributionMetadata: ClientAttributionMetadata?,
+    @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     private val context: Context,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
@@ -198,6 +198,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                                 androidVerificationObject = null,
                             )
                         },
+                        clientAttributionMetadata = clientAttributionMetadata,
                     )
                 }
             }
@@ -289,7 +290,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             createIntentCallback: CreateIntentWithConfirmationTokenCallback,
             @Assisted(CUSTOMER_ID) customerId: String?,
             @Assisted(EPHEMERAL_KEY_SECRET) ephemeralKeySecret: String?,
-            @Assisted clientAttributionMetadata: ClientAttributionMetadata?,
+            @Assisted clientAttributionMetadata: ClientAttributionMetadata,
         ): ConfirmationTokenConfirmationInterceptor
     }
 

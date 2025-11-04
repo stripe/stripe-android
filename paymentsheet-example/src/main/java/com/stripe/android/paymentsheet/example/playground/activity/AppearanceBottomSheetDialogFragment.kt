@@ -39,9 +39,6 @@ import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -1249,7 +1246,7 @@ private fun IncrementDecrementItem(
                     }
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.Remove,
+                    painter = painterResource(R.drawable.ic_remove),
                     contentDescription = null,
                 )
             }
@@ -1264,7 +1261,7 @@ private fun IncrementDecrementItem(
                     }
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.Add,
+                    painter = painterResource(R.drawable.ic_add),
                     contentDescription = null,
                 )
             }

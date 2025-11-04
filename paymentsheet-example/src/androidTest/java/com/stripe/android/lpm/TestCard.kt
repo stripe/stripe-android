@@ -116,7 +116,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
@@ -154,7 +154,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmExistingComplete(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters,
             values = FieldPopulator.Values(
                 cardNumber = secondCardNumber,
@@ -165,7 +165,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
@@ -202,7 +202,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmCustomWithDefaultSavedPaymentMethod(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
@@ -238,7 +238,7 @@ internal class TestCard : BasePlaygroundTest() {
             },
         )
 
-        val customerId = state?.asPaymentState()?.customerConfig?.id
+        val customerId = state?.customerId()
 
         testDriver.confirmCustomAndBuy(
             customerId = customerId,
@@ -279,7 +279,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmCompleteWithSavePaymentMethodAndCvcRecollection(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters
         )
     }
@@ -299,7 +299,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmCustomWithSavePaymentMethodAndCvcRecollection(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters
         )
     }
@@ -369,7 +369,7 @@ internal class TestCard : BasePlaygroundTest() {
 
         // Verify card was save and re-displays
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
@@ -399,7 +399,7 @@ internal class TestCard : BasePlaygroundTest() {
 
         // Verify card was save and re-displays
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(

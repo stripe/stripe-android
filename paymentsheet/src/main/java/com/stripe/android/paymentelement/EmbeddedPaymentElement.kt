@@ -149,7 +149,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
             resultCallback = resultCallback,
         )
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         constructor(
             /**
              * Called with the ConfirmationToken when the customer confirms the payment or setup.

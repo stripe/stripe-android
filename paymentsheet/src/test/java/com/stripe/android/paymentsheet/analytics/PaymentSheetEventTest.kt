@@ -17,7 +17,6 @@ import com.stripe.android.model.PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECT
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -46,7 +45,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -83,7 +81,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -120,7 +117,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -159,7 +155,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -196,7 +191,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -231,7 +225,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -271,7 +264,6 @@ class PaymentSheetEventTest {
         assertThat(config).containsEntry("customer_access_provider", "legacy")
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `Init with customer session enabled customer has expected keys`() {
         val event = createInitEvent(
@@ -316,7 +308,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -376,7 +367,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -436,7 +426,6 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
 
@@ -1581,7 +1570,6 @@ class PaymentSheetEventTest {
                 isSpt = false,
                 linkEnabled = false,
                 googlePaySupported = false,
-                isStripeCardScanAvailable = true,
                 isAnalyticEventCallbackSet = false,
             ).params
         ).isEqualTo(
@@ -1629,7 +1617,6 @@ class PaymentSheetEventTest {
                 isSpt = false,
                 linkEnabled = false,
                 googlePaySupported = false,
-                isStripeCardScanAvailable = true,
                 isAnalyticEventCallbackSet = false,
             ).params
         ).isEqualTo(
@@ -1641,46 +1628,6 @@ class PaymentSheetEventTest {
                 "google_pay_enabled" to false,
             )
         )
-    }
-
-    @Test
-    fun `Init event should report card_scan_available as true if available`() {
-        val config = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING
-        assertThat(
-            PaymentSheetEvent.Init(
-                mode = EventReporter.Mode.Complete,
-                configuration = config.asCommonConfiguration(),
-                appearance = config.appearance,
-                configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
-                primaryButtonColor = config.primaryButtonColorUsage(),
-                isDeferred = false,
-                isSpt = false,
-                linkEnabled = false,
-                googlePaySupported = false,
-                isStripeCardScanAvailable = true,
-                isAnalyticEventCallbackSet = false,
-            ).params["mpe_config"]?.asMap()?.get("card_scan_available")
-        ).isEqualTo(true)
-    }
-
-    @Test
-    fun `Init event should report card_scan_available as false if unavailable`() {
-        val config = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING
-        assertThat(
-            PaymentSheetEvent.Init(
-                mode = EventReporter.Mode.Complete,
-                configuration = config.asCommonConfiguration(),
-                appearance = config.appearance,
-                configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
-                primaryButtonColor = config.primaryButtonColorUsage(),
-                isDeferred = false,
-                isSpt = false,
-                linkEnabled = false,
-                googlePaySupported = false,
-                isStripeCardScanAvailable = false,
-                isAnalyticEventCallbackSet = false,
-            ).params["mpe_config"]?.asMap()?.get("card_scan_available")
-        ).isEqualTo(false)
     }
 
     @Test
@@ -1697,7 +1644,6 @@ class PaymentSheetEventTest {
                 isSpt = false,
                 linkEnabled = false,
                 googlePaySupported = false,
-                isStripeCardScanAvailable = true,
                 isAnalyticEventCallbackSet = true,
             ).params["mpe_config"]?.asMap()?.get("analytic_callback_set")
         ).isEqualTo(true)
@@ -1717,7 +1663,6 @@ class PaymentSheetEventTest {
                 isSpt = false,
                 linkEnabled = false,
                 googlePaySupported = false,
-                isStripeCardScanAvailable = false,
                 isAnalyticEventCallbackSet = false,
             ).params["mpe_config"]?.asMap()?.get("analytic_callback_set")
         ).isEqualTo(false)
@@ -2001,7 +1946,6 @@ class PaymentSheetEventTest {
             isDeferred = false,
             isSpt = false,
             linkEnabled = false,
-            isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
         )
     }
@@ -2069,7 +2013,6 @@ class PaymentSheetEventTest {
         customPaymentMethods: String? = null,
         paymentMethodLayout: String? = "horizontal",
         cardBrandAcceptance: Boolean = false,
-        cardScanAvailable: Boolean = true,
         analyticCallbackSet: Boolean = false,
         extraParams: MutableMap<String, Any?>.() -> Unit = {},
     ): Map<String, Any?> {
@@ -2089,7 +2032,6 @@ class PaymentSheetEventTest {
             "external_payment_methods" to externalPaymentMethods,
             "custom_payment_methods" to customPaymentMethods,
             "card_brand_acceptance" to cardBrandAcceptance,
-            "card_scan_available" to cardScanAvailable,
             "analytic_callback_set" to analyticCallbackSet,
         ).apply {
             if (paymentMethodLayout != null) {

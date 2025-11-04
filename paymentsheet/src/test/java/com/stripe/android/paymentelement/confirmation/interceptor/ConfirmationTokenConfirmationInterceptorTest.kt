@@ -483,7 +483,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = PaymentMethodFixtures.AU_BECS_DEBIT,
                     optionsParams = null,
-                    passiveCaptchaParams = null,
                     hCaptchaToken = null,
                 ),
                 shippingValues = null,
@@ -669,7 +668,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
             optionsParams = null,
             extraParams = null,
             shouldSave = false,
-            passiveCaptchaParams = null,
         )
 
         interceptor.intercept(
@@ -717,7 +715,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
             optionsParams = null,
             extraParams = null,
             shouldSave = false,
-            passiveCaptchaParams = null,
         )
 
         interceptor.intercept(
@@ -764,7 +761,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
             optionsParams = null,
-            passiveCaptchaParams = null,
             hCaptchaToken = null,
         )
 
@@ -812,7 +808,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = null,
-            passiveCaptchaParams = null,
             hCaptchaToken = null,
         )
 
@@ -868,7 +863,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
-            passiveCaptchaParams = null,
             hCaptchaToken = null,
         )
 
@@ -924,7 +918,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
-            passiveCaptchaParams = null,
             hCaptchaToken = null,
         )
 
@@ -981,7 +974,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
-            passiveCaptchaParams = null,
             hCaptchaToken = null,
         )
 
@@ -1060,7 +1052,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 optionsParams = null,
                 extraParams = PaymentMethodExtraParams.Card(setAsDefault = true),
                 shouldSave = true,
-                passiveCaptchaParams = null,
             )
 
             interceptor.intercept(
@@ -1086,6 +1077,51 @@ class ConfirmationTokenConfirmationInterceptorTest {
     }
 
     @Test
+    fun `Saved PM with PI - adds client attribution metadata to confirm params`() {
+        runConfirmationTokenInterceptorScenario(
+            retrievedIntentStatus = StripeIntent.Status.RequiresConfirmation,
+        ) { interceptor ->
+            val confirmationOption = PaymentMethodConfirmationOption.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                optionsParams = null,
+                hCaptchaToken = "test_token",
+            )
+
+            val nextAction = interceptor.intercept(
+                intent = PaymentIntentFactory.create(),
+                confirmationOption = confirmationOption,
+                shippingValues = null,
+            )
+
+            assertThat(nextAction.asConfirmParams<ConfirmPaymentIntentParams>()?.toParamMap())
+                .containsKey("client_attribution_metadata")
+        }
+    }
+
+    @Test
+    fun `New PM with PI - adds client attribution metadata to confirm params`() {
+        runConfirmationTokenInterceptorScenario(
+            retrievedIntentStatus = StripeIntent.Status.RequiresConfirmation,
+        ) { interceptor ->
+            val confirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                optionsParams = PaymentMethodOptionsParams.Card(),
+                extraParams = null,
+                shouldSave = true,
+            )
+
+            val nextAction = interceptor.intercept(
+                intent = PaymentIntentFactory.create(),
+                confirmationOption = confirmationOption,
+                shippingValues = null,
+            )
+
+            assertThat(nextAction.asConfirmParams<ConfirmPaymentIntentParams>()?.toParamMap())
+                .containsKey("client_attribution_metadata")
+        }
+    }
+
+    @Test
     fun `Saved PM - includes radarOptions when hCaptchaToken is provided for CSC flow`() {
         runConfirmationTokenInterceptorScenario(
             retrievedIntentStatus = StripeIntent.Status.RequiresConfirmation,
@@ -1093,7 +1129,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
             val confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = null,
                 hCaptchaToken = "test_token",
             )
 
@@ -1116,7 +1151,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
             val confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = null,
                 hCaptchaToken = null,
             )
 
@@ -1204,7 +1238,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                     ),
                     extraParams = null,
                     shouldSave = true,
-                    passiveCaptchaParams = null,
                 )
                 interceptor.intercept(
                     intent = PaymentIntentFactory.create(),

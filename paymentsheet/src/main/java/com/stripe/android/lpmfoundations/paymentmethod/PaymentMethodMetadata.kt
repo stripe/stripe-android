@@ -2,18 +2,13 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
-import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.link.utils.effectiveBillingDetails
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CustomPaymentMethodUiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrandDefinition
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT
@@ -33,7 +28,6 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.toPaymentMethodIncentive
 import com.stripe.android.paymentsheet.state.LinkDisabledState
-import com.stripe.android.paymentsheet.state.LinkSignupModeResult
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkStateResult
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -85,6 +79,7 @@ internal data class PaymentMethodMetadata(
     val openCardScanAutomatically: Boolean,
     val clientAttributionMetadata: ClientAttributionMetadata,
     val attestOnIntentConfirmation: Boolean,
+    val appearance: PaymentSheet.Appearance,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -372,7 +367,8 @@ internal data class PaymentMethodMetadata(
                 passiveCaptchaParams = elementsSession.passiveCaptchaParams,
                 openCardScanAutomatically = configuration.opensCardScannerAutomatically,
                 clientAttributionMetadata = clientAttributionMetadata,
-                attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation
+                attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation,
+                appearance = configuration.appearance,
             )
         }
 
@@ -433,61 +429,7 @@ internal data class PaymentMethodMetadata(
                     paymentIntentCreationFlow = null,
                 ),
                 attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation,
-            )
-        }
-
-        internal fun createForNativeLink(
-            configuration: LinkConfiguration,
-            linkAccount: LinkAccount,
-            passiveCaptchaParams: PassiveCaptchaParams?,
-            attestOnIntentConfirmation: Boolean,
-        ): PaymentMethodMetadata {
-            return PaymentMethodMetadata(
-                stripeIntent = configuration.stripeIntent,
-                billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
-                allowsDelayedPaymentMethods = false,
-                allowsPaymentMethodsRequiringShippingAddress = false,
-                allowsLinkInSavedPaymentMethods = false,
-                availableWallets = emptyList(),
-                paymentMethodOrder = ConfigurationDefaults.paymentMethodOrder,
-                cbcEligibility = CardBrandChoiceEligibility.create(
-                    isEligible = configuration.cardBrandChoice?.eligible == true,
-                    preferredNetworks = configuration.cardBrandChoice?.preferredNetworks?.map { code ->
-                        CardBrand.fromCode(code)
-                    }.orEmpty(),
-                ),
-                merchantName = configuration.merchantName,
-                sellerBusinessName = configuration.sellerBusinessName,
-                // Use effective billing details to prefill billing details in new card flows
-                defaultBillingDetails = effectiveBillingDetails(
-                    configuration = configuration,
-                    linkAccount = linkAccount
-                ),
-                shippingDetails = null,
-                customerMetadata = null,
-                sharedDataSpecs = emptyList(),
-                externalPaymentMethodSpecs = emptyList(),
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
-                linkConfiguration = PaymentSheet.LinkConfiguration(),
-                linkMode = null,
-                linkStateResult = LinkState(
-                    configuration = configuration,
-                    signupModeResult = LinkSignupModeResult.AlreadyRegistered,
-                    loginState = LinkState.LoginState.LoggedIn
-                ),
-                paymentMethodIncentive = null,
-                isGooglePayReady = false,
-                displayableCustomPaymentMethods = emptyList(),
-                cardBrandFilter = configuration.cardBrandFilter,
-                elementsSessionId = configuration.elementsSessionId,
-                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
-                shopPayConfiguration = null,
-                termsDisplay = emptyMap(),
-                forceSetupFutureUseBehaviorAndNewMandate = configuration.forceSetupFutureUseBehaviorAndNewMandate,
-                passiveCaptchaParams = passiveCaptchaParams,
-                openCardScanAutomatically = false,
-                clientAttributionMetadata = configuration.clientAttributionMetadata,
-                attestOnIntentConfirmation = attestOnIntentConfirmation,
+                appearance = configuration.appearance,
             )
         }
     }
