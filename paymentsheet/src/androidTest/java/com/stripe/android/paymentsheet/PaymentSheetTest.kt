@@ -7,6 +7,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -27,16 +28,20 @@ import okhttp3.mockwebserver.SocketPolicy
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.time.Duration.Companion.seconds
 
 @RunWith(TestParameterInjector::class)
 internal class PaymentSheetTest {
+    private val networkRule = NetworkRule(validationTimeout = 5.seconds)
+
     @get:Rule
-    val testRules: TestRules = TestRules.create {
+    val testRules: TestRules = TestRules.create(
+        networkRule = networkRule
+    ) {
         around(IntentsRule())
     }
 
     private val composeTestRule = testRules.compose
-    private val networkRule = testRules.networkRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
@@ -805,6 +810,7 @@ internal class PaymentSheetTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         val oboMerchantID = "acct_connected_1234"
+
         networkRule.enqueue(
             host("api.stripe.com"),
             method("GET"),
@@ -826,9 +832,6 @@ internal class PaymentSheetTest {
                 configuration = defaultConfiguration,
             )
         }
-
-        val c = 'a'
-        c.isISOControl()
 
         testContext.markTestSucceeded()
     }
