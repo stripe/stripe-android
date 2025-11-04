@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.injection.UIContext
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
@@ -28,7 +29,8 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     private val viewModel: FlowControllerViewModel,
     private val paymentSelectionUpdater: PaymentSelectionUpdater,
     private val confirmationHandler: FlowControllerConfirmationHandler,
-    @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean
+    @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
+    @PaymentElementCallbackIdentifier val callbackIdentifier: String,
 ) {
 
     private val job: AtomicReference<Job?> = AtomicReference(null)
@@ -77,7 +79,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
         try {
             initializationMode.validate()
-            configuration.asCommonConfiguration().validate(isLiveModeProvider())
+            configuration.asCommonConfiguration().validate(isLiveModeProvider(), callbackIdentifier)
             configuration.appearance.parseAppearance()
         } catch (e: IllegalArgumentException) {
             onConfigured(error = e)

@@ -8,6 +8,8 @@ import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -40,9 +42,10 @@ internal data class CommonConfiguration(
     val appearance: PaymentSheet.Appearance,
 ) : Parcelable {
 
-    fun validate(isLiveMode: Boolean) {
+    fun validate(isLiveMode: Boolean, @PaymentElementCallbackIdentifier callbackIdentifier: String) {
         customerAndMerchantValidate()
         externalPaymentMethodsValidate(isLiveMode)
+        confirmationTokenValidate(isLiveMode, callbackIdentifier)
 
         customer?.accessType?.let { customerAccessType ->
             customerAccessTypeValidate(customerAccessType)
@@ -80,6 +83,21 @@ internal data class CommonConfiguration(
                         "external-payment-methods"
                 )
             }
+        }
+    }
+
+    // These exception messages are not localized as they are not intended to be displayed to a user.
+    @Suppress("ThrowsCount")
+    private fun confirmationTokenValidate(
+        isLiveMode: Boolean,
+        @PaymentElementCallbackIdentifier callbackIdentifier: String
+    ) {
+        if (PaymentElementCallbackReferences[callbackIdentifier]?.createIntentWithConfirmationTokenCallback != null &&
+            customer?.accessType is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey &&
+            isLiveMode.not()) {
+            throw IllegalArgumentException(
+                "createIntentWithConfirmationTokenCallback must be used with CustomerSession."
+            )
         }
     }
 

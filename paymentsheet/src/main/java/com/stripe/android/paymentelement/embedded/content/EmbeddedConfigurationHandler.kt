@@ -7,6 +7,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -33,7 +34,8 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
     private val sheetStateHolder: SheetStateHolder,
     private val eventReporter: EventReporter,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
-    @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean
+    @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
+    @PaymentElementCallbackIdentifier private val callbackIdentifier: String,
 ) : EmbeddedConfigurationHandler {
 
     private var cache: ConfigurationCache?
@@ -66,7 +68,7 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
         try {
             initializationMode.validate()
-            targetConfiguration.validate(isLiveModeProvider())
+            targetConfiguration.validate(isLiveModeProvider(), callbackIdentifier)
         } catch (e: IllegalArgumentException) {
             return Result.failure(e)
         }
