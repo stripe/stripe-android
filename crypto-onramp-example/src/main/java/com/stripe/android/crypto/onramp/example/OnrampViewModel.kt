@@ -318,7 +318,7 @@ internal class OnrampViewModel(
             }
             is OnrampVerifyKycInfoResult.UpdateAddress -> {
                 _updateAddressEvent.value = true
-                _message.value = "KYC Verification Requires Address Update - Unimplemented in Example"
+                _message.value = "KYC Verification Requires Address Update"
             }
             is OnrampVerifyKycInfoResult.Cancelled -> {
                 _message.value = "KYC Verification Cancelled"
