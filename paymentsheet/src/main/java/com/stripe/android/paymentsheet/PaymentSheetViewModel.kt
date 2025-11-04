@@ -106,10 +106,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
-        isProcessingPayment = isProcessingPaymentIntent,
         currentScreenFlow = navigationHandler.currentScreen,
         buttonsEnabledFlow = buttonsEnabled,
-        amountFlow = paymentMethodMetadata.mapAsStateFlow { it?.amount() },
+        paymentMethodMetadataFlow = paymentMethodMetadata,
         selectionFlow = selection,
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
         cvcCompleteFlow = cvcRecollectionCompleteFlow,
@@ -134,9 +133,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         mapViewStateToCheckoutIdentifier(viewState, CheckoutIdentifier.SheetBottomBuy)
     }
 
-    internal val isProcessingPaymentIntent
-        get() = args.initializationMode.isProcessingPayment
-
     private var inProgressSelection: PaymentSelection?
         get() = savedStateHandle[IN_PROGRESS_SELECTION]
         set(value) {
@@ -151,9 +147,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override var newPaymentSelection: NewPaymentOptionSelection? = null
 
     @VisibleForTesting
-    internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
-        args.googlePayConfig?.let { config ->
-            if (config.currencyCode == null && !isProcessingPaymentIntent) {
+    internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?
+        get() = args.googlePayConfig?.let { config ->
+            if (config.currencyCode == null && paymentMethodMetadata.value?.stripeIntent is SetupIntent) {
                 logger.warning(
                     "GooglePayConfiguration.currencyCode is required in order to use " +
                         "Google Pay when processing a Setup Intent"
@@ -756,15 +752,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         const val IN_PROGRESS_SELECTION = "IN_PROGRESS_PAYMENT_SELECTION"
     }
 }
-
-private val PaymentElementLoader.InitializationMode.isProcessingPayment: Boolean
-    get() = when (this) {
-        is PaymentElementLoader.InitializationMode.PaymentIntent -> true
-        is PaymentElementLoader.InitializationMode.SetupIntent -> false
-        is PaymentElementLoader.InitializationMode.DeferredIntent -> {
-            intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
-        }
-    }
 
 private val ConfirmationHandler.State.contentVisible: Boolean
     get() = when (this) {
