@@ -33,7 +33,7 @@ import javax.inject.Named
 internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
     @Assisted private val createIntentCallback: CreateIntentCallback,
-    @Assisted private val clientAttributionMetadata: ClientAttributionMetadata?,
+    @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
     @Named(ALLOWS_MANUAL_CONFIRMATION) private val allowsManualConfirmation: Boolean,
@@ -312,7 +312,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         fun create(
             intentConfiguration: PaymentSheet.IntentConfiguration,
             createIntentCallback: CreateIntentCallback,
-            clientAttributionMetadata: ClientAttributionMetadata?,
+            clientAttributionMetadata: ClientAttributionMetadata,
         ): DeferredIntentConfirmationInterceptor
     }
 }
