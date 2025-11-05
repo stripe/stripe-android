@@ -82,6 +82,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">Last 4 digits of SSN</string>
   <!-- Title for the address field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_address_field_title">Address</string>
+  <!-- Text displayed in a confirmation button when gathering kyc information -->
+  <string name="stripe_link_onramp_kyc_verification_confirm_button_text">Confirm</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Log out of Link</string>
   <!-- Text that is displayed when a network error occurs -->

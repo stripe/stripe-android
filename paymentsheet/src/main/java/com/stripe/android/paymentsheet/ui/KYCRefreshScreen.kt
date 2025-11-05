@@ -1,11 +1,13 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,8 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -29,18 +29,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.ui.PrimaryButton
+import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.aspectRatio
 
 @Composable
 @Suppress("LongMethod")
@@ -134,22 +133,11 @@ fun KYCRefreshScreen(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                Button(
-                    onClick = onConfirm,
-                    shape = LinkTheme.shapes.primaryButton,
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = LinkTheme.colors.buttonBrand,
-                        contentColor = LinkTheme.colors.onButtonBrand,
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(LinkTheme.shapes.primaryButtonHeight)
-                ) {
-                    Text(
-                        "Confirm",
-                        style = LinkTheme.typography.body.copy(fontWeight = FontWeight.SemiBold)
-                    )
-                }
+                PrimaryButton(
+                    label = stringResource(R.string.stripe_link_onramp_kyc_verification_confirm_button_text),
+                    state = PrimaryButtonState.Enabled,
+                    onButtonClick = onConfirm,
+                )
             }
         }
     }
