@@ -200,7 +200,8 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                         return FakeCvcRecollectionInteractor()
                     }
                 },
-                isLiveModeProvider = { false }
+                isLiveModeProvider = { false },
+                callbackIdentifier = "test_callback_identifier",
             )
         }
     }

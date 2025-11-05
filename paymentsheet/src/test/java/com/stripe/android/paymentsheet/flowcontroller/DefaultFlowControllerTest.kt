@@ -2580,6 +2580,7 @@ internal class DefaultFlowControllerTest {
                 paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
                 isLiveModeProvider = { false },
                 confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
+                callbackIdentifier = "test_callback_identifier",
             ),
             errorReporter = errorReporter,
             initializedViaCompose = false,

@@ -610,6 +610,7 @@ class FlowControllerConfigurationHandlerTest {
             paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
             isLiveModeProvider = { false },
             confirmationHandler = FakeFlowControllerConfirmationHandler(),
+            callbackIdentifier = "test_callback_identifier",
         )
     }
 }
