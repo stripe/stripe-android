@@ -51,7 +51,7 @@ import java.util.Locale
 @Composable
 @Suppress("LongMethod")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun OnrampKYCRefreshScreen(
+fun OnrampKycRefreshScreen(
     appearance: LinkAppearance?,
     kycInfo: VerifyKYCInfo,
     onClose: () -> Unit,
@@ -154,8 +154,7 @@ fun OnrampKYCRefreshScreen(
                             ),
                             value = address,
                             icon = {
-                                val isDark = isLinkDarkTheme(appearance)
-                                val iconTint = if (isDark) Color.Unspecified else Color.Black
+                                val iconTint = LinkTheme.colors.iconPrimary
 
                                 Icon(
                                     painter = painterResource(id = R.drawable.stripe_ic_edit_outlined_symbol),

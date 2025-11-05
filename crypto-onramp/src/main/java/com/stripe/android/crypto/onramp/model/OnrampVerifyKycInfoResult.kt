@@ -10,7 +10,7 @@ fun interface OnrampVerifyKycCallback {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface OnrampVerifyKycInfoResult {
     /**
-     * Kyc verified successfully.
+     * KYC verified successfully.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data object Confirmed : OnrampVerifyKycInfoResult
@@ -22,7 +22,7 @@ sealed interface OnrampVerifyKycInfoResult {
     data object UpdateAddress : OnrampVerifyKycInfoResult
 
     /**
-     * The Kyc verification was cancelled.
+     * The KYC verification was cancelled.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data object Cancelled : OnrampVerifyKycInfoResult
