@@ -353,7 +353,7 @@ internal class OnrampInteractor @Inject constructor(
             val error = MissingConsumerSecretException()
             analyticsService?.track(
                 OnrampAnalyticsEvent.ErrorOccurred(
-                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.VerifyIdentity, // VerifyKYC
+                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.VerifyKyc,
                     error = error,
                 )
             )
@@ -367,12 +367,19 @@ internal class OnrampInteractor @Inject constructor(
                         address = updatedAddress ?: result.address
                     )
 
+                    analyticsService?.track(OnrampAnalyticsEvent.KycVerificationStarted)
+
                     OnrampStartKycVerificationResult.Completed(
                         response = kycInfo,
                         appearance = state.value.configuration?.appearance
                     )
                 },
                 onFailure = { error ->
+                    OnrampAnalyticsEvent.ErrorOccurred(
+                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.VerifyKyc,
+                        error = error,
+                    )
+
                     OnrampStartKycVerificationResult.Failed(error)
                 }
             )
@@ -617,7 +624,11 @@ internal class OnrampInteractor @Inject constructor(
                 )
 
                 refreshResult.fold(
-                    onSuccess = { OnrampVerifyKycInfoResult.Confirmed },
+                    onSuccess = {
+                        analyticsService?.track(OnrampAnalyticsEvent.KycVerificationCompleted)
+
+                        OnrampVerifyKycInfoResult.Confirmed
+                                },
                     onFailure = {
                         OnrampVerifyKycInfoResult.Failed(
                             refreshResult.exceptionOrNull() ?: Exception("Unknown error")
@@ -625,9 +636,15 @@ internal class OnrampInteractor @Inject constructor(
                     }
                 )
             } else {
-                OnrampVerifyKycInfoResult.Failed(
-                    MissingConsumerSecretException()
+                val error = MissingConsumerSecretException()
+                analyticsService?.track(
+                    OnrampAnalyticsEvent.ErrorOccurred(
+                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.VerifyIdentity,
+                        error = error,
+                    )
                 )
+
+                OnrampVerifyKycInfoResult.Failed(error)
             }
         }
     }

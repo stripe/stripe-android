@@ -73,6 +73,14 @@ internal sealed class OnrampAnalyticsEvent(
         name = "kyc_info_submitted"
     )
 
+    data object KycVerificationStarted : OnrampAnalyticsEvent(
+        name = "kyc_info_verification_started"
+    )
+
+    data object KycVerificationCompleted : OnrampAnalyticsEvent(
+        name = "kyc_info_verification_completed"
+    )
+
     class WalletRegistered(
         network: CryptoNetwork
     ) : OnrampAnalyticsEvent(
@@ -161,7 +169,8 @@ internal sealed class OnrampAnalyticsEvent(
             RegisterWalletAddress("register_wallet_address"),
             CreateCryptoPaymentToken("create_crypto_payment_token"),
             PerformCheckout("perform_checkout"),
-            LogOut("log_out")
+            LogOut("log_out"),
+            VerifyKyc("verify_kyc_info")
         }
     }
 
