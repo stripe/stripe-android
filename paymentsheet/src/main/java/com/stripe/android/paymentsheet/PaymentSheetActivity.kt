@@ -90,7 +90,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 starterArgs.initializationMode.validate()
                 starterArgs.config.asCommonConfiguration().validate(
                     viewModel.isLiveModeProvider(),
-                    viewModel.callbackIdentifier
+                    starterArgs.paymentElementCallbackIdentifier
                 )
                 starterArgs.config.appearance.parseAppearance()
                 Result.success(starterArgs)

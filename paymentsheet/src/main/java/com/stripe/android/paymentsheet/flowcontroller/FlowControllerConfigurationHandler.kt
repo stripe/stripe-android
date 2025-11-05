@@ -30,7 +30,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     private val paymentSelectionUpdater: PaymentSelectionUpdater,
     private val confirmationHandler: FlowControllerConfirmationHandler,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
-    @PaymentElementCallbackIdentifier val callbackIdentifier: String,
+    @PaymentElementCallbackIdentifier private val callbackIdentifier: String,
 ) {
 
     private val job: AtomicReference<Job?> = AtomicReference(null)
