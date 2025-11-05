@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,6 +35,7 @@ import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.theme.isLinkDarkTheme
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.PrimaryButton
@@ -126,10 +128,13 @@ fun KYCRefreshScreen(
                         ),
                         value = address,
                         icon = {
+                            val isDark = isLinkDarkTheme(appearance)
+                            val iconTint = if (isDark) Color.Unspecified else Color.Black
+
                             Icon(
-                                painter = painterResource(id = R.drawable.stripe_ic_kyc_verify_edit_ref),
+                                painter = painterResource(id = R.drawable.stripe_ic_edit_outlined_symbol),
                                 contentDescription = "Edit Address",
-                                tint = Color.Unspecified,
+                                tint = iconTint,
                                 modifier = Modifier
                                     .height(12.dp)
                                     .width(12.dp)

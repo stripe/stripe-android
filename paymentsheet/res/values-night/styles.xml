@@ -3,8 +3,6 @@
     <drawable name="stripe_ic_paymentsheet_link_ref">@drawable/stripe_ic_paymentsheet_link_night</drawable>
     <drawable name="stripe_ic_paymentsheet_sepa_ref">@drawable/stripe_ic_paymentsheet_sepa_night</drawable>
 
-    <drawable name="stripe_ic_kyc_verify_edit_ref">@drawable/stripe_ic_kyc_verify_edit_night</drawable>
-
     <drawable name="stripe_ic_paymentsheet_card_visa_ref">@drawable/stripe_ic_paymentsheet_card_visa_night</drawable>
     <drawable name="stripe_ic_paymentsheet_card_amex_ref">@drawable/stripe_ic_paymentsheet_card_amex_night</drawable>
     <drawable name="stripe_ic_paymentsheet_card_discover_ref">@drawable/stripe_ic_paymentsheet_card_discover_night</drawable>
