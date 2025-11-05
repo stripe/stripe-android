@@ -39,6 +39,8 @@ import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.aspectRatio
 
 @Composable
 @Suppress("LongMethod")
@@ -169,13 +171,12 @@ private fun TopNavigationBar(
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
+        Image(
             painter = painterResource(id = getLinkIcon()),
             contentDescription = "Link",
-            tint = Color.Unspecified,
             modifier = Modifier
-                .height(72.dp)
                 .width(88.dp)
+                .aspectRatio(1f)
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -187,7 +188,7 @@ private fun TopNavigationBar(
                 modifier = Modifier
                     .size(36.dp)
                     .clip(CircleShape)
-                    .background(LinkTheme.colors.textPrimary.copy(alpha = 0.12f))
+                    .background(LinkTheme.colors.surfaceSecondary)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.stripe_ic_paymentsheet_close),
@@ -226,9 +227,10 @@ private fun InfoRow(
                 color = LinkTheme.colors.textPrimary
             )
         }
-        icon?.let {
+
+        if (icon != null) {
             IconButton(onClick = onIconTap ?: {}) {
-                it()
+                icon()
             }
         }
     }
