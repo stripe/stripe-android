@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.ui
+package com.stripe.android.paymentsheet.link.onramp.ui
 
 import android.os.Build
 import androidx.annotation.RestrictTo
@@ -47,7 +47,7 @@ import java.util.Locale
 @Composable
 @Suppress("LongMethod")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun KYCRefreshScreen(
+fun OnrampKYCRefreshScreen(
     appearance: LinkAppearance?,
     kycInfo: VerifyKYCInfo,
     onClose: () -> Unit,

@@ -12,8 +12,8 @@ import androidx.core.os.BundleCompat
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.link.LinkAppearance
-import com.stripe.android.paymentsheet.ui.KYCRefreshScreen
-import com.stripe.android.paymentsheet.ui.VerifyKYCInfo
+import com.stripe.android.paymentsheet.link.onramp.ui.OnrampKYCRefreshScreen
+import com.stripe.android.paymentsheet.link.onramp.ui.VerifyKYCInfo
 import kotlinx.parcelize.Parcelize
 
 internal class VerifyKycInfoActivity : ComponentActivity() {
@@ -28,7 +28,7 @@ internal class VerifyKycInfoActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            KYCRefreshScreen(
+            OnrampKYCRefreshScreen(
                 appearance = linkAppearance,
                 kycInfo = kycInfo.toVerifyKYCInfo(),
                 onClose = {
