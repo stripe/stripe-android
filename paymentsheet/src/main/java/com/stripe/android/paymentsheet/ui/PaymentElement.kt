@@ -29,6 +29,8 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountForm
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormHeaderUI
+import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.getOuterFormInsets
@@ -76,6 +78,10 @@ internal fun PaymentElement(
                 modifier = Modifier.padding(bottom = 12.dp),
                 updatePaymentMethodVisibility = updatePaymentMethodVisibility,
             )
+       } else if (supportedPaymentMethods.size == 1 && isNoFormElementsOrMandateOnly(formElements)) {
+           supportedPaymentMethods.firstOrNull()?.asFormHeaderInformation(incentive)?.let {
+               VerticalModeFormHeaderUI(enabled, it)
+           }
         }
 
         FormElement(
@@ -89,6 +95,10 @@ internal fun PaymentElement(
             onInteractionEvent = onInteractionEvent,
         )
     }
+}
+
+internal fun isNoFormElementsOrMandateOnly(formElements: List<FormElement>): Boolean {
+    return formElements.isEmpty() || (formElements.size == 1 && formElements.first() is MandateTextElement)
 }
 
 @Composable
