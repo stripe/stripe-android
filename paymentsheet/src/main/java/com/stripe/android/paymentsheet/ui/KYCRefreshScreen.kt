@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
@@ -59,39 +60,61 @@ fun KYCRefreshScreen(
         onDismissed = onClose
     ) {
         DefaultLinkTheme(appearance = appearance) {
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(LinkTheme.colors.surfacePrimary)
+                    .padding(24.dp)
             ) {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    TopNavigationBar(
-                        onClose = onClose,
-                        modifier = Modifier
-                            .padding(bottom = 8.dp)
-                    )
+                TopNavigationBar(
+                    onClose = onClose,
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                )
 
-                    Text(
-                        text = "Confirm your information",
-                        style = LinkTheme.typography.title,
-                        color = LinkTheme.colors.textPrimary,
-                        modifier = Modifier
-                            .padding(bottom = 24.dp)
-                            .align(Alignment.CenterHorizontally)
-                    )
-                    Card(
-                        shape = RoundedCornerShape(16.dp),
-                        backgroundColor = LinkTheme.colors.surfaceSecondary,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column {
-                            InfoRow(title = "Name", value = name)
-                            Divider(color = LinkTheme.colors.textPrimary.copy(alpha = 0.12f))
-                            InfoRow(title = "Date of Birth", value = dob)
-                            Divider(color = LinkTheme.colors.textPrimary.copy(alpha = 0.12f))
-                            InfoRow(title = "Last 4 digits of SSN", value = ssnLast4)
-                            Divider(color = LinkTheme.colors.textPrimary.copy(alpha = 0.12f))
-                            InfoRow(title = "Address", value = address, icon = {
+                Text(
+                    text = stringResource(
+                        id = R.string.stripe_link_onramp_kyc_verification_screen_title
+                    ),
+                    style = LinkTheme.typography.title,
+                    color = LinkTheme.colors.textPrimary,
+                    modifier = Modifier
+                        .padding(bottom = 24.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    backgroundColor = LinkTheme.colors.surfaceSecondary,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column {
+                        InfoRow(
+                            title = stringResource(
+                                id = R.string.stripe_link_onramp_kyc_verification_name_field_title
+                            ),
+                            value = name
+                        )
+                        KycDivider()
+                        InfoRow(
+                            title = stringResource(
+                                id = R.string.stripe_link_onramp_kyc_verification_dob_field_title
+                            ),
+                            value = dob
+                        )
+                        KycDivider()
+                        InfoRow(
+                            title = stringResource(
+                                id = R.string.stripe_link_onramp_kyc_verification_ssn_field_title
+                            ),
+                            value = ssnLast4
+                        )
+                        KycDivider()
+                        InfoRow(
+                            title = stringResource(
+                                id = R.string.stripe_link_onramp_kyc_verification_address_field_title
+                            ),
+                            value = address,
+                            icon = {
                                 Icon(
                                     painter = painterResource(id = R.drawable.stripe_ic_kyc_verify_edit_ref),
                                     contentDescription = "Edit Address",
@@ -100,41 +123,38 @@ fun KYCRefreshScreen(
                                         .height(18.dp)
                                         .width(18.dp)
                                 )
-                            }, onIconTap = onEdit)
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    Button(
-                        onClick = onConfirm,
-                        shape = LinkTheme.shapes.primaryButton,
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = LinkTheme.colors.buttonBrand,
-                            contentColor = LinkTheme.colors.onButtonBrand,
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(LinkTheme.shapes.primaryButtonHeight)
-                    ) {
-                        Text(
-                            "Confirm",
-                            style = LinkTheme.typography.body.copy(fontWeight = FontWeight.SemiBold)
+                            },
+                            onIconTap = onEdit
                         )
                     }
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Button(
+                    onClick = onConfirm,
+                    shape = LinkTheme.shapes.primaryButton,
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = LinkTheme.colors.buttonBrand,
+                        contentColor = LinkTheme.colors.onButtonBrand,
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(LinkTheme.shapes.primaryButtonHeight)
+                ) {
+                    Text(
+                        "Confirm",
+                        style = LinkTheme.typography.body.copy(fontWeight = FontWeight.SemiBold)
+                    )
                 }
             }
         }
     }
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface VerifyKYCInfo {
-    val firstName: String
-    val lastName: String
-    val dateOfBirth: DateOfBirth
-    val idNumberLastFour: String?
-    val address: PaymentSheet.Address
+@Composable
+private fun KycDivider() {
+    Divider(color = LinkTheme.colors.textPrimary.copy(alpha = 0.12f))
 }
 
 @Composable
@@ -211,6 +231,15 @@ private fun InfoRow(
             }
         }
     }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface VerifyKYCInfo {
+    val firstName: String
+    val lastName: String
+    val dateOfBirth: DateOfBirth
+    val idNumberLastFour: String?
+    val address: PaymentSheet.Address
 }
 
 private fun PaymentSheet.Address.formattedAddress(): String {

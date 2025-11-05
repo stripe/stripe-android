@@ -72,6 +72,16 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_verification_message_short">Enter the code sent to %s.</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">Update card</string>
+  <!-- Title for the name field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_screen_title">Confirm your information</string>
+  <!-- Title for the name field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_name_field_title">Name</string>
+  <!-- Title for the date of birth field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_dob_field_title">Date of Birth</string>
+  <!-- Title for the ssn field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_ssn_field_title">Last 4 digits of SSN</string>
+  <!-- Title for the address field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_address_field_title">Address</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Log out of Link</string>
   <!-- Text that is displayed when a network error occurs -->
