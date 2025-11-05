@@ -78,8 +78,6 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         }
 
         try {
-            initializationMode.validate()
-            configuration.asCommonConfiguration().validate(isLiveModeProvider(), callbackIdentifier)
             configuration.appearance.parseAppearance()
         } catch (e: IllegalArgumentException) {
             onConfigured(error = e)

@@ -39,10 +39,4 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
             workContext = workContext
         )
     }
-
-    @Provides
-    @Named(IS_LIVE_MODE)
-    fun isLiveMode(
-        paymentConfiguration: Provider<PaymentConfiguration>
-    ): () -> Boolean = { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
 }
