@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import android.os.Build
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -38,6 +40,9 @@ import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import java.text.DateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @Composable
 @Suppress("LongMethod")
@@ -50,7 +55,7 @@ fun KYCRefreshScreen(
     onConfirm: () -> Unit
 ) {
     val name = "${kycInfo.firstName} ${kycInfo.lastName}"
-    val dob = "%02d/%02d/%d".format(kycInfo.dateOfBirth.month, kycInfo.dateOfBirth.day, kycInfo.dateOfBirth.year)
+    val dob = getLocalizedDob(kycInfo.dateOfBirth)
     val ssnLast4 = kycInfo.idNumberLastFour ?: ""
     val address = kycInfo.address.formattedAddress()
     val sheetState = rememberStripeBottomSheetState()
@@ -201,6 +206,22 @@ data class VerifyKYCInfo(
     val idNumberLastFour: String?,
     val address: PaymentSheet.Address
 )
+
+@Composable
+private fun getLocalizedDob(dateOfBirth: DateOfBirth): String {
+    val context = LocalContext.current
+    val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        context.resources.configuration.locales[0]
+    } else {
+        context.resources.configuration.locale
+    } ?: Locale.getDefault()
+
+    val calendar = Calendar.getInstance().apply {
+        set(dateOfBirth.year, dateOfBirth.month - 1, dateOfBirth.day)
+    }
+    val dateFormat = DateFormat.getDateInstance(DateFormat.SHORT, locale)
+    return dateFormat.format(calendar.time)
+}
 
 private fun PaymentSheet.Address.formattedAddress(): String {
     return listOf(
