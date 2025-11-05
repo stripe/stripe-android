@@ -91,7 +91,7 @@ internal object CustomerSheetTestHelper {
                     initializationMode: PaymentElementLoader.InitializationMode,
                     customerId: String?,
                     ephemeralKeySecret: String?,
-                    clientAttributionMetadata: ClientAttributionMetadata?,
+                    clientAttributionMetadata: ClientAttributionMetadata,
                 ): IntentConfirmationInterceptor {
                     return FakeIntentConfirmationInterceptor().apply {
                         enqueueCompleteStep(true)

@@ -58,7 +58,7 @@ internal class TestConfirmationToken : BasePlaygroundTest() {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun testSavedCardWithConfirmationToken_withSSC() {
+    fun testSavedCardWithConfirmationToken_withSSC_andSetupIntent() {
         val cardNumber = "6011111111111117"
 
         val testParameters = createConfirmationTokenParams("card") { settings ->
@@ -101,6 +101,7 @@ internal class TestConfirmationToken : BasePlaygroundTest() {
             settings[CountrySettingsDefinition] = Country.US
             settings[CurrencySettingsDefinition] = Currency.USD
             settings[DelayedPaymentMethodsSettingsDefinition] = true
+            settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             settings[InitializationTypeSettingsDefinition] = InitializationType.DeferredClientSideConfirmation
         }
 
@@ -110,10 +111,11 @@ internal class TestConfirmationToken : BasePlaygroundTest() {
     }
 
     @Test
-    fun testCashAppWithConfirmationTokenInEmbedded_withSSC() {
+    fun testCashAppWithConfirmationTokenInEmbedded_withSSC_andSFU() {
         val testParameters = createConfirmationTokenParams("cashapp") { settings ->
             settings[CountrySettingsDefinition] = Country.US
             settings[CurrencySettingsDefinition] = Currency.USD
+            settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
             settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
                 PaymentMethod.Type.Card,
                 PaymentMethod.Type.CashAppPay

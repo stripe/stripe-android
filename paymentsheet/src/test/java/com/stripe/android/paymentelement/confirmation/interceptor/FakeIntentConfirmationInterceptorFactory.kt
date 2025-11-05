@@ -13,7 +13,7 @@ internal open class FakeIntentConfirmationInterceptorFactory(
         initializationMode: PaymentElementLoader.InitializationMode,
         customerId: String?,
         ephemeralKeySecret: String?,
-        clientAttributionMetadata: ClientAttributionMetadata?,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): IntentConfirmationInterceptor {
         interceptor = FakeIntentConfirmationInterceptor().apply(enqueueStep)
         return interceptor

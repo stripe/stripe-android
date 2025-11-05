@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.utils.putNonEmptySfu
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -43,16 +44,5 @@ data class ConfirmationTokenParams(
         const val PARAM_PAYMENT_METHOD_OPTIONS = "payment_method_options"
         const val PARAM_CLIENT_CONTEXT = "client_context"
         const val PARAM_CLIENT_ATTRIBUTION_METADATA = "client_attribution_metadata"
-    }
-}
-
-private const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
-internal fun MutableMap<String, Any>.putNonEmptySfu(sfu: ConfirmPaymentIntentParams.SetupFutureUsage?) {
-    sfu.takeIf {
-        // Empty values are an attempt to unset a parameter;
-        // however, setup_future_usage cannot be unset.
-        it != null && it != ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-    }?.let {
-        put(PARAM_SETUP_FUTURE_USAGE, it.code)
     }
 }

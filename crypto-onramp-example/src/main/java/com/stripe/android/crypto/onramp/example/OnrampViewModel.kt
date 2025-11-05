@@ -332,7 +332,7 @@ internal class OnrampViewModel(
     fun clearUpdateAddressEvent() {
         _updateAddressEvent.value = false
     }
-
+	
     fun onCollectPaymentResult(result: OnrampCollectPaymentMethodResult) {
         when (result) {
             is OnrampCollectPaymentMethodResult.Completed -> {

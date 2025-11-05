@@ -17,9 +17,10 @@ object PaymentIntentFactory {
         paymentMethodOptionsJsonString: String? = null,
         linkFundingSources: List<String> = emptyList(),
         countryCode: String? = null,
+        amount: Long = 1000L,
     ): PaymentIntent = PaymentIntent(
         created = 500L,
-        amount = 1000L,
+        amount = amount,
         clientSecret = "secret",
         paymentMethod = paymentMethod,
         isLiveMode = false,

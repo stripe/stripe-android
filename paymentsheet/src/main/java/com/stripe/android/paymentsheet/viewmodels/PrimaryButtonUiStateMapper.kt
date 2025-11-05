@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.viewmodels
 
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -8,7 +10,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
 import com.stripe.android.paymentsheet.utils.continueButtonLabel
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -16,10 +17,9 @@ import kotlinx.coroutines.flow.StateFlow
 
 internal class PrimaryButtonUiStateMapper(
     private val config: PaymentSheet.Configuration,
-    private val isProcessingPayment: Boolean,
     private val currentScreenFlow: StateFlow<PaymentSheetScreen>,
     private val buttonsEnabledFlow: StateFlow<Boolean>,
-    private val amountFlow: StateFlow<Amount?>,
+    private val paymentMethodMetadataFlow: StateFlow<PaymentMethodMetadata?>,
     private val selectionFlow: StateFlow<PaymentSelection?>,
     private val customPrimaryButtonUiStateFlow: StateFlow<PrimaryButton.UIState?>,
     private val cvcCompleteFlow: StateFlow<Boolean>,
@@ -31,19 +31,19 @@ internal class PrimaryButtonUiStateMapper(
         return combineAsStateFlow(
             currentScreenFlow,
             buttonsEnabledFlow,
-            amountFlow,
+            paymentMethodMetadataFlow,
             selectionFlow,
             customPrimaryButtonUiStateFlow,
-            cvcCompleteFlow
-        ) { screen, buttonsEnabled, amount, selection, customPrimaryButton, cvcComplete ->
+            cvcCompleteFlow,
+        ) { screen, buttonsEnabled, paymentMethodMetadata, selection, customPrimaryButton, cvcComplete ->
             screen.buyButtonState.mapAsStateFlow { buyButtonState ->
                 val canClickWhenDisabled = screen.isFormScreen() && buttonsEnabled
 
                 customPrimaryButton ?: PrimaryButton.UIState(
                     label = buyButtonState.buyButtonOverride?.label ?: buyButtonLabel(
-                        amount,
+                        paymentMethodMetadata?.amount(),
                         config.primaryButtonLabel,
-                        isProcessingPayment
+                        paymentMethodMetadata?.stripeIntent is PaymentIntent
                     ),
                     onClick = onClick,
                     enabled = buttonsEnabled && selection != null &&

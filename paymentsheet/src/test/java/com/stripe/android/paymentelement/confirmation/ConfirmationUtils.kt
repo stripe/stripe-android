@@ -77,7 +77,7 @@ internal suspend fun createIntentConfirmationInterceptor(
         intentFirstConfirmationInterceptorFactory = object : IntentFirstConfirmationInterceptor.Factory {
             override fun create(
                 clientSecret: String,
-                clientAttributionMetadata: ClientAttributionMetadata?
+                clientAttributionMetadata: ClientAttributionMetadata,
             ): IntentFirstConfirmationInterceptor {
                 return IntentFirstConfirmationInterceptor(
                     clientSecret = clientSecret,
@@ -90,7 +90,7 @@ internal suspend fun createIntentConfirmationInterceptor(
             override fun create(
                 intentConfiguration: PaymentSheet.IntentConfiguration,
                 createIntentCallback: CreateIntentCallback,
-                clientAttributionMetadata: ClientAttributionMetadata?
+                clientAttributionMetadata: ClientAttributionMetadata,
             ): DeferredIntentConfirmationInterceptor {
                 return DeferredIntentConfirmationInterceptor(
                     intentConfiguration = intentConfiguration,
@@ -108,7 +108,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                 createIntentCallback: CreateIntentWithConfirmationTokenCallback,
                 customerId: String?,
                 ephemeralKeySecret: String?,
-                clientAttributionMetadata: ClientAttributionMetadata?,
+                clientAttributionMetadata: ClientAttributionMetadata,
             ): ConfirmationTokenConfirmationInterceptor {
                 return ConfirmationTokenConfirmationInterceptor(
                     intentConfiguration = intentConfiguration,
