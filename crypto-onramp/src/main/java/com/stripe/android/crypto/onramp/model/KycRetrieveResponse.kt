@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.ui.VerifyKYCInfo
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -18,18 +17,18 @@ import kotlinx.serialization.Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class KycRetrieveResponse(
     @SerialName("first_name")
-    override val firstName: String,
+    val firstName: String,
     @SerialName("last_name")
-    override val lastName: String,
+    val lastName: String,
     @SerialName("id_number_last4")
-    override val idNumberLastFour: String?,
+    val idNumberLastFour: String?,
     @SerialName("id_type")
     val idType: String?,
     @SerialName("dob")
     @Serializable(with = DateOfBirthSerializer::class)
-    override val dateOfBirth: DateOfBirth,
+    val dateOfBirth: DateOfBirth,
 
     @SerialName("address")
     @Serializable(with = PaymentSheetAddressSerializer::class)
-    override val address: PaymentSheet.Address
-) : Parcelable, VerifyKYCInfo
+    val address: PaymentSheet.Address
+) : Parcelable

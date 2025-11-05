@@ -30,6 +30,10 @@ internal object DateOfBirthSerializer : KSerializer<DateOfBirth> {
     override fun deserialize(decoder: Decoder): DateOfBirth {
         val surrogate = delegate.deserialize(decoder)
 
-        return DateOfBirth(surrogate.day, surrogate.month, surrogate.year)
+        return DateOfBirth(
+            day = surrogate.day,
+            month = surrogate.month,
+            year = surrogate.year
+        )
     }
 }

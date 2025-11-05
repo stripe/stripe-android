@@ -3,6 +3,7 @@
     <application>
     <activity
         android:name="com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivity"
+        android:theme="@style/StripeVerifyKycTheme"
         android:exported="false" />
     </application>
 </manifest>

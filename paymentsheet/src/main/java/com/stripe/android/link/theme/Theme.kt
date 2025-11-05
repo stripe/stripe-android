@@ -45,11 +45,7 @@ internal fun DefaultLinkTheme(
 ) {
     val stripeImageLoader = runCatching { LocalStripeImageLoader.current }
         .getOrElse { StripeImageLoader(LocalContext.current) }
-    val isDark = when (appearance?.style) {
-        LinkAppearance.Style.ALWAYS_LIGHT -> false
-        LinkAppearance.Style.ALWAYS_DARK -> true
-        LinkAppearance.Style.AUTOMATIC, null -> isSystemInDarkTheme()
-    }
+    val isDark = isLinkDarkTheme(appearance)
 
     // Colors
     val defaultColors = LinkThemeConfig.colors(isDark)
@@ -103,6 +99,15 @@ internal fun DefaultLinkTheme(
             colors = debugColors(),
             content = content
         )
+    }
+}
+
+@Composable
+internal fun isLinkDarkTheme(appearance: LinkAppearance?): Boolean {
+    return when (appearance?.style) {
+        LinkAppearance.Style.ALWAYS_LIGHT -> false
+        LinkAppearance.Style.ALWAYS_DARK -> true
+        LinkAppearance.Style.AUTOMATIC, null -> isSystemInDarkTheme()
     }
 }
 
