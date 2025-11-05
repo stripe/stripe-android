@@ -6,7 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -74,9 +74,13 @@ fun OnrampKYCRefreshScreen(
 
     ElementsBottomSheetLayout(
         state = sheetState,
-        onDismissed = onClose
+        onDismissed = { dismissThen(onClose) }
     ) {
         DefaultLinkTheme(appearance = appearance) {
+            BackHandler {
+                dismissThen(onClose)
+            }
+
             val buttonVerticalSpace = LinkTheme.shapes.primaryButtonHeight + 16.dp
 
             Column(
