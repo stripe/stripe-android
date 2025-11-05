@@ -70,7 +70,8 @@ fun KYCRefreshScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(LinkTheme.colors.surfacePrimary)
-                    .padding(24.dp)
+                    .padding(top = 8.dp)
+                    .padding(bottom = 24.dp)
             ) {
                 LinkAppBar(
                     state = LinkAppBarState(
@@ -96,6 +97,7 @@ fun KYCRefreshScreen(
                 )
                 Column(
                     modifier = Modifier
+                        .padding(horizontal = 24.dp)
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
                         .background(LinkTheme.colors.surfaceSecondary)
@@ -150,6 +152,8 @@ fun KYCRefreshScreen(
                     label = stringResource(R.string.stripe_link_onramp_kyc_verification_confirm_button_text),
                     state = PrimaryButtonState.Enabled,
                     onButtonClick = onConfirm,
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp)
                 )
             }
         }
