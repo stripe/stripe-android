@@ -44,7 +44,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.invisibleToUser
+import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -375,7 +375,7 @@ private fun LinkIconAndDivider(
             add(id = LINK_DIVIDER_ID, width = 0.1.em, height = 1.3.em) { LinkDivider(theme.dividerColor) }
             addSpacer(id = LINK_DIVIDER_SPACER_ID, width = 0.5.em)
         }.build(),
-        modifier = Modifier.semantics { this.invisibleToUser() },
+        modifier = Modifier.semantics { this.hideFromAccessibility() },
     )
 }
 
