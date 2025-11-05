@@ -184,6 +184,26 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `load with empty merchantDisplayName returns failure`() = runTest {
+        val loader = createPaymentElementLoader()
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration(merchantDisplayName = ""),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).isEqualTo(
+            "When a Configuration is passed to PaymentSheet, the Merchant display name cannot be an empty string."
+        )
+    }
+
+    @Test
     fun `load without customer should return expected result`() = runTest {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
@@ -4033,7 +4053,6 @@ internal class DefaultPaymentElementLoaderTest {
             cvcRecollectionHandler = CvcRecollectionHandlerImpl(),
             integrityRequestManager = integrityRequestManager,
             isLiveModeProvider = { false },
-            callbackIdentifier = "test_callback_identifier",
         )
     }
 

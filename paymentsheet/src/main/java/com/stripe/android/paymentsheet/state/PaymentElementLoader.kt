@@ -28,7 +28,6 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -157,7 +156,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val cvcRecollectionHandler: CvcRecollectionHandler,
     private val integrityRequestManager: IntegrityRequestManager,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
-    @PaymentElementCallbackIdentifier private val callbackIdentifier: String,
 ) : PaymentElementLoader {
 
     @Suppress("LongMethod")
@@ -168,7 +166,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
         // Validate configuration before loading
         initializationMode.validate()
-        configuration.validate(isLiveModeProvider(), callbackIdentifier)
+        configuration.validate(isLiveModeProvider())
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
 
