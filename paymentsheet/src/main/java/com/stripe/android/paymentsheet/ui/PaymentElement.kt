@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountForm
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.getOuterFormInsets
@@ -65,7 +66,7 @@ internal fun PaymentElement(
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        if (supportedPaymentMethods.size > 1) {
+        if (supportedPaymentMethods.size > 1 || formElements.any { !it.allowsUserInteraction }) {
             NewPaymentMethodTabLayoutUI(
                 selectedIndex = selectedIndex,
                 isEnabled = enabled,
@@ -89,6 +90,10 @@ internal fun PaymentElement(
             onInteractionEvent = onInteractionEvent,
         )
     }
+}
+
+internal fun isNoFormElementsOrMandateOnly(formElements: List<FormElement>): Boolean {
+    return formElements.isEmpty() || (formElements.size == 1 && formElements.first() is MandateTextElement)
 }
 
 @Composable
