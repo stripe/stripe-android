@@ -1371,7 +1371,8 @@ class PaymentSheet internal constructor(
 
                 @Parcelize
                 @Poko
-                class FlatWithRadio internal constructor(
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                class FlatWithRadio(
                     internal val separatorThicknessDp: Float,
                     internal val startSeparatorInsetDp: Float,
                     internal val endSeparatorInsetDp: Float,
@@ -1533,7 +1534,8 @@ class PaymentSheet internal constructor(
 
                 @Parcelize
                 @Poko
-                class FlatWithCheckmark internal constructor(
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                class FlatWithCheckmark(
                     internal val separatorThicknessDp: Float,
                     internal val startSeparatorInsetDp: Float,
                     internal val endSeparatorInsetDp: Float,
@@ -1696,7 +1698,8 @@ class PaymentSheet internal constructor(
 
                 @Parcelize
                 @Poko
-                class FloatingButton internal constructor(
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                class FloatingButton(
                     internal val spacingDp: Float,
                     internal val additionalInsetsDp: Float,
                 ) : RowStyle() {
@@ -2063,68 +2066,79 @@ class PaymentSheet internal constructor(
          * A primary color used throughout PaymentSheet.
          */
         @ColorInt
-        internal val primary: Int,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val primary: Int,
 
         /**
          * The color used for the surfaces (backgrounds) of PaymentSheet.
          */
         @ColorInt
-        internal val surface: Int,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val surface: Int,
 
         /**
          * The color used for the background of inputs, tabs, and other components.
          */
         @ColorInt
-        internal val component: Int,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val component: Int,
 
         /**
          * The color used for borders of inputs, tabs, and other components.
          */
         @ColorInt
-        internal val componentBorder: Int,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val componentBorder: Int,
 
         /**
          * The color of the divider lines used inside inputs, tabs, and other components.
          */
         @ColorInt
-        internal val componentDivider: Int,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val componentDivider: Int,
 
         /**
          * The default color used for text and on other elements that live on components.
          */
         @ColorInt
-        internal val onComponent: Int,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val onComponent: Int,
 
         /**
          * The color used for items appearing over the background in Payment Sheet.
          */
         @ColorInt
-        internal val onSurface: Int,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val onSurface: Int,
 
         /**
          * The color used for text of secondary importance.
          * For example, this color is used for the label above input fields.
          */
         @ColorInt
-        internal val subtitle: Int,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val subtitle: Int,
 
         /**
          * The color used for input placeholder text.
          */
         @ColorInt
-        internal val placeholderText: Int,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val placeholderText: Int,
 
         /**
          * The color used for icons in PaymentSheet, such as the close or back icons.
          */
         @ColorInt
-        internal val appBarIcon: Int,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val appBarIcon: Int,
 
         /**
          * A color used to indicate errors or destructive actions in PaymentSheet.
          */
         @ColorInt
-        internal val error: Int
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val error: Int
     ) : Parcelable {
         constructor(
             primary: Color,
@@ -2199,18 +2213,21 @@ class PaymentSheet internal constructor(
         /**
          * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
          */
-        internal val cornerRadiusDp: Float,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val cornerRadiusDp: Float,
 
         /**
          * The border used for inputs, tabs, and other components in PaymentSheet.
          */
-        internal val borderStrokeWidthDp: Float,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val borderStrokeWidthDp: Float,
 
         /**
          * The corner radius used for specifically for the sheets displayed by Payment Element. Be default, this is
          * set to the same value as [cornerRadiusDp].
          */
-        internal val bottomSheetCornerRadiusDp: Float = cornerRadiusDp,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val bottomSheetCornerRadiusDp: Float = cornerRadiusDp,
     ) : Parcelable {
         @OptIn(AppearanceAPIAdditionsPreview::class)
         constructor(
@@ -2255,13 +2272,15 @@ class PaymentSheet internal constructor(
          * The scale factor for all fonts in PaymentSheet, the default value is 1.0.
          * When this value increases fonts will increase in size and decrease when this value is lowered.
          */
-        internal val sizeScaleFactor: Float,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val sizeScaleFactor: Float,
 
         /**
          * The font used in text. This should be a resource ID value.
          */
         @FontRes
-        internal val fontResId: Int?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val fontResId: Int?,
 
         /**
          * Custom font configuration for specific text styles
@@ -2388,29 +2407,34 @@ class PaymentSheet internal constructor(
          * Note: If 'null', {@link Colors#primary} is used.
          */
         @ColorInt
-        internal val background: Int?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val background: Int?,
         /**
          * The color of the text and icon in the primary button.
          */
         @ColorInt
-        internal val onBackground: Int,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val onBackground: Int,
         /**
          * The border color of the primary button.
          */
         @ColorInt
-        internal val border: Int,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val border: Int,
         /**
          * The background color for the primary button when in a success state. Defaults
          * to base green background color.
          */
         @ColorInt
-        internal val successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
         /**
          * The success color for the primary button text when in a success state. Defaults
          * to `onBackground`.
          */
         @ColorInt
-        internal val onSuccessBackgroundColor: Int = onBackground,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val onSuccessBackgroundColor: Int = onBackground,
     ) : Parcelable {
         constructor(
             background: Int?,
@@ -2649,21 +2673,25 @@ class PaymentSheet internal constructor(
         /**
          * The customer's billing address.
          */
-        internal val address: Address? = null,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val address: Address? = null,
         /**
          * The customer's email.
          * The value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
          */
-        internal val email: String? = null,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val email: String? = null,
         /**
          * The customer's full name.
          * The value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
          */
-        internal val name: String? = null,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val name: String? = null,
         /**
          * The customer's phone number without formatting e.g. 5551234567
          */
-        internal val phone: String? = null
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val phone: String? = null
     ) : Parcelable {
         internal fun isFilledOut(): Boolean {
             return address != null ||
