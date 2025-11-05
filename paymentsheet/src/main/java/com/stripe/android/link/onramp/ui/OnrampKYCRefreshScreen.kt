@@ -201,7 +201,9 @@ private fun InfoRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(vertical = 16.dp)
+            .padding(start = 16.dp)
+            .padding(end = if (icon == null) 16.dp else 0.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -218,9 +220,12 @@ private fun InfoRow(
         }
 
         if (icon != null) {
-            IconButton(onClick = onIconTap ?: {}) {
-                icon()
-            }
+            IconButton(
+                onClick = onIconTap ?: {},
+                content = { icon() },
+                modifier = Modifier
+                    .padding(start = 16.dp)
+            )
         }
     }
 }
