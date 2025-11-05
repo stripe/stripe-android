@@ -98,7 +98,7 @@ internal fun PaymentElement(
 }
 
 internal fun isNoFormElementsOrMandateOnly(formElements: List<FormElement>): Boolean {
-    return formElements.isEmpty() || (formElements.size == 1 && formElements.first() is MandateTextElement)
+    return formElements.isEmpty() || formElements.any { !it.allowsUserInteraction }
 }
 
 @Composable
