@@ -21,8 +21,10 @@ internal class VerifyKycInfoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val args = intent.getParcelableExtra(VerifyKycInfoActivity.EXTRA_ARGS, VerifyKycArgs::class.java)
-            ?: error("Missing VerifyKycArgs")
+        val args = intent.extras?.let {
+            BundleCompat.getParcelable(it, EXTRA_ARGS, VerifyKycArgs::class.java)
+        } ?: error("Missing VerifyKycArgs")
+
         val kycInfo = args.kycRetrieveResponse
         val linkAppearance = args.appearance
 
@@ -85,10 +87,14 @@ internal data class VerifyKycActivityArgs(
     val linkAppearance: LinkAppearance?
 )
 
-@Parcelize
 internal sealed interface KycRefreshScreenAction : Parcelable {
+    @Parcelize
     data object Cancelled : KycRefreshScreenAction
+
+    @Parcelize
     data object Edit : KycRefreshScreenAction
+
+    @Parcelize
     data class Confirm(val info: RefreshKycInfo) : KycRefreshScreenAction
 }
 
