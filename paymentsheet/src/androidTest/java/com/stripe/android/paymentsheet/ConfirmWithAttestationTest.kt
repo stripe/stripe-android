@@ -24,7 +24,6 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.android.testing.FeatureFlagTestRule
-import com.stripe.android.testing.RetryRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -41,7 +40,6 @@ internal class ConfirmWithAttestationTest {
         .around(IntentsRule())
         .around(featureFlagTestRule)
         .around(testRules)
-        .around(RetryRule(3))
 
     private val networkRule = testRules.networkRule
 
