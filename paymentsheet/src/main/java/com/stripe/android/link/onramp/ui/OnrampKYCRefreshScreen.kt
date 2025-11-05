@@ -1,12 +1,12 @@
 package com.stripe.android.link.onramp.ui
 
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -170,17 +170,16 @@ fun OnrampKYCRefreshScreen(
                         )
                     }
 
-                        PrimaryButton(
-                            label = stringResource(R.string.stripe_link_onramp_kyc_verification_confirm_button_text),
-                            state = PrimaryButtonState.Enabled,
-                            onButtonClick = onConfirm,
-                            modifier = Modifier
-                                .padding(horizontal = 24.dp)
-                                .align(Alignment.BottomCenter)
-                                .navigationBarsPadding()
-                        )
+                    PrimaryButton(
+                        label = stringResource(R.string.stripe_link_onramp_kyc_verification_confirm_button_text),
+                        state = PrimaryButtonState.Enabled,
+                        onButtonClick = onConfirm,
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp)
+                            .align(Alignment.BottomCenter)
+                            .navigationBarsPadding()
+                    )
                 }
-
             }
         }
     }
