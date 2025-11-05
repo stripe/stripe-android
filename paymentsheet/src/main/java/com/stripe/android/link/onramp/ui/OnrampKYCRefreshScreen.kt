@@ -197,9 +197,12 @@ private fun InfoRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp)
-            .padding(start = 16.dp)
-            .padding(end = if (icon == null) 16.dp else 0.dp),
+            .padding(
+                top = 16.dp,
+                bottom = 16.dp,
+                start = 16.dp,
+                end = if (icon == null) 16.dp else 0.dp
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
