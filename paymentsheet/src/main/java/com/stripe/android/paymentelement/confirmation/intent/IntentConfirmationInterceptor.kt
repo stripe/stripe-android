@@ -32,7 +32,7 @@ internal interface IntentConfirmationInterceptor {
             initializationMode: PaymentElementLoader.InitializationMode,
             customerId: String?,
             ephemeralKeySecret: String?,
-            clientAttributionMetadata: ClientAttributionMetadata?,
+            clientAttributionMetadata: ClientAttributionMetadata,
         ): IntentConfirmationInterceptor
     }
 
@@ -53,13 +53,13 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         customerId: String?,
         ephemeralKeySecret: String?,
-        clientAttributionMetadata: ClientAttributionMetadata?,
+        clientAttributionMetadata: ClientAttributionMetadata,
     ): IntentConfirmationInterceptor {
         return when (initializationMode) {
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
                 when (
                     val deferredIntentCallback = deferredIntentCallbackRetriever.waitForDeferredIntentCallback(
-                        initializationMode.intentConfiguration.intentBehavior
+                        behavior = initializationMode.intentConfiguration.intentBehavior,
                     )
                 ) {
                     is DeferredIntentCallback.ConfirmationToken -> {
@@ -73,15 +73,15 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                     }
                     is DeferredIntentCallback.PaymentMethod -> {
                         deferredIntentConfirmationInterceptorFactory.create(
-                            initializationMode.intentConfiguration,
-                            deferredIntentCallback.callback,
-                            clientAttributionMetadata,
+                            intentConfiguration = initializationMode.intentConfiguration,
+                            createIntentCallback = deferredIntentCallback.callback,
+                            clientAttributionMetadata = clientAttributionMetadata,
                         )
                     }
                     is DeferredIntentCallback.SharedPaymentToken -> {
                         sharedPaymentTokenConfirmationInterceptorFactory.create(
-                            initializationMode.intentConfiguration,
-                            deferredIntentCallback.handler,
+                            intentConfiguration = initializationMode.intentConfiguration,
+                            handler = deferredIntentCallback.handler,
                         )
                     }
                 }
@@ -89,7 +89,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
             is PaymentElementLoader.InitializationMode.PaymentIntent,
             is PaymentElementLoader.InitializationMode.SetupIntent -> {
                 intentFirstConfirmationInterceptorFactory.create(
-                    initializationMode.clientSecret,
+                    clientSecret = initializationMode.clientSecret,
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }

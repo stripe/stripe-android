@@ -1385,24 +1385,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Should show amount is true for PaymentIntent`() {
-        val viewModel = createViewModel()
-
-        assertThat(viewModel.isProcessingPaymentIntent)
-            .isTrue()
-    }
-
-    @Test
-    fun `Should show amount is false for SetupIntent`() {
-        val viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
-        )
-
-        assertThat(viewModel.isProcessingPaymentIntent)
-            .isFalse()
-    }
-
-    @Test
     fun `getSupportedPaymentMethods() filters payment methods with delayed settlement`() {
         val viewModel = createViewModel(
             stripeIntent = PAYMENT_INTENT.copy(

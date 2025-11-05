@@ -27,15 +27,12 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class IntentConfirmationChallengeNextActionHandlerTest {
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
-    private val productUsageTokens = setOf("TestToken")
 
     @Test
     fun `performNextActionOnResumed uses Modern starter when launcher is set`() = runTest {
         DummyActivityResultCaller.test {
             val handler = IntentConfirmationChallengeNextActionHandler(
-                publishableKeyProvider = { publishableKey },
-                productUsageTokens = productUsageTokens,
+                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
                 uiContext = testDispatcher
             )
 
@@ -58,8 +55,7 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
             )
 
             val launchArgs = awaitLaunchCall() as IntentConfirmationChallengeActivityContract.Args
-            assertThat(launchArgs.publishableKey).isEqualTo(publishableKey)
-            assertThat(launchArgs.productUsage).isEqualTo(productUsageTokens)
+            assertThat(launchArgs.publishableKey).isEqualTo(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
             assertThat(launchArgs.intent).isEqualTo(paymentIntent)
         }
     }
@@ -67,8 +63,7 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
     @Test
     fun `performNextActionOnResumed uses Legacy starter when launcher is null`() = runTest {
         val handler = IntentConfirmationChallengeNextActionHandler(
-            publishableKeyProvider = { publishableKey },
-            productUsageTokens = productUsageTokens,
+            publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
             uiContext = testDispatcher
         )
         val host = FakeAuthActivityStarterHost()
@@ -90,8 +85,7 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
     fun `onNewActivityResultCaller registers for activity result and handles Success`() = runTest {
         DummyActivityResultCaller.test {
             val handler = IntentConfirmationChallengeNextActionHandler(
-                publishableKeyProvider = { publishableKey },
-                productUsageTokens = productUsageTokens,
+                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
                 uiContext = testDispatcher
             )
 
@@ -124,8 +118,7 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
     fun `onNewActivityResultCaller registers for activity result and handles Failed`() = runTest {
         DummyActivityResultCaller.test {
             val handler = IntentConfirmationChallengeNextActionHandler(
-                publishableKeyProvider = { publishableKey },
-                productUsageTokens = productUsageTokens,
+                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
                 uiContext = testDispatcher
             )
 
@@ -159,8 +152,7 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
     fun `onNewActivityResultCaller sets the launcher on handler`() = runTest {
         DummyActivityResultCaller.test {
             val handler = IntentConfirmationChallengeNextActionHandler(
-                publishableKeyProvider = { publishableKey },
-                productUsageTokens = productUsageTokens,
+                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
                 uiContext = testDispatcher
             )
 
