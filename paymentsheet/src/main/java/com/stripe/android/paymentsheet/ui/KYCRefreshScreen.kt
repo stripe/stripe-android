@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -82,12 +81,12 @@ fun KYCRefreshScreen(
                         .padding(bottom = 24.dp)
                         .align(Alignment.CenterHorizontally)
                 )
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    backgroundColor = LinkTheme.colors.surfaceSecondary,
-                    modifier = Modifier.fillMaxWidth()
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(LinkTheme.colors.surfaceSecondary)
                 ) {
-                    Column {
                         InfoRow(
                             title = stringResource(
                                 id = R.string.stripe_link_onramp_kyc_verification_name_field_title
@@ -120,13 +119,12 @@ fun KYCRefreshScreen(
                                     contentDescription = "Edit Address",
                                     tint = Color.Unspecified,
                                     modifier = Modifier
-                                        .height(18.dp)
-                                        .width(18.dp)
+                                        .height(12.dp)
+                                        .width(12.dp)
                                 )
                             },
                             onIconTap = onEdit
                         )
-                    }
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
