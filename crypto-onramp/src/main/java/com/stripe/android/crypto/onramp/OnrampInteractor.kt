@@ -628,7 +628,7 @@ internal class OnrampInteractor @Inject constructor(
                         analyticsService?.track(OnrampAnalyticsEvent.KycVerificationCompleted)
 
                         OnrampVerifyKycInfoResult.Confirmed
-                                },
+                    },
                     onFailure = {
                         OnrampVerifyKycInfoResult.Failed(
                             refreshResult.exceptionOrNull() ?: Exception("Unknown error")
