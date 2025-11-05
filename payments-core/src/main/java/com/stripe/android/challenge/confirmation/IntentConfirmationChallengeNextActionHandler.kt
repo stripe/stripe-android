@@ -11,7 +11,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
-import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -24,7 +23,6 @@ import kotlin.coroutines.CoroutineContext
  */
 internal class IntentConfirmationChallengeNextActionHandler @Inject constructor(
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
-    @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String>,
     @UIContext private val uiContext: CoroutineContext
 ) : PaymentNextActionHandler<StripeIntent>() {
     private var intentConfirmationChallengeActivityContractNextActionLauncher:
@@ -71,7 +69,6 @@ internal class IntentConfirmationChallengeNextActionHandler @Inject constructor(
             IntentConfirmationChallengeActivityContract.Args(
                 publishableKey = publishableKeyProvider(),
                 intent = actionable,
-                productUsage = productUsageTokens
             )
         )
     }
