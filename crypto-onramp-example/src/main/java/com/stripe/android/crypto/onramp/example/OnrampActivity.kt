@@ -201,6 +201,7 @@ internal class OnrampActivity : ComponentActivity() {
 }
 
 @Composable
+@Suppress("LongMethod")
 fun AddressForm(
     onSubmit: (PaymentSheet.Address) -> Unit,
     onDismiss: () -> Unit
