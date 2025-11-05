@@ -44,9 +44,9 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import kotlinx.coroutines.launch
-import java.text.DateFormat
+import android.text.format.DateFormat
+import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 
 @Composable
 @Suppress("LongMethod")
@@ -245,13 +245,14 @@ private fun getLocalizedDob(dateOfBirth: DateOfBirth): String {
     } else {
         @Suppress("DEPRECATION")
         context.resources.configuration.locale
-    } ?: Locale.getDefault()
+    }
 
     val calendar = Calendar.getInstance().apply {
         set(dateOfBirth.year, dateOfBirth.month - 1, dateOfBirth.day)
     }
-    val dateFormat = DateFormat.getDateInstance(DateFormat.SHORT, locale)
-    return dateFormat.format(calendar.time)
+
+    val pattern = DateFormat.getBestDateTimePattern(locale, "ddMMyyyy")
+    return SimpleDateFormat(pattern, locale).format(calendar.time)
 }
 
 private fun PaymentSheet.Address.formattedAddress(): String {
