@@ -84,6 +84,10 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             statusBarColor = args.statusBarColor,
         )
 
+        handleArgs(args, host)
+    }
+
+    private fun handleArgs(args: PaymentLauncherContract.Args, host: AuthActivityStarterHost) {
         when (args) {
             is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
                 viewModel.confirmStripeIntent(args.confirmStripeIntentParams, host)
