@@ -87,10 +87,14 @@ internal data class VerifyKycActivityArgs(
     val linkAppearance: LinkAppearance?
 )
 
-@Parcelize
 internal sealed interface KycRefreshScreenAction : Parcelable {
+    @Parcelize
     data object Cancelled : KycRefreshScreenAction
+
+    @Parcelize
     data object Edit : KycRefreshScreenAction
+
+    @Parcelize
     data class Confirm(val info: RefreshKycInfo) : KycRefreshScreenAction
 }
 
