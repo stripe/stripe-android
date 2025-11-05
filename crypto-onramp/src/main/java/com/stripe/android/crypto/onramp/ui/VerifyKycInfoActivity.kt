@@ -117,11 +117,11 @@ internal data class VerifyKycArgs(
 ) : Parcelable
 
 private fun KycRetrieveResponse.toVerifyKYCInfo(): VerifyKYCInfo {
-    return object : VerifyKYCInfo {
-        override val firstName = this@toVerifyKYCInfo.firstName
-        override val lastName = this@toVerifyKYCInfo.lastName
-        override val idNumberLastFour = this@toVerifyKYCInfo.idNumberLastFour
-        override val dateOfBirth = this@toVerifyKYCInfo.dateOfBirth
-        override val address = this@toVerifyKYCInfo.address
-    }
+    return VerifyKYCInfo(
+        firstName = firstName,
+        lastName = lastName,
+        idNumberLastFour = idNumberLastFour,
+        dateOfBirth = dateOfBirth,
+        address = address
+    )
 }

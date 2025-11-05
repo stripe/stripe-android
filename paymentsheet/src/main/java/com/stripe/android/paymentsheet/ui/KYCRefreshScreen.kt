@@ -34,6 +34,8 @@ import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.ui.LinkAppBar
+import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.DateOfBirth
@@ -68,8 +70,14 @@ fun KYCRefreshScreen(
                     .background(LinkTheme.colors.surfacePrimary)
                     .padding(24.dp)
             ) {
-                TopNavigationBar(
-                    onClose = onClose,
+                LinkAppBar(
+                    state = LinkAppBarState(
+                        showHeader = true,
+                        canNavigateBack = false,
+                        title = null,
+                        isElevated = false
+                    ),
+                    onBackPressed = onClose,
                     modifier = Modifier
                         .padding(bottom = 8.dp)
                 )
@@ -149,48 +157,6 @@ private fun KycDivider() {
 }
 
 @Composable
-private fun TopNavigationBar(
-    onClose: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Image(
-            painter = painterResource(id = getLinkIcon()),
-            contentDescription = "Link",
-            modifier = Modifier
-                .width(88.dp)
-                .aspectRatio(1f)
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        IconButton(
-            onClick = onClose,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(LinkTheme.colors.surfaceSecondary)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.stripe_ic_paymentsheet_close),
-                    contentDescription = "Close",
-                    tint = LinkTheme.colors.textPrimary,
-                    modifier = Modifier.align(Alignment.Center)
-                        .size(12.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun InfoRow(
     title: String,
     value: String,
@@ -225,13 +191,13 @@ private fun InfoRow(
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface VerifyKYCInfo {
-    val firstName: String
-    val lastName: String
-    val dateOfBirth: DateOfBirth
-    val idNumberLastFour: String?
+data class VerifyKYCInfo(
+    val firstName: String,
+    val lastName: String,
+    val dateOfBirth: DateOfBirth,
+    val idNumberLastFour: String?,
     val address: PaymentSheet.Address
-}
+)
 
 private fun PaymentSheet.Address.formattedAddress(): String {
     return listOf(
