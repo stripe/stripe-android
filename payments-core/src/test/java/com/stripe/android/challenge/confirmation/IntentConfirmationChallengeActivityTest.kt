@@ -1,0 +1,171 @@
+package com.stripe.android.challenge.confirmation
+
+import android.content.Context
+import android.content.Intent
+import androidx.core.os.BundleCompat
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.isInstanceOf
+import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.utils.InjectableActivityScenario
+import com.stripe.android.utils.injectableActivityScenario
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+@RunWith(RobolectricTestRunner::class)
+internal class IntentConfirmationChallengeActivityTest {
+    private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
+    private val context: Context = ApplicationProvider.getApplicationContext()
+
+    @Test
+    fun `createIntent creates correct intent with args`() {
+        val args = createTestArgs()
+
+        val intent = IntentConfirmationChallengeActivity.createIntent(context, args)
+
+        assertThat(intent.component?.className).isEqualTo(IntentConfirmationChallengeActivity::class.java.name)
+        val intentArgs = intent.extras?.let {
+            BundleCompat.getParcelable(
+                it,
+                IntentConfirmationChallengeActivity.EXTRA_ARGS,
+                IntentConfirmationChallengeArgs::class.java
+            )
+        }
+        assertThat(intentArgs?.publishableKey).isEqualTo(args.publishableKey)
+        assertThat(intentArgs?.intent).isEqualTo(args.intent)
+    }
+
+    @Test
+    fun `getArgs returns correct args from SavedStateHandle`() {
+        val args = createTestArgs()
+        val savedStateHandle = SavedStateHandle()
+        savedStateHandle[IntentConfirmationChallengeActivity.EXTRA_ARGS] = args
+
+        val retrievedArgs = IntentConfirmationChallengeActivity.getArgs(savedStateHandle)
+
+        assertThat(retrievedArgs).isEqualTo(args)
+        assertThat(retrievedArgs?.publishableKey).isEqualTo(args.publishableKey)
+        assertThat(retrievedArgs?.intent).isEqualTo(args.intent)
+    }
+
+    @Test
+    fun `getArgs returns null when no args in SavedStateHandle`() {
+        val savedStateHandle = SavedStateHandle()
+
+        val retrievedArgs = IntentConfirmationChallengeActivity.getArgs(savedStateHandle)
+
+        assertThat(retrievedArgs).isNull()
+    }
+
+    @Test
+    fun `finishes with Success result when bridge handler emits Success event`() = runTest {
+        val clientSecret = "pi_test_secret_123"
+        val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
+            .apply {
+                emitEvent(ConfirmationChallengeBridgeEvent.Success(clientSecret = clientSecret))
+            }
+
+        val scenario = launchActivityWithBridgeHandler(bridgeHandler)
+
+        advanceUntilIdle()
+
+        assertThat(scenario.getResult().resultCode).isEqualTo(IntentConfirmationChallengeActivity.RESULT_COMPLETE)
+
+        val result = extractActivityResult(scenario)
+        assertThat(result).isInstanceOf<IntentConfirmationChallengeActivityResult.Success>()
+        val successResult = result as IntentConfirmationChallengeActivityResult.Success
+        assertThat(successResult.clientSecret).isEqualTo(clientSecret)
+
+        scenario.close()
+    }
+
+    @Test
+    fun `finishes with Failed result when bridge handler emits Error event`() = runTest {
+        val error = RuntimeException("Confirmation challenge failed")
+        val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
+            .apply {
+                emitEvent(ConfirmationChallengeBridgeEvent.Error(cause = error))
+            }
+
+        val scenario = launchActivityWithBridgeHandler(bridgeHandler)
+
+        advanceUntilIdle()
+
+        assertThat(scenario.getResult().resultCode).isEqualTo(IntentConfirmationChallengeActivity.RESULT_COMPLETE)
+
+        val result = extractActivityResult(scenario)
+        assertThat(result).isInstanceOf<IntentConfirmationChallengeActivityResult.Failed>()
+        val failedResult = result as IntentConfirmationChallengeActivityResult.Failed
+        assertThat(failedResult.error).isEqualTo(error)
+        assertThat(failedResult.error.message).isEqualTo("Confirmation challenge failed")
+
+        scenario.close()
+    }
+
+    private fun createTestArgs(): IntentConfirmationChallengeArgs {
+        return IntentConfirmationChallengeArgs(
+            publishableKey = "pk_test_123",
+            intent = PaymentIntentFixtures.PI_SUCCEEDED
+        )
+    }
+
+    private fun createTestViewModelFactory(
+        bridgeHandler: ConfirmationChallengeBridgeHandler
+    ): ViewModelProvider.Factory {
+        return object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return IntentConfirmationChallengeViewModel(
+                    bridgeHandler = bridgeHandler,
+                    workContext = testDispatcher
+                ) as T
+            }
+        }
+    }
+
+    private fun launchActivityWithBridgeHandler(
+        bridgeHandler: ConfirmationChallengeBridgeHandler
+    ) = injectableActivityScenario<IntentConfirmationChallengeActivity> {
+        injectActivity {
+            viewModelFactory = createTestViewModelFactory(bridgeHandler)
+        }
+    }.apply {
+        launchForResult(createIntent())
+    }
+
+    private fun createIntent(): Intent {
+        val args = createTestArgs()
+        return Intent(
+            ApplicationProvider.getApplicationContext(),
+            IntentConfirmationChallengeActivity::class.java
+        ).apply {
+            putExtra(IntentConfirmationChallengeActivity.EXTRA_ARGS, args)
+        }
+    }
+
+    private fun extractActivityResult(
+        scenario: InjectableActivityScenario<IntentConfirmationChallengeActivity>
+    ): IntentConfirmationChallengeActivityResult? {
+        return scenario.getResult().resultData?.extras?.let {
+            BundleCompat.getParcelable(
+                it,
+                IntentConfirmationChallengeActivityContract.EXTRA_RESULT,
+                IntentConfirmationChallengeActivityResult::class.java
+            )
+        }
+    }
+}

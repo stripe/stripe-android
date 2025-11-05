@@ -10,6 +10,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.challenge.confirmation.di.DaggerIntentConfirmationChallengeComponent
+import com.stripe.android.core.injection.UIContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,9 +19,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 internal class IntentConfirmationChallengeViewModel @Inject constructor(
     val bridgeHandler: ConfirmationChallengeBridgeHandler,
+    @UIContext private val workContext: CoroutineContext = Dispatchers.Main,
 ) : ViewModel() {
 
     private val _showWebView = MutableStateFlow(false)
@@ -29,7 +33,7 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
     val result: SharedFlow<IntentConfirmationChallengeActivityResult> = _result
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             listenToEvents()
         }
     }

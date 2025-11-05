@@ -3,23 +3,44 @@ package com.stripe.android.challenge.confirmation
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 
 internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
+    @VisibleForTesting
+    internal var viewModelFactory: ViewModelProvider.Factory = IntentConfirmationChallengeViewModel.factory()
+
+    private val viewModel: IntentConfirmationChallengeViewModel by viewModels {
+        viewModelFactory
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        lifecycleScope.launch {
-            dismissWithResult(
-                result = IntentConfirmationChallengeActivityResult.Failed(
-                    error = NotImplementedError("Intent Confirmation Challenge not implemented")
-                )
+        listenForActivityResult()
+
+        setContent {
+            val showWebView by viewModel.showWebView.collectAsState(initial = false)
+            IntentConfirmationChallengeUI(
+                bridgeHandler = viewModel.bridgeHandler,
+                showWebView = showWebView
             )
+        }
+    }
+
+    private fun listenForActivityResult() {
+        lifecycleScope.launch {
+            viewModel.result.collect(::dismissWithResult)
         }
     }
 
