@@ -182,7 +182,7 @@ private fun InfoRow(
             Text(
                 text = title,
                 style = LinkTheme.typography.caption,
-                color = LinkTheme.colors.textSecondary
+                color = LinkTheme.colors.textTertiary
             )
             Text(
                 text = value,
