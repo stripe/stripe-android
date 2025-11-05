@@ -26,7 +26,7 @@ internal class VerifyKycInfoActivity : ComponentActivity() {
         val linkAppearance = args.appearance
 
         enableEdgeToEdge()
-        
+
         setContent {
             KYCRefreshScreen(
                 appearance = linkAppearance,
