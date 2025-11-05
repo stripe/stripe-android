@@ -65,12 +65,12 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
-import com.stripe.android.crypto.onramp.model.DateOfBirth
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.launch
 
@@ -92,6 +92,7 @@ internal class OnrampActivity : ComponentActivity() {
         val callbacks = OnrampCallbacks(
             authenticateUserCallback = viewModel::onAuthenticateUserResult,
             verifyIdentityCallback = viewModel::onVerifyIdentityResult,
+            verifyKycCallback = viewModel::onVerifyKycResult,
             checkoutCallback = viewModel::onCheckoutResult,
             collectPaymentCallback = viewModel::onCollectPaymentResult,
             authorizeCallback = viewModel::onAuthorizeResult
@@ -160,6 +161,9 @@ internal class OnrampActivity : ComponentActivity() {
                         },
                         onCreatePaymentToken = {
                             viewModel.createCryptoPaymentToken()
+                        },
+                        onVerifyKyc = {
+                            onrampPresenter.verifyKycInfo()
                         }
                     )
                 }
@@ -286,6 +290,7 @@ internal fun OnrampScreen(
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
     onCreatePaymentToken: () -> Unit,
+    onVerifyKyc: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -364,6 +369,7 @@ internal fun OnrampScreen(
                     onAuthenticate = onAuthenticateUser,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
+                    onVerifyKyc = onVerifyKyc,
                     onStartVerification = onStartVerification,
                     onCollectPayment = onCollectPayment,
                     onCreatePaymentToken = onCreatePaymentToken,
@@ -582,6 +588,7 @@ private fun AuthenticatedOperationsScreen(
     onAuthenticate: (oauthScopes: String?) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
+    onVerifyKyc: () -> Unit,
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
     onCreatePaymentToken: () -> Unit,
@@ -760,6 +767,15 @@ private fun AuthenticatedOperationsScreen(
             onSsnChange = { ssn = it },
             onCollectKYC = { kycInfo -> onCollectKYC(kycInfo) }
         )
+
+        Button(
+            onClick = { onVerifyKyc() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Text("Verify KYC Info")
+        }
 
         StartVerificationScreen {
             onStartVerification()

@@ -34,6 +34,7 @@ import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
+import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.utils.isLinkAuthorizationError
@@ -303,6 +304,23 @@ internal class OnrampViewModel(
             is OnrampVerifyIdentityResult.Failed -> {
                 _message.value = "Identity Verification failed: ${result.error.message}"
                 _uiState.update { it.copy(screen = Screen.LoginSignup) }
+            }
+        }
+    }
+
+    fun onVerifyKycResult(result: OnrampVerifyKycInfoResult) {
+        when (result) {
+            is OnrampVerifyKycInfoResult.Confirmed -> {
+                _message.value = "KYC Verification Completed"
+            }
+            is OnrampVerifyKycInfoResult.UpdateAddress -> {
+                _message.value = "KYC Verification Requires Address Update - Unimplemented in Example"
+            }
+            is OnrampVerifyKycInfoResult.Cancelled -> {
+                _message.value = "KYC Verification Cancelled"
+            }
+            is OnrampVerifyKycInfoResult.Failed -> {
+                _message.value = "KYC Verification Failed: ${result.error.message}"
             }
         }
     }
