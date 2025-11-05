@@ -5,7 +5,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.coroutines.CoalescingOrchestrator
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -17,7 +16,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Provider
 
 internal interface EmbeddedConfigurationHandler {
@@ -33,7 +31,6 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
     private val sheetStateHolder: SheetStateHolder,
     private val eventReporter: EventReporter,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
-    @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean
 ) : EmbeddedConfigurationHandler {
 
     private var cache: ConfigurationCache?
