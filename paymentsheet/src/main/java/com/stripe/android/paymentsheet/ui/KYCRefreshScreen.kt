@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
@@ -86,45 +88,46 @@ fun KYCRefreshScreen(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
                         .background(LinkTheme.colors.surfaceSecondary)
+                        .verticalScroll(rememberScrollState())
                 ) {
-                        InfoRow(
-                            title = stringResource(
-                                id = R.string.stripe_link_onramp_kyc_verification_name_field_title
-                            ),
-                            value = name
-                        )
-                        KycDivider()
-                        InfoRow(
-                            title = stringResource(
-                                id = R.string.stripe_link_onramp_kyc_verification_dob_field_title
-                            ),
-                            value = dob
-                        )
-                        KycDivider()
-                        InfoRow(
-                            title = stringResource(
-                                id = R.string.stripe_link_onramp_kyc_verification_ssn_field_title
-                            ),
-                            value = ssnLast4
-                        )
-                        KycDivider()
-                        InfoRow(
-                            title = stringResource(
-                                id = R.string.stripe_link_onramp_kyc_verification_address_field_title
-                            ),
-                            value = address,
-                            icon = {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.stripe_ic_kyc_verify_edit_ref),
-                                    contentDescription = "Edit Address",
-                                    tint = Color.Unspecified,
-                                    modifier = Modifier
-                                        .height(12.dp)
-                                        .width(12.dp)
-                                )
-                            },
-                            onIconTap = onEdit
-                        )
+                    InfoRow(
+                        title = stringResource(
+                            id = R.string.stripe_link_onramp_kyc_verification_name_field_title
+                        ),
+                        value = name
+                    )
+                    KycDivider()
+                    InfoRow(
+                        title = stringResource(
+                            id = R.string.stripe_link_onramp_kyc_verification_dob_field_title
+                        ),
+                        value = dob
+                    )
+                    KycDivider()
+                    InfoRow(
+                        title = stringResource(
+                            id = R.string.stripe_link_onramp_kyc_verification_ssn_field_title
+                        ),
+                        value = ssnLast4
+                    )
+                    KycDivider()
+                    InfoRow(
+                        title = stringResource(
+                            id = R.string.stripe_link_onramp_kyc_verification_address_field_title
+                        ),
+                        value = address,
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.stripe_ic_kyc_verify_edit_ref),
+                                contentDescription = "Edit Address",
+                                tint = Color.Unspecified,
+                                modifier = Modifier
+                                    .height(12.dp)
+                                    .width(12.dp)
+                            )
+                        },
+                        onIconTap = onEdit
+                    )
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
