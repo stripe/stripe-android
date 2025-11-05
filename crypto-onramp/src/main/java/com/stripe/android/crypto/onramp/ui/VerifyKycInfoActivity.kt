@@ -12,7 +12,7 @@ import androidx.core.os.BundleCompat
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.link.LinkAppearance
-import com.stripe.android.link.onramp.ui.OnrampKYCRefreshScreen
+import com.stripe.android.link.onramp.ui.OnrampKycRefreshScreen
 import com.stripe.android.link.onramp.ui.VerifyKYCInfo
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.parcelize.Parcelize
@@ -29,7 +29,7 @@ internal class VerifyKycInfoActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            OnrampKYCRefreshScreen(
+            OnrampKycRefreshScreen(
                 appearance = linkAppearance,
                 kycInfo = kycInfo.toVerifyKYCInfo(),
                 onClose = {

@@ -1,14 +1,17 @@
 package com.stripe.android.link.onramp.ui
 
 import android.os.Build
+import android.text.format.DateFormat
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -23,7 +26,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -32,7 +34,6 @@ import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.link.theme.isLinkDarkTheme
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.PrimaryButton
@@ -42,14 +43,13 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import kotlinx.coroutines.launch
-import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 
 @Composable
 @Suppress("LongMethod")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun OnrampKYCRefreshScreen(
+fun OnrampKycRefreshScreen(
     appearance: LinkAppearance?,
     kycInfo: VerifyKYCInfo,
     onClose: () -> Unit,
@@ -72,9 +72,15 @@ fun OnrampKYCRefreshScreen(
 
     ElementsBottomSheetLayout(
         state = sheetState,
-        onDismissed = onClose
+        onDismissed = { dismissThen(onClose) }
     ) {
         DefaultLinkTheme(appearance = appearance) {
+            BackHandler {
+                dismissThen(onClose)
+            }
+
+            val buttonVerticalSpace = LinkTheme.shapes.primaryButtonHeight + 16.dp
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -104,66 +110,73 @@ fun OnrampKYCRefreshScreen(
                         .padding(bottom = 24.dp)
                         .align(Alignment.CenterHorizontally)
                 )
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(LinkTheme.colors.surfaceSecondary)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    InfoRow(
-                        title = stringResource(
-                            id = R.string.stripe_link_onramp_kyc_verification_name_field_title
-                        ),
-                        value = name
-                    )
-                    KycDivider()
-                    InfoRow(
-                        title = stringResource(
-                            id = R.string.stripe_link_onramp_kyc_verification_dob_field_title
-                        ),
-                        value = dob
-                    )
-                    KycDivider()
-                    InfoRow(
-                        title = stringResource(
-                            id = R.string.stripe_link_onramp_kyc_verification_ssn_field_title
-                        ),
-                        value = ssnLast4
-                    )
-                    KycDivider()
-                    InfoRow(
-                        title = stringResource(
-                            id = R.string.stripe_link_onramp_kyc_verification_address_field_title
-                        ),
-                        value = address,
-                        icon = {
-                            val isDark = isLinkDarkTheme(appearance)
-                            val iconTint = if (isDark) Color.Unspecified else Color.Black
 
-                            Icon(
-                                painter = painterResource(id = R.drawable.stripe_ic_edit_outlined_symbol),
-                                contentDescription = "Edit Address",
-                                tint = iconTint,
-                                modifier = Modifier
-                                    .height(12.dp)
-                                    .width(12.dp)
-                            )
-                        },
-                        onIconTap = onEdit
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp)
+                            .padding(bottom = buttonVerticalSpace)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(LinkTheme.colors.surfaceSecondary)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        InfoRow(
+                            title = stringResource(
+                                id = R.string.stripe_link_onramp_kyc_verification_name_field_title
+                            ),
+                            value = name
+                        )
+                        KycDivider()
+                        InfoRow(
+                            title = stringResource(
+                                id = R.string.stripe_link_onramp_kyc_verification_dob_field_title
+                            ),
+                            value = dob
+                        )
+                        KycDivider()
+                        InfoRow(
+                            title = stringResource(
+                                id = R.string.stripe_link_onramp_kyc_verification_ssn_field_title
+                            ),
+                            value = ssnLast4
+                        )
+                        KycDivider()
+                        InfoRow(
+                            title = stringResource(
+                                id = R.string.stripe_link_onramp_kyc_verification_address_field_title
+                            ),
+                            value = address,
+                            icon = {
+                                val iconTint = LinkTheme.colors.iconPrimary
+
+                                Icon(
+                                    painter = painterResource(id = R.drawable.stripe_ic_edit_outlined_symbol),
+                                    contentDescription = "Edit Address",
+                                    tint = iconTint,
+                                    modifier = Modifier
+                                        .height(12.dp)
+                                        .width(12.dp)
+                                )
+                            },
+                            onIconTap = { dismissThen(onEdit) }
+                        )
+                    }
+
+                    PrimaryButton(
+                        label = stringResource(R.string.stripe_link_onramp_kyc_verification_confirm_button_text),
+                        state = PrimaryButtonState.Enabled,
+                        onButtonClick = { dismissThen(onConfirm) },
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp)
+                            .align(Alignment.BottomCenter)
+                            .navigationBarsPadding()
                     )
                 }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                PrimaryButton(
-                    label = stringResource(R.string.stripe_link_onramp_kyc_verification_confirm_button_text),
-                    state = PrimaryButtonState.Enabled,
-                    onButtonClick = onConfirm,
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp)
-                )
             }
         }
     }
@@ -184,7 +197,12 @@ private fun InfoRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(
+                top = 16.dp,
+                bottom = 16.dp,
+                start = 16.dp,
+                end = if (icon == null) 16.dp else 0.dp
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -201,9 +219,12 @@ private fun InfoRow(
         }
 
         if (icon != null) {
-            IconButton(onClick = onIconTap ?: {}) {
-                icon()
-            }
+            IconButton(
+                onClick = onIconTap ?: {},
+                content = { icon() },
+                modifier = Modifier
+                    .padding(start = 16.dp)
+            )
         }
     }
 }
@@ -225,13 +246,14 @@ private fun getLocalizedDob(dateOfBirth: DateOfBirth): String {
     } else {
         @Suppress("DEPRECATION")
         context.resources.configuration.locale
-    } ?: Locale.getDefault()
+    }
 
     val calendar = Calendar.getInstance().apply {
         set(dateOfBirth.year, dateOfBirth.month - 1, dateOfBirth.day)
     }
-    val dateFormat = DateFormat.getDateInstance(DateFormat.SHORT, locale)
-    return dateFormat.format(calendar.time)
+
+    val pattern = DateFormat.getBestDateTimePattern(locale, "ddMMyyyy")
+    return SimpleDateFormat(pattern, locale).format(calendar.time)
 }
 
 private fun PaymentSheet.Address.formattedAddress(): String {
