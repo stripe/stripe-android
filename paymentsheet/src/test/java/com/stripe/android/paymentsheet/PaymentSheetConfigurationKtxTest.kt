@@ -16,6 +16,7 @@ import kotlin.test.assertFailsWith
 class PaymentSheetConfigurationKtxTest {
     @get:Rule
     val callbackTestRule = PaymentElementCallbackTestRule()
+
     @Test
     fun `'validate' should fail when ephemeral key secret is blank`() {
         val configWithBlankEphemeralKeySecret = configuration.newBuilder()
@@ -202,7 +203,7 @@ class PaymentSheetConfigurationKtxTest {
     }
 
     @Test
-    fun `'validate' should fail when createIntentWithConfirmationTokenCallback is set with LegacyCustomerEphemeralKey in test mode`() {
+    fun `'validate' should fail when CT callback is set with LegacyCustomerEphemeralKey in test mode`() {
         val callbackIdentifier = "test_identifier"
 
         PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
@@ -231,7 +232,7 @@ class PaymentSheetConfigurationKtxTest {
     }
 
     @Test
-    fun `'validate' should succeed when createIntentWithConfirmationTokenCallback is set with LegacyCustomerEphemeralKey in live mode`() {
+    fun `'validate' should succeed when CT callback is set with LegacyCustomerEphemeralKey in live mode`() {
         val callbackIdentifier = "test_identifier"
 
         PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
@@ -255,7 +256,7 @@ class PaymentSheetConfigurationKtxTest {
     }
 
     @Test
-    fun `'validate' should succeed when createIntentWithConfirmationTokenCallback is set with CustomerSession in test mode`() {
+    fun `'validate' should succeed when createIntentWithConfirmationTokenCallback is set with CustomerSession`() {
         val callbackIdentifier = "test_identifier"
 
         PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()

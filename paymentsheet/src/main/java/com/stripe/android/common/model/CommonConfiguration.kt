@@ -92,9 +92,11 @@ internal data class CommonConfiguration(
         isLiveMode: Boolean,
         @PaymentElementCallbackIdentifier callbackIdentifier: String
     ) {
-        if (PaymentElementCallbackReferences[callbackIdentifier]?.createIntentWithConfirmationTokenCallback != null &&
+        if (
+            PaymentElementCallbackReferences[callbackIdentifier]?.createIntentWithConfirmationTokenCallback != null &&
             customer?.accessType is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey &&
-            isLiveMode.not()) {
+            isLiveMode.not()
+        ) {
             throw IllegalArgumentException(
                 "createIntentWithConfirmationTokenCallback must be used with CustomerSession."
             )
