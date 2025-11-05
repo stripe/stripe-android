@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.link.onramp.ui
+package com.stripe.android.link.onramp.ui
 
 import android.os.Build
 import androidx.annotation.RestrictTo
@@ -19,6 +19,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +42,7 @@ import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -59,6 +62,14 @@ fun OnrampKYCRefreshScreen(
     val ssnLast4 = kycInfo.idNumberLastFour ?: ""
     val address = kycInfo.address.formattedAddress()
     val sheetState = rememberStripeBottomSheetState()
+    val scope = rememberCoroutineScope()
+
+    fun dismissThen(action: () -> Unit) {
+        scope.launch {
+            sheetState.hide()
+            action()
+        }
+    }
 
     ElementsBottomSheetLayout(
         state = sheetState,
@@ -79,7 +90,7 @@ fun OnrampKYCRefreshScreen(
                         title = null,
                         isElevated = false
                     ),
-                    onBackPressed = onClose,
+                    onBackPressed = { dismissThen(onClose) },
                     modifier = Modifier
                         .padding(bottom = 8.dp)
                 )

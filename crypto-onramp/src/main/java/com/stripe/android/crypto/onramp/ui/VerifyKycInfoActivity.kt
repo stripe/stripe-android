@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp.ui
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
@@ -9,11 +10,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
+import com.stripe.android.crypto.onramp.R
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.link.LinkAppearance
-import com.stripe.android.paymentsheet.link.onramp.ui.OnrampKYCRefreshScreen
-import com.stripe.android.paymentsheet.link.onramp.ui.VerifyKYCInfo
+import com.stripe.android.link.onramp.ui.OnrampKYCRefreshScreen
+import com.stripe.android.link.onramp.ui.VerifyKYCInfo
+import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.parcelize.Parcelize
 
 internal class VerifyKycInfoActivity : ComponentActivity() {
@@ -54,6 +57,11 @@ internal class VerifyKycInfoActivity : ComponentActivity() {
                 }
             )
         }
+    }
+
+    override fun finish() {
+        super.finish()
+        fadeOut()
     }
 
     private fun createResultIntent(action: KycRefreshScreenAction): Intent {
