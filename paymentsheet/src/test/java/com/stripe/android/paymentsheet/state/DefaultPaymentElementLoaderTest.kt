@@ -4032,6 +4032,8 @@ internal class DefaultPaymentElementLoaderTest {
             userFacingLogger = userFacingLogger,
             cvcRecollectionHandler = CvcRecollectionHandlerImpl(),
             integrityRequestManager = integrityRequestManager,
+            isLiveModeProvider = { false },
+            callbackIdentifier = "test_callback_identifier",
         )
     }
 
