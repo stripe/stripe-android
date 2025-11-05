@@ -217,6 +217,7 @@ fun AddressForm(
     }
 
     var values by remember { mutableStateOf(fields.associate { it.first to "" }) }
+    val focusManager = LocalFocusManager.current
 
     Column(
         modifier = Modifier
@@ -229,10 +230,21 @@ fun AddressForm(
             OutlinedTextField(
                 value = values[key] ?: "",
                 onValueChange = { values = values.toMutableMap().apply { set(key, it) } },
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                ),
                 label = { Text(label) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
+                    .onPreviewKeyEvent {
+                        if (it.key == Key.Tab) {
+                            focusManager.moveFocus(FocusDirection.Next)
+                            true
+                        } else {
+                            false
+                        }
+                    }
             )
         }
         Row(
