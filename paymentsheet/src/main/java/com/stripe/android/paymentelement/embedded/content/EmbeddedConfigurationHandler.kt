@@ -64,12 +64,6 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
         )
 
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
-        try {
-            initializationMode.validate()
-            targetConfiguration.validate(isLiveModeProvider())
-        } catch (e: IllegalArgumentException) {
-            return Result.failure(e)
-        }
 
         val arguments = Arguments(
             intentConfiguration = intentConfiguration,
