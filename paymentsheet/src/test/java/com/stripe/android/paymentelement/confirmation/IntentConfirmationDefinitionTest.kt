@@ -333,6 +333,56 @@ class IntentConfirmationDefinitionTest {
     }
 
     @Test
+    fun `On launch with next step action and 'PaymentIntent' with intent, should use optimized path`() = runTest {
+        val launcher = FakePaymentLauncher()
+
+        val definition = createIntentConfirmationDefinition(
+            paymentLauncher = launcher,
+        )
+
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+
+        definition.launch(
+            launcher = launcher,
+            arguments = IntentConfirmationDefinition.Args.NextAction(
+                clientSecret = "pi_123",
+                intent = paymentIntent
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
+        )
+
+        assertThat(launcher.calls.awaitItem()).isEqualTo(
+            FakePaymentLauncher.Call.HandleNextActionWithIntent.PaymentIntent(paymentIntent)
+        )
+    }
+
+    @Test
+    fun `On launch with next step action and 'SetupIntent' with intent, should use optimized path`() = runTest {
+        val launcher = FakePaymentLauncher()
+
+        val definition = createIntentConfirmationDefinition(
+            paymentLauncher = launcher,
+        )
+
+        val setupIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+
+        definition.launch(
+            launcher = launcher,
+            arguments = IntentConfirmationDefinition.Args.NextAction(
+                clientSecret = "seti_123",
+                intent = setupIntent
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
+            confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
+        )
+
+        assertThat(launcher.calls.awaitItem()).isEqualTo(
+            FakePaymentLauncher.Call.HandleNextActionWithIntent.SetupIntent(setupIntent)
+        )
+    }
+
+    @Test
     fun `On 'Completed' payment result, should return successful confirmation result`() {
         val launcher = FakePaymentLauncher()
 
