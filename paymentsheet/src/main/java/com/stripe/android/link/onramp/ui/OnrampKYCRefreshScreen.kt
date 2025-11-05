@@ -1,6 +1,7 @@
 package com.stripe.android.link.onramp.ui
 
 import android.os.Build
+import android.text.format.DateFormat
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.background
@@ -25,7 +26,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -34,7 +34,6 @@ import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.link.theme.isLinkDarkTheme
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.PrimaryButton
@@ -44,7 +43,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import kotlinx.coroutines.launch
-import android.text.format.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
