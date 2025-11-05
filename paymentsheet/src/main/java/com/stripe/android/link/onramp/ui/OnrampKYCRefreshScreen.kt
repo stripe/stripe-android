@@ -3,6 +3,7 @@ package com.stripe.android.link.onramp.ui
 import android.os.Build
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -75,6 +76,8 @@ fun OnrampKYCRefreshScreen(
         onDismissed = onClose
     ) {
         DefaultLinkTheme(appearance = appearance) {
+            val buttonVerticalSpace = LinkTheme.shapes.primaryButtonHeight + 16.dp
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -104,66 +107,74 @@ fun OnrampKYCRefreshScreen(
                         .padding(bottom = 24.dp)
                         .align(Alignment.CenterHorizontally)
                 )
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(LinkTheme.colors.surfaceSecondary)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    InfoRow(
-                        title = stringResource(
-                            id = R.string.stripe_link_onramp_kyc_verification_name_field_title
-                        ),
-                        value = name
-                    )
-                    KycDivider()
-                    InfoRow(
-                        title = stringResource(
-                            id = R.string.stripe_link_onramp_kyc_verification_dob_field_title
-                        ),
-                        value = dob
-                    )
-                    KycDivider()
-                    InfoRow(
-                        title = stringResource(
-                            id = R.string.stripe_link_onramp_kyc_verification_ssn_field_title
-                        ),
-                        value = ssnLast4
-                    )
-                    KycDivider()
-                    InfoRow(
-                        title = stringResource(
-                            id = R.string.stripe_link_onramp_kyc_verification_address_field_title
-                        ),
-                        value = address,
-                        icon = {
-                            val isDark = isLinkDarkTheme(appearance)
-                            val iconTint = if (isDark) Color.Unspecified else Color.Black
 
-                            Icon(
-                                painter = painterResource(id = R.drawable.stripe_ic_edit_outlined_symbol),
-                                contentDescription = "Edit Address",
-                                tint = iconTint,
-                                modifier = Modifier
-                                    .height(12.dp)
-                                    .width(12.dp)
-                            )
-                        },
-                        onIconTap = onEdit
-                    )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp)
+                            .padding(bottom = buttonVerticalSpace)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(LinkTheme.colors.surfaceSecondary)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        InfoRow(
+                            title = stringResource(
+                                id = R.string.stripe_link_onramp_kyc_verification_name_field_title
+                            ),
+                            value = name
+                        )
+                        KycDivider()
+                        InfoRow(
+                            title = stringResource(
+                                id = R.string.stripe_link_onramp_kyc_verification_dob_field_title
+                            ),
+                            value = dob
+                        )
+                        KycDivider()
+                        InfoRow(
+                            title = stringResource(
+                                id = R.string.stripe_link_onramp_kyc_verification_ssn_field_title
+                            ),
+                            value = ssnLast4
+                        )
+                        KycDivider()
+                        InfoRow(
+                            title = stringResource(
+                                id = R.string.stripe_link_onramp_kyc_verification_address_field_title
+                            ),
+                            value = address,
+                            icon = {
+                                val isDark = isLinkDarkTheme(appearance)
+                                val iconTint = if (isDark) Color.Unspecified else Color.Black
+
+                                Icon(
+                                    painter = painterResource(id = R.drawable.stripe_ic_edit_outlined_symbol),
+                                    contentDescription = "Edit Address",
+                                    tint = iconTint,
+                                    modifier = Modifier
+                                        .height(12.dp)
+                                        .width(12.dp)
+                                )
+                            },
+                            onIconTap = onEdit
+                        )
+                    }
+
+                        PrimaryButton(
+                            label = stringResource(R.string.stripe_link_onramp_kyc_verification_confirm_button_text),
+                            state = PrimaryButtonState.Enabled,
+                            onButtonClick = onConfirm,
+                            modifier = Modifier
+                                .padding(horizontal = 24.dp)
+                                .align(Alignment.BottomCenter)
+                        )
                 }
 
-                Spacer(modifier = Modifier.weight(1f))
-
-                PrimaryButton(
-                    label = stringResource(R.string.stripe_link_onramp_kyc_verification_confirm_button_text),
-                    state = PrimaryButtonState.Enabled,
-                    onButtonClick = onConfirm,
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp)
-                )
             }
         }
     }
