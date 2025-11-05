@@ -239,6 +239,27 @@ internal class PaymentLauncherViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Handles next action for a [StripeIntent] that has already been loaded.
+     * This is an internal optimization to avoid re-fetching the intent when we already have it.
+     */
+    internal fun handleNextActionForStripeIntent(intent: StripeIntent, host: AuthActivityStarterHost) {
+        if (hasStarted) return
+        viewModelScope.launch {
+            savedStateHandle[KEY_HAS_STARTED] = true
+            savedStateHandle[KEY_CONFIRM_ACTION_REQUESTED] = false
+            durationProvider.start(DurationProvider.Key.PaymentLauncher)
+
+            nextActionHandlerRegistry
+                .getNextActionHandler(intent)
+                .performNextAction(
+                    host,
+                    intent,
+                    apiRequestOptionsProvider.get()
+                )
+        }
+    }
+
     private fun logHandleNextActionStarted(clientSecret: String): Map<String, String> {
         val analyticsParams = mapOf(
             "intent_id" to clientSecret.toStripeId(),
@@ -402,8 +423,10 @@ internal class PaymentLauncherViewModel @Inject constructor(
                     }
                 }
                 is PaymentLauncherContract.Args.HashedPaymentIntentNextActionArgs,
-                is PaymentLauncherContract.Args.PaymentIntentNextActionArgs -> true
-                is PaymentLauncherContract.Args.SetupIntentNextActionArgs -> false
+                is PaymentLauncherContract.Args.PaymentIntentNextActionArgs,
+                is PaymentLauncherContract.Args.PaymentIntentNextActionWithIntentArgs -> true
+                is PaymentLauncherContract.Args.SetupIntentNextActionArgs,
+                is PaymentLauncherContract.Args.SetupIntentNextActionWithIntentArgs -> false
             }
 
             return subcomponentBuilder

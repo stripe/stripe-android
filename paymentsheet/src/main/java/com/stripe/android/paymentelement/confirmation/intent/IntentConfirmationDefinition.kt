@@ -90,7 +90,7 @@ internal class IntentConfirmationDefinition(
     ) {
         when (arguments) {
             is Args.Confirm -> launchConfirm(launcher, arguments.confirmNextParams)
-            is Args.NextAction -> launchNextAction(launcher, arguments.clientSecret, confirmationArgs.intent)
+            is Args.NextAction -> launchNextAction(launcher, arguments, confirmationArgs.intent)
         }
     }
 
@@ -120,15 +120,26 @@ internal class IntentConfirmationDefinition(
 
     private fun launchNextAction(
         launcher: PaymentLauncher,
-        clientSecret: String,
-        intent: StripeIntent,
+        arguments: Args.NextAction,
+        contextIntent: StripeIntent,
     ) {
+        // If we have the intent already loaded in Args, use it directly to avoid an extra network call
+        val intent = arguments.intent ?: contextIntent
+
         when (intent) {
             is PaymentIntent -> {
-                launcher.handleNextActionForPaymentIntent(clientSecret)
+                if (arguments.intent != null) {
+                    launcher.handleNextActionForPaymentIntent(intent)
+                } else {
+                    launcher.handleNextActionForPaymentIntent(arguments.clientSecret)
+                }
             }
             is SetupIntent -> {
-                launcher.handleNextActionForSetupIntent(clientSecret)
+                if (arguments.intent != null) {
+                    launcher.handleNextActionForSetupIntent(intent)
+                } else {
+                    launcher.handleNextActionForSetupIntent(arguments.clientSecret)
+                }
             }
         }
     }
@@ -148,7 +159,10 @@ internal class IntentConfirmationDefinition(
     }
 
     sealed interface Args {
-        data class NextAction(val clientSecret: String) : Args
+        data class NextAction(
+            val clientSecret: String,
+            val intent: StripeIntent? = null,
+        ) : Args
 
         data class Confirm(val confirmNextParams: ConfirmStripeIntentParams) : Args
     }

@@ -41,6 +41,24 @@ interface PaymentLauncher {
     fun handleNextActionForSetupIntent(clientSecret: String)
 
     /**
+     * Handles next action for a [PaymentIntent] that has already been loaded.
+     * This is an internal optimization to avoid re-fetching the intent when we already have it.
+     *
+     * @RestrictTo for paymentsheet module use only
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun handleNextActionForPaymentIntent(intent: PaymentIntent)
+
+    /**
+     * Handles next action for a [SetupIntent] that has already been loaded.
+     * This is an internal optimization to avoid re-fetching the intent when we already have it.
+     *
+     * @RestrictTo for paymentsheet module use only
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun handleNextActionForSetupIntent(intent: SetupIntent)
+
+    /**
      * Fetches a [PaymentIntent] from a hashed value and handles its next action.
      */
     @SharedPaymentTokenSessionPreview
