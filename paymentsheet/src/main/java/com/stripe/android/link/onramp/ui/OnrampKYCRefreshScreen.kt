@@ -163,14 +163,14 @@ fun OnrampKycRefreshScreen(
                                         .width(12.dp)
                                 )
                             },
-                            onIconTap = onEdit
+                            onIconTap = { dismissThen(onEdit) }
                         )
                     }
 
                     PrimaryButton(
                         label = stringResource(R.string.stripe_link_onramp_kyc_verification_confirm_button_text),
                         state = PrimaryButtonState.Enabled,
-                        onButtonClick = onConfirm,
+                        onButtonClick = { dismissThen(onConfirm) },
                         modifier = Modifier
                             .padding(horizontal = 24.dp)
                             .align(Alignment.BottomCenter)
