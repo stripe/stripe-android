@@ -8,7 +8,6 @@ import com.stripe.android.crypto.onramp.CheckoutState.Status
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutCallback
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
-import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -27,7 +26,6 @@ import org.robolectric.RobolectricTestRunner
 class OnrampPresenterCoordinatorTest {
     private val linkController: LinkController = mock()
     private val interactor: OnrampInteractor = mock()
-    private val cryptoApiRepository: CryptoApiRepository = mock()
 
     private val lifecycleOwner = TestLifecycleOwner()
     private val activity = Robolectric.buildActivity(ComponentActivity::class.java).create().get()
@@ -93,7 +91,6 @@ class OnrampPresenterCoordinatorTest {
             interactor = interactor,
             lifecycleOwner = lifecycleOwner,
             activity = activity,
-            cryptoApiRepository = cryptoApiRepository,
             onrampCallbacks = OnrampCallbacks(
                 checkoutCallback = checkoutCallback,
                 verifyIdentityCallback = {},
