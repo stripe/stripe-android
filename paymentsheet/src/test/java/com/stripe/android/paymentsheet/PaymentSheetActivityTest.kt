@@ -1291,8 +1291,7 @@ internal class PaymentSheetActivityTest {
                         return FakeCvcRecollectionInteractor()
                     }
                 },
-                isLiveModeProvider = { false },
-                callbackIdentifier = "test_callback_identifier",
+                isLiveModeProvider = { false }
             )
         }
     }
