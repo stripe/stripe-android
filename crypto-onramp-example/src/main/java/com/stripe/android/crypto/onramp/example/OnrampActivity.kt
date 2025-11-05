@@ -155,10 +155,11 @@ internal class OnrampActivity : ComponentActivity() {
                         },
                         sheetGesturesEnabled = false,
                         sheetState = rememberModalBottomSheetState(
-                            if (showAddressModal == true)
+                            if (showAddressModal == true) {
                                 ModalBottomSheetValue.Expanded
-                            else
+                            } else {
                                 ModalBottomSheetValue.Hidden
+                            }
                         )
                     ) {
                         OnrampScreen(
