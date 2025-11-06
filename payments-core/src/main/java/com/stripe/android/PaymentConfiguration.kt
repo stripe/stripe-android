@@ -23,7 +23,7 @@ constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun isLiveMode(): Boolean {
-        return !publishableKey.contains("test")
+        return !publishableKey.startsWith("pk_test")
     }
 
     /**
