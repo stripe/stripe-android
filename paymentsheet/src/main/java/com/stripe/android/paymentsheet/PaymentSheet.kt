@@ -1371,9 +1371,7 @@ class PaymentSheet internal constructor(
 
                 @Parcelize
                 @Poko
-                class FlatWithRadio
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                constructor(
+                class FlatWithRadio internal constructor(
                     internal val separatorThicknessDp: Float,
                     internal val startSeparatorInsetDp: Float,
                     internal val endSeparatorInsetDp: Float,
@@ -1535,9 +1533,7 @@ class PaymentSheet internal constructor(
 
                 @Parcelize
                 @Poko
-                class FlatWithCheckmark
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                constructor(
+                class FlatWithCheckmark internal constructor(
                     internal val separatorThicknessDp: Float,
                     internal val startSeparatorInsetDp: Float,
                     internal val endSeparatorInsetDp: Float,
@@ -1700,9 +1696,7 @@ class PaymentSheet internal constructor(
 
                 @Parcelize
                 @Poko
-                class FloatingButton
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                constructor(
+                class FloatingButton internal constructor(
                     internal val spacingDp: Float,
                     internal val additionalInsetsDp: Float,
                 ) : RowStyle() {
