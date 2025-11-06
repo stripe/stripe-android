@@ -2649,21 +2649,21 @@ class PaymentSheet internal constructor(
         /**
          * The customer's billing address.
          */
-        internal val address: Address? = null,
+        val address: Address? = null,
         /**
          * The customer's email.
          * The value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
          */
-        internal val email: String? = null,
+        val email: String? = null,
         /**
          * The customer's full name.
          * The value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
          */
-        internal val name: String? = null,
+        val name: String? = null,
         /**
          * The customer's phone number without formatting e.g. 5551234567
          */
-        internal val phone: String? = null
+        val phone: String? = null
     ) : Parcelable {
         internal fun isFilledOut(): Boolean {
             return address != null ||
