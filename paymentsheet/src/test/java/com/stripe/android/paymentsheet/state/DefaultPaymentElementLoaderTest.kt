@@ -184,6 +184,99 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `load with empty merchantDisplayName returns failure`() = runTest {
+        val loader = createPaymentElementLoader()
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration(merchantDisplayName = ""),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).isEqualTo(
+            "When a Configuration is passed to PaymentSheet, the Merchant display name cannot be an empty string."
+        )
+    }
+
+    @Test
+    fun `load with empty client secret returns failure`() = runTest {
+        val loader = createPaymentElementLoader()
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = " ",
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).isEqualTo(
+            "The PaymentIntent client_secret cannot be an empty string."
+        )
+    }
+
+    @Test
+    fun `load with empty customer id returns failure`() = runTest {
+        val loader = createPaymentElementLoader()
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some name",
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = " ",
+                    ephemeralKeySecret = "ek_123",
+                ),
+            ),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).isEqualTo(
+            "When a CustomerConfiguration is passed to PaymentSheet, the Customer ID cannot be an empty string."
+        )
+    }
+
+    @Test
+    fun `load with conflicting ephemeral key returns failure`() = runTest {
+        val loader = createPaymentElementLoader()
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some name",
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "customer_id",
+                    ephemeralKeySecret = " ",
+                    accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_different"),
+                ),
+            ),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).isEqualTo(
+            "Conflicting ephemeralKeySecrets between CustomerConfiguration and CustomerConfiguration.customerAccessType"
+        )
+    }
+
+    @Test
     fun `load without customer should return expected result`() = runTest {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
@@ -1847,7 +1940,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
-                    clientSecret = "cus_123",
+                    clientSecret = "cuss_123",
                 ),
             ),
             metadata = PaymentElementLoader.Metadata(
@@ -1881,7 +1974,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
-                    clientSecret = "cus_123",
+                    clientSecret = "cuss_123",
                 ),
             ),
             metadata = PaymentElementLoader.Metadata(
@@ -2035,7 +2128,7 @@ internal class DefaultPaymentElementLoaderTest {
                 merchantDisplayName = "Merchant, Inc.",
                 customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
-                    clientSecret = "customer_client_secret",
+                    clientSecret = "cuss_123",
                 ),
             ),
             metadata = PaymentElementLoader.Metadata(
@@ -2046,7 +2139,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(repository.lastParams?.customer).isEqualTo(
             PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                 id = "cus_1",
-                clientSecret = "customer_client_secret",
+                clientSecret = "cuss_123",
             )
         )
     }
@@ -2091,7 +2184,7 @@ internal class DefaultPaymentElementLoaderTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
-                        clientSecret = "customer_client_secret",
+                        clientSecret = "cuss_123",
                     ),
                 ),
                 metadata = PaymentElementLoader.Metadata(
@@ -2132,7 +2225,7 @@ internal class DefaultPaymentElementLoaderTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
-                        clientSecret = "customer_client_secret",
+                        clientSecret = "cuss_123",
                     ),
                 ),
                 metadata = PaymentElementLoader.Metadata(
@@ -2178,7 +2271,7 @@ internal class DefaultPaymentElementLoaderTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
-                        clientSecret = "customer_client_secret",
+                        clientSecret = "cuss_123",
                     ),
                 ),
                 metadata = PaymentElementLoader.Metadata(
@@ -2224,7 +2317,7 @@ internal class DefaultPaymentElementLoaderTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
-                        clientSecret = "customer_client_secret",
+                        clientSecret = "cuss_123",
                     ),
                 ),
                 metadata = PaymentElementLoader.Metadata(
@@ -2270,7 +2363,7 @@ internal class DefaultPaymentElementLoaderTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
-                        clientSecret = "customer_client_secret",
+                        clientSecret = "cuss_123",
                     ),
                 ),
                 metadata = PaymentElementLoader.Metadata(
@@ -2316,7 +2409,7 @@ internal class DefaultPaymentElementLoaderTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
-                        clientSecret = "customer_client_secret",
+                        clientSecret = "cuss_123",
                     ),
                 ),
                 metadata = PaymentElementLoader.Metadata(
@@ -2385,7 +2478,7 @@ internal class DefaultPaymentElementLoaderTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
-                        clientSecret = "customer_client_secret",
+                        clientSecret = "cuss_123",
                     ),
                 ),
                 metadata = PaymentElementLoader.Metadata(
@@ -2413,7 +2506,8 @@ internal class DefaultPaymentElementLoaderTest {
                 errorReporter = errorReporter,
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     isLiveMode = true
-                )
+                ),
+                isLiveMode = true,
             )
 
             val state = loader.load(
@@ -2424,7 +2518,7 @@ internal class DefaultPaymentElementLoaderTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
-                        clientSecret = "customer_client_secret",
+                        clientSecret = "cuss_123",
                     ),
                 ),
                 metadata = PaymentElementLoader.Metadata(
@@ -4005,6 +4099,7 @@ internal class DefaultPaymentElementLoaderTest {
         ),
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
+        isLiveMode: Boolean = false,
     ): PaymentElementLoader {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(customerRepo)
         val createLinkState = DefaultCreateLinkState(
@@ -4032,6 +4127,7 @@ internal class DefaultPaymentElementLoaderTest {
             userFacingLogger = userFacingLogger,
             cvcRecollectionHandler = CvcRecollectionHandlerImpl(),
             integrityRequestManager = integrityRequestManager,
+            isLiveModeProvider = { isLiveMode },
         )
     }
 

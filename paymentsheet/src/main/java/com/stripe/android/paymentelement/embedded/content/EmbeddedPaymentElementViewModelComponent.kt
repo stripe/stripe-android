@@ -190,7 +190,7 @@ internal interface EmbeddedPaymentElementViewModelModule {
         @Named(IS_LIVE_MODE)
         fun providesIsLiveMode(
             paymentConfiguration: Provider<PaymentConfiguration>
-        ): () -> Boolean = { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
+        ): () -> Boolean = { paymentConfiguration.get().isLiveMode() }
 
         @Provides
         @Singleton
