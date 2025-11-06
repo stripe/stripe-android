@@ -328,6 +328,7 @@ internal sealed interface PaymentSheetScreen {
 
     class VerticalModeForm(
         private val interactor: VerticalModeFormInteractor,
+        private val showsWalletHeader: Boolean = false,
     ) : PaymentSheetScreen, Closeable {
 
         override val buyButtonState = stateFlowOf(
@@ -353,12 +354,12 @@ internal sealed interface PaymentSheetScreen {
         }
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
-            return interactor.state.mapAsStateFlow { it.showsWalletHeader }
+            return stateFlowOf(showsWalletHeader)
         }
 
         @Composable
         override fun Content(modifier: Modifier) {
-            VerticalModeFormUI(interactor, modifier)
+            VerticalModeFormUI(interactor, showsWalletHeader, modifier)
         }
 
         override fun close() {

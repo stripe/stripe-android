@@ -7,7 +7,6 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
-import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethodFixtures
@@ -230,62 +229,6 @@ internal class DefaultVerticalModeFormInteractorTest {
         }
     }
 
-    @Test
-    fun `'headerInformation' is not null if 'showWalletsHeaders' is false`() {
-        val headerInformation = FormHeaderInformation(
-            displayName = "Card".resolvableString,
-            shouldShowIcon = false,
-            iconResource = 0,
-            iconResourceNight = null,
-            lightThemeIconUrl = null,
-            darkThemeIconUrl = null,
-            iconRequiresTinting = false,
-            promoBadge = null,
-        )
-
-        runScenario(
-            selectedPaymentMethodCode = "card",
-            headerInformation = headerInformation,
-        ) {
-            showWalletsHeaderSource.emit(false)
-
-            interactor.state.test {
-                val state = awaitItem()
-
-                assertThat(state.showsWalletHeader).isFalse()
-                assertThat(state.formHeader).isEqualTo(headerInformation)
-            }
-        }
-    }
-
-    @Test
-    fun `'headerInformation' is null if 'showWalletsHeaders' is true`() {
-        val headerInformation = FormHeaderInformation(
-            displayName = "Card".resolvableString,
-            shouldShowIcon = false,
-            iconResource = 0,
-            iconResourceNight = null,
-            lightThemeIconUrl = null,
-            darkThemeIconUrl = null,
-            iconRequiresTinting = false,
-            promoBadge = null,
-        )
-
-        runScenario(
-            selectedPaymentMethodCode = "card",
-            headerInformation = headerInformation,
-        ) {
-            showWalletsHeaderSource.emit(true)
-
-            interactor.state.test {
-                val state = awaitItem()
-
-                assertThat(state.showsWalletHeader).isTrue()
-                assertThat(state.formHeader).isNull()
-            }
-        }
-    }
-
     private fun testSetAsDefaultElements(
         hasSavedPaymentMethods: Boolean,
         block: (SaveForFutureUseElement?, SetAsDefaultPaymentMethodElement?) -> Unit
@@ -382,13 +325,11 @@ internal class DefaultVerticalModeFormInteractorTest {
     private fun runScenario(
         selectedPaymentMethodCode: String,
         formElements: List<FormElement> = emptyList(),
-        headerInformation: FormHeaderInformation? = null,
         testBlock: suspend TestParams.() -> Unit,
     ) {
         val formArguments = mock<FormArguments>()
         val usBankAccountArguments = mock<USBankAccountFormArguments>()
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(false)
-        val showWalletsHeader: MutableStateFlow<Boolean> = MutableStateFlow(false)
         val validationRequested = MutableSharedFlow<Unit>()
 
         val onFormFieldValuesChangedTurbine = Turbine<Pair<FormFieldValues?, String>>()
@@ -405,20 +346,18 @@ internal class DefaultVerticalModeFormInteractorTest {
             reportFieldInteraction = {
                 reportFieldInteractionTurbine.add(it)
             },
-            headerInformation = headerInformation,
+            headerInformation = null,
             isLiveMode = true,
             processing = processing,
             validationRequested = validationRequested,
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
             paymentMethodIncentive = stateFlowOf(null),
-            showsWalletHeader = showWalletsHeader,
             uiContext = UnconfinedTestDispatcher(),
         )
 
         TestParams(
             interactor = interactor,
             processingSource = processing,
-            showWalletsHeaderSource = showWalletsHeader,
             validationRequestedSource = validationRequested,
             onFormFieldValuesChangedTurbine = onFormFieldValuesChangedTurbine,
             reportFieldInteractionTurbine = reportFieldInteractionTurbine,
@@ -436,7 +375,6 @@ internal class DefaultVerticalModeFormInteractorTest {
     private class TestParams(
         val interactor: DefaultVerticalModeFormInteractor,
         val processingSource: MutableStateFlow<Boolean>,
-        val showWalletsHeaderSource: MutableStateFlow<Boolean>,
         val validationRequestedSource: MutableSharedFlow<Unit>,
         val onFormFieldValuesChangedTurbine: ReceiveTurbine<Pair<FormFieldValues?, String>>,
         val reportFieldInteractionTurbine: ReceiveTurbine<String>,
