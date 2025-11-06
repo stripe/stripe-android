@@ -15,31 +15,25 @@ internal class IntentConfirmationChallengeUITest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun `when showWebView is false then loader is displayed`() {
-        setContent(showWebView = false)
+    fun `when bridgeReady is false then loader is displayed`() {
+        setContent(bridgeReady = false)
 
         onLoader().assertExists()
-        onLoader().assertIsDisplayed()
+        onWebView().assertIsDisplayed()
     }
 
     @Test
-    fun `when showWebView is true then webview is displayed`() {
-        setContent(showWebView = true)
-
-        onWebView().assertExists()
-    }
-
-    @Test
-    fun `when showWebView is true then loader is not displayed`() {
-        setContent(showWebView = true)
+    fun `when bridgeReady emits true then loader is not displayed`() {
+        setContent(bridgeReady = true)
 
         onLoader().assertDoesNotExist()
+        onWebView().assertIsDisplayed()
     }
 
-    private fun setContent(showWebView: Boolean) = composeTestRule.setContent {
+    private fun setContent(bridgeReady: Boolean) = composeTestRule.setContent {
         IntentConfirmationChallengeUI(
             bridgeHandler = FakeConfirmationChallengeBridgeHandler(),
-            showWebView = showWebView
+            bridgeReady = bridgeReady
         )
     }
 

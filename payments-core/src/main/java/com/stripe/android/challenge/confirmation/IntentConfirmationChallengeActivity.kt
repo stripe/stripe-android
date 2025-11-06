@@ -13,7 +13,6 @@ import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 
 internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
@@ -30,10 +29,10 @@ internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
         listenForActivityResult()
 
         setContent {
-            val showWebView by viewModel.showWebView.collectAsState(initial = false)
+            val bridgeReady by viewModel.bridgeReady.collectAsState(initial = false)
             IntentConfirmationChallengeUI(
                 bridgeHandler = viewModel.bridgeHandler,
-                showWebView = showWebView
+                bridgeReady = bridgeReady
             )
         }
     }

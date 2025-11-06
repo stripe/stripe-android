@@ -11,11 +11,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.challenge.confirmation.di.DaggerIntentConfirmationChallengeComponent
 import com.stripe.android.core.injection.UIContext
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,11 +21,11 @@ import kotlin.coroutines.CoroutineContext
 
 internal class IntentConfirmationChallengeViewModel @Inject constructor(
     val bridgeHandler: ConfirmationChallengeBridgeHandler,
-    @UIContext private val workContext: CoroutineContext = Dispatchers.Main,
+    @UIContext private val workContext: CoroutineContext
 ) : ViewModel() {
 
-    private val _showWebView = MutableStateFlow(false)
-    val showWebView: StateFlow<Boolean> = _showWebView
+    private val _bridgeReady = MutableSharedFlow<Boolean>()
+    val bridgeReady: Flow<Boolean> = _bridgeReady
 
     private val _result = MutableSharedFlow<IntentConfirmationChallengeActivityResult>()
     val result: SharedFlow<IntentConfirmationChallengeActivityResult> = _result
@@ -42,7 +40,7 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
         bridgeHandler.event.collectLatest { event ->
             when (event) {
                 is ConfirmationChallengeBridgeEvent.Ready -> {
-                    _showWebView.emit(true)
+                    _bridgeReady.emit(true)
                 }
                 is ConfirmationChallengeBridgeEvent.Success -> {
                     _result.emit(

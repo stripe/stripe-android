@@ -20,21 +20,13 @@ internal class IntentConfirmationChallengeViewModelTest {
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
-    fun `initial state has showWebView as false`() {
+    fun `when Ready event is received, bridgeReady emits true`() = runTest {
         val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
         val viewModel = createViewModel(fakeBridgeHandler)
 
-        assertThat(viewModel.showWebView.value).isFalse()
-    }
-
-    @Test
-    fun `when Ready event is received, showWebView becomes true`() = runTest {
-        val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val viewModel = createViewModel(fakeBridgeHandler)
-
-        viewModel.showWebView.test {
+        viewModel.bridgeReady.test {
             // Initial state
-            assertThat(awaitItem()).isFalse()
+            expectNoEvents()
 
             // Emit Ready event
             fakeBridgeHandler.emitEvent(ConfirmationChallengeBridgeEvent.Ready)
@@ -88,6 +80,6 @@ internal class IntentConfirmationChallengeViewModelTest {
         bridgeHandler: ConfirmationChallengeBridgeHandler
     ) = IntentConfirmationChallengeViewModel(
         bridgeHandler = bridgeHandler,
-//        workContext = testDispatcher
+        workContext = testDispatcher
     )
 }

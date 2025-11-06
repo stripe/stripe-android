@@ -13,12 +13,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 @Composable
 internal fun IntentConfirmationChallengeUI(
     bridgeHandler: ConfirmationChallengeBridgeHandler,
-    showWebView: Boolean
+    bridgeReady: Boolean
 ) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        if (showWebView.not()) {
+        if (bridgeReady.not()) {
             CircularProgressIndicator(
                 modifier = Modifier
                     .align(Alignment.Center)
