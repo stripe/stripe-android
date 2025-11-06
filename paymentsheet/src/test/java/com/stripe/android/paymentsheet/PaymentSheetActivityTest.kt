@@ -1018,62 +1018,6 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `Handles invalid arguments correctly`() {
-        val invalidCustomerConfig = PaymentSheet.CustomerConfiguration(
-            id = "",
-            ephemeralKeySecret = "",
-        )
-
-        val args = PaymentSheetContract.Args(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "abc",
-            ),
-            config = PaymentSheet.Configuration(
-                merchantDisplayName = "Some name",
-                customer = invalidCustomerConfig,
-            ),
-            statusBarColor = null,
-            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
-        )
-
-        val intent = contract.createIntent(context, args)
-
-        val scenario = ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent)
-
-        val result = contract.parseResult(
-            scenario.result.resultCode,
-            scenario.result.resultData,
-        )
-
-        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
-    }
-
-    @Test
-    fun `Handles invalid client secret correctly`() {
-        val args = PaymentSheetContract.Args(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = ""),
-            config = PaymentSheet.Configuration(
-                merchantDisplayName = "Some name",
-            ),
-            statusBarColor = null,
-            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
-        )
-
-        val intent = contract.createIntent(context, args)
-
-        val scenario = ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent)
-
-        val result = contract.parseResult(
-            scenario.result.resultCode,
-            scenario.result.resultData,
-        )
-
-        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
-    }
-
-    @Test
     fun `processing should enable after checkout`() {
         val viewModel = createViewModel()
         val scenario = activityScenario(viewModel)

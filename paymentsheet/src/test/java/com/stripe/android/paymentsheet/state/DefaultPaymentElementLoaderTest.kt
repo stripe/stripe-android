@@ -4128,6 +4128,7 @@ internal class DefaultPaymentElementLoaderTest {
             cvcRecollectionHandler = CvcRecollectionHandlerImpl(),
             integrityRequestManager = integrityRequestManager,
             isLiveModeProvider = { isLiveMode },
+            callbackIdentifier = "test_callback_identifier",
         )
     }
 
