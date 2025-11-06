@@ -71,6 +71,9 @@ internal class OnrampViewModel(
     private val _authorizeEvent = MutableStateFlow<AuthorizeEvent?>(null)
     val authorizeEvent: StateFlow<AuthorizeEvent?> = _authorizeEvent.asStateFlow()
 
+    private val _updateAddressEvent = MutableStateFlow<Boolean>(false)
+    val updateAddressEvent: StateFlow<Boolean?> = _updateAddressEvent.asStateFlow()
+
     private val minPasswordLength = 8
 
     private fun handleError(error: Throwable, onNonAuthError: () -> Unit = {}) {
@@ -314,7 +317,8 @@ internal class OnrampViewModel(
                 _message.value = "KYC Verification Completed"
             }
             is OnrampVerifyKycInfoResult.UpdateAddress -> {
-                _message.value = "KYC Verification Requires Address Update - Unimplemented in Example"
+                _updateAddressEvent.value = true
+                _message.value = "KYC Verification Requires Address Update"
             }
             is OnrampVerifyKycInfoResult.Cancelled -> {
                 _message.value = "KYC Verification Cancelled"
@@ -325,6 +329,10 @@ internal class OnrampViewModel(
         }
     }
 
+    fun clearUpdateAddressEvent() {
+        _updateAddressEvent.value = false
+    }
+	
     fun onCollectPaymentResult(result: OnrampCollectPaymentMethodResult) {
         when (result) {
             is OnrampCollectPaymentMethodResult.Completed -> {
@@ -760,6 +768,8 @@ data class CheckoutEvent(
 )
 
 data class AuthorizeEvent(val linkAuthIntentId: String)
+
+data object UpdateAddressEvent
 
 @Serializable
 data class OnrampUserData(

@@ -1,5 +1,6 @@
 package com.stripe.android.crypto.onramp.example
 
+import android.R
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -29,6 +31,8 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -36,6 +40,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -125,6 +130,8 @@ internal class OnrampActivity : ComponentActivity() {
         }
 
         setContent {
+            val showAddressModal by viewModel.updateAddressEvent.collectAsStateWithLifecycle()
+
             OnrampExampleTheme {
                 Scaffold(
                     topBar = {
@@ -134,39 +141,140 @@ internal class OnrampActivity : ComponentActivity() {
                         )
                     },
                 ) { innerPadding ->
-                    OnrampScreen(
-                        modifier = Modifier.padding(innerPadding),
-                        viewModel = viewModel,
-                        onAuthenticateUser = { oauthScopes ->
-                            if (oauthScopes.isNullOrBlank()) {
-                                onrampPresenter.authenticateUser()
-                            } else {
-                                // Not the cleanest approach, but good enough for an example.
-                                lifecycleScope.launch {
-                                    val linkAuthIntentId = viewModel.createLinkAuthIntent(oauthScopes)
-                                        ?: return@launch
-                                    viewModel.onAuthorize(linkAuthIntentId)
-                                    onrampPresenter.authorize(linkAuthIntentId)
+                    ModalBottomSheetLayout(
+                        sheetContent = {
+                            AddressForm(
+                                onSubmit = { updatedAddress ->
+                                    viewModel.clearUpdateAddressEvent()
+                                    onrampPresenter.verifyKycInfo(updatedAddress)
+                                },
+                                onDismiss = {
+                                    viewModel.clearUpdateAddressEvent()
                                 }
+                            )
+                        },
+                        sheetGesturesEnabled = false,
+                        sheetState = rememberModalBottomSheetState(
+                            if (showAddressModal == true) {
+                                ModalBottomSheetValue.Expanded
+                            } else {
+                                ModalBottomSheetValue.Hidden
                             }
-                        },
-                        onRegisterWalletAddress = { address, network ->
-                            viewModel.registerWalletAddress(address, network)
-                        },
-                        onStartVerification = {
-                            onrampPresenter.verifyIdentity()
-                        },
-                        onCollectPayment = { type ->
-                            onrampPresenter.collectPaymentMethod(type)
-                        },
-                        onCreatePaymentToken = {
-                            viewModel.createCryptoPaymentToken()
-                        },
-                        onVerifyKyc = {
-                            onrampPresenter.verifyKycInfo()
-                        }
-                    )
+                        )
+                    ) {
+                        OnrampScreen(
+                            modifier = Modifier.padding(innerPadding),
+                            viewModel = viewModel,
+                            onAuthenticateUser = { oauthScopes ->
+                                if (oauthScopes.isNullOrBlank()) {
+                                    onrampPresenter.authenticateUser()
+                                } else {
+                                    // Not the cleanest approach, but good enough for an example.
+                                    lifecycleScope.launch {
+                                        val linkAuthIntentId = viewModel.createLinkAuthIntent(oauthScopes)
+                                            ?: return@launch
+                                        viewModel.onAuthorize(linkAuthIntentId)
+                                        onrampPresenter.authorize(linkAuthIntentId)
+                                    }
+                                }
+                            },
+                            onRegisterWalletAddress = { address, network ->
+                                viewModel.registerWalletAddress(address, network)
+                            },
+                            onStartVerification = {
+                                onrampPresenter.verifyIdentity()
+                            },
+                            onCollectPayment = { type ->
+                                onrampPresenter.collectPaymentMethod(type)
+                            },
+                            onCreatePaymentToken = {
+                                viewModel.createCryptoPaymentToken()
+                            },
+                            onVerifyKyc = {
+                                onrampPresenter.verifyKycInfo()
+                            }
+                        )
+                    }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+@Suppress("LongMethod")
+fun AddressForm(
+    onSubmit: (PaymentSheet.Address) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val fields = remember {
+        listOf(
+            "line1" to "Address Line 1",
+            "line2" to "Address Line 2",
+            "city" to "City",
+            "state" to "State",
+            "country" to "Country",
+            "postalCode" to "Postal Code"
+        )
+    }
+
+    var values by remember { mutableStateOf(fields.associate { it.first to "" }) }
+    val focusManager = LocalFocusManager.current
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
+            .imePadding()
+    ) {
+        fields.forEach { (key, label) ->
+            OutlinedTextField(
+                value = values[key] ?: "",
+                onValueChange = { values = values.toMutableMap().apply { set(key, it) } },
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                ),
+                label = { Text(label) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+                    .onPreviewKeyEvent {
+                        if (it.key == Key.Tab) {
+                            focusManager.moveFocus(FocusDirection.Next)
+                            true
+                        } else {
+                            false
+                        }
+                    }
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = {
+                    onSubmit(
+                        PaymentSheet.Address(
+                            line1 = values["line1"],
+                            line2 = values["line2"],
+                            city = values["city"],
+                            state = values["state"],
+                            country = values["country"],
+                            postalCode = values["postalCode"]
+                        )
+                    )
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Submit")
+            }
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Cancel")
             }
         }
     }
@@ -180,7 +288,7 @@ internal fun SeamlessSignInScreen(
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Image(
-            painter = painterResource(id = android.R.drawable.ic_menu_myplaces),
+            painter = painterResource(id = R.drawable.ic_menu_myplaces),
             contentDescription = "User Icon",
             modifier = Modifier.size(128.dp)
         )
