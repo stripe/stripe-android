@@ -7,13 +7,33 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class PaymentMethodMessage
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-constructor(
-    val paymentMethods: List<String>,
-    val singlePartner: PaymentMethodMessageSinglePartner?,
-    val multiPartner: PaymentMethodMessageMultiPartner?,
-) : StripeModel
+sealed class PaymentMethodMessage : StripeModel {
+    data class SinglePartner(
+        val inlinePartnerPromotion: String,
+        val lightImage: PaymentMethodMessageImage,
+        val darkImage: PaymentMethodMessageImage,
+        val flatImage: PaymentMethodMessageImage,
+        val learnMore: PaymentMethodMessageLearnMore,
+        val paymentMethods: List<String>,
+    ) : PaymentMethodMessage()
+
+    data class MultiPartner(
+        val promotion: String,
+        val lightImages: List<PaymentMethodMessageImage>,
+        val darkImages: List<PaymentMethodMessageImage>,
+        val flatImages: List<PaymentMethodMessageImage>,
+        val learnMore: PaymentMethodMessageLearnMore,
+        val paymentMethods: List<String>
+    ) : PaymentMethodMessage()
+
+    data class UnexpectedError(
+        val message: String
+    ) : PaymentMethodMessage()
+
+    data class NoContent(
+        val paymentMethods: List<String>
+    ) : PaymentMethodMessage()
+}
 
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -33,28 +53,4 @@ data class PaymentMethodMessageLearnMore
 constructor(
     val url: String,
     val message: String
-) : Parcelable
-
-@Parcelize
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class PaymentMethodMessageSinglePartner
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-constructor(
-    val inlinePartnerPromotion: String,
-    val lightImage: PaymentMethodMessageImage,
-    val darkImage: PaymentMethodMessageImage,
-    val flatImage: PaymentMethodMessageImage,
-    val learnMore: PaymentMethodMessageLearnMore
-) : Parcelable
-
-@Parcelize
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class PaymentMethodMessageMultiPartner
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-constructor(
-    val promotion: String,
-    val lightImages: List<PaymentMethodMessageImage>,
-    val darkImages: List<PaymentMethodMessageImage>,
-    val flatImages: List<PaymentMethodMessageImage>,
-    val learnMore: PaymentMethodMessageLearnMore
 ) : Parcelable

@@ -10,8 +10,6 @@ import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodMessageImage
 import com.stripe.android.model.PaymentMethodMessageLearnMore
-import com.stripe.android.model.PaymentMethodMessageMultiPartner
-import com.stripe.android.model.PaymentMethodMessageSinglePartner
 import com.stripe.android.paymentmethodmessaging.R
 import com.stripe.android.screenshottesting.PaparazziRule
 import org.junit.Rule
@@ -137,36 +135,30 @@ class PaymentMethodMessagingContentScreenshotTest {
     }
 
     private fun getSinglePartner(message: String): PaymentMethodMessage {
-        return PaymentMethodMessage(
-            paymentMethods = listOf(),
-            singlePartner = PaymentMethodMessageSinglePartner(
-                inlinePartnerPromotion = message,
-                lightImage = PaymentMethodMessageImage("", "", "", ""),
-                darkImage = PaymentMethodMessageImage("", "", "", ""),
-                flatImage = PaymentMethodMessageImage("", "", "", ""),
-                learnMore = PaymentMethodMessageLearnMore(
-                    url = "",
-                    message = ""
-                )
+        return PaymentMethodMessage.SinglePartner(
+            inlinePartnerPromotion = message,
+            lightImage = PaymentMethodMessageImage("", "", "", ""),
+            darkImage = PaymentMethodMessageImage("", "", "", ""),
+            flatImage = PaymentMethodMessageImage("", "", "", ""),
+            learnMore = PaymentMethodMessageLearnMore(
+                url = "",
+                message = ""
             ),
-            multiPartner = null
+            paymentMethods = listOf()
         )
     }
 
     private fun getMultiPartner(message: String): PaymentMethodMessage {
-        return PaymentMethodMessage(
-            paymentMethods = listOf(),
-            singlePartner = null,
-            multiPartner = PaymentMethodMessageMultiPartner(
-                promotion = message,
-                lightImages = listOf(),
-                darkImages = listOf(),
-                flatImages = listOf(),
-                learnMore = PaymentMethodMessageLearnMore(
-                    url = "",
-                    message = ""
-                )
-            )
+        return PaymentMethodMessage.MultiPartner(
+            promotion = message,
+            lightImages = listOf(),
+            darkImages = listOf(),
+            flatImages = listOf(),
+            learnMore = PaymentMethodMessageLearnMore(
+                url = "",
+                message = ""
+            ),
+            paymentMethods = listOf()
         )
     }
 
