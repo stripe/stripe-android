@@ -66,7 +66,7 @@ internal fun PaymentElement(
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        if (supportedPaymentMethods.size > 1 || formElements.any { !it.allowsUserInteraction }) {
+        if (supportedPaymentMethods.size > 1 || isNonInteractableFormElements(formElements)) {
             NewPaymentMethodTabLayoutUI(
                 selectedIndex = selectedIndex,
                 isEnabled = enabled,
@@ -92,8 +92,8 @@ internal fun PaymentElement(
     }
 }
 
-internal fun isNoFormElementsOrMandateOnly(formElements: List<FormElement>): Boolean {
-    return formElements.isEmpty() || (formElements.size == 1 && formElements.first() is MandateTextElement)
+internal fun isNonInteractableFormElements(formElements: List<FormElement>): Boolean {
+    return formElements.isEmpty() || formElements.all { !it.allowsUserInteraction }
 }
 
 @Composable
