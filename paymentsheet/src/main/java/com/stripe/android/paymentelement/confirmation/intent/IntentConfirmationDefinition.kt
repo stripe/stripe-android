@@ -123,23 +123,16 @@ internal class IntentConfirmationDefinition(
         arguments: Args.NextAction,
         contextIntent: StripeIntent,
     ) {
-        // If we have the intent already loaded in Args, use it directly to avoid an extra network call
+        // If we have the intent already loaded in Args, use it directly to avoid an extra network call.
+        // arguments.intent is null when we only have a client secret and need to fetch the intent.
         val intent = arguments.intent ?: contextIntent
 
-        when (intent) {
-            is PaymentIntent -> {
-                if (arguments.intent != null) {
-                    launcher.handleNextActionForPaymentIntent(intent)
-                } else {
-                    launcher.handleNextActionForPaymentIntent(arguments.clientSecret)
-                }
-            }
-            is SetupIntent -> {
-                if (arguments.intent != null) {
-                    launcher.handleNextActionForSetupIntent(intent)
-                } else {
-                    launcher.handleNextActionForSetupIntent(arguments.clientSecret)
-                }
+        if (arguments.intent != null) {
+            launcher.handleNextActionForStripeIntent(intent)
+        } else {
+            when (intent) {
+                is PaymentIntent -> launcher.handleNextActionForPaymentIntent(arguments.clientSecret)
+                is SetupIntent -> launcher.handleNextActionForSetupIntent(arguments.clientSecret)
             }
         }
     }

@@ -10,8 +10,7 @@ import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import com.stripe.android.core.exception.GenericStripeException
 import com.stripe.android.model.ConfirmStripeIntentParams
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -108,33 +107,13 @@ class PaymentLauncherContract :
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class PaymentIntentNextActionWithIntentArgs internal constructor(
+        data class StripeIntentNextActionWithIntentArgs internal constructor(
             override val publishableKey: String,
             override val stripeAccountId: String?,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
             override val includePaymentSheetNextHandlers: Boolean,
-            val paymentIntent: PaymentIntent,
-            @ColorInt override var statusBarColor: Int?,
-        ) : Args(
-            stripeAccountId = stripeAccountId,
-            enableLogging = enableLogging,
-            productUsage = productUsage,
-            includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
-            statusBarColor = statusBarColor,
-        ) {
-            override fun validate() = Result.success(Unit)
-        }
-
-        @Parcelize
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class SetupIntentNextActionWithIntentArgs internal constructor(
-            override val publishableKey: String,
-            override val stripeAccountId: String?,
-            override val enableLogging: Boolean,
-            override val productUsage: Set<String>,
-            override val includePaymentSheetNextHandlers: Boolean,
-            val setupIntent: SetupIntent,
+            val stripeIntent: StripeIntent,
             @ColorInt override var statusBarColor: Int?,
         ) : Args(
             stripeAccountId = stripeAccountId,

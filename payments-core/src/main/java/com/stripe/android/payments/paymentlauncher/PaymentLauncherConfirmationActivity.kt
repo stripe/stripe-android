@@ -101,11 +101,8 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             is PaymentLauncherContract.Args.SetupIntentNextActionArgs -> {
                 viewModel.handleNextActionForStripeIntent(args.setupIntentClientSecret, host)
             }
-            is PaymentLauncherContract.Args.PaymentIntentNextActionWithIntentArgs -> {
-                viewModel.handleNextActionForStripeIntent(args.paymentIntent, host)
-            }
-            is PaymentLauncherContract.Args.SetupIntentNextActionWithIntentArgs -> {
-                viewModel.handleNextActionForStripeIntent(args.setupIntent, host)
+            is PaymentLauncherContract.Args.StripeIntentNextActionWithIntentArgs -> {
+                viewModel.handleNextActionForStripeIntent(args.stripeIntent, host)
             }
         }
     }

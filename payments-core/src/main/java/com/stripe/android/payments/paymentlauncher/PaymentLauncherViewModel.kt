@@ -423,10 +423,11 @@ internal class PaymentLauncherViewModel @Inject constructor(
                     }
                 }
                 is PaymentLauncherContract.Args.HashedPaymentIntentNextActionArgs,
-                is PaymentLauncherContract.Args.PaymentIntentNextActionArgs,
-                is PaymentLauncherContract.Args.PaymentIntentNextActionWithIntentArgs -> true
-                is PaymentLauncherContract.Args.SetupIntentNextActionArgs,
-                is PaymentLauncherContract.Args.SetupIntentNextActionWithIntentArgs -> false
+                is PaymentLauncherContract.Args.PaymentIntentNextActionArgs -> true
+                is PaymentLauncherContract.Args.SetupIntentNextActionArgs -> false
+                is PaymentLauncherContract.Args.StripeIntentNextActionWithIntentArgs -> {
+                    arg.stripeIntent is PaymentIntent
+                }
             }
 
             return subcomponentBuilder
