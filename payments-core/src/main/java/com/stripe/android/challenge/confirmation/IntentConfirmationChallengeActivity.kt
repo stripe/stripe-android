@@ -1,3 +1,5 @@
+@file:Suppress("ComposeCollectAsStateUsageIssue")
+
 package com.stripe.android.challenge.confirmation
 
 import android.content.Context
