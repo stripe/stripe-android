@@ -28,19 +28,6 @@ import kotlin.test.Test
 
 internal class DefaultEmbeddedConfigurationHandlerTest {
     @Test
-    fun validationFailureReturnsFailureResult() = runScenario {
-        val result = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
-            ),
-            configuration = EmbeddedPaymentElement.Configuration.Builder("").build(),
-        )
-        assertThat(result.exceptionOrNull()?.message).isEqualTo(
-            "When a Configuration is passed to PaymentSheet, the Merchant display name cannot be an empty string."
-        )
-    }
-
-    @Test
     fun `configuration fails when sheetIsOpen`() = runScenario {
         sheetStateHolder.sheetIsOpen = true
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
@@ -313,7 +300,6 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
                 sheetStateHolder,
                 eventReporter,
                 internalRowSelectionCallback = { null },
-                isLiveModeProvider = { false }
             )
             Scenario(
                 loader = loader,

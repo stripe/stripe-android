@@ -2578,7 +2578,6 @@ internal class DefaultFlowControllerTest {
                 eventReporter = eventReporter,
                 viewModel = viewModel,
                 paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
-                isLiveModeProvider = { false },
                 confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
             ),
             errorReporter = errorReporter,
