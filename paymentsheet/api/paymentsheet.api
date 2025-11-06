@@ -1831,6 +1831,10 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$BillingDetails :
 	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddress ()Lcom/stripe/android/paymentsheet/PaymentSheet$Address;
+	public final fun getEmail ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPhone ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
