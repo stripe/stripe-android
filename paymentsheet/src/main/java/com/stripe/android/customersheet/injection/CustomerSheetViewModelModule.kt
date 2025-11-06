@@ -110,7 +110,7 @@ internal interface CustomerSheetViewModelModule {
         @Named(IS_LIVE_MODE)
         fun isLiveMode(
             paymentConfiguration: Provider<PaymentConfiguration>
-        ): () -> Boolean = { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
+        ): () -> Boolean = { paymentConfiguration.get().isLiveMode() }
 
         @Provides
         internal fun providesErrorReporter(
