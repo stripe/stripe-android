@@ -8,7 +8,10 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class PaymentMethodMessage : StripeModel {
-    data class SinglePartner(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class SinglePartner
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         val inlinePartnerPromotion: String,
         val lightImage: PaymentMethodMessageImage,
         val darkImage: PaymentMethodMessageImage,
@@ -17,7 +20,10 @@ sealed class PaymentMethodMessage : StripeModel {
         val paymentMethods: List<String>,
     ) : PaymentMethodMessage()
 
-    data class MultiPartner(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class MultiPartner
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         val promotion: String,
         val lightImages: List<PaymentMethodMessageImage>,
         val darkImages: List<PaymentMethodMessageImage>,
@@ -26,11 +32,17 @@ sealed class PaymentMethodMessage : StripeModel {
         val paymentMethods: List<String>
     ) : PaymentMethodMessage()
 
-    data class UnexpectedError(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class UnexpectedError
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         val message: String
     ) : PaymentMethodMessage()
 
-    data class NoContent(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class NoContent
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         val paymentMethods: List<String>
     ) : PaymentMethodMessage()
 }
