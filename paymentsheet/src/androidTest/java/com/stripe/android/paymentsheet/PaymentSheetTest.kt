@@ -27,12 +27,11 @@ import okhttp3.mockwebserver.SocketPolicy
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.seconds
 
 @RunWith(TestParameterInjector::class)
 internal class PaymentSheetTest {
     @get:Rule
-    val testRules: TestRules = TestRules.create{
+    val testRules: TestRules = TestRules.create {
         around(IntentsRule())
     }
 
