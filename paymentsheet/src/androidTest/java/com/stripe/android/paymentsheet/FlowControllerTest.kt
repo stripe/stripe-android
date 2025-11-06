@@ -1357,8 +1357,7 @@ internal class FlowControllerTest {
                 }
             )
         }
-        isConfiguredLatch.await(5, TimeUnit.SECONDS)
-
+        assertThat(isConfiguredLatch.await(5, TimeUnit.SECONDS)).isTrue()
         testContext.markTestSucceeded()
     }
 }
