@@ -7,7 +7,6 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -32,16 +31,13 @@ import kotlin.time.Duration.Companion.seconds
 
 @RunWith(TestParameterInjector::class)
 internal class PaymentSheetTest {
-    private val networkRule = NetworkRule(validationTimeout = 5.seconds)
-
     @get:Rule
-    val testRules: TestRules = TestRules.create(
-        networkRule = networkRule
-    ) {
+    val testRules: TestRules = TestRules.create{
         around(IntentsRule())
     }
 
     private val composeTestRule = testRules.compose
+    private val networkRule = testRules.networkRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
@@ -832,6 +828,8 @@ internal class PaymentSheetTest {
                 configuration = defaultConfiguration,
             )
         }
+
+        page.waitForCardForm()
 
         testContext.markTestSucceeded()
     }

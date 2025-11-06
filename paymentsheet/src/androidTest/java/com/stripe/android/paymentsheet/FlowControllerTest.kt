@@ -12,6 +12,8 @@ import androidx.compose.ui.test.performScrollToIndex
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
@@ -1336,6 +1338,7 @@ internal class FlowControllerTest {
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
+        val isConfiguredLatch = CountDownLatch(1)
 
         testContext.configureFlowController {
             configureWithIntentConfiguration(
@@ -1352,9 +1355,11 @@ internal class FlowControllerTest {
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
                     presentPaymentOptions()
+                    isConfiguredLatch.countDown()
                 }
             )
         }
+        isConfiguredLatch.await(5, TimeUnit.SECONDS)
 
         testContext.markTestSucceeded()
     }
