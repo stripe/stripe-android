@@ -353,7 +353,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         assertThat(launcher.calls.awaitItem()).isEqualTo(
-            FakePaymentLauncher.Call.HandleNextActionWithIntent.PaymentIntent(paymentIntent)
+            FakePaymentLauncher.Call.HandleNextActionWithIntent.Intent(paymentIntent)
         )
     }
 
@@ -378,7 +378,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         assertThat(launcher.calls.awaitItem()).isEqualTo(
-            FakePaymentLauncher.Call.HandleNextActionWithIntent.SetupIntent(setupIntent)
+            FakePaymentLauncher.Call.HandleNextActionWithIntent.Intent(setupIntent)
         )
     }
 
