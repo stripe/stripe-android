@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,6 +29,24 @@ internal class IntentConfirmationChallengeUITest {
 
         onLoader().assertDoesNotExist()
         onWebView().assertIsDisplayed()
+    }
+
+    @Test
+    fun `loadUrl is called on WebView with correct URL`() {
+        var fakeWebView: FakeIntentConfirmationChallengeWebView? = null
+
+        composeTestRule.setContent {
+            IntentConfirmationChallengeUI(
+                bridgeHandler = FakeConfirmationChallengeBridgeHandler(),
+                bridgeReady = false,
+                webViewFactory = { context, _ ->
+                    FakeIntentConfirmationChallengeWebView(context)
+                        .also { fakeWebView = it }
+                }
+            )
+        }
+
+        assertThat(fakeWebView?.loadedUrl).isEqualTo("http://192.168.2.106:3004")
     }
 
     private fun setContent(bridgeReady: Boolean) = composeTestRule.setContent {
