@@ -20,7 +20,7 @@ internal class IntentConfirmationChallengeViewModelTest {
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
-    fun `when Ready event is received, bridgeReady emits true`() = runTest {
+    fun `when Ready event is received, bridgeReady emits value`() = runTest {
         val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
         val viewModel = createViewModel(fakeBridgeHandler)
 
@@ -31,8 +31,10 @@ internal class IntentConfirmationChallengeViewModelTest {
             // Emit Ready event
             fakeBridgeHandler.emitEvent(ConfirmationChallengeBridgeEvent.Ready)
 
-            // Should emit true
-            assertThat(awaitItem()).isTrue()
+            // Should emit value
+            awaitItem()
+
+            ensureAllEventsConsumed()
         }
     }
 
@@ -52,7 +54,7 @@ internal class IntentConfirmationChallengeViewModelTest {
             val successResult = result as IntentConfirmationChallengeActivityResult.Success
             assertThat(successResult.clientSecret).isEqualTo(expectedClientSecret)
 
-            expectNoEvents()
+            ensureAllEventsConsumed()
         }
     }
 
@@ -72,7 +74,7 @@ internal class IntentConfirmationChallengeViewModelTest {
             val failedResult = result as IntentConfirmationChallengeActivityResult.Failed
             assertThat(failedResult.error).isEqualTo(expectedError)
 
-            expectNoEvents()
+            ensureAllEventsConsumed()
         }
     }
 

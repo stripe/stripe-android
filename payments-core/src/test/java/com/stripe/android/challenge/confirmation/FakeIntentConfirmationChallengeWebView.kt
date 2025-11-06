@@ -12,6 +12,5 @@ internal class FakeIntentConfirmationChallengeWebView(
 
     override fun loadUrl(url: String) {
         loadedUrl = url
-        // Don't call super.loadUrl() to avoid actual WebView operations in tests
     }
 }

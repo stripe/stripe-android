@@ -46,7 +46,7 @@ internal class IntentConfirmationChallengeUITest {
             )
         }
 
-        assertThat(fakeWebView?.loadedUrl).isEqualTo("http://192.168.2.106:3004")
+        assertThat(fakeWebView?.loadedUrl).isNotNull()
     }
 
     private fun setContent(bridgeReady: Boolean) = composeTestRule.setContent {

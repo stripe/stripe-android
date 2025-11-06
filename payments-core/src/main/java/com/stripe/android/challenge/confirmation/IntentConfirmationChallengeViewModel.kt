@@ -24,8 +24,8 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
     @UIContext private val workContext: CoroutineContext
 ) : ViewModel() {
 
-    private val _bridgeReady = MutableSharedFlow<Boolean>()
-    val bridgeReady: Flow<Boolean> = _bridgeReady
+    private val _bridgeReady = MutableSharedFlow<Unit>()
+    val bridgeReady: Flow<Unit> = _bridgeReady
 
     private val _result = MutableSharedFlow<IntentConfirmationChallengeActivityResult>()
     val result: SharedFlow<IntentConfirmationChallengeActivityResult> = _result
@@ -40,7 +40,7 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
         bridgeHandler.event.collectLatest { event ->
             when (event) {
                 is ConfirmationChallengeBridgeEvent.Ready -> {
-                    _bridgeReady.emit(true)
+                    _bridgeReady.emit(Unit)
                 }
                 is ConfirmationChallengeBridgeEvent.Success -> {
                     _result.emit(

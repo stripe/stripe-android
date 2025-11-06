@@ -1,5 +1,3 @@
-@file:Suppress("ComposeCollectAsStateUsageIssue")
-
 package com.stripe.android.challenge.confirmation
 
 import android.content.Context
@@ -9,8 +7,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
@@ -31,7 +32,14 @@ internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
         listenForActivityResult()
 
         setContent {
-            val bridgeReady by viewModel.bridgeReady.collectAsState(initial = false)
+            var bridgeReady by remember { mutableStateOf(false) }
+
+            LaunchedEffect("BridgeEvents") {
+                viewModel.bridgeReady.collect {
+                    bridgeReady = true
+                }
+            }
+
             IntentConfirmationChallengeUI(
                 bridgeHandler = viewModel.bridgeHandler,
                 bridgeReady = bridgeReady
