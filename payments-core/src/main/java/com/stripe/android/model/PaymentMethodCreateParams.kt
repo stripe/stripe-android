@@ -392,8 +392,7 @@ constructor(
     class Card
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val number: String? = null,
+        internal val number: String? = null,
         internal val expiryMonth: Int? = null,
         internal val expiryYear: Int? = null,
         internal val cvc: String? = null,
