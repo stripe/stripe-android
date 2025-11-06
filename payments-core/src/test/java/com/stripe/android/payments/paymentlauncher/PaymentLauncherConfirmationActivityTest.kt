@@ -181,7 +181,7 @@ class PaymentLauncherConfirmationActivityTest {
     }
 
     @Test
-    fun `start with StripeIntentNextActionWithIntentArgs for PaymentIntent should handleNextActionForStripeIntent with intent`() {
+    fun `start with StripeIntentNextActionWithIntentArgs for PaymentIntent should handle with intent`() {
         val testPaymentIntent = mock<com.stripe.android.model.PaymentIntent>()
         mockViewModelActivityScenario().launch(
             Intent(
@@ -209,7 +209,7 @@ class PaymentLauncherConfirmationActivityTest {
     }
 
     @Test
-    fun `start with StripeIntentNextActionWithIntentArgs for SetupIntent should handleNextActionForStripeIntent with intent`() {
+    fun `start with StripeIntentNextActionWithIntentArgs for SetupIntent should handle with intent`() {
         val testSetupIntent = mock<com.stripe.android.model.SetupIntent>()
         mockViewModelActivityScenario().launch(
             Intent(

@@ -189,8 +189,9 @@ class IntentConfirmationDefinitionTest {
 
     @Test
     fun `On 'IntentConfirmationInterceptor' next step, should return 'Launch' confirmation action`() = runTest {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
-            enqueueNextActionStep(clientSecret = "pi_123")
+            enqueueNextActionStep(clientSecret = "pi_123", intent = paymentIntent)
         }
         val definition = createIntentConfirmationDefinition(
             intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
@@ -205,7 +206,8 @@ class IntentConfirmationDefinitionTest {
 
         assertThat(launchAction.launcherArguments).isEqualTo(
             IntentConfirmationDefinition.Args.NextAction(
-                clientSecret = "pi_123"
+                clientSecret = "pi_123",
+                intent = paymentIntent
             )
         )
         assertThat(launchAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
@@ -270,6 +272,7 @@ class IntentConfirmationDefinitionTest {
     @Test
     fun `On launch with next step action and 'SetupIntent', should launch with expected params`() = runTest {
         val launcher = FakePaymentLauncher()
+        val setupIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
 
         val definition = createIntentConfirmationDefinition(
             paymentLauncher = launcher,
@@ -277,13 +280,16 @@ class IntentConfirmationDefinitionTest {
 
         definition.launch(
             launcher = launcher,
-            arguments = IntentConfirmationDefinition.Args.NextAction(clientSecret = "si_123"),
+            arguments = IntentConfirmationDefinition.Args.NextAction(
+                clientSecret = "si_123",
+                intent = setupIntent
+            ),
             confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
         )
 
         assertThat(launcher.calls.awaitItem()).isEqualTo(
-            FakePaymentLauncher.Call.HandleNextAction.SetupIntent(clientSecret = "si_123")
+            FakePaymentLauncher.Call.HandleNextActionWithIntent.Intent(setupIntent)
         )
     }
 
@@ -315,6 +321,7 @@ class IntentConfirmationDefinitionTest {
     @Test
     fun `On launch with next step action and 'PaymentIntent', should launch with expected params`() = runTest {
         val launcher = FakePaymentLauncher()
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
         val definition = createIntentConfirmationDefinition(
             paymentLauncher = launcher,
@@ -322,13 +329,16 @@ class IntentConfirmationDefinitionTest {
 
         definition.launch(
             launcher = launcher,
-            arguments = IntentConfirmationDefinition.Args.NextAction(clientSecret = "pi_123"),
+            arguments = IntentConfirmationDefinition.Args.NextAction(
+                clientSecret = "pi_123",
+                intent = paymentIntent
+            ),
             confirmationArgs = CONFIRMATION_PARAMETERS,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
         )
 
         assertThat(launcher.calls.awaitItem()).isEqualTo(
-            FakePaymentLauncher.Call.HandleNextAction.PaymentIntent(clientSecret = "pi_123")
+            FakePaymentLauncher.Call.HandleNextActionWithIntent.Intent(paymentIntent)
         )
     }
 
