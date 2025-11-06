@@ -2082,70 +2082,26 @@ class PaymentSheet internal constructor(
     @Parcelize
     @Poko
     class Colors(
-        /**
-         * A primary color used throughout PaymentSheet.
-         */
         @ColorInt
         internal val primary: Int,
-
-        /**
-         * The color used for the surfaces (backgrounds) of PaymentSheet.
-         */
         @ColorInt
         internal val surface: Int,
-
-        /**
-         * The color used for the background of inputs, tabs, and other components.
-         */
         @ColorInt
         internal val component: Int,
-
-        /**
-         * The color used for borders of inputs, tabs, and other components.
-         */
         @ColorInt
         internal val componentBorder: Int,
-
-        /**
-         * The color of the divider lines used inside inputs, tabs, and other components.
-         */
         @ColorInt
         internal val componentDivider: Int,
-
-        /**
-         * The default color used for text and on other elements that live on components.
-         */
         @ColorInt
         internal val onComponent: Int,
-
-        /**
-         * The color used for items appearing over the background in Payment Sheet.
-         */
         @ColorInt
         internal val onSurface: Int,
-
-        /**
-         * The color used for text of secondary importance.
-         * For example, this color is used for the label above input fields.
-         */
         @ColorInt
         internal val subtitle: Int,
-
-        /**
-         * The color used for input placeholder text.
-         */
         @ColorInt
         internal val placeholderText: Int,
-
-        /**
-         * The color used for icons in PaymentSheet, such as the close or back icons.
-         */
         @ColorInt
         internal val appBarIcon: Int,
-
-        /**
-         * A color used to indicate errors or destructive actions in PaymentSheet.
-         */
         @ColorInt
         internal val error: Int
     ) : Parcelable {
@@ -2174,6 +2130,252 @@ class PaymentSheet internal constructor(
             appBarIcon = appBarIcon.toArgb(),
             error = error.toArgb()
         )
+
+        class Builder {
+            @ColorInt private var primary: Int? = null
+            @ColorInt private var surface: Int? = null
+            @ColorInt private var component: Int? = null
+            @ColorInt private var componentBorder: Int? = null
+            @ColorInt private var componentDivider: Int? = null
+            @ColorInt private var onComponent: Int? = null
+            @ColorInt private var subtitle: Int? = null
+            @ColorInt private var placeholderText: Int? = null
+            @ColorInt private var onSurface: Int? = null
+            @ColorInt private var appBarIcon: Int? = null
+            @ColorInt private var error: Int? = null
+
+            /**
+             * The primary color used throughout PaymentSheet.
+             *
+             * @param color The primary [Color].
+             */
+            fun primary(color: Color) = apply {
+                this.primary = color.toArgb()
+            }
+
+            /**
+             * The primary color used throughout PaymentSheet.
+             *
+             * @param color The primary color as an [ColorInt] integer.
+             */
+            fun primary(@ColorInt color: Int) = apply {
+                this.primary = color
+            }
+
+            /**
+             * The color used for the surfaces (backgrounds) of PaymentSheet.
+             *
+             * @param color The surface [Color].
+             */
+            fun surface(color: Color) = apply {
+                this.surface = color.toArgb()
+            }
+
+            /**
+             * The color used for the surfaces (backgrounds) of PaymentSheet.
+             *
+             * @param color The surface color as an [ColorInt] integer.
+             */
+            fun surface(@ColorInt color: Int) = apply {
+                this.surface = color
+            }
+
+            /**
+             * The color used for the background of inputs, tabs, and other components.
+             *
+             * @param color The component background [Color].
+             */
+            fun component(color: Color) = apply {
+                this.component = color.toArgb()
+            }
+
+            /**
+             * The color used for the background of inputs, tabs, and other components.
+             *
+             * @param color The component background color as an [ColorInt] integer.
+             */
+            fun component(@ColorInt color: Int) = apply {
+                this.component = color
+            }
+
+            /**
+             * The color used for borders of inputs, tabs, and other components.
+             *
+             * @param color The component border [Color].
+             */
+            fun componentBorder(color: Color) = apply {
+                this.componentBorder = color.toArgb()
+            }
+
+            /**
+             * The color used for borders of inputs, tabs, and other components.
+             *
+             * @param color The component border color as an [ColorInt] integer.
+             */
+            fun componentBorder(@ColorInt color: Int) = apply {
+                this.componentBorder = color
+            }
+
+            /**
+             * The color of the divider lines used inside inputs, tabs, and other components.
+             *
+             * @param color The component divider [Color].
+             */
+            fun componentDivider(color: Color) = apply {
+                this.componentDivider = color.toArgb()
+            }
+
+            /**
+             * The color of the divider lines used inside inputs, tabs, and other components.
+             *
+             * @param color The component divider color as an [ColorInt] integer.
+             */
+            fun componentDivider(@ColorInt color: Int) = apply {
+                this.componentDivider = color
+            }
+
+            /**
+             * The default color used for text and on other elements that live on components.
+             *
+             * @param color The on-component [Color].
+             */
+            fun onComponent(color: Color) = apply {
+                this.onComponent = color.toArgb()
+            }
+
+            /**
+             * The default color used for text and on other elements that live on components.
+             *
+             * @param color The on-component color as an [ColorInt] integer.
+             */
+            fun onComponent(@ColorInt color: Int) = apply {
+                this.onComponent = color
+            }
+
+            /**
+             * The color used for text of secondary importance.
+             * For example, this color is used for the label above input fields.
+             *
+             * @param color The subtitle [Color].
+             */
+            fun subtitle(color: Color) = apply {
+                this.subtitle = color.toArgb()
+            }
+
+            /**
+             * The color used for text of secondary importance.
+             * For example, this color is used for the label above input fields.
+             *
+             * @param color The subtitle color as an [ColorInt] integer.
+             */
+            fun subtitle(@ColorInt color: Int) = apply {
+                this.subtitle = color
+            }
+
+            /**
+             * The color used for input placeholder text.
+             *
+             * @param color The placeholder text [Color].
+             */
+            fun placeholderText(color: Color) = apply {
+                this.placeholderText = color.toArgb()
+            }
+
+            /**
+             * The color used for input placeholder text.
+             *
+             * @param color The placeholder text color as an [ColorInt] integer.
+             */
+            fun placeholderText(@ColorInt color: Int) = apply {
+                this.placeholderText = color
+            }
+
+            /**
+             * The color used for items appearing over the background in Payment Sheet.
+             *
+             * @param color The on-surface [Color].
+             */
+            fun onSurface(color: Color) = apply {
+                this.onSurface = color.toArgb()
+            }
+
+            /**
+             * The color used for items appearing over the background in Payment Sheet.
+             *
+             * @param color The on-surface color as an [ColorInt] integer.
+             */
+            fun onSurface(@ColorInt color: Int) = apply {
+                this.onSurface = color
+            }
+
+            /**
+             * The color used for icons in PaymentSheet, such as the close or back icons.
+             *
+             * @param color The app bar icon [Color].
+             */
+            fun appBarIcon(color: Color) = apply {
+                this.appBarIcon = color.toArgb()
+            }
+
+            /**
+             * The color used for icons in PaymentSheet, such as the close or back icons.
+             *
+             * @param color The app bar icon color as an [ColorInt] integer.
+             */
+            fun appBarIcon(@ColorInt color: Int) = apply {
+                this.appBarIcon = color
+            }
+
+            /**
+             * A color used to indicate errors or destructive actions in PaymentSheet.
+             *
+             * @param color The error [Color].
+             */
+            fun error(color: Color) = apply {
+                this.error = color.toArgb()
+            }
+
+            /**
+             * A color used to indicate errors or destructive actions in PaymentSheet.
+             *
+             * @param color The error color as an [ColorInt] integer.
+             */
+            fun error(@ColorInt color: Int) = apply {
+                this.error = color
+            }
+
+            fun buildLight(): Colors {
+                return Colors(
+                    primary = primary ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
+                    surface = surface ?: StripeThemeDefaults.colorsLight.materialColors.surface.toArgb(),
+                    component = component ?: StripeThemeDefaults.colorsLight.component.toArgb(),
+                    componentBorder = componentBorder ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                    componentDivider = componentDivider ?: StripeThemeDefaults.colorsLight.componentDivider.toArgb(),
+                    onComponent = onComponent ?: StripeThemeDefaults.colorsLight.onComponent.toArgb(),
+                    subtitle = subtitle ?: StripeThemeDefaults.colorsLight.subtitle.toArgb(),
+                    placeholderText = placeholderText ?: StripeThemeDefaults.colorsLight.placeholderText.toArgb(),
+                    onSurface = onSurface ?: StripeThemeDefaults.colorsLight.materialColors.onSurface.toArgb(),
+                    appBarIcon = appBarIcon ?: StripeThemeDefaults.colorsLight.appBarIcon.toArgb(),
+                    error = error ?: StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
+                )
+            }
+
+            fun buildDark(): Colors {
+                return Colors(
+                    primary = primary ?: StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
+                    surface = surface ?: StripeThemeDefaults.colorsDark.materialColors.surface.toArgb(),
+                    component = component ?: StripeThemeDefaults.colorsDark.component.toArgb(),
+                    componentBorder = componentBorder ?: StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                    componentDivider = componentDivider ?: StripeThemeDefaults.colorsDark.componentDivider.toArgb(),
+                    onComponent = onComponent ?: StripeThemeDefaults.colorsDark.onComponent.toArgb(),
+                    subtitle = subtitle ?: StripeThemeDefaults.colorsDark.subtitle.toArgb(),
+                    placeholderText = placeholderText ?: StripeThemeDefaults.colorsDark.placeholderText.toArgb(),
+                    onSurface = onSurface ?: StripeThemeDefaults.colorsDark.materialColors.onSurface.toArgb(),
+                    appBarIcon = appBarIcon ?: StripeThemeDefaults.colorsDark.appBarIcon.toArgb(),
+                    error = error ?: StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
+                )
+            }
+        }
 
         companion object {
             internal fun configureDefaultLight(
