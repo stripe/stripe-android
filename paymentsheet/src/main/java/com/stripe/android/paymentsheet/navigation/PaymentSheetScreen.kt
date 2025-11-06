@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.navigation
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -23,7 +22,7 @@ import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
 import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
-import com.stripe.android.paymentsheet.ui.isNoFormElementsOrMandateOnly
+import com.stripe.android.paymentsheet.ui.isNonInteractableFormElementsOnly
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenUI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
@@ -255,7 +254,7 @@ internal sealed interface PaymentSheetScreen {
 
         override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
             return interactor.state.mapAsStateFlow { state ->
-                if (isWalletEnabled || isNoFormElementsOrMandateOnly(state.formUiElements)) {
+                if (isWalletEnabled || isNonInteractableFormElementsOnly(state.formUiElements)) {
                     null
                 } else if (isCompleteFlow) {
                     R.string.stripe_paymentsheet_add_payment_method_title.resolvableString

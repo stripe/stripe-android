@@ -30,7 +30,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountForm
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormHeaderUI
-import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.getOuterFormInsets
@@ -78,7 +77,7 @@ internal fun PaymentElement(
                 modifier = Modifier.padding(bottom = 12.dp),
                 updatePaymentMethodVisibility = updatePaymentMethodVisibility,
             )
-       } else if (supportedPaymentMethods.size == 1 && isNoFormElementsOrMandateOnly(formElements)) {
+       } else if (supportedPaymentMethods.size == 1 && isNonInteractableFormElementsOnly(formElements)) {
            supportedPaymentMethods.firstOrNull()?.asFormHeaderInformation(incentive)?.let {
                VerticalModeFormHeaderUI(enabled, it)
            }
@@ -97,8 +96,8 @@ internal fun PaymentElement(
     }
 }
 
-internal fun isNoFormElementsOrMandateOnly(formElements: List<FormElement>): Boolean {
-    return formElements.isEmpty() || formElements.any { !it.allowsUserInteraction }
+internal fun isNonInteractableFormElementsOnly(formElements: List<FormElement>): Boolean {
+    return formElements.isEmpty() || formElements.all { !it.allowsUserInteraction }
 }
 
 @Composable
