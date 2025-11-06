@@ -32,17 +32,17 @@ internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
         listenForActivityResult()
 
         setContent {
-            var bridgeReady by remember { mutableStateOf(false) }
+            var showProgressIndicator by remember { mutableStateOf(true) }
 
             LaunchedEffect("BridgeEvents") {
                 viewModel.bridgeReady.collect {
-                    bridgeReady = true
+                    showProgressIndicator = false
                 }
             }
 
             IntentConfirmationChallengeUI(
                 bridgeHandler = viewModel.bridgeHandler,
-                bridgeReady = bridgeReady
+                showProgressIndicator = showProgressIndicator
             )
         }
     }

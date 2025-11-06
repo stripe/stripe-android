@@ -15,7 +15,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 @Composable
 internal fun IntentConfirmationChallengeUI(
     bridgeHandler: ConfirmationChallengeBridgeHandler,
-    bridgeReady: Boolean,
+    showProgressIndicator: Boolean,
     webViewFactory: (Context, ConfirmationChallengeBridgeHandler) -> WebView = { context, handler ->
         IntentConfirmationChallengeWebView(
             context = context,
@@ -26,7 +26,7 @@ internal fun IntentConfirmationChallengeUI(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        if (bridgeReady.not()) {
+        if (showProgressIndicator) {
             CircularProgressIndicator(
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -40,7 +40,7 @@ internal fun IntentConfirmationChallengeUI(
                 .testTag(INTENT_CONFIRMATION_CHALLENGE_WEB_VIEW_TAG),
             factory = { context ->
                 webViewFactory(context, bridgeHandler).apply {
-                    loadUrl("http://192.168.2.106:3004")
+                    loadUrl("http://10.0.2.2:3004")
                 }
             },
             update = { view ->
