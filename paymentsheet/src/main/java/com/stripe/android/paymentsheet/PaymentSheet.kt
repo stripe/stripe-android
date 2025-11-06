@@ -2251,24 +2251,60 @@ class PaymentSheet internal constructor(
     @Parcelize
     @Poko
     class Typography @AppearanceAPIAdditionsPreview constructor(
-        /**
-         * The scale factor for all fonts in PaymentSheet, the default value is 1.0.
-         * When this value increases fonts will increase in size and decrease when this value is lowered.
-         */
         internal val sizeScaleFactor: Float,
-
-        /**
-         * The font used in text. This should be a resource ID value.
-         */
         @FontRes
         internal val fontResId: Int?,
-
-        /**
-         * Custom font configuration for specific text styles
-         * Note: When set, these fonts override the default font calculations for their respective text styles
-         */
         internal val custom: Custom,
     ) : Parcelable {
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Builder {
+            private var sizeScaleFactor: Float = StripeThemeDefaults.typography.fontSizeMultiplier
+
+            @FontRes
+            private var fontResId: Int? = StripeThemeDefaults.typography.fontFamily
+
+            @OptIn(AppearanceAPIAdditionsPreview::class)
+            private var custom: Custom = Custom()
+
+            /**
+             * The scale factor for all fonts in PaymentSheet, the default value is 1.0.
+             * When this value increases fonts will increase in size and decrease when this value is lowered.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun sizeScaleFactor(sizeScaleFactor: Float) = apply {
+                this.sizeScaleFactor = sizeScaleFactor
+            }
+
+            /**
+             * The font used in text. This should be a resource ID value.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun fontResId(@FontRes fontResId: Int?) = apply {
+                this.fontResId = fontResId
+            }
+
+            /**
+             * Custom font configuration for specific text styles
+             * Note: When set, these fonts override the default font calculations for their respective text styles
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @OptIn(AppearanceAPIAdditionsPreview::class)
+            fun custom(custom: Custom) = apply {
+                this.custom = custom
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @OptIn(AppearanceAPIAdditionsPreview::class)
+            fun build(): Typography {
+                return Typography(
+                    sizeScaleFactor = sizeScaleFactor,
+                    fontResId = fontResId,
+                    custom = custom,
+                )
+            }
+        }
+
         @OptIn(AppearanceAPIAdditionsPreview::class)
         constructor(
             /**
@@ -2323,10 +2359,7 @@ class PaymentSheet internal constructor(
         ) : Parcelable
 
         companion object {
-            val default = Typography(
-                sizeScaleFactor = StripeThemeDefaults.typography.fontSizeMultiplier,
-                fontResId = StripeThemeDefaults.typography.fontFamily
-            )
+            val default: Typography = Builder().build()
         }
     }
 
