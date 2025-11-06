@@ -204,4 +204,12 @@ internal interface ConfirmationHandler {
     }
 
     interface Option : Parcelable
+
+    fun interface Saver {
+        fun save(
+            stripeIntent: StripeIntent,
+            confirmationOption: Option,
+            alwaysSave: Boolean,
+        )
+    }
 }
