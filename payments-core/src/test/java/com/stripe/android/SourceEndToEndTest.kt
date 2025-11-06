@@ -4,7 +4,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
-import com.stripe.android.model.KlarnaSourceParams
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.SourceTypeModel
 import org.junit.runner.RunWith
@@ -51,35 +50,6 @@ internal class SourceEndToEndTest {
         return Stripe(
             ApplicationProvider.getApplicationContext(),
             publishableKey
-        )
-    }
-
-    private companion object {
-        private const val RETURN_URL = "https://example.com"
-
-        private val LINE_ITEMS = listOf(
-            KlarnaSourceParams.LineItem(
-                itemType = KlarnaSourceParams.LineItem.Type.Sku,
-                itemDescription = "towel",
-                totalAmount = 10000,
-                quantity = 1
-            ),
-            KlarnaSourceParams.LineItem(
-                itemType = KlarnaSourceParams.LineItem.Type.Sku,
-                itemDescription = "digital watch",
-                totalAmount = 20000,
-                quantity = 2
-            ),
-            KlarnaSourceParams.LineItem(
-                itemType = KlarnaSourceParams.LineItem.Type.Tax,
-                itemDescription = "taxes",
-                totalAmount = 1500
-            ),
-            KlarnaSourceParams.LineItem(
-                itemType = KlarnaSourceParams.LineItem.Type.Shipping,
-                itemDescription = "ground shipping",
-                totalAmount = 499
-            )
         )
     }
 }
