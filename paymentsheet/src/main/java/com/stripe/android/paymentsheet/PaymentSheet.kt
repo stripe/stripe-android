@@ -1389,45 +1389,64 @@ class PaymentSheet internal constructor(
                     @Parcelize
                     @Poko
                     class Colors(
-                        /**
-                         * The color of the separator line between rows.
-                         */
                         @ColorInt
                         internal val separatorColor: Int,
-
-                        /**
-                         * The color of the radio button when selected.
-                         */
                         @ColorInt
                         internal val selectedColor: Int,
-
-                        /**
-                         * The color of the radio button when unselected.
-                         */
                         @ColorInt
                         internal val unselectedColor: Int,
-                    ) : Parcelable
+                    ) : Parcelable {
+                        class Builder {
+                            private var separatorColor: Int? = null
+                            private var selectedColor: Int? = null
+                            private var unselectedColor: Int? = null
+
+                            /**
+                             * The color of the separator line between rows.
+                             */
+                            fun separatorColor(@ColorInt color: Int) = apply {
+                                this.separatorColor = color
+                            }
+
+                            /**
+                             * The color of the radio button when selected.
+                             */
+                            fun selectedColor(@ColorInt color: Int) = apply {
+                                this.selectedColor = color
+                            }
+
+                            /**
+                             * The color of the radio button when unselected.
+                             */
+                            fun unselectedColor(@ColorInt color: Int) = apply {
+                                this.unselectedColor = color
+                            }
+
+                            fun build(theme: Theme): Colors {
+                                return Colors(
+                                    separatorColor = separatorColor ?: when (theme) {
+                                        Theme.LIGHT -> StripeThemeDefaults.radioColorsLight.separatorColor.toArgb()
+                                        Theme.DARK -> StripeThemeDefaults.radioColorsDark.separatorColor.toArgb()
+                                    },
+                                    selectedColor = selectedColor ?: when (theme) {
+                                        Theme.LIGHT -> StripeThemeDefaults.radioColorsLight.selectedColor.toArgb()
+                                        Theme.DARK -> StripeThemeDefaults.radioColorsDark.selectedColor.toArgb()
+                                    },
+                                    unselectedColor = unselectedColor ?: when (theme) {
+                                        Theme.LIGHT -> StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb()
+                                        Theme.DARK -> StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
+                                    }
+                                )
+                            }
+                        }
+                        enum class Theme {
+                            LIGHT,
+                            DARK
+                        }
+                    }
 
                     internal companion object {
-                        val default = FlatWithRadio(
-                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                            additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
-                            horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp,
-                            colorsLight = Colors(
-                                separatorColor = StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
-                                selectedColor = StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
-                                unselectedColor = StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb()
-                            ),
-                            colorsDark = Colors(
-                                separatorColor = StripeThemeDefaults.radioColorsDark.separatorColor.toArgb(),
-                                selectedColor = StripeThemeDefaults.radioColorsDark.selectedColor.toArgb(),
-                                unselectedColor = StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
-                            ),
-                        )
+                        val default: FlatWithRadio = Builder().build()
                     }
 
                     class Builder {
@@ -1439,16 +1458,8 @@ class PaymentSheet internal constructor(
                         private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
                             .additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
-                        private var colorsLight = Colors(
-                            separatorColor = StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
-                            selectedColor = StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
-                            unselectedColor = StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb()
-                        )
-                        private var colorsDark = Colors(
-                            separatorColor = StripeThemeDefaults.radioColorsDark.separatorColor.toArgb(),
-                            selectedColor = StripeThemeDefaults.radioColorsDark.selectedColor.toArgb(),
-                            unselectedColor = StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
-                        )
+                        private var colorsLight = Colors.Builder().build(Colors.Theme.LIGHT)
+                        private var colorsDark = Colors.Builder().build(Colors.Theme.DARK)
 
                         /**
                          * The thickness of the separator line between rows.
@@ -1548,42 +1559,55 @@ class PaymentSheet internal constructor(
                     @Parcelize
                     @Poko
                     class Colors(
-                        /**
-                         * The color of the separator line between rows.
-                         */
                         @ColorInt
                         internal val separatorColor: Int,
-
-                        /**
-                         * The color of the checkmark.
-                         */
                         @ColorInt
                         internal val checkmarkColor: Int,
-                    ) : Parcelable
+                    ) : Parcelable {
+                        class Builder {
+                            private var separatorColor: Int? = null
+                            private var checkmarkColor: Int? = null
+
+                            /**
+                             * The color of the separator line between rows.
+                             */
+                            fun separatorColor(@ColorInt color: Int) = apply {
+                                this.separatorColor = color
+                            }
+
+                            /**
+                             * The color of the checkmark.
+                             */
+                            fun checkmarkColor(@ColorInt color: Int) = apply {
+                                this.checkmarkColor = color
+                            }
+
+                            fun build(theme: Theme): Colors {
+                                return Colors(
+                                    separatorColor = separatorColor ?: when (theme) {
+                                        Theme.LIGHT -> StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb()
+                                        Theme.DARK -> StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb()
+                                    },
+                                    checkmarkColor = checkmarkColor ?: when (theme) {
+                                        Theme.LIGHT -> StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb()
+                                        Theme.DARK -> StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb()
+                                    }
+                                )
+                            }
+                        }
+
+                        enum class Theme {
+                            LIGHT,
+                            DARK
+                        }
+                    }
 
                     override fun hasSeparators() = true
                     override fun startSeparatorHasDefaultInset() = false
                     internal fun getColors(isDark: Boolean): Colors = if (isDark) colorsDark else colorsLight
 
                     internal companion object {
-                        val default = FlatWithCheckmark(
-                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                            checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
-                            additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
-                            horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp,
-                            colorsLight = Colors(
-                                separatorColor = StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
-                                checkmarkColor = StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb()
-                            ),
-                            colorsDark = Colors(
-                                separatorColor = StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb(),
-                                checkmarkColor = StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb()
-                            )
-                        )
+                        val default: FlatWithCheckmark = Builder().build()
                     }
 
                     class Builder {
@@ -1596,14 +1620,8 @@ class PaymentSheet internal constructor(
                         private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
                             .additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
-                        private var colorsLight = Colors(
-                            separatorColor = StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
-                            checkmarkColor = StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb(),
-                        )
-                        private var colorsDark = Colors(
-                            separatorColor = StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb(),
-                            checkmarkColor = StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb(),
-                        )
+                        private var colorsLight = Colors.Builder().build(Colors.Theme.LIGHT)
+                        private var colorsDark = Colors.Builder().build(Colors.Theme.DARK)
 
                         /**
                          * The thickness of the separator line between rows.
@@ -1780,43 +1798,54 @@ class PaymentSheet internal constructor(
                     @Parcelize
                     @Poko
                     class Colors(
-                        /**
-                         * The color of the separator line between rows.
-                         */
                         @ColorInt
                         internal val separatorColor: Int,
-
-                        /**
-                         * The color of the disclosure icon.
-                         */
                         @ColorInt
                         internal val disclosureColor: Int,
-                    ) : Parcelable
+                    ) : Parcelable {
+                        class Builder {
+                            private var separatorColor: Int? = null
+                            private var disclosureColor: Int? = null
+
+                            /**
+                             * The color of the separator line between rows.
+                             */
+                            fun separatorColor(@ColorInt color: Int) = apply {
+                                this.separatorColor = color
+                            }
+
+                            /**
+                             * The color of the disclosure icon.
+                             */
+                            fun disclosureColor(@ColorInt color: Int) = apply {
+                                this.disclosureColor = color
+                            }
+
+                            fun build(theme: Theme): Colors {
+                                return Colors(
+                                    separatorColor = separatorColor ?: when (theme) {
+                                        Theme.LIGHT -> StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb()
+                                        Theme.DARK -> StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb()
+                                    },
+                                    disclosureColor = disclosureColor ?: when (theme) {
+                                        Theme.LIGHT -> StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
+                                        Theme.DARK -> StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
+                                    }
+                                )
+                            }
+                        }
+                        enum class Theme {
+                            LIGHT,
+                            DARK
+                        }
+                    }
 
                     override fun hasSeparators() = true
                     override fun startSeparatorHasDefaultInset() = false
                     internal fun getColors(isDark: Boolean): Colors = if (isDark) colorsDark else colorsLight
 
                     internal companion object {
-                        val default = FlatWithDisclosure(
-                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                            additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
-                            horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp,
-                            colorsLight = Colors(
-                                separatorColor = StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
-                                disclosureColor = StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
-                            ),
-                            colorsDark = Colors(
-                                separatorColor = StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
-                                disclosureColor = StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
-
-                            ),
-                            disclosureIconRes = R.drawable.stripe_ic_chevron_right
-                        )
+                        val default: FlatWithDisclosure = Builder().build()
                     }
 
                     class Builder {
@@ -1828,14 +1857,8 @@ class PaymentSheet internal constructor(
                         private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
                             .additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
-                        private var colorsLight = Colors(
-                            separatorColor = StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
-                            disclosureColor = StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
-                        )
-                        private var colorsDark = Colors(
-                            separatorColor = StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
-                            disclosureColor = StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
-                        )
+                        private var colorsLight = Colors.Builder().build(Colors.Theme.LIGHT)
+                        private var colorsDark = Colors.Builder().build(Colors.Theme.DARK)
                         private var disclosureIconRes: Int = R.drawable.stripe_ic_chevron_right
 
                         /**
