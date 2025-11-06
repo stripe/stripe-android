@@ -368,8 +368,8 @@ internal class VerticalModeFormUIScreenshotTest {
             FakeVerticalModeFormInteractor.create(
                 paymentMethodCode = "card",
                 metadata = metadata,
+                showsWalletHeader = true,
             ),
-            showsWalletHeader = true,
         )
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.walletsStateSource.value = WalletsState(
@@ -464,8 +464,8 @@ internal class VerticalModeFormUIScreenshotTest {
                     paymentMethodCode = paymentMethodCode,
                     metadata = metadata,
                     isProcessing = isProcessing,
+                    showsWalletHeader = showsWalletHeader,
                 ),
-                showsWalletHeader = showsWalletHeader,
             )
         }
     }
