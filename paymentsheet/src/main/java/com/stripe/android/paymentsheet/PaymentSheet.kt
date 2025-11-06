@@ -1396,6 +1396,8 @@ class PaymentSheet internal constructor(
                         @ColorInt
                         internal val unselectedColor: Int,
                     ) : Parcelable {
+
+                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                         class Builder {
                             private var separatorColor: Int? = null
                             private var selectedColor: Int? = null
@@ -1404,6 +1406,7 @@ class PaymentSheet internal constructor(
                             /**
                              * The color of the separator line between rows.
                              */
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun separatorColor(@ColorInt color: Int) = apply {
                                 this.separatorColor = color
                             }
@@ -1411,6 +1414,7 @@ class PaymentSheet internal constructor(
                             /**
                              * The color of the radio button when selected.
                              */
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun selectedColor(@ColorInt color: Int) = apply {
                                 this.selectedColor = color
                             }
@@ -1418,30 +1422,34 @@ class PaymentSheet internal constructor(
                             /**
                              * The color of the radio button when unselected.
                              */
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun unselectedColor(@ColorInt color: Int) = apply {
                                 this.unselectedColor = color
                             }
 
-                            fun build(theme: Theme): Colors {
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun buildLight(): Colors {
                                 return Colors(
-                                    separatorColor = separatorColor ?: when (theme) {
-                                        Theme.LIGHT -> StripeThemeDefaults.radioColorsLight.separatorColor.toArgb()
-                                        Theme.DARK -> StripeThemeDefaults.radioColorsDark.separatorColor.toArgb()
-                                    },
-                                    selectedColor = selectedColor ?: when (theme) {
-                                        Theme.LIGHT -> StripeThemeDefaults.radioColorsLight.selectedColor.toArgb()
-                                        Theme.DARK -> StripeThemeDefaults.radioColorsDark.selectedColor.toArgb()
-                                    },
-                                    unselectedColor = unselectedColor ?: when (theme) {
-                                        Theme.LIGHT -> StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb()
-                                        Theme.DARK -> StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
-                                    }
+                                    separatorColor = separatorColor
+                                        ?: StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
+                                    selectedColor = selectedColor
+                                        ?: StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
+                                    unselectedColor = unselectedColor
+                                        ?: StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb()
                                 )
                             }
-                        }
-                        enum class Theme {
-                            LIGHT,
-                            DARK
+
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun buildDark(): Colors {
+                                return Colors(
+                                    separatorColor = separatorColor
+                                        ?: StripeThemeDefaults.radioColorsDark.separatorColor.toArgb(),
+                                    selectedColor = selectedColor
+                                        ?: StripeThemeDefaults.radioColorsDark.selectedColor.toArgb(),
+                                    unselectedColor = unselectedColor
+                                        ?: StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
+                                )
+                            }
                         }
                     }
 
@@ -1458,8 +1466,8 @@ class PaymentSheet internal constructor(
                         private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
                             .additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
-                        private var colorsLight = Colors.Builder().build(Colors.Theme.LIGHT)
-                        private var colorsDark = Colors.Builder().build(Colors.Theme.DARK)
+                        private var colorsLight = Colors.Builder().buildLight()
+                        private var colorsDark = Colors.Builder().buildDark()
 
                         /**
                          * The thickness of the separator line between rows.
@@ -1564,6 +1572,8 @@ class PaymentSheet internal constructor(
                         @ColorInt
                         internal val checkmarkColor: Int,
                     ) : Parcelable {
+
+                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                         class Builder {
                             private var separatorColor: Int? = null
                             private var checkmarkColor: Int? = null
@@ -1571,6 +1581,7 @@ class PaymentSheet internal constructor(
                             /**
                              * The color of the separator line between rows.
                              */
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun separatorColor(@ColorInt color: Int) = apply {
                                 this.separatorColor = color
                             }
@@ -1578,27 +1589,30 @@ class PaymentSheet internal constructor(
                             /**
                              * The color of the checkmark.
                              */
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun checkmarkColor(@ColorInt color: Int) = apply {
                                 this.checkmarkColor = color
                             }
 
-                            fun build(theme: Theme): Colors {
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun buildLight(): Colors {
                                 return Colors(
-                                    separatorColor = separatorColor ?: when (theme) {
-                                        Theme.LIGHT -> StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb()
-                                        Theme.DARK -> StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb()
-                                    },
-                                    checkmarkColor = checkmarkColor ?: when (theme) {
-                                        Theme.LIGHT -> StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb()
-                                        Theme.DARK -> StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb()
-                                    }
+                                    separatorColor = separatorColor
+                                        ?: StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
+                                    checkmarkColor = checkmarkColor
+                                        ?: StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb()
                                 )
                             }
-                        }
 
-                        enum class Theme {
-                            LIGHT,
-                            DARK
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun buildDark(): Colors {
+                                return Colors(
+                                    separatorColor = separatorColor
+                                        ?: StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb(),
+                                    checkmarkColor = checkmarkColor
+                                        ?: StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb()
+                                )
+                            }
                         }
                     }
 
@@ -1620,8 +1634,8 @@ class PaymentSheet internal constructor(
                         private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
                             .additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
-                        private var colorsLight = Colors.Builder().build(Colors.Theme.LIGHT)
-                        private var colorsDark = Colors.Builder().build(Colors.Theme.DARK)
+                        private var colorsLight = Colors.Builder().buildLight()
+                        private var colorsDark = Colors.Builder().buildDark()
 
                         /**
                          * The thickness of the separator line between rows.
@@ -1803,6 +1817,8 @@ class PaymentSheet internal constructor(
                         @ColorInt
                         internal val disclosureColor: Int,
                     ) : Parcelable {
+
+                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                         class Builder {
                             private var separatorColor: Int? = null
                             private var disclosureColor: Int? = null
@@ -1810,6 +1826,7 @@ class PaymentSheet internal constructor(
                             /**
                              * The color of the separator line between rows.
                              */
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun separatorColor(@ColorInt color: Int) = apply {
                                 this.separatorColor = color
                             }
@@ -1817,26 +1834,30 @@ class PaymentSheet internal constructor(
                             /**
                              * The color of the disclosure icon.
                              */
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun disclosureColor(@ColorInt color: Int) = apply {
                                 this.disclosureColor = color
                             }
 
-                            fun build(theme: Theme): Colors {
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun buildLight(): Colors {
                                 return Colors(
-                                    separatorColor = separatorColor ?: when (theme) {
-                                        Theme.LIGHT -> StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb()
-                                        Theme.DARK -> StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb()
-                                    },
-                                    disclosureColor = disclosureColor ?: when (theme) {
-                                        Theme.LIGHT -> StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
-                                        Theme.DARK -> StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
-                                    }
+                                    separatorColor = separatorColor
+                                        ?: StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
+                                    disclosureColor = disclosureColor
+                                        ?: StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
                                 )
                             }
-                        }
-                        enum class Theme {
-                            LIGHT,
-                            DARK
+
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun buildDark(): Colors {
+                                return Colors(
+                                    separatorColor = separatorColor
+                                        ?: StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
+                                    disclosureColor = disclosureColor
+                                        ?: StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
+                                )
+                            }
                         }
                     }
 
@@ -1857,8 +1878,8 @@ class PaymentSheet internal constructor(
                         private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
                             .additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
-                        private var colorsLight = Colors.Builder().build(Colors.Theme.LIGHT)
-                        private var colorsDark = Colors.Builder().build(Colors.Theme.DARK)
+                        private var colorsLight = Colors.Builder().buildLight()
+                        private var colorsDark = Colors.Builder().buildDark()
                         private var disclosureIconRes: Int = R.drawable.stripe_ic_chevron_right
 
                         /**
