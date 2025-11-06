@@ -21,6 +21,11 @@ constructor(
         ApiKeyValidator.get().requireValid(publishableKey)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun isLiveMode(): Boolean {
+        return !publishableKey.startsWith("pk_test")
+    }
+
     /**
      * Manages saving and loading [PaymentConfiguration] data to SharedPreferences.
      */

@@ -28,6 +28,8 @@ import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkController.ConfigureResult
+import com.stripe.android.model.DateOfBirth
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -163,8 +165,8 @@ class OnrampInteractorTest {
             firstName = "Test",
             lastName = "User",
             idNumber = "999-88-7777",
-            dateOfBirth = com.stripe.android.crypto.onramp.model.DateOfBirth(day = 1, month = 3, year = 1975),
-            address = com.stripe.android.paymentsheet.PaymentSheet.Address(city = "Orlando", state = "FL")
+            dateOfBirth = DateOfBirth(day = 1, month = 3, year = 1975),
+            address = PaymentSheet.Address(city = "Orlando", state = "FL")
         )
         val result = interactor.attachKycInfo(kycInfo)
         assert(result is OnrampAttachKycInfoResult.Completed)
