@@ -265,7 +265,8 @@ internal class FakeEventReporter : EventReporter {
     override fun onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
         visiblePaymentMethods: List<String>,
         hiddenPaymentMethods: List<String>,
-        walletsState: WalletsState?
+        walletsState: WalletsState?,
+        isVerticalLayout: Boolean
     ) {
     }
 

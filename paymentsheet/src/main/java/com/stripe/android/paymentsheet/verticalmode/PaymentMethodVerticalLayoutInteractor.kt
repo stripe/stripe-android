@@ -184,6 +184,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                         visiblePaymentMethods = visiblePaymentMethods,
                         hiddenPaymentMethods = hiddenPaymentMethods,
                         walletsState = viewModel.walletsState.value,
+                        isVerticalLayout = true,
                     )
                 },
             ).also { interactor ->

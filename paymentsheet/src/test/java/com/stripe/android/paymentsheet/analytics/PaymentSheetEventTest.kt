@@ -1884,6 +1884,7 @@ class PaymentSheetEventTest {
             isSpt = false,
             linkEnabled = true,
             googlePaySupported = true,
+            isVerticalLayout = true,
         )
 
         assertThat(initialDisplayedPaymentMethodsEvent.params).isEqualTo(
@@ -1893,7 +1894,8 @@ class PaymentSheetEventTest {
                 "link_enabled" to true,
                 "google_pay_enabled" to true,
                 "visible_payment_methods" to "link,saved,card,affirm",
-                "hidden_payment_methods" to "crypto,klarna,alipay"
+                "hidden_payment_methods" to "crypto,klarna,alipay",
+                "payment_method_layout" to "vertical"
             )
         )
     }

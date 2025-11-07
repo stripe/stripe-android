@@ -254,6 +254,7 @@ internal interface EventReporter : CardScanEventsReporter {
         visiblePaymentMethods: List<String>,
         hiddenPaymentMethods: List<String>,
         walletsState: WalletsState?,
+        isVerticalLayout: Boolean,
     )
 
     /**
