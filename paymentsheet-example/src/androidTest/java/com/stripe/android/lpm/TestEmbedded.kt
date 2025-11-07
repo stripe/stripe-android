@@ -3,15 +3,20 @@ package com.stripe.android.lpm
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionOnBehalfOfSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedFormSheetActionSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedFormSheetActionSettingDefinition.FormSheetAction
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
@@ -90,6 +95,30 @@ internal class TestEmbedded : BasePlaygroundTest() {
                 settings[CurrencySettingsDefinition] = Currency.USD
                 settings[DelayedPaymentMethodsSettingsDefinition] = true
                 settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
+            },
+        )
+    }
+
+    @Test
+    fun testCardWithOBO_UseCartesBancaires() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = parameters.copy(
+                saveForFutureUseCheckboxVisible = true,
+                authorizationAction = null,
+            ).copyPlaygroundSettings { settings ->
+                settings[GooglePaySettingsDefinition] = false
+                settings[CountrySettingsDefinition] = Country.US
+                settings[CustomerSessionOnBehalfOfSettingsDefinition] =
+                    CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT
+                settings[CustomerSessionSettingsDefinition] = true
+                settings[CurrencySettingsDefinition] = Currency.EUR
+
+                settings[SupportedPaymentMethodsSettingsDefinition] = "card"
+
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT
+            },
+            populateCustomLpmFields = {
+                populateCardBrandChoiceCardDetails("Cartes Bancaires")
             },
         )
     }

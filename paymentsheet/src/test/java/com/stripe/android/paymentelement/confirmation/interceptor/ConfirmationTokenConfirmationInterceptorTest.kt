@@ -303,7 +303,10 @@ class ConfirmationTokenConfirmationInterceptorTest {
             val nextStep = interceptor.interceptDefaultNewPaymentMethod()
             assertThat(nextStep).isEqualTo(
                 ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>(
-                    launcherArguments = IntentConfirmationDefinition.Args.NextAction("pi_123_secret_456"),
+                    launcherArguments = IntentConfirmationDefinition.Args.NextAction(
+                        clientSecret = "pi_123_secret_456",
+                        intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+                    ),
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     isConfirmationToken = true,
                     receivesResultInProcess = false,

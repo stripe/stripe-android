@@ -13,7 +13,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.FakeEmbeddedConfirmationSaver
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -133,8 +132,6 @@ class DefaultFormActivityStateHelperTest {
             assertThat(completedState.processingState).isEqualTo(PrimaryButtonProcessingState.Completed)
             assertThat(completedState.isProcessing).isFalse()
         }
-
-        assertThat(confirmationSaver.saveTurbine.awaitItem()).isNotNull()
     }
 
     @Test
@@ -280,7 +277,6 @@ class DefaultFormActivityStateHelperTest {
         val selectionHolder: EmbeddedSelectionHolder,
         val stateHolder: FormActivityStateHelper,
         val onClickOverrideDelegate: OnClickOverrideDelegate,
-        val confirmationSaver: FakeEmbeddedConfirmationSaver
     )
 
     private fun testScenario(
@@ -291,7 +287,6 @@ class DefaultFormActivityStateHelperTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
         val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
-        val confirmationSaver = FakeEmbeddedConfirmationSaver()
         val stateHolder = DefaultFormActivityStateHelper(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
@@ -299,17 +294,13 @@ class DefaultFormActivityStateHelperTest {
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = onClickOverrideDelegate,
             eventReporter = FakeEventReporter(),
-            confirmationSaver = confirmationSaver,
         )
 
         Scenario(
             selectionHolder = selectionHolder,
             stateHolder = stateHolder,
             onClickOverrideDelegate = onClickOverrideDelegate,
-            confirmationSaver = confirmationSaver,
         ).block()
-
-        confirmationSaver.validate()
     }
 
     private suspend fun TurbineTestContext<FormActivityStateHelper.State>.awaitAndVerifyInitialState() {

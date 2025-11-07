@@ -3,9 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.content.SharedPreferences
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.model.toSavedSelection
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.VisibleForTesting
 import javax.inject.Inject
@@ -36,18 +34,6 @@ internal class DefaultPrefsRepository(
         } ?: SavedSelection.None
     }
 
-    override fun savePaymentSelection(paymentSelection: PaymentSelection?) {
-        val savedSelection = paymentSelection?.toSavedSelection()
-        when (savedSelection) {
-            SavedSelection.GooglePay -> "google_pay"
-            SavedSelection.Link -> "link"
-            is SavedSelection.PaymentMethod -> "payment_method:${savedSelection.id}:${savedSelection.isLinkOrigin}"
-            else -> null
-        }?.let { value ->
-            apply(value)
-        }
-    }
-
     override fun setSavedSelection(savedSelection: SavedSelection?): Boolean {
         return when (savedSelection) {
             SavedSelection.GooglePay -> "google_pay"
@@ -57,15 +43,6 @@ internal class DefaultPrefsRepository(
         }.let { value ->
             commit(value)
         }
-    }
-
-    /**
-     * Asynchronous and does not notify of any failures
-     */
-    private fun apply(value: String) {
-        prefs.edit()
-            .putString(getKey(), value)
-            .apply()
     }
 
     /**

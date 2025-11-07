@@ -33,6 +33,8 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
+import com.stripe.android.paymentsheet.FakePrefsRepository
+import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
@@ -219,6 +221,13 @@ internal interface LpmNetworkTestModule {
         @Singleton
         @IOContext
         fun provideWorkContext(): CoroutineContext = UnconfinedTestDispatcher()
+
+        @Provides
+        fun providePrefsRepositoryFactory(): PrefsRepository.Factory {
+            return PrefsRepository.Factory {
+                FakePrefsRepository()
+            }
+        }
 
         private val STATUS_BAR_COLOR_VALUE = null
         private const val ENABLE_LOGGING_VALUE = false

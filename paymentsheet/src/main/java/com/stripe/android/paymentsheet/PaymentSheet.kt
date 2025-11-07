@@ -2131,17 +2131,29 @@ class PaymentSheet internal constructor(
             error = error.toArgb()
         )
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Suppress("TooManyFunctions")
         class Builder {
             @ColorInt private var primary: Int? = null
+
             @ColorInt private var surface: Int? = null
+
             @ColorInt private var component: Int? = null
+
             @ColorInt private var componentBorder: Int? = null
+
             @ColorInt private var componentDivider: Int? = null
+
             @ColorInt private var onComponent: Int? = null
+
             @ColorInt private var subtitle: Int? = null
+
             @ColorInt private var placeholderText: Int? = null
+
             @ColorInt private var onSurface: Int? = null
+
             @ColorInt private var appBarIcon: Int? = null
+
             @ColorInt private var error: Int? = null
 
             /**
@@ -2149,6 +2161,7 @@ class PaymentSheet internal constructor(
              *
              * @param color The primary [Color].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun primary(color: Color) = apply {
                 this.primary = color.toArgb()
             }
@@ -2156,8 +2169,9 @@ class PaymentSheet internal constructor(
             /**
              * The primary color used throughout PaymentSheet.
              *
-             * @param color The primary color as an [ColorInt] integer.
+             * @param color The primary color as an [ColorInt].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun primary(@ColorInt color: Int) = apply {
                 this.primary = color
             }
@@ -2167,6 +2181,7 @@ class PaymentSheet internal constructor(
              *
              * @param color The surface [Color].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun surface(color: Color) = apply {
                 this.surface = color.toArgb()
             }
@@ -2174,8 +2189,9 @@ class PaymentSheet internal constructor(
             /**
              * The color used for the surfaces (backgrounds) of PaymentSheet.
              *
-             * @param color The surface color as an [ColorInt] integer.
+             * @param color The surface color as an [ColorInt].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun surface(@ColorInt color: Int) = apply {
                 this.surface = color
             }
@@ -2185,6 +2201,7 @@ class PaymentSheet internal constructor(
              *
              * @param color The component background [Color].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun component(color: Color) = apply {
                 this.component = color.toArgb()
             }
@@ -2192,8 +2209,9 @@ class PaymentSheet internal constructor(
             /**
              * The color used for the background of inputs, tabs, and other components.
              *
-             * @param color The component background color as an [ColorInt] integer.
+             * @param color The component background color as an [ColorInt].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun component(@ColorInt color: Int) = apply {
                 this.component = color
             }
@@ -2203,6 +2221,7 @@ class PaymentSheet internal constructor(
              *
              * @param color The component border [Color].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun componentBorder(color: Color) = apply {
                 this.componentBorder = color.toArgb()
             }
@@ -2210,8 +2229,9 @@ class PaymentSheet internal constructor(
             /**
              * The color used for borders of inputs, tabs, and other components.
              *
-             * @param color The component border color as an [ColorInt] integer.
+             * @param color The component border color as an [ColorInt].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun componentBorder(@ColorInt color: Int) = apply {
                 this.componentBorder = color
             }
@@ -2221,6 +2241,7 @@ class PaymentSheet internal constructor(
              *
              * @param color The component divider [Color].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun componentDivider(color: Color) = apply {
                 this.componentDivider = color.toArgb()
             }
@@ -2228,8 +2249,9 @@ class PaymentSheet internal constructor(
             /**
              * The color of the divider lines used inside inputs, tabs, and other components.
              *
-             * @param color The component divider color as an [ColorInt] integer.
+             * @param color The component divider color as an [ColorInt].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun componentDivider(@ColorInt color: Int) = apply {
                 this.componentDivider = color
             }
@@ -2239,6 +2261,7 @@ class PaymentSheet internal constructor(
              *
              * @param color The on-component [Color].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun onComponent(color: Color) = apply {
                 this.onComponent = color.toArgb()
             }
@@ -2246,8 +2269,9 @@ class PaymentSheet internal constructor(
             /**
              * The default color used for text and on other elements that live on components.
              *
-             * @param color The on-component color as an [ColorInt] integer.
+             * @param color The on-component color as an [ColorInt].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun onComponent(@ColorInt color: Int) = apply {
                 this.onComponent = color
             }
@@ -2258,6 +2282,7 @@ class PaymentSheet internal constructor(
              *
              * @param color The subtitle [Color].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun subtitle(color: Color) = apply {
                 this.subtitle = color.toArgb()
             }
@@ -2266,8 +2291,9 @@ class PaymentSheet internal constructor(
              * The color used for text of secondary importance.
              * For example, this color is used for the label above input fields.
              *
-             * @param color The subtitle color as an [ColorInt] integer.
+             * @param color The subtitle color as an [ColorInt].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun subtitle(@ColorInt color: Int) = apply {
                 this.subtitle = color
             }
@@ -2277,6 +2303,7 @@ class PaymentSheet internal constructor(
              *
              * @param color The placeholder text [Color].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun placeholderText(color: Color) = apply {
                 this.placeholderText = color.toArgb()
             }
@@ -2284,8 +2311,9 @@ class PaymentSheet internal constructor(
             /**
              * The color used for input placeholder text.
              *
-             * @param color The placeholder text color as an [ColorInt] integer.
+             * @param color The placeholder text color as an [ColorInt].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun placeholderText(@ColorInt color: Int) = apply {
                 this.placeholderText = color
             }
@@ -2295,6 +2323,7 @@ class PaymentSheet internal constructor(
              *
              * @param color The on-surface [Color].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun onSurface(color: Color) = apply {
                 this.onSurface = color.toArgb()
             }
@@ -2302,8 +2331,9 @@ class PaymentSheet internal constructor(
             /**
              * The color used for items appearing over the background in Payment Sheet.
              *
-             * @param color The on-surface color as an [ColorInt] integer.
+             * @param color The on-surface color as an [ColorInt].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun onSurface(@ColorInt color: Int) = apply {
                 this.onSurface = color
             }
@@ -2313,6 +2343,7 @@ class PaymentSheet internal constructor(
              *
              * @param color The app bar icon [Color].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun appBarIcon(color: Color) = apply {
                 this.appBarIcon = color.toArgb()
             }
@@ -2320,8 +2351,9 @@ class PaymentSheet internal constructor(
             /**
              * The color used for icons in PaymentSheet, such as the close or back icons.
              *
-             * @param color The app bar icon color as an [ColorInt] integer.
+             * @param color The app bar icon color as an [ColorInt].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun appBarIcon(@ColorInt color: Int) = apply {
                 this.appBarIcon = color
             }
@@ -2331,6 +2363,7 @@ class PaymentSheet internal constructor(
              *
              * @param color The error [Color].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun error(color: Color) = apply {
                 this.error = color.toArgb()
             }
@@ -2338,12 +2371,14 @@ class PaymentSheet internal constructor(
             /**
              * A color used to indicate errors or destructive actions in PaymentSheet.
              *
-             * @param color The error color as an [ColorInt] integer.
+             * @param color The error color as an [ColorInt].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun error(@ColorInt color: Int) = apply {
                 this.error = color
             }
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun buildLight(): Colors {
                 return Colors(
                     primary = primary ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
@@ -2360,6 +2395,7 @@ class PaymentSheet internal constructor(
                 )
             }
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun buildDark(): Colors {
                 return Colors(
                     primary = primary ?: StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
@@ -2453,6 +2489,7 @@ class PaymentSheet internal constructor(
             bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusDp),
         )
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Builder {
             private var cornerRadiusDp: Float = StripeThemeDefaults.shapes.cornerRadius
             private var borderStrokeWidthDp: Float = StripeThemeDefaults.shapes.borderStrokeWidth
@@ -2463,6 +2500,7 @@ class PaymentSheet internal constructor(
              *
              * @param cornerRadiusDp The corner radius in dp.
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun cornerRadiusDp(cornerRadiusDp: Float) = apply {
                 this.cornerRadiusDp = cornerRadiusDp
             }
@@ -2472,6 +2510,7 @@ class PaymentSheet internal constructor(
              *
              * @param cornerRadiusRes The corner radius resource ID.
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun cornerRadiusDp(context: Context, @DimenRes cornerRadiusRes: Int) = apply {
                 this.cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusRes)
             }
@@ -2481,6 +2520,7 @@ class PaymentSheet internal constructor(
              *
              * @param borderStrokeWidthDp The border width in dp.
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun borderStrokeWidthDp(borderStrokeWidthDp: Float) = apply {
                 this.borderStrokeWidthDp = borderStrokeWidthDp
             }
@@ -2490,6 +2530,7 @@ class PaymentSheet internal constructor(
              *
              * @param borderStrokeWidthRes The border width resource ID.
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun borderStrokeWidthDp(context: Context, @DimenRes borderStrokeWidthRes: Int) = apply {
                 this.borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthRes)
             }
@@ -2498,6 +2539,7 @@ class PaymentSheet internal constructor(
              * The corner radius used for specifically for the sheets displayed by Payment Element. Be default, this is
              * set to the same value as [cornerRadiusDp].
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun bottomSheetCornerRadiusDp(bottomSheetCornerRadiusDp: Float) = apply {
                 this.bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp
             }
@@ -2508,6 +2550,7 @@ class PaymentSheet internal constructor(
              *
              * @param bottomSheetCornerRadiusRes The bottom sheet corner radius resource ID.
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun bottomSheetCornerRadiusDp(
                 context: Context,
                 @DimenRes bottomSheetCornerRadiusRes: Int
@@ -2517,6 +2560,7 @@ class PaymentSheet internal constructor(
             }
 
             @OptIn(AppearanceAPIAdditionsPreview::class)
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun build(): Shapes {
                 return Shapes(
                     cornerRadiusDp = cornerRadiusDp,
@@ -2540,15 +2584,21 @@ class PaymentSheet internal constructor(
         internal val custom: Custom,
     ) : Parcelable {
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Builder {
             private var sizeScaleFactor: Float = StripeThemeDefaults.typography.fontSizeMultiplier
+
+            @FontRes
             private var fontResId: Int? = StripeThemeDefaults.typography.fontFamily
-            @OptIn(AppearanceAPIAdditionsPreview::class) private var custom: Custom = Custom()
+
+            @OptIn(AppearanceAPIAdditionsPreview::class)
+            private var custom: Custom = Custom()
 
             /**
              * The scale factor for all fonts in PaymentSheet, the default value is 1.0.
              * When this value increases fonts will increase in size and decrease when this value is lowered.
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun sizeScaleFactor(sizeScaleFactor: Float) = apply {
                 this.sizeScaleFactor = sizeScaleFactor
             }
@@ -2556,6 +2606,7 @@ class PaymentSheet internal constructor(
             /**
              * The font used in text. This should be a resource ID value.
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun fontResId(@FontRes fontResId: Int?) = apply {
                 this.fontResId = fontResId
             }
@@ -2564,11 +2615,13 @@ class PaymentSheet internal constructor(
              * Custom font configuration for specific text styles
              * Note: When set, these fonts override the default font calculations for their respective text styles
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @OptIn(AppearanceAPIAdditionsPreview::class)
             fun custom(custom: Custom) = apply {
                 this.custom = custom
             }
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @OptIn(AppearanceAPIAdditionsPreview::class)
             fun build(): Typography {
                 return Typography(
