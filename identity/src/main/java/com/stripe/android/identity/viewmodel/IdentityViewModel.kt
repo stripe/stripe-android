@@ -22,6 +22,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.navigation.NavController
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.framework.image.longerEdge
+import com.stripe.android.camera.framework.util.NANOS_PER_MILLI
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.model.StripeFilePurpose
@@ -1894,7 +1895,6 @@ internal class IdentityViewModel(
         const val FRONT = "front"
         const val BACK = "back"
         const val BYTES_IN_KB = 1024
-        private const val NANOS_PER_MILLI: Long = 1_000_000
         private const val DOCUMENT_FRONT_UPLOAD_STATE = "document_front_upload_state"
         private const val DOCUMENT_BACK_UPLOAD_STATE = "document_back_upload_state"
         private const val SELFIE_UPLOAD_STATE = "selfie_upload_state"
