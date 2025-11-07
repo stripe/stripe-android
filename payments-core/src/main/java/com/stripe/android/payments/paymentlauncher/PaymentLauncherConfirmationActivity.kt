@@ -84,6 +84,10 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             statusBarColor = args.statusBarColor,
         )
 
+        handleArgs(args, host)
+    }
+
+    private fun handleArgs(args: PaymentLauncherContract.Args, host: AuthActivityStarterHost) {
         when (args) {
             is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
                 viewModel.confirmStripeIntent(args.confirmStripeIntentParams, host)
@@ -96,6 +100,9 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             }
             is PaymentLauncherContract.Args.SetupIntentNextActionArgs -> {
                 viewModel.handleNextActionForStripeIntent(args.setupIntentClientSecret, host)
+            }
+            is PaymentLauncherContract.Args.StripeIntentNextActionWithIntentArgs -> {
+                viewModel.handleNextActionForStripeIntent(args.stripeIntent, host)
             }
         }
     }
