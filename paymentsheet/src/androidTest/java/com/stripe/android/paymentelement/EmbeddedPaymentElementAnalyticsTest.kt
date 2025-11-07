@@ -91,7 +91,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
                 "visible_payment_methods",
                 Uri.encode("link,card,afterpay_clearpay,klarna,cashapp,affirm,alipay")
             ),
-            query("payment_method_layout","vertical")
+            query("payment_method_layout", "vertical")
         )
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
@@ -299,7 +299,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", ""),
             query("visible_payment_methods", Uri.encode("saved,card,cashapp")),
-            query("payment_method_layout","vertical")
+            query("payment_method_layout", "vertical")
         )
 
         testContext.configure {
@@ -374,7 +374,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", ""),
             query("visible_payment_methods", Uri.encode("saved,card,cashapp")),
-            query("payment_method_layout","vertical"),
+            query("payment_method_layout", "vertical"),
         )
 
         testContext.configure {
@@ -432,7 +432,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", ""),
             query("visible_payment_methods", Uri.encode("saved,card,cashapp")),
-            query("payment_method_layout","vertical"),
+            query("payment_method_layout", "vertical"),
         )
 
         testContext.configure {

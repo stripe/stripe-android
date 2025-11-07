@@ -98,7 +98,7 @@ internal class PaymentSheetAnalyticsTest {
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", Uri.encode("cashapp,affirm,alipay")),
             query("visible_payment_methods", Uri.encode("link,card,afterpay_clearpay,klarna")),
-            query("payment_method_layout","horizontal"),
+            query("payment_method_layout", "horizontal"),
         )
         testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
 
@@ -180,7 +180,7 @@ internal class PaymentSheetAnalyticsTest {
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", Uri.encode("cashapp,affirm,alipay")),
             query("visible_payment_methods", Uri.encode("card,afterpay_clearpay,klarna")),
-            query("payment_method_layout","horizontal"),
+            query("payment_method_layout", "horizontal"),
         )
         testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
 
