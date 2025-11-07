@@ -2421,20 +2421,8 @@ class PaymentSheet internal constructor(
     @Parcelize
     @Poko
     class Shapes @AppearanceAPIAdditionsPreview constructor(
-        /**
-         * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
-         */
         internal val cornerRadiusDp: Float,
-
-        /**
-         * The border used for inputs, tabs, and other components in PaymentSheet.
-         */
         internal val borderStrokeWidthDp: Float,
-
-        /**
-         * The corner radius used for specifically for the sheets displayed by Payment Element. Be default, this is
-         * set to the same value as [cornerRadiusDp].
-         */
         internal val bottomSheetCornerRadiusDp: Float = cornerRadiusDp,
     ) : Parcelable {
         @OptIn(AppearanceAPIAdditionsPreview::class)
@@ -2465,11 +2453,81 @@ class PaymentSheet internal constructor(
             bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusDp),
         )
 
+        class Builder {
+            private var cornerRadiusDp: Float = StripeThemeDefaults.shapes.cornerRadius
+            private var borderStrokeWidthDp: Float = StripeThemeDefaults.shapes.borderStrokeWidth
+            private var bottomSheetCornerRadiusDp: Float? = null
+
+            /**
+             * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
+             *
+             * @param cornerRadiusDp The corner radius in dp.
+             */
+            fun cornerRadiusDp(cornerRadiusDp: Float) = apply {
+                this.cornerRadiusDp = cornerRadiusDp
+            }
+
+            /**
+             * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
+             *
+             * @param cornerRadiusRes The corner radius resource ID.
+             */
+            fun cornerRadiusDp(context: Context, @DimenRes cornerRadiusRes: Int) = apply {
+                this.cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusRes)
+            }
+
+            /**
+             * The border used for inputs, tabs, and other components in PaymentSheet.
+             *
+             * @param borderStrokeWidthDp The border width in dp.
+             */
+            fun borderStrokeWidthDp(borderStrokeWidthDp: Float) = apply {
+                this.borderStrokeWidthDp = borderStrokeWidthDp
+            }
+
+            /**
+             * The border used for inputs, tabs, and other components in PaymentSheet.
+             *
+             * @param borderStrokeWidthRes The border width resource ID.
+             */
+            fun borderStrokeWidthDp(context: Context, @DimenRes borderStrokeWidthRes: Int) = apply {
+                this.borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthRes)
+            }
+
+            /**
+             * The corner radius used for specifically for the sheets displayed by Payment Element. Be default, this is
+             * set to the same value as [cornerRadiusDp].
+             */
+            fun bottomSheetCornerRadiusDp(bottomSheetCornerRadiusDp: Float) = apply {
+                this.bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp
+            }
+
+            /**
+             * The corner radius used for specifically for the sheets displayed by Payment Element. Be default, this is
+             * set to the same value as [cornerRadiusDp].
+             *
+             * @param bottomSheetCornerRadiusRes The bottom sheet corner radius resource ID.
+             */
+            fun bottomSheetCornerRadiusDp(
+                context: Context,
+                @DimenRes bottomSheetCornerRadiusRes: Int
+            ) = apply {
+                this.bottomSheetCornerRadiusDp =
+                    context.getRawValueFromDimenResource(bottomSheetCornerRadiusRes)
+            }
+
+            @OptIn(AppearanceAPIAdditionsPreview::class)
+            fun build(): Shapes {
+                return Shapes(
+                    cornerRadiusDp = cornerRadiusDp,
+                    borderStrokeWidthDp = borderStrokeWidthDp,
+                    bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp ?: cornerRadiusDp,
+                )
+            }
+        }
+
         companion object {
-            val default = Shapes(
-                cornerRadiusDp = StripeThemeDefaults.shapes.cornerRadius,
-                borderStrokeWidthDp = StripeThemeDefaults.shapes.borderStrokeWidth
-            )
+            val default: Shapes = Builder().build()
         }
     }
 
