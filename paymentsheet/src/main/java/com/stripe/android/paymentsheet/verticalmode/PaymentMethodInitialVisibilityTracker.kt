@@ -52,6 +52,10 @@ internal class PaymentMethodInitialVisibilityTracker(
         }
     }
 
+    fun getHasDispatched(): Boolean{
+        return this.hasDispatched
+    }
+
     /**
      * When this function is called from onGloballyPositioned
      * it is guaranteed to be called twice on any given stable coordinate

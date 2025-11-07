@@ -248,6 +248,18 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         getDisplayablePaymentMethods(paymentMethods, walletsState, incentive)
     }
 
+    private val expectedItemsForVisibilityTracking = combineAsStateFlow(
+        paymentMethods,
+        walletsState,
+        mostRecentlySelectedSavedPaymentMethod,
+    ) { paymentMethods, walletsState, mostRecentlySelectedSavedPaymentMethod ->
+        getExpectedItemsForVisibilityTracking(
+            paymentMethods,
+            walletsState,
+            mostRecentlySelectedSavedPaymentMethod
+        )
+    }
+
     override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
@@ -345,7 +357,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         val wallets = mutableListOf<DisplayablePaymentMethod>()
 
         // Add Link inline if NOT allowed in header
-        walletsState?.link(WalletLocation.INLINE)?.let { linkData ->
+        walletsState?.getInlineLink()?.let { linkData ->
             val subtitle = when (val state = linkData.state) {
                 is LinkButtonState.Email -> state.email.resolvableString
                 is LinkButtonState.DefaultPayment,
@@ -370,9 +382,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
 
         // Add Google Pay inline if NOT allowed in header
-        walletsState?.googlePay(WalletLocation.INLINE)?.let {
+        walletsState?.getInlineGPay()?.let { it ->
             wallets += DisplayablePaymentMethod(
-                code = "google_pay",
+                code = it.getCode(),
                 displayName = PaymentsCoreR.string.stripe_google_pay.resolvableString,
                 iconResource = PaymentsCoreR.drawable.stripe_google_pay_mark,
                 iconResourceNight = null,
@@ -390,17 +402,65 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         return wallets + lpms
     }
 
+    private fun WalletsState.getInlineLink(): WalletsState.Link? {
+        return this.link(WalletLocation.INLINE)
+    }
+
+    private fun WalletsState.getInlineGPay(): WalletsState.GooglePay? {
+        return this.googlePay(WalletLocation.INLINE)
+    }
+
+    private fun WalletsState.GooglePay.getCode(): String {
+        return "google_pay"
+    }
+
     private fun getDisplayedSavedPaymentMethod(
         paymentMethods: List<PaymentMethod>?,
         paymentMethodMetadata: PaymentMethodMetadata,
         mostRecentlySelectedSavedPaymentMethod: PaymentMethod?,
     ): DisplayableSavedPaymentMethod? {
-        val paymentMethodToDisplay = mostRecentlySelectedSavedPaymentMethod ?: paymentMethods?.firstOrNull()
+        val paymentMethodToDisplay = getPaymentMethodToDisplay(
+            paymentMethods = paymentMethods,
+            mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
+        )
         return paymentMethodToDisplay?.toDisplayableSavedPaymentMethod(
             providePaymentMethodName,
             paymentMethodMetadata,
             defaultPaymentMethodId = null
         )
+    }
+
+    private fun getPaymentMethodToDisplay(
+        paymentMethods: List<PaymentMethod>?,
+        mostRecentlySelectedSavedPaymentMethod: PaymentMethod?,
+    ): PaymentMethod? {
+        return mostRecentlySelectedSavedPaymentMethod ?: paymentMethods?.firstOrNull()
+    }
+
+    private fun getExpectedItemsForVisibilityTracking(
+        paymentMethods: List<PaymentMethod>?,
+        walletsState: WalletsState?,
+        mostRecentlySelectedSavedPaymentMethod: PaymentMethod?,
+    ): List<String> {
+        val currentSavedPaymentMethodCode = getPaymentMethodToDisplay(
+            paymentMethods, mostRecentlySelectedSavedPaymentMethod
+        )?.type
+        val currentDisplayablePaymentMethodCodes = supportedPaymentMethods.map {
+            it.code
+        }
+
+        return buildList {
+            if (currentSavedPaymentMethodCode != null) {
+                add("saved")
+            }
+            walletsState?.getInlineLink()?.let {
+                add(PaymentMethod.Type.Link.code)
+            }
+            walletsState?.getInlineGPay()?.let{
+                add(it.getCode())
+            }
+            addAll(currentDisplayablePaymentMethodCodes)
+        }
     }
 
     private fun getAvailableSavedPaymentMethodAction(
@@ -478,29 +538,19 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     }
 
     private val visibilityTracker = PaymentMethodInitialVisibilityTracker(
-        expectedItems = getExpectedItems(),
+        expectedItems = expectedItemsForVisibilityTracking.value,
         renderedLpmCallback = { visiblePaymentMethods, hiddenPaymentMethods ->
             onInitiallyDisplayedPaymentMethodVisibilitySnapshot(visiblePaymentMethods, hiddenPaymentMethods)
         },
         dispatcher = dispatcher
     )
 
-    private fun getExpectedItems(): List<String> {
-        val currentSavedPaymentMethodCode = displayedSavedPaymentMethod.value?.paymentMethod?.type
-        val currentDisplayablePaymentMethodCodes = displayablePaymentMethods.value.map { it.code }
-
-        val output = buildList {
-            if (currentSavedPaymentMethodCode != null) {
-                add("saved")
-            }
-            addAll(currentDisplayablePaymentMethodCodes)
+    private fun updatePaymentMethodVisibility(itemCode: String, layoutCoordinates: LayoutCoordinates) {
+        if (visibilityTracker.getHasDispatched()) {
+            return
         }
 
-        return output
-    }
-
-    private fun updatePaymentMethodVisibility(itemCode: String, layoutCoordinates: LayoutCoordinates) {
-        visibilityTracker.updateExpectedItems(getExpectedItems())
+        visibilityTracker.updateExpectedItems(expectedItemsForVisibilityTracking.value)
         visibilityTracker.updateVisibility(itemCode, layoutCoordinates)
     }
 
