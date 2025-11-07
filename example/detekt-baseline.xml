@@ -12,7 +12,6 @@
     <ID>MagicNumber:PaymentAuthActivity.kt$PaymentAuthActivity$6</ID>
     <ID>MagicNumber:SourcesAdapter.kt$SourcesAdapter.ViewHolder$6</ID>
     <ID>MagicNumber:UpiWaitingActivity.kt$UpiWaitingActivity$5000</ID>
-    <ID>MaxLineLength:CreateCardSourceActivity.kt$CreateCardSourceActivity$viewBinding.cardWidget</ID>
     <ID>VariableNaming:StripeImageActivity.kt$StripeImageActivity$private val LocalStripeImageLoader = staticCompositionLocalOf&lt;StripeImageLoader> { error("No ImageLoader provided") }</ID>
   </CurrentIssues>
 </SmellBaseline>

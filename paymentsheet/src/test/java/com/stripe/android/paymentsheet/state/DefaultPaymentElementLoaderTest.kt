@@ -3160,7 +3160,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Emits correct event when CVC recollection is required for deferred`() = runTest {
         val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
         )
 
@@ -3193,52 +3193,6 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "link"),
             requireCvcRecollection = true,
-            hasDefaultPaymentMethod = null,
-            setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-            paymentMethodOptionsSetupFutureUsage = false,
-            setupFutureUsage = null,
-            openCardScanAutomatically = false,
-        )
-    }
-
-    @Test
-    fun `Emits correct event when CVC recollection is required on intent but not deferred config`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
-        )
-
-        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                    amount = 100L,
-                    currency = "usd"
-                ),
-                requireCvcRecollection = false
-            )
-        )
-
-        loader.load(
-            initializationMode = initializationMode,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = true,
-            ),
-        )
-
-        verify(eventReporter).onLoadSucceeded(
-            paymentSelection = null,
-            linkEnabled = true,
-            linkMode = LinkMode.LinkPaymentMethod,
-            linkDisabledReasons = null,
-            linkSignupDisabledReasons = null,
-            googlePaySupported = true,
-            currency = "usd",
-            initializationMode = initializationMode,
-            orderedLpms = listOf("card", "link"),
-            requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,

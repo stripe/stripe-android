@@ -34,7 +34,6 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
     ): Boolean {
         return !confirmationOption.optionsParams.hasAlreadyRecollectedCvc() && handler.requiresCVCRecollection(
             stripeIntent = confirmationArgs.intent,
-            initializationMode = confirmationArgs.initializationMode,
             paymentMethod = confirmationOption.paymentMethod,
             optionsParams = confirmationOption.optionsParams,
         ) && !confirmationOption.originatedFromWallet

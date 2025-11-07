@@ -743,7 +743,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 orderedLpms = state.paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
                 requireCvcRecollection = cvcRecollectionHandler.cvcRecollectionEnabled(
                     state.paymentMethodMetadata.stripeIntent,
-                    initializationMode
                 ),
                 hasDefaultPaymentMethod = hasDefaultPaymentMethod,
                 setAsDefaultEnabled = setAsDefaultEnabled,
