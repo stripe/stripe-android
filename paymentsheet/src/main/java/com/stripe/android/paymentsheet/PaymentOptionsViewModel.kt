@@ -56,7 +56,7 @@ import kotlin.coroutines.CoroutineContext
 
 @JvmSuppressWildcards
 internal class PaymentOptionsViewModel @Inject constructor(
-    private val args: PaymentOptionContract.Args,
+    val args: PaymentOptionContract.Args,
     private val linkAccountHolder: LinkAccountHolder,
     private val linkGateFactory: LinkGate.Factory,
     val linkPaymentLauncher: LinkPaymentLauncher,

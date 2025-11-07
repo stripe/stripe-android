@@ -456,6 +456,9 @@ internal class DefaultFlowControllerTest {
                 ),
             ),
             configuration = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "pi_1234_secret_1234",
+            ),
             enableLogging = ENABLE_LOGGING,
             productUsage = PRODUCT_USAGE,
             linkAccountInfo = LinkAccountUpdate.Value(null),

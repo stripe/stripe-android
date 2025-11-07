@@ -323,6 +323,7 @@ internal class DefaultFlowController @Inject internal constructor(
         val args = PaymentOptionContract.Args(
             state = state.paymentSheetState.copy(paymentSelection = paymentSelection),
             configuration = state.config,
+            initializationMode = state.initializationMode,
             enableLogging = enableLogging,
             productUsage = productUsage,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
@@ -481,8 +482,6 @@ internal class DefaultFlowController @Inject internal constructor(
             return
         }
 
-        val initializationMode = requireNotNull(initializationMode)
-
         when (val paymentSelection = viewModel.paymentSelection) {
             is Link,
             is PaymentSelection.New.LinkInline,
@@ -494,12 +493,12 @@ internal class DefaultFlowController @Inject internal constructor(
             null -> confirmPaymentSelection(
                 paymentSelection = paymentSelection,
                 state = state.paymentSheetState,
-                initializationMode = initializationMode,
+                initializationMode = state.initializationMode,
             )
             is PaymentSelection.Saved -> confirmSavedPaymentMethod(
                 paymentSelection = paymentSelection,
                 state = state.paymentSheetState,
-                initializationMode = initializationMode,
+                initializationMode = state.initializationMode,
             )
         }
     }
@@ -756,7 +755,8 @@ internal class DefaultFlowController @Inject internal constructor(
     data class State(
         val paymentSheetState: PaymentSheetState.Full,
         val config: PaymentSheet.Configuration,
-        val declinedLink2FA: Boolean = false
+        val initializationMode: PaymentElementLoader.InitializationMode,
+        val declinedLink2FA: Boolean = false,
     ) : Parcelable {
         fun copyPaymentSheetState(
             paymentSelection: PaymentSelection? = paymentSheetState.paymentSelection,

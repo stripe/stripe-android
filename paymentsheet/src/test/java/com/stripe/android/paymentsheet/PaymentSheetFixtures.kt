@@ -7,6 +7,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.BILLING_DETAILS
 import com.stripe.android.model.StripeIntent
@@ -165,6 +166,9 @@ internal object PaymentSheetFixtures {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         ),
         configuration = CONFIG_GOOGLEPAY,
+        initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+            clientSecret = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.clientSecret!!,
+        ),
         enableLogging = false,
         productUsage = mock(),
         paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,

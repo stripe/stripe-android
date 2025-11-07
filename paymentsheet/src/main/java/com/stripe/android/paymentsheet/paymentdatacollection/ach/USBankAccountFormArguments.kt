@@ -9,6 +9,7 @@ import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -88,9 +89,11 @@ internal class USBankAccountFormArguments(
                 hasCustomerConfiguration = paymentMethodMetadata.customerMetadata != null,
             )
             val instantDebits = selectedPaymentMethodCode == PaymentMethod.Type.Link.code
-            val initializationMode = (viewModel as? PaymentSheetViewModel)
-                ?.args
-                ?.initializationMode
+            val initializationMode = when (viewModel) {
+                is PaymentSheetViewModel -> viewModel.args.initializationMode
+                is PaymentOptionsViewModel -> viewModel.args.initializationMode
+                else -> null
+            }
             val onBehalfOf = (initializationMode as? PaymentElementLoader.InitializationMode.DeferredIntent)
                 ?.intentConfiguration
                 ?.onBehalfOf

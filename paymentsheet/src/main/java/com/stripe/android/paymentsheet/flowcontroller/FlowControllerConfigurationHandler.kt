@@ -131,7 +131,11 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         )
 
         withContext(uiContext) {
-            viewModel.state = DefaultFlowController.State(paymentSheetState = state, config = configuration)
+            viewModel.state = DefaultFlowController.State(
+                paymentSheetState = state,
+                config = configuration,
+                initializationMode = configureRequest.initializationMode,
+            )
         }
         confirmationHandler.bootstrap(state.paymentMethodMetadata)
     }

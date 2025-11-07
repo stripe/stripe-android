@@ -216,6 +216,9 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
             ),
         ),
         configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+        initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+            clientSecret = PaymentIntentFactory.create().clientSecret!!,
+        ),
         enableLogging = false,
         productUsage = mock(),
         paymentElementCallbackIdentifier = "PaymentOptionsViewModelTestCallbackIdentifier",
