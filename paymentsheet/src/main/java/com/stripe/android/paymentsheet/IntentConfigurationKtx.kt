@@ -8,7 +8,7 @@ import com.stripe.android.paymentsheet.paymentmethodoptions.setupfutureusage.toJ
 
 internal fun PaymentSheet.IntentConfiguration.toDeferredIntentParams(): DeferredIntentParams {
     return DeferredIntentParams(
-        mode = mode.toDeferredIntentMode(),
+        mode = mode.toDeferredIntentMode(requireCvcRecollection),
         paymentMethodTypes = paymentMethodTypes,
         onBehalfOf = onBehalfOf,
         paymentMethodConfigurationId = paymentMethodConfigurationId,
@@ -16,7 +16,9 @@ internal fun PaymentSheet.IntentConfiguration.toDeferredIntentParams(): Deferred
 }
 
 @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
-private fun PaymentSheet.IntentConfiguration.Mode.toDeferredIntentMode(): DeferredIntentParams.Mode {
+private fun PaymentSheet.IntentConfiguration.Mode.toDeferredIntentMode(
+    requireCvcRecollection: Boolean,
+): DeferredIntentParams.Mode {
     return when (this) {
         is PaymentSheet.IntentConfiguration.Mode.Payment -> {
             DeferredIntentParams.Mode.Payment(
@@ -24,7 +26,7 @@ private fun PaymentSheet.IntentConfiguration.Mode.toDeferredIntentMode(): Deferr
                 currency = currency,
                 setupFutureUsage = setupFutureUse?.toIntentUsage(),
                 captureMethod = captureMethod.toIntentCaptureMethod(),
-                paymentMethodOptionsJsonString = paymentMethodOptions?.toJsonObjectString()
+                paymentMethodOptionsJsonString = paymentMethodOptions.toJsonObjectString(requireCvcRecollection)
             )
         }
         is PaymentSheet.IntentConfiguration.Mode.Setup -> {
