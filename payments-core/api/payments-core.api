@@ -2547,127 +2547,6 @@ public final class com/stripe/android/model/IssuingCardPin$Creator : android/os/
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/KlarnaSourceParams : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
-	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/Set;)V
-	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/Set;Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/Set;Ljava/lang/String;Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/Set;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/Address;)V
-	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/Set;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/Address;Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/Set;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/Address;Ljava/lang/String;Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/Set;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/Address;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;)V
-	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/Set;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/Address;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/model/KlarnaSourceParams$PaymentPageOptions;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/Set;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/Address;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/model/KlarnaSourceParams$PaymentPageOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBillingAddress ()Lcom/stripe/android/model/Address;
-	public final fun getBillingDob ()Lcom/stripe/android/model/DateOfBirth;
-	public final fun getBillingEmail ()Ljava/lang/String;
-	public final fun getBillingFirstName ()Ljava/lang/String;
-	public final fun getBillingLastName ()Ljava/lang/String;
-	public final fun getBillingPhone ()Ljava/lang/String;
-	public final fun getCustomPaymentMethods ()Ljava/util/Set;
-	public final fun getLineItems ()Ljava/util/List;
-	public final fun getPageOptions ()Lcom/stripe/android/model/KlarnaSourceParams$PaymentPageOptions;
-	public final fun getPurchaseCountry ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toParamMap ()Ljava/util/Map;
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/model/KlarnaSourceParams$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/KlarnaSourceParams;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/model/KlarnaSourceParams;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/model/KlarnaSourceParams$CustomPaymentMethods : java/lang/Enum {
-	public static final field Installments Lcom/stripe/android/model/KlarnaSourceParams$CustomPaymentMethods;
-	public static final field PayIn4 Lcom/stripe/android/model/KlarnaSourceParams$CustomPaymentMethods;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/KlarnaSourceParams$CustomPaymentMethods;
-	public static fun values ()[Lcom/stripe/android/model/KlarnaSourceParams$CustomPaymentMethods;
-}
-
-public final class com/stripe/android/model/KlarnaSourceParams$LineItem : android/os/Parcelable {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/model/KlarnaSourceParams$LineItem$Type;Ljava/lang/String;I)V
-	public fun <init> (Lcom/stripe/android/model/KlarnaSourceParams$LineItem$Type;Ljava/lang/String;ILjava/lang/Integer;)V
-	public synthetic fun <init> (Lcom/stripe/android/model/KlarnaSourceParams$LineItem$Type;Ljava/lang/String;ILjava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getItemDescription ()Ljava/lang/String;
-	public final fun getItemType ()Lcom/stripe/android/model/KlarnaSourceParams$LineItem$Type;
-	public final fun getQuantity ()Ljava/lang/Integer;
-	public final fun getTotalAmount ()I
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/model/KlarnaSourceParams$LineItem$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/KlarnaSourceParams$LineItem;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/model/KlarnaSourceParams$LineItem;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/model/KlarnaSourceParams$LineItem$Type : java/lang/Enum {
-	public static final field Shipping Lcom/stripe/android/model/KlarnaSourceParams$LineItem$Type;
-	public static final field Sku Lcom/stripe/android/model/KlarnaSourceParams$LineItem$Type;
-	public static final field Tax Lcom/stripe/android/model/KlarnaSourceParams$LineItem$Type;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/KlarnaSourceParams$LineItem$Type;
-	public static fun values ()[Lcom/stripe/android/model/KlarnaSourceParams$LineItem$Type;
-}
-
-public final class com/stripe/android/model/KlarnaSourceParams$PaymentPageOptions : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/KlarnaSourceParams$PaymentPageOptions$PurchaseType;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/KlarnaSourceParams$PaymentPageOptions$PurchaseType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBackgroundImageUrl ()Ljava/lang/String;
-	public final fun getLogoUrl ()Ljava/lang/String;
-	public final fun getPageTitle ()Ljava/lang/String;
-	public final fun getPurchaseType ()Lcom/stripe/android/model/KlarnaSourceParams$PaymentPageOptions$PurchaseType;
-	public fun hashCode ()I
-	public fun toParamMap ()Ljava/util/Map;
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/model/KlarnaSourceParams$PaymentPageOptions$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/KlarnaSourceParams$PaymentPageOptions;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/model/KlarnaSourceParams$PaymentPageOptions;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/model/KlarnaSourceParams$PaymentPageOptions$PurchaseType : java/lang/Enum {
-	public static final field Book Lcom/stripe/android/model/KlarnaSourceParams$PaymentPageOptions$PurchaseType;
-	public static final field Buy Lcom/stripe/android/model/KlarnaSourceParams$PaymentPageOptions$PurchaseType;
-	public static final field Continue Lcom/stripe/android/model/KlarnaSourceParams$PaymentPageOptions$PurchaseType;
-	public static final field Download Lcom/stripe/android/model/KlarnaSourceParams$PaymentPageOptions$PurchaseType;
-	public static final field Order Lcom/stripe/android/model/KlarnaSourceParams$PaymentPageOptions$PurchaseType;
-	public static final field Rent Lcom/stripe/android/model/KlarnaSourceParams$PaymentPageOptions$PurchaseType;
-	public static final field Subscribe Lcom/stripe/android/model/KlarnaSourceParams$PaymentPageOptions$PurchaseType;
-	public final fun getCode ()Ljava/lang/String;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/KlarnaSourceParams$PaymentPageOptions$PurchaseType;
-	public static fun values ()[Lcom/stripe/android/model/KlarnaSourceParams$PaymentPageOptions$PurchaseType;
-}
-
 public final class com/stripe/android/model/LinkPaymentDetails$BankAccount$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/LinkPaymentDetails$BankAccount;
@@ -4848,9 +4727,9 @@ public final class com/stripe/android/model/Source : com/stripe/android/core/mod
 	public final fun component15 ()Ljava/lang/String;
 	public final fun component16 ()Ljava/lang/String;
 	public final fun component17 ()Lcom/stripe/android/model/Source$Usage;
+	public final fun component19 ()Lcom/stripe/android/model/SourceOrder;
 	public final fun component2 ()Ljava/lang/Long;
-	public final fun component20 ()Lcom/stripe/android/model/SourceOrder;
-	public final fun component21 ()Ljava/lang/String;
+	public final fun component20 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Lcom/stripe/android/model/Source$CodeVerification;
 	public final fun component5 ()Ljava/lang/Long;
@@ -4868,7 +4747,6 @@ public final class com/stripe/android/model/Source : com/stripe/android/core/mod
 	public final fun getCurrency ()Ljava/lang/String;
 	public final fun getFlow ()Lcom/stripe/android/model/Source$Flow;
 	public fun getId ()Ljava/lang/String;
-	public final fun getKlarna ()Lcom/stripe/android/model/Source$Klarna;
 	public final fun getOwner ()Lcom/stripe/android/model/Source$Owner;
 	public final fun getReceiver ()Lcom/stripe/android/model/Source$Receiver;
 	public final fun getRedirect ()Lcom/stripe/android/model/Source$Redirect;
@@ -4941,43 +4819,6 @@ public final class com/stripe/android/model/Source$Flow : java/lang/Enum {
 	public fun toString ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/Source$Flow;
 	public static fun values ()[Lcom/stripe/android/model/Source$Flow;
-}
-
-public final class com/stripe/android/model/Source$Klarna : com/stripe/android/core/model/StripeModel {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)V
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getClientToken ()Ljava/lang/String;
-	public final fun getCustomPaymentMethods ()Ljava/util/Set;
-	public final fun getFirstName ()Ljava/lang/String;
-	public final fun getLastName ()Ljava/lang/String;
-	public final fun getPayLaterAssetUrlsDescriptive ()Ljava/lang/String;
-	public final fun getPayLaterAssetUrlsStandard ()Ljava/lang/String;
-	public final fun getPayLaterName ()Ljava/lang/String;
-	public final fun getPayLaterRedirectUrl ()Ljava/lang/String;
-	public final fun getPayNowAssetUrlsDescriptive ()Ljava/lang/String;
-	public final fun getPayNowAssetUrlsStandard ()Ljava/lang/String;
-	public final fun getPayNowName ()Ljava/lang/String;
-	public final fun getPayNowRedirectUrl ()Ljava/lang/String;
-	public final fun getPayOverTimeAssetUrlsDescriptive ()Ljava/lang/String;
-	public final fun getPayOverTimeAssetUrlsStandard ()Ljava/lang/String;
-	public final fun getPayOverTimeName ()Ljava/lang/String;
-	public final fun getPayOverTimeRedirectUrl ()Ljava/lang/String;
-	public final fun getPaymentMethodCategories ()Ljava/util/Set;
-	public final fun getPurchaseCountry ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/model/Source$Klarna$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/Source$Klarna;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/model/Source$Klarna;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/model/Source$Owner : com/stripe/android/core/model/StripeModel {
@@ -5080,7 +4921,6 @@ public abstract interface annotation class com/stripe/android/model/Source$Sourc
 	public static final field Companion Lcom/stripe/android/model/Source$SourceType$Companion;
 	public static final field EPS Ljava/lang/String;
 	public static final field IDEAL Ljava/lang/String;
-	public static final field KLARNA Ljava/lang/String;
 	public static final field MULTIBANCO Ljava/lang/String;
 	public static final field P24 Ljava/lang/String;
 	public static final field SEPA_DEBIT Ljava/lang/String;
@@ -5095,7 +4935,6 @@ public final class com/stripe/android/model/Source$SourceType$Companion {
 	public static final field CARD Ljava/lang/String;
 	public static final field EPS Ljava/lang/String;
 	public static final field IDEAL Ljava/lang/String;
-	public static final field KLARNA Ljava/lang/String;
 	public static final field MULTIBANCO Ljava/lang/String;
 	public static final field P24 Ljava/lang/String;
 	public static final field SEPA_DEBIT Ljava/lang/String;
@@ -5319,7 +5158,6 @@ public final class com/stripe/android/model/SourceParams : android/os/Parcelable
 	public static final fun createCustomParams (Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createEPSParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createIdealParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
-	public static final fun createKlarna (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/KlarnaSourceParams;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createMasterpassParams (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createMultibancoParams (JLjava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createP24Params (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
@@ -5382,7 +5220,6 @@ public final class com/stripe/android/model/SourceParams$Companion {
 	public static synthetic fun createEPSParams$default (Lcom/stripe/android/model/SourceParams$Companion;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/SourceParams;
 	public final fun createIdealParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static synthetic fun createIdealParams$default (Lcom/stripe/android/model/SourceParams$Companion;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/SourceParams;
-	public final fun createKlarna (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/KlarnaSourceParams;)Lcom/stripe/android/model/SourceParams;
 	public final fun createMasterpassParams (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public final fun createMultibancoParams (JLjava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public final fun createP24Params (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;

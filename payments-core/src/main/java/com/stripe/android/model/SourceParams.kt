@@ -428,60 +428,6 @@ class SourceParams internal constructor(
         }
 
         /**
-         * Create params for a Klarna Source
-         *
-         * [Klarna Payments with Sources](https://stripe.com/docs/sources/klarna)
-         *
-         * @param returnUrl The URL you provide to redirect the customer back to you after they
-         * authenticated their payment. It can use your application URI scheme in the context of
-         * a mobile application.
-         * @param currency Three-letter ISO code for the currency associated with the source.
-         * This is the currency for which the source will be chargeable once ready.
-         * @param klarnaParams Klarna-specific params
-         */
-        @JvmStatic
-        fun createKlarna(
-            returnUrl: String,
-            currency: String,
-            klarnaParams: KlarnaSourceParams
-        ): SourceParams {
-            val totalAmount = klarnaParams.lineItems.sumBy { it.totalAmount }
-            val sourceOrderParams = SourceOrderParams(
-                items = klarnaParams.lineItems.map {
-                    val type = when (it.itemType) {
-                        KlarnaSourceParams.LineItem.Type.Sku ->
-                            SourceOrderParams.Item.Type.Sku
-                        KlarnaSourceParams.LineItem.Type.Tax ->
-                            SourceOrderParams.Item.Type.Tax
-                        KlarnaSourceParams.LineItem.Type.Shipping ->
-                            SourceOrderParams.Item.Type.Shipping
-                    }
-                    SourceOrderParams.Item(
-                        type = type,
-                        amount = it.totalAmount,
-                        currency = currency,
-                        description = it.itemDescription,
-                        quantity = it.quantity
-                    )
-                }
-            )
-            return SourceParams(
-                SourceType.KLARNA,
-                flow = Flow.Redirect,
-                sourceOrder = sourceOrderParams,
-                amount = totalAmount.toLong(),
-                currency = currency,
-                returnUrl = returnUrl,
-                owner = OwnerParams(
-                    address = klarnaParams.billingAddress,
-                    email = klarnaParams.billingEmail,
-                    phone = klarnaParams.billingPhone
-                ),
-                apiParams = ApiParams(klarnaParams.toParamMap())
-            )
-        }
-
-        /**
          * Create Bancontact Source params.
          *
          * @param amount A positive integer in the smallest currency unit representing the amount to
