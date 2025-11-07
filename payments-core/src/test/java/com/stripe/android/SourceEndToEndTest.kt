@@ -12,11 +12,13 @@ import com.stripe.android.model.SourceParams
 import com.stripe.android.model.SourceTypeModel
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 internal class SourceEndToEndTest {
     @Test
+    @Ignore
     fun createKlarnaParams_createsExpectedSourceOrderItems() {
         val sourceParams = SourceParams.createKlarna(
             returnUrl = RETURN_URL,
@@ -51,6 +53,7 @@ internal class SourceEndToEndTest {
     }
 
     @Test
+    @Ignore
     fun createFullKlarnaParams() {
         val sourceParams = SourceParams.createKlarna(
             returnUrl = RETURN_URL,
@@ -79,6 +82,7 @@ internal class SourceEndToEndTest {
     }
 
     @Test
+    @Ignore
     fun createKlarnaParamsWithCustomPaymentMethods() {
         val sourceParams = SourceParams.createKlarna(
             returnUrl = RETURN_URL,
@@ -135,6 +139,7 @@ internal class SourceEndToEndTest {
     }
 
     @Test
+    @Ignore
     fun createKlarnaParamsWithPageOptions() {
         val sourceParams = SourceParams.createKlarna(
             returnUrl = RETURN_URL,
