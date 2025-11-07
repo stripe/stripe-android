@@ -38,11 +38,11 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.camera.framework.exception.ImageTypeNotSupportedException
 import com.stripe.android.camera.framework.image.NV21Image
 import com.stripe.android.camera.framework.image.getRenderScript
+import com.stripe.android.camera.framework.util.NANOS_PER_MILLI
 import com.stripe.android.camera.framework.util.mapArray
 import com.stripe.android.camera.framework.util.mapToIntArray
 import com.stripe.android.camera.framework.util.size
 import com.stripe.android.camera.framework.util.toByteArray
-import com.stripe.android.camera.framework.util.NANOS_PER_MILLI
 import java.nio.ByteBuffer
 import java.nio.ReadOnlyBufferException
 import java.util.concurrent.Executor
