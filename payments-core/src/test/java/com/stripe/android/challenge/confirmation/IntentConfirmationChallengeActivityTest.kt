@@ -2,6 +2,10 @@ package com.stripe.android.challenge.confirmation
 
 import android.content.Context
 import android.content.Intent
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.core.os.BundleCompat
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -28,6 +32,9 @@ internal class IntentConfirmationChallengeActivityTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
@@ -58,8 +65,6 @@ internal class IntentConfirmationChallengeActivityTest {
         val retrievedArgs = IntentConfirmationChallengeActivity.getArgs(savedStateHandle)
 
         assertThat(retrievedArgs).isEqualTo(args)
-        assertThat(retrievedArgs?.publishableKey).isEqualTo(args.publishableKey)
-        assertThat(retrievedArgs?.intent).isEqualTo(args.intent)
     }
 
     @Test
@@ -112,6 +117,46 @@ internal class IntentConfirmationChallengeActivityTest {
         val failedResult = result as IntentConfirmationChallengeActivityResult.Failed
         assertThat(failedResult.error).isEqualTo(error)
         assertThat(failedResult.error.message).isEqualTo("Confirmation challenge failed")
+
+        scenario.close()
+    }
+
+    @Test
+    fun `progress indicator resets on configuration change`() = runTest {
+        val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
+
+        val scenario = launchActivityWithBridgeHandler(bridgeHandler)
+
+        // Progress indicator should be initially visible
+        composeTestRule
+            .onNodeWithTag(
+                INTENT_CONFIRMATION_CHALLENGE_LOADER_TAG,
+                useUnmergedTree = true
+            )
+            .assertIsDisplayed()
+
+        // Emit Ready event to hide progress indicator
+        bridgeHandler.emitEvent(ConfirmationChallengeBridgeEvent.Ready)
+        advanceUntilIdle()
+
+        // Progress indicator should now be hidden
+        composeTestRule
+            .onNodeWithTag(
+                INTENT_CONFIRMATION_CHALLENGE_LOADER_TAG,
+                useUnmergedTree = true
+            )
+            .assertIsNotDisplayed()
+
+        // Recreate activity to simulate configuration change
+        scenario.recreate()
+
+        // Progress indicator should be visible again after recreation
+        composeTestRule
+            .onNodeWithTag(
+                INTENT_CONFIRMATION_CHALLENGE_LOADER_TAG,
+                useUnmergedTree = true
+            )
+            .assertIsDisplayed()
 
         scenario.close()
     }

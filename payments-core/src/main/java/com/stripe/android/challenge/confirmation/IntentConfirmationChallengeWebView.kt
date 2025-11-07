@@ -1,15 +1,10 @@
 package com.stripe.android.challenge.confirmation
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.webkit.WebView
 
-@SuppressLint("ViewConstructor")
-internal class IntentConfirmationChallengeWebView(
-    context: Context,
-    bridgeHandler: ConfirmationChallengeBridgeHandler,
-) : WebView(context) {
+internal open class IntentConfirmationChallengeWebView(context: Context) : WebView(context) {
 
     init {
         setBackgroundColor(Color.TRANSPARENT)
@@ -17,6 +12,9 @@ internal class IntentConfirmationChallengeWebView(
             javaScriptEnabled = true
             domStorageEnabled = true
         }
-        addJavascriptInterface(bridgeHandler, "Android")
+    }
+
+    open fun addBridgeHandler(handler: ConfirmationChallengeBridgeHandler) {
+        addJavascriptInterface(handler, "Android")
     }
 }

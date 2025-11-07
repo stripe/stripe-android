@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,21 +33,26 @@ internal class IntentConfirmationChallengeUITest {
     }
 
     @Test
-    fun `loadUrl is called on WebView with correct URL`() {
+    fun `addBridgeHandler and loadUrl are called in correct order`() = runTest {
+        val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
         var fakeWebView: FakeIntentConfirmationChallengeWebView? = null
 
         composeTestRule.setContent {
             IntentConfirmationChallengeUI(
-                bridgeHandler = FakeConfirmationChallengeBridgeHandler(),
+                bridgeHandler = bridgeHandler,
                 showProgressIndicator = false,
-                webViewFactory = { context, _ ->
+                webViewFactory = { context ->
                     FakeIntentConfirmationChallengeWebView(context)
                         .also { fakeWebView = it }
                 }
             )
         }
 
-        assertThat(fakeWebView?.loadedUrl).isNotNull()
+        assertThat(fakeWebView?.awaitCall())
+            .isEqualTo(FakeIntentConfirmationChallengeWebView.Call.AddBridgeHandler(bridgeHandler))
+        assertThat(fakeWebView?.awaitCall())
+            .isEqualTo(FakeIntentConfirmationChallengeWebView.Call.LoadUrl("http://10.0.2.2:3004"))
+        fakeWebView?.ensureAllEventsConsumed()
     }
 
     private fun setContent(showProgressIndicator: Boolean) = composeTestRule.setContent {
