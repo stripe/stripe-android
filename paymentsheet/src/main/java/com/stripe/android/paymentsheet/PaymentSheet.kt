@@ -2690,34 +2690,11 @@ class PaymentSheet internal constructor(
     @Parcelize
     @Poko
     class PrimaryButtonColors(
-        /**
-         * The background color of the primary button.
-         * Note: If 'null', {@link Colors#primary} is used.
-         */
-        @ColorInt
-        internal val background: Int?,
-        /**
-         * The color of the text and icon in the primary button.
-         */
-        @ColorInt
-        internal val onBackground: Int,
-        /**
-         * The border color of the primary button.
-         */
-        @ColorInt
-        internal val border: Int,
-        /**
-         * The background color for the primary button when in a success state. Defaults
-         * to base green background color.
-         */
-        @ColorInt
-        internal val successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
-        /**
-         * The success color for the primary button text when in a success state. Defaults
-         * to `onBackground`.
-         */
-        @ColorInt
-        internal val onSuccessBackgroundColor: Int = onBackground,
+        @ColorInt internal val background: Int?,
+        @ColorInt internal val onBackground: Int,
+        @ColorInt internal val border: Int,
+        @ColorInt internal val successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
+        @ColorInt internal val onSuccessBackgroundColor: Int = onBackground,
     ) : Parcelable {
         constructor(
             background: Int?,
@@ -2755,21 +2732,143 @@ class PaymentSheet internal constructor(
             onSuccessBackgroundColor = onSuccessBackgroundColor.toArgb(),
         )
 
+        class Builder {
+            @ColorInt private var background: Int? = null
+
+            @ColorInt private var onBackground: Int? = null
+
+            @ColorInt private var border: Int? = null
+
+            @ColorInt private var successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb()
+
+            @ColorInt private var onSuccessBackgroundColor: Int? = null
+
+            /**
+             * The background color of the primary button.
+             * Note: If 'null', {@link Colors#primary} is used.
+             *
+             * @param background The background color as an [ColorInt].
+             */
+            fun background(@ColorInt background: Int?) = apply {
+                this.background = background
+            }
+
+            /**
+             * The background color of the primary button.
+             * Note: If 'null', {@link Colors#primary} is used.
+             *
+             * @param background The background [Color].
+             */
+            fun background(background: Color?) = apply {
+                this.background = background?.toArgb()
+            }
+
+            /**
+             * The color of the text and icon in the primary button.
+             *
+             * @param onBackground The on-background color as an [ColorInt].
+             */
+            fun onBackground(@ColorInt onBackground: Int) = apply {
+                this.onBackground = onBackground
+            }
+
+            /**
+             * The color of the text and icon in the primary button.
+             *
+             * @param onBackground The on-background [Color].
+             */
+            fun onBackground(onBackground: Color) = apply {
+                this.onBackground = onBackground.toArgb()
+            }
+
+            /**
+             * The border color of the primary button.
+             *
+             * @param border The border color as an [ColorInt].
+             */
+            fun border(@ColorInt border: Int) = apply {
+                this.border = border
+            }
+
+            /**
+             * The border color of the primary button.
+             *
+             * @param border The border [Color].
+             */
+            fun border(border: Color) = apply {
+                this.border = border.toArgb()
+            }
+
+            /**
+             * The background color for the primary button when in a success state. Defaults
+             * to base green background color.
+             *
+             * @param successBackgroundColor The success background color as an [ColorInt].
+             */
+            fun successBackgroundColor(@ColorInt successBackgroundColor: Int) = apply {
+                this.successBackgroundColor = successBackgroundColor
+            }
+
+            /**
+             * The background color for the primary button when in a success state. Defaults
+             * to base green background color.
+             *
+             * @param successBackgroundColor The success background [Color].
+             */
+            fun successBackgroundColor(successBackgroundColor: Color) = apply {
+                this.successBackgroundColor = successBackgroundColor.toArgb()
+            }
+
+            /**
+             * The success color for the primary button text when in a success state. Defaults
+             * to `onBackground`.
+             *
+             * @param onSuccessBackgroundColor The on-success background color as an [ColorInt].
+             */
+            fun onSuccessBackgroundColor(@ColorInt onSuccessBackgroundColor: Int) = apply {
+                this.onSuccessBackgroundColor = onSuccessBackgroundColor
+            }
+
+            /**
+             * The success color for the primary button text when in a success state. Defaults
+             * to `onBackground`.
+             *
+             * @param onSuccessBackgroundColor The on-success background [Color].
+             */
+            fun onSuccessBackgroundColor(onSuccessBackgroundColor: Color) = apply {
+                this.onSuccessBackgroundColor = onSuccessBackgroundColor.toArgb()
+            }
+
+            fun buildLight(): PrimaryButtonColors {
+                return PrimaryButtonColors(
+                    background = background,
+                    onBackground = onBackground
+                        ?: StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                    border = border
+                        ?: StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
+                    successBackgroundColor = successBackgroundColor,
+                    onSuccessBackgroundColor = onSuccessBackgroundColor
+                        ?: (onBackground ?: StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb()),
+                )
+            }
+
+            fun buildDark(): PrimaryButtonColors {
+                return PrimaryButtonColors(
+                    background = background,
+                    onBackground = onBackground
+                        ?: StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+                    border = border
+                        ?: StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
+                    successBackgroundColor = successBackgroundColor,
+                    onSuccessBackgroundColor = onSuccessBackgroundColor
+                        ?: (onBackground ?: StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb()),
+                )
+            }
+        }
+
         companion object {
-            val defaultLight = PrimaryButtonColors(
-                background = null,
-                onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
-                successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.successBackground.toArgb(),
-                onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-            )
-            val defaultDark = PrimaryButtonColors(
-                background = null,
-                onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-                border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
-                successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.successBackground.toArgb(),
-                onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-            )
+            val defaultLight: PrimaryButtonColors = Builder().buildLight()
+            val defaultDark: PrimaryButtonColors = Builder().buildDark()
         }
     }
 
