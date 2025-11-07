@@ -286,9 +286,8 @@ class CameraXAdapter(
     }
 
     /** Return current exposure duration in milliseconds if available. May be null if not yet measured. */
-    @Suppress("MagicNumber")
     fun getExposureDuration(): Long? {
-        return latestExposureDuration?.let { it / 1_000_000 }
+        return latestExposureDuration?.let { it / NANOS_PER_MILLI }
     }
 
     /**
