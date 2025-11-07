@@ -384,7 +384,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         // Add Google Pay inline if NOT allowed in header
         walletsState?.getInlineGPay()?.let { it ->
             wallets += DisplayablePaymentMethod(
-                code = it.getCode(),
+                code = "google_pay",
                 displayName = PaymentsCoreR.string.stripe_google_pay.resolvableString,
                 iconResource = PaymentsCoreR.drawable.stripe_google_pay_mark,
                 iconResourceNight = null,
@@ -408,10 +408,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     private fun WalletsState.getInlineGPay(): WalletsState.GooglePay? {
         return this.googlePay(WalletLocation.INLINE)
-    }
-
-    private fun WalletsState.GooglePay.getCode(): String {
-        return "google_pay"
     }
 
     private fun getDisplayedSavedPaymentMethod(
@@ -443,7 +439,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         mostRecentlySelectedSavedPaymentMethod: PaymentMethod?,
     ): List<String> {
         val currentSavedPaymentMethodCode = getPaymentMethodToDisplay(
-            paymentMethods, mostRecentlySelectedSavedPaymentMethod
+            paymentMethods = paymentMethods,
+            mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
         )?.type
         val currentDisplayablePaymentMethodCodes = supportedPaymentMethods.map {
             it.code
@@ -456,8 +453,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             walletsState?.getInlineLink()?.let {
                 add(PaymentMethod.Type.Link.code)
             }
-            walletsState?.getInlineGPay()?.let{
-                add(it.getCode())
+            walletsState?.getInlineGPay()?.let {
+                add("google_pay")
             }
             addAll(currentDisplayablePaymentMethodCodes)
         }

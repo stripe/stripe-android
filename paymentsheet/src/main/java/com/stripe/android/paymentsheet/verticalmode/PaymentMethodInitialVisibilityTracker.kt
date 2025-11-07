@@ -52,7 +52,7 @@ internal class PaymentMethodInitialVisibilityTracker(
         }
     }
 
-    fun getHasDispatched(): Boolean{
+    fun getHasDispatched(): Boolean {
         return this.hasDispatched
     }
 
