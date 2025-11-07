@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -815,6 +816,7 @@ class DefaultConfirmationHandlerTest {
                     errorReporter = errorReporter,
                     savedStateHandle = savedStateHandle,
                     ioContext = dispatcher,
+                    logger = FakeLogger(),
                     confirmationSaver = { intent, option, alwaysSave ->
                         confirmationSaverTurbine.add(Pair(intent, option))
                     },

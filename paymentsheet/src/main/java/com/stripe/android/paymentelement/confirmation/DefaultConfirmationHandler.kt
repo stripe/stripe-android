@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.resolvableString
@@ -31,6 +32,7 @@ internal class DefaultConfirmationHandler(
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
     private val ioContext: CoroutineContext,
+    private val logger: Logger,
     private val confirmationSaver: ConfirmationHandler.Saver,
 ) : ConfirmationHandler {
     private var initialConfirmationArguments: ConfirmationHandler.Args?
@@ -240,6 +242,8 @@ internal class DefaultConfirmationHandler(
     }
 
     private fun onHandlerResult(result: ConfirmationHandler.Result) {
+        result.log(logger)
+
         _state.value = ConfirmationHandler.State.Complete(result)
 
         if (result is ConfirmationHandler.Result.Succeeded) {
@@ -301,6 +305,7 @@ internal class DefaultConfirmationHandler(
         private val savedStateHandle: SavedStateHandle,
         private val errorReporter: ErrorReporter,
         @IOContext private val ioContext: CoroutineContext,
+        private val logger: Logger,
         private val confirmationSaver: ConfirmationHandler.Saver,
     ) : ConfirmationHandler.Factory {
         override fun create(scope: CoroutineScope): ConfirmationHandler {
@@ -310,6 +315,7 @@ internal class DefaultConfirmationHandler(
                 errorReporter = errorReporter,
                 savedStateHandle = savedStateHandle,
                 ioContext = ioContext,
+                logger = logger,
                 confirmationSaver = confirmationSaver,
             )
         }

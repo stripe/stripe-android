@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -208,6 +209,7 @@ internal fun createTestConfirmationHandlerFactory(
         savedStateHandle = savedStateHandle,
         errorReporter = FakeErrorReporter(),
         ioContext = Dispatchers.Unconfined,
+        logger = Logger.getInstance(true),
         confirmationSaver = { _, _, _ -> },
     )
 }
