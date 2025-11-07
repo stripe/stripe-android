@@ -18,9 +18,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
-import com.stripe.android.paymentelement.embedded.DefaultEmbeddedConfirmationSaver
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
-import com.stripe.android.paymentelement.embedded.EmbeddedConfirmationSaver
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -93,9 +91,6 @@ internal interface FormActivityViewModelModule {
 
     @Binds
     fun bindsPrefsRepositoryFactory(factory: DefaultPrefsRepository.Factory): PrefsRepository.Factory
-
-    @Binds
-    fun bindsConfirmationSaver(saver: DefaultEmbeddedConfirmationSaver): EmbeddedConfirmationSaver
 
     companion object {
         @Provides

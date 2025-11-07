@@ -55,6 +55,8 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
@@ -124,8 +126,8 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `load with configuration should return expected result`() = runTest {
-        prefsRepository.savePaymentSelection(
-            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        prefsRepository.setSavedSelection(
+            SavedSelection.PaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id)
         )
 
         val loader = createPaymentElementLoader(
@@ -296,8 +298,8 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `load with google pay kill switch enabled should return expected result`() = runTest {
-        prefsRepository.savePaymentSelection(
-            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        prefsRepository.setSavedSelection(
+            SavedSelection.PaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id)
         )
 
         val loader = createPaymentElementLoader(
@@ -321,7 +323,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Should default to first payment method if customer has payment methods`() = runTest {
-        prefsRepository.savePaymentSelection(null)
+        prefsRepository.setSavedSelection(null)
 
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
@@ -346,7 +348,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Should default to last used payment method if available even if customer has payment methods`() = runTest {
-        prefsRepository.savePaymentSelection(PaymentSelection.GooglePay)
+        prefsRepository.setSavedSelection(SavedSelection.GooglePay)
 
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
@@ -370,7 +372,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Should default to google if customer has no payment methods and no last used payment method`() =
         runTest {
-            prefsRepository.savePaymentSelection(null)
+            prefsRepository.setSavedSelection(null)
 
             val loader = createPaymentElementLoader(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -394,7 +396,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Should default to no payment method when google pay is not ready`() =
         runTest {
-            prefsRepository.savePaymentSelection(null)
+            prefsRepository.setSavedSelection(null)
 
             val loader = createPaymentElementLoader(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -418,7 +420,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Should default to no payment method when saved selection is Google Pay & its not ready`() =
         runTest {
-            prefsRepository.savePaymentSelection(PaymentSelection.GooglePay)
+            prefsRepository.setSavedSelection(SavedSelection.GooglePay)
 
             val loader = createPaymentElementLoader(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -443,7 +445,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Should default to no payment method when using wallet buttons`() =
         runTest {
-            prefsRepository.savePaymentSelection(null)
+            prefsRepository.setSavedSelection(null)
 
             val loader = createPaymentElementLoader(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -474,7 +476,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Should default to no payment method when using wallet buttons & google is saved selection`() =
         runTest {
-            prefsRepository.savePaymentSelection(PaymentSelection.GooglePay)
+            prefsRepository.setSavedSelection(SavedSelection.GooglePay)
 
             val loader = createPaymentElementLoader(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -505,7 +507,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Should default to no payment method when using wallet buttons & link is saved selection`() =
         runTest {
-            prefsRepository.savePaymentSelection(PaymentSelection.Link())
+            prefsRepository.setSavedSelection(SavedSelection.Link)
 
             val loader = createPaymentElementLoader(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -535,7 +537,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Should default to no payment method when google pay is not configured`() =
         runTest {
-            prefsRepository.savePaymentSelection(null)
+            prefsRepository.setSavedSelection(null)
 
             val userFacingLogger = FakeUserFacingLogger()
             val loader = createPaymentElementLoader(
@@ -563,7 +565,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Should default to no payment method if customer has no payment methods and no last used payment method`() =
         runTest {
-            prefsRepository.savePaymentSelection(null)
+            prefsRepository.setSavedSelection(null)
 
             val loader = createPaymentElementLoader(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
@@ -1331,7 +1333,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Moves last-used customer payment method to the front of the list`() = runTest {
         val paymentMethods = PaymentMethodFixtures.createCards(10)
         val lastUsed = paymentMethods[6]
-        prefsRepository.savePaymentSelection(PaymentSelection.Saved(lastUsed))
+        prefsRepository.setSavedSelection(SavedSelection.PaymentMethod(lastUsed.id))
 
         val loader = createPaymentElementLoader(
             customerRepo = FakeCustomerRepository(paymentMethods = paymentMethods),
@@ -2582,7 +2584,7 @@ internal class DefaultPaymentElementLoaderTest {
         val paymentMethods = PaymentMethodFixtures.createCards(10)
         val lastUsed = paymentMethods[6]
 
-        prefsRepository.savePaymentSelection(PaymentSelection.Saved(lastUsed))
+        prefsRepository.setSavedSelection(SavedSelection.PaymentMethod(lastUsed.id))
 
         val loader = createPaymentElementLoader(
             customer = ElementsSession.Customer(
@@ -2721,11 +2723,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `When using 'CustomerSession' & has a default saved Stripe payment method, should call 'ElementsSessionRepository' with default id`() =
         runTest {
-            prefsRepository.savePaymentSelection(
-                PaymentSelection.Saved(
-                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1234321"),
-                )
-            )
+            prefsRepository.setSavedSelection(SavedSelection.PaymentMethod("pm_1234321"))
 
             val repository = FakeElementsSessionRepository(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -2793,7 +2791,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `When using 'CustomerSession' & has a default Google Pay payment method, should not call 'ElementsSessionRepository' with default id`() =
         runTest {
-            prefsRepository.savePaymentSelection(PaymentSelection.GooglePay)
+            prefsRepository.setSavedSelection(SavedSelection.GooglePay)
 
             val repository = FakeElementsSessionRepository(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -2982,11 +2980,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `When using 'LegacyEphemeralKey' & has a default saved Stripe payment method, should not call 'ElementsSessionRepository' with default id`() =
         runTest {
-            prefsRepository.savePaymentSelection(
-                PaymentSelection.Saved(
-                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1234321"),
-                )
-            )
+            prefsRepository.setSavedSelection(SavedSelection.PaymentMethod("pm_1234321"))
 
             val repository = FakeElementsSessionRepository(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -3257,7 +3251,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Should filter out saved cards with disallowed brands`() = runTest {
-        prefsRepository.savePaymentSelection(null)
+        prefsRepository.setSavedSelection(null)
 
         val paymentMethods = listOf(
             PaymentMethodFactory.card(id = "pm_12345").update(
@@ -3912,7 +3906,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private suspend fun testSuccessfulLoadSendsEventsCorrectly(paymentSelection: PaymentSelection?) {
-        prefsRepository.savePaymentSelection(paymentSelection)
+        prefsRepository.setSavedSelection(paymentSelection?.toSavedSelection())
 
         val loader = createPaymentElementLoader(
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
@@ -4197,7 +4191,7 @@ internal class DefaultPaymentElementLoaderTest {
         val defaultPaymentMethodId = defaultPaymentMethod?.id
 
         lastUsedPaymentMethod?.let {
-            prefsRepository.savePaymentSelection(PaymentSelection.Saved(lastUsedPaymentMethod))
+            prefsRepository.setSavedSelection(SavedSelection.PaymentMethod(lastUsedPaymentMethod.id))
         }
 
         val loader = createPaymentElementLoader(

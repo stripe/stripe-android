@@ -207,7 +207,8 @@ internal fun createTestConfirmationHandlerFactory(
         ),
         savedStateHandle = savedStateHandle,
         errorReporter = FakeErrorReporter(),
-        ioContext = Dispatchers.Unconfined
+        ioContext = Dispatchers.Unconfined,
+        confirmationSaver = { _, _, _ -> },
     )
 }
 
