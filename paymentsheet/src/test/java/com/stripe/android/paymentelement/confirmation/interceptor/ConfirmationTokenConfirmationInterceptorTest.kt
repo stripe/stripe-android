@@ -987,7 +987,8 @@ class ConfirmationTokenConfirmationInterceptorTest {
         )
 
         assertThat(observedParams).hasSize(1)
-        assertThat(observedParams[0].clientContext?.requireCvcRecollection).isEqualTo(true)
+        assertThat(observedParams[0].clientContext?.paymentMethodOptionsJson)
+            .isEqualTo("""{"card":{"require_cvc_recollection":"true"}}""")
     }
 
     @Test
