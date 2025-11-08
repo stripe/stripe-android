@@ -29,6 +29,8 @@ data class ElementsSession(
     val elementsSessionId: String,
     private val passiveCaptcha: PassiveCaptchaParams?,
     val elementsSessionConfigId: String?,
+    val accountId: String?,
+    val merchantId: String?,
 ) : StripeModel {
 
     val linkPassthroughModeEnabled: Boolean
@@ -87,6 +89,9 @@ data class ElementsSession(
             return flags[Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION] == true &&
                 FeatureFlags.enableAttestationOnIntentConfirmation.isEnabled
         }
+
+    val onBehalfOf: String?
+        get() = accountId.takeIf { !it.equals(merchantId) }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
@@ -274,6 +279,8 @@ data class ElementsSession(
                 elementsSessionId = elementsSessionId,
                 passiveCaptcha = null,
                 elementsSessionConfigId = null,
+                accountId = null,
+                merchantId = null,
             )
         }
     }

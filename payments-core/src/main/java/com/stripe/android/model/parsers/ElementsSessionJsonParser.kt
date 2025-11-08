@@ -87,6 +87,9 @@ internal class ElementsSessionJsonParser(
             PassiveCaptchaJsonParser().parse(it)
         }
 
+        val accountId = json.optString("account_id")
+        val merchantId = json.optString("merchant_id")
+
         return if (stripeIntent != null) {
             ElementsSession(
                 linkSettings = parseLinkSettings(linkSettings, linkFundingSources),
@@ -105,6 +108,8 @@ internal class ElementsSessionJsonParser(
                 elementsSessionId = elementsSessionId.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString(),
                 passiveCaptcha = passiveCaptcha,
                 elementsSessionConfigId = elementsSessionConfigId,
+                accountId = accountId,
+                merchantId = merchantId,
             )
         } else {
             null
