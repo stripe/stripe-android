@@ -12,11 +12,13 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.MandateHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
 import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceContext
 import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
@@ -89,6 +91,14 @@ internal abstract class BaseSheetViewModel(
 
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
         .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
+
+    /**
+     * Stores the latest form field values for synchronous access during confirmation.
+     * This is updated whenever form values change and allows us to build PaymentSelection
+     * synchronously without waiting for async flow collection.
+     */
+    private var lastKnownFormFieldValues: Pair<FormFieldValues?, String>? = null
+    private var formHelper: FormHelper? = null
 
     val processing: StateFlow<Boolean> = savedStateHandle
         .getStateFlow(SAVE_PROCESSING, false)
@@ -177,6 +187,39 @@ internal abstract class BaseSheetViewModel(
     }
 
     abstract fun handlePaymentMethodSelected(selection: PaymentSelection?)
+
+    /**
+     * Sets the form helper for synchronous PaymentSelection building.
+     * Should be called by interactors when they create the form helper.
+     */
+    fun setFormHelper(helper: FormHelper?) {
+        formHelper = helper
+    }
+
+    /**
+     * Stores the latest form field values for synchronous access.
+     * This should be called whenever form field values change.
+     */
+    fun updateFormFieldValues(
+        formValues: FormFieldValues?,
+        selectedPaymentMethodCode: String
+    ) {
+        lastKnownFormFieldValues = formValues to selectedPaymentMethodCode
+    }
+
+    /**
+     * Gets the current PaymentSelection synchronously by reading the latest form field values
+     * directly, bypassing the async flow collection chain. Falls back to the StateFlow value
+     * if form values aren't available (e.g., for saved payment methods).
+     */
+    fun getCurrentPaymentSelectionForConfirmation(): PaymentSelection? {
+        // Try to build from current form field values first
+        val (formValues, code) = lastKnownFormFieldValues ?: return selection.value
+        val helper = formHelper ?: return selection.value
+        
+        // Build PaymentSelection synchronously from current form state
+        return helper.buildPaymentSelection(formValues, code) ?: selection.value
+    }
 
     fun updateSelection(selection: PaymentSelection?) {
         when (selection) {

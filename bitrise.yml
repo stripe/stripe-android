@@ -268,7 +268,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33DebugAndroidTest
+            - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33DebugAndroidTest --continue
     meta:
       bitrise.io:
         stack: linux-docker-android-22.04

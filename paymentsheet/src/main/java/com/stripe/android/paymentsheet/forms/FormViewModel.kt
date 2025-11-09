@@ -120,4 +120,36 @@ internal class FormViewModel(
             !hiddenIds.contains(it)
         }
     }
+
+    /**
+     * Synchronously reads the current form field values without waiting for flow emissions.
+     * This ensures we get the latest state even if the async flow collection hasn't completed yet.
+     */
+    fun getCurrentFormFieldValues(): List<Pair<IdentifierSpec, FormFieldEntry>> {
+        return elements.flatMap { element ->
+            element.getFormFieldValueFlow().value
+        }
+    }
+
+    /**
+     * Synchronously builds FormFieldValues from current form state.
+     */
+    fun getCurrentFormFieldValuesForConfirmation(): FormFieldValues {
+        val currentValues = getCurrentFormFieldValues()
+        val userReuse = currentValues
+            .firstOrNull { it.first == IdentifierSpec.SaveForFutureUse }
+            ?.second?.value?.toBoolean()
+            ?.let { saveForFutureUse ->
+                if (saveForFutureUse) {
+                    PaymentSelection.CustomerRequestedSave.RequestReuse
+                } else {
+                    PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                }
+            } ?: PaymentSelection.CustomerRequestedSave.NoRequest
+
+        return FormFieldValues(
+            fieldValuePairs = currentValues.toMap(),
+            userRequestedReuse = userReuse
+        )
+    }
 }

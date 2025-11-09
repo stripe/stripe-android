@@ -359,7 +359,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun checkout() {
-        val currentSelection = selection.value
+        // Get current selection synchronously to ensure we have the latest form state
+        val currentSelection = getCurrentPaymentSelectionForConfirmation()
 
         if (currentSelection is PaymentSelection.Saved && shouldLaunchCvcRecollectionScreen(currentSelection)) {
             launchCvcRecollection(currentSelection)

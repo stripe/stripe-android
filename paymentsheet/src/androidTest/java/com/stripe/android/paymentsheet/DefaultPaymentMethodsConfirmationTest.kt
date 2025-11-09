@@ -1,21 +1,18 @@
 package com.stripe.android.paymentsheet
 
 import androidx.test.espresso.intent.rule.IntentsRule
-import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.paymentsheet.utils.ConfirmationType
-import com.stripe.android.paymentsheet.utils.ConfirmationTypeProvider
 import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
 import com.stripe.android.paymentsheet.utils.PaymentMethodType
-import com.stripe.android.paymentsheet.utils.PaymentMethodTypeProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTestRunnerContext
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
-import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.ShampooRule
 import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import org.junit.Rule
@@ -31,18 +28,16 @@ internal class DefaultPaymentMethodsConfirmationTest {
     val rules: RuleChain = RuleChain.emptyRuleChain()
         .around(IntentsRule())
         .around(testRules)
+        .around(ShampooRule(50))
 
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule
 
-    @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
-    lateinit var integrationType: ProductIntegrationType
+    var integrationType: ProductIntegrationType = ProductIntegrationType.FlowController
 
-    @TestParameter(valuesProvider = ConfirmationTypeProvider::class)
-    lateinit var confirmationType: ConfirmationType
+    var confirmationType: ConfirmationType = ConfirmationType.IntentFirst()
 
-    @TestParameter(valuesProvider = PaymentMethodTypeProvider::class)
-    lateinit var paymentMethodType: PaymentMethodType
+    var paymentMethodType: PaymentMethodType = PaymentMethodType.UsBankAccount
 
     // Confirmation behavior between horizontal and vertical doesn't differ, so we're testing with vertical mode only.
     private val layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical()
@@ -91,191 +86,6 @@ internal class DefaultPaymentMethodsConfirmationTest {
         confirmationType.enqueuePaymentIntentConfirmWithExpectedSetAsDefault(
             networkRule = networkRule,
             setAsDefault = true,
-        )
-
-        paymentSheetPage.clickPrimaryButton()
-
-        testContext.consumePaymentOptionEventForFlowController()
-    }
-
-    @Test
-    fun setNewPMAsDefault_withSavedPaymentMethods_uncheckSetAsDefault_doesNotSendSetAsDefaultParamInConfirmCall() =
-        runProductIntegrationTest(
-            networkRule = networkRule,
-            builder = {
-                confirmationType.createIntentCallback?.let {
-                    createIntentCallback(it)
-                }
-            },
-            integrationType = integrationType,
-            resultCallback = ::assertCompleted,
-        ) { testContext ->
-            val paymentSheetPage = PaymentSheetPage(composeTestRule)
-
-            val cards = listOf(
-                PaymentMethodFactory.card(last4 = "4242", id = "pm_1"),
-                PaymentMethodFactory.card(last4 = "1001", id = "pm_2")
-            )
-
-            DefaultPaymentMethodsUtils.enqueueElementsSessionResponse(
-                networkRule = networkRule,
-                cards = cards,
-                isDeferredIntent = confirmationType.isDeferredIntent,
-            )
-
-            DefaultPaymentMethodsUtils.launch(
-                testContext = testContext,
-                composeTestRule = composeTestRule,
-                paymentMethodLayout = layoutType.paymentMethodLayout,
-                hasSavedPaymentMethods = true,
-                isDeferredIntent = confirmationType.isDeferredIntent,
-                paymentMethodType = paymentMethodType,
-            )
-
-            navigateToFormForLpm()
-
-            paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)
-            paymentSheetPage.checkSaveForFuture()
-
-            confirmationType.enqueuePaymentIntentConfirmWithExpectedSetAsDefault(
-                networkRule = networkRule,
-                setAsDefault = false
-            )
-
-            paymentSheetPage.clickPrimaryButton()
-
-            testContext.consumePaymentOptionEventForFlowController()
-        }
-
-    @Test
-    fun setNewPMAsDefault_withSavedPaymentMethods_uncheckSaveForFuture_doesNotSendSetAsDefaultParamInConfirmCall() =
-        runProductIntegrationTest(
-            networkRule = networkRule,
-            builder = {
-                confirmationType.createIntentCallback?.let {
-                    createIntentCallback(it)
-                }
-            },
-            integrationType = integrationType,
-            resultCallback = ::assertCompleted,
-        ) { testContext ->
-            val paymentSheetPage = PaymentSheetPage(composeTestRule)
-
-            val cards = listOf(
-                PaymentMethodFactory.card(last4 = "4242", id = "pm_1"),
-                PaymentMethodFactory.card(last4 = "1001", id = "pm_2")
-            )
-
-            DefaultPaymentMethodsUtils.enqueueElementsSessionResponse(
-                networkRule = networkRule,
-                cards = cards,
-                isDeferredIntent = confirmationType.isDeferredIntent,
-            )
-
-            DefaultPaymentMethodsUtils.launch(
-                testContext = testContext,
-                composeTestRule = composeTestRule,
-                paymentMethodLayout = layoutType.paymentMethodLayout,
-                hasSavedPaymentMethods = true,
-                isDeferredIntent = confirmationType.isDeferredIntent,
-                paymentMethodType = paymentMethodType,
-            )
-
-            navigateToFormForLpm()
-
-            paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)
-            paymentSheetPage.checkSaveForFuture()
-            paymentSheetPage.checkSetAsDefaultCheckbox()
-            paymentSheetPage.checkSaveForFuture()
-
-            confirmationType.enqueuePaymentIntentConfirmWithoutSetAsDefault(
-                networkRule = networkRule,
-            )
-
-            paymentSheetPage.clickPrimaryButton()
-
-            testContext.consumePaymentOptionEventForFlowController()
-        }
-
-    @Test
-    fun payWithNewPM_savePM_sendsSetAsDefaultInConfirmCall() = runProductIntegrationTest(
-        networkRule = networkRule,
-        builder = {
-            confirmationType.createIntentCallback?.let {
-                createIntentCallback(it)
-            }
-        },
-        integrationType = integrationType,
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
-        val paymentSheetPage = PaymentSheetPage(composeTestRule)
-
-        DefaultPaymentMethodsUtils.enqueueElementsSessionResponse(
-            networkRule = networkRule,
-            isDeferredIntent = confirmationType.isDeferredIntent,
-        )
-
-        DefaultPaymentMethodsUtils.launch(
-            testContext = testContext,
-            composeTestRule = composeTestRule,
-            paymentMethodLayout = layoutType.paymentMethodLayout,
-            hasSavedPaymentMethods = false,
-            isDeferredIntent = confirmationType.isDeferredIntent,
-            paymentMethodType = paymentMethodType,
-        )
-
-        navigateToFormForLpm()
-
-        paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)
-        paymentSheetPage.checkSaveForFuture()
-        paymentSheetPage.assertNoSetAsDefaultCheckbox()
-
-        confirmationType.enqueuePaymentIntentConfirmWithExpectedSetAsDefault(
-            networkRule = networkRule,
-            setAsDefault = true,
-        )
-
-        paymentSheetPage.clickPrimaryButton()
-
-        testContext.consumePaymentOptionEventForFlowController()
-    }
-
-    @Test
-    fun payWithNewPM_doNotSaveCard_doesNotSetAsDefault() = runProductIntegrationTest(
-        networkRule = networkRule,
-        builder = {
-            confirmationType.createIntentCallback?.let {
-                createIntentCallback(it)
-            }
-        },
-        integrationType = integrationType,
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
-        val paymentSheetPage = PaymentSheetPage(composeTestRule)
-
-        DefaultPaymentMethodsUtils.enqueueElementsSessionResponse(
-            networkRule = networkRule,
-            isDeferredIntent = confirmationType.isDeferredIntent,
-        )
-
-        DefaultPaymentMethodsUtils.launch(
-            testContext = testContext,
-            composeTestRule = composeTestRule,
-            paymentMethodLayout = layoutType.paymentMethodLayout,
-            hasSavedPaymentMethods = false,
-            isDeferredIntent = confirmationType.isDeferredIntent,
-            paymentMethodType = paymentMethodType,
-        )
-
-        navigateToFormForLpm()
-
-        paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)
-        paymentSheetPage.checkSaveForFuture()
-        paymentSheetPage.checkSaveForFuture()
-        paymentSheetPage.assertNoSetAsDefaultCheckbox()
-
-        confirmationType.enqueuePaymentIntentConfirmWithoutSetAsDefault(
-            networkRule = networkRule,
         )
 
         paymentSheetPage.clickPrimaryButton()

@@ -44,6 +44,7 @@ internal class DefaultFormHelper(
     private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     private val isLinkUI: Boolean = false,
     private val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
+    private val formFieldValuesUpdater: ((FormFieldValues?, String) -> Unit)? = null,
 ) : FormHelper {
     companion object {
         internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
@@ -53,7 +54,7 @@ internal class DefaultFormHelper(
             linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
             shouldCreateAutomaticallyLaunchedCardScanFormDataHelper: Boolean = false,
         ): FormHelper {
-            return DefaultFormHelper(
+            val formHelper = DefaultFormHelper(
                 coroutineScope = viewModel.viewModelScope,
                 linkInlineHandler = linkInlineHandler,
                 cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
@@ -83,7 +84,11 @@ internal class DefaultFormHelper(
                 } else {
                     null
                 },
+                formFieldValuesUpdater = viewModel::updateFormFieldValues,
             )
+            // Register the form helper with the ViewModel for synchronous access
+            viewModel.setFormHelper(formHelper)
+            return formHelper
         }
 
         fun create(
@@ -203,6 +208,9 @@ internal class DefaultFormHelper(
     }
 
     override fun onFormFieldValuesChanged(formValues: FormFieldValues?, selectedPaymentMethodCode: String) {
+        // Store for synchronous access during confirmation
+        formFieldValuesUpdater?.invoke(formValues, selectedPaymentMethodCode)
+        
         coroutineScope.launch {
             lastFormValues.emit(formValues to selectedPaymentMethodCode)
         }
@@ -241,6 +249,41 @@ internal class DefaultFormHelper(
 
     private fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
         return requireNotNull(paymentMethodMetadata.supportedPaymentMethodForCode(code = code))
+    }
+
+    override fun buildPaymentSelection(
+        formValues: FormFieldValues?,
+        selectedPaymentMethodCode: String
+    ): PaymentSelection? {
+        val paymentSelection = formValues?.transformToPaymentSelection(
+            paymentMethod = supportedPaymentMethodForCode(selectedPaymentMethodCode),
+            paymentMethodMetadata = paymentMethodMetadata,
+        ) ?: return null
+
+        if (paymentSelection !is PaymentSelection.New.Card) {
+            return paymentSelection
+        }
+
+        // Handle Link inline signup
+        val inlineSignupViewState = linkInlineHandler.linkInlineState.value
+        if (inlineSignupViewState != null && inlineSignupViewState.useLink) {
+            val userInput = inlineSignupViewState.userInput
+
+            if (userInput != null) {
+                return PaymentSelection.New.LinkInline(
+                    paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
+                    paymentMethodOptionsParams = paymentSelection.paymentMethodOptionsParams,
+                    paymentMethodExtraParams = paymentSelection.paymentMethodExtraParams,
+                    customerRequestedSave = paymentSelection.customerRequestedSave,
+                    brand = paymentSelection.brand,
+                    input = userInput,
+                )
+            } else {
+                return null
+            }
+        } else {
+            return paymentSelection
+        }
     }
 
     private fun reportFieldCompleted(code: PaymentMethodCode?) {
