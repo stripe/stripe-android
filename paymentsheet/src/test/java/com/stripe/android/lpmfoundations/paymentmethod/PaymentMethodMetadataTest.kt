@@ -1176,6 +1176,7 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             attestOnIntentConfirmation = false,
             appearance = configuration.appearance,
+            onBehalfOf = null,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1261,6 +1262,7 @@ internal class PaymentMethodMetadataTest {
             ),
             attestOnIntentConfirmation = false,
             appearance = configuration.appearance,
+            onBehalfOf = null,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -1384,6 +1386,8 @@ internal class PaymentMethodMetadataTest {
             merchantLogoUrl = null,
             passiveCaptcha = passiveCaptchaParams,
             elementsSessionConfigId = null,
+            accountId = "acct_1SGP1sPvdtoA7EjP",
+            merchantId = "acct_1SGP1sPvdtoA7EjP",
         )
     }
 

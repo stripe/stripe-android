@@ -90,6 +90,8 @@ internal object CustomerSheetFixtures {
             passiveCaptcha = null,
             merchantLogoUrl = null,
             elementsSessionConfigId = null,
+            accountId = "acct_1SGP1sPvdtoA7EjP",
+            merchantId = "acct_1SGP1sPvdtoA7EjP",
         )
 
         return CustomerSheetSession(
