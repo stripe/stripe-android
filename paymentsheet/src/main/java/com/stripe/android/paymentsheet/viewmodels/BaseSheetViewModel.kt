@@ -27,9 +27,11 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.state.PaymentMethodRefresher
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -57,6 +59,8 @@ internal abstract class BaseSheetViewModel(
     val savedStateHandle: SavedStateHandle,
     val linkHandler: LinkHandler,
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+    val tapToAddCollectionHandler: TapToAddCollectionHandler,
+    val paymentMethodRefresher: PaymentMethodRefresher,
     val isCompleteFlow: Boolean,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(

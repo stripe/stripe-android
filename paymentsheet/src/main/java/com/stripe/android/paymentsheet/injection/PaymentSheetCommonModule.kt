@@ -32,6 +32,7 @@ import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.taptoadd.TapToAddModule
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
@@ -66,6 +67,7 @@ import javax.inject.Singleton
         LinkComponent::class,
     ],
     includes = [
+        TapToAddModule::class,
         LinkCommonModule::class,
         PaymentsIntegrityModule::class
     ]

@@ -192,6 +192,9 @@ class EmbeddedPaymentElement @Inject internal constructor(
 
         internal var rowSelectionBehavior: RowSelectionBehavior = RowSelectionBehavior.default()
 
+        @OptIn(TapToAddPreview::class)
+        internal var createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback? = null
+
         /**
          * Called when a user confirms payment for an external payment method.
          */
@@ -223,6 +226,13 @@ class EmbeddedPaymentElement @Inject internal constructor(
          */
         fun rowSelectionBehavior(rowSelectionBehavior: RowSelectionBehavior) = apply {
             this.rowSelectionBehavior = rowSelectionBehavior
+        }
+
+        @TapToAddPreview
+        fun createCardPresentSetupIntentCallback(
+            createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback,
+        ) = apply {
+            this.createCardPresentSetupIntentCallback = createCardPresentSetupIntentCallback
         }
 
         @OptIn(SharedPaymentTokenSessionPreview::class)

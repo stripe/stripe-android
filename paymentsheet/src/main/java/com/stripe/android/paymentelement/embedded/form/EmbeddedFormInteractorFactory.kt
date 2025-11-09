@@ -65,6 +65,8 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
                         paymentMethodMetadata.supportedPaymentMethodForCode(code = paymentMethodCode)
                     ),
                     paymentMethodMetadata = paymentMethodMetadata,
+                    collectedPaymentMethod = null,
+                    inlineSignupViewState = null,
                 )
             )
         }

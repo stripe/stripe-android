@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
@@ -15,9 +16,11 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.getSetupFutureUseValue
+import com.stripe.android.taptoadd.TapToAddFormCollectedIdentifier
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.utils.collectAsState
@@ -106,7 +109,9 @@ internal fun FormFieldValues.transformToExtraParams(
 internal fun FormFieldValues.transformToPaymentSelection(
     paymentMethod: SupportedPaymentMethod,
     paymentMethodMetadata: PaymentMethodMetadata,
-): PaymentSelection {
+    collectedPaymentMethod: DisplayableSavedPaymentMethod?,
+    inlineSignupViewState: InlineSignupViewState?,
+): PaymentSelection? {
     val setupFutureUsage = userRequestedReuse.getSetupFutureUseValue(
         paymentMethodMetadata.hasIntentToSetup(paymentMethod.code)
     )
@@ -114,13 +119,36 @@ internal fun FormFieldValues.transformToPaymentSelection(
     val options = transformToPaymentMethodOptionsParams(paymentMethod.code, setupFutureUsage)
     val extras = transformToExtraParams(paymentMethod.code)
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
-        PaymentSelection.New.Card(
-            paymentMethodOptionsParams = options,
-            paymentMethodCreateParams = params,
-            paymentMethodExtraParams = extras,
-            brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
-            customerRequestedSave = userRequestedReuse,
-        )
+        val collectedTapToAddPaymentMethod = fieldValuePairs[TapToAddFormCollectedIdentifier]
+
+        return if (collectedTapToAddPaymentMethod != null && collectedPaymentMethod != null) {
+            if (inlineSignupViewState != null && inlineSignupViewState.useLink) {
+                val userInput = inlineSignupViewState.userInput
+
+                if (userInput != null) {
+                    PaymentSelection.Saved(
+                        paymentMethod = collectedPaymentMethod.paymentMethod,
+                        paymentMethodOptionsParams = options,
+                        linkUserInput = userInput,
+                    )
+                } else {
+                    null
+                }
+            } else {
+                PaymentSelection.Saved(
+                    paymentMethod = collectedPaymentMethod.paymentMethod,
+                    paymentMethodOptionsParams = options,
+                )
+            }
+        } else {
+            PaymentSelection.New.Card(
+                paymentMethodOptionsParams = options,
+                paymentMethodCreateParams = params,
+                paymentMethodExtraParams = extras,
+                brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
+                customerRequestedSave = userRequestedReuse,
+            )
+        }
     } else if (paymentMethodMetadata.isExternalPaymentMethod(paymentMethod.code)) {
         PaymentSelection.ExternalPaymentMethod(
             type = paymentMethod.code,

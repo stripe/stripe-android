@@ -57,6 +57,7 @@ import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
+import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -145,6 +146,7 @@ internal class PaymentSheetPlaygroundActivity :
 
     @OptIn(
         ExperimentalAnalyticEventCallbackApi::class,
+        TapToAddPreview::class,
     )
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -174,6 +176,8 @@ internal class PaymentSheetPlaygroundActivity :
                             it.createIntentCallback(viewModel::createIntentCallback)
                         }
                     }
+                    .createCardPresentSetupIntentCallback(viewModel::createCardPresentSetupIntent)
+                    .createTerminalSessionCallback(viewModel::createTerminalSession)
             }
                 .build()
             val flowController = remember(playgroundState) {
@@ -191,6 +195,8 @@ internal class PaymentSheetPlaygroundActivity :
                             it.createIntentCallback(viewModel::createIntentCallback)
                         }
                     }
+                    .createCardPresentSetupIntentCallback(viewModel::createCardPresentSetupIntent)
+                    .createTerminalSessionCallback(viewModel::createTerminalSession)
             }
                 .build()
             val embeddedPaymentElementBuilder = remember(playgroundState) {

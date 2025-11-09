@@ -9,8 +9,11 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement.RowSelectionBeha
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
+import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
+import com.stripe.android.paymentelement.CreateTerminalSessionCallback
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -22,6 +25,7 @@ import com.stripe.android.paymentsheet.ShopPayHandlers
     ShopPayPreview::class,
     SharedPaymentTokenSessionPreview::class,
     WalletButtonsPreview::class,
+    TapToAddPreview::class,
 )
 internal data class PaymentElementCallbacks private constructor(
     val createIntentCallback: CreateIntentCallback?,
@@ -32,6 +36,8 @@ internal data class PaymentElementCallbacks private constructor(
     val rowSelectionCallback: InternalRowSelectionCallback?,
     val shopPayHandlers: ShopPayHandlers?,
     val preparePaymentMethodHandler: PreparePaymentMethodHandler?,
+    val createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback?,
+    val createTerminalSessionCallback: CreateTerminalSessionCallback?,
 ) {
     class Builder {
         private var createIntentCallback: CreateIntentCallback? = null
@@ -42,6 +48,8 @@ internal data class PaymentElementCallbacks private constructor(
         private var rowSelectionCallback: InternalRowSelectionCallback? = null
         private var shopPayHandlers: ShopPayHandlers? = null
         private var preparePaymentMethodHandler: PreparePaymentMethodHandler? = null
+        private var createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback? = null
+        private var createTerminalSessionCallback: CreateTerminalSessionCallback? = null
 
         fun createIntentCallback(createIntentCallback: CreateIntentCallback?) = apply {
             this.createIntentCallback = createIntentCallback
@@ -88,6 +96,18 @@ internal data class PaymentElementCallbacks private constructor(
             this.shopPayHandlers = shopPayHandlers
         }
 
+        fun createCardPresentSetupIntentCallback(
+            createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback?,
+        ) = apply {
+            this.createCardPresentSetupIntentCallback = createCardPresentSetupIntentCallback
+        }
+
+        fun createTerminalSessionCallback(
+            createTerminalSessionCallback: CreateTerminalSessionCallback?
+        ) = apply {
+            this.createTerminalSessionCallback = createTerminalSessionCallback
+        }
+
         fun build(): PaymentElementCallbacks {
             var mutualExclusiveCallbackCount = 0
             if (createIntentCallback != null) {
@@ -116,6 +136,8 @@ internal data class PaymentElementCallbacks private constructor(
                 rowSelectionCallback = rowSelectionCallback,
                 shopPayHandlers = shopPayHandlers,
                 preparePaymentMethodHandler = preparePaymentMethodHandler,
+                createCardPresentSetupIntentCallback = createCardPresentSetupIntentCallback,
+                createTerminalSessionCallback = createTerminalSessionCallback,
             )
         }
     }

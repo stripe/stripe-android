@@ -61,7 +61,8 @@ fun rememberEmbeddedPaymentElement(
         @OptIn(
             ExperimentalCustomPaymentMethodsApi::class,
             ExperimentalAnalyticEventCallbackApi::class,
-            SharedPaymentTokenSessionPreview::class
+            SharedPaymentTokenSessionPreview::class,
+            TapToAddPreview::class,
         )
         PaymentElementCallbacks.Builder()
             .apply {
@@ -83,6 +84,7 @@ fun rememberEmbeddedPaymentElement(
             .externalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
             .analyticEventCallback(builder.analyticEventCallback)
             .rowSelectionImmediateActionCallback(builder.rowSelectionBehavior, embeddedPaymentElement)
+            .createCardPresentSetupIntentCallback(builder.createCardPresentSetupIntentCallback)
             .build()
     }
 

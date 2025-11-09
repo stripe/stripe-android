@@ -44,6 +44,10 @@ dependencies {
     implementation libs.compose.navigation
     implementation libs.accompanist.systemUiController
 
+    // Terminal
+    compileOnly libs.terminal.core
+    compileOnly libs.terminal.tapToPay
+
     // Other
     implementation libs.playServicesWallet
     implementation libs.payButtonCompose

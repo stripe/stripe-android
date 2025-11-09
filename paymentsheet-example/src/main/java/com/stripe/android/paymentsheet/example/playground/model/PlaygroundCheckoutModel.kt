@@ -229,6 +229,10 @@ data class CheckoutResponse(
     val customerEphemeralKeySecret: String? = null,
     @SerialName("customerSessionClientSecret")
     val customerSessionClientSecret: String? = null,
+    @SerialName("connectionToken")
+    val connectionToken: String? = null,
+    @SerialName("locationId")
+    val locationId: String? = null,
     @SerialName("amount")
     val amount: Long,
     @SerialName("paymentMethodTypes")

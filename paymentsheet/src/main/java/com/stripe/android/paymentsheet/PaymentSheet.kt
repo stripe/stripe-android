@@ -33,12 +33,15 @@ import com.stripe.android.paymentelement.AddressAutocompletePreview
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
+import com.stripe.android.paymentelement.CreateTerminalSessionCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
+import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -354,6 +357,20 @@ class PaymentSheet internal constructor(
             handler: PreparePaymentMethodHandler
         ) = apply {
             callbacksBuilder.preparePaymentMethodHandler(handler)
+        }
+
+        @TapToAddPreview
+        fun createCardPresentSetupIntentCallback(
+            callback: CreateCardPresentSetupIntentCallback
+        ) = apply {
+            callbacksBuilder.createCardPresentSetupIntentCallback(callback)
+        }
+
+        @TapToAddPreview
+        fun createTerminalSessionCallback(
+            callback: CreateTerminalSessionCallback
+        ) = apply {
+            callbacksBuilder.createTerminalSessionCallback(callback)
         }
 
         /**
@@ -4109,6 +4126,20 @@ class PaymentSheet internal constructor(
                 handler: PreparePaymentMethodHandler
             ) = apply {
                 callbacksBuilder.preparePaymentMethodHandler(handler)
+            }
+
+            @TapToAddPreview
+            fun createCardPresentSetupIntentCallback(
+                callback: CreateCardPresentSetupIntentCallback
+            ) = apply {
+                callbacksBuilder.createCardPresentSetupIntentCallback(callback)
+            }
+
+            @TapToAddPreview
+            fun createTerminalSessionCallback(
+                callback: CreateTerminalSessionCallback
+            ) = apply {
+                callbacksBuilder.createTerminalSessionCallback(callback)
             }
 
             /**

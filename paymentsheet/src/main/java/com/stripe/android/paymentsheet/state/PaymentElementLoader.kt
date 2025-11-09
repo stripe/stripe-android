@@ -43,6 +43,7 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.taptoadd.TapToAddConnectionManager
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.attestation.IntegrityRequestManager
@@ -156,6 +157,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val cvcRecollectionHandler: CvcRecollectionHandler,
     private val integrityRequestManager: IntegrityRequestManager,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
+    private val tapToAddConnectionManager: TapToAddConnectionManager,
 ) : PaymentElementLoader {
 
     @Suppress("LongMethod")
@@ -169,6 +171,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration.validate(isLiveModeProvider())
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
+
+        tapToAddConnectionManager.startConnecting()
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
         val elementsSession = retrieveElementsSession(
@@ -373,6 +377,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customerInfo = customerInfo,
             ),
             initializationMode = initializationMode,
+            isTapToAddSupported = tapToAddConnectionManager.isSupported,
             clientAttributionMetadata = clientAttributionMetadata,
         )
     }

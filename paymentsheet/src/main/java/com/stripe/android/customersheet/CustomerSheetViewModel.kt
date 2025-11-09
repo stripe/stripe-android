@@ -508,7 +508,9 @@ internal class CustomerSheetViewModel(
                     primaryButtonEnabled = formFieldValues != null && !it.isProcessing,
                     draftPaymentSelection = formFieldValues?.transformToPaymentSelection(
                         paymentMethod = it.supportedPaymentMethods.first { spm -> spm.code == it.paymentMethodCode },
-                        paymentMethodMetadata = paymentMethodMetadata
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        collectedPaymentMethod = null,
+                        inlineSignupViewState = null,
                     )
                 )
             }

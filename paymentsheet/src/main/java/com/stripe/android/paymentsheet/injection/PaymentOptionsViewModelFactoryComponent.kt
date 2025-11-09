@@ -3,10 +3,14 @@ package com.stripe.android.paymentsheet.injection
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.confirmation.cvc.CvcRecollectionConfirmationModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
@@ -25,6 +29,11 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         CoreCommonModule::class,
         ResourceRepositoryModule::class,
+        CvcRecollectionConfirmationModule::class,
+        ApplicationIdModule::class,
+        MobileSessionIdModule::class,
+        LinkHoldbackExposureModule::class,
+        GooglePayLauncherModule::class,
     ]
 )
 internal interface PaymentOptionsViewModelFactoryComponent {

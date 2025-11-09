@@ -161,6 +161,7 @@ internal sealed class PaymentSelection : Parcelable {
         val paymentMethod: PaymentMethod,
         val walletType: WalletType? = null,
         val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+        val linkUserInput: UserInput? = null,
     ) : PaymentSelection() {
 
         enum class WalletType(val paymentSelection: PaymentSelection) {

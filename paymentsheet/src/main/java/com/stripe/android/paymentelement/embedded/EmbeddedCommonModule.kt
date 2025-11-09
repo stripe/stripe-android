@@ -27,6 +27,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.taptoadd.TapToAddModule
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
@@ -49,6 +50,7 @@ import kotlin.coroutines.CoroutineContext
         CoreCommonModule::class,
         PaymentsIntegrityModule::class,
         PaymentElementRequestSurfaceModule::class,
+        TapToAddModule::class,
     ],
 )
 internal interface EmbeddedCommonModule {

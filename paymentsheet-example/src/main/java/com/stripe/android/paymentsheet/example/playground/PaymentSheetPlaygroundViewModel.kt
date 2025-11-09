@@ -22,9 +22,12 @@ import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
+import com.stripe.android.paymentelement.CreateCardPresentSetupIntentResult
+import com.stripe.android.paymentelement.CreateTerminalSessionResult
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
+import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -37,6 +40,8 @@ import com.stripe.android.paymentsheet.example.playground.model.CreateSetupInten
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyResponse
+import com.stripe.android.paymentsheet.example.playground.network.CreateCardPresentSetupIntentRequester
+import com.stripe.android.paymentsheet.example.playground.network.CreateTerminalSessionRequester
 import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.network.SharedPaymentTokenPlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.Country
@@ -537,6 +542,53 @@ internal class PaymentSheetPlaygroundViewModel(
                 id = confirmationToken.id,
             ),
             playgroundState = playgroundState,
+        )
+    }
+
+    @OptIn(TapToAddPreview::class)
+    suspend fun createCardPresentSetupIntent(
+        customerId: String
+    ): CreateCardPresentSetupIntentResult {
+        val snapshot = state.value?.snapshot
+            ?: return CreateCardPresentSetupIntentResult.Failure(
+                cause = IllegalStateException("No payment playground state"),
+                displayMessage = "No payment playground state"
+            )
+
+        return CreateCardPresentSetupIntentRequester(snapshot, getApplication()).fetch(customerId).fold(
+            onSuccess = { clientSecret ->
+                CreateCardPresentSetupIntentResult.Success(clientSecret)
+            },
+            onFailure = { exception ->
+                CreateCardPresentSetupIntentResult.Failure(
+                    cause = IllegalStateException(exception),
+                    displayMessage = null
+                )
+            },
+        )
+    }
+
+    @OptIn(TapToAddPreview::class)
+    suspend fun createTerminalSession(): CreateTerminalSessionResult {
+        val snapshot = state.value?.snapshot
+            ?: return CreateTerminalSessionResult.Failure(
+                cause = IllegalStateException("No payment playground state"),
+                displayMessage = "No payment playground state"
+            )
+
+        return CreateTerminalSessionRequester(snapshot, getApplication()).fetch().fold(
+            onSuccess = { response ->
+                CreateTerminalSessionResult.Success(
+                    connectionToken = response.connectionToken,
+                    locationId = response.locationId,
+                )
+            },
+            onFailure = { exception ->
+                CreateTerminalSessionResult.Failure(
+                    cause = IllegalStateException(exception),
+                    displayMessage = null
+                )
+            },
         )
     }
 

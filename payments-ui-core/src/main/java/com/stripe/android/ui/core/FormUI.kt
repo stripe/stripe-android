@@ -238,7 +238,7 @@ private fun FormUIElement(
             ),
         )
         is OTPElement -> OTPElementUI(enabled, element)
-        is RenderableFormElement -> element.ComposeUI(enabled)
+        is RenderableFormElement -> element.ComposeUI(enabled, hiddenIdentifiers, lastTextFieldIdentifier)
     }
 }
 
