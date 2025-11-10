@@ -196,6 +196,7 @@ internal class PaymentSheetPage(
     }
 
     fun clickPrimaryButton() {
+        composeTestRule.waitForIdle()
         composeTestRule.waitUntil(5_000) {
             composeTestRule
                 .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()))
