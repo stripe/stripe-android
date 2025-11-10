@@ -3,6 +3,7 @@ package com.stripe.android.challenge.confirmation
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.testing.CoroutineTestRule
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -13,31 +14,27 @@ import java.io.IOException
 @RunWith(RobolectricTestRunner::class)
 internal class IntentConfirmationChallengeViewModelTest {
 
+    private val testDispatcher = UnconfinedTestDispatcher()
+
     @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
-    fun `initial state has showWebView as false`() {
+    fun `when Ready event is received, bridgeReady emits value`() = runTest {
         val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
         val viewModel = createViewModel(fakeBridgeHandler)
 
-        assertThat(viewModel.showWebView.value).isFalse()
-    }
-
-    @Test
-    fun `when Ready event is received, showWebView becomes true`() = runTest {
-        val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val viewModel = createViewModel(fakeBridgeHandler)
-
-        viewModel.showWebView.test {
+        viewModel.bridgeReady.test {
             // Initial state
-            assertThat(awaitItem()).isFalse()
+            expectNoEvents()
 
             // Emit Ready event
             fakeBridgeHandler.emitEvent(ConfirmationChallengeBridgeEvent.Ready)
 
-            // Should emit true
-            assertThat(awaitItem()).isTrue()
+            // Should emit value
+            awaitItem()
+
+            ensureAllEventsConsumed()
         }
     }
 
@@ -57,7 +54,7 @@ internal class IntentConfirmationChallengeViewModelTest {
             val successResult = result as IntentConfirmationChallengeActivityResult.Success
             assertThat(successResult.clientSecret).isEqualTo(expectedClientSecret)
 
-            expectNoEvents()
+            ensureAllEventsConsumed()
         }
     }
 
@@ -77,13 +74,14 @@ internal class IntentConfirmationChallengeViewModelTest {
             val failedResult = result as IntentConfirmationChallengeActivityResult.Failed
             assertThat(failedResult.error).isEqualTo(expectedError)
 
-            expectNoEvents()
+            ensureAllEventsConsumed()
         }
     }
 
     private fun createViewModel(
         bridgeHandler: ConfirmationChallengeBridgeHandler
     ) = IntentConfirmationChallengeViewModel(
-        bridgeHandler = bridgeHandler
+        bridgeHandler = bridgeHandler,
+        workContext = testDispatcher
     )
 }
