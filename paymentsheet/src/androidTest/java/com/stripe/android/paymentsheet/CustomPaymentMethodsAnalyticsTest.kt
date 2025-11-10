@@ -33,7 +33,7 @@ import kotlin.time.Duration.Companion.seconds
 class CustomPaymentMethodsAnalyticsTest {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
-        validationTimeout = 1.seconds, // Analytics requests happen async.
+        validationTimeout = 5.seconds, // Analytics requests happen async.
     )
     private val applicationContext = ApplicationProvider.getApplicationContext<Context>()
 

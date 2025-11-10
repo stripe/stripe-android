@@ -34,7 +34,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class EmbeddedPaymentElementAnalyticsTest {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
-        validationTimeout = 1.seconds, // Analytics requests happen async.
+        validationTimeout = 5.seconds, // Analytics requests happen async.
     )
     private val analyticEventRule = AnalyticEventRule()
 
