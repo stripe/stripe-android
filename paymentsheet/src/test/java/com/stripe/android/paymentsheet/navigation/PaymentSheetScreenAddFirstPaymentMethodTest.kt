@@ -12,6 +12,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import com.stripe.android.R as PaymentsCoreR
 
 internal class PaymentSheetScreenAddFirstPaymentMethodTest {
     @get:Rule
@@ -48,12 +49,12 @@ internal class PaymentSheetScreenAddFirstPaymentMethodTest {
         val interactor = FakeAddPaymentMethodInteractor(state)
         PaymentSheetScreen.AddFirstPaymentMethod(interactor)
             .title(isCompleteFlow = false, isWalletEnabled = false).test {
-                assertThat(awaitItem()).isEqualTo(null)
+                assertThat(awaitItem()).isEqualTo(PaymentsCoreR.string.stripe_title_add_a_card.resolvableString)
             }
     }
 
     @Test
-    fun `title returns choose payment method with non card one supported payment method`() = runTest {
+    fun `title returns null with non card one supported payment method`() = runTest {
         val state = createState(
             metadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
