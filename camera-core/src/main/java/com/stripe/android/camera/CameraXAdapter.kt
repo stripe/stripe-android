@@ -1,10 +1,17 @@
 package com.stripe.android.camera
 
 import android.app.Activity
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.graphics.PointF
 import android.graphics.Rect
+import android.hardware.camera2.CameraCaptureSession
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
+import android.hardware.camera2.CaptureRequest
+import android.hardware.camera2.CaptureResult
+import android.hardware.camera2.TotalCaptureResult
 import android.os.Build
 import android.os.Handler
 import android.renderscript.RenderScript
@@ -14,6 +21,8 @@ import android.util.Size
 import android.view.ViewGroup
 import androidx.annotation.CheckResult
 import androidx.annotation.RestrictTo
+import androidx.camera.camera2.interop.Camera2CameraInfo
+import androidx.camera.camera2.interop.Camera2Interop
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.DisplayOrientedMeteringPointFactory
@@ -29,6 +38,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.camera.framework.exception.ImageTypeNotSupportedException
 import com.stripe.android.camera.framework.image.NV21Image
 import com.stripe.android.camera.framework.image.getRenderScript
+import com.stripe.android.camera.framework.util.NANOS_PER_MILLI
 import com.stripe.android.camera.framework.util.mapArray
 import com.stripe.android.camera.framework.util.mapToIntArray
 import com.stripe.android.camera.framework.util.size
@@ -179,6 +189,10 @@ class CameraXAdapter(
     private val cameraProviderFuture = ProcessCameraProvider.getInstance(activity)
     private lateinit var lifecycleOwner: LifecycleOwner
 
+    // latest camera metadata from analyzer frames
+    private var latestExposureIso: Float? = null
+    private var latestExposureDuration: Long? = null
+
     private val cameraListeners = mutableListOf<(Camera) -> Unit>()
 
     /** Blocking camera operations are performed using this executor */
@@ -222,6 +236,7 @@ class CameraXAdapter(
         }
     }
 
+    @androidx.camera.camera2.interop.ExperimentalCamera2Interop
     override fun changeCamera() {
         withCameraProvider {
             lensFacing = when {
@@ -256,6 +271,45 @@ class CameraXAdapter(
         }
     }
 
+    @androidx.camera.camera2.interop.ExperimentalCamera2Interop
+    fun getFocalLength(): Float? {
+        return runCatching {
+            val camId = Camera2CameraInfo.from(requireNotNull(camera).cameraInfo).cameraId
+            val cm = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+            val chars = cm.getCameraCharacteristics(camId)
+            chars.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.firstOrNull()
+        }.getOrNull()
+    }
+
+    /** Return current exposure ISO if available. May be null if not yet measured. */
+    fun getExposureIso(): Float? {
+        return latestExposureIso
+    }
+
+    /** Return current exposure duration in milliseconds if available. May be null if not yet measured. */
+    fun getExposureDuration(): Long? {
+        return latestExposureDuration?.let { it / NANOS_PER_MILLI }
+    }
+
+    /**
+     * Return whether the current camera is a virtual/logical camera (combining multiple physical cameras).
+     * Returns true if it's a logical multi-camera, false if it's a single physical camera, null if unknown.
+     */
+    @androidx.camera.camera2.interop.ExperimentalCamera2Interop
+    fun isVirtualCamera(): Boolean? {
+        return runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                val camId = Camera2CameraInfo.from(requireNotNull(camera).cameraInfo).cameraId
+                val cm = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+                val chars = cm.getCameraCharacteristics(camId)
+                val capabilities = chars.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES) ?: intArrayOf()
+                capabilities.contains(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA)
+            } else {
+                null
+            }
+        }.getOrNull()
+    }
+
     override fun setFocus(point: PointF) {
         camera?.let { cam ->
             val meteringPointFactory = DisplayOrientedMeteringPointFactory(
@@ -271,6 +325,7 @@ class CameraXAdapter(
         }
     }
 
+    @androidx.camera.camera2.interop.ExperimentalCamera2Interop
     override fun onCreate() {
         // Initialize our background executor
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -306,6 +361,7 @@ class CameraXAdapter(
         }
     }
 
+    @androidx.camera.camera2.interop.ExperimentalCamera2Interop
     private fun setUpCamera() {
         withCameraProvider {
             lensFacing = if (startWithBackCamera && hasBackCamera(it)) {
@@ -323,6 +379,7 @@ class CameraXAdapter(
     }
 
     @Synchronized
+    @androidx.camera.camera2.interop.ExperimentalCamera2Interop
     private fun bindCameraUseCases(cameraProvider: ProcessCameraProvider) {
         // CameraSelector
         val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
@@ -332,11 +389,26 @@ class CameraXAdapter(
             .setTargetResolution(previewView.size())
             .build()
 
-        imageAnalyzer = ImageAnalysis.Builder()
+        val analysisBuilder = ImageAnalysis.Builder()
             .setTargetRotation(displayRotation)
             .setTargetResolution(minimumResolution.resolutionToSize(displaySize))
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .setImageQueueDepth(1)
+        runCatching {
+            Camera2Interop.Extender(analysisBuilder).setSessionCaptureCallback(
+                object : CameraCaptureSession.CaptureCallback() {
+                    override fun onCaptureCompleted(
+                        session: CameraCaptureSession,
+                        request: CaptureRequest,
+                        result: TotalCaptureResult
+                    ) {
+                        latestExposureIso = result.get(CaptureResult.SENSOR_SENSITIVITY)?.toFloat()
+                        latestExposureDuration = result.get(CaptureResult.SENSOR_EXPOSURE_TIME)
+                    }
+                }
+            )
+        }
+        imageAnalyzer = analysisBuilder
             .build()
             .also { analysis ->
                 analysis.setAnalyzer(
@@ -347,13 +419,17 @@ class CameraXAdapter(
                     image.close()
                     sendImageToStream(
                         CameraPreviewImage(
-                            bitmap,
-                            Rect(
+                            image = bitmap,
+                            viewBounds = Rect(
                                 previewView.left,
                                 previewView.top,
                                 previewView.width,
                                 previewView.height
-                            )
+                            ),
+                            exposureIso = latestExposureIso,
+                            focalLength = getFocalLength(),
+                            exposureDurationNs = latestExposureDuration,
+                            isVirtualCamera = this.isVirtualCamera()
                         )
                     )
                 }
