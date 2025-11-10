@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
 import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpdater
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
@@ -74,6 +75,10 @@ internal abstract class PaymentSheetCommonModule {
     @Singleton
     @Binds
     abstract fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
+
+    @Binds
+    @Singleton
+    abstract fun bindsLoadingReporter(eventReporter: DefaultEventReporter): LoadingEventReporter
 
     @Binds
     abstract fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
