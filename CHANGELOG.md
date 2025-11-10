@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 22.1.0 - 2025-11-10
+
 * [UPDATED][11893](https://github.com/stripe/stripe-android/pull/11893) Update `compileSdkVersion` and `targetSdkVersion` to 35 following changes to [Target API level requirements for Google Play apps](https://support.google.com/googleplay/android-developer/answer/11926878?hl=en).
 
 ## 22.0.0 - 2025-11-03
