@@ -105,7 +105,6 @@ internal class FormActivityScreenShotTest {
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = OnClickDelegateOverrideImpl(),
             eventReporter = FakeEventReporter(),
-            confirmationSaver = {},
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -115,10 +114,12 @@ internal class FormActivityScreenShotTest {
             selectedPaymentMethodCode = "",
         )
         val eventReporter = FakeEventReporter()
+        val initializationMode = EmbeddedConfirmationStateFixtures.defaultState().initializationMode
         val interactor = EmbeddedFormInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
             paymentMethodCode = "card",
             hasSavedPaymentMethods = false,
+            initializationMode = initializationMode,
             embeddedSelectionHolder = selectionHolder,
             embeddedFormHelperFactory = formHelperFactory,
             viewModelScope = TestScope(UnconfinedTestDispatcher()),

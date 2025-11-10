@@ -10,6 +10,7 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Compan
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
@@ -27,7 +28,8 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val formActivityStateHelper: FormActivityStateHelper,
-    private val eventReporter: EventReporter
+    private val eventReporter: EventReporter,
+    private val initializationMode: PaymentElementLoader.InitializationMode,
 ) {
     fun create(): DefaultVerticalModeFormInteractor {
         val formHelper = embeddedFormHelperFactory.create(
@@ -47,6 +49,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
             setSelection = embeddedSelectionHolder::set,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
+            initializationMode = initializationMode,
             onAnalyticsEvent = eventReporter::onUsBankAccountFormEvent,
             onMandateTextChanged = { mandateText, _ ->
                 formActivityStateHelper.updateMandate(mandateText)

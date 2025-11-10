@@ -167,7 +167,6 @@ internal class DefaultEmbeddedConfirmationHelperTest {
             confirmationStarter = EmbeddedConfirmationStarter(
                 confirmationHandler = confirmationHandler,
                 coroutineScope = backgroundScope,
-                confirmationSaver = {},
             ),
             activityResultCaller = mock(),
             lifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined),

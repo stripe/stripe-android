@@ -496,7 +496,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             addAll(currentDisplayablePaymentMethodCodes)
         }
 
-        println(output)
         return output
     }
 

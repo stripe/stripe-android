@@ -138,6 +138,7 @@ internal class USBankAccountFormArguments(
             hostedSurface: String,
             setSelection: (PaymentSelection?) -> Unit,
             hasSavedPaymentMethods: Boolean,
+            initializationMode: PaymentElementLoader.InitializationMode,
             onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
             onAnalyticsEvent: (USBankAccountFormViewModel.AnalyticsEvent) -> Unit,
             onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
@@ -157,12 +158,16 @@ internal class USBankAccountFormArguments(
                     paymentMethodMetadata.paymentMethodIncentive
                 )
             )
+            val onBehalfOf = (initializationMode as? PaymentElementLoader.InitializationMode.DeferredIntent)
+                ?.intentConfiguration
+                ?.onBehalfOf
+
             return USBankAccountFormArguments(
                 showCheckbox = isSaveForFutureUseValueChangeable && instantDebits.not(),
                 hostedSurface = hostedSurface,
                 instantDebits = instantDebits,
                 linkMode = paymentMethodMetadata.linkMode,
-                onBehalfOf = null,
+                onBehalfOf = onBehalfOf,
                 isCompleteFlow = false,
                 isPaymentFlow = paymentMethodMetadata.stripeIntent is PaymentIntent,
                 stripeIntentId = paymentMethodMetadata.stripeIntent.id,

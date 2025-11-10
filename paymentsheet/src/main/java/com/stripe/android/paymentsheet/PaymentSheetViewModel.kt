@@ -26,7 +26,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
@@ -55,7 +54,6 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
-import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -82,7 +80,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     eventReporter: EventReporter,
     private val paymentElementLoader: PaymentElementLoader,
     customerRepository: CustomerRepository,
-    private val prefsRepository: PrefsRepository,
     private val logger: Logger,
     @IOContext workContext: CoroutineContext,
     savedStateHandle: SavedStateHandle,
@@ -267,7 +264,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             // If we just received a transaction result after process death, we don't error. Instead, we dismiss
             // PaymentSheet and return a `Completed` result to the caller.
             handlePaymentCompleted(
-                intent = pendingResult.intent,
                 deferredIntentConfirmationType = pendingResult.deferredIntentConfirmationType,
                 isConfirmationToken = pendingResult.isConfirmationToken,
                 finishImmediately = true,
@@ -566,7 +562,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun handlePaymentCompleted(
-        intent: StripeIntent,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         finishImmediately: Boolean,
         isConfirmationToken: Boolean
@@ -585,22 +580,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             linkHandler.logOut()
         }
 
-        /*
-         * Sets current selection as default payment method in future payment sheet usage. New payment
-         * methods are only saved if the payment sheet is in setup mode, is in payment intent with setup
-         * for usage, or the customer has requested the payment method be saved.
-         */
-        when (currentSelection) {
-            is PaymentSelection.New -> intent.paymentMethod.takeIf {
-                currentSelection.canSave(args.initializationMode)
-            }?.let { method ->
-                PaymentSelection.Saved(method)
-            }
-            else -> currentSelection
-        }?.let {
-            prefsRepository.savePaymentSelection(it)
-        }
-
         inProgressSelection = null
 
         if (finishImmediately) {
@@ -615,7 +594,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun processConfirmationResult(result: ConfirmationHandler.Result?) {
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> handlePaymentCompleted(
-                intent = result.intent,
                 deferredIntentConfirmationType = result.deferredIntentConfirmationType,
                 isConfirmationToken = result.isConfirmationToken,
                 finishImmediately = false,

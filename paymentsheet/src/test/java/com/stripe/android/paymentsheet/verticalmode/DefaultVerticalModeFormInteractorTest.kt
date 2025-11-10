@@ -249,7 +249,6 @@ internal class DefaultVerticalModeFormInteractorTest {
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = OnClickDelegateOverrideImpl(),
             eventReporter = FakeEventReporter(),
-            confirmationSaver = {},
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -259,10 +258,12 @@ internal class DefaultVerticalModeFormInteractorTest {
             selectedPaymentMethodCode = "",
         )
         val eventReporter = FakeEventReporter()
+        val initializationMode = EmbeddedConfirmationStateFixtures.defaultState().initializationMode
         val setAsDefaultInteractor = EmbeddedFormInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
             paymentMethodCode = "card",
             hasSavedPaymentMethods = hasSavedPaymentMethods,
+            initializationMode = initializationMode,
             embeddedSelectionHolder = selectionHolder,
             embeddedFormHelperFactory = formHelperFactory,
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
@@ -299,7 +300,6 @@ internal class DefaultVerticalModeFormInteractorTest {
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = OnClickDelegateOverrideImpl(),
             eventReporter = FakeEventReporter(),
-            confirmationSaver = {},
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -309,10 +309,12 @@ internal class DefaultVerticalModeFormInteractorTest {
             selectedPaymentMethodCode = selectedPaymentMethodCode,
         )
         val eventReporter = FakeEventReporter()
+        val initializationMode = EmbeddedConfirmationStateFixtures.defaultState().initializationMode
         val setAsDefaultInteractor = EmbeddedFormInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
             paymentMethodCode = selectedPaymentMethodCode,
             hasSavedPaymentMethods = false,
+            initializationMode = initializationMode,
             embeddedSelectionHolder = selectionHolder,
             embeddedFormHelperFactory = formHelperFactory,
             viewModelScope = TestScope(UnconfinedTestDispatcher()),

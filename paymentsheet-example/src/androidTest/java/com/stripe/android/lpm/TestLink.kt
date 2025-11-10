@@ -11,7 +11,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.LinkType
 import com.stripe.android.paymentsheet.example.playground.settings.LinkTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -24,7 +23,6 @@ internal class TestLink : BasePlaygroundTest() {
         testDriver.confirmWithBankAccountInLink(testParameters)
     }
 
-    @Ignore("Disabled due to #ir-draft-remote")
     @Test
     fun testLinkPaymentWithBankAccountInPassthroughMode() {
         val testParameters = makeLinkTestParameters(passthroughMode = true)

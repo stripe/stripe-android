@@ -19,7 +19,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.paymentmethodoptions.setupfutureusage.toJsonObjectString
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -681,7 +680,136 @@ internal class ElementsSessionRepositoryTest {
                             currency = "usd",
                             setupFutureUsage = null,
                             captureMethod = PaymentIntent.CaptureMethod.Automatic,
-                            paymentMethodOptionsJsonString = paymentMethodOptions.toJsonObjectString()
+                            paymentMethodOptionsJsonString = """
+                                {"card":{"setup_future_usage":"on_session"},"affirm":{"setup_future_usage":"none"},"amazon_pay":{"setup_future_usage":"off_session"}}
+                            """.trimIndent(),
+                        ),
+                        paymentMethodTypes = listOf(),
+                        paymentMethodConfigurationId = null,
+                        onBehalfOf = null
+                    ),
+                    externalPaymentMethods = emptyList(),
+                    customPaymentMethods = listOf(),
+                    savedPaymentMethodSelectionId = null,
+                    mobileSessionId = MOBILE_SESSION_ID,
+                    appId = APP_ID,
+                    link = ElementsSessionParams.Link(disallowFundingSourceCreation = emptySet()),
+                )
+            ),
+            options = any()
+        )
+    }
+
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    @Test
+    fun `Verify PMO SFU + requireCvcRecollection params are passed to 'StripeRepository'`() = runTest {
+        whenever(stripeRepository.retrieveElementsSession(any(), any())).thenReturn(
+            Result.success(
+                ElementsSession.createFromFallback(
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                    sessionsError = null,
+                )
+            )
+        )
+
+        val paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
+            setupFutureUsageValues = mapOf(
+                PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
+                PaymentMethod.Type.Affirm to PaymentSheet.IntentConfiguration.SetupFutureUse.None,
+                PaymentMethod.Type.AmazonPay
+                    to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+            )
+        )
+
+        createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1000,
+                        currency = "usd",
+                        setupFutureUse = null,
+                        paymentMethodOptions = paymentMethodOptions,
+                    ),
+                    requireCvcRecollection = true,
+                ),
+            ),
+            customer = null,
+            customPaymentMethods = listOf(),
+            externalPaymentMethods = listOf(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+        ).getOrThrow()
+
+        verify(stripeRepository).retrieveElementsSession(
+            params = eq(
+                ElementsSessionParams.DeferredIntentType(
+                    deferredIntentParams = DeferredIntentParams(
+                        mode = DeferredIntentParams.Mode.Payment(
+                            amount = 1000,
+                            currency = "usd",
+                            setupFutureUsage = null,
+                            captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                            paymentMethodOptionsJsonString = """
+                                {"card":{"setup_future_usage":"on_session","require_cvc_recollection":"true"},"affirm":{"setup_future_usage":"none"},"amazon_pay":{"setup_future_usage":"off_session"}}
+                            """.trimIndent()
+                        ),
+                        paymentMethodTypes = listOf(),
+                        paymentMethodConfigurationId = null,
+                        onBehalfOf = null
+                    ),
+                    externalPaymentMethods = emptyList(),
+                    customPaymentMethods = listOf(),
+                    savedPaymentMethodSelectionId = null,
+                    mobileSessionId = MOBILE_SESSION_ID,
+                    appId = APP_ID,
+                    link = ElementsSessionParams.Link(disallowFundingSourceCreation = emptySet()),
+                )
+            ),
+            options = any()
+        )
+    }
+
+    @Test
+    fun `Verify requireCvcRecollection param is passed to 'StripeRepository'`() = runTest {
+        whenever(stripeRepository.retrieveElementsSession(any(), any())).thenReturn(
+            Result.success(
+                ElementsSession.createFromFallback(
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                    sessionsError = null,
+                )
+            )
+        )
+
+        createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1000,
+                        currency = "usd",
+                        setupFutureUse = null,
+                    ),
+                    requireCvcRecollection = true,
+                ),
+            ),
+            customer = null,
+            customPaymentMethods = listOf(),
+            externalPaymentMethods = listOf(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+        ).getOrThrow()
+
+        verify(stripeRepository).retrieveElementsSession(
+            params = eq(
+                ElementsSessionParams.DeferredIntentType(
+                    deferredIntentParams = DeferredIntentParams(
+                        mode = DeferredIntentParams.Mode.Payment(
+                            amount = 1000,
+                            currency = "usd",
+                            setupFutureUsage = null,
+                            captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                            paymentMethodOptionsJsonString = """
+                                {"card":{"require_cvc_recollection":"true"}}
+                            """.trimIndent()
                         ),
                         paymentMethodTypes = listOf(),
                         paymentMethodConfigurationId = null,

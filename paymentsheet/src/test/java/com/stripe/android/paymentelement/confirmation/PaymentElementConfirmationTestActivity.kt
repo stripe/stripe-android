@@ -39,6 +39,8 @@ import com.stripe.android.paymentelement.confirmation.injection.PaymentElementCo
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
+import com.stripe.android.paymentsheet.FakePrefsRepository
+import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
@@ -222,5 +224,12 @@ internal interface PaymentElementConfirmationTestModule {
         fun providesLinkEventsReporter(): LinkEventsReporter = FakeLinkEventsReporterForConfirmation(
             FakeLinkEventsReporter()
         )
+
+        @Provides
+        fun providePrefsRepositoryFactory(): PrefsRepository.Factory {
+            return PrefsRepository.Factory {
+                FakePrefsRepository()
+            }
+        }
     }
 }

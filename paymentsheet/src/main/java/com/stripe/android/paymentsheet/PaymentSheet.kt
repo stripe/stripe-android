@@ -1389,45 +1389,72 @@ class PaymentSheet internal constructor(
                     @Parcelize
                     @Poko
                     class Colors(
-                        /**
-                         * The color of the separator line between rows.
-                         */
                         @ColorInt
                         internal val separatorColor: Int,
-
-                        /**
-                         * The color of the radio button when selected.
-                         */
                         @ColorInt
                         internal val selectedColor: Int,
-
-                        /**
-                         * The color of the radio button when unselected.
-                         */
                         @ColorInt
                         internal val unselectedColor: Int,
-                    ) : Parcelable
+                    ) : Parcelable {
+
+                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                        class Builder {
+                            private var separatorColor: Int? = null
+                            private var selectedColor: Int? = null
+                            private var unselectedColor: Int? = null
+
+                            /**
+                             * The color of the separator line between rows.
+                             */
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun separatorColor(@ColorInt color: Int) = apply {
+                                this.separatorColor = color
+                            }
+
+                            /**
+                             * The color of the radio button when selected.
+                             */
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun selectedColor(@ColorInt color: Int) = apply {
+                                this.selectedColor = color
+                            }
+
+                            /**
+                             * The color of the radio button when unselected.
+                             */
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun unselectedColor(@ColorInt color: Int) = apply {
+                                this.unselectedColor = color
+                            }
+
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun buildLight(): Colors {
+                                return Colors(
+                                    separatorColor = separatorColor
+                                        ?: StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
+                                    selectedColor = selectedColor
+                                        ?: StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
+                                    unselectedColor = unselectedColor
+                                        ?: StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb()
+                                )
+                            }
+
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun buildDark(): Colors {
+                                return Colors(
+                                    separatorColor = separatorColor
+                                        ?: StripeThemeDefaults.radioColorsDark.separatorColor.toArgb(),
+                                    selectedColor = selectedColor
+                                        ?: StripeThemeDefaults.radioColorsDark.selectedColor.toArgb(),
+                                    unselectedColor = unselectedColor
+                                        ?: StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
+                                )
+                            }
+                        }
+                    }
 
                     internal companion object {
-                        val default = FlatWithRadio(
-                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                            additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
-                            horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp,
-                            colorsLight = Colors(
-                                separatorColor = StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
-                                selectedColor = StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
-                                unselectedColor = StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb()
-                            ),
-                            colorsDark = Colors(
-                                separatorColor = StripeThemeDefaults.radioColorsDark.separatorColor.toArgb(),
-                                selectedColor = StripeThemeDefaults.radioColorsDark.selectedColor.toArgb(),
-                                unselectedColor = StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
-                            ),
-                        )
+                        val default: FlatWithRadio = Builder().build()
                     }
 
                     class Builder {
@@ -1439,16 +1466,8 @@ class PaymentSheet internal constructor(
                         private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
                             .additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
-                        private var colorsLight = Colors(
-                            separatorColor = StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
-                            selectedColor = StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
-                            unselectedColor = StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb()
-                        )
-                        private var colorsDark = Colors(
-                            separatorColor = StripeThemeDefaults.radioColorsDark.separatorColor.toArgb(),
-                            selectedColor = StripeThemeDefaults.radioColorsDark.selectedColor.toArgb(),
-                            unselectedColor = StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
-                        )
+                        private var colorsLight = Colors.Builder().buildLight()
+                        private var colorsDark = Colors.Builder().buildDark()
 
                         /**
                          * The thickness of the separator line between rows.
@@ -1548,42 +1567,61 @@ class PaymentSheet internal constructor(
                     @Parcelize
                     @Poko
                     class Colors(
-                        /**
-                         * The color of the separator line between rows.
-                         */
                         @ColorInt
                         internal val separatorColor: Int,
-
-                        /**
-                         * The color of the checkmark.
-                         */
                         @ColorInt
                         internal val checkmarkColor: Int,
-                    ) : Parcelable
+                    ) : Parcelable {
+
+                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                        class Builder {
+                            private var separatorColor: Int? = null
+                            private var checkmarkColor: Int? = null
+
+                            /**
+                             * The color of the separator line between rows.
+                             */
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun separatorColor(@ColorInt color: Int) = apply {
+                                this.separatorColor = color
+                            }
+
+                            /**
+                             * The color of the checkmark.
+                             */
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun checkmarkColor(@ColorInt color: Int) = apply {
+                                this.checkmarkColor = color
+                            }
+
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun buildLight(): Colors {
+                                return Colors(
+                                    separatorColor = separatorColor
+                                        ?: StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
+                                    checkmarkColor = checkmarkColor
+                                        ?: StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb()
+                                )
+                            }
+
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun buildDark(): Colors {
+                                return Colors(
+                                    separatorColor = separatorColor
+                                        ?: StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb(),
+                                    checkmarkColor = checkmarkColor
+                                        ?: StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb()
+                                )
+                            }
+                        }
+                    }
 
                     override fun hasSeparators() = true
                     override fun startSeparatorHasDefaultInset() = false
                     internal fun getColors(isDark: Boolean): Colors = if (isDark) colorsDark else colorsLight
 
                     internal companion object {
-                        val default = FlatWithCheckmark(
-                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                            checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
-                            additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
-                            horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp,
-                            colorsLight = Colors(
-                                separatorColor = StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
-                                checkmarkColor = StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb()
-                            ),
-                            colorsDark = Colors(
-                                separatorColor = StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb(),
-                                checkmarkColor = StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb()
-                            )
-                        )
+                        val default: FlatWithCheckmark = Builder().build()
                     }
 
                     class Builder {
@@ -1596,14 +1634,8 @@ class PaymentSheet internal constructor(
                         private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
                             .additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
-                        private var colorsLight = Colors(
-                            separatorColor = StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
-                            checkmarkColor = StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb(),
-                        )
-                        private var colorsDark = Colors(
-                            separatorColor = StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb(),
-                            checkmarkColor = StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb(),
-                        )
+                        private var colorsLight = Colors.Builder().buildLight()
+                        private var colorsDark = Colors.Builder().buildDark()
 
                         /**
                          * The thickness of the separator line between rows.
@@ -1780,43 +1812,61 @@ class PaymentSheet internal constructor(
                     @Parcelize
                     @Poko
                     class Colors(
-                        /**
-                         * The color of the separator line between rows.
-                         */
                         @ColorInt
                         internal val separatorColor: Int,
-
-                        /**
-                         * The color of the disclosure icon.
-                         */
                         @ColorInt
                         internal val disclosureColor: Int,
-                    ) : Parcelable
+                    ) : Parcelable {
+
+                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                        class Builder {
+                            private var separatorColor: Int? = null
+                            private var disclosureColor: Int? = null
+
+                            /**
+                             * The color of the separator line between rows.
+                             */
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun separatorColor(@ColorInt color: Int) = apply {
+                                this.separatorColor = color
+                            }
+
+                            /**
+                             * The color of the disclosure icon.
+                             */
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun disclosureColor(@ColorInt color: Int) = apply {
+                                this.disclosureColor = color
+                            }
+
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun buildLight(): Colors {
+                                return Colors(
+                                    separatorColor = separatorColor
+                                        ?: StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
+                                    disclosureColor = disclosureColor
+                                        ?: StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
+                                )
+                            }
+
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            fun buildDark(): Colors {
+                                return Colors(
+                                    separatorColor = separatorColor
+                                        ?: StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
+                                    disclosureColor = disclosureColor
+                                        ?: StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
+                                )
+                            }
+                        }
+                    }
 
                     override fun hasSeparators() = true
                     override fun startSeparatorHasDefaultInset() = false
                     internal fun getColors(isDark: Boolean): Colors = if (isDark) colorsDark else colorsLight
 
                     internal companion object {
-                        val default = FlatWithDisclosure(
-                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                            additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
-                            horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp,
-                            colorsLight = Colors(
-                                separatorColor = StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
-                                disclosureColor = StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
-                            ),
-                            colorsDark = Colors(
-                                separatorColor = StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
-                                disclosureColor = StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
-
-                            ),
-                            disclosureIconRes = R.drawable.stripe_ic_chevron_right
-                        )
+                        val default: FlatWithDisclosure = Builder().build()
                     }
 
                     class Builder {
@@ -1828,14 +1878,8 @@ class PaymentSheet internal constructor(
                         private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
                             .additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
-                        private var colorsLight = Colors(
-                            separatorColor = StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
-                            disclosureColor = StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
-                        )
-                        private var colorsDark = Colors(
-                            separatorColor = StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
-                            disclosureColor = StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
-                        )
+                        private var colorsLight = Colors.Builder().buildLight()
+                        private var colorsDark = Colors.Builder().buildDark()
                         private var disclosureIconRes: Int = R.drawable.stripe_ic_chevron_right
 
                         /**
@@ -2059,70 +2103,26 @@ class PaymentSheet internal constructor(
     @Parcelize
     @Poko
     class Colors(
-        /**
-         * A primary color used throughout PaymentSheet.
-         */
         @ColorInt
         internal val primary: Int,
-
-        /**
-         * The color used for the surfaces (backgrounds) of PaymentSheet.
-         */
         @ColorInt
         internal val surface: Int,
-
-        /**
-         * The color used for the background of inputs, tabs, and other components.
-         */
         @ColorInt
         internal val component: Int,
-
-        /**
-         * The color used for borders of inputs, tabs, and other components.
-         */
         @ColorInt
         internal val componentBorder: Int,
-
-        /**
-         * The color of the divider lines used inside inputs, tabs, and other components.
-         */
         @ColorInt
         internal val componentDivider: Int,
-
-        /**
-         * The default color used for text and on other elements that live on components.
-         */
         @ColorInt
         internal val onComponent: Int,
-
-        /**
-         * The color used for items appearing over the background in Payment Sheet.
-         */
         @ColorInt
         internal val onSurface: Int,
-
-        /**
-         * The color used for text of secondary importance.
-         * For example, this color is used for the label above input fields.
-         */
         @ColorInt
         internal val subtitle: Int,
-
-        /**
-         * The color used for input placeholder text.
-         */
         @ColorInt
         internal val placeholderText: Int,
-
-        /**
-         * The color used for icons in PaymentSheet, such as the close or back icons.
-         */
         @ColorInt
         internal val appBarIcon: Int,
-
-        /**
-         * A color used to indicate errors or destructive actions in PaymentSheet.
-         */
         @ColorInt
         internal val error: Int
     ) : Parcelable {
@@ -2151,6 +2151,288 @@ class PaymentSheet internal constructor(
             appBarIcon = appBarIcon.toArgb(),
             error = error.toArgb()
         )
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Suppress("TooManyFunctions")
+        class Builder {
+            @ColorInt private var primary: Int? = null
+
+            @ColorInt private var surface: Int? = null
+
+            @ColorInt private var component: Int? = null
+
+            @ColorInt private var componentBorder: Int? = null
+
+            @ColorInt private var componentDivider: Int? = null
+
+            @ColorInt private var onComponent: Int? = null
+
+            @ColorInt private var subtitle: Int? = null
+
+            @ColorInt private var placeholderText: Int? = null
+
+            @ColorInt private var onSurface: Int? = null
+
+            @ColorInt private var appBarIcon: Int? = null
+
+            @ColorInt private var error: Int? = null
+
+            /**
+             * The primary color used throughout PaymentSheet.
+             *
+             * @param color The primary [Color].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun primary(color: Color) = apply {
+                this.primary = color.toArgb()
+            }
+
+            /**
+             * The primary color used throughout PaymentSheet.
+             *
+             * @param color The primary color as an [ColorInt].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun primary(@ColorInt color: Int) = apply {
+                this.primary = color
+            }
+
+            /**
+             * The color used for the surfaces (backgrounds) of PaymentSheet.
+             *
+             * @param color The surface [Color].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun surface(color: Color) = apply {
+                this.surface = color.toArgb()
+            }
+
+            /**
+             * The color used for the surfaces (backgrounds) of PaymentSheet.
+             *
+             * @param color The surface color as an [ColorInt].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun surface(@ColorInt color: Int) = apply {
+                this.surface = color
+            }
+
+            /**
+             * The color used for the background of inputs, tabs, and other components.
+             *
+             * @param color The component background [Color].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun component(color: Color) = apply {
+                this.component = color.toArgb()
+            }
+
+            /**
+             * The color used for the background of inputs, tabs, and other components.
+             *
+             * @param color The component background color as an [ColorInt].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun component(@ColorInt color: Int) = apply {
+                this.component = color
+            }
+
+            /**
+             * The color used for borders of inputs, tabs, and other components.
+             *
+             * @param color The component border [Color].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun componentBorder(color: Color) = apply {
+                this.componentBorder = color.toArgb()
+            }
+
+            /**
+             * The color used for borders of inputs, tabs, and other components.
+             *
+             * @param color The component border color as an [ColorInt].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun componentBorder(@ColorInt color: Int) = apply {
+                this.componentBorder = color
+            }
+
+            /**
+             * The color of the divider lines used inside inputs, tabs, and other components.
+             *
+             * @param color The component divider [Color].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun componentDivider(color: Color) = apply {
+                this.componentDivider = color.toArgb()
+            }
+
+            /**
+             * The color of the divider lines used inside inputs, tabs, and other components.
+             *
+             * @param color The component divider color as an [ColorInt].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun componentDivider(@ColorInt color: Int) = apply {
+                this.componentDivider = color
+            }
+
+            /**
+             * The default color used for text and on other elements that live on components.
+             *
+             * @param color The on-component [Color].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun onComponent(color: Color) = apply {
+                this.onComponent = color.toArgb()
+            }
+
+            /**
+             * The default color used for text and on other elements that live on components.
+             *
+             * @param color The on-component color as an [ColorInt].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun onComponent(@ColorInt color: Int) = apply {
+                this.onComponent = color
+            }
+
+            /**
+             * The color used for text of secondary importance.
+             * For example, this color is used for the label above input fields.
+             *
+             * @param color The subtitle [Color].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun subtitle(color: Color) = apply {
+                this.subtitle = color.toArgb()
+            }
+
+            /**
+             * The color used for text of secondary importance.
+             * For example, this color is used for the label above input fields.
+             *
+             * @param color The subtitle color as an [ColorInt].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun subtitle(@ColorInt color: Int) = apply {
+                this.subtitle = color
+            }
+
+            /**
+             * The color used for input placeholder text.
+             *
+             * @param color The placeholder text [Color].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun placeholderText(color: Color) = apply {
+                this.placeholderText = color.toArgb()
+            }
+
+            /**
+             * The color used for input placeholder text.
+             *
+             * @param color The placeholder text color as an [ColorInt].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun placeholderText(@ColorInt color: Int) = apply {
+                this.placeholderText = color
+            }
+
+            /**
+             * The color used for items appearing over the background in Payment Sheet.
+             *
+             * @param color The on-surface [Color].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun onSurface(color: Color) = apply {
+                this.onSurface = color.toArgb()
+            }
+
+            /**
+             * The color used for items appearing over the background in Payment Sheet.
+             *
+             * @param color The on-surface color as an [ColorInt].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun onSurface(@ColorInt color: Int) = apply {
+                this.onSurface = color
+            }
+
+            /**
+             * The color used for icons in PaymentSheet, such as the close or back icons.
+             *
+             * @param color The app bar icon [Color].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun appBarIcon(color: Color) = apply {
+                this.appBarIcon = color.toArgb()
+            }
+
+            /**
+             * The color used for icons in PaymentSheet, such as the close or back icons.
+             *
+             * @param color The app bar icon color as an [ColorInt].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun appBarIcon(@ColorInt color: Int) = apply {
+                this.appBarIcon = color
+            }
+
+            /**
+             * A color used to indicate errors or destructive actions in PaymentSheet.
+             *
+             * @param color The error [Color].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun error(color: Color) = apply {
+                this.error = color.toArgb()
+            }
+
+            /**
+             * A color used to indicate errors or destructive actions in PaymentSheet.
+             *
+             * @param color The error color as an [ColorInt].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun error(@ColorInt color: Int) = apply {
+                this.error = color
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun buildLight(): Colors {
+                return Colors(
+                    primary = primary ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
+                    surface = surface ?: StripeThemeDefaults.colorsLight.materialColors.surface.toArgb(),
+                    component = component ?: StripeThemeDefaults.colorsLight.component.toArgb(),
+                    componentBorder = componentBorder ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                    componentDivider = componentDivider ?: StripeThemeDefaults.colorsLight.componentDivider.toArgb(),
+                    onComponent = onComponent ?: StripeThemeDefaults.colorsLight.onComponent.toArgb(),
+                    subtitle = subtitle ?: StripeThemeDefaults.colorsLight.subtitle.toArgb(),
+                    placeholderText = placeholderText ?: StripeThemeDefaults.colorsLight.placeholderText.toArgb(),
+                    onSurface = onSurface ?: StripeThemeDefaults.colorsLight.materialColors.onSurface.toArgb(),
+                    appBarIcon = appBarIcon ?: StripeThemeDefaults.colorsLight.appBarIcon.toArgb(),
+                    error = error ?: StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
+                )
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun buildDark(): Colors {
+                return Colors(
+                    primary = primary ?: StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
+                    surface = surface ?: StripeThemeDefaults.colorsDark.materialColors.surface.toArgb(),
+                    component = component ?: StripeThemeDefaults.colorsDark.component.toArgb(),
+                    componentBorder = componentBorder ?: StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                    componentDivider = componentDivider ?: StripeThemeDefaults.colorsDark.componentDivider.toArgb(),
+                    onComponent = onComponent ?: StripeThemeDefaults.colorsDark.onComponent.toArgb(),
+                    subtitle = subtitle ?: StripeThemeDefaults.colorsDark.subtitle.toArgb(),
+                    placeholderText = placeholderText ?: StripeThemeDefaults.colorsDark.placeholderText.toArgb(),
+                    onSurface = onSurface ?: StripeThemeDefaults.colorsDark.materialColors.onSurface.toArgb(),
+                    appBarIcon = appBarIcon ?: StripeThemeDefaults.colorsDark.appBarIcon.toArgb(),
+                    error = error ?: StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
+                )
+            }
+        }
 
         companion object {
             internal fun configureDefaultLight(
@@ -2196,20 +2478,8 @@ class PaymentSheet internal constructor(
     @Parcelize
     @Poko
     class Shapes @AppearanceAPIAdditionsPreview constructor(
-        /**
-         * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
-         */
         internal val cornerRadiusDp: Float,
-
-        /**
-         * The border used for inputs, tabs, and other components in PaymentSheet.
-         */
         internal val borderStrokeWidthDp: Float,
-
-        /**
-         * The corner radius used for specifically for the sheets displayed by Payment Element. Be default, this is
-         * set to the same value as [cornerRadiusDp].
-         */
         internal val bottomSheetCornerRadiusDp: Float = cornerRadiusDp,
     ) : Parcelable {
         @OptIn(AppearanceAPIAdditionsPreview::class)
@@ -2240,35 +2510,149 @@ class PaymentSheet internal constructor(
             bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusDp),
         )
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Builder {
+            private var cornerRadiusDp: Float = StripeThemeDefaults.shapes.cornerRadius
+            private var borderStrokeWidthDp: Float = StripeThemeDefaults.shapes.borderStrokeWidth
+            private var bottomSheetCornerRadiusDp: Float? = null
+
+            /**
+             * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
+             *
+             * @param cornerRadiusDp The corner radius in dp.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun cornerRadiusDp(cornerRadiusDp: Float) = apply {
+                this.cornerRadiusDp = cornerRadiusDp
+            }
+
+            /**
+             * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
+             *
+             * @param cornerRadiusRes The corner radius resource ID.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun cornerRadiusDp(context: Context, @DimenRes cornerRadiusRes: Int) = apply {
+                this.cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusRes)
+            }
+
+            /**
+             * The border used for inputs, tabs, and other components in PaymentSheet.
+             *
+             * @param borderStrokeWidthDp The border width in dp.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun borderStrokeWidthDp(borderStrokeWidthDp: Float) = apply {
+                this.borderStrokeWidthDp = borderStrokeWidthDp
+            }
+
+            /**
+             * The border used for inputs, tabs, and other components in PaymentSheet.
+             *
+             * @param borderStrokeWidthRes The border width resource ID.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun borderStrokeWidthDp(context: Context, @DimenRes borderStrokeWidthRes: Int) = apply {
+                this.borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthRes)
+            }
+
+            /**
+             * The corner radius used for specifically for the sheets displayed by Payment Element. Be default, this is
+             * set to the same value as [cornerRadiusDp].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun bottomSheetCornerRadiusDp(bottomSheetCornerRadiusDp: Float) = apply {
+                this.bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp
+            }
+
+            /**
+             * The corner radius used for specifically for the sheets displayed by Payment Element. Be default, this is
+             * set to the same value as [cornerRadiusDp].
+             *
+             * @param bottomSheetCornerRadiusRes The bottom sheet corner radius resource ID.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun bottomSheetCornerRadiusDp(
+                context: Context,
+                @DimenRes bottomSheetCornerRadiusRes: Int
+            ) = apply {
+                this.bottomSheetCornerRadiusDp =
+                    context.getRawValueFromDimenResource(bottomSheetCornerRadiusRes)
+            }
+
+            @OptIn(AppearanceAPIAdditionsPreview::class)
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun build(): Shapes {
+                return Shapes(
+                    cornerRadiusDp = cornerRadiusDp,
+                    borderStrokeWidthDp = borderStrokeWidthDp,
+                    bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp ?: cornerRadiusDp,
+                )
+            }
+        }
+
         companion object {
-            val default = Shapes(
-                cornerRadiusDp = StripeThemeDefaults.shapes.cornerRadius,
-                borderStrokeWidthDp = StripeThemeDefaults.shapes.borderStrokeWidth
-            )
+            val default: Shapes = Builder().build()
         }
     }
 
     @Parcelize
     @Poko
     class Typography @AppearanceAPIAdditionsPreview constructor(
-        /**
-         * The scale factor for all fonts in PaymentSheet, the default value is 1.0.
-         * When this value increases fonts will increase in size and decrease when this value is lowered.
-         */
         internal val sizeScaleFactor: Float,
-
-        /**
-         * The font used in text. This should be a resource ID value.
-         */
         @FontRes
         internal val fontResId: Int?,
-
-        /**
-         * Custom font configuration for specific text styles
-         * Note: When set, these fonts override the default font calculations for their respective text styles
-         */
         internal val custom: Custom,
     ) : Parcelable {
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Builder {
+            private var sizeScaleFactor: Float = StripeThemeDefaults.typography.fontSizeMultiplier
+
+            @FontRes
+            private var fontResId: Int? = StripeThemeDefaults.typography.fontFamily
+
+            @OptIn(AppearanceAPIAdditionsPreview::class)
+            private var custom: Custom = Custom()
+
+            /**
+             * The scale factor for all fonts in PaymentSheet, the default value is 1.0.
+             * When this value increases fonts will increase in size and decrease when this value is lowered.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun sizeScaleFactor(sizeScaleFactor: Float) = apply {
+                this.sizeScaleFactor = sizeScaleFactor
+            }
+
+            /**
+             * The font used in text. This should be a resource ID value.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun fontResId(@FontRes fontResId: Int?) = apply {
+                this.fontResId = fontResId
+            }
+
+            /**
+             * Custom font configuration for specific text styles
+             * Note: When set, these fonts override the default font calculations for their respective text styles
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @OptIn(AppearanceAPIAdditionsPreview::class)
+            fun custom(custom: Custom) = apply {
+                this.custom = custom
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @OptIn(AppearanceAPIAdditionsPreview::class)
+            fun build(): Typography {
+                return Typography(
+                    sizeScaleFactor = sizeScaleFactor,
+                    fontResId = fontResId,
+                    custom = custom,
+                )
+            }
+        }
+
         @OptIn(AppearanceAPIAdditionsPreview::class)
         constructor(
             /**
@@ -2323,10 +2707,7 @@ class PaymentSheet internal constructor(
         ) : Parcelable
 
         companion object {
-            val default = Typography(
-                sizeScaleFactor = StripeThemeDefaults.typography.fontSizeMultiplier,
-                fontResId = StripeThemeDefaults.typography.fontFamily
-            )
+            val default: Typography = Builder().build()
         }
     }
 
@@ -2383,34 +2764,11 @@ class PaymentSheet internal constructor(
     @Parcelize
     @Poko
     class PrimaryButtonColors(
-        /**
-         * The background color of the primary button.
-         * Note: If 'null', {@link Colors#primary} is used.
-         */
-        @ColorInt
-        internal val background: Int?,
-        /**
-         * The color of the text and icon in the primary button.
-         */
-        @ColorInt
-        internal val onBackground: Int,
-        /**
-         * The border color of the primary button.
-         */
-        @ColorInt
-        internal val border: Int,
-        /**
-         * The background color for the primary button when in a success state. Defaults
-         * to base green background color.
-         */
-        @ColorInt
-        internal val successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
-        /**
-         * The success color for the primary button text when in a success state. Defaults
-         * to `onBackground`.
-         */
-        @ColorInt
-        internal val onSuccessBackgroundColor: Int = onBackground,
+        @ColorInt internal val background: Int?,
+        @ColorInt internal val onBackground: Int,
+        @ColorInt internal val border: Int,
+        @ColorInt internal val successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
+        @ColorInt internal val onSuccessBackgroundColor: Int = onBackground,
     ) : Parcelable {
         constructor(
             background: Int?,
@@ -2448,21 +2806,157 @@ class PaymentSheet internal constructor(
             onSuccessBackgroundColor = onSuccessBackgroundColor.toArgb(),
         )
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Suppress("TooManyFunctions")
+        class Builder {
+            @ColorInt private var background: Int? = null
+
+            @ColorInt private var onBackground: Int? = null
+
+            @ColorInt private var border: Int? = null
+
+            @ColorInt private var successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb()
+
+            @ColorInt private var onSuccessBackgroundColor: Int? = null
+
+            /**
+             * The background color of the primary button.
+             * Note: If 'null', {@link Colors#primary} is used.
+             *
+             * @param background The background color as an [ColorInt].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun background(@ColorInt background: Int?) = apply {
+                this.background = background
+            }
+
+            /**
+             * The background color of the primary button.
+             * Note: If 'null', {@link Colors#primary} is used.
+             *
+             * @param background The background [Color].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun background(background: Color?) = apply {
+                this.background = background?.toArgb()
+            }
+
+            /**
+             * The color of the text and icon in the primary button.
+             *
+             * @param onBackground The on-background color as an [ColorInt].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun onBackground(@ColorInt onBackground: Int) = apply {
+                this.onBackground = onBackground
+            }
+
+            /**
+             * The color of the text and icon in the primary button.
+             *
+             * @param onBackground The on-background [Color].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun onBackground(onBackground: Color) = apply {
+                this.onBackground = onBackground.toArgb()
+            }
+
+            /**
+             * The border color of the primary button.
+             *
+             * @param border The border color as an [ColorInt].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun border(@ColorInt border: Int) = apply {
+                this.border = border
+            }
+
+            /**
+             * The border color of the primary button.
+             *
+             * @param border The border [Color].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun border(border: Color) = apply {
+                this.border = border.toArgb()
+            }
+
+            /**
+             * The background color for the primary button when in a success state. Defaults
+             * to base green background color.
+             *
+             * @param successBackgroundColor The success background color as an [ColorInt].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun successBackgroundColor(@ColorInt successBackgroundColor: Int) = apply {
+                this.successBackgroundColor = successBackgroundColor
+            }
+
+            /**
+             * The background color for the primary button when in a success state. Defaults
+             * to base green background color.
+             *
+             * @param successBackgroundColor The success background [Color].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun successBackgroundColor(successBackgroundColor: Color) = apply {
+                this.successBackgroundColor = successBackgroundColor.toArgb()
+            }
+
+            /**
+             * The success color for the primary button text when in a success state. Defaults
+             * to `onBackground`.
+             *
+             * @param onSuccessBackgroundColor The on-success background color as an [ColorInt].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun onSuccessBackgroundColor(@ColorInt onSuccessBackgroundColor: Int) = apply {
+                this.onSuccessBackgroundColor = onSuccessBackgroundColor
+            }
+
+            /**
+             * The success color for the primary button text when in a success state. Defaults
+             * to `onBackground`.
+             *
+             * @param onSuccessBackgroundColor The on-success background [Color].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun onSuccessBackgroundColor(onSuccessBackgroundColor: Color) = apply {
+                this.onSuccessBackgroundColor = onSuccessBackgroundColor.toArgb()
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun buildLight(): PrimaryButtonColors {
+                return PrimaryButtonColors(
+                    background = background,
+                    onBackground = onBackground
+                        ?: StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                    border = border
+                        ?: StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
+                    successBackgroundColor = successBackgroundColor,
+                    onSuccessBackgroundColor = onSuccessBackgroundColor
+                        ?: (onBackground ?: StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb()),
+                )
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun buildDark(): PrimaryButtonColors {
+                return PrimaryButtonColors(
+                    background = background,
+                    onBackground = onBackground
+                        ?: StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+                    border = border
+                        ?: StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
+                    successBackgroundColor = successBackgroundColor,
+                    onSuccessBackgroundColor = onSuccessBackgroundColor
+                        ?: (onBackground ?: StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb()),
+                )
+            }
+        }
+
         companion object {
-            val defaultLight = PrimaryButtonColors(
-                background = null,
-                onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
-                successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.successBackground.toArgb(),
-                onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-            )
-            val defaultDark = PrimaryButtonColors(
-                background = null,
-                onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-                border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
-                successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.successBackground.toArgb(),
-                onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-            )
+            val defaultLight: PrimaryButtonColors = Builder().buildLight()
+            val defaultDark: PrimaryButtonColors = Builder().buildDark()
         }
     }
 

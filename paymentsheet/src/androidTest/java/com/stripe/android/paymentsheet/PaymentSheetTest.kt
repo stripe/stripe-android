@@ -12,6 +12,7 @@ import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.utils.IntegrationType
@@ -22,8 +23,10 @@ import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.paymentelementtestpages.FormPage
 import okhttp3.mockwebserver.SocketPolicy
+import org.json.JSONArray
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -455,6 +458,87 @@ internal class PaymentSheetTest {
         }
 
         page.fillCvcRecollection("123")
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testDeferredIntentWithCvcRecollection() = runPaymentSheetTest(
+        networkRule = networkRule,
+        resultCallback = ::assertCompleted,
+        builder = {
+            createIntentCallback { _, _ ->
+                CreateIntentResult.Success("pi_example_secret_example")
+            }
+        }
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+            query(urlEncode("deferred_intent[payment_method_options][card][require_cvc_recollection]"), "true")
+        ) { response ->
+            val cardsArray = JSONArray()
+
+            val cardPaymentMethodId = "pm_54545454"
+            cardsArray.put(PaymentMethodFactory.convertCardToJson(PaymentMethodFactory.card(cardPaymentMethodId)))
+
+            response.testBodyFromFile(
+                filename = "elements-sessions-deferred_intent_and_default_pms_enabled.json",
+                replacements = listOf(
+                    ResponseReplacement(
+                        "DEFAULT_PAYMENT_METHOD_HERE",
+                        "\"$cardPaymentMethodId\""
+                    ),
+                    ResponseReplacement(
+                        "[PAYMENT_METHODS_HERE]",
+                        cardsArray.toString(2),
+                    )
+                )
+            )
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 5000,
+                        currency = "USD"
+                    ),
+                    requireCvcRecollection = true,
+                ),
+                configuration = defaultConfiguration.newBuilder()
+                    .customer(
+                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "cus_1",
+                            clientSecret = "cuss_654321",
+                        )
+                    )
+                    .link(
+                        PaymentSheet.LinkConfiguration.Builder()
+                            .display(PaymentSheet.LinkConfiguration.Display.Never)
+                            .build()
+                    )
+                    .build(),
+            )
+        }
+
+        page.fillCvcRecollection("123")
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/payment_intents/pi_example"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
+        }
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            bodyPart(urlEncode("payment_method_options[card][cvc]"), "123")
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
         page.clickPrimaryButton()
     }
 
