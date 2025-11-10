@@ -121,6 +121,7 @@ class VerticalModePage(
     }
 
     fun clickViewMore() {
+        waitUntilVisible()
         composeTestRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClick()
     }
 

@@ -77,7 +77,8 @@ internal object DefaultPaymentMethodsUtils {
 
         if (paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Horizontal && hasSavedPaymentMethods) {
             composeTestRule.waitUntil(timeoutMillis = 5_000) {
-                composeTestRule.onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG)).fetchSemanticsNodes()
+                composeTestRule.onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
+                    .fetchSemanticsNodes(atLeastOneRootRequired = false)
                     .isNotEmpty()
             }
         }
