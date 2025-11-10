@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
 import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
+import com.stripe.android.paymentsheet.utils.isOnlyOneNonCardPaymentMethod
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenUI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
@@ -253,7 +254,7 @@ internal sealed interface PaymentSheetScreen {
 
         override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
             return interactor.state.mapAsStateFlow { state ->
-                if (isWalletEnabled) {
+                if (isWalletEnabled || state.supportedPaymentMethods.isOnlyOneNonCardPaymentMethod()) {
                     null
                 } else if (isCompleteFlow) {
                     R.string.stripe_paymentsheet_add_payment_method_title.resolvableString

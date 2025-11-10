@@ -6,6 +6,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -33,6 +34,34 @@ class VerticalModeInitialScreenFactoryTest {
     ) {
         assertThat(screens).hasSize(1)
         assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+    }
+
+    @Test
+    fun `showsWalletHeader is false for VerticalModeForm if no available wallets`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("cashapp"),
+            ),
+            availableWallets = listOf()
+        )
+    ) {
+        assertThat(screens).hasSize(1)
+        assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+        assertThat(screens[0].showsWalletsHeader(false).value).isFalse()
+    }
+
+    @Test
+    fun `showsWalletHeader is true for VerticalModeForm if available wallets exist`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("cashapp"),
+            ),
+            availableWallets = listOf(WalletType.Link)
+        )
+    ) {
+        assertThat(screens).hasSize(1)
+        assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+        assertThat(screens[0].showsWalletsHeader(false).value).isTrue()
     }
 
     @Test

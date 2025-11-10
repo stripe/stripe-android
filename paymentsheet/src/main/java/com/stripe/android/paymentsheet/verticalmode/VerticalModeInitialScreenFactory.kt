@@ -27,7 +27,7 @@ internal object VerticalModeInitialScreenFactory {
                         customerStateHolder = customerStateHolder,
                         bankFormInteractor = bankFormInteractor,
                     ),
-                    showsWalletHeader = true,
+                    showsWalletHeader = paymentMethodMetadata.availableWallets.isNotEmpty(),
                 )
             )
         }
