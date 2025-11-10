@@ -38,8 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodMessageImage
-import com.stripe.android.model.PaymentMethodMessageMultiPartner
-import com.stripe.android.model.PaymentMethodMessageSinglePartner
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.navigation.rememberKeyboardController
@@ -52,7 +50,7 @@ internal sealed class PaymentMethodMessagingContent {
     abstract fun Content(appearance: PaymentMethodMessagingElement.Appearance.State)
 
     class SinglePartner(
-        private val message: PaymentMethodMessageSinglePartner
+        private val message: PaymentMethodMessage.SinglePartner
     ) : PaymentMethodMessagingContent() {
         @Composable
         override fun Content(appearance: PaymentMethodMessagingElement.Appearance.State) {
@@ -61,7 +59,7 @@ internal sealed class PaymentMethodMessagingContent {
     }
 
     class MultiPartner(
-        private val message: PaymentMethodMessageMultiPartner
+        private val message: PaymentMethodMessage.MultiPartner
     ) : PaymentMethodMessagingContent() {
         @Composable
         override fun Content(appearance: PaymentMethodMessagingElement.Appearance.State) {
@@ -78,14 +76,11 @@ internal sealed class PaymentMethodMessagingContent {
 
     companion object {
         fun get(message: PaymentMethodMessage): PaymentMethodMessagingContent {
-            val singlePartnerMessage = message.singlePartner
-            val multiPartnerMessage = message.multiPartner
-            return if (singlePartnerMessage != null) {
-                SinglePartner(singlePartnerMessage)
-            } else if (multiPartnerMessage != null) {
-                MultiPartner(multiPartnerMessage)
-            } else {
-                NoContent
+            return when (message) {
+                is PaymentMethodMessage.MultiPartner -> MultiPartner(message)
+                is PaymentMethodMessage.SinglePartner -> SinglePartner(message)
+                is PaymentMethodMessage.NoContent,
+                is PaymentMethodMessage.UnexpectedError -> NoContent
             }
         }
     }
@@ -93,7 +88,7 @@ internal sealed class PaymentMethodMessagingContent {
 
 @Composable
 private fun SinglePartner(
-    message: PaymentMethodMessageSinglePartner,
+    message: PaymentMethodMessage.SinglePartner,
     appearance: PaymentMethodMessagingElement.Appearance.State
 ) {
     val image = when (appearance.theme) {
@@ -121,7 +116,7 @@ private fun SinglePartner(
 
 @Composable
 private fun MultiPartner(
-    message: PaymentMethodMessageMultiPartner,
+    message: PaymentMethodMessage.MultiPartner,
     appearance: PaymentMethodMessagingElement.Appearance.State
 ) {
     val style = appearance.font?.toTextStyle()
@@ -196,7 +191,7 @@ private fun Images(
 }
 
 private fun getImages(
-    message: PaymentMethodMessageMultiPartner,
+    message: PaymentMethodMessage.MultiPartner,
     theme: PaymentMethodMessagingElement.Appearance.Theme
 ): List<PaymentMethodMessageImage> {
     return when (theme) {
