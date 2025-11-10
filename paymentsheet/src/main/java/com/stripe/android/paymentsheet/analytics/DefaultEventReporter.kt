@@ -780,7 +780,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     private fun fireAnalyticEvent(event: AnalyticEvent) {
-        CoroutineScope(workContext).launch {
+        CoroutineScope(analyticEventCoroutineContext ?: workContext).launch {
             analyticEventCallbackProvider.get()?.run {
                 try {
                     onEvent(event)
@@ -805,8 +805,11 @@ internal class DefaultEventReporter @Inject internal constructor(
         }
     }
 
-    private companion object {
-        const val CLIENT_ID = "stripe-mobile-sdk"
-        const val ORIGIN = "stripe-mobile-sdk-android"
+    companion object {
+        private const val CLIENT_ID = "stripe-mobile-sdk"
+        private const val ORIGIN = "stripe-mobile-sdk-android"
+
+        @Volatile
+        var analyticEventCoroutineContext: CoroutineContext? = null
     }
 }
