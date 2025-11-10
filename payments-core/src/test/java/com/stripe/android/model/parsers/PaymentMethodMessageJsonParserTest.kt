@@ -11,42 +11,42 @@ class PaymentMethodMessageJsonParserTest {
     @Test
     fun parsesNoContent() {
         val message = PaymentMethodMessageJsonParser()
-            .parse(PaymentMethodMessageFixtures.NO_CONTENT_JSON) as? PaymentMethodMessage.NoContent
+            .parse(PaymentMethodMessageFixtures.NO_CONTENT_JSON) as PaymentMethodMessage.NoContent
 
         assertThat(message).isNotNull()
-        assertThat(message?.paymentMethods).isEmpty()
+        assertThat(message.paymentMethods).isEmpty()
     }
 
     @Test
     fun parsesSinglePartner() {
         val message = PaymentMethodMessageJsonParser()
-            .parse(PaymentMethodMessageFixtures.SINGLE_PARTNER_JSON) as? PaymentMethodMessage.SinglePartner
+            .parse(PaymentMethodMessageFixtures.SINGLE_PARTNER_JSON) as PaymentMethodMessage.SinglePartner
         assertThat(message).isNotNull()
-        assertThat(message?.paymentMethods).hasSize(1)
-        assertThat(message?.inlinePartnerPromotion).isNotNull()
-        assertThat(message?.learnMore).isNotNull()
-        assertThat(message?.darkImage).isNotNull()
-        assertThat(message?.lightImage).isNotNull()
-        assertThat(message?.flatImage).isNotNull()
+        assertThat(message.paymentMethods).hasSize(1)
+        assertThat(message.inlinePartnerPromotion).isNotNull()
+        assertThat(message.learnMore).isNotNull()
+        assertThat(message.darkImage).isNotNull()
+        assertThat(message.lightImage).isNotNull()
+        assertThat(message.flatImage).isNotNull()
     }
 
     @Test
     fun parsesMultiPartner() {
         val message = PaymentMethodMessageJsonParser()
-            .parse(PaymentMethodMessageFixtures.MULTI_PARTNER_JSON) as? PaymentMethodMessage.MultiPartner
+            .parse(PaymentMethodMessageFixtures.MULTI_PARTNER_JSON) as PaymentMethodMessage.MultiPartner
         assertThat(message).isNotNull()
-        assertThat(message?.paymentMethods).hasSize(3)
-        assertThat(message?.lightImages).hasSize(3)
-        assertThat(message?.darkImages).hasSize(3)
-        assertThat(message?.darkImages).hasSize(3)
-        assertThat(message?.learnMore).isNotNull()
+        assertThat(message.paymentMethods).hasSize(3)
+        assertThat(message.lightImages).hasSize(3)
+        assertThat(message.darkImages).hasSize(3)
+        assertThat(message.darkImages).hasSize(3)
+        assertThat(message.learnMore).isNotNull()
     }
 
     @Test
     fun handlesInvalidJsonGracefullyAndReturnsUnexpectedError() {
         val message = PaymentMethodMessageJsonParser()
-            .parse(JSONObject("{}")) as? PaymentMethodMessage.UnexpectedError
-        assertThat(message?.message).isEqualTo("content not found")
+            .parse(JSONObject("{}")) as PaymentMethodMessage.UnexpectedError
+        assertThat(message.message).isEqualTo("content not found")
     }
 
     @Test
@@ -56,8 +56,8 @@ class PaymentMethodMessageJsonParserTest {
             .remove("content")
 
         val message = PaymentMethodMessageJsonParser()
-            .parse(invalidMessage) as? PaymentMethodMessage.UnexpectedError
-        assertThat(message?.message).isEqualTo("content not found")
+            .parse(invalidMessage) as PaymentMethodMessage.UnexpectedError
+        assertThat(message.message).isEqualTo("content not found")
     }
 
     @Test
@@ -83,9 +83,9 @@ class PaymentMethodMessageJsonParserTest {
             .getJSONObject("content")
             .remove("promotion")
         val message = PaymentMethodMessageJsonParser()
-            .parse(invalidMessage) as? PaymentMethodMessage.UnexpectedError
+            .parse(invalidMessage) as PaymentMethodMessage.UnexpectedError
         assertThat(message).isNotNull()
-        assertThat(message?.message).isEqualTo("content.promotion not found")
+        assertThat(message.message).isEqualTo("content.promotion not found")
     }
 
     @Test
@@ -97,9 +97,9 @@ class PaymentMethodMessageJsonParserTest {
             .getJSONObject("content")
             .remove("learn_more")
         val message = PaymentMethodMessageJsonParser()
-            .parse(invalidMessage) as? PaymentMethodMessage.MultiPartner
+            .parse(invalidMessage) as PaymentMethodMessage.MultiPartner
         assertThat(message).isNotNull()
-        assertThat(message?.paymentMethods).hasSize(1)
+        assertThat(message.paymentMethods).hasSize(1)
     }
 
     @Test
@@ -111,10 +111,10 @@ class PaymentMethodMessageJsonParserTest {
             .getJSONObject("content")
             .remove("images")
         val message = PaymentMethodMessageJsonParser()
-            .parse(invalidMessage) as? PaymentMethodMessage.MultiPartner
+            .parse(invalidMessage) as PaymentMethodMessage.MultiPartner
         assertThat(message).isNotNull()
         assertThat(message).isNotNull()
-        assertThat(message?.paymentMethods).hasSize(1)
+        assertThat(message.paymentMethods).hasSize(1)
     }
 
     @Test
@@ -125,9 +125,9 @@ class PaymentMethodMessageJsonParserTest {
             .getJSONObject(0)
             .remove("content")
         val message = PaymentMethodMessageJsonParser()
-            .parse(invalidMessage) as? PaymentMethodMessage.UnexpectedError
+            .parse(invalidMessage) as PaymentMethodMessage.UnexpectedError
         assertThat(message).isNotNull()
-        assertThat(message?.message).isEqualTo(
+        assertThat(message.message).isEqualTo(
             "payment_plan_groups.content not found"
         )
     }
@@ -141,9 +141,9 @@ class PaymentMethodMessageJsonParserTest {
             .getJSONObject("content")
             .remove("inline_partner_promotion")
         val message = PaymentMethodMessageJsonParser()
-            .parse(invalidMessage) as? PaymentMethodMessage.UnexpectedError
+            .parse(invalidMessage) as PaymentMethodMessage.UnexpectedError
         assertThat(message).isNotNull()
-        assertThat(message?.message).isEqualTo(
+        assertThat(message.message).isEqualTo(
             "payment_plan_groups.content.inline_partner_promotion not found"
         )
     }
@@ -161,9 +161,9 @@ class PaymentMethodMessageJsonParserTest {
         learnMore.put("url", "")
 
         val message = PaymentMethodMessageJsonParser()
-            .parse(invalidMessage) as? PaymentMethodMessage.MultiPartner
+            .parse(invalidMessage) as PaymentMethodMessage.MultiPartner
         assertThat(message).isNotNull()
-        assertThat(message?.paymentMethods).hasSize(1)
+        assertThat(message.paymentMethods).hasSize(1)
     }
 
     private fun JSONObject.deepCopy() = JSONObject(this.toString())
