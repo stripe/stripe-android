@@ -164,6 +164,8 @@
   <string name="stripe_move_closer">Move ID closer</string>
   <!-- Instructional text when camera is too close to a document -->
   <string name="stripe_move_farther">Move ID farther back</string>
+  <!-- Instructional text when the document is not centered in the frame -->
+  <string name="stripe_move_id_to_center">Move ID to the center</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">NRIC or FIN</string>
   <!-- No comment provided by engineer. -->

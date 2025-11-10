@@ -145,7 +145,21 @@ internal class IDDetectorTransitioner(
             foundState
         }
 
-        moreResultsRequired(foundState) -> foundState
+        moreResultsRequired(foundState) -> {
+            // Centering feedback: if the detected document is not centered, surface guidance.
+            val centerX = analyzerOutput.boundingBox.left + analyzerOutput.boundingBox.width / 2f
+            val centerY = analyzerOutput.boundingBox.top + analyzerOutput.boundingBox.height / 2f
+            val tol = 0.15f
+            val centered =
+                centerX in (0.5f - tol)..(0.5f + tol) && centerY in (0.5f - tol)..(0.5f + tol)
+            if (!centered) {
+                foundState.withFeedback(
+                    com.stripe.android.identity.R.string.stripe_move_id_to_center
+                )
+            } else {
+                foundState
+            }
+        }
         else -> {
             Satisfied(foundState.type, foundState.transitioner)
         }
