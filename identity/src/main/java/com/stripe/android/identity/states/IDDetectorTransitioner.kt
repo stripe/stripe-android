@@ -149,7 +149,7 @@ internal class IDDetectorTransitioner(
         !run {
             val centerX = analyzerOutput.boundingBox.left + analyzerOutput.boundingBox.width / 2f
             val centerY = analyzerOutput.boundingBox.top + analyzerOutput.boundingBox.height / 2f
-            val tol = 0.15f
+            val tol = 0.05f
             centerX in (0.5f - tol)..(0.5f + tol) && centerY in (0.5f - tol)..(0.5f + tol)
         } -> {
             foundState.reachedStateAt = TimeSource.Monotonic.markNow()
