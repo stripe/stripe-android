@@ -156,4 +156,20 @@ class PaymentMethodJsonParserTest {
         assertThat(usBankAccount.usBankAccount?.financialConnectionsAccount)
             .isEqualTo("fca_111")
     }
+
+    @Test
+    fun `Sets isLinkPassthroughMode correctly for payment methods without Link wallet type`() {
+        val usBankAccount = PaymentMethodJsonParser().parse(
+            PaymentMethodFixtures.CARD_JSON
+        )
+        assertThat(usBankAccount.isLinkPassthroughMode).isFalse()
+    }
+
+    @Test
+    fun `Sets isLinkPassthroughMode correctly for payment methods with Link wallet type`() {
+        val usBankAccount = PaymentMethodJsonParser().parse(
+            PaymentMethodFixtures.CARD_WITH_LINK_WALLET_TYPE_JSON
+        )
+        assertThat(usBankAccount.isLinkPassthroughMode).isTrue()
+    }
 }
