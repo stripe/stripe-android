@@ -13,6 +13,11 @@ This major version introduces many small breaking changes. Please see [MIGRATING
 * [Added] CustomerSessions is now generally available.
 * [Added] ConfirmationTokens is now generally available.
 
+### CardScan
+
+* [REMOVED][11785](https://github.com/stripe/stripe-android/pull/11785) CardScan has been removed. See [CardScan Module Removal](https://github.com/stripe/stripe-android/blob/f6bd19dd3543dfe474e97147989220b186242826/MIGRATING.md#3-cardscan-module-removal) to learn more. 
+
+
 ## 21.29.0 - 2025-10-20
 * [Added] Added support for `onBehalfOf` to CustomerSheet.IntentConfiguration. This parameter makes CustomerSheet use a connected account to determine the payment method that users see and whether CardBrandChoice is enabled. For more information, see the [SetupIntent docs](https://docs.stripe.com/api/setup_intents/object#setup_intent_object-on_behalf_of).
 
