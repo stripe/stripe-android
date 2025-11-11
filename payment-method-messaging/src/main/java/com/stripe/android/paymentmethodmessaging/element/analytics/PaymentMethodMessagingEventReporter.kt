@@ -30,6 +30,8 @@ internal class DefaultPaymentMethodMessagingEventReporter @Inject constructor(
     @IOContext private val workContext: CoroutineContext
 ) : PaymentMethodMessagingEventReporter {
 
+    private var lastAppearance: PaymentMethodMessagingElement.Appearance.State? = null
+
     private fun fireEvent(event: PaymentMethodMessagingEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
@@ -84,11 +86,14 @@ internal class DefaultPaymentMethodMessagingEventReporter @Inject constructor(
     }
 
     override fun onElementDisplayed(appearance: PaymentMethodMessagingElement.Appearance.State) {
-        fireEvent(
-            PaymentMethodMessagingEvent.ElementDisplayed(
-                appearance = appearance
+        if (lastAppearance != appearance) {
+            fireEvent(
+                PaymentMethodMessagingEvent.ElementDisplayed(
+                    appearance = appearance
+                )
             )
-        )
+        }
+        lastAppearance = appearance
     }
 
     override fun onElementTapped() {

@@ -183,7 +183,7 @@ class PaymentMethodMessagingElement @Inject internal constructor(
             this.colors = colors.build()
         }
 
-        internal class State(
+        internal data class State(
             val theme: Theme,
             val font: Font.State?,
             val colors: Colors.State,
@@ -240,7 +240,7 @@ class PaymentMethodMessagingElement @Inject internal constructor(
                 this.letterSpacingSp = letterSpacingSp
             }
 
-            internal class State(
+            internal data class State(
                 @FontRes
                 val fontFamily: Int? = null,
                 val fontSizeSp: Float? = null,
@@ -275,7 +275,7 @@ class PaymentMethodMessagingElement @Inject internal constructor(
                 this.infoIconColor = infoIconColor
             }
 
-            internal class State(
+            internal data class State(
                 @ColorInt
                 val textColor: Int,
                 @ColorInt

@@ -108,6 +108,37 @@ class DefaultPaymentMethodMessagingEventReporterTest {
     }
 
     @Test
+    fun `does not resend onElementDisplayed if appearance is the same`() = runScenario {
+        eventReporter.onElementDisplayed(PaymentMethodMessagingElement.Appearance().build())
+        val firstRequest = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(firstRequest.params["appearance"]).isEqualTo(
+            mapOf(
+                "font" to false,
+                "style" to false,
+                "text_color" to false,
+                "info_icon_color" to false
+            )
+        )
+        eventReporter.onElementDisplayed(PaymentMethodMessagingElement.Appearance().build())
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+        eventReporter.onElementDisplayed(
+            PaymentMethodMessagingElement
+                .Appearance()
+                .theme(PaymentMethodMessagingElement.Appearance.Theme.DARK)
+                .build()
+        )
+        val secondRequest = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(secondRequest.params["appearance"]).isEqualTo(
+            mapOf(
+                "font" to false,
+                "style" to true,
+                "text_color" to false,
+                "info_icon_color" to false
+            )
+        )
+    }
+
+    @Test
     fun `onElementTapped should fire analytics request with expected value`() = runScenario {
         eventReporter.onElementTapped()
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()

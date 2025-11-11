@@ -71,7 +71,7 @@ internal sealed class PaymentMethodMessagingEvent : AnalyticsEvent {
     internal fun PaymentMethodMessagingElement.Appearance.State.toAnalyticsValue(): Map<String, Any?> {
         val setFont = this.font != null
         val setTextColor = this.colors.textColor != StripeThemeDefaults.colorsLight.onComponent.toArgb()
-        val setIconColor = this.colors.textColor != StripeThemeDefaults.colorsLight.subtitle.toArgb()
+        val setIconColor = this.colors.infoIconColor != StripeThemeDefaults.colorsLight.subtitle.toArgb()
         val setTheme = this.theme != PaymentMethodMessagingElement.Appearance.Theme.LIGHT
         return buildMap {
             put(FIELD_FONT, setFont)
