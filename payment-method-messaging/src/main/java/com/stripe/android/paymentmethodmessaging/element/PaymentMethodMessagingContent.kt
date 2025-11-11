@@ -50,20 +50,22 @@ internal sealed class PaymentMethodMessagingContent {
     abstract fun Content(appearance: PaymentMethodMessagingElement.Appearance.State)
 
     class SinglePartner(
-        private val message: PaymentMethodMessage.SinglePartner
+        private val message: PaymentMethodMessage.SinglePartner,
+        private val analyticsOnClick: () -> Unit
     ) : PaymentMethodMessagingContent() {
         @Composable
         override fun Content(appearance: PaymentMethodMessagingElement.Appearance.State) {
-            SinglePartner(message, appearance)
+            SinglePartner(message, appearance, analyticsOnClick)
         }
     }
 
     class MultiPartner(
-        private val message: PaymentMethodMessage.MultiPartner
+        private val message: PaymentMethodMessage.MultiPartner,
+        private val analyticsOnClick: () -> Unit
     ) : PaymentMethodMessagingContent() {
         @Composable
         override fun Content(appearance: PaymentMethodMessagingElement.Appearance.State) {
-            MultiPartner(message, appearance)
+            MultiPartner(message, appearance, analyticsOnClick)
         }
     }
 
@@ -75,10 +77,10 @@ internal sealed class PaymentMethodMessagingContent {
     }
 
     companion object {
-        fun get(message: PaymentMethodMessage): PaymentMethodMessagingContent {
+        fun get(message: PaymentMethodMessage, analyticsOnClick: () -> Unit): PaymentMethodMessagingContent {
             return when (message) {
-                is PaymentMethodMessage.MultiPartner -> MultiPartner(message)
-                is PaymentMethodMessage.SinglePartner -> SinglePartner(message)
+                is PaymentMethodMessage.MultiPartner -> MultiPartner(message, analyticsOnClick)
+                is PaymentMethodMessage.SinglePartner -> SinglePartner(message, analyticsOnClick)
                 is PaymentMethodMessage.NoContent,
                 is PaymentMethodMessage.UnexpectedError -> NoContent
             }
@@ -89,7 +91,8 @@ internal sealed class PaymentMethodMessagingContent {
 @Composable
 private fun SinglePartner(
     message: PaymentMethodMessage.SinglePartner,
-    appearance: PaymentMethodMessagingElement.Appearance.State
+    appearance: PaymentMethodMessagingElement.Appearance.State,
+    analyticsOnClick: () -> Unit
 ) {
     val image = when (appearance.theme) {
         PaymentMethodMessagingElement.Appearance.Theme.LIGHT -> message.lightImage
@@ -103,6 +106,7 @@ private fun SinglePartner(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.clickable {
             scope.launch { keyboardController.dismiss() }
+            analyticsOnClick()
             launchLearnMore(context, message.learnMore.url, appearance.theme)
         }
     ) {
@@ -117,7 +121,8 @@ private fun SinglePartner(
 @Composable
 private fun MultiPartner(
     message: PaymentMethodMessage.MultiPartner,
-    appearance: PaymentMethodMessagingElement.Appearance.State
+    appearance: PaymentMethodMessagingElement.Appearance.State,
+    analyticsOnClick: () -> Unit
 ) {
     val style = appearance.font?.toTextStyle()
         ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Normal)
@@ -129,6 +134,7 @@ private fun MultiPartner(
     Column(
         modifier = Modifier.clickable {
             scope.launch { keyboardController.dismiss() }
+            analyticsOnClick()
             launchLearnMore(context, message.learnMore.url, appearance.theme)
         }
     ) {

@@ -25,9 +25,9 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getSinglePartner(
-                    message = "Buy stuff in increments with {partner}"
+                    message = "Buy stuff in increments with {partner}",
                 )
-            )
+            ) {}
             content.Content(PaymentMethodMessagingElement.Appearance().build())
         }
     }
@@ -39,7 +39,7 @@ class PaymentMethodMessagingContentScreenshotTest {
                 getSinglePartner(
                     message = "Buy stuff in increments with {partner}"
                 )
-            )
+            ) {}
             Box(Modifier.background(Color.Black)) {
                 content.Content(appearance = darkAppearance.build())
             }
@@ -53,7 +53,7 @@ class PaymentMethodMessagingContentScreenshotTest {
                 getSinglePartner(
                     message = "Buy stuff in increments with {partner}"
                 )
-            )
+            ) {}
             content.Content(flatAppearance.build())
         }
     }
@@ -65,7 +65,7 @@ class PaymentMethodMessagingContentScreenshotTest {
                 getSinglePartner(
                     message = "This is a lonnnnnnngggggggg messsssaaaaaaaaaaaaage forrrrrrrrrrrrrrrrrrrrrrrr {partner}"
                 )
-            )
+            ) {}
             content.Content(PaymentMethodMessagingElement.Appearance().build())
         }
     }
@@ -77,7 +77,7 @@ class PaymentMethodMessagingContentScreenshotTest {
                 getSinglePartner(
                     message = "Buy stuff in increments with {partner}"
                 )
-            )
+            ) {}
             content.Content(crazyAppearance.build())
         }
     }
@@ -87,7 +87,7 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getMultiPartner("Buy stuff in increments of money")
-            )
+            ) {}
             content.Content(PaymentMethodMessagingElement.Appearance().build())
         }
     }
@@ -97,7 +97,7 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getMultiPartner("Buy stuff in increments of money")
-            )
+            ) {}
             Box(Modifier.background(Color.Black)) {
                 content.Content(darkAppearance.build())
             }
@@ -109,7 +109,7 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getMultiPartner("Buy stuff in increments of money")
-            )
+            ) {}
             content.Content(flatAppearance.build())
         }
     }
@@ -119,7 +119,7 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getMultiPartner("Buyyyyyyyyyyyyyy stufffffffffffffffff innnnnn incrementssssss of moneyyyyyyyyy")
-            )
+            ) {}
             content.Content(PaymentMethodMessagingElement.Appearance().build())
         }
     }
@@ -129,7 +129,7 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getMultiPartner("Buy stuff in increments of money")
-            )
+            ) {}
             content.Content(crazyAppearance.build())
         }
     }
