@@ -30,7 +30,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
@@ -41,38 +40,15 @@ class DefaultPaymentMethodMessagingEventReporterTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
-    private val durationProvider = FakeDurationProvider()
-    private val application = ApplicationProvider.getApplicationContext<Application>()
-    private val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-    private val analyticsRequestFactory = AnalyticsRequestFactory(
-        packageManager = application.packageManager,
-        packageName = application.packageName.orEmpty(),
-        packageInfo = application.packageInfo,
-        publishableKeyProvider = { "pk_test_123" },
-        networkTypeProvider = { "5G" },
-    )
-    private val eventReporter = DefaultPaymentMethodMessagingEventReporter(
-        analyticsRequestExecutor = analyticsRequestExecutor,
-        analyticsRequestFactory = analyticsRequestFactory,
-        durationProvider = durationProvider,
-        workContext = testDispatcher
-    )
-
-    @AfterTest
-    fun tearDown() {
-        analyticsRequestExecutor.validate()
-        durationProvider.validate()
-    }
-
     @Test
-    fun `onInit should fire analytics request with expected value`() = runTest {
+    fun `onInit should fire analytics request with expected value`() = runScenario {
         eventReporter.onInit()
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params["event"]).isEqualTo(PMME_INIT)
     }
 
     @Test
-    fun `onLoadStarted should fire analytics request with expected value`() = runTest {
+    fun `onLoadStarted should fire analytics request with expected value`() = runScenario {
         eventReporter.simulateLoadStarted()
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params["event"]).isEqualTo(PMME_LOAD_STARTED)
@@ -85,7 +61,7 @@ class DefaultPaymentMethodMessagingEventReporterTest {
     }
 
     @Test
-    fun `onLoadSucceeded should fire analytics request with expected value`() = runTest {
+    fun `onLoadSucceeded should fire analytics request with expected value`() = runScenario {
         eventReporter.simulateLoadSucceeded()
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params["event"]).isEqualTo(PMME_LOAD_SUCCEEDED)
@@ -95,7 +71,7 @@ class DefaultPaymentMethodMessagingEventReporterTest {
     }
 
     @Test
-    fun `onLoadFailed should fire analytics request with expected value`() = runTest {
+    fun `onLoadFailed should fire analytics request with expected value`() = runScenario {
         eventReporter.onLoadFailed(Throwable("something went wrong"))
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params["event"]).isEqualTo(PMME_LOAD_FAILED)
@@ -104,7 +80,7 @@ class DefaultPaymentMethodMessagingEventReporterTest {
     }
 
     @Test
-    fun `onElementDisplayed should fire analytics request with expected value`() = runTest {
+    fun `onElementDisplayed should fire analytics request with expected value`() = runScenario {
         eventReporter.onElementDisplayed(
             appearance = PaymentMethodMessagingElement.Appearance()
                 .colors(
@@ -132,14 +108,14 @@ class DefaultPaymentMethodMessagingEventReporterTest {
     }
 
     @Test
-    fun `onElementTapped should fire analytics request with expected value`() = runTest {
+    fun `onElementTapped should fire analytics request with expected value`() = runScenario {
         eventReporter.onElementTapped()
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params["event"]).isEqualTo(PMME_TAPPED)
     }
 
     @Test
-    fun `on completed loading, should reset load timer`() = runTest {
+    fun `on completed loading, should reset load timer`() = runScenario {
         eventReporter.simulateLoadStarted()
         analyticsRequestExecutor.requestTurbine.awaitItem()
         validateDurationStartCall()
@@ -149,7 +125,7 @@ class DefaultPaymentMethodMessagingEventReporterTest {
     }
 
     @Test
-    fun `on loading failed, should reset load timer`() = runTest {
+    fun `on loading failed, should reset load timer`() = runScenario {
         eventReporter.simulateLoadStarted()
         analyticsRequestExecutor.requestTurbine.awaitItem()
         validateDurationStartCall()
@@ -158,17 +134,51 @@ class DefaultPaymentMethodMessagingEventReporterTest {
         validateDurationEndCall()
     }
 
-    suspend fun validateDurationStartCall() {
-        val duration = durationProvider.callsTurbine.awaitItem()
-        assertThat(duration).isInstanceOf(FakeDurationProvider.Call.Start::class.java)
-        assertThat(duration.key).isEqualTo(DurationProvider.Key.Loading)
-        assertThat((duration as FakeDurationProvider.Call.Start).reset).isEqualTo(true)
+    private class Scenario(
+        val eventReporter: DefaultPaymentMethodMessagingEventReporter,
+        val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
+        val durationProvider: FakeDurationProvider,
+    ) {
+        suspend fun validateDurationStartCall() {
+            val duration = durationProvider.callsTurbine.awaitItem()
+            assertThat(duration).isInstanceOf(FakeDurationProvider.Call.Start::class.java)
+            assertThat(duration.key).isEqualTo(DurationProvider.Key.Loading)
+            assertThat((duration as FakeDurationProvider.Call.Start).reset).isEqualTo(true)
+        }
+
+        suspend fun validateDurationEndCall() {
+            val duration = durationProvider.callsTurbine.awaitItem()
+            assertThat(duration).isInstanceOf(FakeDurationProvider.Call.End::class.java)
+            assertThat(duration.key).isEqualTo(DurationProvider.Key.Loading)
+        }
     }
 
-    suspend fun validateDurationEndCall() {
-        val duration = durationProvider.callsTurbine.awaitItem()
-        assertThat(duration).isInstanceOf(FakeDurationProvider.Call.End::class.java)
-        assertThat(duration.key).isEqualTo(DurationProvider.Key.Loading)
+    private fun runScenario(
+        testBlock: suspend Scenario.() -> Unit
+    ) = runTest {
+        val durationProvider = FakeDurationProvider()
+        val application = ApplicationProvider.getApplicationContext<Application>()
+        val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        val analyticsRequestFactory = AnalyticsRequestFactory(
+            packageManager = application.packageManager,
+            packageName = application.packageName.orEmpty(),
+            packageInfo = application.packageInfo,
+            publishableKeyProvider = { "pk_test_123" },
+            networkTypeProvider = { "5G" },
+        )
+        val eventReporter = DefaultPaymentMethodMessagingEventReporter(
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestFactory = analyticsRequestFactory,
+            durationProvider = durationProvider,
+            workContext = testDispatcher
+        )
+        Scenario(
+            eventReporter = eventReporter,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            durationProvider = durationProvider
+        ).testBlock()
+        analyticsRequestExecutor.validate()
+        durationProvider.validate()
     }
 
     private fun DefaultPaymentMethodMessagingEventReporter.simulateLoadStarted() {
