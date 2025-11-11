@@ -39,11 +39,11 @@ import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemera
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyResponse
 import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.network.SharedPaymentTokenPlaygroundRequester
-import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings

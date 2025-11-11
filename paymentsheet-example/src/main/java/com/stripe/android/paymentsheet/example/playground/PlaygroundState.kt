@@ -14,8 +14,6 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Merchant
-import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
@@ -25,6 +23,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodConfigurationSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
