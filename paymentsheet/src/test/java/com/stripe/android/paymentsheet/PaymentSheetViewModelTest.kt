@@ -1268,34 +1268,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Handles invalid customer configuration correctly`() = runTest {
-        val invalidCustomerError = PaymentSheetLoadingException.Unknown(
-            cause = IllegalArgumentException(
-                "When a CustomerConfiguration is passed to PaymentSheet, the Customer ID cannot be an empty string."
-            )
-        )
-        val viewModel = createViewModel(validationError = invalidCustomerError)
-        viewModel.paymentSheetResult.test {
-            val result = awaitItem()
-            assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
-        }
-    }
-
-    @Test
-    fun `Handles invalid client secret correctly`() = runTest {
-        val invalidClientSecretError = PaymentSheetLoadingException.Unknown(
-            cause = IllegalArgumentException(
-                "The PaymentIntent client_secret cannot be an empty string."
-            )
-        )
-        val viewModel = createViewModel(validationError = invalidClientSecretError)
-        viewModel.paymentSheetResult.test {
-            val result = awaitItem()
-            assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
-        }
-    }
-
-    @Test
     fun `Verify supported payment methods includes afterpay if no shipping and no allow flag`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(

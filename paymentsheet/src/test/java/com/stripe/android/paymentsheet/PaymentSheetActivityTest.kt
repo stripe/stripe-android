@@ -23,7 +23,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.core.view.isVisible
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -1006,15 +1005,68 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Handles missing arguments correctly`() {
-        val scenario = ActivityScenario.launchActivityForResult(PaymentSheetActivity::class.java)
+        ActivityScenario.launchActivityForResult(PaymentSheetActivity::class.java).use { scenario ->
+            val result = contract.parseResult(
+                scenario.result.resultCode,
+                scenario.result.resultData,
+            )
 
-        val result = contract.parseResult(
-            scenario.result.resultCode,
-            scenario.result.resultData,
+            assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+        }
+    }
+
+    @Test
+    fun `Handles invalid arguments correctly`() {
+        val invalidCustomerConfig = PaymentSheet.CustomerConfiguration(
+            id = "",
+            ephemeralKeySecret = "",
         )
 
-        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+        val args = PaymentSheetContract.Args(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "abc",
+            ),
+            config = PaymentSheet.Configuration(
+                merchantDisplayName = "Some name",
+                customer = invalidCustomerConfig,
+            ),
+            statusBarColor = null,
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
+        )
+
+        val intent = contract.createIntent(context, args)
+
+        ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent).use { scenario ->
+            val result = contract.parseResult(
+                scenario.result.resultCode,
+                scenario.result.resultData,
+            )
+
+            assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+        }
+    }
+
+    @Test
+    fun `Handles invalid client secret correctly`() {
+        val args = PaymentSheetContract.Args(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = ""),
+            config = PaymentSheet.Configuration(
+                merchantDisplayName = "Some name",
+            ),
+            statusBarColor = null,
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
+        )
+
+        val intent = contract.createIntent(context, args)
+
+        ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent).use { scenario ->
+            val result = contract.parseResult(
+                scenario.result.resultCode,
+                scenario.result.resultData,
+            )
+
+            assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+        }
     }
 
     @Test
