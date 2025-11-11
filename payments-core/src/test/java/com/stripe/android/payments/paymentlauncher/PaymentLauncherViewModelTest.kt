@@ -58,6 +58,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertNotNull
 
 @RunWith(RobolectricTestRunner::class)
+@Suppress("LargeClass")
 class PaymentLauncherViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
