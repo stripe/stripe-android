@@ -50,7 +50,7 @@ internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
             return PaymentMethodMessagingElement.ConfigureResult.Failed(it)
         }
 
-        val content = PaymentMethodMessagingContent.get(paymentMethodMessage)
+        val content = PaymentMethodMessagingContent.get(paymentMethodMessage, eventReporter::onElementTapped)
         _messagingContent.value = content
         eventReporter.onLoadSucceeded(paymentMethodMessage.paymentMethods(), content)
 

@@ -92,6 +92,7 @@ internal class DefaultPaymentMethodMessagingEventReporter @Inject constructor(
     }
 
     override fun onElementTapped() {
+        println("YEET onElementTapped")
         fireEvent(
             PaymentMethodMessagingEvent.ElementTapped()
         )

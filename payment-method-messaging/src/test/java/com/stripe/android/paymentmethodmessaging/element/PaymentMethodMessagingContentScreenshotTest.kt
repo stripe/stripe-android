@@ -4,8 +4,6 @@ package com.stripe.android.paymentmethodmessaging.element
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -13,7 +11,6 @@ import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodMessageImage
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.paymentmethodmessaging.R
-import com.stripe.android.paymentmethodmessaging.element.analytics.LocalElementTappedAnalyticsListener
 import com.stripe.android.screenshottesting.PaparazziRule
 import org.junit.Rule
 import org.junit.Test
@@ -28,12 +25,10 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getSinglePartner(
-                    message = "Buy stuff in increments with {partner}"
+                    message = "Buy stuff in increments with {partner}",
                 )
-            )
-            displayContent {
-                content.Content(PaymentMethodMessagingElement.Appearance().build())
-            }
+            ) {}
+            content.Content(PaymentMethodMessagingElement.Appearance().build())
         }
     }
 
@@ -44,11 +39,9 @@ class PaymentMethodMessagingContentScreenshotTest {
                 getSinglePartner(
                     message = "Buy stuff in increments with {partner}"
                 )
-            )
-            displayContent {
-                Box(Modifier.background(Color.Black)) {
-                    content.Content(appearance = darkAppearance.build())
-                }
+            ) {}
+            Box(Modifier.background(Color.Black)) {
+                content.Content(appearance = darkAppearance.build())
             }
         }
     }
@@ -60,10 +53,8 @@ class PaymentMethodMessagingContentScreenshotTest {
                 getSinglePartner(
                     message = "Buy stuff in increments with {partner}"
                 )
-            )
-            displayContent {
-                content.Content(flatAppearance.build())
-            }
+            ) {}
+            content.Content(flatAppearance.build())
         }
     }
 
@@ -74,10 +65,8 @@ class PaymentMethodMessagingContentScreenshotTest {
                 getSinglePartner(
                     message = "This is a lonnnnnnngggggggg messsssaaaaaaaaaaaaage forrrrrrrrrrrrrrrrrrrrrrrr {partner}"
                 )
-            )
-            displayContent {
-                content.Content(PaymentMethodMessagingElement.Appearance().build())
-            }
+            ) {}
+            content.Content(PaymentMethodMessagingElement.Appearance().build())
         }
     }
 
@@ -88,10 +77,8 @@ class PaymentMethodMessagingContentScreenshotTest {
                 getSinglePartner(
                     message = "Buy stuff in increments with {partner}"
                 )
-            )
-            displayContent {
-                content.Content(crazyAppearance.build())
-            }
+            ) {}
+            content.Content(crazyAppearance.build())
         }
     }
 
@@ -100,10 +87,8 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getMultiPartner("Buy stuff in increments of money")
-            )
-            displayContent {
-                content.Content(PaymentMethodMessagingElement.Appearance().build())
-            }
+            ) {}
+            content.Content(PaymentMethodMessagingElement.Appearance().build())
         }
     }
 
@@ -112,11 +97,9 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getMultiPartner("Buy stuff in increments of money")
-            )
-            displayContent {
-                Box(Modifier.background(Color.Black)) {
-                    content.Content(darkAppearance.build())
-                }
+            ) {}
+            Box(Modifier.background(Color.Black)) {
+                content.Content(darkAppearance.build())
             }
         }
     }
@@ -126,10 +109,8 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getMultiPartner("Buy stuff in increments of money")
-            )
-            displayContent {
-                content.Content(flatAppearance.build())
-            }
+            ) {}
+            content.Content(flatAppearance.build())
         }
     }
 
@@ -138,10 +119,8 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getMultiPartner("Buyyyyyyyyyyyyyy stufffffffffffffffff innnnnn incrementssssss of moneyyyyyyyyy")
-            )
-            displayContent {
-                content.Content(PaymentMethodMessagingElement.Appearance().build())
-            }
+            ) {}
+            content.Content(PaymentMethodMessagingElement.Appearance().build())
         }
     }
 
@@ -150,10 +129,8 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getMultiPartner("Buy stuff in increments of money")
-            )
-            displayContent {
-                content.Content(crazyAppearance.build())
-            }
+            ) {}
+            content.Content(crazyAppearance.build())
         }
     }
 
@@ -183,13 +160,6 @@ class PaymentMethodMessagingContentScreenshotTest {
             ),
             paymentMethods = listOf()
         )
-    }
-
-    @Composable
-    private fun displayContent(content: @Composable () -> Unit) {
-        CompositionLocalProvider(LocalElementTappedAnalyticsListener provides {}) {
-            content()
-        }
     }
 
     companion object {

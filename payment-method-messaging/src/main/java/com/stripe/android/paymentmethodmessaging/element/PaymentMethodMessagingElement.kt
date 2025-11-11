@@ -6,11 +6,9 @@ import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentmethodmessaging.element.analytics.LocalElementTappedAnalyticsListener
 import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEventReporter
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.utils.collectAsState
@@ -46,11 +44,7 @@ class PaymentMethodMessagingElement @Inject internal constructor(
         val content by messagingCoordinator.messagingContent.collectAsState()
         val appearanceState = appearance.build()
         eventReporter.onElementDisplayed(appearanceState)
-        CompositionLocalProvider(
-            LocalElementTappedAnalyticsListener provides { eventReporter.onElementTapped() }
-        ) {
-            content?.Content(appearanceState)
-        }
+        content?.Content(appearanceState)
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

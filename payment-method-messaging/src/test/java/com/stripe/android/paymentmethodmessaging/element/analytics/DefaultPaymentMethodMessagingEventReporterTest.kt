@@ -216,7 +216,7 @@ class DefaultPaymentMethodMessagingEventReporterTest {
                         url = ""
                     )
                 )
-            ),
+            ) {},
         )
     }
 }
