@@ -41,6 +41,7 @@ internal class IntentConfirmationChallengeUITest {
 
         composeTestRule.setContent {
             IntentConfirmationChallengeUI(
+                hostUrl = "http://10.0.2.2:3004",
                 bridgeHandler = bridgeHandler,
                 showProgressIndicator = false,
                 webViewFactory = { context ->
@@ -62,6 +63,7 @@ internal class IntentConfirmationChallengeUITest {
 
     private fun setContent(showProgressIndicator: Boolean) = composeTestRule.setContent {
         IntentConfirmationChallengeUI(
+            hostUrl = "http://10.0.2.2:3004",
             bridgeHandler = FakeConfirmationChallengeBridgeHandler(),
             showProgressIndicator = showProgressIndicator,
             webViewClientFactory = { WebViewClient() }

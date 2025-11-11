@@ -14,6 +14,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 
 @Composable
 internal fun IntentConfirmationChallengeUI(
+    hostUrl: String,
     bridgeHandler: ConfirmationChallengeBridgeHandler,
     showProgressIndicator: Boolean,
     webViewClientFactory: () -> WebViewClient,
@@ -42,7 +43,7 @@ internal fun IntentConfirmationChallengeUI(
                 webViewFactory(context).apply {
                     this.webViewClient = webViewClientFactory()
                     addBridgeHandler(bridgeHandler)
-                    loadUrl("http://10.0.2.2:3004")
+                    loadUrl(hostUrl)
                 }
             },
             update = { view ->

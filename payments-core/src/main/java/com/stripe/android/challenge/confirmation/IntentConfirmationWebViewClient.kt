@@ -10,27 +10,28 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 
 internal class IntentConfirmationWebViewClient(
+    private val hostUrl: String,
     private val errorHandler: WebViewErrorHandler
 ) : WebViewClient() {
 
     override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
         super.onReceivedError(view, request, error)
-        if (request?.isForMainFrame == true) {
-            errorHandler(
-                WebViewError(
-                    message = error?.description?.toString(),
-                    errorCode = error?.errorCode,
-                    url = request.url?.toString(),
-                    webViewErrorType = "generic_resource_error"
-                )
+        if (request?.url?.toString() != hostUrl) return
+        errorHandler(
+            WebViewError(
+                message = error?.description?.toString(),
+                errorCode = error?.errorCode,
+                url = request.url?.toString(),
+                webViewErrorType = "generic_resource_error"
             )
-        }
+        )
     }
 
     // Pre-23
     @Suppress("DEPRECATION")
     override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
         super.onReceivedError(view, errorCode, description, failingUrl)
+        if (failingUrl != hostUrl) return
         errorHandler(
             WebViewError(
                 message = description,
@@ -47,16 +48,15 @@ internal class IntentConfirmationWebViewClient(
         errorResponse: WebResourceResponse?
     ) {
         super.onReceivedHttpError(view, request, errorResponse)
-        if (request?.isForMainFrame == true) {
-            errorHandler(
-                WebViewError(
-                    message = errorResponse?.reasonPhrase,
-                    errorCode = errorResponse?.statusCode,
-                    url = request.url?.toString(),
-                    webViewErrorType = "http_error"
-                )
+        if (request?.url?.toString() != hostUrl) return
+        errorHandler(
+            WebViewError(
+                message = errorResponse?.reasonPhrase,
+                errorCode = errorResponse?.statusCode,
+                url = request.url?.toString(),
+                webViewErrorType = "http_error"
             )
-        }
+        )
     }
 
     override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
