@@ -42,7 +42,14 @@ internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
 
             IntentConfirmationChallengeUI(
                 bridgeHandler = viewModel.bridgeHandler,
-                showProgressIndicator = showProgressIndicator
+                showProgressIndicator = showProgressIndicator,
+                webViewClientFactory = {
+                    IntentConfirmationWebViewClient(
+                        errorHandler = { error ->
+                            viewModel.handleWebViewError(error)
+                        }
+                    )
+                }
             )
         }
     }
