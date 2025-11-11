@@ -46,6 +46,7 @@ Enable Google Pay API in `AndroidManifest.xml`:
 ## Step 2: Implement Google Pay Card Recognition
 
 Replace your calls to `CardScanSheet.create()` and `present()` with the Google Pay API calls.
+> **Note**: `attachCardScanFragment()` is not supported in Google Pay Card Recognition.
 
 ### Remove Stripe CardScan Logic
 
@@ -106,7 +107,7 @@ When the user taps the "Scan Card" button (or equivalent):
 fun createPaymentsClient(activity: Activity): PaymentsClient {  
     val walletOptions = Wallet.WalletOptions.Builder()  
         // choose between ENVIRONMENT_PRODUCTION and ENVIRONMENT_TEST  
-        // ENVIRONMENT_TEST always returns a mock value  
+        // ENVIRONMENT_TEST always returns a mock result
         .setEnvironment(WalletConstants.ENVIRONMENT_PRODUCTION)   
         .build()
 
@@ -163,7 +164,6 @@ private fun handleScannedCard(result: CardRecognitionResult) {
     val expirationYear: Int? = result.creditCardExpirationDate?.year  // Four-digit year
 
     // Your logic to update your UI/backend with the new card details  
-    // You might pass this data to a Stripe Tokenization API call next.  
 }
 ```
 
