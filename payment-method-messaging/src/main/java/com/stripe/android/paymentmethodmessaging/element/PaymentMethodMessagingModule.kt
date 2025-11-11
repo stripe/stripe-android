@@ -6,6 +6,12 @@ import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.utils.DefaultDurationProvider
+import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.paymentmethodmessaging.element.analytics.DefaultPaymentMethodMessagingEventReporter
+import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEventReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.isSystemDarkTheme
@@ -21,6 +27,16 @@ internal interface PaymentMethodMessagingModule {
     fun providesPaymentMethodMessagingCoordinator(
         impl: DefaultPaymentMethodMessagingCoordinator
     ): PaymentMethodMessagingCoordinator
+
+    @Binds
+    fun providesPaymentMethodMessagingEventReporter(
+        impl: DefaultPaymentMethodMessagingEventReporter
+    ): PaymentMethodMessagingEventReporter
+
+    @Binds
+    fun bindsPaymentAnalyticsRequestFactory(
+        paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
+    ): AnalyticsRequestFactory
 
     companion object {
         @Provides
@@ -55,6 +71,11 @@ internal interface PaymentMethodMessagingModule {
         @Provides
         fun paymentConfiguration(application: Application): PaymentConfiguration {
             return PaymentConfiguration.getInstance(application)
+        }
+
+        @Provides
+        fun provideDurationProvider(): DurationProvider {
+            return DefaultDurationProvider.instance
         }
     }
 }

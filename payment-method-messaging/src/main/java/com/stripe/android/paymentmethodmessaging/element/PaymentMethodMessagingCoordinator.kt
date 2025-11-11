@@ -5,6 +5,8 @@ package com.stripe.android.paymentmethodmessaging.element
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEventReporter
+import com.stripe.android.paymentmethodmessaging.element.analytics.paymentMethods
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
@@ -19,7 +21,8 @@ internal interface PaymentMethodMessagingCoordinator {
 
 internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val paymentConfiguration: Provider<PaymentConfiguration>
+    private val paymentConfiguration: Provider<PaymentConfiguration>,
+    private val eventReporter: PaymentMethodMessagingEventReporter
 ) : PaymentMethodMessagingCoordinator {
 
     private val _messagingContent = MutableStateFlow<PaymentMethodMessagingContent?>(null)
@@ -28,6 +31,7 @@ internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
     override suspend fun configure(
         configuration: PaymentMethodMessagingElement.Configuration.State
     ): PaymentMethodMessagingElement.ConfigureResult {
+        eventReporter.onLoadStarted(configuration)
         val result = stripeRepository.retrievePaymentMethodMessage(
             paymentMethods = configuration.paymentMethodTypes?.map { it.code } ?: listOf(),
             amount = configuration.amount.toInt(),
@@ -42,11 +46,13 @@ internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
 
         val paymentMethodMessage = result.getOrElse {
             _messagingContent.value = null
+            eventReporter.onLoadFailed(it)
             return PaymentMethodMessagingElement.ConfigureResult.Failed(it)
         }
 
         val content = PaymentMethodMessagingContent.get(paymentMethodMessage)
         _messagingContent.value = content
+        eventReporter.onLoadSucceeded(paymentMethodMessage.paymentMethods(), content)
 
         return when (content) {
             is PaymentMethodMessagingContent.SinglePartner,

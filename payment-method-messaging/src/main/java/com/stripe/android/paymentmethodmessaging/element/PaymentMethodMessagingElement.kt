@@ -6,9 +6,12 @@ import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentmethodmessaging.element.analytics.LocalElementTappedAnalyticsListener
+import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEventReporter
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.utils.collectAsState
 import java.util.Locale
@@ -17,8 +20,13 @@ import javax.inject.Inject
 @PaymentMethodMessagingElementPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentMethodMessagingElement @Inject internal constructor(
-    private val messagingCoordinator: PaymentMethodMessagingCoordinator
+    private val messagingCoordinator: PaymentMethodMessagingCoordinator,
+    private val eventReporter: PaymentMethodMessagingEventReporter
 ) {
+
+    init {
+        eventReporter.onInit()
+    }
 
     /**
      * Call this method to configure [PaymentMethodMessagingElement] or when the [Configuration] values
@@ -36,7 +44,13 @@ class PaymentMethodMessagingElement @Inject internal constructor(
     @Composable
     fun Content(appearance: Appearance = Appearance()) {
         val content by messagingCoordinator.messagingContent.collectAsState()
-        content?.Content(appearance.build())
+        val appearanceState = appearance.build()
+        eventReporter.onElementDisplayed(appearanceState)
+        CompositionLocalProvider(
+            LocalElementTappedAnalyticsListener provides { eventReporter.onElementTapped() }
+        ) {
+            content?.Content(appearanceState)
+        }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

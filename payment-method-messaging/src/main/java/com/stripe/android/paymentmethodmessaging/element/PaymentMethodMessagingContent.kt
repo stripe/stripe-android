@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodMessageImage
+import com.stripe.android.paymentmethodmessaging.element.analytics.LocalElementTappedAnalyticsListener
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.navigation.rememberKeyboardController
@@ -99,10 +100,12 @@ private fun SinglePartner(
     val context = LocalContext.current
     val keyboardController = rememberKeyboardController()
     val scope = rememberCoroutineScope()
+    val analyticsListener = LocalElementTappedAnalyticsListener.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.clickable {
             scope.launch { keyboardController.dismiss() }
+            analyticsListener()
             launchLearnMore(context, message.learnMore.url, appearance.theme)
         }
     ) {
@@ -125,10 +128,12 @@ private fun MultiPartner(
     val context = LocalContext.current
     val keyboardController = rememberKeyboardController()
     val scope = rememberCoroutineScope()
+    val analyticsListener = LocalElementTappedAnalyticsListener.current
 
     Column(
         modifier = Modifier.clickable {
             scope.launch { keyboardController.dismiss() }
+            analyticsListener()
             launchLearnMore(context, message.learnMore.url, appearance.theme)
         }
     ) {
