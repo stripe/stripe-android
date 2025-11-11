@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import android.os.Parcelable
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.ui.core.forms.convertToFormValuesMap
 import kotlinx.parcelize.Parcelize
@@ -25,7 +26,8 @@ internal sealed class LinkPaymentDetails(
     @Parcelize
     class Saved(
         override val paymentDetails: ConsumerPaymentDetails.Passthrough,
-        override val paymentMethodCreateParams: PaymentMethodCreateParams
+        override val paymentMethodCreateParams: PaymentMethodCreateParams,
+        val paymentMethod: PaymentMethod,
     ) : LinkPaymentDetails(paymentDetails, paymentMethodCreateParams)
 
     /**

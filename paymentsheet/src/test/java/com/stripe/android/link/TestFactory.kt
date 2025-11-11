@@ -30,8 +30,10 @@ import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -174,6 +176,32 @@ internal object TestFactory {
     val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
         paymentDetails = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
         paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
+        paymentMethod = PaymentMethod.Builder()
+            .setId(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.paymentMethodId)
+            .setType(PaymentMethod.Type.Card)
+            .setCard(
+                PaymentMethod.Card(
+                    last4 = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.last4,
+                    wallet = Wallet.LinkWallet(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.last4),
+                )
+            )
+            .build(),
+    )
+
+    val LINK_SAVED_PAYMENT_DETAILS_WITH_BILLING = LinkPaymentDetails.Saved(
+        paymentDetails = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
+        paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
+        paymentMethod = PaymentMethod.Builder()
+            .setId(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.paymentMethodId)
+            .setType(PaymentMethod.Type.Card)
+            .setCard(
+                PaymentMethod.Card(
+                    last4 = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.last4,
+                    wallet = Wallet.LinkWallet(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.last4),
+                )
+            )
+            .setBillingDetails(PaymentMethodCreateParamsFixtures.BILLING_DETAILS)
+            .build(),
     )
 
     val LINK_ACCOUNT = LinkAccount(CONSUMER_SESSION)

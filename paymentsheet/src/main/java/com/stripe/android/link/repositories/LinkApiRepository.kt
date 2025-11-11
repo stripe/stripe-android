@@ -321,6 +321,7 @@ internal class LinkApiRepository @Inject constructor(
                     extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
                     clientAttributionMetadata = clientAttributionMetadata,
                 ),
+                paymentMethod = paymentMethod,
             )
         }
     }
