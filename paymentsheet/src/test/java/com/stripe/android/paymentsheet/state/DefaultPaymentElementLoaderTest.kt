@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.common.model.PaymentMethodRemovePermission
@@ -23,6 +24,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUs
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.Address
@@ -43,6 +45,8 @@ import com.stripe.android.model.StripeIntent.Status.Succeeded
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.ConfigFixtures
@@ -125,6 +129,7 @@ internal class DefaultPaymentElementLoaderTest {
     @AfterTest
     fun tearDown() {
         eventReporter.validate()
+        PaymentElementCallbackReferences.clear()
     }
 
     @Test
@@ -1553,6 +1558,104 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `integrationMetadata returns intent first for payment intent`() = runTest {
+        val paymentIntent = PaymentElementLoader.InitializationMode.PaymentIntent("secret")
+        assertThat(paymentIntent.integrationMetadata(null))
+            .isEqualTo(IntegrationMetadata.IntentFirst)
+        assertThat(paymentIntent.integrationMetadata(PaymentElementCallbacks.Builder().build()))
+            .isEqualTo(IntegrationMetadata.IntentFirst)
+    }
+
+    @Test
+    fun `integrationMetadata returns intent first for setup intent`() = runTest {
+        val setupIntent = PaymentElementLoader.InitializationMode.SetupIntent("secret")
+        assertThat(setupIntent.integrationMetadata(null))
+            .isEqualTo(IntegrationMetadata.IntentFirst)
+        assertThat(setupIntent.integrationMetadata(PaymentElementCallbacks.Builder().build()))
+            .isEqualTo(IntegrationMetadata.IntentFirst)
+    }
+
+    @Test
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    fun `integrationMetadata returns spt`() = runTest {
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 1234,
+                    currency = "cad",
+                ),
+            ),
+        )
+        assertThat(
+            initializationMode.integrationMetadata(
+                PaymentElementCallbacks.Builder()
+                    .preparePaymentMethodHandler { _, _ ->
+                        error("Should not be called.")
+                    }.build()
+            )
+        ).isEqualTo(IntegrationMetadata.DeferredIntentWithSharedPaymentToken)
+    }
+
+    @Test
+    fun `integrationMetadata returns confirmation token`() = runTest {
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 1234,
+                    currency = "cad",
+                ),
+            ),
+        )
+        assertThat(
+            initializationMode.integrationMetadata(
+                PaymentElementCallbacks.Builder()
+                    .createIntentCallback { _ ->
+                        error("Should not be called.")
+                    }.build()
+            )
+        ).isEqualTo(IntegrationMetadata.DeferredIntentWithConfirmationToken)
+    }
+
+    @Test
+    fun `integrationMetadata returns payment method`() = runTest {
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 1234,
+                    currency = "cad",
+                ),
+            ),
+        )
+        assertThat(
+            initializationMode.integrationMetadata(
+                PaymentElementCallbacks.Builder()
+                    .createIntentCallback { _, _ ->
+                        error("Should not be called.")
+                    }.build()
+            )
+        ).isEqualTo(IntegrationMetadata.DeferredIntentWithPaymentMethod)
+    }
+
+    @Test
+    fun `integrationMetadata throws when no callbacks set`() = runTest {
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 1234,
+                    currency = "cad",
+                ),
+            ),
+        )
+
+        assertFailsWith<IllegalStateException>("No callback for deferred intent.") {
+            initializationMode.integrationMetadata(null)
+        }
+        assertFailsWith<IllegalStateException>("No callback for deferred intent.") {
+            initializationMode.integrationMetadata(PaymentElementCallbacks.Builder().build())
+        }
+    }
+
+    @Test
     fun `Emits correct events when loading succeeds for non-deferred intent`() = runTest {
         val loader = createPaymentElementLoader(
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
@@ -1620,6 +1723,11 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Emits correct events when loading succeeds for deferred intent`() = runTest {
+        PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _ ->
+                error("Should not be called.")
+            }
+            .build()
         val loader = createPaymentElementLoader(
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
         )
@@ -1659,6 +1767,36 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isFalse()
         assertThat(loadSucceededCall.setupFutureUsage).isNull()
         assertThat(loadSucceededCall.openCardScanAutomatically).isFalse()
+    }
+
+    @Test
+    fun `Fails to load when missing deferred intent callback`() = runTest {
+        val loader = createPaymentElementLoader(
+            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+        )
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 1234,
+                    currency = "cad",
+                ),
+            ),
+        )
+
+        val result = loader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = true,
+            ),
+        ).exceptionOrNull()
+
+        assertThat(result).isInstanceOf<IllegalStateException>()
+        assertThat(result?.message).isEqualTo("No callback for deferred intent.")
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem().initializedViaCompose).isTrue()
+        val loadFailedCall = eventReporter.loadFailedTurbine.awaitItem()
+        assertThat(loadFailedCall.error.message).isEqualTo("No callback for deferred intent.")
     }
 
     @Test
@@ -1704,6 +1842,11 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Emits correct events when loading fails with invalid confirmation method`() = runTest {
+        PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _ ->
+                error("Should not be called.")
+            }
+            .build()
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 confirmationMethod = Manual,
@@ -3371,6 +3514,11 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Emits correct event when CVC recollection is required for deferred`() = runTest {
+        PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _ ->
+                error("Should not be called.")
+            }
+            .build()
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
@@ -4241,6 +4389,7 @@ internal class DefaultPaymentElementLoaderTest {
             cvcRecollectionHandler = CvcRecollectionHandlerImpl(),
             integrityRequestManager = integrityRequestManager,
             isLiveModeProvider = { isLiveMode },
+            paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
         )
     }
 
@@ -4265,6 +4414,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private companion object {
+        private const val PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER = "PaymentElementLoaderTest"
         private val PAYMENT_METHODS =
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
         private val DEFAULT_PAYMENT_SHEET_CONFIG = PaymentSheet.Configuration(

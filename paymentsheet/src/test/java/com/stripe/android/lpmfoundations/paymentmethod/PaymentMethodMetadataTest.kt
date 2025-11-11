@@ -25,6 +25,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -1114,6 +1115,7 @@ internal class PaymentMethodMetadataTest {
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            paymentElementCallbacks = PaymentElementCallbacks.Builder().build(),
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1177,6 +1179,7 @@ internal class PaymentMethodMetadataTest {
             attestOnIntentConfirmation = false,
             appearance = configuration.appearance,
             onBehalfOf = null,
+            integrationMetadata = IntegrationMetadata.IntentFirst,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1263,6 +1266,7 @@ internal class PaymentMethodMetadataTest {
             attestOnIntentConfirmation = false,
             appearance = configuration.appearance,
             onBehalfOf = null,
+            integrationMetadata = IntegrationMetadata.CustomerSheet,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -1337,6 +1341,7 @@ internal class PaymentMethodMetadataTest {
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            paymentElementCallbacks = PaymentElementCallbacks.Builder().build(),
         )
     }
 
@@ -2055,6 +2060,7 @@ internal class PaymentMethodMetadataTest {
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            paymentElementCallbacks = PaymentElementCallbacks.Builder().build(),
         )
 
         assertThat(metadata.availableWallets)
@@ -2115,6 +2121,7 @@ internal class PaymentMethodMetadataTest {
             customerMetadata = null,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            paymentElementCallbacks = PaymentElementCallbacks.Builder().build(),
         )
     }
 
