@@ -61,13 +61,19 @@ dependencies {
 
     androidTestUtil testLibs.testOrchestrator
 
+    androidTestImplementation project(':network-testing')
+    androidTestImplementation project(':payments-core-testing')
     androidTestImplementation testLibs.androidx.junit
     androidTestImplementation testLibs.androidx.junitKtx
+    androidTestImplementation testLibs.androidx.composeUi
     androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.androidx.testRules
     androidTestImplementation testLibs.espresso.core
     androidTestImplementation testLibs.espresso.intents
     androidTestImplementation testLibs.espresso.web
     androidTestImplementation testLibs.truth
+    androidTestImplementation testLibs.androidx.uiAutomator
+    androidTestImplementation testLibs.androidx.coreKtx
 }
 
 ext {

@@ -3,8 +3,13 @@
 package com.stripe.android.paymentmethodmessaging.element
 
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEventReporter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
@@ -15,11 +20,16 @@ internal interface PaymentMethodMessagingCoordinator {
     suspend fun configure(
         configuration: PaymentMethodMessagingElement.Configuration.State
     ): PaymentMethodMessagingElement.ConfigureResult
+    fun onElementClicked()
+    fun onElementDisplayed(appearance: PaymentMethodMessagingElement.Appearance.State)
+    fun onElementInit()
 }
 
 internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val paymentConfiguration: Provider<PaymentConfiguration>
+    private val paymentConfiguration: Provider<PaymentConfiguration>,
+    private val eventReporter: PaymentMethodMessagingEventReporter,
+    @ViewModelScope private val viewModelScope: CoroutineScope
 ) : PaymentMethodMessagingCoordinator {
 
     private val _messagingContent = MutableStateFlow<PaymentMethodMessagingContent?>(null)
@@ -28,30 +38,59 @@ internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
     override suspend fun configure(
         configuration: PaymentMethodMessagingElement.Configuration.State
     ): PaymentMethodMessagingElement.ConfigureResult {
-        val result = stripeRepository.retrievePaymentMethodMessage(
-            paymentMethods = configuration.paymentMethodTypes?.map { it.code } ?: listOf(),
-            amount = configuration.amount.toInt(),
-            currency = configuration.currency,
-            locale = configuration.locale,
-            country = configuration.countryCode,
-            requestOptions = ApiRequest.Options(
-                apiKey = paymentConfiguration.get().publishableKey,
-                stripeAccount = paymentConfiguration.get().stripeAccountId
+        return viewModelScope.async {
+            eventReporter.onLoadStarted(configuration)
+            stripeRepository.retrievePaymentMethodMessage(
+                paymentMethods = configuration.paymentMethodTypes?.map { it.code } ?: listOf(),
+                amount = configuration.amount.toInt(),
+                currency = configuration.currency,
+                locale = configuration.locale,
+                country = configuration.countryCode,
+                requestOptions = ApiRequest.Options(
+                    apiKey = paymentConfiguration.get().publishableKey,
+                    stripeAccount = paymentConfiguration.get().stripeAccountId
+                )
+            ).fold(
+                onSuccess = { paymentMethodMessage ->
+                    val content = PaymentMethodMessagingContent.get(paymentMethodMessage)
+                    eventReporter.onLoadSucceeded(
+                        paymentMethods = paymentMethodMessage.getPaymentMethods(),
+                        content = content
+                    )
+                    _messagingContent.value = content
+                    when (content) {
+                        is PaymentMethodMessagingContent.SinglePartner,
+                        is PaymentMethodMessagingContent.MultiPartner -> PaymentMethodMessagingElement.ConfigureResult.Succeeded()
+                        is PaymentMethodMessagingContent.NoContent -> PaymentMethodMessagingElement.ConfigureResult.NoContent()
+                    }
+                },
+                onFailure = {
+                    _messagingContent.value = null
+                    eventReporter.onLoadFailed(it)
+                    PaymentMethodMessagingElement.ConfigureResult.Failed(it)
+                }
             )
-        )
+        }.await()
+    }
 
-        val paymentMethodMessage = result.getOrElse {
-            _messagingContent.value = null
-            return PaymentMethodMessagingElement.ConfigureResult.Failed(it)
-        }
+    override fun onElementDisplayed(appearance: PaymentMethodMessagingElement.Appearance.State) {
+        eventReporter.onElementDisplayed(appearance)
+    }
 
-        val content = PaymentMethodMessagingContent.get(paymentMethodMessage)
-        _messagingContent.value = content
+    override fun onElementClicked() {
+        eventReporter.onElementTapped()
+    }
 
-        return when (content) {
-            is PaymentMethodMessagingContent.SinglePartner,
-            is PaymentMethodMessagingContent.MultiPartner -> PaymentMethodMessagingElement.ConfigureResult.Succeeded()
-            is PaymentMethodMessagingContent.NoContent -> PaymentMethodMessagingElement.ConfigureResult.NoContent()
+    override fun onElementInit() {
+        eventReporter.onInit()
+    }
+
+    private fun PaymentMethodMessage.getPaymentMethods(): List<String> {
+        return when (this) {
+            is PaymentMethodMessage.SinglePartner -> this.paymentMethods
+            is PaymentMethodMessage.MultiPartner -> this.paymentMethods
+            is PaymentMethodMessage.NoContent -> this.paymentMethods
+            is PaymentMethodMessage.UnexpectedError -> emptyList()
         }
     }
 }

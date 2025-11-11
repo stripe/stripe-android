@@ -17,6 +17,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -86,6 +87,10 @@ internal sealed class PaymentMethodMessagingContent {
     }
 }
 
+val LocalAnalyticsListener = compositionLocalOf<() -> Unit> {
+    error("No AnalyticsListenerProvided")
+}
+
 @Composable
 private fun SinglePartner(
     message: PaymentMethodMessage.SinglePartner,
@@ -99,10 +104,12 @@ private fun SinglePartner(
     val context = LocalContext.current
     val keyboardController = rememberKeyboardController()
     val scope = rememberCoroutineScope()
+    val analyticsListener = LocalAnalyticsListener.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.clickable {
             scope.launch { keyboardController.dismiss() }
+            analyticsListener()
             launchLearnMore(context, message.learnMore.url, appearance.theme)
         }
     ) {
@@ -125,10 +132,12 @@ private fun MultiPartner(
     val context = LocalContext.current
     val keyboardController = rememberKeyboardController()
     val scope = rememberCoroutineScope()
+    val analyticsListener = LocalAnalyticsListener.current
 
     Column(
         modifier = Modifier.clickable {
             scope.launch { keyboardController.dismiss() }
+            analyticsListener()
             launchLearnMore(context, message.learnMore.url, appearance.theme)
         }
     ) {

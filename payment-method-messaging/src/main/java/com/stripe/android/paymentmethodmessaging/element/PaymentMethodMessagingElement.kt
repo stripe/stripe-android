@@ -6,6 +6,7 @@ import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.model.PaymentMethod
@@ -19,6 +20,10 @@ import javax.inject.Inject
 class PaymentMethodMessagingElement @Inject internal constructor(
     private val messagingCoordinator: PaymentMethodMessagingCoordinator
 ) {
+
+    init {
+        messagingCoordinator.onElementInit()
+    }
 
     /**
      * Call this method to configure [PaymentMethodMessagingElement] or when the [Configuration] values
@@ -36,7 +41,11 @@ class PaymentMethodMessagingElement @Inject internal constructor(
     @Composable
     fun Content(appearance: Appearance = Appearance()) {
         val content by messagingCoordinator.messagingContent.collectAsState()
-        content?.Content(appearance.build())
+        val appearanceState = appearance.build()
+        messagingCoordinator.onElementDisplayed(appearanceState)
+        CompositionLocalProvider(LocalAnalyticsListener provides { messagingCoordinator.onElementClicked() }) {
+            content?.Content(appearanceState)
+        }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
