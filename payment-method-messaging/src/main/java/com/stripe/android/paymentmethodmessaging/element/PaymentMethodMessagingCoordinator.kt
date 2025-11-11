@@ -4,7 +4,10 @@ package com.stripe.android.paymentmethodmessaging.element
 
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
@@ -19,7 +22,8 @@ internal interface PaymentMethodMessagingCoordinator {
 
 internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val paymentConfiguration: Provider<PaymentConfiguration>
+    private val paymentConfiguration: Provider<PaymentConfiguration>,
+    private val errorReporter: ErrorReporter
 ) : PaymentMethodMessagingCoordinator {
 
     private val _messagingContent = MutableStateFlow<PaymentMethodMessagingContent?>(null)
@@ -43,6 +47,12 @@ internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
         val paymentMethodMessage = result.getOrElse {
             _messagingContent.value = null
             return PaymentMethodMessagingElement.ConfigureResult.Failed(it)
+        }
+
+        if (paymentMethodMessage is PaymentMethodMessage.UnexpectedError) {
+            errorReporter.report(
+                errorEvent = UnexpectedErrorEvent.PAYMENT_METHOD_MESSAGING_ELEMENT_UNABLE_TO_PARSE_RESPONSE,
+            )
         }
 
         val content = PaymentMethodMessagingContent.get(paymentMethodMessage)

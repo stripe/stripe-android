@@ -7,6 +7,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
+import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -14,7 +16,12 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
 
     private val repository: StripeRepository = FakeStripeRepository()
     private val paymentConfig = { PaymentConfiguration(publishableKey = "key") }
-    private val coordinator = DefaultPaymentMethodMessagingCoordinator(repository, paymentConfig)
+    private val errorReporter = FakeErrorReporter()
+    private val coordinator = DefaultPaymentMethodMessagingCoordinator(
+        stripeRepository = repository,
+        paymentConfiguration = paymentConfig,
+        errorReporter = errorReporter
+    )
 
     @Test
     fun `configure returns no content if single and multi partner null`() = runTest {
@@ -96,11 +103,30 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
         }
     }
 
+    @Test
+    fun `sends unexpected error if content type is UnexpectedError`() = runTest {
+        coordinator.messagingContent.test {
+            assertThat(awaitItem()).isNull()
+
+            val errorResult = configureCoordinator(ResultType.UNEXPECTED_ERROR)
+            assertThat(errorResult)
+                .isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.NoContent::class.java)
+            assertThat(awaitItem()).isInstanceOf(PaymentMethodMessagingContent.NoContent::class.java)
+
+            val error = errorReporter.awaitCall()
+            assertThat(error).isNotNull()
+            assertThat(error.errorEvent).isEqualTo(
+                UnexpectedErrorEvent.PAYMENT_METHOD_MESSAGING_ELEMENT_UNABLE_TO_PARSE_RESPONSE
+            )
+        }
+    }
+
     private enum class ResultType {
         MULTI_PARTNER,
         SINGLE_PARTNER,
         NO_CONTENT,
-        FAILURE
+        FAILURE,
+        UNEXPECTED_ERROR
     }
 
     private suspend fun configureCoordinator(result: ResultType): PaymentMethodMessagingElement.ConfigureResult {
@@ -115,6 +141,7 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
             ResultType.NO_CONTENT ->
                 config.amount(0L)
             ResultType.FAILURE -> config.amount(-1L)
+            ResultType.UNEXPECTED_ERROR -> config.amount(-100L)
         }
         return coordinator.configure(config.build())
     }
