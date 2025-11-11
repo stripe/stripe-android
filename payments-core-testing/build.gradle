@@ -1,5 +1,11 @@
 apply from: configs.androidLibrary
 
+android {
+    defaultConfig {
+        buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
+    }
+}
+
 dependencies {
     implementation project(":payments-core")
 
