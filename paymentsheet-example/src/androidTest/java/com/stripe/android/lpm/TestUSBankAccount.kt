@@ -10,8 +10,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
@@ -40,7 +40,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "us_bank_account",
     ) { settings ->
-        settings[CountrySettingsDefinition] = Country.US
+        settings[MerchantSettingsDefinition] = Merchant.US
         settings[CurrencySettingsDefinition] = Currency.USD
         settings[DelayedPaymentMethodsSettingsDefinition] = true
     }

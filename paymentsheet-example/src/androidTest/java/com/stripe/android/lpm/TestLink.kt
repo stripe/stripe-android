@@ -2,8 +2,8 @@ package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
@@ -34,7 +34,7 @@ internal class TestLink : BasePlaygroundTest() {
             paymentMethodCode = "card",
         ) { settings ->
             settings[SupportedPaymentMethodsSettingsDefinition] = if (passthroughMode) "card" else "card,link"
-            settings[CountrySettingsDefinition] = Country.US
+            settings[MerchantSettingsDefinition] = Merchant.US
             settings[LinkSettingsDefinition] = true
             settings[LinkTypeSettingsDefinition] = LinkType.Native
             settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On

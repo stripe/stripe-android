@@ -3,7 +3,7 @@ package com.stripe.android.lpm
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
-import com.stripe.android.paymentsheet.example.playground.settings.Country
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,43 +16,43 @@ import org.junit.runner.RunWith
 internal class TestGooglePay : BasePlaygroundTest() {
     @Test
     fun testUnitedStates() {
-        testDriver.confirmWithGooglePay(Country.US)
+        testDriver.confirmWithGooglePay(Merchant.US)
     }
 
     @Test
     fun testFrance() {
-        testDriver.confirmWithGooglePay(Country.FR)
+        testDriver.confirmWithGooglePay(Merchant.FR)
     }
 
     @Test
     fun testGreatBritain() {
-        testDriver.confirmWithGooglePay(Country.GB)
+        testDriver.confirmWithGooglePay(Merchant.GB)
     }
 
     @Test
     fun testAustralia() {
-        testDriver.confirmWithGooglePay(Country.AU)
+        testDriver.confirmWithGooglePay(Merchant.AU)
     }
 
     @Test
     fun testBrazil() {
-        testDriver.confirmWithGooglePay(Country.BR)
+        testDriver.confirmWithGooglePay(Merchant.BR)
     }
 
     @Test
     fun testJapan() {
-        testDriver.confirmWithGooglePay(Country.JP)
+        testDriver.confirmWithGooglePay(Merchant.JP)
     }
 
     @Test
     fun testMexico() {
-        testDriver.confirmWithGooglePay(Country.MX)
+        testDriver.confirmWithGooglePay(Merchant.MX)
     }
 
     @Test
     fun testSetupIntentInEEA() {
         testDriver.confirmWithGooglePay(
-            country = Country.FR,
+            merchant = Merchant.FR,
             checkoutMode = CheckoutMode.SETUP
         )
     }
@@ -60,7 +60,7 @@ internal class TestGooglePay : BasePlaygroundTest() {
     @Test
     fun testSetupIntentInUS() {
         testDriver.confirmWithGooglePay(
-            country = Country.US,
+            merchant = Merchant.US,
             checkoutMode = CheckoutMode.SETUP
         )
     }

@@ -7,8 +7,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
@@ -32,7 +32,7 @@ internal class TestLinkCardBrand : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "link",
     ) { settings ->
-        settings[CountrySettingsDefinition] = Country.US
+        settings[MerchantSettingsDefinition] = Merchant.US
         settings[CurrencySettingsDefinition] = Currency.USD
         settings[AutomaticPaymentMethodsSettingsDefinition] = false
         settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On

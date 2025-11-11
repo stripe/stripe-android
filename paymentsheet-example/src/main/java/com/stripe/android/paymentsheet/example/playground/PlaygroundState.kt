@@ -14,8 +14,8 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
@@ -42,7 +42,7 @@ import kotlinx.parcelize.Parcelize
 internal sealed interface PlaygroundState : Parcelable {
     val snapshot: PlaygroundSettings.Snapshot
     val integrationType: PlaygroundConfigurationData.IntegrationType
-    val countryCode: Country
+    val merchantCode: Merchant
     val endpoint: String
 
     @Stable
@@ -58,8 +58,8 @@ internal sealed interface PlaygroundState : Parcelable {
         override val integrationType
             get() = snapshot.configurationData.integrationType
 
-        override val countryCode
-            get() = snapshot[CountrySettingsDefinition]
+        override val merchantCode
+            get() = snapshot[MerchantSettingsDefinition]
 
         val initializationType
             get() = snapshot[InitializationTypeSettingsDefinition]
@@ -134,8 +134,8 @@ internal sealed interface PlaygroundState : Parcelable {
         override val integrationType
             get() = snapshot.configurationData.integrationType
 
-        override val countryCode
-            get() = snapshot[CountrySettingsDefinition]
+        override val merchantCode
+            get() = snapshot[MerchantSettingsDefinition]
 
         val isNewCustomer
             get() = snapshot[CustomerSettingsDefinition] == CustomerType.NEW
@@ -176,8 +176,8 @@ internal sealed interface PlaygroundState : Parcelable {
         override val integrationType
             get() = snapshot.configurationData.integrationType
 
-        override val countryCode
-            get() = snapshot[CountrySettingsDefinition]
+        override val merchantCode
+            get() = snapshot[MerchantSettingsDefinition]
 
         @IgnoredOnParcel
         val amount = 9999L

@@ -39,7 +39,7 @@ import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemera
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyResponse
 import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.network.SharedPaymentTokenPlaygroundRequester
-import com.stripe.android.paymentsheet.example.playground.settings.Country
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
@@ -194,7 +194,7 @@ internal class PaymentSheetPlaygroundViewModel(
                 } ?: throw IllegalStateException("Cannot fetch an ephemeral key!")
             },
             setupIntentClientSecretProvider = if (customerState?.inSetupMode == true) {
-                { customerId -> createSetupIntentClientSecret(customerId, customerState.countryCode) }
+                { customerId -> createSetupIntentClientSecret(customerId, customerState.merchantCode) }
             } else {
                 null
             },
@@ -274,7 +274,7 @@ internal class PaymentSheetPlaygroundViewModel(
             override suspend fun provideSetupIntentClientSecret(customerId: String): kotlin.Result<String> {
                 val request = CreateSetupIntentRequest(
                     customerId = customerId,
-                    merchantCountryCode = playgroundState.countryCode.value,
+                    merchantCountryCode = playgroundState.merchantCode.value,
                     onBehalfOf = playgroundState.onBehalfOf.takeIf { it?.isNotBlank() ?: false }
                 )
 
@@ -349,11 +349,11 @@ internal class PaymentSheetPlaygroundViewModel(
 
     private suspend fun createSetupIntentClientSecret(
         customerId: String,
-        country: Country,
+        merchant: Merchant,
     ): CustomerAdapter.Result<String> {
         val request = CreateSetupIntentRequest(
             customerId = customerId,
-            merchantCountryCode = country.value,
+            merchantCountryCode = merchant.value,
         )
 
         val apiResponse = Fuel.post(baseUrl + "create_setup_intent")
@@ -587,7 +587,7 @@ internal class PaymentSheetPlaygroundViewModel(
                     clientSecret = playgroundState.clientSecret,
                     paymentMethodId = confirmationParams.id,
                     shouldSavePaymentMethod = confirmationParams.shouldSavePaymentMethod,
-                    merchantCountryCode = playgroundState.countryCode.value,
+                    merchantCountryCode = playgroundState.merchantCode.value,
                     mode = playgroundState.checkoutMode.value,
                     returnUrl = RETURN_URL,
                 )
@@ -597,7 +597,7 @@ internal class PaymentSheetPlaygroundViewModel(
                 request = ConfirmIntentRequestParams.ConfirmationToken(
                     clientSecret = playgroundState.clientSecret,
                     confirmationTokenId = confirmationParams.id,
-                    merchantCountryCode = playgroundState.countryCode.value,
+                    merchantCountryCode = playgroundState.merchantCode.value,
                     mode = playgroundState.checkoutMode.value,
                 )
             }

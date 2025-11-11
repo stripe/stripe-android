@@ -5,8 +5,8 @@ import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
@@ -82,7 +82,7 @@ internal class TestBacs : BasePlaygroundTest() {
                 PaymentMethod.Type.BacsDebit
             ).joinToString(",")
             settings[DelayedPaymentMethodsSettingsDefinition] = true
-            settings[CountrySettingsDefinition] = Country.GB
+            settings[MerchantSettingsDefinition] = Merchant.GB
             settings[CurrencySettingsDefinition] = Currency.GBP
         }
     }
