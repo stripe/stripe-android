@@ -153,6 +153,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         )
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
         validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
+        validateAnalyticsRequest(eventName = "mc_dismiss")
 
         formPage.clickPrimaryButton()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
@@ -258,6 +259,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             eventName = "mc_embedded_payment_success",
             query("is_confirmation_tokens", "true")
         )
+        validateAnalyticsRequest(eventName = "mc_dismiss")
 
         formPage.clickPrimaryButton()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
@@ -387,6 +389,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         managePage.clickEdit(card1.id)
         editPage.waitUntilVisible()
         validateAnalyticsRequest(eventName = "mc_cancel_edit_screen")
+        validateAnalyticsRequest(eventName = "mc_dismiss")
         Espresso.pressBack()
         managePage.waitUntilVisible()
         managePage.clickDone()
