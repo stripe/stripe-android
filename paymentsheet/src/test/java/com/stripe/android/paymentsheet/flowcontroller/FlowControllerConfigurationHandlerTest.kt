@@ -15,7 +15,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -257,99 +256,6 @@ class FlowControllerConfigurationHandlerTest {
             configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
         )
-    }
-
-    @Test
-    fun `configure() with invalid paymentIntent`() = runTest {
-        val configureErrors = Turbine<Throwable?>()
-        val configurationHandler = createConfigurationHandler()
-
-        configurationHandler.configure(
-            scope = this,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(" "),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            initializedViaCompose = false,
-        ) { _, error ->
-            configureErrors.add(error)
-        }
-
-        assertThat(configureErrors.awaitItem()?.message)
-            .isEqualTo("The PaymentIntent client_secret cannot be an empty string.")
-    }
-
-    @Test
-    fun `configure() with invalid merchant`() = runTest {
-        val configureErrors = Turbine<Throwable?>()
-        val configurationHandler = createConfigurationHandler()
-
-        configurationHandler.configure(
-            scope = this,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-            ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
-                .merchantDisplayName("")
-                .build(),
-            initializedViaCompose = false,
-        ) { _, error ->
-            configureErrors.add(error)
-        }
-
-        assertThat(configureErrors.awaitItem()?.message)
-            .isEqualTo("When a Configuration is passed to PaymentSheet, the Merchant display name cannot be an empty string.")
-    }
-
-    @Test
-    fun `configure() with invalid customer id`() = runTest {
-        val configureErrors = Turbine<Throwable?>()
-        val configurationHandler = createConfigurationHandler()
-
-        configurationHandler.configure(
-            scope = this,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-            ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
-                .customer(
-                    PaymentSheet.CustomerConfiguration(
-                        id = " ",
-                        ephemeralKeySecret = PaymentSheetFixtures.DEFAULT_EPHEMERAL_KEY,
-                    )
-                ).build(),
-            initializedViaCompose = false,
-        ) { _, error ->
-            configureErrors.add(error)
-        }
-
-        assertThat(configureErrors.awaitItem()?.message)
-            .isEqualTo("When a CustomerConfiguration is passed to PaymentSheet, the Customer ID cannot be an empty string.")
-    }
-
-    @Test
-    fun `configure() with invalid customer ephemeral key`() = runTest {
-        val configureErrors = Turbine<Throwable?>()
-        val configurationHandler = createConfigurationHandler()
-
-        configurationHandler.configure(
-            scope = this,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-            ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
-                .customer(
-                    PaymentSheet.CustomerConfiguration(
-                        id = "customer_id",
-                        ephemeralKeySecret = " ",
-                        accessType = LegacyCustomerEphemeralKey(PaymentSheetFixtures.DEFAULT_EPHEMERAL_KEY),
-                    )
-                ).build(),
-            initializedViaCompose = false,
-        ) { _, error ->
-            configureErrors.add(error)
-        }
-
-        assertThat(configureErrors.awaitItem()?.message)
-            .isEqualTo("Conflicting ephemeralKeySecrets between CustomerConfiguration and CustomerConfiguration.customerAccessType")
     }
 
     @Test
@@ -608,7 +514,6 @@ class FlowControllerConfigurationHandlerTest {
             eventReporter = eventReporter,
             viewModel = viewModel,
             paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
-            isLiveModeProvider = { false },
             confirmationHandler = FakeFlowControllerConfirmationHandler(),
         )
     }

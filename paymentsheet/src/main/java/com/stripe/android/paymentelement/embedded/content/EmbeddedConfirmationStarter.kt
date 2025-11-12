@@ -4,7 +4,6 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.embedded.EmbeddedConfirmationSaver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -16,7 +15,6 @@ import javax.inject.Singleton
 internal class EmbeddedConfirmationStarter @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     @ViewModelScope private val coroutineScope: CoroutineScope,
-    private val confirmationSaver: EmbeddedConfirmationSaver,
 ) {
     init {
         coroutineScope.launch {
@@ -26,9 +24,6 @@ internal class EmbeddedConfirmationStarter @Inject constructor(
                     is ConfirmationHandler.State.Idle -> Unit
 
                     is ConfirmationHandler.State.Complete -> {
-                        if (state.result is ConfirmationHandler.Result.Succeeded) {
-                            confirmationSaver.save(state.result.intent)
-                        }
                         _result.send(state.result)
                     }
                 }

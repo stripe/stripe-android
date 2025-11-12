@@ -99,6 +99,14 @@ internal class FormActivity : AppCompatActivity() {
         fadeOut()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+
+        if (isFinishing && ::eventReporter.isInitialized) {
+            eventReporter.onDismiss()
+        }
+    }
+
     private fun setFormResult(result: FormResult) {
         setResult(
             Activity.RESULT_OK,

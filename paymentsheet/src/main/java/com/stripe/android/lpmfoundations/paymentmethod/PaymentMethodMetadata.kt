@@ -80,6 +80,7 @@ internal data class PaymentMethodMetadata(
     val clientAttributionMetadata: ClientAttributionMetadata,
     val attestOnIntentConfirmation: Boolean,
     val appearance: PaymentSheet.Appearance,
+    val onBehalfOf: String?,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -369,6 +370,7 @@ internal data class PaymentMethodMetadata(
                 clientAttributionMetadata = clientAttributionMetadata,
                 attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation,
                 appearance = configuration.appearance,
+                onBehalfOf = elementsSession.onBehalfOf,
             )
         }
 
@@ -430,6 +432,7 @@ internal data class PaymentMethodMetadata(
                 ),
                 attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation,
                 appearance = configuration.appearance,
+                onBehalfOf = elementsSession.onBehalfOf,
             )
         }
     }

@@ -14,6 +14,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentmethodmessaging.element.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -91,6 +92,7 @@ internal class PaymentMethodMessagingContentTest {
         val coordinator = DefaultPaymentMethodMessagingCoordinator(
             stripeRepository = FakeStripeRepository(),
             paymentConfiguration = { PaymentConfiguration("key") },
+            FakeEventReporter()
         )
 
         Scenario(

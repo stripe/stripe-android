@@ -1,5 +1,7 @@
 package com.stripe.android.networktesting
 
+import com.stripe.android.core.networking.AnalyticsRequest
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.ConnectionFactory
 import com.stripe.android.core.networking.StripeRequest
@@ -93,10 +95,14 @@ private class NetworkStatement(
 ) : Statement() {
     override fun evaluate() {
         try {
+            if (!hostsToTrack.contains(AnalyticsRequest.HOST.hostFromUrl())) {
+                AnalyticsRequestExecutor.ENABLED = false
+            }
             setup()
             baseStatement.evaluate()
             mockWebServer.dispatcher.validate()
         } finally {
+            AnalyticsRequestExecutor.ENABLED = true
             tearDown()
         }
     }

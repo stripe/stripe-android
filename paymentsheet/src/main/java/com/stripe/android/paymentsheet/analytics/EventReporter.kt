@@ -19,20 +19,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
 
-@Suppress("TooManyFunctions")
-internal interface EventReporter : CardScanEventsReporter {
-
-    /**
-     * PaymentSheet has been instantiated or FlowController has finished its configuration.
-     */
-    fun onInit(
-        commonConfiguration: CommonConfiguration,
-        appearance: PaymentSheet.Appearance,
-        primaryButtonColor: Boolean?,
-        configurationSpecificPayload: PaymentSheetEvent.ConfigurationSpecificPayload,
-        isDeferred: Boolean,
-    )
-
+internal interface LoadingEventReporter {
     /**
      * PaymentSheet or FlowController have started loading.
      */
@@ -71,6 +58,26 @@ internal interface EventReporter : CardScanEventsReporter {
      * PaymentSheet or FlowController have failed to load from the Elements session endpoint.
      */
     fun onElementsSessionLoadFailed(error: Throwable)
+
+    /**
+     * The client was unable to parse the response from LUXE.
+     */
+    fun onLpmSpecFailure(errorMessage: String?)
+}
+
+@Suppress("TooManyFunctions")
+internal interface EventReporter : CardScanEventsReporter {
+
+    /**
+     * PaymentSheet has been instantiated or FlowController has finished its configuration.
+     */
+    fun onInit(
+        commonConfiguration: CommonConfiguration,
+        appearance: PaymentSheet.Appearance,
+        primaryButtonColor: Boolean?,
+        configurationSpecificPayload: PaymentSheetEvent.ConfigurationSpecificPayload,
+        isDeferred: Boolean,
+    )
 
     /**
      * PaymentSheet has been dismissed by pressing the close button.
@@ -157,11 +164,6 @@ internal interface EventReporter : CardScanEventsReporter {
         paymentSelection: PaymentSelection,
         error: PaymentSheetConfirmationError,
     )
-
-    /**
-     * The client was unable to parse the response from LUXE.
-     */
-    fun onLpmSpecFailure(errorMessage: String?)
 
     /**
      * The user has auto-filled a text field.

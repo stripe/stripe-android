@@ -7,10 +7,6 @@ class ConfirmationTokenClientContextParamsTest {
 
     @Test
     fun toParamMap_withAllProperties_shouldCreateExpectedMap() {
-        val paymentMethodOptions = PaymentMethodOptionsParams.Card(
-            network = "visa",
-            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-        )
         val params = ConfirmationTokenClientContextParams(
             mode = "payment",
             currency = "usd",
@@ -20,7 +16,7 @@ class ConfirmationTokenClientContextParamsTest {
             onBehalfOf = "acct_123456",
             paymentMethodConfiguration = "pmc_123456",
             customer = "cus_123456",
-            paymentMethodOptions = paymentMethodOptions
+            paymentMethodOptionsJson = """{"card":{"setup_future_usage":"off_session"}}"""
         )
 
         assertThat(params.toParamMap())
@@ -70,25 +66,7 @@ class ConfirmationTokenClientContextParamsTest {
             onBehalfOf = null,
             paymentMethodConfiguration = null,
             customer = null,
-            paymentMethodOptions = null
-        )
-
-        assertThat(params.toParamMap())
-            .isEqualTo(
-                mapOf(
-                    "mode" to "payment",
-                    "currency" to "usd"
-                )
-            )
-    }
-
-    @Test
-    fun toParamMap_withEmptyPaymentMethodOptions_shouldNotIncludePaymentMethodOptions() {
-        val paymentMethodOptions = PaymentMethodOptionsParams.Card()
-        val params = ConfirmationTokenClientContextParams(
-            mode = "payment",
-            currency = "usd",
-            paymentMethodOptions = paymentMethodOptions
+            paymentMethodOptionsJson = null
         )
 
         assertThat(params.toParamMap())
@@ -120,9 +98,6 @@ class ConfirmationTokenClientContextParamsTest {
 
     @Test
     fun toParamMap_withSepaDebitPaymentMethodOptions_shouldCreateExpectedMap() {
-        val paymentMethodOptions = PaymentMethodOptionsParams.SepaDebit(
-            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-        )
         val params = ConfirmationTokenClientContextParams(
             mode = "payment",
             currency = "eur",
@@ -130,7 +105,7 @@ class ConfirmationTokenClientContextParamsTest {
             captureMethod = "automatic",
             paymentMethodTypes = listOf("sepa_debit"),
             customer = "cus_test_customer",
-            paymentMethodOptions = paymentMethodOptions
+            paymentMethodOptionsJson = """{"sepa_debit":{"setup_future_usage":"off_session"}}"""
         )
 
         assertThat(params.toParamMap())
@@ -153,14 +128,12 @@ class ConfirmationTokenClientContextParamsTest {
 
     @Test
     fun toParamMap_withRequireCvcRecollection_shouldCreateExpectedMap() {
-        val paymentMethodOptions = PaymentMethodOptionsParams.Card(
-            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-        )
         val params = ConfirmationTokenClientContextParams(
             mode = "payment",
             currency = "usd",
-            paymentMethodOptions = paymentMethodOptions,
-            requireCvcRecollection = true
+            paymentMethodOptionsJson = """
+                {"card":{"setup_future_usage":"off_session","require_cvc_recollection":true}}
+            """.trimIndent()
         )
 
         assertThat(params.toParamMap())
@@ -179,34 +152,11 @@ class ConfirmationTokenClientContextParamsTest {
     }
 
     @Test
-    fun toParamMap_withBlankSetupFutureUsage_shouldNotIncludeSetupFutureUsage() {
-        val paymentMethodOptions = PaymentMethodOptionsParams.Card(
-            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-        )
-        val params = ConfirmationTokenClientContextParams(
-            mode = "payment",
-            currency = "usd",
-            paymentMethodOptions = paymentMethodOptions
-        )
-
-        assertThat(params.toParamMap())
-            .isEqualTo(
-                mapOf(
-                    "mode" to "payment",
-                    "currency" to "usd"
-                )
-            )
-    }
-
-    @Test
     fun toParamMap_withOnlyPmoSetupFutureUsage_shouldIncludePmoSfuValues() {
-        val paymentMethodOptions = PaymentMethodOptionsParams.Card(
-            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession,
-        )
         val params = ConfirmationTokenClientContextParams(
             mode = "payment",
             currency = "usd",
-            paymentMethodOptions = paymentMethodOptions
+            paymentMethodOptionsJson = """{"card":{"setup_future_usage":"on_session"}}"""
         )
 
         val paramMap = params.toParamMap()
@@ -217,14 +167,11 @@ class ConfirmationTokenClientContextParamsTest {
 
     @Test
     fun toParamMap_withPmoSetupFutureUsage_shouldIncludeBothValues() {
-        val paymentMethodOptions = PaymentMethodOptionsParams.Card(
-            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-        )
         val params = ConfirmationTokenClientContextParams(
             mode = "payment",
             currency = "usd",
             setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
-            paymentMethodOptions = paymentMethodOptions
+            paymentMethodOptionsJson = """{"card":{"setup_future_usage":"off_session"}}"""
         )
 
         val paramMap = params.toParamMap()
@@ -236,31 +183,11 @@ class ConfirmationTokenClientContextParamsTest {
     }
 
     @Test
-    fun toParamMap_withPmoBlankSetupFutureUsage_shouldNotIncludeSetupFutureUsage() {
-        val paymentMethodOptions = PaymentMethodOptionsParams.Card(
-            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-        )
-        val params = ConfirmationTokenClientContextParams(
-            mode = "payment",
-            currency = "usd",
-            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank,
-            paymentMethodOptions = paymentMethodOptions
-        )
-
-        val paramMap = params.toParamMap()
-        // Blank values should not be included anywhere
-        assertThat(paramMap.containsKey("setup_future_usage")).isFalse()
-        val pmoMap = paramMap["payment_method_options"] as? Map<*, *>
-        val cardOptions = pmoMap?.get("card") as? Map<*, *>
-        assertThat(cardOptions?.containsKey("setup_future_usage")).isNotEqualTo(true)
-    }
-
-    @Test
     fun toParamMap_withRequireCvcRecollectionOnly_shouldCreateExpectedMap() {
         val params = ConfirmationTokenClientContextParams(
             mode = "payment",
             currency = "usd",
-            requireCvcRecollection = true
+            paymentMethodOptionsJson = """{"card":{"require_cvc_recollection":true}}"""
         )
 
         assertThat(params.toParamMap())
@@ -279,14 +206,12 @@ class ConfirmationTokenClientContextParamsTest {
 
     @Test
     fun toParamMap_withRequireCvcRecollectionAndNonCardPmo_shouldCreateSeparateCardEntry() {
-        val paymentMethodOptions = PaymentMethodOptionsParams.SepaDebit(
-            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-        )
         val params = ConfirmationTokenClientContextParams(
             mode = "payment",
             currency = "eur",
-            paymentMethodOptions = paymentMethodOptions,
-            requireCvcRecollection = true
+            paymentMethodOptionsJson = """
+                {"sepa_debit":{"setup_future_usage":"off_session"},"card":{"require_cvc_recollection":true}}
+            """.trimIndent()
         )
 
         assertThat(params.toParamMap())
@@ -302,23 +227,6 @@ class ConfirmationTokenClientContextParamsTest {
                             "require_cvc_recollection" to true
                         )
                     )
-                )
-            )
-    }
-
-    @Test
-    fun toParamMap_withRequireCvcRecollectionFalse_shouldNotIncludeCvcRecollection() {
-        val params = ConfirmationTokenClientContextParams(
-            mode = "payment",
-            currency = "usd",
-            requireCvcRecollection = false
-        )
-
-        assertThat(params.toParamMap())
-            .isEqualTo(
-                mapOf(
-                    "mode" to "payment",
-                    "currency" to "usd"
                 )
             )
     }

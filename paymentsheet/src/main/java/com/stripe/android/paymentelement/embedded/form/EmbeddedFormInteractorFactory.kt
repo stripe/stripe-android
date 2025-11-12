@@ -27,7 +27,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val formActivityStateHelper: FormActivityStateHelper,
-    private val eventReporter: EventReporter
+    private val eventReporter: EventReporter,
 ) {
     fun create(): DefaultVerticalModeFormInteractor {
         val formHelper = embeddedFormHelperFactory.create(

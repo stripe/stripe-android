@@ -48,6 +48,18 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">是的，更新</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">登录或注册</string>
+  <!-- Title for the address field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_address_field_title">地址</string>
+  <!-- Text displayed in a confirmation button when gathering kyc information -->
+  <string name="stripe_link_onramp_kyc_verification_confirm_button_text">确认</string>
+  <!-- Title for the date of birth field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_dob_field_title">出生日期</string>
+  <!-- Title for the name field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_name_field_title">姓名</string>
+  <!-- Title of the screen responsible for confirming kyc information -->
+  <string name="stripe_link_onramp_kyc_verification_screen_title">确认您的信息</string>
+  <!-- Title for the SSN field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_ssn_field_title">社会保障号码 (SSN) 最后 4 位</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">同意并继续</string>
   <!-- Title for the Link signup screen -->

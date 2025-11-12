@@ -5,39 +5,41 @@ import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArray
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodMessageImage
 import com.stripe.android.model.PaymentMethodMessageLearnMore
-import com.stripe.android.model.PaymentMethodMessageMultiPartner
-import com.stripe.android.model.PaymentMethodMessageSinglePartner
 import org.json.JSONArray
 import org.json.JSONObject
 
 internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMessage> {
     override fun parse(json: JSONObject): PaymentMethodMessage? {
         val paymentMethods = jsonArrayToList(json.optJSONArray(FIELD_PAYMENT_METHODS))
-        val singlePartner = maybeGetSinglePartner(json)
-        val multiPartner = maybeGetMultiPartner(json)
+        val singlePartner = maybeGetSinglePartner(json, paymentMethods)
+        val multiPartner = maybeGetMultiPartner(json, paymentMethods)
+        val unexpectedError = maybeGetUnexpectedError(json)
 
-        return PaymentMethodMessage(
-            paymentMethods = paymentMethods,
-            singlePartner = singlePartner,
-            multiPartner = multiPartner
-        )
+        return unexpectedError ?: singlePartner ?: multiPartner ?: PaymentMethodMessage.NoContent(paymentMethods)
     }
 
-    private fun maybeGetMultiPartner(json: JSONObject): PaymentMethodMessageMultiPartner? {
+    private fun maybeGetMultiPartner(
+        json: JSONObject,
+        paymentMethods: List<String>
+    ): PaymentMethodMessage.MultiPartner? {
         val content = json.optJSONObject(FIELD_CONTENT) ?: return null
         val imagesMap = getImages(content.optJSONArray(FIELD_IMAGES))
         val learnMore = getLearnMore(content) ?: return null
         val promotion = getPromotion(content) ?: return null
-        return PaymentMethodMessageMultiPartner(
+        return PaymentMethodMessage.MultiPartner(
             promotion = promotion,
             lightImages = imagesMap[FIELD_LIGHT_THEME_PNG] ?: emptyList(),
             darkImages = imagesMap[FIELD_DARK_THEME_PNG] ?: emptyList(),
             flatImages = imagesMap[FIELD_FLAT_THEME_PNG] ?: emptyList(),
-            learnMore = learnMore
+            learnMore = learnMore,
+            paymentMethods = paymentMethods
         )
     }
 
-    private fun maybeGetSinglePartner(json: JSONObject): PaymentMethodMessageSinglePartner? {
+    private fun maybeGetSinglePartner(
+        json: JSONObject,
+        paymentMethods: List<String>
+    ): PaymentMethodMessage.SinglePartner? {
         val paymentPlanGroups = json.optJSONArray(FIELD_PAYMENT_PLAN_GROUPS)
         // Only use inline_partner_promotion if one payment plan group is present
         if (paymentPlanGroups?.length() != 1) return null
@@ -53,13 +55,53 @@ internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMes
         val darkImage = getImage(imagesMap[FIELD_DARK_THEME_PNG]) ?: return null
         val flatImage = getImage(imagesMap[FIELD_FLAT_THEME_PNG]) ?: return null
 
-        return PaymentMethodMessageSinglePartner(
+        return PaymentMethodMessage.SinglePartner(
             inlinePartnerPromotion = inlinePartnerPromotion,
             lightImage = lightImage,
             darkImage = darkImage,
             flatImage = flatImage,
-            learnMore = learnMore
+            learnMore = learnMore,
+            paymentMethods = paymentMethods
         )
+    }
+
+    /**
+     * Check if expected keys exist. These keys can be mapped to null or empty objects but they should always be
+     * present in the response.
+     */
+    private fun maybeGetUnexpectedError(json: JSONObject): PaymentMethodMessage.UnexpectedError? {
+        val paymentPlanGroups = json.optJSONArray(FIELD_PAYMENT_PLAN_GROUPS)
+        if (paymentPlanGroups?.length() == 1) {
+            val paymentPlanGroup = paymentPlanGroups.get(0) as? JSONObject
+            val contentExists = paymentPlanGroup?.has(FIELD_CONTENT) == true
+            if (!contentExists) {
+                return PaymentMethodMessage.UnexpectedError(
+                    "payment_plan_groups.content not found"
+                )
+            }
+            val content = paymentPlanGroup.get(FIELD_CONTENT) as? JSONObject
+            val inlinePartnerPromotionExists = content?.has(FIELD_INLINE_PARTNER_PROMOTION) == true
+            if (!inlinePartnerPromotionExists) {
+                return PaymentMethodMessage.UnexpectedError(
+                    "payment_plan_groups.content.inline_partner_promotion not found"
+                )
+            }
+        } else {
+            val contentExists = json.has(FIELD_CONTENT)
+            if (!contentExists) {
+                return PaymentMethodMessage.UnexpectedError(
+                    "content not found"
+                )
+            }
+            val content = json.optJSONObject(FIELD_CONTENT)
+            val promotionExists = content?.has(FIELD_PROMOTION) == true
+            if (!promotionExists) {
+                return PaymentMethodMessage.UnexpectedError(
+                    "content.promotion not found"
+                )
+            }
+        }
+        return null
     }
 
     private fun getPromotion(json: JSONObject): String? {

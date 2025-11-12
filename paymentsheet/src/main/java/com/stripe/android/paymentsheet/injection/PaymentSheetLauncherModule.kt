@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import android.content.Context
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -11,6 +13,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(
@@ -42,5 +45,11 @@ internal abstract class PaymentSheetLauncherModule {
         fun provideCVCRecollectionHandler(): CvcRecollectionHandler {
             return CvcRecollectionHandlerImpl()
         }
+
+        @Provides
+        @Named(IS_LIVE_MODE)
+        fun isLiveMode(
+            paymentConfiguration: Provider<PaymentConfiguration>
+        ): () -> Boolean = { !paymentConfiguration.get().publishableKey.contains("test") }
     }
 }

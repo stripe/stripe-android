@@ -1624,6 +1624,24 @@ class ElementsSessionJsonParserTest {
             .isNull()
     }
 
+    @Test
+    fun `returns accountId and merchantId`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val session = parser.parse(ElementsSessionFixtures.PAYMENT_INTENT_WITH_EXTERNAL_VENMO_JSON)!!
+
+        assertThat(session.accountId).isEqualTo("acct_1HvTI7Lu5o3P18Zp")
+        assertThat(session.merchantId).isEqualTo("acct_1HvTI7Lu5o3P18Zp")
+    }
+
     companion object {
         private const val APP_ID = "com.app.id"
     }

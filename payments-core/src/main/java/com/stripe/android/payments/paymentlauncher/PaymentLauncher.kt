@@ -14,6 +14,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.utils.rememberActivityOrNull
 
 /**
@@ -39,6 +40,15 @@ interface PaymentLauncher {
      * Fetches a [SetupIntent] and handles its next action.
      */
     fun handleNextActionForSetupIntent(clientSecret: String)
+
+    /**
+     * Handles next action for a [StripeIntent] that has already been loaded.
+     * This is an internal optimization to avoid re-fetching the intent when we already have it.
+     *
+     * @RestrictTo for paymentsheet module use only
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun handleNextActionForStripeIntent(intent: StripeIntent)
 
     /**
      * Fetches a [PaymentIntent] from a hashed value and handles its next action.

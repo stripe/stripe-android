@@ -275,7 +275,14 @@ internal class GooglePayTest {
     }
 
     private fun intendedGooglePayToBeLaunched() {
-        intended(hasComponent(GOOGLE_PAY_ACTIVITY_NAME))
+        composeTestRule.waitUntil(UI_TIMEOUT) {
+            try {
+                intended(hasComponent(GOOGLE_PAY_ACTIVITY_NAME))
+                true
+            } catch (_: AssertionError) {
+                false
+            }
+        }
     }
 
     private fun intendedPaymentConfirmationToBeLaunched() {

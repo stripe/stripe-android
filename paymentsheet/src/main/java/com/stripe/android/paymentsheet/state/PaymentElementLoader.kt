@@ -8,6 +8,7 @@ import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
@@ -32,7 +33,7 @@ import com.stripe.android.payments.financialconnections.GetFinancialConnectionsA
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -51,6 +52,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -144,7 +146,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val customerRepository: CustomerRepository,
     private val lpmRepository: LpmRepository,
     private val logger: Logger,
-    private val eventReporter: EventReporter,
+    private val eventReporter: LoadingEventReporter,
     private val errorReporter: ErrorReporter,
     @IOContext private val workContext: CoroutineContext,
     private val createLinkState: CreateLinkState,
@@ -153,6 +155,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val userFacingLogger: UserFacingLogger,
     private val cvcRecollectionHandler: CvcRecollectionHandler,
     private val integrityRequestManager: IntegrityRequestManager,
+    @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
 ) : PaymentElementLoader {
 
     @Suppress("LongMethod")
@@ -161,6 +164,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration: CommonConfiguration,
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
+        // Validate configuration before loading
+        initializationMode.validate()
+        configuration.validate(isLiveModeProvider())
+
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
@@ -736,7 +743,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 orderedLpms = state.paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
                 requireCvcRecollection = cvcRecollectionHandler.cvcRecollectionEnabled(
                     state.paymentMethodMetadata.stripeIntent,
-                    initializationMode
                 ),
                 hasDefaultPaymentMethod = hasDefaultPaymentMethod,
                 setAsDefaultEnabled = setAsDefaultEnabled,

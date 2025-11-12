@@ -24,6 +24,7 @@ import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.ui.core.elements.H4Text
@@ -34,7 +35,6 @@ import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
 import javax.inject.Inject
-import kotlin.getValue
 
 internal class ManageActivity : AppCompatActivity() {
     private val args: ManageContract.Args? by lazy {
@@ -55,6 +55,9 @@ internal class ManageActivity : AppCompatActivity() {
 
     @Inject
     lateinit var selectionHolder: EmbeddedSelectionHolder
+
+    @Inject
+    lateinit var eventReporter: EventReporter
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -154,6 +157,14 @@ internal class ManageActivity : AppCompatActivity() {
     override fun finish() {
         super.finish()
         fadeOut()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        if (isFinishing && ::eventReporter.isInitialized) {
+            eventReporter.onDismiss()
+        }
     }
 
     private fun setManageResult(shouldInvokeSelectionCallback: Boolean) {

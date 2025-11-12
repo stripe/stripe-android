@@ -393,7 +393,7 @@ internal class PaymentSheetPage(
     }
 
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(5000) {
             composeTestRule
                 .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -402,6 +402,8 @@ internal class PaymentSheetPage(
     }
 
     fun clickOnLpm(code: String, forVerticalMode: Boolean = false) {
+        waitUntilVisible()
+
         if (forVerticalMode) {
             composeTestRule.waitUntil {
                 composeTestRule
@@ -437,7 +439,7 @@ internal class PaymentSheetPage(
         composeTestRule.waitUntil {
             composeTestRule
                 .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }
@@ -446,7 +448,7 @@ internal class PaymentSheetPage(
         composeTestRule.waitUntil {
             composeTestRule
                 .onAllNodes(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code").and(isSelected()))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }

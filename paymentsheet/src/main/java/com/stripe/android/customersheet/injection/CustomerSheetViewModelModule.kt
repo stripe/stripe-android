@@ -31,6 +31,8 @@ import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
+import com.stripe.android.paymentsheet.DefaultPrefsRepository
+import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
@@ -66,6 +68,11 @@ internal interface CustomerSheetViewModelModule {
     fun bindsStripeIntentRepository(
         impl: RealElementsSessionRepository,
     ): ElementsSessionRepository
+
+    @Binds
+    fun bindsPrefsRepositoryFactory(
+        factory: DefaultPrefsRepository.Factory
+    ): PrefsRepository.Factory
 
     @Suppress("TooManyFunctions")
     companion object {
@@ -110,7 +117,7 @@ internal interface CustomerSheetViewModelModule {
         @Named(IS_LIVE_MODE)
         fun isLiveMode(
             paymentConfiguration: Provider<PaymentConfiguration>
-        ): () -> Boolean = { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
+        ): () -> Boolean = { paymentConfiguration.get().isLiveMode() }
 
         @Provides
         internal fun providesErrorReporter(

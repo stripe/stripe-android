@@ -96,7 +96,8 @@ class OnrampPresenterCoordinatorTest {
                 verifyIdentityCallback = {},
                 authenticateUserCallback = {},
                 collectPaymentCallback = {},
-                authorizeCallback = {}
+                authorizeCallback = {},
+                verifyKycCallback = {}
             ),
             coroutineScope = testScope
         )

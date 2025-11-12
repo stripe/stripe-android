@@ -3655,13 +3655,10 @@ internal class StripeApiRepositoryTest {
         whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
             .thenReturn(stripeResponse)
 
-        val paymentMethodOptions = PaymentMethodOptionsParams.Card(
-            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-        )
         val clientContext = ConfirmationTokenClientContextParams(
             mode = "payment",
             currency = "usd",
-            paymentMethodOptions = paymentMethodOptions
+            paymentMethodOptionsJson = """{"card":{"setup_future_usage":"off_session"}}"""
         )
         val confirmationTokenParams = ConfirmationTokenParams(
             paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,

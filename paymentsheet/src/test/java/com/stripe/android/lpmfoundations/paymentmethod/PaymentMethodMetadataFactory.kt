@@ -58,6 +58,7 @@ internal object PaymentMethodMetadataFactory {
         clientAttributionMetadata: ClientAttributionMetadata? = null,
         attestOnIntentConfirmation: Boolean = false,
         appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+        onBehalfOf: String? = null,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -102,6 +103,7 @@ internal object PaymentMethodMetadataFactory {
             clientAttributionMetadata ?: PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             attestOnIntentConfirmation = attestOnIntentConfirmation,
             appearance = appearance,
+            onBehalfOf = onBehalfOf,
         )
     }
 

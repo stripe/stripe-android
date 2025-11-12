@@ -73,6 +73,8 @@ internal class FakeElementsSessionRepository(
                     passiveCaptcha = passiveCaptchaParams,
                     merchantLogoUrl = null,
                     elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
+                    accountId = "acct_1SGP1sPvdtoA7EjP",
+                    merchantId = "acct_1SGP1sPvdtoA7EjP",
                 )
             )
         }

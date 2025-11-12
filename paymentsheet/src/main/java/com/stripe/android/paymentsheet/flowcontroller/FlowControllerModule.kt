@@ -130,7 +130,7 @@ internal object FlowControllerModule {
     @Singleton
     @Named(IS_LIVE_MODE)
     fun provideIsLiveMode(paymentConfiguration: Provider<PaymentConfiguration>): () -> Boolean {
-        return { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
+        return { paymentConfiguration.get().isLiveMode() }
     }
 
     @Module

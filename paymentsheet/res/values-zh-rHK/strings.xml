@@ -48,6 +48,18 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">是，更新</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">登入或註冊</string>
+  <!-- Title for the address field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_address_field_title">地址</string>
+  <!-- Text displayed in a confirmation button when gathering kyc information -->
+  <string name="stripe_link_onramp_kyc_verification_confirm_button_text">確認</string>
+  <!-- Title for the date of birth field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_dob_field_title">出生日期</string>
+  <!-- Title for the name field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_name_field_title">名稱</string>
+  <!-- Title of the screen responsible for confirming kyc information -->
+  <string name="stripe_link_onramp_kyc_verification_screen_title">確認個人資訊</string>
+  <!-- Title for the SSN field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_ssn_field_title">SSN 的最後 4 位數字</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">同意並繼續</string>
   <!-- Title for the Link signup screen -->
@@ -127,7 +139,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">卡未更新，請重試。</string>
   <!-- Title shown above a carousel containing available payment methods -->
-  <string name="stripe_paymentsheet_choose_payment_method">選擇一個支付方式</string>
+  <string name="stripe_paymentsheet_choose_payment_method">選擇支付方式</string>
   <string name="stripe_paymentsheet_close">關閉</string>
   <!-- A button used to confirm selecting a saved payment method -->
   <string name="stripe_paymentsheet_confirm">確定</string>
@@ -252,7 +264,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Countdown timer text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_message">請在 %s 內打開您的 UPI 應用程式來批准付款</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
-  <string name="stripe_upi_polling_payment_failed_message">請返回並選擇另一個支付方式。</string>
+  <string name="stripe_upi_polling_payment_failed_message">請返回並選擇另一種支付方式</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">付款失敗</string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
