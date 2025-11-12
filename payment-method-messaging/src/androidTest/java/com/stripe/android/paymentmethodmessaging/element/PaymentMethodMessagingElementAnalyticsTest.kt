@@ -56,7 +56,7 @@ internal class PaymentMethodMessagingElementAnalyticsTest {
     val testRule = RuleChain.emptyRuleChain()
         .around(composeTestRule)
         .around(networkRule)
-        .around(RetryRule(5))
+        //.around(RetryRule(5))
         .around(AdvancedFraudSignalsTestRule())
 
     @Test
@@ -77,13 +77,6 @@ internal class PaymentMethodMessagingElementAnalyticsTest {
             eventName = "payment_method_messaging_element_displayed"
         )
 
-        testContext.configure(
-            PaymentMethodMessagingElement.Configuration()
-                .amount(0)
-                .currency("usd")
-                .locale("en")
-        )
-
         validateAnalyticsRequest(
             eventName = "payment_method_messaging_element_load_started",
             query("amount", "0"),
@@ -95,6 +88,13 @@ internal class PaymentMethodMessagingElementAnalyticsTest {
             eventName = "payment_method_messaging_element_load_succeeded",
             query("payment_methods", ""),
             query("content_type", "no_content")
+        )
+
+        testContext.configure(
+            PaymentMethodMessagingElement.Configuration()
+                .amount(0)
+                .currency("usd")
+                .locale("en")
         )
     }
 
@@ -129,10 +129,11 @@ internal fun runPaymentMethodMessagingElementTest(
     networkRule: NetworkRule,
     block: suspend (PaymentMethodMessagingElementTestRunnerContext) -> Unit
 ) {
+    val application = ApplicationProvider.getApplicationContext<Application>()
+    PaymentConfiguration.init(application, "pk_test_123")
+    var element =  PaymentMethodMessagingElement.create(application)
     val factory: (ComponentActivity) -> PaymentMethodMessagingElement = {
-        lateinit var element: PaymentMethodMessagingElement
         it.setContent {
-            element = PaymentMethodMessagingElement.create(it.application)
             Column {
                 element.Content()
             }
@@ -142,9 +143,6 @@ internal fun runPaymentMethodMessagingElementTest(
 
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
-        scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
-        }
 
         lateinit var paymentMethodMessagingElement: PaymentMethodMessagingElement
         scenario.onActivity {
