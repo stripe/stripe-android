@@ -3050,7 +3050,6 @@ internal class PaymentSheetViewModelTest {
 
         val arguments = startTurbine.awaitItem()
 
-        assertThat(arguments.initializationMode).isEqualTo(initializationMode)
         assertThat(arguments.confirmationOption).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = CARD_PAYMENT_METHOD,

@@ -513,7 +513,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 confirmationHandler.start(
                     arguments = ConfirmationHandler.Args(
                         confirmationOption = option,
-                        initializationMode = args.initializationMode,
                         paymentMethodMetadata = paymentMethodMetadata,
                     ),
                 )

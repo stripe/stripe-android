@@ -6,8 +6,10 @@ import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -59,7 +61,7 @@ internal object PaymentMethodMetadataFactory {
         attestOnIntentConfirmation: Boolean = false,
         appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
         onBehalfOf: String? = null,
-        integrationMetadata: IntegrationMetadata = IntegrationMetadata.IntentFirst,
+        integrationMetadata: IntegrationMetadata = stripeIntent.integrationMetadata(),
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -113,5 +115,30 @@ internal object PaymentMethodMetadataFactory {
         val inputStream = PaymentMethodMetadataFactory::class.java.classLoader!!.getResourceAsStream("lpms.json")
         val specsString = inputStream.bufferedReader().use { it.readText() }
         return LpmSerializer.deserializeList(specsString).getOrThrow()
+    }
+
+    private fun StripeIntent.integrationMetadata(): IntegrationMetadata {
+        clientSecret?.let { return IntegrationMetadata.IntentFirst(it) }
+        return when (this) {
+            is PaymentIntent -> {
+                IntegrationMetadata.DeferredIntentWithPaymentMethod(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            amount = amount ?: 5000,
+                            currency = currency ?: "usd"
+                        )
+                    )
+                )
+            }
+            is SetupIntent -> {
+                IntegrationMetadata.DeferredIntentWithPaymentMethod(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Setup(
+                            currency = "usd"
+                        )
+                    )
+                )
+            }
+        }
     }
 }

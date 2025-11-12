@@ -42,7 +42,6 @@ import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -693,9 +692,6 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
                 useAttestationEndpointsForLink = false,
                 suppress2faModal = false,
-                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                    clientSecret = "pi_123_secret_123",
-                ),
                 elementsSessionId = "session_1234",
                 linkMode = LinkMode.LinkPaymentMethod,
                 allowDefaultOptIn = false,

@@ -187,7 +187,8 @@ internal class DefaultPaymentElementLoaderTest {
                         elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
                         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
-                    )
+                    ),
+                    integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_1234"),
                 ),
             )
         )
@@ -1561,30 +1562,31 @@ internal class DefaultPaymentElementLoaderTest {
     fun `integrationMetadata returns intent first for payment intent`() = runTest {
         val paymentIntent = PaymentElementLoader.InitializationMode.PaymentIntent("secret")
         assertThat(paymentIntent.integrationMetadata(null))
-            .isEqualTo(IntegrationMetadata.IntentFirst)
+            .isEqualTo(IntegrationMetadata.IntentFirst("secret"))
         assertThat(paymentIntent.integrationMetadata(PaymentElementCallbacks.Builder().build()))
-            .isEqualTo(IntegrationMetadata.IntentFirst)
+            .isEqualTo(IntegrationMetadata.IntentFirst("secret"))
     }
 
     @Test
     fun `integrationMetadata returns intent first for setup intent`() = runTest {
         val setupIntent = PaymentElementLoader.InitializationMode.SetupIntent("secret")
         assertThat(setupIntent.integrationMetadata(null))
-            .isEqualTo(IntegrationMetadata.IntentFirst)
+            .isEqualTo(IntegrationMetadata.IntentFirst("secret"))
         assertThat(setupIntent.integrationMetadata(PaymentElementCallbacks.Builder().build()))
-            .isEqualTo(IntegrationMetadata.IntentFirst)
+            .isEqualTo(IntegrationMetadata.IntentFirst("secret"))
     }
 
     @Test
     @OptIn(SharedPaymentTokenSessionPreview::class)
     fun `integrationMetadata returns spt`() = runTest {
-        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                    amount = 1234,
-                    currency = "cad",
-                ),
+        val intentConfiguration = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 1234,
+                currency = "cad",
             ),
+        )
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            intentConfiguration = intentConfiguration
         )
         assertThat(
             initializationMode.integrationMetadata(
@@ -1593,18 +1595,19 @@ internal class DefaultPaymentElementLoaderTest {
                         error("Should not be called.")
                     }.build()
             )
-        ).isEqualTo(IntegrationMetadata.DeferredIntentWithSharedPaymentToken)
+        ).isEqualTo(IntegrationMetadata.DeferredIntentWithSharedPaymentToken(intentConfiguration))
     }
 
     @Test
     fun `integrationMetadata returns confirmation token`() = runTest {
-        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                    amount = 1234,
-                    currency = "cad",
-                ),
+        val intentConfiguration = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 1234,
+                currency = "cad",
             ),
+        )
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            intentConfiguration = intentConfiguration
         )
         assertThat(
             initializationMode.integrationMetadata(
@@ -1613,18 +1616,19 @@ internal class DefaultPaymentElementLoaderTest {
                         error("Should not be called.")
                     }.build()
             )
-        ).isEqualTo(IntegrationMetadata.DeferredIntentWithConfirmationToken)
+        ).isEqualTo(IntegrationMetadata.DeferredIntentWithConfirmationToken(intentConfiguration))
     }
 
     @Test
     fun `integrationMetadata returns payment method`() = runTest {
-        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                    amount = 1234,
-                    currency = "cad",
-                ),
+        val intentConfiguration = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 1234,
+                currency = "cad",
             ),
+        )
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            intentConfiguration = intentConfiguration
         )
         assertThat(
             initializationMode.integrationMetadata(
@@ -1633,7 +1637,7 @@ internal class DefaultPaymentElementLoaderTest {
                         error("Should not be called.")
                     }.build()
             )
-        ).isEqualTo(IntegrationMetadata.DeferredIntentWithPaymentMethod)
+        ).isEqualTo(IntegrationMetadata.DeferredIntentWithPaymentMethod(intentConfiguration))
     }
 
     @Test

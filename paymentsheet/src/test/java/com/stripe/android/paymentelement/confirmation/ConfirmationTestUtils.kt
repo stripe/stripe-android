@@ -8,7 +8,6 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentIntentFactory
 import kotlinx.coroutines.test.runTest
@@ -193,15 +192,12 @@ internal fun ConfirmationHandler.Result?.assertCanceled(): ConfirmationHandler.R
     return this as ConfirmationHandler.Result.Canceled
 }
 
-internal val PAYMENT_INTENT = PaymentIntentFactory.create()
+internal val PAYMENT_INTENT = PaymentIntentFactory.create(clientSecret = "pi_123_secret_123")
 
 internal val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
+    confirmationOption = FakeConfirmationOption(),
     paymentMethodMetadata = PaymentMethodMetadataFactory.create(
         stripeIntent = PAYMENT_INTENT,
         passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
     ),
-    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-        clientSecret = "pi_123_secret_123",
-    ),
-    confirmationOption = FakeConfirmationOption(),
 )

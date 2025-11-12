@@ -1179,7 +1179,7 @@ internal class PaymentMethodMetadataTest {
             attestOnIntentConfirmation = false,
             appearance = configuration.appearance,
             onBehalfOf = null,
-            integrationMetadata = IntegrationMetadata.IntentFirst,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -2174,7 +2174,6 @@ internal class PaymentMethodMetadataTest {
             passthroughModeEnabled = false,
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,
-            initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
             elementsSessionId = "session_1234",
             linkMode = LinkMode.LinkPaymentMethod,
             allowDefaultOptIn = false,

@@ -13,6 +13,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.networking.StripeRepository
@@ -40,7 +41,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
-import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
@@ -50,7 +50,7 @@ import javax.inject.Provider
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
 internal suspend fun createIntentConfirmationInterceptor(
-    initializationMode: InitializationMode,
+    integrationMetadata: IntegrationMetadata,
     customerId: String? = null,
     ephemeralKeySecret: String? = null,
     stripeRepository: StripeRepository = object : AbsFakeStripeRepository() {},
@@ -139,7 +139,7 @@ internal suspend fun createIntentConfirmationInterceptor(
             }
         },
     ).create(
-        initializationMode = initializationMode,
+        integrationMetadata = integrationMetadata,
         customerId = customerId,
         ephemeralKeySecret = ephemeralKeySecret,
         clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,

@@ -47,8 +47,8 @@ internal suspend fun assertIntentConfirmed(
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = params.intent,
                     shippingDetails = params.shippingDetails,
+                    integrationMetadata = params.integrationMetadata,
                 ),
-                initializationMode = params.initializationMode,
             )
         )
 

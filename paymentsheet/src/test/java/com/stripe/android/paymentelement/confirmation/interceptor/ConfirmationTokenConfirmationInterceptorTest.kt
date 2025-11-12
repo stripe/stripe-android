@@ -9,6 +9,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenParams
@@ -33,11 +34,9 @@ import com.stripe.android.paymentelement.confirmation.intent.CreateIntentWithCon
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
-import com.stripe.android.paymentelement.confirmation.interceptor.DeferredIntentConfirmationInterceptorTest.Companion.DEFAULT_DEFERRED_INTENT
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
@@ -64,6 +63,15 @@ class ConfirmationTokenConfirmationInterceptorTest {
         confirmationTokenParser.parse(ConfirmationTokenFixtures.CONFIRMATION_TOKEN_JSON)!!
     }
 
+    internal val defaultIntegrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(
+        intentConfiguration = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 1099L,
+                currency = "usd",
+            ),
+        ),
+    )
+
     @Test
     fun `Fails if creating confirmation token did not succeed`() = runTest {
         val invalidRequestException = InvalidRequestException(
@@ -77,7 +85,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         )
 
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
                     confirmationTokenParams: ConfirmationTokenParams,
@@ -113,7 +121,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         )
 
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
                     confirmationTokenParams: ConfirmationTokenParams,
@@ -148,7 +156,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
     @Test
     fun `Fails if callback returns failure with custom error message`() = runInterceptorScenario(
-        initializationMode = DEFAULT_DEFERRED_INTENT,
+        integrationMetadata = defaultIntegrationMetadata,
         scenario = InterceptorTestScenario(
             stripeRepository = createFakeStripeRepositoryForConfirmationToken(),
             errorReporter = FakeErrorReporter(),
@@ -174,7 +182,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
     @Test
     fun `Fails if callback returns failure without custom error message`() = runTest {
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = createFakeStripeRepositoryForConfirmationToken(),
             errorReporter = FakeErrorReporter(),
             intentCreationConfirmationTokenCallbackProvider = Provider {
@@ -195,7 +203,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
     @Test
     fun `Returns confirm as next step after creating an unconfirmed intent`() = runInterceptorScenario(
-        initializationMode = DEFAULT_DEFERRED_INTENT,
+        integrationMetadata = defaultIntegrationMetadata,
         scenario = InterceptorTestScenario(
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
@@ -231,7 +239,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
     @Test
     fun `Returns complete as next step after creating and confirming a succeeded intent`() = runInterceptorScenario(
-        initializationMode = DEFAULT_DEFERRED_INTENT,
+        integrationMetadata = defaultIntegrationMetadata,
         scenario = InterceptorTestScenario(
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
@@ -272,7 +280,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
     @Test
     fun `Returns handleNextAction as next step after creating and confirming a non-succeeded intent`() =
         runInterceptorScenario(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             scenario = InterceptorTestScenario(
                 stripeRepository = object : AbsFakeStripeRepository() {
                     override suspend fun createConfirmationToken(
@@ -321,7 +329,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
             .thenReturn(Result.success(confirmationToken))
 
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = stripeRepository,
             errorReporter = FakeErrorReporter(),
             intentCreationConfirmationTokenCallbackProvider = Provider {
@@ -351,7 +359,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedTokens = mutableListOf<ConfirmationToken>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
                     confirmationTokenParams: ConfirmationTokenParams,
@@ -387,7 +395,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             publishableKeyProvider = { "pk_test_123" },
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
@@ -422,7 +430,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             publishableKeyProvider = { "pk_live_123" },
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
@@ -455,7 +463,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
     @Test
     fun `Saved PM - succeed without ephemeralKeySecret if the payment method is not attached`() =
         runInterceptorScenario(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             scenario = InterceptorTestScenario(
                 stripeRepository = object : AbsFakeStripeRepository() {
                     override suspend fun createConfirmationToken(
@@ -504,7 +512,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
     @Test
     fun `Saved PM - succeed if a ephemeralKeySecret associated with the customer is provided`() =
         runInterceptorScenario(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             scenario = InterceptorTestScenario(
                 ephemeralKeySecret = "ek_test_123",
                 stripeRepository = object : AbsFakeStripeRepository() {
@@ -557,7 +565,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
         val interceptor = createIntentConfirmationInterceptor(
             ephemeralKeySecret = "ek_test_123",
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
                     confirmationTokenParams: ConfirmationTokenParams,
@@ -634,7 +642,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
                     confirmationTokenParams: ConfirmationTokenParams,
@@ -688,7 +696,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
                     confirmationTokenParams: ConfirmationTokenParams,
@@ -736,7 +744,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
         val interceptor = createIntentConfirmationInterceptor(
             ephemeralKeySecret = "ek_test_123",
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
                     confirmationTokenParams: ConfirmationTokenParams,
@@ -783,7 +791,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
         val interceptor = createIntentConfirmationInterceptor(
             ephemeralKeySecret = "ek_test_123",
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
                     confirmationTokenParams: ConfirmationTokenParams,
@@ -830,7 +838,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
         val interceptor = createIntentConfirmationInterceptor(
             ephemeralKeySecret = "ek_test_123",
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            integrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
@@ -885,7 +893,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
         val interceptor = createIntentConfirmationInterceptor(
             ephemeralKeySecret = "ek_test_123",
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            integrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
@@ -941,7 +949,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val interceptor = createIntentConfirmationInterceptor(
             ephemeralKeySecret = "ek_test_123",
             publishableKeyProvider = { "pk_test_123" },
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            integrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
@@ -1173,12 +1181,12 @@ class ConfirmationTokenConfirmationInterceptorTest {
     private fun runConfirmationTokenInterceptorScenario(
         observedParams: Turbine<ConfirmationTokenParams> = Turbine(),
         retrievedIntentStatus: StripeIntent.Status = StripeIntent.Status.Succeeded,
-        initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_DEFERRED_INTENT,
+        integrationMetadata: IntegrationMetadata = defaultIntegrationMetadata,
         isLiveMode: Boolean = true,
         block: suspend (IntentConfirmationInterceptor) -> Unit
     ) {
         runInterceptorScenario(
-            initializationMode = initializationMode,
+            integrationMetadata = integrationMetadata,
             scenario = InterceptorTestScenario(
                 ephemeralKeySecret = "ek_test_123",
                 publishableKeyProvider = { if (isLiveMode) "pk_live_123" else "pk_test_123" },
@@ -1229,7 +1237,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         runConfirmationTokenInterceptorScenario(
             observedParams = observedParams,
             isLiveMode = false,
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            integrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(mode = paymentMode)
             ),
         ) { interceptor ->

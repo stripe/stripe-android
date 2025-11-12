@@ -96,7 +96,7 @@ internal interface PaymentElementLoader {
             }
 
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
-                return IntegrationMetadata.IntentFirst
+                return IntegrationMetadata.IntentFirst(clientSecret)
             }
         }
 
@@ -110,7 +110,7 @@ internal interface PaymentElementLoader {
             }
 
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
-                return IntegrationMetadata.IntentFirst
+                return IntegrationMetadata.IntentFirst(clientSecret)
             }
         }
 
@@ -133,13 +133,13 @@ internal interface PaymentElementLoader {
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
                 return when {
                     paymentElementCallbacks?.preparePaymentMethodHandler != null -> {
-                        IntegrationMetadata.DeferredIntentWithSharedPaymentToken
+                        IntegrationMetadata.DeferredIntentWithSharedPaymentToken(intentConfiguration)
                     }
                     paymentElementCallbacks?.createIntentWithConfirmationTokenCallback != null -> {
-                        IntegrationMetadata.DeferredIntentWithConfirmationToken
+                        IntegrationMetadata.DeferredIntentWithConfirmationToken(intentConfiguration)
                     }
                     paymentElementCallbacks?.createIntentCallback != null -> {
-                        IntegrationMetadata.DeferredIntentWithPaymentMethod
+                        IntegrationMetadata.DeferredIntentWithPaymentMethod(intentConfiguration)
                     }
                     else -> throw IllegalStateException("No callback for deferred intent.")
                 }

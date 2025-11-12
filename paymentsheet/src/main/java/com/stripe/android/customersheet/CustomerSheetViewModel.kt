@@ -39,6 +39,7 @@ import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
 import com.stripe.android.customersheet.util.sortPaymentMethods
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
@@ -68,7 +69,6 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -1050,10 +1050,9 @@ internal class CustomerSheetViewModel(
                     paymentMethod = paymentMethod,
                     optionsParams = null,
                 ),
-                initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
-                    clientSecret = clientSecret
+                paymentMethodMetadata = metadata.copy(
+                    integrationMetadata = IntegrationMetadata.IntentFirst(clientSecret = clientSecret)
                 ),
-                paymentMethodMetadata = metadata,
             )
         )
 

@@ -10,7 +10,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.test.runTest
 import kotlinx.parcelize.Parcelize
 import org.junit.Test
@@ -648,11 +647,8 @@ class ConfirmationMediatorTest {
         private val INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
         private val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             confirmationOption = FakeConfirmationOption(),
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         )
     }
 }

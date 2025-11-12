@@ -11,7 +11,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -23,7 +22,6 @@ internal interface FormActivityConfirmationHelper {
 
 @FormActivityScope
 internal class DefaultFormActivityConfirmationHelper @Inject constructor(
-    private val initializationMode: PaymentElementLoader.InitializationMode,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val confirmationHandler: ConfirmationHandler,
     private val configuration: EmbeddedPaymentElement.Configuration,
@@ -83,7 +81,6 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
         ) ?: return null
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
-            initializationMode = initializationMode,
             paymentMethodMetadata = paymentMethodMetadata,
         )
     }

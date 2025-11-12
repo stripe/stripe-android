@@ -9,7 +9,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -31,7 +30,6 @@ internal data class LinkConfiguration(
     val useAttestationEndpointsForLink: Boolean,
     val suppress2faModal: Boolean,
     val disableRuxInFlowController: Boolean,
-    val initializationMode: PaymentElementLoader.InitializationMode,
     val elementsSessionId: String,
     val linkMode: LinkMode?,
     val allowDefaultOptIn: Boolean,

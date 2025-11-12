@@ -29,7 +29,6 @@ import com.stripe.android.paymentelement.confirmation.paymentElementConfirmation
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.RadarOptionsFactory
@@ -216,7 +215,7 @@ internal class PassiveChallengeConfirmationActivityTest {
     }
 
     private companion object {
-        val PAYMENT_INTENT = PaymentIntentFactory.create()
+        val PAYMENT_INTENT = PaymentIntentFactory.create(clientSecret = "pi_123_secret_123")
 
         val PAYMENT_METHOD = PaymentMethodFactory.card()
 
@@ -236,9 +235,6 @@ internal class PassiveChallengeConfirmationActivityTest {
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
             confirmationOption = CONFIRMATION_OPTION,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123"
-            ),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PAYMENT_INTENT,
                 shippingDetails = AddressDetails(),

@@ -7,13 +7,11 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentCallback
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentCallbackNotFoundException
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentCallbackRetriever
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -34,9 +32,7 @@ class DeferredIntentCallbackRetrieverTest {
         failureMessage = PREPARE_PAYMENT_METHOD_HANDLER_MESSAGE,
         userMessage = PREPARE_PAYMENT_METHOD_HANDLER_MESSAGE.resolvableString,
     ) { errorReporter ->
-        createDefaultRetriever(errorReporter = errorReporter).waitForDeferredIntentCallback(
-            PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken(null)
-        )
+        createDefaultRetriever(errorReporter = errorReporter).waitForSharedPaymentTokenCallback()
     }
 
     @Test
@@ -53,9 +49,7 @@ class DeferredIntentCallbackRetrieverTest {
                         CreateIntentResult.Success(clientSecret = "pi_123")
                     }
                 },
-            ).waitForDeferredIntentCallback(
-                PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken(null)
-            )
+            ).waitForSharedPaymentTokenCallback()
         }
 
     @Test
@@ -64,9 +58,7 @@ class DeferredIntentCallbackRetrieverTest {
         failureMessage = CREATE_INTENT_CALLBACK_MESSAGE,
         userMessage = CREATE_INTENT_CALLBACK_MESSAGE.resolvableString,
     ) { errorReporter ->
-        createDefaultRetriever(errorReporter = errorReporter).waitForDeferredIntentCallback(
-            PaymentSheet.IntentConfiguration.IntentBehavior.Default
-        )
+        createDefaultRetriever(errorReporter = errorReporter).waitForPaymentMethodCallback()
     }
 
     @Test
@@ -83,9 +75,7 @@ class DeferredIntentCallbackRetrieverTest {
                         CreateIntentResult.Success(clientSecret = "pi_123")
                     }
                 }
-            ).waitForDeferredIntentCallback(
-                PaymentSheet.IntentConfiguration.IntentBehavior.Default
-            )
+            ).waitForPaymentMethodCallback()
         }
 
     @Test
@@ -97,9 +87,7 @@ class DeferredIntentCallbackRetrieverTest {
         createDefaultRetriever(
             errorReporter = errorReporter,
             publishableKeyProvider = { "pk_live_12345" },
-        ).waitForDeferredIntentCallback(
-            PaymentSheet.IntentConfiguration.IntentBehavior.Default
-        )
+        ).waitForPaymentMethodCallback()
     }
 
     @Test
@@ -113,9 +101,7 @@ class DeferredIntentCallbackRetrieverTest {
                 createDefaultRetriever(
                     errorReporter = errorReporter,
                     intentCreationCallbackProvider = Provider { callback },
-                ).waitForDeferredIntentCallback(
-                    PaymentSheet.IntentConfiguration.IntentBehavior.Default
-                )
+                ).waitForPaymentMethodCallback()
             }
             dispatcher.scheduler.advanceTimeBy(1000)
             assertTrue(retrieveJob.isActive)
@@ -144,9 +130,7 @@ class DeferredIntentCallbackRetrieverTest {
                 createDefaultRetriever(
                     errorReporter = errorReporter,
                     intentCreationWithConfirmationTokenCallback = Provider { callback },
-                ).waitForDeferredIntentCallback(
-                    PaymentSheet.IntentConfiguration.IntentBehavior.Default
-                )
+                ).waitForConfirmationTokenCallback()
             }
             dispatcher.scheduler.advanceTimeBy(1000)
             assertTrue(retrieveJob.isActive)
@@ -176,9 +160,7 @@ class DeferredIntentCallbackRetrieverTest {
                 createDefaultRetriever(
                     errorReporter = errorReporter,
                     preparePaymentMethodHandlerProvider = Provider { callback },
-                ).waitForDeferredIntentCallback(
-                    PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken(null)
-                )
+                ).waitForSharedPaymentTokenCallback()
             }
             dispatcher.scheduler.advanceTimeBy(1000)
             assertTrue(retrieveJob.isActive)
@@ -200,7 +182,7 @@ class DeferredIntentCallbackRetrieverTest {
         event: ErrorReporter.ErrorEvent,
         failureMessage: String,
         userMessage: ResolvableString,
-        retrieveCall: suspend (errorReporter: FakeErrorReporter) -> DeferredIntentCallback
+        retrieveCall: suspend (errorReporter: FakeErrorReporter) -> Any
     ) {
         val errorReporter = FakeErrorReporter()
         val dispatcher = StandardTestDispatcher()
@@ -258,11 +240,9 @@ class DeferredIntentCallbackRetrieverTest {
 
     companion object {
         private const val CREATE_INTENT_CALLBACK_MESSAGE =
-            "One of CreateIntentCallback or CreateIntentWithConfirmationTokenCallback " +
-                "must be implemented when using IntentConfiguration with PaymentSheet"
+            "CreateIntentCallback must be implemented when using IntentConfiguration!"
 
         const val PREPARE_PAYMENT_METHOD_HANDLER_MESSAGE =
-            "PreparePaymentMethodHandler must be implemented when using IntentConfiguration with " +
-                "shared payment tokens!"
+            "PreparePaymentMethodHandler must be implemented when using IntentConfiguration!"
     }
 }

@@ -84,7 +84,6 @@ internal class FormActivityConfirmationHandlerTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
 
         val confirmationHelper = DefaultFormActivityConfirmationHelper(
-            initializationMode = embeddedState.initializationMode,
             paymentMethodMetadata = paymentMethodMetadata,
             confirmationHandler = confirmationHandler,
             configuration = embeddedState.configuration,

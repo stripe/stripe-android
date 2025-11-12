@@ -29,7 +29,6 @@ import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.view.ActivityStarter
@@ -174,7 +173,8 @@ internal class BacsConfirmationActivityTest {
             currency = "CAD",
             paymentMethodOptionsJsonString = """
                 {"card": {"require_cvc_recollection": true}}
-            """.trimIndent()
+            """.trimIndent(),
+            clientSecret = "pi_123_secret_123",
         )
 
         val PAYMENT_METHOD = PaymentMethodFactory.bacs()
@@ -195,9 +195,6 @@ internal class BacsConfirmationActivityTest {
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
             confirmationOption = CONFIRMATION_OPTION,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123"
-            ),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PAYMENT_INTENT,
                 shippingDetails = AddressDetails(),

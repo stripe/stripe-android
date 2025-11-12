@@ -65,7 +65,7 @@ internal open class BaseLpmNetworkTest(
                 this,
                 LpmAssertionParams(
                     intent = data.intent,
-                    initializationMode = data.initializationMode,
+                    integrationMetadata = data.integrationMetadata,
                     createParams = createParams,
                     optionsParams = optionsParams,
                     extraParams = extraParams,
