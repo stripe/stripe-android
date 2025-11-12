@@ -19,56 +19,45 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class DefaultPaymentMethodMessagingCoordinatorTest {
 
-    private val repository: StripeRepository = FakeStripeRepository()
-    private val paymentConfig = { PaymentConfiguration(publishableKey = "key") }
-    private val errorReporter = FakeErrorReporter()
-    private val coordinator = DefaultPaymentMethodMessagingCoordinator(
-        stripeRepository = repository,
-        paymentConfiguration = paymentConfig,
-        eventReporter = FakeEventReporter(),
-        viewModelScope = CoroutineScope(UnconfinedTestDispatcher()),
-        errorReporter = errorReporter
-    )
-
     @Test
-    fun `configure returns no content if single and multi partner null`() = runTest {
+    fun `configure returns no content if single and multi partner null`() = runScenario {
         coordinator.messagingContent.test {
             assertThat(awaitItem()).isNull()
 
-            val result = configureCoordinator(ResultType.NO_CONTENT)
+            val result = coordinator.configureCoordinator(ResultType.NO_CONTENT)
             assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.NoContent::class.java)
             assertThat(awaitItem()).isInstanceOf(PaymentMethodMessagingContent.NoContent::class.java)
         }
     }
 
     @Test
-    fun `configure returns succeeded if single partner is not null`() = runTest {
+    fun `configure returns succeeded if single partner is not null`() = runScenario {
         coordinator.messagingContent.test {
             assertThat(awaitItem()).isNull()
 
-            val result = configureCoordinator(ResultType.SINGLE_PARTNER)
+            val result = coordinator.configureCoordinator(ResultType.SINGLE_PARTNER)
             assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
             assertThat(awaitItem()).isInstanceOf(PaymentMethodMessagingContent.SinglePartner::class.java)
         }
     }
 
     @Test
-    fun `configure returns succeeded if multi partner is not null`() = runTest {
+    fun `configure returns succeeded if multi partner is not null`() = runScenario {
         coordinator.messagingContent.test {
             assertThat(awaitItem()).isNull()
 
-            val result = configureCoordinator(ResultType.MULTI_PARTNER)
+            val result = coordinator.configureCoordinator(ResultType.MULTI_PARTNER)
             assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
             assertThat(awaitItem()).isInstanceOf(PaymentMethodMessagingContent.MultiPartner::class.java)
         }
     }
 
     @Test
-    fun `configure returns failed if call fails`() = runTest {
+    fun `configure returns failed if call fails`() = runScenario {
         coordinator.messagingContent.test {
             assertThat(awaitItem()).isNull()
 
-            val result = configureCoordinator(ResultType.FAILURE)
+            val result = coordinator.configureCoordinator(ResultType.FAILURE)
             assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Failed::class.java)
             assertThat((result as? PaymentMethodMessagingElement.ConfigureResult.Failed)?.error?.message).isEqualTo(
                 "Price must be non negative"
@@ -78,32 +67,32 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
     }
 
     @Test
-    fun `sets content to null on failure`() = runTest {
+    fun `sets content to null on failure`() = runScenario {
         coordinator.messagingContent.test {
             assertThat(awaitItem()).isNull()
 
-            val successfulResult = configureCoordinator(ResultType.MULTI_PARTNER)
+            val successfulResult = coordinator.configureCoordinator(ResultType.MULTI_PARTNER)
             assertThat(successfulResult)
                 .isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
             assertThat(awaitItem()).isInstanceOf(PaymentMethodMessagingContent.MultiPartner::class.java)
 
-            val failedResult = configureCoordinator(ResultType.FAILURE)
+            val failedResult = coordinator.configureCoordinator(ResultType.FAILURE)
             assertThat(failedResult).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Failed::class.java)
             assertThat(awaitItem()).isNull()
         }
     }
 
     @Test
-    fun `updates messagingContent with new content`() = runTest {
+    fun `updates messagingContent with new content`() = runScenario {
         coordinator.messagingContent.test {
             assertThat(awaitItem()).isNull()
 
-            val singlePartnerResult = configureCoordinator(ResultType.SINGLE_PARTNER)
+            val singlePartnerResult = coordinator.configureCoordinator(ResultType.SINGLE_PARTNER)
             assertThat(singlePartnerResult)
                 .isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
             assertThat(awaitItem()).isInstanceOf(PaymentMethodMessagingContent.SinglePartner::class.java)
 
-            val multiPartnerResult = configureCoordinator(ResultType.MULTI_PARTNER)
+            val multiPartnerResult = coordinator.configureCoordinator(ResultType.MULTI_PARTNER)
             assertThat(multiPartnerResult)
                 .isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
             assertThat(awaitItem()).isInstanceOf(PaymentMethodMessagingContent.MultiPartner::class.java)
@@ -111,11 +100,11 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
     }
 
     @Test
-    fun `sends unexpected error if content type is UnexpectedError`() = runTest {
+    fun `sends unexpected error if content type is UnexpectedError`() = runScenario {
         coordinator.messagingContent.test {
             assertThat(awaitItem()).isNull()
 
-            val errorResult = configureCoordinator(ResultType.UNEXPECTED_ERROR)
+            val errorResult = coordinator.configureCoordinator(ResultType.UNEXPECTED_ERROR)
             assertThat(errorResult)
                 .isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.NoContent::class.java)
             assertThat(awaitItem()).isInstanceOf(PaymentMethodMessagingContent.NoContent::class.java)
@@ -129,6 +118,34 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
         }
     }
 
+    private class Scenario(
+        val coordinator: DefaultPaymentMethodMessagingCoordinator,
+        val errorReporter: FakeErrorReporter
+    )
+
+    private fun runScenario(
+        testBlock: suspend Scenario.() -> Unit
+    ) = runTest {
+        val repository: StripeRepository = FakeStripeRepository()
+        val paymentConfig = { PaymentConfiguration(publishableKey = "key") }
+        val errorReporter = FakeErrorReporter()
+        val coordinator = DefaultPaymentMethodMessagingCoordinator(
+            stripeRepository = repository,
+            paymentConfiguration = paymentConfig,
+            eventReporter = FakeEventReporter(),
+            viewModelScope = CoroutineScope(UnconfinedTestDispatcher()),
+            errorReporter = errorReporter
+        )
+
+        Scenario(
+            coordinator = coordinator,
+            errorReporter = errorReporter
+        ).testBlock()
+
+        errorReporter.ensureAllEventsConsumed()
+        coordinator.messagingContent.test { expectMostRecentItem() }
+    }
+
     private enum class ResultType {
         MULTI_PARTNER,
         SINGLE_PARTNER,
@@ -137,7 +154,9 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
         UNEXPECTED_ERROR
     }
 
-    private suspend fun configureCoordinator(result: ResultType): PaymentMethodMessagingElement.ConfigureResult {
+    private suspend fun PaymentMethodMessagingCoordinator.configureCoordinator(
+        result: ResultType
+    ): PaymentMethodMessagingElement.ConfigureResult {
         val config = PaymentMethodMessagingElement.Configuration()
             .currency("usd")
             .countryCode("US")
@@ -151,6 +170,6 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
             ResultType.FAILURE -> config.amount(-1L)
             ResultType.UNEXPECTED_ERROR -> config.amount(-100L)
         }
-        return coordinator.configure(config.build())
+        return this.configure(config.build())
     }
 }
