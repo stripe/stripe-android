@@ -258,6 +258,11 @@ internal class FlowControllerTest {
             networkRule = networkRule,
             integrationType = integrationType,
             callConfirmOnPaymentOptionCallback = false,
+            builder = {
+                createIntentCallback { _ ->
+                    error("Not expected to be called.")
+                }
+            },
             resultCallback = ::assertCompleted,
         ) { testContext ->
             networkRule.enqueue(
@@ -1281,6 +1286,11 @@ internal class FlowControllerTest {
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
+        builder = {
+            createIntentCallback { _ ->
+                error("Not expected to be called.")
+            }
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -1325,6 +1335,11 @@ internal class FlowControllerTest {
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
+        builder = {
+            createIntentCallback { _ ->
+                error("Not expected to be called.")
+            }
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         val oboMerchantID = "acct_connected_1234"

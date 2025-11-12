@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
@@ -19,6 +20,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata.Permissions.Companion.createForPaymentSheetCustomerSession
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata.Permissions.Companion.createForPaymentSheetLegacyEphemeralKey
 import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.create
@@ -28,6 +30,9 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -79,6 +84,7 @@ internal interface PaymentElementLoader {
 
     sealed class InitializationMode : Parcelable {
         abstract fun validate()
+        abstract fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata
 
         @Parcelize
         data class PaymentIntent(
@@ -87,6 +93,10 @@ internal interface PaymentElementLoader {
 
             override fun validate() {
                 PaymentIntentClientSecret(clientSecret).validate()
+            }
+
+            override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
+                return IntegrationMetadata.IntentFirst
             }
         }
 
@@ -97,6 +107,10 @@ internal interface PaymentElementLoader {
 
             override fun validate() {
                 SetupIntentClientSecret(clientSecret).validate()
+            }
+
+            override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
+                return IntegrationMetadata.IntentFirst
             }
         }
 
@@ -112,6 +126,22 @@ internal interface PaymentElementLoader {
                             "Payment IntentConfiguration requires a positive amount."
                         )
                     }
+                }
+            }
+
+            @OptIn(SharedPaymentTokenSessionPreview::class)
+            override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
+                return when {
+                    paymentElementCallbacks?.preparePaymentMethodHandler != null -> {
+                        IntegrationMetadata.DeferredIntentWithSharedPaymentToken
+                    }
+                    paymentElementCallbacks?.createIntentWithConfirmationTokenCallback != null -> {
+                        IntegrationMetadata.DeferredIntentWithConfirmationToken
+                    }
+                    paymentElementCallbacks?.createIntentCallback != null -> {
+                        IntegrationMetadata.DeferredIntentWithPaymentMethod
+                    }
+                    else -> throw IllegalStateException("No callback for deferred intent.")
                 }
             }
         }
@@ -156,6 +186,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val cvcRecollectionHandler: CvcRecollectionHandler,
     private val integrityRequestManager: IntegrityRequestManager,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
 ) : PaymentElementLoader {
 
     @Suppress("LongMethod")
@@ -374,6 +405,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             ),
             initializationMode = initializationMode,
             clientAttributionMetadata = clientAttributionMetadata,
+            paymentElementCallbacks = PaymentElementCallbackReferences[paymentElementCallbackIdentifier],
         )
     }
 
