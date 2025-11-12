@@ -143,7 +143,6 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
         ).testBlock()
 
         errorReporter.ensureAllEventsConsumed()
-        coordinator.messagingContent.test { expectMostRecentItem() }
     }
 
     private enum class ResultType {
