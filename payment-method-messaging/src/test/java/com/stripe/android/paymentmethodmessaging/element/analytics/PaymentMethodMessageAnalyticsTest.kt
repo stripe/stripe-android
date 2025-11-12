@@ -206,5 +206,6 @@ internal class PaymentMethodMessageAnalyticsTest {
             errorReporter = errorReporter
         ).testBlock()
         eventReporter.validate()
+        errorReporter.ensureAllEventsConsumed()
     }
 }
