@@ -1,19 +1,18 @@
 # Migrating from Stripe CardScan to Google Pay Card Recognition API
 
-## Step 1: Opt-in Google Pay API Production Access
-Before you start migrating, you must **opt-in by [requesting production access](https://developers.google.com/pay/api/android/guides/test-and-deploy/request-prod-access) to the Google Pay API** using the [Google Pay & Wallet Console](https://pay.google.com/business/console?utm_source=devsite&utm_medium=devsite&utm_campaign=devsite).
+## Request Google Pay API production access
+Before you migrate, you must [request production access](https://developers.google.com/pay/api/android/guides/test-and-deploy/request-prod-access) to the Google Pay API using the [Google Pay & Wallet Console](https://pay.google.com/business/console?utm_source=devsite&utm_medium=devsite&utm_campaign=devsite).
 
 ---
 
+## Update Dependencies
 
-
-## Step 2: Update Dependencies
-
-First, remove the old Stripe CardScan dependency and add the necessary Google Play service dependency to your app-level `build.gradle` (or `build.gradle.kts`):
+1. Remove the old Stripe CardScan dependency 
+2. Add the necessary Google Play service dependency to your app-level `build.gradle` (or `build.gradle.kts`).
 
 ### Remove Stripe CardScan Dependency
 
-Remove the line for the stripecardscan module:
+Remove the line for the `stripecardscan` module:
 
 ```groovy
 // REMOVE THIS LINE  
@@ -22,7 +21,7 @@ implementation("com.stripe:stripecardscan:VERSION")
 
 ### Add Google Pay Dependency
 
-Add the Google Play service library as described [here](https://developers.google.com/pay/api/android/guides/setup#app%20dependencies), and enable Google Pay API in `AndroidManifest.xml`:
+Add the Google Play service library according to the [Google documentation](https://developers.google.com/pay/api/android/guides/setup#app%20dependencies), and enable Google Pay API in `AndroidManifest.xml`:
 
 ```xml
 <application>
@@ -34,11 +33,11 @@ Add the Google Play service library as described [here](https://developers.googl
 
 ---
 
-## Step 3: Initialize the CardScan Client
+## Initialize the CardScan Client
 
 
 ### Remove CardScanSheet.create()
-Your old code likely looked something like this (simplified):
+Remove the code resembling the following simplified example:
 ```kotlin
 // Remove this
 val cardScanSheet = CardScanSheet.create(this, object : CardScanSheet.CardScanResultCallback {  
@@ -68,7 +67,7 @@ private val cardRecognitionLauncher = registerForActivityResult(
 }
 ```
 
-## Step 4: Initialize the PaymentsClient and Launch the Recognition
+## Initialize the PaymentsClient and Launch the Recognition
 
 
 ### Remove CardScanSheet.present() or attachCardScanFragment()
@@ -129,13 +128,13 @@ fun present() {
 
 ---
 
-## Step 4: Handle the Scanned Data
+## Handle the Scanned Data
 
-The final step is to update the function that processes the recognized card data.
+Update the function that processes the recognized card data.
 
-### Old Data Class (Removed)
+### Remove data class
 
-The old `ScannedCard` class has been removed:
+Make sure you removed the old `ScannedCard` class:
 
 ```kotlin
 // REMOVED CODE  
@@ -146,9 +145,9 @@ data class ScannedCard(
 )
 ```
 
-### New Data Class (Replacement)
+### Replacement data class
 
-You will now use `CardRecognitionResult` from the Google Pay API:
+Your app now uses `CardRecognitionResult` from the Google Pay API:
 
 ```kotlin
 // REPLACEMENT CLASS  
