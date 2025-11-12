@@ -252,14 +252,14 @@ class GooglePayConfirmationDefinitionTest {
     fun `'Launch' action should be returned if currency code is not provided with deferred intent in payment mode`() =
         runActionTest(
             merchantCurrencyCode = null,
-            intent = PaymentIntentFactory.create(id = null, clientSecret = null),
+            intent = PaymentIntentFactory.createDeferred(),
             test = ::assertLaunchAction,
         )
 
     @Test
     fun `'Launch' action should be returned if currency code is provided with deferred intent in payment mode`() =
         runActionTest(
-            intent = PaymentIntentFactory.create(id = null, clientSecret = null),
+            intent = PaymentIntentFactory.createDeferred(),
             merchantCurrencyCode = "USD",
             test = ::assertLaunchAction,
         )
