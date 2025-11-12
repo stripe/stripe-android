@@ -1,16 +1,13 @@
 # Migrating from Stripe CardScan to Google Pay Card Recognition API
 
-> **⚠️ Important: Opt-in Required**
->
-> Before you start migrating, you must **opt-in by [requesting production access](https://developers.google.com/pay/api/android/guides/test-and-deploy/request-prod-access) to the Google Pay API** using the [Google Pay & Wallet Console](https://pay.google.com/business/console?utm_source=devsite&utm_medium=devsite&utm_campaign=devsite).
+## Step 1: Opt-in Google Pay API Production Access
+Before you start migrating, you must **opt-in by [requesting production access](https://developers.google.com/pay/api/android/guides/test-and-deploy/request-prod-access) to the Google Pay API** using the [Google Pay & Wallet Console](https://pay.google.com/business/console?utm_source=devsite&utm_medium=devsite&utm_campaign=devsite).
 
 ---
 
-Migrating your code from the removed Stripe CardScan module to the Google Pay Card Recognition API involves three main steps: updating dependencies, changing the initialization logic, and replacing the result handling.
 
-Here is a general guide on how to replace the removed Stripe classes with the Google Pay functionality.
 
-## Step 1: Update Dependencies
+## Step 2: Update Dependencies
 
 First, remove the old Stripe CardScan dependency and add the necessary Google Play service dependency to your app-level `build.gradle` (or `build.gradle.kts`):
 
@@ -25,8 +22,7 @@ implementation("com.stripe:stripecardscan:VERSION")
 
 ### Add Google Pay Dependency
 
-Add the [Google Play service library](https://developers.google.com/pay/api/android/guides/setup#app%20dependencies):
-
+Add the Google Play service library as described [here](https://developers.google.com/pay/api/android/guides/setup#app%20dependencies):
 ```groovy
 implementation 'com.google.android.gms:play-services-wallet:VERSION' // Use the latest stable version
 ```
@@ -43,7 +39,7 @@ Enable Google Pay API in `AndroidManifest.xml`:
 
 ---
 
-## Step 2: Implement Google Pay Card Recognition
+## Step 3: Implement Google Pay Card Recognition
 
 Replace your calls to `CardScanSheet.create()` and `present()` with the Google Pay API calls.
 > **Note**: `attachCardScanFragment()` is not supported in Google Pay Card Recognition.
@@ -135,7 +131,7 @@ fun present() {
 
 ---
 
-## Step 3: Handle the Scanned Data
+## Step 4: Handle the Scanned Data
 
 The final step is to update the function that processes the recognized card data.
 
@@ -166,9 +162,3 @@ private fun handleScannedCard(result: CardRecognitionResult) {
     // Your logic to update your UI/backend with the new card details  
 }
 ```
-
----
-
-## Summary
-
-By following these three steps—updating the build files, replacing the launch logic using `PaymentsClient` and `registerForActivityResult`, and handling the `CardRecognitionResult`—you will have successfully migrated your card scanning functionality from the removed Stripe CardScan module to the Google Pay Card Recognition API.
