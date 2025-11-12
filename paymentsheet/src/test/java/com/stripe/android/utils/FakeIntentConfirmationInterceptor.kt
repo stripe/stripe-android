@@ -58,10 +58,10 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         )
     }
 
-    fun enqueueNextActionStep(clientSecret: String, intent: StripeIntent) {
+    fun enqueueNextActionStep(intent: StripeIntent) {
         channel.trySend(
             ConfirmationDefinition.Action.Launch(
-                launcherArguments = IntentConfirmationDefinition.Args.NextAction(clientSecret, intent),
+                launcherArguments = IntentConfirmationDefinition.Args.NextAction(intent),
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                 isConfirmationToken = false,
                 receivesResultInProcess = false,

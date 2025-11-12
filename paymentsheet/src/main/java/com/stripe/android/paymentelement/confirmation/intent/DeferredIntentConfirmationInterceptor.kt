@@ -194,7 +194,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         ).mapCatching { intent ->
             when {
                 intent.isConfirmed -> handleConfirmedIntent(intent, confirmationOption)
-                intent.requiresAction() -> handleIntentRequiringAction(clientSecret, intent, paymentMethod)
+                intent.requiresAction() -> handleIntentRequiringAction(intent, paymentMethod)
                 else -> handleIntentConfirmation(
                     clientSecret = clientSecret,
                     intent = intent,
@@ -229,14 +229,13 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
     }
 
     private fun handleIntentRequiringAction(
-        clientSecret: String,
         intent: StripeIntent,
         paymentMethod: PaymentMethod
     ): ConfirmationDefinition.Action<Args> {
         return runCatching<ConfirmationDefinition.Action<Args>> {
             DeferredIntentValidator.validatePaymentMethod(intent, paymentMethod)
             ConfirmationDefinition.Action.Launch(
-                launcherArguments = Args.NextAction(clientSecret, intent),
+                launcherArguments = Args.NextAction(intent),
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                 isConfirmationToken = false,
                 receivesResultInProcess = false,

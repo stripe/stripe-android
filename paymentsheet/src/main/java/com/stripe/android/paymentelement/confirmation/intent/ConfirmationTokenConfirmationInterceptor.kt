@@ -177,7 +177,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 )
             } else if (intent.requiresAction()) {
                 ConfirmationDefinition.Action.Launch<Args>(
-                    launcherArguments = Args.NextAction(clientSecret, intent),
+                    launcherArguments = Args.NextAction(intent),
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     isConfirmationToken = true,
                     receivesResultInProcess = false,

@@ -132,7 +132,6 @@ internal class IntentConfirmationDefinition(
 
     sealed interface Args {
         data class NextAction(
-            val clientSecret: String,
             val intent: StripeIntent,
         ) : Args
 
