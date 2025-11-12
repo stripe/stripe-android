@@ -11,14 +11,21 @@ Features that are deprecated at Stripe or in the SDK. You must migrate away or s
 - **Giropay**: Removed. Use alternative payment methods. See [this page](https://support.stripe.com/questions/availability-of-giropay-june-2024-update) for more information.
 
 **Removed APIs:**
-- **CardParams**: Legacy `CardParams` removed from `CardWidget`. Use `PaymentMethodCreateParams` instead.
+- **CardParams**: Legacy `CardParams` removed from `CardWidget`. Use `PaymentMethodCreateParams` to create PaymentMethods instead of tokens.
+
+    **For creating PaymentMethods (recommended):**
     ```kotlin
-    // before
+    // before - creating tokens with CardParams
     val cardParams = cardWidget.cardParams
-  
-    // after
+    val token = stripe.createCardToken(cardParams)
+
+    // after - creating payment methods with PaymentMethodCreateParams
     val params = cardWidget.paymentMethodCreateParams
+    val paymentMethod = stripe.createPaymentMethod(params)
     ```
+
+    **Note:** Stripe recommends using PaymentMethods instead of tokens. PaymentMethods provide a unified API for supporting multiple payment types, simplified payment lifecycle management, and better error handling. They are compatible with modern payment flows like Payment Element and are Stripe's recommended path for all new integrations. See [Transitioning from Source and Tokens to PaymentMethod](https://docs.stripe.com/payments/payment-methods/transitioning) for more details.
+
 - **Deprecated Google Pay APIs**: `GooglePayPaymentMethodLauncherContract` and `rememberLauncher()` removed. Use GooglePayPaymentMethodLauncher directly or `rememberGooglePayPaymentMethodLauncher`, `rememberGooglePayLauncher` for compose.
     ```kotlin
     // before
