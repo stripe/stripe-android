@@ -11,7 +11,9 @@ import com.stripe.android.paymentmethodmessaging.element.FakeStripeRepository
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingContent
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElement
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElementPreview
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -154,20 +156,41 @@ internal class PaymentMethodMessageAnalyticsTest {
         assertThat(eventReporter.elementTappedTurbine.awaitItem()).isNotNull()
     }
 
+    @Test
+    fun `does not send onLoadSucceeded if unexpected error occurs`() = runScenario {
+        element.configure(
+            configuration = PaymentMethodMessagingElement.Configuration()
+                .currency("usd")
+                .countryCode("US")
+                .amount(-100L)
+        )
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        eventReporter.loadSucceededTurbine.expectNoEvents()
+        val error = errorReporter.awaitCall()
+        assertThat(error).isNotNull()
+        assertThat(error.errorEvent).isEqualTo(
+            ErrorReporter.UnexpectedErrorEvent.PAYMENT_METHOD_MESSAGING_ELEMENT_UNABLE_TO_PARSE_RESPONSE
+        )
+        assertThat(error.additionalNonPiiParams["error_message"]).isEqualTo("whoops")
+    }
+
     private class Scenario(
         val element: PaymentMethodMessagingElement,
-        val eventReporter: FakeEventReporter
+        val eventReporter: FakeEventReporter,
+        val errorReporter: FakeErrorReporter
     )
 
     private fun runScenario(
         testBlock: suspend Scenario.() -> Unit
     ) = runTest {
         val eventReporter = FakeEventReporter()
+        val errorReporter = FakeErrorReporter()
         val coordinator = DefaultPaymentMethodMessagingCoordinator(
             stripeRepository = FakeStripeRepository(),
             paymentConfiguration = { PaymentConfiguration(publishableKey = "pk_123_test") },
             eventReporter = eventReporter,
-            viewModelScope = CoroutineScope(UnconfinedTestDispatcher())
+            viewModelScope = CoroutineScope(UnconfinedTestDispatcher()),
+            errorReporter = errorReporter
         )
 
         val element = PaymentMethodMessagingElement(
@@ -179,7 +202,8 @@ internal class PaymentMethodMessageAnalyticsTest {
 
         Scenario(
             element = element,
-            eventReporter = eventReporter
+            eventReporter = eventReporter,
+            errorReporter = errorReporter
         ).testBlock()
         eventReporter.validate()
     }

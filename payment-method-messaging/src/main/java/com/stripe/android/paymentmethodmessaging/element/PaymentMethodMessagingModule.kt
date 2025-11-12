@@ -13,6 +13,8 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentmethodmessaging.element.analytics.DefaultPaymentMethodMessagingEventReporter
 import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEventReporter
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.isSystemDarkTheme
@@ -40,6 +42,9 @@ internal interface PaymentMethodMessagingModule {
     fun bindsPaymentAnalyticsRequestFactory(
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
     ): AnalyticsRequestFactory
+
+    @Binds
+    fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
 
     companion object {
         @Provides
