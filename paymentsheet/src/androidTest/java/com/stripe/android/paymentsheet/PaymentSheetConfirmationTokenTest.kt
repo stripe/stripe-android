@@ -224,6 +224,7 @@ internal class PaymentSheetConfirmationTokenTest {
             clientContext(isLiveMode),
             cvcRecollection(paymentMethodType),
             mandateDataAndSetupFutureUsage(paymentMethodType),
+            clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
             response.testBodyFromFile("confirmation-token-create-with-new-card.json")
         }
@@ -245,12 +246,12 @@ internal class PaymentSheetConfirmationTokenTest {
 
     private fun clientContext(isLiveMode: Boolean): RequestMatcher {
         // The client_context param is only sent in test mode when creating a confirmation token
-//        return if (isLiveMode) {
-//            not(bodyPart(urlEncode("client_context[mode]"), ".+".toRegex()))
-//        } else {
+        return if (isLiveMode) {
+            not(bodyPart(urlEncode("client_context[mode]"), ".+".toRegex()))
+        } else {
             // we only verify client context is not null here
         return bodyPart(urlEncode("client_context[mode]"), "payment")
-//        }
+        }
     }
 
     private fun cvcRecollection(paymentMethodType: PaymentMethodType): RequestMatcher {

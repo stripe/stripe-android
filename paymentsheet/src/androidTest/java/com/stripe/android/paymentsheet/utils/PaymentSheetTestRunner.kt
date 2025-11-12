@@ -64,7 +64,13 @@ internal fun runPaymentSheetTest(
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
+            PaymentConfiguration.init(it,
+                if (isLiveMode) {
+                    "pk_live_123"
+                } else {
+                    "pk_test_123"
+                }
+            )
             LinkStore(it.applicationContext).clear()
         }
 
@@ -89,6 +95,7 @@ internal fun runPaymentSheetTest(
         }
 
         val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
+        networkRule.validate()
         assertThat(didCompleteSuccessfully).isTrue()
     }
 }
@@ -169,6 +176,7 @@ internal fun runMultiplePaymentSheetInstancesTest(
         block(testContext)
 
         val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
+        networkRule.validate()
         assertThat(didCompleteSuccessfully).isTrue()
 
         if (testType == MultipleInstancesTestType.RunWithFirst) {
