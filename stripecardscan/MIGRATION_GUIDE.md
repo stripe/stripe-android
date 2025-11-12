@@ -3,8 +3,6 @@
 ## Request Google Pay API production access
 Before you migrate, you must [request production access](https://developers.google.com/pay/api/android/guides/test-and-deploy/request-prod-access) to the Google Pay API using the [Google Pay & Wallet Console](https://pay.google.com/business/console?utm_source=devsite&utm_medium=devsite&utm_campaign=devsite).
 
----
-
 ## Update Dependencies
 
 1. Remove the old Stripe CardScan dependency 
@@ -30,8 +28,6 @@ Add the Google Play service library according to the [Google documentation](http
         android:value="true" />
 </application>
 ```
-
----
 
 ## Initialize the CardScan Client
 
@@ -125,8 +121,6 @@ fun present() {
         }  
 }
 ```
-
----
 
 ## Handle the Scanned Data
 
