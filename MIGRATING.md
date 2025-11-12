@@ -24,6 +24,8 @@ Features that are deprecated at Stripe or in the SDK. You must migrate away or s
     val paymentMethod = stripe.createPaymentMethod(params)
     ```
 
+    **Note:** Stripe recommends using PaymentMethods instead of tokens. PaymentMethods provide a unified API for supporting multiple payment types, simplified payment lifecycle management, and better error handling. They are compatible with modern payment flows like Payment Element and are Stripe's recommended path for all new integrations. See [Transitioning from Source and Tokens to PaymentMethod](https://docs.stripe.com/payments/payment-methods/transitioning) for more details.
+
 - **Deprecated Google Pay APIs**: `GooglePayPaymentMethodLauncherContract` and `rememberLauncher()` removed. Use GooglePayPaymentMethodLauncher directly or `rememberGooglePayPaymentMethodLauncher`, `rememberGooglePayLauncher` for compose.
     ```kotlin
     // before
