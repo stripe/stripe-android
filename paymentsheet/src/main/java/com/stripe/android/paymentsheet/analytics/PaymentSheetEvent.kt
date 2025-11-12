@@ -150,6 +150,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 }
                 is PaymentElementLoader.InitializationMode.PaymentIntent -> "payment_intent"
                 is PaymentElementLoader.InitializationMode.SetupIntent -> "setup_intent"
+                is PaymentElementLoader.InitializationMode.CheckoutSession -> "checkout_session"
             }
     }
 

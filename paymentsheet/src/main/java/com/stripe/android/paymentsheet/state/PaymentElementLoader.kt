@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.coroutines.runCatching
@@ -10,6 +11,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
@@ -30,6 +32,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -58,6 +61,7 @@ import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -145,6 +149,23 @@ internal interface PaymentElementLoader {
                 }
             }
         }
+
+        @Parcelize
+        data class CheckoutSession(
+            val id: String,
+        ) : InitializationMode() {
+            override fun validate() {
+                if (!id.startsWith("cs_")) {
+                    throw IllegalArgumentException(
+                        "Must use a checkout session id."
+                    )
+                }
+            }
+
+            override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
+                return IntegrationMetadata.CheckoutSession(id)
+            }
+        }
     }
 
     @Parcelize
@@ -187,6 +208,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val integrityRequestManager: IntegrityRequestManager,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    private val stripeRepository: StripeRepository,
+    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
 ) : PaymentElementLoader {
 
     @Suppress("LongMethod")
@@ -262,13 +285,19 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
 
         val customer = async {
-            createCustomerState(
-                configuration = configuration,
-                customerInfo = customerInfo,
-                metadata = paymentMethodMetadata.await(),
-                savedSelection = savedSelection,
-                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
-            )
+            if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
+                createCustomerState(
+                    id = initializationMode.id
+                )
+            } else {
+                createCustomerState(
+                    configuration = configuration,
+                    customerInfo = customerInfo,
+                    metadata = paymentMethodMetadata.await(),
+                    savedSelection = savedSelection,
+                    cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
+                )
+            }
         }
 
         val initialPaymentSelection = async {
@@ -496,6 +525,22 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 )
             }
             else -> null
+        }
+    }
+
+    private suspend fun createCustomerState(
+        id: String
+    ): CustomerState? {
+        val requestOptions = ApiRequest.Options(
+            apiKey = lazyPaymentConfig.get().publishableKey,
+            stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+        )
+        val result = stripeRepository.fetchPaymentPage(id, requestOptions)
+        return result.getOrThrow().paymentMethods?.let {
+            CustomerState(
+                paymentMethods = it,
+                defaultPaymentMethodId = null,
+            )
         }
     }
 
