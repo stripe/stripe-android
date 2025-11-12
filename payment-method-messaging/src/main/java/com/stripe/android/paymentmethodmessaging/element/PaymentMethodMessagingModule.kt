@@ -6,6 +6,7 @@ import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
@@ -18,6 +19,8 @@ import com.stripe.android.uicore.isSystemDarkTheme
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
 
 @Module
@@ -76,6 +79,12 @@ internal interface PaymentMethodMessagingModule {
         @Provides
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
+        }
+
+        @Provides
+        @ViewModelScope
+        fun provideViewModelScope(): CoroutineScope {
+            return CoroutineScope(Dispatchers.Main)
         }
     }
 }

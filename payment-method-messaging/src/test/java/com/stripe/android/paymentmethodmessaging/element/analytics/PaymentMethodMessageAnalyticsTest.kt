@@ -13,6 +13,7 @@ import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingE
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElementPreview
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -165,7 +166,8 @@ internal class PaymentMethodMessageAnalyticsTest {
         val coordinator = DefaultPaymentMethodMessagingCoordinator(
             stripeRepository = FakeStripeRepository(),
             paymentConfiguration = { PaymentConfiguration(publishableKey = "pk_123_test") },
-            eventReporter = eventReporter
+            eventReporter = eventReporter,
+            viewModelScope = CoroutineScope(UnconfinedTestDispatcher())
         )
 
         val element = PaymentMethodMessagingElement(

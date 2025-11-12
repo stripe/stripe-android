@@ -8,14 +8,23 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentmethodmessaging.element.analytics.FakeEventReporter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class DefaultPaymentMethodMessagingCoordinatorTest {
 
     private val repository: StripeRepository = FakeStripeRepository()
     private val paymentConfig = { PaymentConfiguration(publishableKey = "key") }
-    private val coordinator = DefaultPaymentMethodMessagingCoordinator(repository, paymentConfig, FakeEventReporter())
+    private val coordinator = DefaultPaymentMethodMessagingCoordinator(
+        stripeRepository = repository,
+        paymentConfiguration = paymentConfig,
+        eventReporter = FakeEventReporter(),
+        viewModelScope = CoroutineScope(UnconfinedTestDispatcher())
+    )
 
     @Test
     fun `configure returns no content if single and multi partner null`() = runTest {
