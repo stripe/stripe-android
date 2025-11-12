@@ -53,6 +53,41 @@ internal class IntentConfirmationWebViewClientTest {
         assertThat(errors).isEmpty()
     }
 
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.M])
+    fun `onReceivedError handles trailing slash in failingUrl`() = testWithSetup { client, errors, webView ->
+        val request = createRequest(url = "$HOST_URL/")
+        val error = createWebResourceError()
+
+        client.onReceivedError(webView, request, error)
+
+        assertThat(errors.size).isAtLeast(1)
+        errors[0].assertHasDetails(
+            message = "net::ERR_FAILED",
+            errorCode = -2,
+            url = "$HOST_URL/",
+            type = "generic_resource_error"
+        )
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.M])
+    fun `onReceivedError handles trailing slash in hostUrl`() =
+        testWithSetup("$HOST_URL/") { client, errors, webView ->
+            val request = createRequest(HOST_URL)
+            val error = createWebResourceError()
+
+            client.onReceivedError(webView, request, error)
+
+            assertThat(errors.size).isAtLeast(1)
+            errors[0].assertHasDetails(
+                message = "net::ERR_FAILED",
+                errorCode = -2,
+                url = HOST_URL,
+                type = "generic_resource_error"
+            )
+        }
+
     // onReceivedError (Pre-API 23) tests
     @Test
     @Config(sdk = [Build.VERSION_CODES.LOLLIPOP])
@@ -68,6 +103,37 @@ internal class IntentConfirmationWebViewClientTest {
             type = "generic_resource_error"
         )
     }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.LOLLIPOP])
+    fun `onReceivedError legacy API handles trailing slash in failingUrl`() = testWithSetup { client, errors, webView ->
+        @Suppress("DEPRECATION")
+        client.onReceivedError(webView, -2, "Connection failed", "$HOST_URL/")
+
+        assertThat(errors).hasSize(1)
+        errors[0].assertHasDetails(
+            message = "Connection failed",
+            errorCode = -2,
+            url = "$HOST_URL/",
+            type = "generic_resource_error"
+        )
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.LOLLIPOP])
+    fun `onReceivedError legacy API handles trailing slash in hostUrl`() =
+        testWithSetup(hostUrl = "$HOST_URL/") { client, errors, webView ->
+            @Suppress("DEPRECATION")
+            client.onReceivedError(webView, -2, "Connection failed", HOST_URL)
+
+            assertThat(errors).hasSize(1)
+            errors[0].assertHasDetails(
+                message = "Connection failed",
+                errorCode = -2,
+                url = HOST_URL,
+                type = "generic_resource_error"
+            )
+        }
 
     // onReceivedHttpError tests
     @Test
@@ -97,6 +163,41 @@ internal class IntentConfirmationWebViewClientTest {
 
         assertThat(errors).isEmpty()
     }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.M])
+    fun `onReceivedHttpError handles trailing slash in request url`() = testWithSetup { client, errors, webView ->
+        val request = createRequest(url = "$HOST_URL/")
+        val response = createWebResourceResponse()
+
+        client.onReceivedHttpError(webView, request, response)
+
+        assertThat(errors).hasSize(1)
+        errors[0].assertHasDetails(
+            message = "Not Found",
+            errorCode = 404,
+            url = "$HOST_URL/",
+            type = "http_error"
+        )
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.M])
+    fun `onReceivedHttpError handles trailing slash in hostUrl`() =
+        testWithSetup(hostUrl = "$HOST_URL/") { client, errors, webView ->
+            val request = createRequest(HOST_URL)
+            val response = createWebResourceResponse()
+
+            client.onReceivedHttpError(webView, request, response)
+
+            assertThat(errors).hasSize(1)
+            errors[0].assertHasDetails(
+                message = "Not Found",
+                errorCode = 404,
+                url = HOST_URL,
+                type = "http_error"
+            )
+        }
 
     // onReceivedSslError tests
     @Test
@@ -133,11 +234,12 @@ internal class IntentConfirmationWebViewClientTest {
 
     // Helper methods
     private fun testWithSetup(
+        hostUrl: String = HOST_URL,
         block: (IntentConfirmationWebViewClient, MutableList<WebViewError>, WebView) -> Unit
     ) {
         val capturedErrors = mutableListOf<WebViewError>()
         val errorHandler = WebViewErrorHandler { error -> capturedErrors.add(error) }
-        val client = IntentConfirmationWebViewClient(HOST_URL, errorHandler = errorHandler)
+        val client = IntentConfirmationWebViewClient(hostUrl, errorHandler = errorHandler)
         val webView = WebView(ApplicationProvider.getApplicationContext())
 
         block(client, capturedErrors, webView)

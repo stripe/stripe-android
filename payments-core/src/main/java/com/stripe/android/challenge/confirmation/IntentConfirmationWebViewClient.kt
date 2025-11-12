@@ -1,5 +1,6 @@
 package com.stripe.android.challenge.confirmation
 
+import android.net.Uri
 import android.net.http.SslError
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.SslErrorHandler
@@ -14,14 +15,31 @@ internal class IntentConfirmationWebViewClient(
     private val errorHandler: WebViewErrorHandler
 ) : WebViewClient() {
 
+    private fun urlsMatch(url1: String?, url2: String): Boolean {
+        if (url1 == null) return false
+        val uri1 = Uri.parse(url1).normalizeTrailingSlash()
+        val uri2 = Uri.parse(url2).normalizeTrailingSlash()
+        return uri1 == uri2
+    }
+
+    private fun Uri.normalizeTrailingSlash(): Uri {
+        val path = this.path ?: return this
+        val normalizedPath = path.trimEnd('/')
+        return if (normalizedPath != path) {
+            this.buildUpon().path(normalizedPath).build()
+        } else {
+            this
+        }
+    }
+
     override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
         super.onReceivedError(view, request, error)
-        if (request?.url?.toString() != hostUrl) return
+        if (!urlsMatch(request?.url?.toString(), hostUrl)) return
         errorHandler(
             WebViewError(
                 message = error?.description?.toString(),
                 errorCode = error?.errorCode,
-                url = request.url?.toString(),
+                url = request?.url?.toString(),
                 webViewErrorType = "generic_resource_error"
             )
         )
@@ -31,7 +49,7 @@ internal class IntentConfirmationWebViewClient(
     @Suppress("DEPRECATION")
     override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
         super.onReceivedError(view, errorCode, description, failingUrl)
-        if (failingUrl != hostUrl) return
+        if (!urlsMatch(failingUrl, hostUrl)) return
         errorHandler(
             WebViewError(
                 message = description,
@@ -48,12 +66,12 @@ internal class IntentConfirmationWebViewClient(
         errorResponse: WebResourceResponse?
     ) {
         super.onReceivedHttpError(view, request, errorResponse)
-        if (request?.url?.toString() != hostUrl) return
+        if (!urlsMatch(request?.url?.toString(), hostUrl)) return
         errorHandler(
             WebViewError(
                 message = errorResponse?.reasonPhrase,
                 errorCode = errorResponse?.statusCode,
-                url = request.url?.toString(),
+                url = request?.url?.toString(),
                 webViewErrorType = "http_error"
             )
         )
