@@ -25,7 +25,7 @@ class EditPage(
         composeTestRule.waitUntil {
             composeTestRule
                 .onAllNodes(hasTestTag(UPDATE_PM_SCREEN_TEST_TAG))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }

@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.resolvableString
@@ -30,8 +31,18 @@ internal class DefaultConfirmationHandler(
     private val coroutineScope: CoroutineScope,
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
-    private val ioContext: CoroutineContext
+    private val ioContext: CoroutineContext,
+    private val logger: Logger,
+    private val confirmationSaver: ConfirmationHandler.Saver,
 ) : ConfirmationHandler {
+    private var initialConfirmationArguments: ConfirmationHandler.Args?
+        get() {
+            return savedStateHandle.get<ConfirmationHandler.Args>(INITIAL_CONFIRMATION_ARGUMENTS_KEY)
+        }
+        set(value) {
+            savedStateHandle.set(INITIAL_CONFIRMATION_ARGUMENTS_KEY, value)
+        }
+
     private val isInitiallyAwaitingForResultData = retrieveIsAwaitingForResultData()
 
     override val hasReloadedFromProcessDeath = isInitiallyAwaitingForResultData != null
@@ -94,6 +105,8 @@ internal class DefaultConfirmationHandler(
     override suspend fun start(
         arguments: ConfirmationHandler.Args,
     ) {
+        initialConfirmationArguments = arguments
+
         withContext(coroutineScope.coroutineContext) {
             val currentState = _state.value
 
@@ -229,7 +242,21 @@ internal class DefaultConfirmationHandler(
     }
 
     private fun onHandlerResult(result: ConfirmationHandler.Result) {
+        result.log(logger)
+
         _state.value = ConfirmationHandler.State.Complete(result)
+
+        if (result is ConfirmationHandler.Result.Succeeded) {
+            initialConfirmationArguments?.let { arguments ->
+                confirmationSaver.save(
+                    result.intent,
+                    arguments.confirmationOption,
+                    arguments.paymentMethodMetadata.forceSetupFutureUseBehaviorAndNewMandate,
+                )
+            }
+        }
+
+        initialConfirmationArguments = null
 
         removeIsAwaitingForResult()
     }
@@ -278,6 +305,8 @@ internal class DefaultConfirmationHandler(
         private val savedStateHandle: SavedStateHandle,
         private val errorReporter: ErrorReporter,
         @IOContext private val ioContext: CoroutineContext,
+        private val logger: Logger,
+        private val confirmationSaver: ConfirmationHandler.Saver,
     ) : ConfirmationHandler.Factory {
         override fun create(scope: CoroutineScope): ConfirmationHandler {
             return DefaultConfirmationHandler(
@@ -285,12 +314,15 @@ internal class DefaultConfirmationHandler(
                 coroutineScope = scope,
                 errorReporter = errorReporter,
                 savedStateHandle = savedStateHandle,
-                ioContext = ioContext
+                ioContext = ioContext,
+                logger = logger,
+                confirmationSaver = confirmationSaver,
             )
         }
     }
 
     internal companion object {
         private const val AWAITING_CONFIRMATION_RESULT_KEY = "AwaitingConfirmationResult"
+        private const val INITIAL_CONFIRMATION_ARGUMENTS_KEY = "INITIAL_CONFIRMATION_ARGUMENTS_KEY"
     }
 }

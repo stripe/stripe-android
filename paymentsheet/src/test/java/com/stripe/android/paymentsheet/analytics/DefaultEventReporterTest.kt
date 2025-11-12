@@ -1541,8 +1541,8 @@ class DefaultEventReporterTest {
     private fun createEventReporter(
         mode: EventReporter.Mode,
         duration: Duration = 1.seconds,
-        configure: EventReporter.() -> Unit = {},
-    ): EventReporter {
+        configure: DefaultEventReporter.() -> Unit = {},
+    ): DefaultEventReporter {
         val reporter = DefaultEventReporter(
             context = ApplicationProvider.getApplicationContext(),
             mode = mode,
@@ -1566,8 +1566,8 @@ class DefaultEventReporterTest {
     private fun createEventReporter(
         mode: EventReporter.Mode,
         durationProvider: DurationProvider,
-        configure: EventReporter.() -> Unit = {},
-    ): EventReporter {
+        configure: DefaultEventReporter.() -> Unit = {},
+    ): DefaultEventReporter {
         val reporter = DefaultEventReporter(
             context = ApplicationProvider.getApplicationContext(),
             mode = mode,
@@ -1587,7 +1587,7 @@ class DefaultEventReporterTest {
         return reporter
     }
 
-    private fun EventReporter.simulateInit() {
+    private fun DefaultEventReporter.simulateInit() {
         onInit(
             commonConfiguration = configuration.asCommonConfiguration(),
             appearance = configuration.appearance,
@@ -1597,7 +1597,7 @@ class DefaultEventReporterTest {
         )
     }
 
-    private fun EventReporter.simulateSuccessfulSetup(
+    private fun DefaultEventReporter.simulateSuccessfulSetup(
         paymentSelection: PaymentSelection = PaymentSelection.GooglePay,
         linkEnabled: Boolean = true,
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,

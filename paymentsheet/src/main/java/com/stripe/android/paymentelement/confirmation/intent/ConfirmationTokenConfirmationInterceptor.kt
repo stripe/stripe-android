@@ -177,7 +177,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 )
             } else if (intent.requiresAction()) {
                 ConfirmationDefinition.Action.Launch<Args>(
-                    launcherArguments = Args.NextAction(clientSecret),
+                    launcherArguments = Args.NextAction(clientSecret, intent),
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     isConfirmationToken = true,
                     receivesResultInProcess = false,
@@ -254,17 +254,18 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     private fun prepareConfirmationTokenClientContextParams(paymentMethodOptions: PaymentMethodOptionsParams?):
         ConfirmationTokenClientContextParams {
         return with(intentConfiguration.toDeferredIntentParams()) {
+            val paymentMode = (mode as? DeferredIntentParams.Mode.Payment)
+
             ConfirmationTokenClientContextParams(
                 mode = mode.code,
                 currency = mode.currency,
                 setupFutureUsage = resolveSetupFutureUsage(paymentMethodOptions),
-                captureMethod = (mode as? DeferredIntentParams.Mode.Payment)?.captureMethod?.code,
+                captureMethod = paymentMode?.captureMethod?.code,
                 paymentMethodTypes = paymentMethodTypes,
                 onBehalfOf = onBehalfOf,
                 paymentMethodConfiguration = paymentMethodConfigurationId,
                 customer = customerId,
-                paymentMethodOptions = paymentMethodOptions,
-                requireCvcRecollection = intentConfiguration.requireCvcRecollection
+                paymentMethodOptionsJson = paymentMode?.paymentMethodOptionsJsonString,
             )
         }
     }

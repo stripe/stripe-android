@@ -19,6 +19,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
@@ -80,6 +81,8 @@ internal data class PaymentMethodMetadata(
     val clientAttributionMetadata: ClientAttributionMetadata,
     val attestOnIntentConfirmation: Boolean,
     val appearance: PaymentSheet.Appearance,
+    val onBehalfOf: String?,
+    val integrationMetadata: IntegrationMetadata,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -323,6 +326,7 @@ internal data class PaymentMethodMetadata(
             customerMetadata: CustomerMetadata?,
             initializationMode: PaymentElementLoader.InitializationMode,
             clientAttributionMetadata: ClientAttributionMetadata,
+            paymentElementCallbacks: PaymentElementCallbacks?,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
@@ -369,6 +373,8 @@ internal data class PaymentMethodMetadata(
                 clientAttributionMetadata = clientAttributionMetadata,
                 attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation,
                 appearance = configuration.appearance,
+                onBehalfOf = elementsSession.onBehalfOf,
+                integrationMetadata = initializationMode.integrationMetadata(paymentElementCallbacks),
             )
         }
 
@@ -430,6 +436,8 @@ internal data class PaymentMethodMetadata(
                 ),
                 attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation,
                 appearance = configuration.appearance,
+                onBehalfOf = elementsSession.onBehalfOf,
+                integrationMetadata = IntegrationMetadata.CustomerSheet,
             )
         }
     }

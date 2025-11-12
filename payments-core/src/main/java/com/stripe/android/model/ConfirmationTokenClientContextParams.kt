@@ -1,8 +1,10 @@
 package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeJsonUtils.jsonObjectToMap
 import com.stripe.android.utils.putNonEmptySfu
 import kotlinx.parcelize.Parcelize
+import org.json.JSONObject
 
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -31,11 +33,8 @@ data class ConfirmationTokenClientContextParams(
     /** Customer ID */
     val customer: String? = null,
 
-    /** Payment method specific options as a dictionary */
-    val paymentMethodOptions: PaymentMethodOptionsParams? = null,
-
-    /** Indicates whether the customer is required to re-enter their CVC code */
-    val requireCvcRecollection: Boolean? = null,
+    /** Payment method specific options as a JSON string */
+    val paymentMethodOptionsJson: String? = null,
 ) : StripeParamsModel {
     override fun toParamMap(): Map<String, Any> {
         return buildMap {
@@ -53,46 +52,8 @@ data class ConfirmationTokenClientContextParams(
             onBehalfOf?.let { put(PARAM_ON_BEHALF_OF, it) }
             paymentMethodConfiguration?.let { put(PARAM_PAYMENT_METHOD_CONFIGURATION, it) }
             customer?.let { put(PARAM_CUSTOMER, it) }
-            preparePaymentMethodOptionsParamMap(
-                paymentMethodOptions,
-                requireCvcRecollection,
-            )?.let {
-                put(PARAM_PAYMENT_METHOD_OPTIONS, it)
-            }
+            paymentMethodOptionsJson?.let { put(PARAM_PAYMENT_METHOD_OPTIONS, jsonObjectToMap(JSONObject(it)) as Any) }
         }
-    }
-
-    /**
-     * https://stripe.sourcegraphcloud.com/stripe-internal/pay-server/-/blob/lib/elements/api/client_context/param.rb
-     */
-    private fun preparePaymentMethodOptionsParamMap(
-        paymentMethodOptions: PaymentMethodOptionsParams?,
-        requireCvcRecollection: Boolean?,
-    ): Map<String, Any>? {
-        val options = mutableMapOf<String, Any>()
-
-        // Add setup_future_usage for the payment method type if present
-        paymentMethodOptions?.let { pmo ->
-            val sfu = pmo.setupFutureUsage()
-            if (sfu != null) {
-                val pmOptions = mutableMapOf<String, Any>()
-                pmOptions.putNonEmptySfu(sfu)
-
-                if (pmOptions.isNotEmpty()) {
-                    options[pmo.type.code] = pmOptions
-                }
-            }
-        }
-
-        // Add require_cvc_recollection under card options if needed
-        if (requireCvcRecollection == true) {
-            @Suppress("UNCHECKED_CAST")
-            val cardOptions = (options["card"] as? MutableMap<String, Any>) ?: mutableMapOf()
-            cardOptions[PARAM_REQUIRE_CVC_RECOLLECTION] = true
-            options["card"] = cardOptions
-        }
-
-        return options.takeIf { it.isNotEmpty() }
     }
 
     private companion object {
@@ -104,6 +65,5 @@ data class ConfirmationTokenClientContextParams(
         const val PARAM_PAYMENT_METHOD_CONFIGURATION = "payment_method_configuration"
         const val PARAM_CUSTOMER = "customer"
         const val PARAM_PAYMENT_METHOD_OPTIONS = "payment_method_options"
-        const val PARAM_REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
     }
 }

@@ -249,7 +249,6 @@ internal class DefaultVerticalModeFormInteractorTest {
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = OnClickDelegateOverrideImpl(),
             eventReporter = FakeEventReporter(),
-            confirmationSaver = {},
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -299,7 +298,6 @@ internal class DefaultVerticalModeFormInteractorTest {
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = OnClickDelegateOverrideImpl(),
             eventReporter = FakeEventReporter(),
-            confirmationSaver = {},
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),

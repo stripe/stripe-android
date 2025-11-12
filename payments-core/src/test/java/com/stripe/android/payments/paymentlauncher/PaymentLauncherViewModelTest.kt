@@ -395,6 +395,44 @@ class PaymentLauncherViewModelTest {
         }
 
     @Test
+    fun `verify next action with PaymentIntent object is handled correctly without fetching`() =
+        runTest {
+            val testPaymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
+            whenever(nextActionHandlerRegistry.getNextActionHandler(eq(testPaymentIntent)))
+                .thenReturn(piAuthenticator)
+
+            createViewModel().handleNextActionForStripeIntent(testPaymentIntent, authHost)
+
+            verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
+            verify(piAuthenticator).performNextAction(
+                eq(authHost),
+                eq(testPaymentIntent),
+                eq(apiRequestOptions)
+            )
+            // Verify we don't fetch from repository when intent is already provided
+            verify(stripeApiRepository, never()).retrieveStripeIntent(any(), any(), any())
+        }
+
+    @Test
+    fun `verify next action with SetupIntent object is handled correctly without fetching`() =
+        runTest {
+            val testSetupIntent = mock<SetupIntent>()
+            whenever(nextActionHandlerRegistry.getNextActionHandler(eq(testSetupIntent)))
+                .thenReturn(siAuthenticator)
+
+            createViewModel().handleNextActionForStripeIntent(testSetupIntent, authHost)
+
+            verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
+            verify(siAuthenticator).performNextAction(
+                eq(authHost),
+                eq(testSetupIntent),
+                eq(apiRequestOptions)
+            )
+            // Verify we don't fetch from repository when intent is already provided
+            verify(stripeApiRepository, never()).retrieveStripeIntent(any(), any(), any())
+        }
+
+    @Test
     fun `verify paymentIntentProcessor is chosen correctly`() =
         runTest {
             val viewModel = createViewModel(isPaymentIntent = true)

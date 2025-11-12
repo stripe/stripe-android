@@ -10,11 +10,9 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
@@ -88,12 +86,6 @@ internal class USBankAccountFormArguments(
                 hasCustomerConfiguration = paymentMethodMetadata.customerMetadata != null,
             )
             val instantDebits = selectedPaymentMethodCode == PaymentMethod.Type.Link.code
-            val initializationMode = (viewModel as? PaymentSheetViewModel)
-                ?.args
-                ?.initializationMode
-            val onBehalfOf = (initializationMode as? PaymentElementLoader.InitializationMode.DeferredIntent)
-                ?.intentConfiguration
-                ?.onBehalfOf
             val stripeIntent = paymentMethodMetadata.stripeIntent
             return USBankAccountFormArguments(
                 showCheckbox = isSaveForFutureUseValueChangeable &&
@@ -102,7 +94,7 @@ internal class USBankAccountFormArguments(
                 hostedSurface = hostedSurface,
                 instantDebits = instantDebits,
                 linkMode = paymentMethodMetadata.linkMode,
-                onBehalfOf = onBehalfOf,
+                onBehalfOf = paymentMethodMetadata.onBehalfOf,
                 isCompleteFlow = viewModel.isCompleteFlow,
                 isPaymentFlow = stripeIntent is PaymentIntent,
                 stripeIntentId = stripeIntent.id,
@@ -157,12 +149,13 @@ internal class USBankAccountFormArguments(
                     paymentMethodMetadata.paymentMethodIncentive
                 )
             )
+
             return USBankAccountFormArguments(
                 showCheckbox = isSaveForFutureUseValueChangeable && instantDebits.not(),
                 hostedSurface = hostedSurface,
                 instantDebits = instantDebits,
                 linkMode = paymentMethodMetadata.linkMode,
-                onBehalfOf = null,
+                onBehalfOf = paymentMethodMetadata.onBehalfOf,
                 isCompleteFlow = false,
                 isPaymentFlow = paymentMethodMetadata.stripeIntent is PaymentIntent,
                 stripeIntentId = paymentMethodMetadata.stripeIntent.id,

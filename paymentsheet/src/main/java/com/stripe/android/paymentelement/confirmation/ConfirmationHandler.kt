@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
@@ -117,6 +118,8 @@ internal interface ConfirmationHandler {
      * Defines the result types that can be returned after completing a confirmation process.
      */
     sealed interface Result {
+        fun log(logger: Logger)
+
         /**
          * Indicates that the confirmation process was canceled by the customer.
          */
@@ -144,6 +147,10 @@ internal interface ConfirmationHandler {
                  */
                 None,
             }
+
+            override fun log(logger: Logger) {
+                logger.info("ConfirmationHandler.Result.Canceled: $action")
+            }
         }
 
         /**
@@ -155,7 +162,11 @@ internal interface ConfirmationHandler {
             val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
             val isConfirmationToken: Boolean,
             val completedFullPaymentFlow: Boolean = true,
-        ) : Result
+        ) : Result {
+            override fun log(logger: Logger) {
+                logger.info("ConfirmationHandler.Result.Succeeded")
+            }
+        }
 
         /**
          * Indicates that the confirmation process has failed. A cause and potentially a resolvable message are
@@ -166,6 +177,10 @@ internal interface ConfirmationHandler {
             val message: ResolvableString,
             val type: ErrorType,
         ) : Result {
+            override fun log(logger: Logger) {
+                logger.error("ConfirmationHandler.Result.Failed", cause)
+            }
+
             /**
              * Types of errors that can occur when confirming a payment.
              */
@@ -204,4 +219,12 @@ internal interface ConfirmationHandler {
     }
 
     interface Option : Parcelable
+
+    fun interface Saver {
+        fun save(
+            stripeIntent: StripeIntent,
+            confirmationOption: Option,
+            alwaysSave: Boolean,
+        )
+    }
 }

@@ -71,6 +71,8 @@ internal class EmbeddedFormPage(
     }
 
     fun clickPrimaryButton() {
+        waitUntilVisible()
+
         composeTestRule.waitUntil {
             composeTestRule.onAllNodes(hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON).and(isEnabled()))
                 .fetchSemanticsNodes()

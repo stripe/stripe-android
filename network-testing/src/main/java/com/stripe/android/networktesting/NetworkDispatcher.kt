@@ -15,6 +15,7 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
     private val extraRequests: MutableList<RecordedRequest> = Collections.synchronizedList(mutableListOf())
 
     fun enqueue(vararg requestMatcher: RequestMatcher, responseFactory: (MockResponse) -> Unit) {
+        validateEnqueueState()
         enqueuedResponses.add(
             Entry(composite(*requestMatcher)) {
                 val response = MockResponse()
@@ -29,6 +30,7 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
         vararg requestMatcher: RequestMatcher,
         responseFactory: (TestRecordedRequest, MockResponse) -> Unit
     ) {
+        validateEnqueueState()
         enqueuedResponses.add(
             Entry(composite(*requestMatcher)) {
                 val response = MockResponse()
@@ -37,6 +39,15 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
                 response
             }
         )
+    }
+
+    private fun validateEnqueueState() {
+        val exceptionMessage = StringBuilder()
+        addExtraRequestsToExceptionMessage(exceptionMessage)
+        if (exceptionMessage.isNotEmpty()) {
+            exceptionMessage.insert(0, "Responses must be enqueued before the production code makes the request.\n")
+            throw IllegalStateException(exceptionMessage.toString())
+        }
     }
 
     fun clear() {
@@ -52,6 +63,13 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
                     remainingMatchersDescription()
             )
         }
+        addExtraRequestsToExceptionMessage(exceptionMessage)
+        if (exceptionMessage.isNotEmpty()) {
+            throw IllegalStateException(exceptionMessage.toString())
+        }
+    }
+
+    private fun addExtraRequestsToExceptionMessage(exceptionMessage: StringBuilder) {
         if (extraRequests.isNotEmpty()) {
             if (exceptionMessage.isNotEmpty()) {
                 exceptionMessage.append('\n')
@@ -60,9 +78,6 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
                 "Production code made extra requests that your test did not enqueue. Remaining: " +
                     "${extraRequests.size}.\n${extraRequestDescriptions()}"
             )
-        }
-        if (exceptionMessage.isNotEmpty()) {
-            throw IllegalStateException(exceptionMessage.toString())
         }
     }
 

@@ -31,7 +31,7 @@ internal data class CustomerSessionElementsSession(
 @Singleton
 internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
     private val elementsSessionRepository: ElementsSessionRepository,
-    private val prefsRepositoryFactory: @JvmSuppressWildcards (String) -> PrefsRepository,
+    private val prefsRepositoryFactory: PrefsRepository.Factory,
     private val customerSessionProvider: CustomerSheet.CustomerSessionProvider,
     private val errorReporter: ErrorReporter,
     private val timeProvider: () -> Long,
@@ -67,7 +67,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
 
                 validateCustomerSessionClientSecret(customerSessionClientSecret.clientSecret)
 
-                val prefsRepository = prefsRepositoryFactory(customerSessionClientSecret.customerId)
+                val prefsRepository = prefsRepositoryFactory.create(customerSessionClientSecret.customerId)
 
                 val savedSelection = prefsRepository.getSavedSelection(
                     isGooglePayAvailable = false,

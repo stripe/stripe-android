@@ -236,7 +236,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         return runCatching<ConfirmationDefinition.Action<Args>> {
             DeferredIntentValidator.validatePaymentMethod(intent, paymentMethod)
             ConfirmationDefinition.Action.Launch(
-                launcherArguments = Args.NextAction(clientSecret),
+                launcherArguments = Args.NextAction(clientSecret, intent),
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                 isConfirmationToken = false,
                 receivesResultInProcess = false,

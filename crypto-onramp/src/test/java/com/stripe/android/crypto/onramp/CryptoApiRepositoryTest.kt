@@ -325,10 +325,10 @@ class CryptoApiRepositoryTest {
             assertThat(params["birth_city"]).isNull()
             assertThat(params["city"]).isEqualTo("Orlando")
             assertThat(params["state"]).isEqualTo("FL")
-            assertThat(params["country"]).isNull()
-            assertThat(params["line1"]).isNull()
-            assertThat(params["line2"]).isNull()
-            assertThat(params["zip"]).isNull()
+            assertThat(params["country"]).isEqualTo("")
+            assertThat(params["line1"]).isEqualTo("")
+            assertThat(params["line2"]).isEqualTo("")
+            assertThat(params["zip"]).isEqualTo("")
 
             assertThat(params["credentials"]).isEqualTo(
                 mapOf("consumer_session_client_secret" to "test-secret")

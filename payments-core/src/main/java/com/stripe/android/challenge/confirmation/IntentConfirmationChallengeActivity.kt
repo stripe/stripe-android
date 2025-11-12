@@ -3,23 +3,53 @@ package com.stripe.android.challenge.confirmation
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
 internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
+    @VisibleForTesting
+    internal var viewModelFactory: ViewModelProvider.Factory = IntentConfirmationChallengeViewModel.factory()
+
+    private val viewModel: IntentConfirmationChallengeViewModel by viewModels {
+        viewModelFactory
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        lifecycleScope.launch {
-            dismissWithResult(
-                result = IntentConfirmationChallengeActivityResult.Failed(
-                    error = NotImplementedError("Intent Confirmation Challenge not implemented")
-                )
+        listenForActivityResult()
+
+        setContent {
+            var showProgressIndicator by remember { mutableStateOf(true) }
+
+            LaunchedEffect("BridgeEvents") {
+                viewModel.bridgeReady.collect {
+                    showProgressIndicator = false
+                }
+            }
+
+            IntentConfirmationChallengeUI(
+                bridgeHandler = viewModel.bridgeHandler,
+                showProgressIndicator = showProgressIndicator
             )
+        }
+    }
+
+    private fun listenForActivityResult() {
+        lifecycleScope.launch {
+            viewModel.result.collect(::dismissWithResult)
         }
     }
 

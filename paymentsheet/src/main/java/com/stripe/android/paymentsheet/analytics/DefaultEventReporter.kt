@@ -49,7 +49,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     private val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>,
     @IOContext private val workContext: CoroutineContext,
     private val logger: UserFacingLogger,
-) : EventReporter {
+) : EventReporter, LoadingEventReporter {
 
     private var isDeferred: Boolean = false
     private var isSpt: Boolean = false
@@ -333,9 +333,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         paymentSelection: PaymentSelection,
     ) {
         if (paymentSelection.isSaved) {
-            paymentSelection.code()?.let {
-                fireAnalyticEvent(AnalyticEvent.SelectedSavedPaymentMethod(it))
-            }
+            fireAnalyticEvent(AnalyticEvent.SelectedSavedPaymentMethod(paymentSelection.code()))
         }
         fireEvent(
             PaymentSheetEvent.SelectPaymentOption(
@@ -611,7 +609,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         val isLinkVisible = walletsState?.link(WalletLocation.HEADER) != null &&
             walletsState.buttonsEnabled
 
-        val visiblePaymentMethodsWithWallets = buildList<String> {
+        val visiblePaymentMethodsWithWallets = buildList {
             if (isGooglePayVisible) add("google_pay")
             if (isLinkVisible) add("link")
             addAll(visiblePaymentMethods)
@@ -780,7 +778,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     private fun fireAnalyticEvent(event: AnalyticEvent) {
-        CoroutineScope(workContext).launch {
+        CoroutineScope(analyticEventCoroutineContext ?: workContext).launch {
             analyticEventCallbackProvider.get()?.run {
                 try {
                     onEvent(event)
@@ -805,8 +803,11 @@ internal class DefaultEventReporter @Inject internal constructor(
         }
     }
 
-    private companion object {
-        const val CLIENT_ID = "stripe-mobile-sdk"
-        const val ORIGIN = "stripe-mobile-sdk-android"
+    companion object {
+        private const val CLIENT_ID = "stripe-mobile-sdk"
+        private const val ORIGIN = "stripe-mobile-sdk-android"
+
+        @Volatile
+        var analyticEventCoroutineContext: CoroutineContext? = null
     }
 }

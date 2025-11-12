@@ -48,6 +48,18 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Ja, bijwerken</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Aanmelden of registreren</string>
+  <!-- Title for the address field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_address_field_title">Adres</string>
+  <!-- Text displayed in a confirmation button when gathering kyc information -->
+  <string name="stripe_link_onramp_kyc_verification_confirm_button_text">Bevestigen</string>
+  <!-- Title for the date of birth field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_dob_field_title">Geboortedatum</string>
+  <!-- Title for the name field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_name_field_title">Naam</string>
+  <!-- Title of the screen responsible for confirming kyc information -->
+  <string name="stripe_link_onramp_kyc_verification_screen_title">Bevestig je gegevens</string>
+  <!-- Title for the SSN field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_ssn_field_title">Laatste 4 cijfers van BSN</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Akkoord en doorgaan</string>
   <!-- Title for the Link signup screen -->

@@ -17,6 +17,8 @@ class CheckoutRequest private constructor(
     val currency: String?,
     @SerialName("mode")
     val mode: String?,
+    @SerialName("on_behalf_of")
+    val onBehalfOf: String?,
     @SerialName("set_shipping_address")
     val setShippingAddress: Boolean?,
     @SerialName("automatic_payment_methods")
@@ -67,6 +69,7 @@ class CheckoutRequest private constructor(
         private var customerKeyType: CustomerKeyType? = null
         private var currency: String? = null
         private var mode: String? = null
+        private var onBehalfOf: String? = null
         private var setShippingAddress: Boolean? = null
         private var automaticPaymentMethods: Boolean? = null
         private var useLink: Boolean? = null
@@ -177,6 +180,10 @@ class CheckoutRequest private constructor(
             this.isConfirmationToken = isConfirmationToken
         }
 
+        fun onBehalfOf(onBehalfOf: String?) = apply {
+            this.onBehalfOf = onBehalfOf
+        }
+
         fun build(): CheckoutRequest {
             return CheckoutRequest(
                 initialization = initialization,
@@ -184,6 +191,7 @@ class CheckoutRequest private constructor(
                 customerKeyType = customerKeyType,
                 currency = currency,
                 mode = mode,
+                onBehalfOf = onBehalfOf,
                 setShippingAddress = setShippingAddress,
                 automaticPaymentMethods = automaticPaymentMethods,
                 useLink = useLink,

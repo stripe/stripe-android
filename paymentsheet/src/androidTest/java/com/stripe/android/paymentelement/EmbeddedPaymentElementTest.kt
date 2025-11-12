@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
@@ -11,6 +12,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -369,6 +371,38 @@ internal class EmbeddedPaymentElementTest {
 
         embeddedContentPage.clickOnLpm("card")
         formPage.assertMandateIsMissing()
+        testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testOBO_PassedToElementsSessionCall() = runEmbeddedPaymentElementTest(
+        networkRule = networkRule,
+        createIntentCallback = { _, shouldSavePaymentMethod ->
+            assertThat(shouldSavePaymentMethod).isFalse()
+            CreateIntentResult.Success("pi_example_secret_12345")
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        val oboMerchantID = "acct_connected_1234"
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+            query(urlEncode("deferred_intent[on_behalf_of]"), oboMerchantID)
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.configure(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 5000,
+                    currency = "USD",
+                ),
+                onBehalfOf = oboMerchantID,
+            )
+        )
+
         testContext.markTestSucceeded()
     }
 

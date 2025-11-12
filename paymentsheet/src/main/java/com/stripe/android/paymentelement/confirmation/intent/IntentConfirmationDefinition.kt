@@ -6,8 +6,6 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -90,7 +88,7 @@ internal class IntentConfirmationDefinition(
     ) {
         when (arguments) {
             is Args.Confirm -> launchConfirm(launcher, arguments.confirmNextParams)
-            is Args.NextAction -> launchNextAction(launcher, arguments.clientSecret, confirmationArgs.intent)
+            is Args.NextAction -> launcher.handleNextActionForStripeIntent(arguments.intent)
         }
     }
 
@@ -118,21 +116,6 @@ internal class IntentConfirmationDefinition(
         }
     }
 
-    private fun launchNextAction(
-        launcher: PaymentLauncher,
-        clientSecret: String,
-        intent: StripeIntent,
-    ) {
-        when (intent) {
-            is PaymentIntent -> {
-                launcher.handleNextActionForPaymentIntent(clientSecret)
-            }
-            is SetupIntent -> {
-                launcher.handleNextActionForSetupIntent(clientSecret)
-            }
-        }
-    }
-
     private fun launchConfirm(
         launcher: PaymentLauncher,
         confirmStripeIntentParams: ConfirmStripeIntentParams
@@ -148,7 +131,10 @@ internal class IntentConfirmationDefinition(
     }
 
     sealed interface Args {
-        data class NextAction(val clientSecret: String) : Args
+        data class NextAction(
+            val clientSecret: String,
+            val intent: StripeIntent,
+        ) : Args
 
         data class Confirm(val confirmNextParams: ConfirmStripeIntentParams) : Args
     }

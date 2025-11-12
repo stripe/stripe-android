@@ -6,17 +6,11 @@ import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.LinkDisabledReason
-import com.stripe.android.model.LinkMode
-import com.stripe.android.model.LinkSignupDisabledReason
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsState
 
 @Suppress("EmptyFunctionBlock")
@@ -103,36 +97,6 @@ internal class FakeEventReporter : EventReporter {
     ) {
     }
 
-    override fun onLoadStarted(initializedViaCompose: Boolean) {
-    }
-
-    override fun onLoadSucceeded(
-        paymentSelection: PaymentSelection?,
-        linkEnabled: Boolean,
-        linkMode: LinkMode?,
-        linkDisabledReasons: List<LinkDisabledReason>?,
-        linkSignupDisabledReasons: List<LinkSignupDisabledReason>?,
-        googlePaySupported: Boolean,
-        linkDisplay: PaymentSheet.LinkConfiguration.Display,
-        currency: String?,
-        initializationMode: PaymentElementLoader.InitializationMode,
-        financialConnectionsAvailability: FinancialConnectionsAvailability?,
-        orderedLpms: List<String>,
-        requireCvcRecollection: Boolean,
-        hasDefaultPaymentMethod: Boolean?,
-        setAsDefaultEnabled: Boolean?,
-        paymentMethodOptionsSetupFutureUsage: Boolean,
-        setupFutureUsage: StripeIntent.Usage?,
-        openCardScanAutomatically: Boolean,
-    ) {
-    }
-
-    override fun onLoadFailed(error: Throwable) {
-    }
-
-    override fun onElementsSessionLoadFailed(error: Throwable) {
-    }
-
     override fun onDismiss() {
     }
 
@@ -202,9 +166,6 @@ internal class FakeEventReporter : EventReporter {
                 error = error,
             )
         )
-    }
-
-    override fun onLpmSpecFailure(errorMessage: String?) {
     }
 
     override fun onAutofill(type: String) {

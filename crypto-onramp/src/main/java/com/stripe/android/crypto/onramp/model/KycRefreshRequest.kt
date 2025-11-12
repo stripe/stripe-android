@@ -41,6 +41,11 @@ internal data class KycRefreshRequest(
     companion object Companion {
         /**
          * Converts SDK KycInfo model to an internal API refresh request model.
+         *
+         * Clearing behavior:
+         * - Any nullable property provided as `null` that is part of `address` is treated
+         *   as an explicit request to clear its previously stored value. Internally `null`
+         *   is normalized to an empty string (`""`) when encoded so the backend clears the field.
          */
         fun fromRefreshKycInfo(
             kycInfo: RefreshKycInfo,
@@ -52,12 +57,12 @@ internal data class KycRefreshRequest(
                 idNumberLastFour = kycInfo.idNumberLastFour,
                 idType = SOCIAL_SECURITY_NUMBER,
                 dateOfBirth = kycInfo.dateOfBirth,
-                city = kycInfo.address.city,
-                country = kycInfo.address.country,
-                line1 = kycInfo.address.line1,
-                line2 = kycInfo.address.line2,
-                postalCode = kycInfo.address.postalCode,
-                state = kycInfo.address.state,
+                city = kycInfo.address.city ?: "",
+                country = kycInfo.address.country ?: "",
+                line1 = kycInfo.address.line1 ?: "",
+                line2 = kycInfo.address.line2 ?: "",
+                postalCode = kycInfo.address.postalCode ?: "",
+                state = kycInfo.address.state ?: "",
                 credentials = credentials
             )
         }

@@ -181,6 +181,62 @@ class PaymentLauncherConfirmationActivityTest {
     }
 
     @Test
+    fun `start with StripeIntentNextActionWithIntentArgs for PaymentIntent should handle with intent`() {
+        val testPaymentIntent = mock<com.stripe.android.model.PaymentIntent>()
+        mockViewModelActivityScenario().launch(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                PaymentLauncherConfirmationActivity::class.java
+            ).putExtras(
+                PaymentLauncherContract.Args.StripeIntentNextActionWithIntentArgs(
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    enableLogging = false,
+                    productUsage = PRODUCT_USAGE,
+                    includePaymentSheetNextHandlers = false,
+                    stripeIntent = testPaymentIntent,
+                    statusBarColor = Color.RED,
+                ).toBundle()
+            )
+        ).use {
+            it.onActivity {
+                runTest {
+                    verify(viewModel).handleNextActionForStripeIntent(eq(testPaymentIntent), any())
+                    verify(viewModel).register(any(), any())
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `start with StripeIntentNextActionWithIntentArgs for SetupIntent should handle with intent`() {
+        val testSetupIntent = mock<com.stripe.android.model.SetupIntent>()
+        mockViewModelActivityScenario().launch(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                PaymentLauncherConfirmationActivity::class.java
+            ).putExtras(
+                PaymentLauncherContract.Args.StripeIntentNextActionWithIntentArgs(
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    enableLogging = false,
+                    productUsage = PRODUCT_USAGE,
+                    includePaymentSheetNextHandlers = false,
+                    stripeIntent = testSetupIntent,
+                    statusBarColor = Color.RED,
+                ).toBundle()
+            )
+        ).use {
+            it.onActivity {
+                runTest {
+                    verify(viewModel).handleNextActionForStripeIntent(eq(testSetupIntent), any())
+                    verify(viewModel).register(any(), any())
+                }
+            }
+        }
+    }
+
+    @Test
     fun `start without args should finish with Error result`() {
         mockViewModelActivityScenario().launchForResult(
             Intent(

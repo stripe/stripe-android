@@ -1246,7 +1246,6 @@ internal class PaymentSheetActivityTest {
                     cbcEligibility = cbcEligibility,
                 ),
                 customerRepository = FakeCustomerRepository(paymentMethods),
-                prefsRepository = FakePrefsRepository(),
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,

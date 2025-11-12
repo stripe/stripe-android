@@ -16,7 +16,7 @@ import kotlin.coroutines.CoroutineContext
 internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
     private val elementsSessionManager: CustomerSessionElementsSessionManager,
     private val customerRepository: CustomerRepository,
-    private val prefsRepositoryFactory: @JvmSuppressWildcards (String) -> PrefsRepository,
+    private val prefsRepositoryFactory: PrefsRepository.Factory,
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerSheetSavedSelectionDataSource {
     override suspend fun retrieveSavedSelection(
@@ -109,7 +109,7 @@ internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
 
     private suspend fun createPrefsRepository(): CustomerSheetDataResult<PrefsRepository> {
         return elementsSessionManager.fetchCustomerSessionEphemeralKey().mapCatching { ephemeralKey ->
-            prefsRepositoryFactory(ephemeralKey.customerId)
+            prefsRepositoryFactory.create(ephemeralKey.customerId)
         }.toCustomerSheetDataResult()
     }
 }

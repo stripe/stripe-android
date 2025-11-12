@@ -6,6 +6,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 
 class FakePaymentLauncher : PaymentLauncher {
@@ -26,6 +27,10 @@ class FakePaymentLauncher : PaymentLauncher {
 
     override fun handleNextActionForSetupIntent(clientSecret: String) {
         _calls.add(Call.HandleNextAction.SetupIntent(clientSecret))
+    }
+
+    override fun handleNextActionForStripeIntent(intent: StripeIntent) {
+        _calls.add(Call.HandleNextActionWithIntent.Intent(intent))
     }
 
     @SharedPaymentTokenSessionPreview
@@ -56,6 +61,12 @@ class FakePaymentLauncher : PaymentLauncher {
             data class SetupIntent(
                 override val clientSecret: String
             ) : HandleNextAction
+        }
+
+        sealed interface HandleNextActionWithIntent : Call {
+            data class Intent(
+                val intent: StripeIntent
+            ) : HandleNextActionWithIntent
         }
 
         sealed interface HandleHashedNextAction : Call {

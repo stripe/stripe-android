@@ -144,9 +144,29 @@ class ElementsSessionTest {
         assertThat(session.enableAttestationOnIntentConfirmation).isFalse()
     }
 
+    @Test
+    fun `onBehalfOf is null when account and merchant are the same`() {
+        val session = createElementsSession(
+            accountId = "acct_1SGP1sPvdtoA7EjP",
+            merchantId = "acct_1SGP1sPvdtoA7EjP",
+        )
+        assertThat(session.onBehalfOf).isNull()
+    }
+
+    @Test
+    fun `onBehalfOf is accountId when account and merchant are not the same`() {
+        val session = createElementsSession(
+            accountId = "acct_1SGP1sPvdtoA7EjP",
+            merchantId = "acct_1HvTI7Lu5o3P18Zp",
+        )
+        assertThat(session.onBehalfOf).isEqualTo("acct_1SGP1sPvdtoA7EjP")
+    }
+
     private fun createElementsSession(
-        passiveCaptcha: PassiveCaptchaParams?,
-        flags: Map<ElementsSession.Flag, Boolean>
+        passiveCaptcha: PassiveCaptchaParams? = null,
+        flags: Map<ElementsSession.Flag, Boolean> = emptyMap(),
+        accountId: String? = "acct_1SGP1sPvdtoA7EjP",
+        merchantId: String? = "acct_1SGP1sPvdtoA7EjP",
     ): ElementsSession {
         return ElementsSession(
             linkSettings = null,
@@ -166,6 +186,8 @@ class ElementsSessionTest {
             elementsSessionId = "elements_session_test",
             passiveCaptcha = passiveCaptcha,
             elementsSessionConfigId = null,
+            accountId = accountId,
+            merchantId = merchantId,
         )
     }
 }
