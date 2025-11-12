@@ -2,6 +2,7 @@ package com.stripe.android.challenge.confirmation
 
 import android.net.Uri
 import android.net.http.SslError
+import android.os.Build
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceError
@@ -9,6 +10,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.annotation.RequiresApi
 
 internal class IntentConfirmationWebViewClient(
     private val hostUrl: String,
@@ -32,6 +34,7 @@ internal class IntentConfirmationWebViewClient(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
         super.onReceivedError(view, request, error)
         if (!urlsMatch(request?.url?.toString(), hostUrl)) return

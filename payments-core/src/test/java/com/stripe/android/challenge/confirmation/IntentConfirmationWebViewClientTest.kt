@@ -33,7 +33,7 @@ internal class IntentConfirmationWebViewClientTest {
             client.onReceivedError(webView, request, error)
 
             // Note: The implementation calls super.onReceivedError() which triggers the legacy version too
-            assertThat(errors.size).isAtLeast(1)
+            assertThat(errors.size).isEqualTo(1)
             errors[0].assertHasDetails(
                 message = "net::ERR_FAILED",
                 errorCode = -2,
@@ -61,7 +61,7 @@ internal class IntentConfirmationWebViewClientTest {
 
         client.onReceivedError(webView, request, error)
 
-        assertThat(errors.size).isAtLeast(1)
+        assertThat(errors.size).isEqualTo(1)
         errors[0].assertHasDetails(
             message = "net::ERR_FAILED",
             errorCode = -2,
@@ -79,7 +79,7 @@ internal class IntentConfirmationWebViewClientTest {
 
             client.onReceivedError(webView, request, error)
 
-            assertThat(errors.size).isAtLeast(1)
+            assertThat(errors.size).isEqualTo(1)
             errors[0].assertHasDetails(
                 message = "net::ERR_FAILED",
                 errorCode = -2,
