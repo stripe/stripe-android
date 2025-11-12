@@ -23,6 +23,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -1011,6 +1012,7 @@ internal class PaymentSheetActivityTest {
                 scenario.result.resultData,
             )
 
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
             assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
         }
     }
@@ -1042,6 +1044,7 @@ internal class PaymentSheetActivityTest {
                 scenario.result.resultData,
             )
 
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
             assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
         }
     }
@@ -1065,6 +1068,7 @@ internal class PaymentSheetActivityTest {
                 scenario.result.resultData,
             )
 
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
             assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
         }
     }

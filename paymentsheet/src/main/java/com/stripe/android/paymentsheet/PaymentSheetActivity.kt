@@ -10,6 +10,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
@@ -85,8 +86,17 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         val result = if (starterArgs == null) {
             Result.failure(defaultInitializationError())
         } else {
-            starterArgs.config.appearance.parseAppearance()
-            Result.success(starterArgs)
+            try {
+                starterArgs.initializationMode.validate()
+                starterArgs.config.asCommonConfiguration().validate(
+                    viewModel.isLiveModeProvider(),
+                    starterArgs.paymentElementCallbackIdentifier
+                )
+                starterArgs.config.appearance.parseAppearance()
+                Result.success(starterArgs)
+            } catch (e: IllegalArgumentException) {
+                Result.failure(e)
+            }
         }
 
         earlyExitDueToIllegalState = result.isFailure
