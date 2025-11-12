@@ -7,6 +7,10 @@ import com.stripe.android.model.StripeIntent
 
 object PaymentIntentFactory {
 
+    fun createDeferred(): PaymentIntent {
+        return create(id = null, clientSecret = null)
+    }
+
     fun create(
         id: String? = "pi_12345",
         clientSecret: String? = "secret",

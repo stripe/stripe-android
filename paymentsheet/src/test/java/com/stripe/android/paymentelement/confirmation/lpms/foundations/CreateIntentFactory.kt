@@ -84,7 +84,7 @@ internal class CreateIntentFactory(
                         )
                     )
                 ),
-                intent = PaymentIntentFactory.create(id = null, clientSecret = null),
+                intent = PaymentIntentFactory.createDeferred(),
             )
         )
     }
