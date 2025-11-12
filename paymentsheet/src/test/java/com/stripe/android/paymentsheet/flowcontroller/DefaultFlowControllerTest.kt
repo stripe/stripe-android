@@ -32,6 +32,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.LinkSignupMode
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.CardBrand
@@ -868,7 +869,6 @@ internal class DefaultFlowControllerTest {
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             ),
-            initializationMode = INITIALIZATION_MODE,
         )
 
         verifyPaymentSelection(
@@ -900,7 +900,6 @@ internal class DefaultFlowControllerTest {
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             ),
-            initializationMode = INITIALIZATION_MODE,
         )
 
         verifyPaymentSelection(
@@ -938,7 +937,6 @@ internal class DefaultFlowControllerTest {
                     validationError = null,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 ),
-                initializationMode = INITIALIZATION_MODE,
             )
 
             verifyPaymentSelection(
@@ -962,7 +960,6 @@ internal class DefaultFlowControllerTest {
         flowController.confirmPaymentSelection(
             paymentSelection = null,
             state = PAYMENT_SHEET_STATE_FULL,
-            initializationMode = INITIALIZATION_MODE,
         )
 
         assertThat(errorReporter.getLoggedErrors()).isEmpty()
@@ -984,7 +981,6 @@ internal class DefaultFlowControllerTest {
         flowController.confirmPaymentSelection(
             paymentSelection = PaymentSelection.Link(),
             state = PAYMENT_SHEET_STATE_FULL,
-            initializationMode = INITIALIZATION_MODE,
         )
 
         assertThat(errorReporter.getLoggedErrors()).contains(
@@ -1609,11 +1605,10 @@ internal class DefaultFlowControllerTest {
             )
         )
         val flowController = createAndConfigureFlowControllerForDeferred(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                    amount = 12345,
-                    currency = "usd"
-                )
+            intentConfiguration = intentConfiguration,
+            paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                amount = 12345,
+                currency = "usd"
             )
         )
 
@@ -1636,8 +1631,8 @@ internal class DefaultFlowControllerTest {
                 optionsParams = null,
             )
         )
-        assertThat(arguments.initializationMode)
-            .isEqualTo(PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration))
+        assertThat(arguments.paymentMethodMetadata.integrationMetadata)
+            .isEqualTo(IntegrationMetadata.DeferredIntentWithPaymentMethod(intentConfiguration))
     }
 
     @Test
@@ -2481,10 +2476,6 @@ internal class DefaultFlowControllerTest {
             paymentSelection = null,
             validationError = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-        )
-
-        private val INITIALIZATION_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(
-            clientSecret = "pi_123"
         )
 
         private const val ENABLE_LOGGING = false

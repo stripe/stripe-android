@@ -8,7 +8,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.model.LinkMode
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import org.junit.Test
 
@@ -96,7 +95,6 @@ class SignUpScreenStateTest {
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             useAttestationEndpointsForLink = true,
             suppress2faModal = false,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("pi_123_secret_456"),
             elementsSessionId = "elements_session_id_123",
             linkMode = LinkMode.Passthrough,
             allowDefaultOptIn = false,

@@ -9,6 +9,7 @@ object PaymentIntentFactory {
 
     fun create(
         id: String? = "pi_12345",
+        clientSecret: String? = "secret",
         paymentMethod: PaymentMethod? = createCardPaymentMethod(),
         paymentMethodTypes: List<String> = listOf("card"),
         setupFutureUsage: StripeIntent.Usage? = null,
@@ -18,14 +19,15 @@ object PaymentIntentFactory {
         linkFundingSources: List<String> = emptyList(),
         countryCode: String? = null,
         amount: Long = 1000L,
+        currency: String? = "usd",
     ): PaymentIntent = PaymentIntent(
         created = 500L,
         amount = amount,
-        clientSecret = "secret",
+        clientSecret = clientSecret,
         paymentMethod = paymentMethod,
         isLiveMode = false,
         id = id,
-        currency = "usd",
+        currency = currency,
         countryCode = countryCode,
         paymentMethodTypes = paymentMethodTypes,
         status = status,

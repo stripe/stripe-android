@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.interceptor
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -14,7 +15,6 @@ import com.stripe.android.paymentelement.confirmation.createIntentConfirmationIn
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
@@ -61,7 +61,7 @@ class HCaptchaConfirmationInterceptorTest {
     ): ConfirmSetupIntentParams? {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = InitializationMode.DeferredIntent(
+            integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup(
                         currency = "usd",
@@ -104,7 +104,7 @@ class HCaptchaConfirmationInterceptorTest {
     ): ConfirmPaymentIntentParams? {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = InitializationMode.DeferredIntent(
+            integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,

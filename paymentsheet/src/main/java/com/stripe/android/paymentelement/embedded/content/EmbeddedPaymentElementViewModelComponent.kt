@@ -170,13 +170,6 @@ internal interface EmbeddedPaymentElementViewModelModule {
         }
 
         @Provides
-        fun providesInitializationMode(
-            stateHolder: EmbeddedConfirmationStateHolder
-        ): PaymentElementLoader.InitializationMode? {
-            return stateHolder.state?.initializationMode
-        }
-
-        @Provides
         @Named(IS_LIVE_MODE)
         fun providesIsLiveMode(
             paymentConfiguration: Provider<PaymentConfiguration>

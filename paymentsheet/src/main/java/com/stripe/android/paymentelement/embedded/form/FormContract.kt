@@ -8,7 +8,6 @@ import androidx.core.os.BundleCompat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -58,7 +57,6 @@ internal object FormContract : ActivityResultContract<FormContract.Args, FormRes
         val paymentMethodMetadata: PaymentMethodMetadata,
         val hasSavedPaymentMethods: Boolean,
         val configuration: EmbeddedPaymentElement.Configuration,
-        val initializationMode: PaymentElementLoader.InitializationMode,
         val paymentElementCallbackIdentifier: String,
         val statusBarColor: Int?,
         val paymentSelection: PaymentSelection?,

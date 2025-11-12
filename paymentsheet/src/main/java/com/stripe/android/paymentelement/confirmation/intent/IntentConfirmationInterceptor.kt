@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -10,7 +11,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
 internal interface IntentConfirmationInterceptor {
@@ -29,7 +29,7 @@ internal interface IntentConfirmationInterceptor {
 
     interface Factory {
         suspend fun create(
-            initializationMode: PaymentElementLoader.InitializationMode,
+            integrationMetadata: IntegrationMetadata,
             customerId: String?,
             ephemeralKeySecret: String?,
             clientAttributionMetadata: ClientAttributionMetadata,
@@ -50,46 +50,42 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
     private val sharedPaymentTokenConfirmationInterceptorFactory: SharedPaymentTokenConfirmationInterceptor.Factory,
 ) : IntentConfirmationInterceptor.Factory {
     override suspend fun create(
-        initializationMode: PaymentElementLoader.InitializationMode,
+        integrationMetadata: IntegrationMetadata,
         customerId: String?,
         ephemeralKeySecret: String?,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): IntentConfirmationInterceptor {
-        return when (initializationMode) {
-            is PaymentElementLoader.InitializationMode.DeferredIntent -> {
-                when (
-                    val deferredIntentCallback = deferredIntentCallbackRetriever.waitForDeferredIntentCallback(
-                        behavior = initializationMode.intentConfiguration.intentBehavior,
-                    )
-                ) {
-                    is DeferredIntentCallback.ConfirmationToken -> {
-                        confirmationTokenConfirmationInterceptorFactory.create(
-                            intentConfiguration = initializationMode.intentConfiguration,
-                            createIntentCallback = deferredIntentCallback.callback,
-                            customerId = customerId,
-                            ephemeralKeySecret = ephemeralKeySecret,
-                            clientAttributionMetadata = clientAttributionMetadata,
-                        )
-                    }
-                    is DeferredIntentCallback.PaymentMethod -> {
-                        deferredIntentConfirmationInterceptorFactory.create(
-                            intentConfiguration = initializationMode.intentConfiguration,
-                            createIntentCallback = deferredIntentCallback.callback,
-                            clientAttributionMetadata = clientAttributionMetadata,
-                        )
-                    }
-                    is DeferredIntentCallback.SharedPaymentToken -> {
-                        sharedPaymentTokenConfirmationInterceptorFactory.create(
-                            intentConfiguration = initializationMode.intentConfiguration,
-                            handler = deferredIntentCallback.handler,
-                        )
-                    }
-                }
+        return when (integrationMetadata) {
+            IntegrationMetadata.CustomerSheet -> {
+                // CustomerSheet doesn't call confirm with IntegrationMetadata.CustomerSheet.
+                // CustomerSheet calls confirm with an IntegrationMetadata.IntentFirst setup intent.
+                throw IllegalStateException("No intent confirmation interceptor for CustomerSheet.")
             }
-            is PaymentElementLoader.InitializationMode.PaymentIntent,
-            is PaymentElementLoader.InitializationMode.SetupIntent -> {
+            is IntegrationMetadata.DeferredIntentWithConfirmationToken -> {
+                confirmationTokenConfirmationInterceptorFactory.create(
+                    intentConfiguration = integrationMetadata.intentConfiguration,
+                    createIntentCallback = deferredIntentCallbackRetriever.waitForConfirmationTokenCallback(),
+                    customerId = customerId,
+                    ephemeralKeySecret = ephemeralKeySecret,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                )
+            }
+            is IntegrationMetadata.DeferredIntentWithPaymentMethod -> {
+                deferredIntentConfirmationInterceptorFactory.create(
+                    intentConfiguration = integrationMetadata.intentConfiguration,
+                    createIntentCallback = deferredIntentCallbackRetriever.waitForPaymentMethodCallback(),
+                    clientAttributionMetadata = clientAttributionMetadata,
+                )
+            }
+            is IntegrationMetadata.DeferredIntentWithSharedPaymentToken -> {
+                sharedPaymentTokenConfirmationInterceptorFactory.create(
+                    intentConfiguration = integrationMetadata.intentConfiguration,
+                    handler = deferredIntentCallbackRetriever.waitForSharedPaymentTokenCallback(),
+                )
+            }
+            is IntegrationMetadata.IntentFirst -> {
                 intentFirstConfirmationInterceptorFactory.create(
-                    clientSecret = initializationMode.clientSecret,
+                    clientSecret = integrationMetadata.clientSecret,
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }

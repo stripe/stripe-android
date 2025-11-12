@@ -122,7 +122,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
             configuration = embeddedConfirmationState.configuration,
-            initializationMode = embeddedConfirmationState.initializationMode,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             paymentSelection = currentSelection,

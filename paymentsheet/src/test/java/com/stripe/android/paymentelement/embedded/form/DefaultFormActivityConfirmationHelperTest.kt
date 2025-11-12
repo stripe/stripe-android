@@ -13,9 +13,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
@@ -110,11 +108,6 @@ class DefaultFormActivityConfirmationHelperTest {
         val eventReporter = FakeEventReporter()
         val testLifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined)
         val confirmationHelper = DefaultFormActivityConfirmationHelper(
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(5050, "USD")
-                )
-            ),
             paymentMethodMetadata = paymentMethodMetadata,
             confirmationHandler = confirmationHandler,
             configuration = configuration,

@@ -38,7 +38,7 @@ internal class IntentConfirmationDefinition(
         val interceptor: IntentConfirmationInterceptor
         try {
             interceptor = intentConfirmationInterceptorFactory.create(
-                initializationMode = confirmationArgs.initializationMode,
+                integrationMetadata = confirmationArgs.paymentMethodMetadata.integrationMetadata,
                 customerId = paymentMethodMetadata.customerMetadata?.id,
                 ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.ephemeralKeySecret,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,

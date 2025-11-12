@@ -8,8 +8,9 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.ErrorReporter.ExpectedErrorEvent
+import com.stripe.android.payments.core.analytics.ErrorReporter.SuccessEvent
 import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
@@ -28,60 +29,50 @@ internal class DeferredIntentCallbackRetriever @Inject constructor(
     // if PaymentConfiguration.init() hasn't been called yet.
     private val requestOptionsProvider: Provider<ApiRequest.Options>,
 ) {
+    suspend fun waitForConfirmationTokenCallback(): CreateIntentWithConfirmationTokenCallback {
+        return waitForDeferredIntentCallback(
+            neededWaitEvent = SuccessEvent.FOUND_CREATE_INTENT_WITH_CONFIRMATION_TOKEN_CALLBACK_WHILE_POLLING,
+            notFoundEvent = ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL,
+        ) {
+            intentCreateIntentWithConfirmationTokenCallback.get()
+        }
+    }
 
-    suspend fun waitForDeferredIntentCallback(
-        behavior: PaymentSheet.IntentConfiguration.IntentBehavior
-    ): DeferredIntentCallback {
-        return retrieveDeferredIntentCallback(behavior) ?: run {
-            withTimeoutOrNull(PROVIDER_FETCH_TIMEOUT.seconds) {
-                var deferredIntentCallback: DeferredIntentCallback? = null
+    suspend fun waitForSharedPaymentTokenCallback(): PreparePaymentMethodHandler {
+        return waitForDeferredIntentCallback(
+            neededWaitEvent = SuccessEvent.FOUND_PREPARE_PAYMENT_METHOD_HANDLER_WHILE_POLLING,
+            notFoundEvent = ExpectedErrorEvent.PREPARE_PAYMENT_METHOD_HANDLER_NULL,
+        ) {
+            preparePaymentMethodHandlerProvider.get()
+        }
+    }
 
-                while (deferredIntentCallback == null) {
-                    delay(PROVIDER_FETCH_INTERVAL)
-                    deferredIntentCallback = retrieveDeferredIntentCallback(behavior)
-                }
+    suspend fun waitForPaymentMethodCallback(): CreateIntentCallback {
+        return waitForDeferredIntentCallback(
+            neededWaitEvent = SuccessEvent.FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING,
+            notFoundEvent = ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL,
+        ) {
+            intentCreationCallbackProvider.get()
+        }
+    }
 
-                deferredIntentCallback.also {
-                    when (it) {
-                        is DeferredIntentCallback.PaymentMethod -> {
-                            errorReporter.report(
-                                ErrorReporter.SuccessEvent.FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING
-                            )
-                        }
-                        is DeferredIntentCallback.ConfirmationToken -> {
-                            errorReporter.report(
-                                ErrorReporter.SuccessEvent
-                                    .FOUND_CREATE_INTENT_WITH_CONFIRMATION_TOKEN_CALLBACK_WHILE_POLLING
-                            )
-                        }
-                        is DeferredIntentCallback.SharedPaymentToken -> {
-                            errorReporter.report(
-                                ErrorReporter.SuccessEvent
-                                    .FOUND_PREPARE_PAYMENT_METHOD_HANDLER_WHILE_POLLING
-                            )
-                        }
-                    }
+    private suspend inline fun <reified T : Any> waitForDeferredIntentCallback(
+        neededWaitEvent: SuccessEvent,
+        notFoundEvent: ExpectedErrorEvent,
+        crossinline fetcher: () -> T?
+    ): T {
+        return fetcher() ?: withTimeoutOrNull(PROVIDER_FETCH_TIMEOUT.seconds) {
+            while (true) {
+                delay(PROVIDER_FETCH_INTERVAL)
+                fetcher()?.let {
+                    errorReporter.report(neededWaitEvent)
+                    return@withTimeoutOrNull it
                 }
             }
+            null
         } ?: run {
-            val errorMessage: String
-            when (behavior) {
-                is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken -> {
-                    errorMessage = "${PreparePaymentMethodHandler::class.java.simpleName} must be implemented " +
-                        "when using IntentConfiguration with shared payment tokens!"
-
-                    errorReporter.report(
-                        ErrorReporter.ExpectedErrorEvent.PREPARE_PAYMENT_METHOD_HANDLER_NULL
-                    )
-                }
-                is PaymentSheet.IntentConfiguration.IntentBehavior.Default -> {
-                    errorMessage = "One of ${CreateIntentCallback::class.java.simpleName} or " +
-                        "${CreateIntentWithConfirmationTokenCallback::class.java.simpleName} must be implemented " +
-                        "when using IntentConfiguration with PaymentSheet"
-
-                    errorReporter.report(ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL)
-                }
-            }
+            errorReporter.report(notFoundEvent)
+            val errorMessage = "${T::class.java.simpleName} must be implemented when using IntentConfiguration!"
             throw DeferredIntentCallbackNotFoundException(
                 message = errorMessage,
                 resolvableError = if (requestOptionsProvider.get().apiKeyIsLiveMode) {
@@ -91,29 +82,6 @@ internal class DeferredIntentCallbackRetriever @Inject constructor(
                 }
             )
         }
-    }
-
-    private fun retrieveDeferredIntentCallback(
-        behavior: PaymentSheet.IntentConfiguration.IntentBehavior
-    ): DeferredIntentCallback? {
-        // PaymentMethod callback, ConfirmationToken callback and SharedPaymentToken handler are mutually exclusive
-        // and verified in PaymentElementCallbacks.Builder.build()
-        when (behavior) {
-            is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken -> {
-                preparePaymentMethodHandlerProvider.get()?.let {
-                    return DeferredIntentCallback.SharedPaymentToken(it)
-                }
-            }
-            is PaymentSheet.IntentConfiguration.IntentBehavior.Default -> {
-                intentCreationCallbackProvider.get()?.let {
-                    return DeferredIntentCallback.PaymentMethod(it)
-                }
-                intentCreateIntentWithConfirmationTokenCallback.get()?.let {
-                    return DeferredIntentCallback.ConfirmationToken(it)
-                }
-            }
-        }
-        return null
     }
 
     private companion object {
@@ -127,11 +95,4 @@ internal class DeferredIntentCallbackNotFoundException(
     val resolvableError: ResolvableString
 ) : StripeException(message = message) {
     override fun analyticsValue(): String = "deferredIntentCallbackNotFound"
-}
-
-@OptIn(SharedPaymentTokenSessionPreview::class)
-internal sealed class DeferredIntentCallback {
-    class SharedPaymentToken(val handler: PreparePaymentMethodHandler) : DeferredIntentCallback()
-    class PaymentMethod(val callback: CreateIntentCallback) : DeferredIntentCallback()
-    class ConfirmationToken(val callback: CreateIntentWithConfirmationTokenCallback) : DeferredIntentCallback()
 }

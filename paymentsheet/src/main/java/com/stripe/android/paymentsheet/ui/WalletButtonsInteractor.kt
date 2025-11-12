@@ -35,7 +35,6 @@ import com.stripe.android.paymentsheet.configType
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnButtonPressed
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnHidden
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnResendCode
@@ -318,7 +317,6 @@ internal class DefaultWalletButtonsInteractor constructor(
 
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
-            initializationMode = arguments.initializationMode,
             paymentMethodMetadata = arguments.paymentMethodMetadata,
         )
     }
@@ -328,7 +326,6 @@ internal class DefaultWalletButtonsInteractor constructor(
         val paymentMethodMetadata: PaymentMethodMetadata,
         val configuration: CommonConfiguration,
         val appearance: PaymentSheet.Appearance,
-        val initializationMode: PaymentElementLoader.InitializationMode,
         val paymentSelection: PaymentSelection?,
     )
 
@@ -352,7 +349,6 @@ internal class DefaultWalletButtonsInteractor constructor(
                             configuration = flowControllerState.paymentSheetState.config,
                             paymentMethodMetadata = flowControllerState.paymentSheetState.paymentMethodMetadata,
                             appearance = configureRequest.configuration.appearance,
-                            initializationMode = configureRequest.initializationMode,
                             paymentSelection = flowControllerViewModel.paymentSelection
                         )
                     } else {
@@ -395,7 +391,6 @@ internal class DefaultWalletButtonsInteractor constructor(
                             configuration = state.configuration.asCommonConfiguration(),
                             paymentMethodMetadata = state.paymentMethodMetadata,
                             appearance = state.configuration.appearance,
-                            initializationMode = state.initializationMode,
                             paymentSelection = state.selection
                         )
                     }

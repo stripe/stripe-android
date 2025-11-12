@@ -10,7 +10,6 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertCanceled
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -41,14 +40,11 @@ class EmbeddedConfirmationStarterTest {
     @Test
     fun `on confirm, should call 'start' on confirmation handler`() = test {
         val arguments = ConfirmationHandler.Args(
+            confirmationOption = FakeConfirmationOption(),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFactory.create(
                     paymentMethod = PaymentMethodFactory.card(random = true),
                 )
-            ),
-            confirmationOption = FakeConfirmationOption(),
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
             ),
         )
 
@@ -58,7 +54,6 @@ class EmbeddedConfirmationStarterTest {
 
         assertThat(startCall.confirmationOption).isEqualTo(arguments.confirmationOption)
         assertThat(startCall.intent).isEqualTo(arguments.intent)
-        assertThat(startCall.initializationMode).isEqualTo(arguments.initializationMode)
         assertThat(startCall.paymentMethodMetadata).isEqualTo(arguments.paymentMethodMetadata)
     }
 

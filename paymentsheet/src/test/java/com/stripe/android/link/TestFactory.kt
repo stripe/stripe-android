@@ -35,7 +35,6 @@ import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
@@ -237,7 +236,6 @@ internal object TestFactory {
         defaultBillingDetails = null,
         useAttestationEndpointsForLink = false,
         suppress2faModal = false,
-        initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
         elementsSessionId = "session_1234",
         linkMode = LinkMode.LinkPaymentMethod,
         allowDefaultOptIn = false,

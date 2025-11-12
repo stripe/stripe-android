@@ -173,7 +173,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
 
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
-            initializationMode = configuration.initializationMode,
             paymentMethodMetadata = paymentMethodMetadata,
         )
     }
@@ -216,7 +215,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     }
                 ),
             ),
-            initializationMode = configuration.initializationMode,
             paymentMethodMetadata = paymentMethodMetadata,
         )
     }

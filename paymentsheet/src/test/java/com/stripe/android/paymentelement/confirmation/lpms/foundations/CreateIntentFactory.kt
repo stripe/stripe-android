@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.lpms.foundations
 
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -8,7 +9,6 @@ import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.M
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.StripeNetworkTestClient
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
 
@@ -31,7 +31,7 @@ internal class CreateIntentFactory(
             createWithSetupFutureUsage = createWithSetupFutureUsage,
         ).mapCatching { clientSecret ->
             CreateIntentData(
-                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                integrationMetadata = IntegrationMetadata.IntentFirst(
                     clientSecret = clientSecret,
                 ),
                 intent = testClient.retrievePaymentIntent(clientSecret).getOrThrow(),
@@ -73,7 +73,7 @@ internal class CreateIntentFactory(
 
         return Result.success(
             CreateIntentData(
-                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = amount.toLong(),
@@ -84,8 +84,7 @@ internal class CreateIntentFactory(
                         )
                     )
                 ),
-                // This intent is never used in the deferred mode so it's safe to make a mocked one here
-                intent = PaymentIntentFactory.create(),
+                intent = PaymentIntentFactory.create(id = null, clientSecret = null),
             )
         )
     }
@@ -98,7 +97,7 @@ internal class CreateIntentFactory(
             paymentMethodType = paymentMethodType,
         ).mapCatching { clientSecret ->
             CreateIntentData(
-                initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
+                integrationMetadata = IntegrationMetadata.IntentFirst(
                     clientSecret = clientSecret,
                 ),
                 intent = testClient.retrieveSetupIntent(clientSecret).getOrThrow(),
@@ -134,7 +133,7 @@ internal class CreateIntentFactory(
 
         return Result.success(
             CreateIntentData(
-                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         mode = PaymentSheet.IntentConfiguration.Mode.Setup(
                             setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
@@ -147,7 +146,7 @@ internal class CreateIntentFactory(
     }
 
     data class CreateIntentData(
-        val initializationMode: PaymentElementLoader.InitializationMode,
+        val integrationMetadata: IntegrationMetadata,
         val intent: StripeIntent,
     )
 }
