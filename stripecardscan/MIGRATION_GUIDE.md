@@ -22,12 +22,7 @@ implementation("com.stripe:stripecardscan:VERSION")
 
 ### Add Google Pay Dependency
 
-Add the Google Play service library as described [here](https://developers.google.com/pay/api/android/guides/setup#app%20dependencies):
-```groovy
-implementation 'com.google.android.gms:play-services-wallet:VERSION' // Use the latest stable version
-```
-
-Enable Google Pay API in `AndroidManifest.xml`:
+Add the Google Play service library as described [here](https://developers.google.com/pay/api/android/guides/setup#app%20dependencies), and enable Google Pay API in `AndroidManifest.xml`:
 
 ```xml
 <application>
@@ -39,17 +34,13 @@ Enable Google Pay API in `AndroidManifest.xml`:
 
 ---
 
-## Step 3: Implement Google Pay Card Recognition
+## Step 3: Initialize the CardScan Client
 
-Replace your calls to `CardScanSheet.create()` and `present()` with the Google Pay API calls.
-> **Note**: `attachCardScanFragment()` is not supported in Google Pay Card Recognition.
 
-### Remove Stripe CardScan Logic
-
+### Remove CardScanSheet.create()
 Your old code likely looked something like this (simplified):
-
 ```kotlin
-// REMOVED CODE  
+// Remove this
 val cardScanSheet = CardScanSheet.create(this, object : CardScanSheet.CardScanResultCallback {  
     override fun onCardScanSheetResult(result: CardScanSheetResult) {  
         when (result) {  
@@ -58,48 +49,56 @@ val cardScanSheet = CardScanSheet.create(this, object : CardScanSheet.CardScanRe
         }  
     }  
 })  
-
-viewBinding.launchScanButton.setOnClickListener {  
-    cardScanSheet.present(CardScanConfiguration(null))  
-}
 ```
 
-### Replace with Google Pay Logic
-
+### Add cardRecognitionLauncher
 The replacement uses the `PaymentsClient` to launch the recognition flow. Since Google Pay Card Recognition uses the standard Android **Activity Result API**, you should use `registerForActivityResult` for better compatibility and lifecycle handling.
-
-#### 1. Create a Result Launcher (in your Fragment or Activity):
-
 ```kotlin
-// 1. Define the launcher for the recognition result  
+// Add this
 private val cardRecognitionLauncher = registerForActivityResult(  
     ActivityResultContracts.StartIntentSenderForResult()  
 ) { result ->  
     val data = result.data  
     if (result.resultCode == Activity.RESULT_OK && data != null) {  
-        // Successful scan  
         val cardDetails = PaymentCardRecognitionResult.getFromIntent(data)  
         cardDetails?.let { handleScannedCard(it) }  
-    } else {  
-        // Scan failed or was canceled  
-        // You can check result.resultCode for specific error/cancellation codes  
-        handleScanFailure()  
+    } else {
+        // ... handle Canceled/Failed  
     }  
 }
 ```
 
-#### 2. Initialize the PaymentsClient and Launch the Recognition:
+## Step 4: Initialize the PaymentsClient and Launch the Recognition
 
+
+### Remove CardScanSheet.present() or attachCardScanFragment()
 ```kotlin
+// Remove this
+viewBinding.launchScanButton.setOnClickListener {  
+    cardScanSheet.present(CardScanConfiguration(null))  
+}
+// or remove this if using attachCardScanFragment()
+viewBinding.launchScanButton.setOnClickListener {
+    viewBinding.launchScanButton.isEnabled = false
+    viewBinding.fragmentContainer.visibility = View.VISIBLE
+    cardScanSheet.attachCardScanFragment(
+        this,
+        supportFragmentManager,
+        R.id.fragment_container,
+        this::onScanFinished
+    )
+}
+
+```
+
+### Replace with paymentsClient launch
+```kotlin
+// Replace with this
+// note: Google Pay Card Recognition always launches a new activity, you'll need to update your UI accordingly if you were using fragments
 viewBinding.launchScanButton.setOnClickListener {  
     present()  
 }
-```
 
-When the user taps the "Scan Card" button (or equivalent):
-
-```kotlin
-// 2. Initialize the PaymentsClient  
 fun createPaymentsClient(activity: Activity): PaymentsClient {  
     val walletOptions = Wallet.WalletOptions.Builder()  
         // choose between ENVIRONMENT_PRODUCTION and ENVIRONMENT_TEST  
@@ -110,7 +109,6 @@ fun createPaymentsClient(activity: Activity): PaymentsClient {
     return Wallet.getPaymentsClient(activity, walletOptions)  
 }
 
-// 3. Launch the recognition flow  
 fun present() {  
     val paymentsClient = createPaymentsClient(this)  
     val request = PaymentCardRecognitionIntentRequest.getDefaultInstance()  
