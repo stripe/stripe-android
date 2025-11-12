@@ -48,6 +48,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundCon
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.countryCode
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.Dispatchers
@@ -274,7 +275,7 @@ internal class PaymentSheetPlaygroundViewModel(
             override suspend fun provideSetupIntentClientSecret(customerId: String): kotlin.Result<String> {
                 val request = CreateSetupIntentRequest(
                     customerId = customerId,
-                    merchantCountryCode = playgroundState.merchantCode.value,
+                    merchantCountryCode = playgroundState.merchantCode.countryCode,
                     onBehalfOf = playgroundState.onBehalfOf.takeIf { it?.isNotBlank() ?: false }
                 )
 
@@ -353,7 +354,7 @@ internal class PaymentSheetPlaygroundViewModel(
     ): CustomerAdapter.Result<String> {
         val request = CreateSetupIntentRequest(
             customerId = customerId,
-            merchantCountryCode = merchant.value,
+            merchantCountryCode = merchant.countryCode,
         )
 
         val apiResponse = Fuel.post(baseUrl + "create_setup_intent")
@@ -587,7 +588,7 @@ internal class PaymentSheetPlaygroundViewModel(
                     clientSecret = playgroundState.clientSecret,
                     paymentMethodId = confirmationParams.id,
                     shouldSavePaymentMethod = confirmationParams.shouldSavePaymentMethod,
-                    merchantCountryCode = playgroundState.merchantCode.value,
+                    merchantCountryCode = playgroundState.merchantCode.countryCode,
                     mode = playgroundState.checkoutMode.value,
                     returnUrl = RETURN_URL,
                 )
@@ -597,7 +598,7 @@ internal class PaymentSheetPlaygroundViewModel(
                 request = ConfirmIntentRequestParams.ConfirmationToken(
                     clientSecret = playgroundState.clientSecret,
                     confirmationTokenId = confirmationParams.id,
-                    merchantCountryCode = playgroundState.merchantCode.value,
+                    merchantCountryCode = playgroundState.merchantCode.countryCode,
                     mode = playgroundState.checkoutMode.value,
                 )
             }

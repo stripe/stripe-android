@@ -13,10 +13,10 @@ internal object MerchantSettingsDefinition :
         defaultValue = Merchant.US,
     ),
     PlaygroundSettingDefinition.Displayable<Merchant> {
-    private val supportedPaymentFlowCountries = Merchant.entries.map { it.value }.toSet()
+    private val supportedPaymentFlowCountries = Merchant.entries.map { it.countryCode }.toSet()
     private val supportedCustomerFlowCountries = setOf(
-        Merchant.US.value,
-        Merchant.FR.value,
+        Merchant.US.countryCode,
+        Merchant.FR.countryCode,
     )
 
     override val displayName: String = "Merchant"
@@ -52,7 +52,7 @@ internal object MerchantSettingsDefinition :
         value: Merchant,
         customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder
     ) {
-        customerEphemeralKeyRequestBuilder.merchantCountryCode(value.value)
+        customerEphemeralKeyRequestBuilder.merchantCountryCode(value.countryCode)
     }
 
     override fun valueUpdated(value: Merchant, playgroundSettings: PlaygroundSettings) {
@@ -109,3 +109,11 @@ enum class Merchant(override val value: String) : ValueEnum {
     TH("TH"),
     StripeShop("stripe_shop_test")
 }
+
+val Merchant.countryCode: String
+    get() {
+        return when (this) {
+            Merchant.StripeShop -> "US"
+            else -> value
+        }
+    }

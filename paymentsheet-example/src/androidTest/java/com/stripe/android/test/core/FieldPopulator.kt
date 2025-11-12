@@ -15,6 +15,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.countryCode
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.ui.core.elements.TranslationId
 import com.stripe.android.ui.core.elements.formatExpirationDateForAccessibility
@@ -155,7 +156,7 @@ internal class FieldPopulator(
         get() = testParameters.playgroundSettingsSnapshot[DefaultBillingAddressSettingsDefinition] != DefaultBillingAddress.Off
 
     private val merchantCountryCode: String
-        get() = testParameters.playgroundSettingsSnapshot[MerchantSettingsDefinition].value
+        get() = testParameters.playgroundSettingsSnapshot[MerchantSettingsDefinition].countryCode
 
     private fun usesStateDropdown(): Boolean {
         return merchantCountryCode in setOf("US", "GB")
