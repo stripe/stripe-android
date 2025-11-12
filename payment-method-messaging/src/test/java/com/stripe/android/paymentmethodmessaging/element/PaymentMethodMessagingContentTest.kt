@@ -16,6 +16,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentmethodmessaging.element.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -94,7 +95,8 @@ internal class PaymentMethodMessagingContentTest {
             stripeRepository = FakeStripeRepository(),
             paymentConfiguration = { PaymentConfiguration("key") },
             eventReporter = FakeEventReporter(),
-            viewModelScope = CoroutineScope(UnconfinedTestDispatcher())
+            viewModelScope = CoroutineScope(UnconfinedTestDispatcher()),
+            errorReporter = FakeErrorReporter()
         )
 
         Scenario(
