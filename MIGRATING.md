@@ -74,16 +74,14 @@ APIs that are no longer publicly exposed. If you need access to any of these int
 - Some constructors were made internal (ie `PaymentSheetResult`). We don't expect merchants to create these, they should only be created from the Stripe SDK
 
 ### 3. CardScan Module Removal
-All CardScan modules have been completely removed. CardScan feature in our UI surfaces has migrated to [Google Pay Card Recognition](https://developers.google.com/pay/payment-card-recognition/debit-credit-card-recognition), which is now the default. 
-Opt-in by [requesting production access](https://developers.google.com/pay/api/android/guides/test-and-deploy/request-prod-access) to the Google Pay API using the [Google Pay & Wallet Console](https://pay.google.com/business/console?utm_source=devsite&utm_medium=devsite&utm_campaign=devsite)
-
 - The `stripecardscan` module has been removed:
     * `CardScanSheet` class and its methods (`create()`, `present()`, `attachCardScanFragment()`, `removeCardScanFragment()`) have been removed
     * `CardScanSheetResult` and its implementations (`Completed`, `Canceled`, `Failed`) have been removed
     * `CardScanSheet.CardScanResultCallback` has been removed
     * `ScannedCard` has been removed
     * `CancellationReason` and its implementations (`Closed`, `Back`, `UserCannotScan`, `CameraPermissionDenied`) have been removed                                                                                                      
-- If you don't use PaymentSheet, you can integrate [Google Payment Card Recognition API](https://developers.google.com/pay/payment-card-recognition/debit-credit-card-recognition) directly into your app.
+- The CardScan feature in our UI surfaces has been migrated to [Google Pay Card Recognition](https://developers.google.com/pay/payment-card-recognition/debit-credit-card-recognition), which requires your application to have production access to the Google Pay API. If you previously used the CardScan feature, you can continue using it by [requesting production access](https://developers.google.com/pay/api/android/guides/test-and-deploy/request-prod-access) to the Google Pay API using the [Google Pay & Wallet Console](https://pay.google.com/business/console?utm_source=devsite&utm_medium=devsite&utm_campaign=devsite)
+- If you integrate with the cardscan module directly, you can [migrate to Google Payment Card Recognition API](stripecardscan/MIGRATION_GUIDE.md).
 
 ### 4. Other Breaking Changes
 **Data Class Removal**
