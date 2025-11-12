@@ -68,6 +68,6 @@ internal interface LinkControllerModule {
         @Named(IS_LIVE_MODE)
         fun isLiveMode(
             paymentConfiguration: Provider<PaymentConfiguration>
-        ): () -> Boolean = { !paymentConfiguration.get().publishableKey.contains("test") }
+        ): () -> Boolean = { paymentConfiguration.get().isLiveMode() }
     }
 }

@@ -88,7 +88,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         } else {
             try {
                 starterArgs.initializationMode.validate()
-                starterArgs.config.asCommonConfiguration().validate(viewModel.isLiveModeProvider())
+                starterArgs.config.asCommonConfiguration().validate(
+                    viewModel.isLiveModeProvider(),
+                    starterArgs.paymentElementCallbackIdentifier
+                )
                 starterArgs.config.appearance.parseAppearance()
                 Result.success(starterArgs)
             } catch (e: IllegalArgumentException) {

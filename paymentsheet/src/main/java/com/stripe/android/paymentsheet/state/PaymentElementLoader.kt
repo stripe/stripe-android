@@ -197,7 +197,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
         // Validate configuration before loading
         initializationMode.validate()
-        configuration.validate(isLiveModeProvider())
+        configuration.validate(isLiveModeProvider(), paymentElementCallbackIdentifier)
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
 

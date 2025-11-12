@@ -1006,15 +1006,15 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Handles missing arguments correctly`() {
-        val scenario = ActivityScenario.launchActivityForResult(PaymentSheetActivity::class.java)
+        ActivityScenario.launchActivityForResult(PaymentSheetActivity::class.java).use { scenario ->
+            val result = contract.parseResult(
+                scenario.result.resultCode,
+                scenario.result.resultData,
+            )
 
-        val result = contract.parseResult(
-            scenario.result.resultCode,
-            scenario.result.resultData,
-        )
-
-        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+            assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+        }
     }
 
     @Test
@@ -1038,15 +1038,15 @@ internal class PaymentSheetActivityTest {
 
         val intent = contract.createIntent(context, args)
 
-        val scenario = ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent)
+        ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent).use { scenario ->
+            val result = contract.parseResult(
+                scenario.result.resultCode,
+                scenario.result.resultData,
+            )
 
-        val result = contract.parseResult(
-            scenario.result.resultCode,
-            scenario.result.resultData,
-        )
-
-        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+            assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+        }
     }
 
     @Test
@@ -1062,15 +1062,15 @@ internal class PaymentSheetActivityTest {
 
         val intent = contract.createIntent(context, args)
 
-        val scenario = ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent)
+        ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent).use { scenario ->
+            val result = contract.parseResult(
+                scenario.result.resultCode,
+                scenario.result.resultData,
+            )
 
-        val result = contract.parseResult(
-            scenario.result.resultCode,
-            scenario.result.resultData,
-        )
-
-        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+            assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+        }
     }
 
     @Test
