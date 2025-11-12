@@ -17,23 +17,6 @@ internal class IntentConfirmationWebViewClient(
     private val errorHandler: WebViewErrorHandler
 ) : WebViewClient() {
 
-    private fun urlsMatch(url1: String?, url2: String): Boolean {
-        if (url1 == null) return false
-        val uri1 = Uri.parse(url1).normalizeTrailingSlash()
-        val uri2 = Uri.parse(url2).normalizeTrailingSlash()
-        return uri1 == uri2
-    }
-
-    private fun Uri.normalizeTrailingSlash(): Uri {
-        val path = this.path ?: return this
-        val normalizedPath = path.trimEnd('/')
-        return if (normalizedPath != path) {
-            this.buildUpon().path(normalizedPath).build()
-        } else {
-            this
-        }
-    }
-
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
         super.onReceivedError(view, request, error)
@@ -103,5 +86,22 @@ internal class IntentConfirmationWebViewClient(
             )
         )
         return super.onRenderProcessGone(view, detail)
+    }
+
+    private fun urlsMatch(url1: String?, url2: String): Boolean {
+        if (url1 == null) return false
+        val uri1 = Uri.parse(url1).normalizeTrailingSlash()
+        val uri2 = Uri.parse(url2).normalizeTrailingSlash()
+        return uri1 == uri2
+    }
+
+    private fun Uri.normalizeTrailingSlash(): Uri {
+        val path = this.path ?: return this
+        val normalizedPath = path.trimEnd('/')
+        return if (normalizedPath != path) {
+            this.buildUpon().path(normalizedPath).build()
+        } else {
+            this
+        }
     }
 }
