@@ -3566,12 +3566,12 @@ internal class PaymentSheetViewModelTest {
     private fun createLinkInlinePaymentSelection(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
         input: UserInput,
-    ): PaymentSelection.New.LinkInline {
-        return PaymentSelection.New.LinkInline(
+    ): PaymentSelection.New.Card {
+        return PaymentSelection.New.Card(
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             brand = CardBrand.Visa,
             customerRequestedSave = customerRequestedSave,
-            input = input,
+            linkInput = input,
         )
     }
 

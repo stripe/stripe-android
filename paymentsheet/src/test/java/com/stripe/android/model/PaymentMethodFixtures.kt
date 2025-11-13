@@ -515,13 +515,13 @@ internal object PaymentMethodFixtures {
         )
     )
 
-    val LINK_INLINE_PAYMENT_SELECTION = PaymentSelection.New.LinkInline(
+    val LINK_INLINE_PAYMENT_SELECTION = PaymentSelection.New.Card(
         paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
         paymentMethodOptionsParams = null,
         paymentMethodExtraParams = null,
         brand = CardBrand.Visa,
         customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-        input = UserInput.SignUp(
+        linkInput = UserInput.SignUp(
             email = "email@email",
             phone = "2267007611",
             country = "CA",

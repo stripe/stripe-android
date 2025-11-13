@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
@@ -24,7 +23,6 @@ internal sealed interface NewPaymentOptionSelection {
     data class New(override val paymentSelection: PaymentSelection.New) : NewPaymentOptionSelection {
         override fun getPaymentMethodCode(): PaymentMethodCode {
             return when (paymentSelection) {
-                is PaymentSelection.New.LinkInline -> PaymentMethod.Type.Card.code
                 is PaymentSelection.New.Card,
                 is PaymentSelection.New.USBankAccount,
                 is PaymentSelection.New.GenericPaymentMethod -> paymentSelection.paymentMethodCreateParams.typeCode

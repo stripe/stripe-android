@@ -40,7 +40,6 @@ internal val PaymentSelection.shippingDetails: AddressDetails?
         is PaymentSelection.GooglePay,
         is PaymentSelection.New.Card,
         is PaymentSelection.New.GenericPaymentMethod,
-        is PaymentSelection.New.LinkInline,
         is PaymentSelection.New.USBankAccount,
         is PaymentSelection.ShopPay,
         is PaymentSelection.Saved -> {

@@ -1255,11 +1255,11 @@ internal class PaymentOptionsViewModelTest {
 
             val selection = awaitItem()
 
-            assertThat(selection).isInstanceOf<PaymentSelection.New.LinkInline>()
+            assertThat(selection).isInstanceOf<PaymentSelection.New.Card>()
 
-            val inlineSelection = selection as PaymentSelection.New.LinkInline
+            val inlineSelection = selection as PaymentSelection.New.Card
 
-            assertThat(inlineSelection.input).isEqualTo(input)
+            assertThat(inlineSelection.linkInput).isEqualTo(input)
             assertThat(inlineSelection.brand).isEqualTo(CardBrand.Visa)
             assertThat(inlineSelection.customerRequestedSave).isEqualTo(expectedCustomerRequestedSave)
         }

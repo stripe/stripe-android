@@ -1064,7 +1064,7 @@ internal class DefaultFlowControllerTest {
                     extraParams = paymentSelection.paymentMethodExtraParams,
                     saveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest,
                     linkConfiguration = TestFactory.LINK_CONFIGURATION,
-                    userInput = paymentSelection.input,
+                    userInput = requireNotNull(paymentSelection.linkInput),
                 )
             )
 
@@ -1120,7 +1120,7 @@ internal class DefaultFlowControllerTest {
                     createParams = paymentSelection.paymentMethodCreateParams,
                     optionsParams = paymentSelection.paymentMethodOptionsParams,
                     extraParams = paymentSelection.paymentMethodExtraParams,
-                    userInput = paymentSelection.input,
+                    userInput = requireNotNull(paymentSelection.linkInput),
                     linkConfiguration = linkConfiguration,
                     saveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest,
                 )
@@ -1176,7 +1176,7 @@ internal class DefaultFlowControllerTest {
                     extraParams = paymentSelection.paymentMethodExtraParams,
                     saveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest,
                     linkConfiguration = linkConfig,
-                    userInput = paymentSelection.input,
+                    userInput = requireNotNull(paymentSelection.linkInput),
                 )
             )
             assertThat(arguments.intent).isEqualTo(intent)
