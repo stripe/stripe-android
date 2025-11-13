@@ -164,7 +164,7 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         }
 
         override fun getItemId(position: Int): Long {
-            return requireNotNull(paymentMethods[position].id).hashCode().toLong()
+            return paymentMethods[position].id.hashCode().toLong()
         }
 
         class PaymentMethodViewHolder internal constructor(

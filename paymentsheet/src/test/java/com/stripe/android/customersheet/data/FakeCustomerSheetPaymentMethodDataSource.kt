@@ -50,7 +50,7 @@ internal class FakeCustomerSheetPaymentMethodDataSource(
                 onSuccess = { it },
                 onFailure = { _, _ -> listOf() }
             ).find { method ->
-                method.id!! == id
+                method.id == id
             }!!
         }
     }

@@ -518,7 +518,7 @@ internal class PaymentSheetPlaygroundViewModel(
         )
         return createAndConfirmIntent(
             confirmationParams = ConfirmationParams.PaymentMethod(
-                id = paymentMethod.id!!,
+                id = paymentMethod.id,
                 shouldSavePaymentMethod = shouldSavePaymentMethod,
             ),
             playgroundState = playgroundState,

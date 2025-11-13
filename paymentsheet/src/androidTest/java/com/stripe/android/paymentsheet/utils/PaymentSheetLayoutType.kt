@@ -139,12 +139,12 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
             val managePage = ManagePage(composeTestRule)
 
             verticalModePage.assertHasSavedPaymentMethods()
-            verticalModePage.assertHasSelectedSavedPaymentMethod(paymentMethod.id!!)
+            verticalModePage.assertHasSelectedSavedPaymentMethod(paymentMethod.id)
             verticalModePage.assertPrimaryButton(isEnabled())
 
             verticalModePage.clickViewMore()
             managePage.waitUntilVisible()
-            verticalModePage.assertHasSelectedSavedPaymentMethod(paymentMethod.id!!)
+            verticalModePage.assertHasSelectedSavedPaymentMethod(paymentMethod.id)
 
             Espresso.pressBack()
         }
@@ -210,7 +210,7 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
             managePage.waitUntilVisible()
 
             managePage.clickEdit()
-            managePage.clickEdit(paymentMethod.id!!)
+            managePage.clickEdit(paymentMethod.id)
 
             editPage.waitUntilVisible()
         }

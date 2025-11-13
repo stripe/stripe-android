@@ -193,7 +193,7 @@ interface CustomerAdapter {
             internal fun PaymentSelection.toPaymentOption(): PaymentOption? {
                 return when (this) {
                     is PaymentSelection.GooglePay -> GooglePay
-                    is PaymentSelection.Saved -> StripeId(paymentMethod.id!!)
+                    is PaymentSelection.Saved -> StripeId(paymentMethod.id)
                     else -> null
                 }
             }
