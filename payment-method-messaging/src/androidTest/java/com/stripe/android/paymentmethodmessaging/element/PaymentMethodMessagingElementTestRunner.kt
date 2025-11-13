@@ -31,7 +31,7 @@ internal fun runPaymentMethodMessagingElementTest(
 ) {
     val application = ApplicationProvider.getApplicationContext<Application>()
     PaymentConfiguration.init(application, "pk_test_123")
-    val element =  PaymentMethodMessagingElement.create(application)
+    val element = PaymentMethodMessagingElement.create(application)
     val factory: (ComponentActivity) -> PaymentMethodMessagingElement = {
         it.setContent {
             Column {
