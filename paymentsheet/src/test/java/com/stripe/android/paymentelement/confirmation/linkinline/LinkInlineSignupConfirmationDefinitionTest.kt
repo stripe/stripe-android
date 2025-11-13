@@ -163,6 +163,15 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         )
 
     @Test
+    fun `'action' should include billing details in saved option when PaymentMethod is provided`() =
+        testSuccessfulSignupWithSavedLinkCard(
+            saveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest,
+            expectedSetupForFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank,
+            verifyBillingDetails = true,
+            includePaymentMethod = true,
+        )
+
+    @Test
     fun `'action' should skip & return 'Launch' if input is sign in`() = test(
         initialAccountStatus = AccountStatus.Verified(true, null),
     ) {
@@ -227,6 +236,16 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                     paymentMethodId = "pm_1",
                 ),
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                paymentMethod = PaymentMethod.Builder()
+                    .setId("pm_1")
+                    .setType(PaymentMethod.Type.Card)
+                    .setCard(
+                        PaymentMethod.Card(
+                            last4 = "4242",
+                            wallet = Wallet.LinkWallet("4242"),
+                        )
+                    )
+                    .build(),
             )
         ),
         signInResult = Result.success(true),
@@ -473,10 +492,28 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     private fun testSuccessfulSignupWithSavedLinkCard(
         saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption,
         expectedSetupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage,
+        verifyBillingDetails: Boolean = false,
+        includePaymentMethod: Boolean = false,
     ) {
         val confirmationOption = createLinkInlineSignupConfirmationOption(
             saveOption = saveOption,
         )
+
+        val paymentMethod = PaymentMethod.Builder()
+            .setId("pm_1")
+            .setType(PaymentMethod.Type.Card)
+            .setCard(
+                PaymentMethod.Card(
+                    last4 = "4242",
+                    wallet = Wallet.LinkWallet("4242"),
+                )
+            )
+            .apply {
+                if (includePaymentMethod) {
+                    setBillingDetails(PaymentMethodCreateParamsFixtures.BILLING_DETAILS)
+                }
+            }
+            .build()
 
         actionTest(
             attachNewCardToAccountResult = Result.success(
@@ -487,6 +524,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                         paymentMethodId = "pm_1",
                     ),
                     paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    paymentMethod = paymentMethod,
                 )
             ),
             signInResult = Result.success(true),
@@ -513,12 +551,18 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
             assertThat(savedConfirmationOption.originatedFromWallet).isTrue()
 
-            val paymentMethod = savedConfirmationOption.paymentMethod
+            val resultPaymentMethod = savedConfirmationOption.paymentMethod
 
-            assertThat(paymentMethod.id).isEqualTo("pm_1")
-            assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Card)
-            assertThat(paymentMethod.card?.last4).isEqualTo("4242")
-            assertThat(paymentMethod.card?.wallet).isEqualTo(Wallet.LinkWallet(dynamicLast4 = "4242"))
+            assertThat(resultPaymentMethod.id).isEqualTo("pm_1")
+            assertThat(resultPaymentMethod.type).isEqualTo(PaymentMethod.Type.Card)
+            assertThat(resultPaymentMethod.card?.last4).isEqualTo("4242")
+            assertThat(resultPaymentMethod.card?.wallet).isEqualTo(Wallet.LinkWallet(dynamicLast4 = "4242"))
+
+            if (verifyBillingDetails) {
+                assertThat(resultPaymentMethod.billingDetails).isEqualTo(
+                    PaymentMethodCreateParamsFixtures.BILLING_DETAILS
+                )
+            }
 
             assertThat(launchAction.receivesResultInProcess).isTrue()
             assertThat(launchAction.deferredIntentConfirmationType).isNull()
