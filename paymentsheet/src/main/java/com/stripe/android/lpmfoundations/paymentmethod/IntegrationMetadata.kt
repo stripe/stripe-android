@@ -29,4 +29,7 @@ internal sealed class IntegrationMetadata : Parcelable {
     // not ideal.
     @Parcelize
     object CustomerSheet : IntegrationMetadata()
+
+    @Parcelize
+    object CryptoOnramp : IntegrationMetadata()
 }

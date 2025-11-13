@@ -145,6 +145,17 @@ internal interface PaymentElementLoader {
                 }
             }
         }
+
+        @Parcelize
+        object CryptoOnramp : InitializationMode() {
+            override fun validate() {
+                // Nothing to validate.
+            }
+
+            override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
+                return IntegrationMetadata.CryptoOnramp
+            }
+        }
     }
 
     @Parcelize

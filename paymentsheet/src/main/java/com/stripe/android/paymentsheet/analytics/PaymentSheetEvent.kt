@@ -142,6 +142,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
         private val PaymentElementLoader.InitializationMode.defaultAnalyticsValue: String
             get() = when (this) {
+                is PaymentElementLoader.InitializationMode.CryptoOnramp -> "crypto_onramp"
                 is PaymentElementLoader.InitializationMode.DeferredIntent -> {
                     when (this.intentConfiguration.mode) {
                         is PaymentSheet.IntentConfiguration.Mode.Payment -> "deferred_payment_intent"
