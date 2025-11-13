@@ -101,6 +101,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         GOOGLE_PAY_IS_READY_API_CALL(
             eventName = "elements.google_pay_repository.is_ready_request_api_call_failure"
         ),
+        GOOGLE_PAY_IS_READY_TIMEOUT(
+            eventName = "elements.google_pay_repository.is_ready_timeout"
+        ),
         CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE(
             eventName = "elements.customer_sheet.elements_session.load_failure"
         ),
