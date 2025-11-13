@@ -21,7 +21,7 @@ import org.junit.Test
 
 internal class PaymentSheetConfirmationTokenTest {
     @get:Rule
-    private val testRules: TestRules = TestRules.create()
+    val testRules: TestRules = TestRules.create()
 
     private val networkRule = testRules.networkRule
 
