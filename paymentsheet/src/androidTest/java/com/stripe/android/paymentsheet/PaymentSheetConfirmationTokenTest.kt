@@ -9,6 +9,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -92,6 +93,24 @@ internal class PaymentSheetConfirmationTokenTest {
         }
     }
 
+    @Test
+    fun testSuccessfulSetup() {
+        runPaymentSheetTest(
+            networkRule = networkRule,
+            isLiveMode = false,
+            builder = {
+                createIntentCallback { _ ->
+                    CreateIntentResult.Success("seti_example_secret_example")
+                }
+            },
+            resultCallback = ::assertCompleted,
+        ) { testContext ->
+            presentSheet(testContext, CustomerType.NewCustomer, PaymentMethodType.Card, isPayment = false)
+            completePaymentMethodSelection(CustomerType.NewCustomer, PaymentMethodType.Card)
+            confirm(false, PaymentMethodType.Card, isPayment = false)
+        }
+    }
+
     private fun verifyTestCombination(
         isLiveMode: Boolean,
         customerType: CustomerType,
@@ -122,6 +141,7 @@ internal class PaymentSheetConfirmationTokenTest {
         testContext: PaymentSheetTestRunnerContext,
         customerType: CustomerType,
         paymentMethodType: PaymentMethodType,
+        isPayment: Boolean = true,
     ) {
         if (paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection) {
             networkRule.enqueue(
@@ -154,15 +174,19 @@ internal class PaymentSheetConfirmationTokenTest {
         testContext.presentPaymentSheet {
             presentWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 5099,
-                        currency = "usd",
-                        setupFutureUse = if (paymentMethodType == PaymentMethodType.CashAppWithSetupFutureUsage) {
-                            PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
-                        } else {
-                            null
-                        }
-                    ),
+                    mode = if (isPayment) {
+                        PaymentSheet.IntentConfiguration.Mode.Payment(
+                            amount = 5099,
+                            currency = "usd",
+                            setupFutureUse = if (paymentMethodType == PaymentMethodType.CashAppWithSetupFutureUsage) {
+                                PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                            } else {
+                                null
+                            }
+                        )
+                    } else {
+                        PaymentSheet.IntentConfiguration.Mode.Setup()
+                    },
                     requireCvcRecollection = paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection
                 ),
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
@@ -217,40 +241,76 @@ internal class PaymentSheetConfirmationTokenTest {
     private fun confirm(
         isLiveMode: Boolean,
         paymentMethodType: PaymentMethodType,
+        isPayment: Boolean = true,
     ) {
         networkRule.enqueue(
             method("POST"),
             path("/v1/confirmation_tokens"),
-            clientContext(isLiveMode),
+            clientContext(isLiveMode, isPayment),
             cvcRecollection(paymentMethodType),
-            mandateDataAndSetupFutureUsage(paymentMethodType),
+            mandateDataAndSetupFutureUsage(paymentMethodType, isPayment),
             clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
-            response.testBodyFromFile("confirmation-token-create-with-new-card.json")
+            if (isPayment) {
+                response.testBodyFromFile("confirmation-token-create-with-new-card.json")
+            } else {
+                response.testBodyFromFile(
+                    "confirmation-token-create-with-new-card.json",
+                    listOf(
+                        ResponseReplacement(
+                            original = "\"payment_intent\": \"pi_example\"",
+                            new = "\"setup_intent\": \"seti_example\"",
+                        )
+                    )
+                )
+            }
         }
-        networkRule.enqueue(
-            path("/v1/payment_intents/pi_example"),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
-        }
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/payment_intents/pi_example/confirm"),
-            bodyPart("confirmation_token", "ctoken_example"),
-            bodyPart("return_url", urlEncode("stripesdk://payment_return_url/com.stripe.android.paymentsheet.test")),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-confirm.json")
+        if (isPayment) {
+            networkRule.enqueue(
+                path("/v1/payment_intents/pi_example"),
+            ) { response ->
+                response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
+            }
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/payment_intents/pi_example/confirm"),
+                bodyPart("confirmation_token", "ctoken_example"),
+                bodyPart("return_url", urlEncode("stripesdk://payment_return_url/com.stripe.android.paymentsheet.test")),
+            ) { response ->
+                response.testBodyFromFile("payment-intent-confirm.json")
+            }
+        } else {
+            networkRule.enqueue(
+                path("/v1/setup_intents/seti_example"),
+            ) { response ->
+                response.testBodyFromFile("setup-intent-get.json")
+            }
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/setup_intents/seti_example/confirm"),
+                bodyPart("confirmation_token", "ctoken_example"),
+                bodyPart("return_url", urlEncode("stripesdk://payment_return_url/com.stripe.android.paymentsheet.test")),
+            ) { response ->
+                response.testBodyFromFile("setup-intent-confirm.json")
+            }
         }
         page.clickPrimaryButton()
     }
 
-    private fun clientContext(isLiveMode: Boolean): RequestMatcher {
+    private fun clientContext(isLiveMode: Boolean, isPayment: Boolean = true): RequestMatcher {
         // The client_context param is only sent in test mode when creating a confirmation token
         return if (isLiveMode) {
             not(bodyPart(urlEncode("client_context[mode]"), ".+".toRegex()))
         } else {
             // we only verify client context is not null here
-        return bodyPart(urlEncode("client_context[mode]"), "payment")
+            bodyPart(
+                urlEncode("client_context[mode]"),
+                if (isPayment) {
+                    "payment"
+                } else {
+                    "setup"
+                }
+            )
         }
     }
 
@@ -270,7 +330,10 @@ internal class PaymentSheetConfirmationTokenTest {
         }
     }
 
-    private fun mandateDataAndSetupFutureUsage(paymentMethodType: PaymentMethodType): RequestMatcher {
+    private fun mandateDataAndSetupFutureUsage(
+        paymentMethodType: PaymentMethodType,
+        isPayment: Boolean = true
+    ): RequestMatcher {
         return if (paymentMethodType == PaymentMethodType.CashAppWithSetupFutureUsage) {
             RequestMatchers.composite(
                 bodyPart(
@@ -279,7 +342,7 @@ internal class PaymentSheetConfirmationTokenTest {
                 ),
                 bodyPart(
                     urlEncode("setup_future_usage"),
-                    "off_session"
+                    urlEncode("off_session")
                 ),
             )
         } else {
@@ -290,12 +353,19 @@ internal class PaymentSheetConfirmationTokenTest {
                         ".+".toRegex()
                     )
                 ),
-                not(
+                if (isPayment) {
+                    not(
+                        bodyPart(
+                            urlEncode("setup_future_usage"),
+                            ".+".toRegex()
+                        )
+                    )
+                } else {
                     bodyPart(
                         urlEncode("setup_future_usage"),
-                        ".+".toRegex()
+                        urlEncode("off_session")
                     )
-                )
+                }
             )
         }
     }
