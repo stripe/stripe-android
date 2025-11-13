@@ -90,7 +90,15 @@ internal class IDDetectorTransitioner(
                     "Model outputs ${analyzerOutput.category}, which doesn't match with " +
                         "scanType ${initialState.type}, stay in Initial"
                 )
-                initialState
+                return if (analyzerOutput.category == Category.INVALID) {
+                    // No document detected now: clear any prior wrong-side feedback
+                    if (initialState.feedbackRes != null) initialState.withFeedback(null) else initialState
+                } else {
+                    // Detected a document but wrong side: show flip guidance while staying in Initial
+                    initialState.withFeedback(
+                        com.stripe.android.identity.R.string.stripe_incorrect_side_flip
+                    )
+                }
             }
         }
     }
