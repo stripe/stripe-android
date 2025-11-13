@@ -201,6 +201,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
 
+        val isGooglePaySupportedOnDevice = async {
+            isGooglePaySupportedOnDevice()
+        }
+        val isGooglePaySupportedByConfiguration = async {
+            configuration.isGooglePayReady()
+        }
+
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
         val elementsSession = retrieveElementsSession(
             initializationMode = initializationMode,
@@ -223,7 +230,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession = elementsSession,
         )
 
-        val isGooglePayReady = isGooglePayReady(configuration, elementsSession)
+        val isGooglePayReady = isGooglePayReady(configuration, elementsSession, isGooglePaySupportedByConfiguration)
 
         val savedSelection = async {
             retrieveSavedSelection(
@@ -256,6 +263,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customerInfo = customerInfo,
                 linkStateResult = linkState.await(),
                 isGooglePayReady = isGooglePayReady,
+                isGooglePaySupportedOnDevice = isGooglePaySupportedOnDevice.await(),
                 initializationMode = initializationMode,
                 clientAttributionMetadata = clientAttributionMetadata,
             )
@@ -308,7 +316,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession = elementsSession,
             state = state,
             isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
-            isGooglePaySupported = isGooglePaySupported(),
+            isGooglePaySupported = isGooglePaySupportedOnDevice.await(),
             linkDisplay = configuration.link.display,
             initializationMode = initializationMode,
             customerInfo = customerInfo,
@@ -368,6 +376,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customerInfo: CustomerInfo?,
         linkStateResult: LinkStateResult,
         isGooglePayReady: Boolean,
+        isGooglePaySupportedOnDevice: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): PaymentMethodMetadata {
@@ -397,6 +406,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
+            isGooglePaySupportedOnDevice = isGooglePaySupportedOnDevice,
             linkStateResult = linkStateResult,
             customerMetadata = getCustomerMetadata(
                 configuration = configuration,
@@ -570,6 +580,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private suspend fun isGooglePayReady(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
+        isGooglePaySupportedByConfiguration: Deferred<Boolean>,
     ): Boolean {
         if (!elementsSession.isGooglePayEnabled) {
             userFacingLogger.logWarningWithoutPii(
@@ -579,7 +590,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             userFacingLogger.logWarningWithoutPii(
                 "GooglePayConfiguration is not set."
             )
-        } else if (!configuration.isGooglePayReady()) {
+        } else if (!isGooglePaySupportedByConfiguration.await()) {
             @Suppress("MaxLineLength")
             userFacingLogger.logWarningWithoutPii(
                 """
@@ -591,7 +602,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 """.trimIndent()
             )
         }
-        return elementsSession.isGooglePayEnabled && configuration.isGooglePayReady()
+        return elementsSession.isGooglePayEnabled && isGooglePaySupportedByConfiguration.await()
     }
 
     private suspend fun CommonConfiguration.isGooglePayReady(): Boolean {
@@ -607,7 +618,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }?.isReady()?.first() ?: false
     }
 
-    private suspend fun isGooglePaySupported(): Boolean {
+    private suspend fun isGooglePaySupportedOnDevice(): Boolean {
         return googlePayRepositoryFactory(GooglePayEnvironment.Production).isReady().first()
     }
 
