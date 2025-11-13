@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 22.1.1 - 2025-11-13
+
 * [UPDATED] Additional APIs and improvements to support the development of the React Native StripeCryptoOnramp SDK.
 
 ## 22.1.0 - 2025-11-10
