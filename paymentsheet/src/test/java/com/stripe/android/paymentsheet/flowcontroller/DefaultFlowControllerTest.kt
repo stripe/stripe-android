@@ -1044,7 +1044,7 @@ internal class DefaultFlowControllerTest {
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
 
-            val paymentSelection = PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
+            val paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION_WITH_LINK
 
             flowController.onPaymentOptionResult(
                 PaymentOptionsActivityResult.Succeeded(
@@ -1102,7 +1102,7 @@ internal class DefaultFlowControllerTest {
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
 
-            val paymentSelection = PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
+            val paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION_WITH_LINK
 
             flowController.onPaymentOptionResult(
                 PaymentOptionsActivityResult.Succeeded(
@@ -1156,7 +1156,7 @@ internal class DefaultFlowControllerTest {
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
 
-            val paymentSelection = PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
+            val paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION_WITH_LINK
 
             flowController.onPaymentOptionResult(
                 PaymentOptionsActivityResult.Succeeded(

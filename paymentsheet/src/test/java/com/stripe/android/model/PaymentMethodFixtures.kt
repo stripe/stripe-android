@@ -515,7 +515,7 @@ internal object PaymentMethodFixtures {
         )
     )
 
-    val LINK_INLINE_PAYMENT_SELECTION = PaymentSelection.New.Card(
+    val CARD_PAYMENT_SELECTION_WITH_LINK = PaymentSelection.New.Card(
         paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
         paymentMethodOptionsParams = null,
         paymentMethodExtraParams = null,

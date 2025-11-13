@@ -886,7 +886,7 @@ internal class PaymentSheetViewModelTest {
             val viewModel = createLinkViewModel()
 
             viewModel.updateSelection(
-                createLinkInlinePaymentSelection(
+                createCardPaymentSelectionWithLink(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
                     input = UserInput.SignUp(
                         email = "email@email.com",
@@ -917,7 +917,7 @@ internal class PaymentSheetViewModelTest {
             val viewModel = createLinkViewModel()
 
             viewModel.updateSelection(
-                createLinkInlinePaymentSelection(
+                createCardPaymentSelectionWithLink(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
                     input = UserInput.SignUp(
                         email = "email@email.com",
@@ -3563,7 +3563,7 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
-    private fun createLinkInlinePaymentSelection(
+    private fun createCardPaymentSelectionWithLink(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
         input: UserInput,
     ): PaymentSelection.New.Card {
