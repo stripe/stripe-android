@@ -22,10 +22,10 @@ internal sealed class PaymentMethodMessagingEvent : AnalyticsEvent {
     ) : PaymentMethodMessagingEvent() {
         override val eventName: String = PMME_LOAD_STARTED
         override val additionalParams: Map<String, Any?> = buildMap {
-            put(FIELD_PAYMENT_METHODS, configuration.paymentMethodTypes?.joinToString(",") { it.code })
+            put(FIELD_REQUESTED_PAYMENT_METHODS, configuration.paymentMethodTypes?.joinToString(",") { it.code })
             put(FIELD_AMOUNT, configuration.amount)
             put(FIELD_CURRENCY, configuration.currency)
-            put(FIELD_LOCALE, configuration.locale)
+            put(FIELD_REQUESTED_LOCALE, configuration.locale)
             put(FIELD_COUNTRY_CODE, configuration.countryCode)
         }
     }
@@ -88,10 +88,11 @@ internal sealed class PaymentMethodMessagingEvent : AnalyticsEvent {
         const val PMME_LOAD_FAILED = "payment_method_messaging_element_load_failed"
         const val PMME_DISPLAYED = "payment_method_messaging_element_displayed"
         const val PMME_TAPPED = "payment_method_messaging_element_tapped"
+        const val FIELD_REQUESTED_PAYMENT_METHODS = "requested_payment_methods"
         const val FIELD_PAYMENT_METHODS = "payment_methods"
         const val FIELD_AMOUNT = "amount"
         const val FIELD_CURRENCY = "currency"
-        const val FIELD_LOCALE = "locale"
+        const val FIELD_REQUESTED_LOCALE = "requested_locale"
         const val FIELD_COUNTRY_CODE = "country_code"
         const val FIELD_CONTENT_TYPE = "content_type"
         const val FIELD_DURATION = "duration"

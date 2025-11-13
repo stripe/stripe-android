@@ -52,10 +52,10 @@ class DefaultPaymentMethodMessagingEventReporterTest {
         eventReporter.simulateLoadStarted()
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params["event"]).isEqualTo(PMME_LOAD_STARTED)
-        assertThat(request.params["payment_methods"]).isEqualTo("affirm,klarna")
+        assertThat(request.params["requested_payment_methods"]).isEqualTo("affirm,klarna")
         assertThat(request.params["amount"]).isEqualTo(5000)
         assertThat(request.params["currency"]).isEqualTo("usd")
-        assertThat(request.params["locale"]).isEqualTo("en")
+        assertThat(request.params["requested_locale"]).isEqualTo("en")
         assertThat(request.params["country_code"]).isEqualTo("US")
         validateDurationStartCall()
     }
