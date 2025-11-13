@@ -306,7 +306,7 @@ internal class LinkApiRepository @Inject constructor(
         ).onFailure {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
         }.map { paymentMethod ->
-            val paymentMethodId = requireNotNull(paymentMethod.id)
+            val paymentMethodId = paymentMethod.id
             LinkPaymentDetails.Saved(
                 paymentDetails = ConsumerPaymentDetails.Passthrough(
                     id = id,

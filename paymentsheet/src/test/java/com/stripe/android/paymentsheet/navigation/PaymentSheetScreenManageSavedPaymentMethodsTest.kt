@@ -78,7 +78,7 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsTest {
         return ManageScreenInteractor.State(
             paymentMethods = paymentMethods.map { paymentMethod ->
                 DisplayableSavedPaymentMethod.create(
-                    displayName = paymentMethod.id?.resolvableString ?: "unknown".resolvableString,
+                    displayName = paymentMethod.id.resolvableString,
                     paymentMethod = paymentMethod
                 )
             },
