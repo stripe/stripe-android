@@ -2808,16 +2808,13 @@ class PaymentSheet internal constructor(
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Suppress("TooManyFunctions")
-        class Builder {
-            @ColorInt private var background: Int? = null
-
-            @ColorInt private var onBackground: Int? = null
-
-            @ColorInt private var border: Int? = null
-
-            @ColorInt private var successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb()
-
-            @ColorInt private var onSuccessBackgroundColor: Int? = null
+        class Builder internal constructor(
+            @ColorInt private var background: Int?,
+            @ColorInt private var onBackground: Int,
+            @ColorInt private var border: Int,
+            @ColorInt private var successBackgroundColor: Int,
+            @ColorInt private var onSuccessBackgroundColor: Int,
+        ) {
 
             /**
              * The background color of the primary button.
@@ -2843,22 +2840,26 @@ class PaymentSheet internal constructor(
 
             /**
              * The color of the text and icon in the primary button.
+             * Note: This also overrides the [onSuccessBackgroundColor] to match this value.
              *
              * @param onBackground The on-background color as an [ColorInt].
              */
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun onBackground(@ColorInt onBackground: Int) = apply {
                 this.onBackground = onBackground
+                this.onSuccessBackgroundColor = onBackground
             }
 
             /**
              * The color of the text and icon in the primary button.
+             * Note: This also overrides the [onSuccessBackgroundColor] to match this value.
              *
              * @param onBackground The on-background [Color].
              */
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun onBackground(onBackground: Color) = apply {
                 this.onBackground = onBackground.toArgb()
+                this.onSuccessBackgroundColor = onBackground.toArgb()
             }
 
             /**
@@ -2926,37 +2927,47 @@ class PaymentSheet internal constructor(
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            fun buildLight(): PrimaryButtonColors {
+            fun build(): PrimaryButtonColors {
                 return PrimaryButtonColors(
                     background = background,
-                    onBackground = onBackground
-                        ?: StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                    border = border
-                        ?: StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
+                    onBackground = onBackground,
+                    border = border,
                     successBackgroundColor = successBackgroundColor,
-                    onSuccessBackgroundColor = onSuccessBackgroundColor
-                        ?: (onBackground ?: StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb()),
+                    onSuccessBackgroundColor = onSuccessBackgroundColor,
                 )
             }
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            fun buildDark(): PrimaryButtonColors {
-                return PrimaryButtonColors(
-                    background = background,
-                    onBackground = onBackground
-                        ?: StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-                    border = border
-                        ?: StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
-                    successBackgroundColor = successBackgroundColor,
-                    onSuccessBackgroundColor = onSuccessBackgroundColor
-                        ?: (onBackground ?: StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb()),
+            companion object {
+
+                /**
+                 * Creates a [Builder] prepopulated with default light mode values.
+                 */
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                fun light(): Builder = Builder(
+                    background = null,
+                    onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                    border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
+                    successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                    onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                )
+
+                /**
+                 * Creates a [Builder] prepopulated with default dark mode values.
+                 */
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                fun dark(): Builder = Builder(
+                    background = null,
+                    onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+                    border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
+                    successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                    onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
                 )
             }
         }
 
         companion object {
-            val defaultLight: PrimaryButtonColors = Builder().buildLight()
-            val defaultDark: PrimaryButtonColors = Builder().buildDark()
+            val defaultLight: PrimaryButtonColors = Builder.light().build()
+            val defaultDark: PrimaryButtonColors = Builder.dark().build()
         }
     }
 
