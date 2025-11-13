@@ -1398,10 +1398,11 @@ class PaymentSheet internal constructor(
                     ) : Parcelable {
 
                         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                        class Builder {
-                            private var separatorColor: Int? = null
-                            private var selectedColor: Int? = null
-                            private var unselectedColor: Int? = null
+                        class Builder internal constructor (
+                            private var separatorColor: Int,
+                            private var selectedColor: Int,
+                            private var unselectedColor: Int,
+                        ) {
 
                             /**
                              * The color of the separator line between rows.
@@ -1427,27 +1428,34 @@ class PaymentSheet internal constructor(
                                 this.unselectedColor = color
                             }
 
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                            fun buildLight(): Colors {
+                            fun build(): Colors {
                                 return Colors(
-                                    separatorColor = separatorColor
-                                        ?: StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
-                                    selectedColor = selectedColor
-                                        ?: StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
+                                    separatorColor = separatorColor,
+                                    selectedColor = selectedColor,
                                     unselectedColor = unselectedColor
-                                        ?: StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb()
                                 )
                             }
 
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                            fun buildDark(): Colors {
-                                return Colors(
-                                    separatorColor = separatorColor
-                                        ?: StripeThemeDefaults.radioColorsDark.separatorColor.toArgb(),
-                                    selectedColor = selectedColor
-                                        ?: StripeThemeDefaults.radioColorsDark.selectedColor.toArgb(),
-                                    unselectedColor = unselectedColor
-                                        ?: StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
+                            companion object {
+
+                                /**
+                                 * Creates a [Builder] prepopulated with default light mode values.
+                                 */
+                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                                fun light(): Builder = Builder(
+                                    separatorColor = StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
+                                    selectedColor = StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
+                                    unselectedColor = StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb()
+                                )
+
+                                /**
+                                 * Creates a [Builder] prepopulated with default dark mode values.
+                                 */
+                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                                fun dark(): Builder = Builder(
+                                    separatorColor = StripeThemeDefaults.radioColorsDark.separatorColor.toArgb(),
+                                    selectedColor = StripeThemeDefaults.radioColorsDark.selectedColor.toArgb(),
+                                    unselectedColor = StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
                                 )
                             }
                         }
@@ -1466,8 +1474,8 @@ class PaymentSheet internal constructor(
                         private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
                             .additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
-                        private var colorsLight = Colors.Builder().buildLight()
-                        private var colorsDark = Colors.Builder().buildDark()
+                        private var colorsLight = Colors.Builder.light().build()
+                        private var colorsDark = Colors.Builder.dark().build()
 
                         /**
                          * The thickness of the separator line between rows.
