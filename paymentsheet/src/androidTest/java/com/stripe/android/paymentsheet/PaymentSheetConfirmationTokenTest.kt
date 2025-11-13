@@ -21,18 +21,18 @@ import org.junit.Test
 
 internal class PaymentSheetConfirmationTokenTest {
     @get:Rule
-    val testRules: TestRules = TestRules.create()
+    private val testRules: TestRules = TestRules.create()
 
     private val networkRule = testRules.networkRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(testRules.compose)
 
-    enum class CustomerType {
+    private enum class CustomerType {
         NewCustomer,
         ReturningCustomer,
     }
 
-    enum class PaymentMethodType {
+    private enum class PaymentMethodType {
         Card,
         CashAppWithSetupFutureUsage,
         SavedCard,
@@ -67,7 +67,7 @@ internal class PaymentSheetConfirmationTokenTest {
         paymentMethodType = PaymentMethodType.SavedCardWithCvcRecollection,
     )
 
-    fun testSuccessfulPayment(
+    private fun testSuccessfulPayment(
         isLiveMode: Boolean,
         customerType: CustomerType,
         paymentMethodType: PaymentMethodType,
