@@ -32,6 +32,7 @@ class TestRules private constructor(
         ): TestRules {
             val chain = RuleChain.emptyRuleChain()
                 .around(DetectLeaksAfterTestSuccess())
+                .around(FakeGooglePayRepositoryRule())
                 .around(composeTestRule)
                 .around(RetryRule(5))
                 .around(networkRule)
