@@ -297,6 +297,3 @@ internal class PaymentMethodMessagingElementAnalyticsTest {
         }
     }
 }
-
-
-
