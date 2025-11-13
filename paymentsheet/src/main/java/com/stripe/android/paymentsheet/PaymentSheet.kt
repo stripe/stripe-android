@@ -1582,9 +1582,10 @@ class PaymentSheet internal constructor(
                     ) : Parcelable {
 
                         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                        class Builder {
-                            private var separatorColor: Int? = null
-                            private var checkmarkColor: Int? = null
+                        class Builder internal constructor(
+                            private var separatorColor: Int,
+                            private var checkmarkColor: Int,
+                        ) {
 
                             /**
                              * The color of the separator line between rows.
@@ -1603,22 +1604,31 @@ class PaymentSheet internal constructor(
                             }
 
                             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                            fun buildLight(): Colors {
+                            fun build(): Colors {
                                 return Colors(
-                                    separatorColor = separatorColor
-                                        ?: StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
+                                    separatorColor = separatorColor,
                                     checkmarkColor = checkmarkColor
-                                        ?: StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb()
                                 )
                             }
 
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                            fun buildDark(): Colors {
-                                return Colors(
-                                    separatorColor = separatorColor
-                                        ?: StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb(),
-                                    checkmarkColor = checkmarkColor
-                                        ?: StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb()
+                            companion object {
+
+                                /**
+                                 * Creates a [Builder] prepopulated with default light mode values.
+                                 */
+                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                                fun light(): Builder = Builder(
+                                    separatorColor = StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
+                                    checkmarkColor = StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb()
+                                )
+
+                                /**
+                                 * Creates a [Builder] prepopulated with default dark mode values.
+                                 */
+                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                                fun dark(): Builder = Builder(
+                                    separatorColor = StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb(),
+                                    checkmarkColor = StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb()
                                 )
                             }
                         }
@@ -1642,8 +1652,8 @@ class PaymentSheet internal constructor(
                         private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
                             .additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
-                        private var colorsLight = Colors.Builder().buildLight()
-                        private var colorsDark = Colors.Builder().buildDark()
+                        private var colorsLight = Colors.Builder.light().build()
+                        private var colorsDark = Colors.Builder.dark().build()
 
                         /**
                          * The thickness of the separator line between rows.
