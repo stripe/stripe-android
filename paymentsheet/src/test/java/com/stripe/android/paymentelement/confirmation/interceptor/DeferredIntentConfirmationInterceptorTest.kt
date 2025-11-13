@@ -270,7 +270,6 @@ class DeferredIntentConfirmationInterceptorTest {
             assertThat(nextStep).isEqualTo(
                 ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>(
                     launcherArguments = IntentConfirmationDefinition.Args.NextAction(
-                        clientSecret = "pi_123_secret_456",
                         intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.copy(
                             paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
                             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,

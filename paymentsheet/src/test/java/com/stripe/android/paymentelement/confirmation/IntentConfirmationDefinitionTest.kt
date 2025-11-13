@@ -191,7 +191,7 @@ class IntentConfirmationDefinitionTest {
     fun `On 'IntentConfirmationInterceptor' next step, should return 'Launch' confirmation action`() = runTest {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
-            enqueueNextActionStep(clientSecret = "pi_123", intent = paymentIntent)
+            enqueueNextActionStep(intent = paymentIntent)
         }
         val definition = createIntentConfirmationDefinition(
             intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
@@ -206,7 +206,6 @@ class IntentConfirmationDefinitionTest {
 
         assertThat(launchAction.launcherArguments).isEqualTo(
             IntentConfirmationDefinition.Args.NextAction(
-                clientSecret = "pi_123",
                 intent = paymentIntent
             )
         )
@@ -281,7 +280,6 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = launcher,
             arguments = IntentConfirmationDefinition.Args.NextAction(
-                clientSecret = "si_123",
                 intent = setupIntent
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
@@ -330,7 +328,6 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = launcher,
             arguments = IntentConfirmationDefinition.Args.NextAction(
-                clientSecret = "pi_123",
                 intent = paymentIntent
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS,
@@ -355,7 +352,6 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = launcher,
             arguments = IntentConfirmationDefinition.Args.NextAction(
-                clientSecret = "pi_123",
                 intent = paymentIntent
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS,
@@ -380,7 +376,6 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = launcher,
             arguments = IntentConfirmationDefinition.Args.NextAction(
-                clientSecret = "seti_123",
                 intent = setupIntent
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,

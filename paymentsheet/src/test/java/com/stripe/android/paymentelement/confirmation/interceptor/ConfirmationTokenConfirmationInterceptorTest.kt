@@ -312,7 +312,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
             assertThat(nextStep).isEqualTo(
                 ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>(
                     launcherArguments = IntentConfirmationDefinition.Args.NextAction(
-                        clientSecret = "pi_123_secret_456",
                         intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
                     ),
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
