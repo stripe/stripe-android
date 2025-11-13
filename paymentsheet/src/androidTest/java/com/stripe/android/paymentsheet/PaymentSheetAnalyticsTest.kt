@@ -264,6 +264,11 @@ internal class PaymentSheetAnalyticsTest {
         // cardscan is not available in test mode
         testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
         testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        testContext.validateAnalyticsRequest(
+            eventName = "mc_initial_displayed_payment_methods",
+            query("visible_payment_methods", Uri.encode("link,card,afterpay_clearpay,klarna,cashapp,affirm,alipay")),
+            query("payment_method_layout", "vertical"),
+        )
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
@@ -277,6 +282,8 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_form_interacted")
         testContext.validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
+        // wait for idle so initialDisplayedPMs event reliably dispatches
+        composeTestRule.waitForIdle()
         page.clickOnLpm("card", forVerticalMode = true)
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
@@ -340,6 +347,11 @@ internal class PaymentSheetAnalyticsTest {
         // cardscan is not available in test mode
         testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
         testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        testContext.validateAnalyticsRequest(
+            eventName = "mc_initial_displayed_payment_methods",
+            query("visible_payment_methods", Uri.encode("link,card,afterpay_clearpay,klarna,cashapp,affirm,alipay")),
+            query("payment_method_layout", "vertical"),
+        )
 
         testContext.configureFlowController {
             configureWithPaymentIntent(
@@ -359,6 +371,8 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_form_interacted")
         testContext.validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
+        // wait for idle so initialDisplayedPMs event reliably dispatches
+        composeTestRule.waitForIdle()
         page.clickOnLpm("card", forVerticalMode = true)
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
