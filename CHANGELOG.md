@@ -8,11 +8,11 @@
 
 ## 22.1.1 - 2025-11-13
 
-- [UPDATED] Additional APIs and improvements to support the development of the React Native StripeCryptoOnramp SDK.
+* [UPDATED] Additional APIs and improvements to support the development of the React Native StripeCryptoOnramp SDK.
 
 ## 22.1.0 - 2025-11-10
 
-- [UPDATED][11893](https://github.com/stripe/stripe-android/pull/11893) Update `compileSdkVersion` and `targetSdkVersion` to 35 following changes to [Target API level requirements for Google Play apps](https://support.google.com/googleplay/android-developer/answer/11926878?hl=en).
+* [UPDATED][11893](https://github.com/stripe/stripe-android/pull/11893) Update `compileSdkVersion` and `targetSdkVersion` to 35 following changes to [Target API level requirements for Google Play apps](https://support.google.com/googleplay/android-developer/answer/11926878?hl=en).
 
 ## 22.0.0 - 2025-11-03
 
@@ -25,7 +25,8 @@ This major version introduces many small breaking changes. Please see [MIGRATING
 
 ### CardScan
 
-- [REMOVED][11785](https://github.com/stripe/stripe-android/pull/11785) CardScan has been removed. See [CardScan Module Removal](https://github.com/stripe/stripe-android/blob/f6bd19dd3543dfe474e97147989220b186242826/MIGRATING.md#3-cardscan-module-removal) to learn more.
+* [REMOVED][11785](https://github.com/stripe/stripe-android/pull/11785) CardScan has been removed. See [CardScan Module Removal](https://github.com/stripe/stripe-android/blob/f6bd19dd3543dfe474e97147989220b186242826/MIGRATING.md#3-cardscan-module-removal) to learn more. 
+
 
 ## 21.29.0 - 2025-10-20
 * [Added] Added support for `onBehalfOf` to CustomerSheet.IntentConfiguration. This parameter makes CustomerSheet use a connected account to determine the payment method that users see and whether CardBrandChoice is enabled. For more information, see the [SetupIntent docs](https://docs.stripe.com/api/setup_intents/object#setup_intent_object-on_behalf_of).
