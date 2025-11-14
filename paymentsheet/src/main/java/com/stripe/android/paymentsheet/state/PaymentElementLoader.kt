@@ -803,7 +803,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 setupFutureUsage = elementsSession.stripeIntent.setupFutureUsage(),
                 paymentMethodOptionsSetupFutureUsage = elementsSession.stripeIntent
                     .paymentMethodOptionsSetupFutureUsageMap(),
-                openCardScanAutomatically = state.paymentMethodMetadata.openCardScanAutomatically
             )
         }
     }

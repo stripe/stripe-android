@@ -479,7 +479,6 @@ class PaymentSheetEventTest {
                 "fc_sdk_availability" to "FULL",
                 "payment_method_options_setup_future_usage" to false,
                 "setup_future_usage" to null,
-                "open_card_scan_automatically" to false,
             )
         )
     }
@@ -646,18 +645,6 @@ class PaymentSheetEventTest {
         assertThat(event.params).containsEntry(
             "setup_future_usage",
             "off_session"
-        )
-    }
-
-    @Test
-    fun `LoadSucceeded with openCardScanAutomatically should return expected params`() {
-        val event = createLoadSucceededEvent(
-            openCardScanAutomatically = true
-        )
-
-        assertThat(event.params).containsEntry(
-            "open_card_scan_automatically",
-            true
         )
     }
 
@@ -1604,6 +1591,7 @@ class PaymentSheetEventTest {
                 "address" to "Full",
             ),
             paymentMethodLayout = "automatic",
+            openCardScannerAutomatically = true,
         )
         val config = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING
         assertThat(
@@ -1972,7 +1960,6 @@ class PaymentSheetEventTest {
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
         paymentMethodOptionsSetupfutureUsage: Boolean = false,
         setupFutureUsage: StripeIntent.Usage? = null,
-        openCardScanAutomatically: Boolean = false,
     ): PaymentSheetEvent.LoadSucceeded {
         return PaymentSheetEvent.LoadSucceeded(
             isDeferred = isDeferred,
@@ -1992,7 +1979,6 @@ class PaymentSheetEventTest {
             financialConnectionsAvailability = financialConnectionsAvailability,
             paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupfutureUsage,
             setupFutureUsage = setupFutureUsage,
-            openCardScanAutomatically = openCardScanAutomatically
         )
     }
 
@@ -2014,6 +2000,7 @@ class PaymentSheetEventTest {
         paymentMethodLayout: String? = "horizontal",
         cardBrandAcceptance: Boolean = false,
         analyticCallbackSet: Boolean = false,
+        openCardScannerAutomatically: Boolean = false,
         extraParams: MutableMap<String, Any?>.() -> Unit = {},
     ): Map<String, Any?> {
         return mutableMapOf(
@@ -2033,6 +2020,7 @@ class PaymentSheetEventTest {
             "custom_payment_methods" to customPaymentMethods,
             "card_brand_acceptance" to cardBrandAcceptance,
             "analytic_callback_set" to analyticCallbackSet,
+            "open_card_scan_automatically" to openCardScannerAutomatically,
         ).apply {
             if (paymentMethodLayout != null) {
                 put("payment_method_layout", paymentMethodLayout)

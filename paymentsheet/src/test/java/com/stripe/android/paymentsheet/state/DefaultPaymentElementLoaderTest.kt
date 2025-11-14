@@ -1708,7 +1708,6 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
         assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isFalse()
         assertThat(loadSucceededCall.setupFutureUsage).isNull()
-        assertThat(loadSucceededCall.openCardScanAutomatically).isFalse()
     }
 
     @Test
@@ -1779,7 +1778,6 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
         assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isFalse()
         assertThat(loadSucceededCall.setupFutureUsage).isNull()
-        assertThat(loadSucceededCall.openCardScanAutomatically).isFalse()
     }
 
     @Test
@@ -3437,7 +3435,6 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
         assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isFalse()
         assertThat(loadSucceededCall.setupFutureUsage).isNull()
-        assertThat(loadSucceededCall.openCardScanAutomatically).isFalse()
     }
 
     @Test
@@ -3475,7 +3472,6 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
         assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isFalse()
         assertThat(loadSucceededCall.setupFutureUsage).isNull()
-        assertThat(loadSucceededCall.openCardScanAutomatically).isFalse()
     }
 
     @Test
@@ -3991,30 +3987,6 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(loadSucceededCall.setupFutureUsage).isEqualTo(StripeIntent.Usage.OffSession)
     }
 
-    @Test
-    fun `Emits correct load event for openCardScanAutomatically'`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-        )
-
-        loader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Some Name",
-                opensCardScannerAutomatically = true,
-            ),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.openCardScanAutomatically).isTrue()
-    }
-
     private fun removeLastPaymentMethodTest(
         customer: PaymentSheet.CustomerConfiguration,
         shouldDisableMobilePaymentElement: Boolean = false,
@@ -4251,7 +4223,6 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
         assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isFalse()
         assertThat(loadSucceededCall.setupFutureUsage).isNull()
-        assertThat(loadSucceededCall.openCardScanAutomatically).isFalse()
     }
 
     private fun createLinkSettings(

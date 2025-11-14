@@ -61,7 +61,6 @@ internal class FakeLoadingEventReporter : LoadingEventReporter {
         setAsDefaultEnabled: Boolean?,
         paymentMethodOptionsSetupFutureUsage: Boolean,
         setupFutureUsage: StripeIntent.Usage?,
-        openCardScanAutomatically: Boolean
     ) {
         _loadSucceededTurbine.add(
             LoadSucceededCall(
@@ -81,7 +80,6 @@ internal class FakeLoadingEventReporter : LoadingEventReporter {
                 setAsDefaultEnabled = setAsDefaultEnabled,
                 paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupFutureUsage,
                 setupFutureUsage = setupFutureUsage,
-                openCardScanAutomatically = openCardScanAutomatically,
             )
         )
     }
@@ -131,7 +129,6 @@ internal class FakeLoadingEventReporter : LoadingEventReporter {
         val setAsDefaultEnabled: Boolean?,
         val paymentMethodOptionsSetupFutureUsage: Boolean,
         val setupFutureUsage: StripeIntent.Usage?,
-        val openCardScanAutomatically: Boolean,
     )
 
     class LoadFailedCall(
