@@ -546,6 +546,45 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         assertThat(option.createParams).isEqualTo(expectedCreateParams)
     }
 
+    @Test
+    fun `'canConfirm' should return false when payment method is not a card for New option`() {
+        val definition = createPassiveChallengeConfirmationDefinition()
+        val nonCardOption = PaymentMethodConfirmationOption.New(
+            createParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
+            optionsParams = null,
+            extraParams = null,
+            shouldSave = false,
+        )
+
+        val result = definition.canConfirm(
+            confirmationOption = nonCardOption,
+            confirmationArgs = CONFIRMATION_PARAMETERS
+        )
+
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `'canConfirm' should return false when payment method is not a card for Saved option`() {
+        val definition = createPassiveChallengeConfirmationDefinition()
+        val nonCardPaymentMethod = PAYMENT_INTENT.paymentMethod!!.copy(
+            type = com.stripe.android.model.PaymentMethod.Type.USBankAccount
+        )
+        val nonCardOption = PaymentMethodConfirmationOption.Saved(
+            paymentMethod = nonCardPaymentMethod,
+            optionsParams = null,
+            originatedFromWallet = false,
+            hCaptchaToken = null,
+        )
+
+        val result = definition.canConfirm(
+            confirmationOption = nonCardOption,
+            confirmationArgs = CONFIRMATION_PARAMETERS
+        )
+
+        assertThat(result).isFalse()
+    }
+
     private fun createPassiveChallengeConfirmationDefinition(
         errorReporter: ErrorReporter = FakeErrorReporter(),
         passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer(),

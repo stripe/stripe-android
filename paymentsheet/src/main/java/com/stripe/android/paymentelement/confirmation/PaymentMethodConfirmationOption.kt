@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation
 
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -75,5 +76,12 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
                 is PaymentMethodExtraParams.BacsDebit, null -> false
             }
         }
+    }
+}
+
+internal fun PaymentMethodConfirmationOption.isCard(): Boolean {
+    return when (this) {
+        is PaymentMethodConfirmationOption.New -> createParams.card != null
+        is PaymentMethodConfirmationOption.Saved -> paymentMethod.type == PaymentMethod.Type.Card
     }
 }
