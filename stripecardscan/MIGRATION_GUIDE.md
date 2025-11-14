@@ -1,5 +1,7 @@
 # Migrating from Stripe CardScan to Google Pay Card Recognition API
 
+> This guide is intended for developers who used CardScanSheet directly in their apps.
+
 ## Request Google Pay API production access
 Before you migrate, you must [request production access](https://developers.google.com/pay/api/android/guides/test-and-deploy/request-prod-access) to the Google Pay API using the [Google Pay & Wallet Console](https://pay.google.com/business/console?utm_source=devsite&utm_medium=devsite&utm_campaign=devsite).
 
