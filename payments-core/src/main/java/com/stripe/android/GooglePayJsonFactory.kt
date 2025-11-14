@@ -493,7 +493,7 @@ class GooglePayJsonFactory internal constructor(
          * ISO 3166-1 alpha-2 country code values of the countries where shipping is allowed.
          * If this object isn't specified, all shipping address countries are allowed.
          */
-        internal val allowedCountryCodes: Set<String> = emptySet(),
+        private val allowedCountryCodes: Set<String> = emptySet(),
 
         /**
          * Set to true if a phone number is required for the provided shipping address.

@@ -184,7 +184,7 @@ class GooglePayJsonFactoryTest {
                 currencyCode = "USD",
                 totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
                 countryCode = "us"
-            ),
+            )
         )
         val countryCode = createPaymentDataRequestJson
             .getJSONObject("transactionInfo")
@@ -199,7 +199,7 @@ class GooglePayJsonFactoryTest {
             transactionInfo = GooglePayJsonFactory.TransactionInfo(
                 currencyCode = "usd",
                 totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final
-            ),
+            )
         )
         val currencyCode = createPaymentDataRequestJson
             .getJSONObject("transactionInfo")
@@ -221,7 +221,7 @@ class GooglePayJsonFactoryTest {
             shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
                 isRequired = true,
                 allowedCountryCodes = setOf("us", "de")
-            ),
+            )
         )
 
         val allowedCountryCodes = createPaymentDataRequestJson
@@ -597,7 +597,7 @@ class GooglePayJsonFactoryTest {
                 currencyCode = "USD",
                 totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
                 totalPrice = 100
-            ),
+            )
         )
 
         val paymentDataAllowedCardNetworks = paymentDataRequestJson
