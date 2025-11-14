@@ -114,6 +114,7 @@ private fun SinglePartner(
             label = message.inlinePartnerPromotion,
             image = image,
             appearance = appearance,
+            learnMoreMessage = message.learnMore.message
         )
     }
 }
@@ -152,7 +153,10 @@ private fun MultiPartner(
                             placeholderVerticalAlign = PlaceholderVerticalAlign.Center
                         )
                     ) {
-                        InfoIcon(appearance)
+                        InfoIcon(
+                            appearance = appearance,
+                            learnMoreMessage = message.learnMore.message
+                        )
                     }
                 )
             )
@@ -211,7 +215,8 @@ private fun getImages(
 private fun TextWithLogo(
     label: String,
     image: PaymentMethodMessageImage,
-    appearance: PaymentMethodMessagingElement.Appearance.State
+    appearance: PaymentMethodMessagingElement.Appearance.State,
+    learnMoreMessage: String
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
@@ -246,7 +251,10 @@ private fun TextWithLogo(
                     placeholderVerticalAlign = PlaceholderVerticalAlign.Center
                 )
             ) {
-                InfoIcon(appearance)
+                InfoIcon(
+                    appearance = appearance,
+                    learnMoreMessage = learnMoreMessage
+                )
             }
         )
     )
@@ -260,6 +268,7 @@ private fun String.buildInlineLogoAnnotatedStringWithInfoIcon(): AnnotatedString
     if (preLogoString == null || postLogoString == null) {
         // {partner} not found, just show label
         append(this@buildInlineLogoAnnotatedStringWithInfoIcon)
+        appendInlineContent(id = INLINE_ICON_KEY)
     } else {
         append(preLogoString)
         appendInlineContent(id = INLINE_IMAGE_KEY)
@@ -284,10 +293,13 @@ private fun PaymentMethodMessagingElement.Appearance.Font.State.toTextStyle(): T
 }
 
 @Composable
-private fun InfoIcon(appearance: PaymentMethodMessagingElement.Appearance.State) {
+private fun InfoIcon(
+    appearance: PaymentMethodMessagingElement.Appearance.State,
+    learnMoreMessage: String
+) {
     Icon(
         painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_info),
-        contentDescription = null,
+        contentDescription = learnMoreMessage,
         tint = Color(appearance.colors.infoIconColor),
         modifier = Modifier.fillMaxSize().padding(start = 4.dp)
     )
