@@ -281,9 +281,6 @@ internal class PaymentSheetAnalyticsTest {
 
         testContext.validateAnalyticsRequest(eventName = "mc_form_interacted")
         testContext.validateAnalyticsRequest(eventName = "mc_card_number_completed")
-
-        // wait for idle so initialDisplayedPMs event reliably dispatches
-        composeTestRule.waitForIdle()
         page.clickOnLpm("card", forVerticalMode = true)
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
@@ -371,8 +368,6 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_form_interacted")
         testContext.validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
-        // wait for idle so initialDisplayedPMs event reliably dispatches
-        composeTestRule.waitForIdle()
         page.clickOnLpm("card", forVerticalMode = true)
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))

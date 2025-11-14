@@ -404,6 +404,7 @@ internal class PaymentSheetPage(
     }
 
     fun clickOnLpm(code: String, forVerticalMode: Boolean = false) {
+        composeTestRule.waitForIdle()
         waitUntilVisible()
 
         if (forVerticalMode) {
