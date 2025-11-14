@@ -3,6 +3,8 @@ package com.stripe.android.shoppay.di
 import com.stripe.android.BuildConfig
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -25,6 +27,7 @@ import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.ShopPayHandlers
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.shoppay.ShopPayArgs
 import com.stripe.android.shoppay.bridge.ConfirmationRequest
 import com.stripe.android.shoppay.bridge.ConfirmationRequestJsonParser
 import com.stripe.android.shoppay.bridge.DefaultShopPayBridgeHandler
@@ -138,5 +141,17 @@ internal interface ShopPayModule {
         ): AnalyticEventCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
         }
+
+        @Provides
+        @Named(STRIPE_ACCOUNT_ID)
+        fun provideStripeAccountId(args: ShopPayArgs): () -> String? = { args.stripeAccountId }
+
+        @Provides
+        @Named(PUBLISHABLE_KEY)
+        fun providePublishableKey(args: ShopPayArgs): () -> String = { args.publishableKey }
+
+        @Provides
+        @PaymentElementCallbackIdentifier
+        fun providePaymentElementCallbackIdentifier(args: ShopPayArgs): String = args.paymentElementCallbackIdentifier
     }
 }

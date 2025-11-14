@@ -22,7 +22,6 @@
     <ID>LargeClass:DefaultConfirmationHandlerTest.kt$DefaultConfirmationHandlerTest</ID>
     <ID>LargeClass:DefaultEventReporterTest.kt$DefaultEventReporterTest</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
-    <ID>LargeClass:DefaultLinkConfirmationHandlerTest.kt$DefaultLinkConfirmationHandlerTest</ID>
     <ID>LargeClass:DefaultPaymentElementLoaderTest.kt$DefaultPaymentElementLoaderTest</ID>
     <ID>LargeClass:ElementsSessionRepositoryTest.kt$ElementsSessionRepositoryTest</ID>
     <ID>LargeClass:InputAddressViewModelTest.kt$InputAddressViewModelTest</ID>
@@ -117,6 +116,7 @@
     <ID>TooManyFunctions:PaymentSheet.kt$PaymentSheet.Appearance$Builder</ID>
     <ID>TooManyFunctions:PaymentSheet.kt$PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark$Builder</ID>
     <ID>TooManyFunctions:PaymentSheet.kt$PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure$Builder</ID>
+    <ID>TooManyFunctions:ShopPayModule.kt$ShopPayModule$Companion</ID>
     <ID>TooManyFunctions:WalletViewModel.kt$WalletViewModel : ViewModel</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
   </CurrentIssues>
