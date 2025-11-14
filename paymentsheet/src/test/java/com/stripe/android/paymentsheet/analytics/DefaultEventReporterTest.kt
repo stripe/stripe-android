@@ -1637,7 +1637,6 @@ class DefaultEventReporterTest {
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
         paymentMethodOptionsSetupFutureUsage: Boolean = false,
         setupFutureUsage: StripeIntent.Usage? = null,
-        openCardScanAutomatically: Boolean = false,
     ) {
         simulateInit()
         onLoadStarted(initializedViaCompose = false)
@@ -1658,7 +1657,6 @@ class DefaultEventReporterTest {
             linkDisplay = linkDisplay,
             paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupFutureUsage,
             setupFutureUsage = setupFutureUsage,
-            openCardScanAutomatically = openCardScanAutomatically,
         )
     }
 

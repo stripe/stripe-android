@@ -46,7 +46,6 @@ internal interface LoadingEventReporter {
         setAsDefaultEnabled: Boolean?,
         paymentMethodOptionsSetupFutureUsage: Boolean,
         setupFutureUsage: StripeIntent.Usage?,
-        openCardScanAutomatically: Boolean,
     )
 
     /**
