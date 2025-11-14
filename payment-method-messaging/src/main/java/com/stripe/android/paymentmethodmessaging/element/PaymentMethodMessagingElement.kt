@@ -108,9 +108,9 @@ class PaymentMethodMessagingElement @Inject internal constructor(
         }
 
         /**
-         * The locale code used to localize text displayed in the element.
+         * Language code used to localize message displayed in the element.
          * See [the Stripe documentation](https://docs.stripe.com/js/appendix/supported_locales) for a list of
-         * supported values. Defaults to the current device locale identifier.
+         * supported values. Defaults to the current device locale language.
          * **Note**: Not all device locales are supported by Stripe, and English will be used in the case of
          * an unsupported locale. If you want to ensure a specific locale is used, pass it explicitly.
          */
