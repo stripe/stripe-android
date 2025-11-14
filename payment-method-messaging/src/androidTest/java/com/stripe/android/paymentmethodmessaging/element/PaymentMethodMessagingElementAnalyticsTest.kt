@@ -16,7 +16,6 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.testing.RetryRule
-import com.stripe.android.testing.ShampooRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
