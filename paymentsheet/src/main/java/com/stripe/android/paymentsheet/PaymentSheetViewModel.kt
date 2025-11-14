@@ -38,7 +38,6 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
-import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.isLink
@@ -701,15 +700,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             val savedStateHandle = extras.createSavedStateHandle()
             val arguments = starterArgsSupplier()
 
-            val component = DaggerPaymentSheetLauncherComponent
-                .builder()
-                .application(application)
-                .savedStateHandle(savedStateHandle)
-                .paymentElementCallbackIdentifier(arguments.paymentElementCallbackIdentifier)
-                .build()
-                .paymentSheetViewModelSubcomponentBuilder
-                .paymentSheetViewModelModule(PaymentSheetViewModelModule(arguments))
-                .build()
+            val component = DaggerPaymentSheetLauncherComponent.factory()
+                .build(
+                    application = application,
+                    handle = savedStateHandle,
+                    starterArgs = arguments,
+                )
 
             return component.viewModel as T
         }

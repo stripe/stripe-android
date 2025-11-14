@@ -16,11 +16,7 @@ import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
 
-@Module(
-    subcomponents = [
-        PaymentSheetViewModelSubcomponent::class,
-    ]
-)
+@Module
 internal abstract class PaymentSheetLauncherModule {
     @Binds
     abstract fun bindsApplicationForContext(application: Application): Context

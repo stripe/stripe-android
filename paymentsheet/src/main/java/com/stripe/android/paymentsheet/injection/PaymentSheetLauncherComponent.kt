@@ -8,8 +8,10 @@ import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
-import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
+import com.stripe.android.paymentsheet.PaymentSheetContract
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
@@ -28,25 +30,20 @@ import javax.inject.Singleton
         ResourceRepositoryModule::class,
         ApplicationIdModule::class,
         MobileSessionIdModule::class,
-        LinkHoldbackExposureModule::class
+        LinkHoldbackExposureModule::class,
+        PaymentSheetViewModelModule::class,
+        PaymentElementConfirmationModule::class,
     ]
 )
 internal interface PaymentSheetLauncherComponent {
-    val paymentSheetViewModelSubcomponentBuilder: PaymentSheetViewModelSubcomponent.Builder
+    val viewModel: PaymentSheetViewModel
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun savedStateHandle(handle: SavedStateHandle): Builder
-
-        @BindsInstance
-        fun paymentElementCallbackIdentifier(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String
-        ): Builder
-
-        fun build(): PaymentSheetLauncherComponent
+    @Component.Factory
+    interface Factory {
+        fun build(
+            @BindsInstance application: Application,
+            @BindsInstance handle: SavedStateHandle,
+            @BindsInstance starterArgs: PaymentSheetContract.Args,
+        ): PaymentSheetLauncherComponent
     }
 }
