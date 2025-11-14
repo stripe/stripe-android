@@ -26,7 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -240,12 +240,12 @@ data class VerifyKYCInfo(
 
 @Composable
 private fun getLocalizedDob(dateOfBirth: DateOfBirth): String {
-    val context = LocalContext.current
+    val configuration = LocalConfiguration.current
     val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        context.resources.configuration.locales[0]
+        configuration.locales[0]
     } else {
         @Suppress("DEPRECATION")
-        context.resources.configuration.locale
+        configuration.locale
     }
 
     val calendar = Calendar.getInstance().apply {
