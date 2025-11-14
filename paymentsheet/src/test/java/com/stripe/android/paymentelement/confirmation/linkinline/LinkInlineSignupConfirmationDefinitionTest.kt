@@ -348,7 +348,6 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             confirmationOption = createLinkInlineSignupConfirmationOption(),
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = LinkInlineSignupConfirmationDefinition.Result(
                 nextConfirmationOption = nextOption,
             ),

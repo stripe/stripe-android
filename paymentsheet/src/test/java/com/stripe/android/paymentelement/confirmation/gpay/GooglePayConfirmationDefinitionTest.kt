@@ -109,7 +109,6 @@ class GooglePayConfirmationDefinitionTest {
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = GooglePayPaymentMethodLauncher.Result.Completed(
                 paymentMethod = paymentMethod,
             ),
@@ -139,7 +138,6 @@ class GooglePayConfirmationDefinitionTest {
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = GooglePayPaymentMethodLauncher.Result.Failed(
                 errorCode = 400,
                 error = exception
@@ -164,7 +162,6 @@ class GooglePayConfirmationDefinitionTest {
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = GooglePayPaymentMethodLauncher.Result.Failed(
                 errorCode = GooglePayPaymentMethodLauncher.NETWORK_ERROR,
                 error = exception
@@ -191,7 +188,6 @@ class GooglePayConfirmationDefinitionTest {
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = GooglePayPaymentMethodLauncher.Result.Canceled,
         )
 
@@ -410,6 +406,7 @@ class GooglePayConfirmationDefinitionTest {
                 transactionId = "pi_12345",
                 label = null,
                 clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+                isElements = true,
             )
         }
     }
@@ -446,6 +443,7 @@ class GooglePayConfirmationDefinitionTest {
                 transactionId = "pi_12345",
                 label = "Merchant Inc.",
                 clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+                isElements = true,
             )
         }
     }
@@ -483,6 +481,7 @@ class GooglePayConfirmationDefinitionTest {
                 transactionId = "pi_12345",
                 label = "Merchant Inc.",
                 clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+                isElements = true,
             )
         }
     }

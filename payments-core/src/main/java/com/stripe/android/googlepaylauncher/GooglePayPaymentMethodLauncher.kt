@@ -224,6 +224,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
             transactionId = transactionId,
             label = label,
             clientAttributionMetadata = null,
+            isElements = false,
         )
     }
 
@@ -234,6 +235,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         clientAttributionMetadata: ClientAttributionMetadata?,
         transactionId: String? = null,
         label: String? = null,
+        isElements: Boolean = false,
     ) {
         check(skipReadyCheck || isReady) {
             "present() may only be called when Google Pay is available on this device."
@@ -248,6 +250,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 transactionId = transactionId,
                 cardBrandFilter = cardBrandFilter,
                 clientAttributionMetadata = clientAttributionMetadata,
+                isElements = isElements,
             )
         )
     }

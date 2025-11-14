@@ -61,7 +61,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
 
@@ -103,7 +102,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
 
@@ -219,7 +217,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
 
@@ -259,7 +256,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
 
@@ -292,7 +288,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
 
@@ -325,7 +320,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
 
@@ -358,7 +352,6 @@ internal class DefaultLinkConfirmationHandlerTest {
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
 
@@ -395,7 +388,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
 
@@ -438,7 +430,6 @@ internal class DefaultLinkConfirmationHandlerTest {
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
 
@@ -475,7 +466,6 @@ internal class DefaultLinkConfirmationHandlerTest {
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
 
@@ -512,7 +502,6 @@ internal class DefaultLinkConfirmationHandlerTest {
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
 
@@ -574,7 +563,6 @@ internal class DefaultLinkConfirmationHandlerTest {
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
 
@@ -617,7 +605,6 @@ internal class DefaultLinkConfirmationHandlerTest {
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
 

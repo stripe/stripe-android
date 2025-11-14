@@ -37,7 +37,7 @@ tags:
 - tapOn:
     id: "skip_cta"
 # CONFIRM AND COMPLETE
-- assertVisible: "Your accounts were connected."
+- assertVisible: "Your accounts were connected"
 - tapOn:
     id: "done_button"
 - scrollUntilVisible:

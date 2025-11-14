@@ -240,7 +240,6 @@ internal class AttestationConfirmationDefinitionTest {
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = AttestationActivityResult.Success(testToken),
         )
 
@@ -272,7 +271,6 @@ internal class AttestationConfirmationDefinitionTest {
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = AttestationActivityResult.Success(testToken),
         )
 
@@ -297,7 +295,6 @@ internal class AttestationConfirmationDefinitionTest {
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = AttestationActivityResult.Failed(exception),
         )
 
@@ -319,7 +316,6 @@ internal class AttestationConfirmationDefinitionTest {
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = AttestationActivityResult.Failed(exception),
         )
 

@@ -81,7 +81,7 @@ tags:
 - assertVisible:
     id: "OTP-0"
 - inputText: "111111"
-- assertVisible: "Your account was connected."
+- assertVisible: "Your account was connected"
 - tapOn:
     id: "done_button"
 - scrollUntilVisible:

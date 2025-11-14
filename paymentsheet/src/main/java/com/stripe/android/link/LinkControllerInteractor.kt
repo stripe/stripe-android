@@ -98,6 +98,9 @@ internal class LinkControllerInteractor @Inject constructor(
         MutableSharedFlow<LinkController.AuthorizeResult>(extraBufferCapacity = 1)
     val authorizeResultFlow = _authorizeResultFlow.asSharedFlow()
 
+    val paymentMethodMetadata: PaymentMethodMetadata?
+        get() = _state.value.paymentMethodMetadata
+
     fun state(context: Context): StateFlow<LinkController.State> {
         return combineAsStateFlow(_internalLinkAccount, _state) { account, state ->
             LinkController.State(

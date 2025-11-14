@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.utils
+package com.stripe.android.networktesting
 
 import com.stripe.android.Stripe
 import org.junit.rules.TestWatcher

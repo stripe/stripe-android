@@ -2,6 +2,10 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Financial Connections
+
+* [Added] `StripeFinancialConnections` SDK is now localized!
+
 ## 22.1.1 - 2025-11-13
 
 * [UPDATED] Additional APIs and improvements to support the development of the React Native StripeCryptoOnramp SDK.

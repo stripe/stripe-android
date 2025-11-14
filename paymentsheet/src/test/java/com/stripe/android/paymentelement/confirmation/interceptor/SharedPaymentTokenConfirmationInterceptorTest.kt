@@ -68,7 +68,6 @@ class SharedPaymentTokenConfirmationInterceptorTest {
                 ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                     intent = intent,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
-                    isConfirmationToken = false,
                     completedFullPaymentFlow = false,
                 )
             )
@@ -116,7 +115,6 @@ class SharedPaymentTokenConfirmationInterceptorTest {
                 ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                     intent = intent,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
-                    isConfirmationToken = false,
                     completedFullPaymentFlow = false,
                 )
             )
@@ -166,7 +164,6 @@ class SharedPaymentTokenConfirmationInterceptorTest {
                 ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                     intent = intent,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
-                    isConfirmationToken = false,
                     completedFullPaymentFlow = false,
                 )
             )

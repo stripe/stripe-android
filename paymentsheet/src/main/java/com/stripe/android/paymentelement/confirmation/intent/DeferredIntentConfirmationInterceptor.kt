@@ -151,7 +151,6 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                     ConfirmationDefinition.Action.Complete(
                         intent = intent,
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
-                        isConfirmationToken = false,
                         completedFullPaymentFlow = true,
                     )
                 } else {
@@ -223,7 +222,6 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         return ConfirmationDefinition.Action.Complete(
             intent = intent,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-            isConfirmationToken = false,
             completedFullPaymentFlow = true,
         )
     }
@@ -236,9 +234,8 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
             DeferredIntentValidator.validatePaymentMethod(intent, paymentMethod)
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = Args.NextAction(intent),
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                isConfirmationToken = false,
                 receivesResultInProcess = false,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
             )
         }.getOrElse {
             ConfirmationDefinition.Action.Fail(
@@ -265,7 +262,6 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
             intent,
             shippingValues,
             isDeferred = true,
-            isConfirmationToken = false,
         ) {
             create(
                 paymentMethod = paymentMethod,

@@ -271,7 +271,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
             ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                isConfirmationToken = true,
                 completedFullPaymentFlow = true,
             )
         )
@@ -315,7 +314,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                         intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
                     ),
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                    isConfirmationToken = true,
                     receivesResultInProcess = false,
                 )
             )
@@ -347,7 +345,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
             ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                 intent = intent,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
-                isConfirmationToken = true,
                 completedFullPaymentFlow = true,
             )
         )
@@ -502,7 +499,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                     intent = PaymentIntentFixtures.PI_SUCCEEDED,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                    isConfirmationToken = true,
                     completedFullPaymentFlow = true,
                 )
             )
@@ -544,7 +540,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                     intent = PaymentIntentFixtures.PI_SUCCEEDED,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                    isConfirmationToken = true,
                     completedFullPaymentFlow = true,
                 )
             )

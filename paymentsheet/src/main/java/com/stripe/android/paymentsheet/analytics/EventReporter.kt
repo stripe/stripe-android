@@ -46,7 +46,6 @@ internal interface LoadingEventReporter {
         setAsDefaultEnabled: Boolean?,
         paymentMethodOptionsSetupFutureUsage: Boolean,
         setupFutureUsage: StripeIntent.Usage?,
-        openCardScanAutomatically: Boolean,
     )
 
     /**
@@ -154,7 +153,6 @@ internal interface EventReporter : CardScanEventsReporter {
     fun onPaymentSuccess(
         paymentSelection: PaymentSelection,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        isConfirmationToken: Boolean,
     )
 
     /**

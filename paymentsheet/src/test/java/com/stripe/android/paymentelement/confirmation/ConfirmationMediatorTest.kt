@@ -158,7 +158,6 @@ class ConfirmationMediatorTest {
         action = ConfirmationDefinition.Action.Complete(
             intent = INTENT,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-            isConfirmationToken = false,
             completedFullPaymentFlow = true,
         ),
     ) {
@@ -183,7 +182,6 @@ class ConfirmationMediatorTest {
 
         assertThat(completeAction.intent).isEqualTo(INTENT)
         assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
-        assertThat(completeAction.isConfirmationToken).isEqualTo(false)
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 
@@ -192,7 +190,6 @@ class ConfirmationMediatorTest {
         action = ConfirmationDefinition.Action.Complete(
             intent = INTENT,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-            isConfirmationToken = false,
             completedFullPaymentFlow = false,
         ),
     ) {
@@ -217,7 +214,6 @@ class ConfirmationMediatorTest {
 
         assertThat(completeAction.intent).isEqualTo(INTENT)
         assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
-        assertThat(completeAction.isConfirmationToken).isEqualTo(false)
         assertThat(completeAction.completedFullPaymentFlow).isFalse()
     }
 
@@ -259,7 +255,6 @@ class ConfirmationMediatorTest {
         action = ConfirmationDefinition.Action.Launch(
             launcherArguments = TestConfirmationDefinition.LauncherArgs,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-            isConfirmationToken = false,
             receivesResultInProcess = false,
         ),
     ) {
@@ -310,7 +305,6 @@ class ConfirmationMediatorTest {
         assertThat(parameters?.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
         assertThat(parameters?.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
         assertThat(parameters?.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
-        assertThat(parameters?.isConfirmationToken).isEqualTo(false)
     }
 
     @Test
@@ -319,7 +313,6 @@ class ConfirmationMediatorTest {
             action = ConfirmationDefinition.Action.Launch(
                 launcherArguments = TestConfirmationDefinition.LauncherArgs,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-                isConfirmationToken = false,
                 receivesResultInProcess = true,
             ),
         ) {
@@ -357,7 +350,6 @@ class ConfirmationMediatorTest {
         action = ConfirmationDefinition.Action.Launch(
             launcherArguments = TestConfirmationDefinition.LauncherArgs,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             receivesResultInProcess = false,
         ),
     ) {
@@ -393,7 +385,6 @@ class ConfirmationMediatorTest {
         action = ConfirmationDefinition.Action.Launch(
             launcherArguments = TestConfirmationDefinition.LauncherArgs,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             receivesResultInProcess = false,
         ),
     ) {
@@ -438,13 +429,11 @@ class ConfirmationMediatorTest {
         action = ConfirmationDefinition.Action.Launch(
             launcherArguments = TestConfirmationDefinition.LauncherArgs,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-            isConfirmationToken = false,
             receivesResultInProcess = false,
         ),
         result = ConfirmationDefinition.Result.Succeeded(
             intent = INTENT,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-            isConfirmationToken = false,
         ),
     ) {
         val waitForResultLatch = CountDownLatch(1)
@@ -512,7 +501,6 @@ class ConfirmationMediatorTest {
 
         assertThat(successResult.intent).isEqualTo(INTENT)
         assertThat(successResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
-        assertThat(successResult.isConfirmationToken).isEqualTo(false)
 
         // The params should be cleared to avoid keeping the PAN around in memory longer than necessary.
         assertThat(savedStateHandle.get<Any>(mediator.key + ConfirmationMediator.PARAMETERS_POSTFIX_KEY)).isNull()
