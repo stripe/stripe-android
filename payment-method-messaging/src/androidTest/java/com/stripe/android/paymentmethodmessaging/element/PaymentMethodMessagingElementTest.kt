@@ -34,7 +34,7 @@ class PaymentMethodMessagingElementTest {
         .around(AdvancedFraudSignalsTestRule())
 
     @Test
-    fun testNoContent() = runPaymentMethodMessagingElementTest(networkRule = networkRule) { testContext ->
+    fun testNoContent() = runPaymentMethodMessagingElementTest { testContext ->
         networkRule.enqueue(
             host("ppm.stripe.com"),
             method("GET"),
@@ -49,7 +49,7 @@ class PaymentMethodMessagingElementTest {
     }
 
     @Test
-    fun testSinglePartner() = runPaymentMethodMessagingElementTest(networkRule = networkRule) { testContext ->
+    fun testSinglePartner() = runPaymentMethodMessagingElementTest { testContext ->
         networkRule.enqueue(
             host("ppm.stripe.com"),
             method("GET"),
@@ -67,7 +67,7 @@ class PaymentMethodMessagingElementTest {
     }
 
     @Test
-    fun testMultiPartner() = runPaymentMethodMessagingElementTest(networkRule = networkRule) { testContext ->
+    fun testMultiPartner() = runPaymentMethodMessagingElementTest { testContext ->
         networkRule.enqueue(
             host("ppm.stripe.com"),
             method("GET"),
@@ -84,7 +84,7 @@ class PaymentMethodMessagingElementTest {
     }
 
     @Test
-    fun testError() = runPaymentMethodMessagingElementTest(networkRule = networkRule) { testContext ->
+    fun testError() = runPaymentMethodMessagingElementTest { testContext ->
         networkRule.enqueue(
             host("ppm.stripe.com"),
             method("GET"),
@@ -104,9 +104,7 @@ class PaymentMethodMessagingElementTest {
     }
 
     @Test
-    fun testUpdatesContentOnConfigChange() = runPaymentMethodMessagingElementTest(
-        networkRule = networkRule
-    ) { testContext ->
+    fun testUpdatesContentOnConfigChange() = runPaymentMethodMessagingElementTest { testContext ->
         networkRule.enqueue(
             host("ppm.stripe.com"),
             method("GET"),

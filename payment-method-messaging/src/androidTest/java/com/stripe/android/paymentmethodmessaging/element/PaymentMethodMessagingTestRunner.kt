@@ -32,7 +32,6 @@ internal class PaymentMethodMessagingElementTestRunnerContext(
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal fun runPaymentMethodMessagingElementTest(
-    networkRule: NetworkRule,
     block: suspend (PaymentMethodMessagingElementTestRunnerContext) -> Unit
 ) {
     val factory: (ComponentActivity) -> PaymentMethodMessagingElement = {
@@ -64,7 +63,5 @@ internal fun runPaymentMethodMessagingElementTest(
         runTest {
             block(testContext)
         }
-
-        networkRule.validate()
     }
 }
