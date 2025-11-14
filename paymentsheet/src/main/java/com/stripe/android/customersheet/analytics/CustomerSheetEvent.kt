@@ -38,6 +38,7 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
                         ),
                     FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
                     FIELD_CARD_BRAND_ACCEPTANCE to configuration.cardBrandAcceptance.toAnalyticsValue(),
+                    FIELD_OPEN_CARD_SCAN_AUTOMATICALLY_ENABLED to configuration.opensCardScannerAutomatically
                 )
                 return mapOf(
                     FIELD_CUSTOMER_SHEET_CONFIGURATION to configurationMap,
@@ -415,6 +416,7 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         const val FIELD_ERROR_MESSAGE = "error_message"
         const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
         const val FIELD_SYNC_DEFAULT_ENABLED = "sync_default_enabled"
+        const val FIELD_OPEN_CARD_SCAN_AUTOMATICALLY_ENABLED = "open_card_scan_automatically_enabled"
         const val FIELD_SELECTED_LPM = "selected_lpm"
         const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
         const val FIELD_CUSTOMER_ACCESS_PROVIDER = "customer_access_provider"
