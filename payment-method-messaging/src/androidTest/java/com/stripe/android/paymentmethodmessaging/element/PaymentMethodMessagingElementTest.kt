@@ -14,12 +14,10 @@ import com.stripe.android.testing.RetryRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
-import kotlin.time.Duration.Companion.seconds
 
 class PaymentMethodMessagingElementTest {
     private val networkRule = NetworkRule(
-        hostsToTrack = listOf("https://ppm.stripe.com"),
-        validationTimeout = 1.seconds
+        hostsToTrack = listOf("https://ppm.stripe.com")
     )
     private val composeTestRule = createEmptyComposeRule()
 
