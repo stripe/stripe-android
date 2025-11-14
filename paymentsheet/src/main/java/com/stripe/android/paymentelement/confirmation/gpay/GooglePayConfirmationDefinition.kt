@@ -99,6 +99,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             transactionId = intent.id,
             label = config.customLabel,
             clientAttributionMetadata = confirmationArgs.paymentMethodMetadata.clientAttributionMetadata,
+            isElements = true,
         )
     }
 

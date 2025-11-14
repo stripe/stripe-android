@@ -406,6 +406,7 @@ class GooglePayConfirmationDefinitionTest {
                 transactionId = "pi_12345",
                 label = null,
                 clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+                isElements = true,
             )
         }
     }
@@ -442,6 +443,7 @@ class GooglePayConfirmationDefinitionTest {
                 transactionId = "pi_12345",
                 label = "Merchant Inc.",
                 clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+                isElements = true,
             )
         }
     }
@@ -479,6 +481,7 @@ class GooglePayConfirmationDefinitionTest {
                 transactionId = "pi_12345",
                 label = "Merchant Inc.",
                 clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+                isElements = true,
             )
         }
     }
