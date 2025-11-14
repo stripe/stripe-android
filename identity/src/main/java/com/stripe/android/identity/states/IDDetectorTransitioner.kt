@@ -148,9 +148,17 @@ internal class IDDetectorTransitioner(
         }
 
         isBlurry(analyzerOutput.blurScore) -> {
-            // reset timer of the foundState
+            // reset timer of the foundState and show blur feedback only if it's severely blurry
             foundState.reachedStateAt = TimeSource.Monotonic.markNow()
-            foundState
+            val feedbackThreshold = if (blurThreshold > 0f) blurThreshold * BLUR_FEEDBACK_RATIO else 0f
+            if (analyzerOutput.blurScore <= feedbackThreshold) {
+                foundState.withFeedback(
+                    com.stripe.android.identity.R.string.stripe_reduce_blur
+                )
+            } else {
+                // Clear blur feedback when it's only mildly blurry
+                foundState.withFeedback(null)
+            }
         }
 
         // Center gating: if the detected document is not centered, keep in Found and reset timer
@@ -303,6 +311,8 @@ internal class IDDetectorTransitioner(
         const val DEFAULT_DISPLAY_SATISFIED_DURATION = 0
         const val DEFAULT_DISPLAY_UNSATISFIED_DURATION = 0
         const val DEFAULT_BLUR_THRESHOLD = 0f
+        // Only show blur feedback when blur is worse than this fraction of the gating threshold
+        const val BLUR_FEEDBACK_RATIO = 0.85f
         val TAG: String = IDDetectorTransitioner::class.java.simpleName
     }
 
