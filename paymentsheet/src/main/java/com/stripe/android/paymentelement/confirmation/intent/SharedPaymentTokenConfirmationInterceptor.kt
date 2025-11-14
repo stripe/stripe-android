@@ -2,7 +2,6 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.core.exception.GenericStripeException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.utils.errorMessage
@@ -77,13 +76,7 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
     ): ConfirmationDefinition.Action<Args> {
         runCatching {
             stripeRepository.createSavedPaymentMethodRadarSession(
-                paymentMethodId = paymentMethod.id
-                    ?: throw GenericStripeException(
-                        cause = IllegalStateException(
-                            "No payment method ID was found for provided 'PaymentMethod' object!"
-                        ),
-                        analyticsValue = "noPaymentMethodId"
-                    ),
+                paymentMethodId = paymentMethod.id,
                 requestOptions = requestOptions,
             ).getOrThrow()
         }.onFailure {
@@ -102,7 +95,6 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
             ConfirmationDefinition.Action.Complete(
                 intent = intent,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
-                isConfirmationToken = false,
                 completedFullPaymentFlow = false,
             )
         } catch (@Suppress("TooGenericExceptionCaught") exception: Exception) {

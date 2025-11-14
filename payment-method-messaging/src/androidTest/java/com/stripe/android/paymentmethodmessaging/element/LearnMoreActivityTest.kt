@@ -13,10 +13,12 @@ import androidx.test.espresso.web.webdriver.DriverAtoms.getText
 import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElement.Appearance.Theme
 import org.hamcrest.Matchers.containsString
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@OptIn(PaymentMethodMessagingElementPreview::class)
 @RunWith(AndroidJUnit4::class)
 internal class LearnMoreActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
@@ -25,7 +27,10 @@ internal class LearnMoreActivityTest {
     fun loadsUrl() {
         val intent = LearnMoreActivityArgs.createIntent(
             applicationContext,
-            LearnMoreActivityArgs("file:///android_asset/fake_web_content.html")
+            LearnMoreActivityArgs(
+                learnMoreUrl = "file:///android_asset/fake_web_content.html",
+                theme = Theme.LIGHT
+            )
         )
         ActivityScenario.launch<LearnMoreActivity>(intent).use {
             onWebView().check(
@@ -53,7 +58,7 @@ internal class LearnMoreActivityTest {
     fun finishesIfUrlIsBlank() {
         val intent = LearnMoreActivityArgs.createIntent(
             applicationContext,
-            LearnMoreActivityArgs("")
+            LearnMoreActivityArgs("", Theme.LIGHT)
         )
         ActivityScenario.launch<LearnMoreActivity>(intent).use { activityScenario ->
             assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)

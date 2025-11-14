@@ -47,6 +47,7 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.LinkButtonTestTag
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntent
@@ -786,7 +787,6 @@ internal class PaymentSheetActivityTest {
                 result = ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
         }
@@ -1006,15 +1006,15 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Handles missing arguments correctly`() {
-        val scenario = ActivityScenario.launchActivityForResult(PaymentSheetActivity::class.java)
+        ActivityScenario.launchActivityForResult(PaymentSheetActivity::class.java).use { scenario ->
+            val result = contract.parseResult(
+                scenario.result.resultCode,
+                scenario.result.resultData,
+            )
 
-        val result = contract.parseResult(
-            scenario.result.resultCode,
-            scenario.result.resultData,
-        )
-
-        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+            assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+        }
     }
 
     @Test
@@ -1038,15 +1038,15 @@ internal class PaymentSheetActivityTest {
 
         val intent = contract.createIntent(context, args)
 
-        val scenario = ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent)
+        ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent).use { scenario ->
+            val result = contract.parseResult(
+                scenario.result.resultCode,
+                scenario.result.resultData,
+            )
 
-        val result = contract.parseResult(
-            scenario.result.resultCode,
-            scenario.result.resultData,
-        )
-
-        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+            assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+        }
     }
 
     @Test
@@ -1062,15 +1062,15 @@ internal class PaymentSheetActivityTest {
 
         val intent = contract.createIntent(context, args)
 
-        val scenario = ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent)
+        ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent).use { scenario ->
+            val result = contract.parseResult(
+                scenario.result.resultCode,
+                scenario.result.resultData,
+            )
 
-        val result = contract.parseResult(
-            scenario.result.resultCode,
-            scenario.result.resultData,
-        )
-
-        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+            assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+        }
     }
 
     @Test
@@ -1250,7 +1250,6 @@ internal class PaymentSheetActivityTest {
                     cbcEligibility = cbcEligibility,
                 ),
                 customerRepository = FakeCustomerRepository(paymentMethods),
-                prefsRepository = FakePrefsRepository(),
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
@@ -1260,7 +1259,7 @@ internal class PaymentSheetActivityTest {
                     intentConfirmationInterceptorFactory =
                     object : IntentConfirmationInterceptor.Factory {
                         override suspend fun create(
-                            initializationMode: PaymentElementLoader.InitializationMode,
+                            integrationMetadata: IntegrationMetadata,
                             customerId: String?,
                             ephemeralKeySecret: String?,
                             clientAttributionMetadata: ClientAttributionMetadata,

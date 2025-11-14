@@ -28,7 +28,6 @@ import com.stripe.android.paymentelement.confirmation.paymentElementConfirmation
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.RadarOptionsFactory
@@ -236,10 +235,11 @@ internal class AttestationConfirmationActivityTest {
     }
 
     private companion object {
-        private val PAYMENT_INTENT = PaymentIntentFactory.create().copy(
+        private val PAYMENT_INTENT = PaymentIntentFactory.create(
             id = "pm_1",
             amount = 5000,
             currency = "USD",
+            clientSecret = "pi_123_secret_123",
         )
 
         private val NEW_CONFIRMATION_OPTION = PaymentMethodConfirmationOption.New(
@@ -258,9 +258,6 @@ internal class AttestationConfirmationActivityTest {
 
         private val CONFIRMATION_ARGUMENTS_NEW = ConfirmationHandler.Args(
             confirmationOption = NEW_CONFIRMATION_OPTION,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123"
-            ),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 shippingDetails = AddressDetails(),
                 stripeIntent = PAYMENT_INTENT,
@@ -269,9 +266,6 @@ internal class AttestationConfirmationActivityTest {
 
         private val CONFIRMATION_ARGUMENTS_SAVED = ConfirmationHandler.Args(
             confirmationOption = SAVED_CONFIRMATION_OPTION,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123"
-            ),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 shippingDetails = AddressDetails(),
                 stripeIntent = PAYMENT_INTENT,

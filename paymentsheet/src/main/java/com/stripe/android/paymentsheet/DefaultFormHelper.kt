@@ -119,33 +119,11 @@ internal class DefaultFormHelper(
         lastFormValues,
         linkInlineHandler.linkInlineState,
     ) { formValues, inlineSignupViewState ->
-        val paymentSelection = formValues.first?.transformToPaymentSelection(
+        formValues.first?.transformToPaymentSelection(
             paymentMethod = supportedPaymentMethodForCode(formValues.second),
             paymentMethodMetadata = paymentMethodMetadata,
-        ) ?: return@combine null
-
-        if (paymentSelection !is PaymentSelection.New.Card) {
-            return@combine paymentSelection
-        }
-
-        if (inlineSignupViewState != null && inlineSignupViewState.useLink) {
-            val userInput = inlineSignupViewState.userInput
-
-            if (userInput != null) {
-                PaymentSelection.New.LinkInline(
-                    paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
-                    paymentMethodOptionsParams = paymentSelection.paymentMethodOptionsParams,
-                    paymentMethodExtraParams = paymentSelection.paymentMethodExtraParams,
-                    customerRequestedSave = paymentSelection.customerRequestedSave,
-                    brand = paymentSelection.brand,
-                    input = userInput,
-                )
-            } else {
-                null
-            }
-        } else {
-            paymentSelection
-        }
+            inlineSignupViewState = inlineSignupViewState,
+        )
     }
 
     private var previouslyCompletedForm: PaymentMethodCode?
@@ -177,12 +155,12 @@ internal class DefaultFormHelper(
                 paymentMethodOptionsParams = currentSelection?.getPaymentMethodOptionParams(),
                 paymentMethodExtraParams = currentSelection?.getPaymentMethodExtraParams(),
                 initialLinkUserInput = when (val selection = currentSelection?.paymentSelection) {
-                    is PaymentSelection.New.LinkInline -> selection.input
+                    is PaymentSelection.New.Card -> selection.linkInput
                     else -> null
                 },
-                previousLinkSignupCheckboxSelection = when (currentSelection?.paymentSelection) {
-                    is PaymentSelection.New.LinkInline -> true // User entered a card and opted-in to Link
-                    is PaymentSelection.New.Card -> false // User entered a card and did not opt-in to Link
+                previousLinkSignupCheckboxSelection = when (val selection = currentSelection?.paymentSelection) {
+                    // User entered a card and may have link input
+                    is PaymentSelection.New.Card -> selection.linkInput != null
                     else -> null // Not a card, so no previous choice
                 },
                 setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,

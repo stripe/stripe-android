@@ -34,7 +34,6 @@ import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.utils.determineFallbackPaymentSelectionAfterLinkLogout
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -54,7 +53,6 @@ import com.stripe.android.paymentsheet.PaymentOptionsActivityResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
-import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
@@ -70,7 +68,6 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
-import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.coroutines.CoroutineScope
@@ -88,7 +85,6 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionResultCallback: PaymentOptionResultCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
-    private val prefsRepositoryFactory: PrefsRepository.Factory,
     activityResultCaller: ActivityResultCaller,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     // Properties provided through injection
@@ -116,9 +112,6 @@ internal class DefaultFlowController @Inject internal constructor(
      * after [DefaultFlowController].
      */
     lateinit var flowControllerComponent: FlowControllerComponent
-
-    private val initializationMode: PaymentElementLoader.InitializationMode?
-        get() = viewModel.previousConfigureRequest?.initializationMode
 
     override var shippingDetails: AddressDetails?
         get() = viewModel.state?.config?.shippingDetails
@@ -485,11 +478,8 @@ internal class DefaultFlowController @Inject internal constructor(
             return
         }
 
-        val initializationMode = requireNotNull(initializationMode)
-
         when (val paymentSelection = viewModel.paymentSelection) {
             is Link,
-            is PaymentSelection.New.LinkInline,
             is PaymentSelection.GooglePay,
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.CustomPaymentMethod,
@@ -498,12 +488,10 @@ internal class DefaultFlowController @Inject internal constructor(
             null -> confirmPaymentSelection(
                 paymentSelection = paymentSelection,
                 state = state.paymentSheetState,
-                initializationMode = initializationMode,
             )
             is PaymentSelection.Saved -> confirmSavedPaymentMethod(
                 paymentSelection = paymentSelection,
                 state = state.paymentSheetState,
-                initializationMode = initializationMode,
             )
         }
     }
@@ -511,7 +499,6 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun confirmSavedPaymentMethod(
         paymentSelection: PaymentSelection.Saved,
         state: PaymentSheetState.Full,
-        initializationMode: PaymentElementLoader.InitializationMode,
     ) {
         if (paymentSelection.paymentMethod.type == PaymentMethod.Type.SepaDebit &&
             viewModel.paymentSelection?.hasAcknowledgedSepaMandate == false
@@ -525,7 +512,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 )
             )
         } else {
-            confirmPaymentSelection(paymentSelection, state, initializationMode)
+            confirmPaymentSelection(paymentSelection, state)
         }
     }
 
@@ -533,7 +520,6 @@ internal class DefaultFlowController @Inject internal constructor(
     fun confirmPaymentSelection(
         paymentSelection: PaymentSelection?,
         state: PaymentSheetState.Full,
-        initializationMode: PaymentElementLoader.InitializationMode,
     ) {
         viewModelScope.launch {
             val confirmationOption = paymentSelection?.toConfirmationOption(
@@ -545,7 +531,6 @@ internal class DefaultFlowController @Inject internal constructor(
                 confirmationHandler.start(
                     arguments = ConfirmationHandler.Args(
                         confirmationOption = option,
-                        initializationMode = initializationMode,
                         paymentMethodMetadata = state.paymentMethodMetadata,
                     )
                 )
@@ -612,13 +597,10 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun onIntentResult(result: ConfirmationHandler.Result) {
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> {
-                savePaymentSelectionIfEligible(result.intent)
-
                 viewModel.paymentSelection?.let { paymentSelection ->
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
                         deferredIntentConfirmationType = result.deferredIntentConfirmationType,
-                        isConfirmationToken = result.isConfirmationToken,
                     )
                 }
 
@@ -650,43 +632,6 @@ internal class DefaultFlowController @Inject internal constructor(
             is ConfirmationHandler.Result.Canceled -> {
                 handleCancellation(result)
             }
-        }
-    }
-
-    private fun savePaymentSelectionIfEligible(stripeIntent: StripeIntent) {
-        val currentSelection = viewModel.paymentSelection
-        val currentInitializationMode = initializationMode
-
-        /*
-         * Sets current selection as default payment method in future payment sheet usage. New payment
-         * methods are only saved if the payment sheet is in setup mode, is in payment intent with setup
-         * for usage, or the customer has requested the payment method be saved.
-         */
-        val selectionToSave = when (currentSelection) {
-            is PaymentSelection.New -> stripeIntent.paymentMethod.takeIf {
-                val alwaysSave = viewModel.state?.paymentSheetState?.alwaysSaveForFutureUse == true
-                currentInitializationMode != null && (currentSelection.canSave(currentInitializationMode) || alwaysSave)
-            }?.let { method ->
-                PaymentSelection.Saved(method)
-            }
-            is PaymentSelection.Saved -> {
-                when (currentSelection.walletType) {
-                    PaymentSelection.Saved.WalletType.GooglePay -> {
-                        PaymentSelection.GooglePay
-                    }
-                    PaymentSelection.Saved.WalletType.Link -> {
-                        // Don't save as Link, but instead as the actual payment method. If the payment method isn't
-                        // attached to the customer, we will fallback to Link during load.
-                        currentSelection
-                    }
-                    null -> currentSelection
-                }
-            }
-            else -> currentSelection
-        }
-
-        selectionToSave?.let {
-            prefsRepositoryFactory.create(viewModel.state?.config?.customer?.id).savePaymentSelection(it)
         }
     }
 
@@ -765,7 +710,6 @@ internal class DefaultFlowController @Inject internal constructor(
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
                         deferredIntentConfirmationType = deferredIntentConfirmationType,
-                        isConfirmationToken = false,
                     )
                 }
             }

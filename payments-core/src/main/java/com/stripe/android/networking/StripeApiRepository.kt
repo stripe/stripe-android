@@ -1940,7 +1940,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         return paymentMethodResult.mapCatching { paymentMethod ->
             ConfirmPaymentIntentParams.createForDashboard(
                 clientSecret = clientSecret,
-                paymentMethodId = paymentMethod.id!!,
+                paymentMethodId = paymentMethod.id,
                 paymentMethodOptions = paymentMethodOptions,
             )
         }
@@ -1962,7 +1962,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         return paymentMethodResult.mapCatching { paymentMethod ->
             ConfirmSetupIntentParams.createForDashboard(
                 clientSecret = clientSecret,
-                paymentMethodId = paymentMethod.id!!,
+                paymentMethodId = paymentMethod.id,
                 paymentMethodOptions = paymentMethodOptions,
             )
         }

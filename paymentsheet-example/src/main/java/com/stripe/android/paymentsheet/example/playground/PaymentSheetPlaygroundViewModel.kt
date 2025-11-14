@@ -211,8 +211,8 @@ internal class PaymentSheetPlaygroundViewModel(
                     CustomerSheet.IntentConfiguration.Builder()
                         .paymentMethodTypes(playgroundState.supportedPaymentMethodTypes)
                         .apply {
-                            if (playgroundState.onBehalfOf.isNotBlank()) {
-                                this.onBehalfOf(playgroundState.onBehalfOf)
+                            if (!playgroundState.onBehalfOf.isNullOrBlank()) {
+                                this.onBehalfOf(playgroundState.onBehalfOf!!)
                             }
                         }
                         .build()
@@ -275,7 +275,7 @@ internal class PaymentSheetPlaygroundViewModel(
                 val request = CreateSetupIntentRequest(
                     customerId = customerId,
                     merchantCountryCode = playgroundState.countryCode.value,
-                    onBehalfOf = playgroundState.onBehalfOf.takeIf { it.isNotBlank() }
+                    onBehalfOf = playgroundState.onBehalfOf.takeIf { it?.isNotBlank() ?: false }
                 )
 
                 val apiResponse = Fuel.post(baseUrl + "create_setup_intent")
@@ -518,7 +518,7 @@ internal class PaymentSheetPlaygroundViewModel(
         )
         return createAndConfirmIntent(
             confirmationParams = ConfirmationParams.PaymentMethod(
-                id = paymentMethod.id!!,
+                id = paymentMethod.id,
                 shouldSavePaymentMethod = shouldSavePaymentMethod,
             ),
             playgroundState = playgroundState,

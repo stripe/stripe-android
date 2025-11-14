@@ -25,6 +25,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -1106,6 +1107,7 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = false,
+            isGooglePaySupportedOnDevice = false,
             linkStateResult = LinkState(
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
                 configuration = createLinkConfiguration(),
@@ -1114,6 +1116,7 @@ internal class PaymentMethodMetadataTest {
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            paymentElementCallbacks = PaymentElementCallbacks.Builder().build(),
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1157,6 +1160,7 @@ internal class PaymentMethodMetadataTest {
             ),
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             isGooglePayReady = false,
+            isGooglePaySupportedOnDevice = false,
             linkConfiguration = PaymentSheet.LinkConfiguration(),
             linkMode = null,
             linkStateResult = LinkState(
@@ -1176,6 +1180,8 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             attestOnIntentConfirmation = false,
             appearance = configuration.appearance,
+            onBehalfOf = null,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1216,6 +1222,7 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
+            isGooglePaySupportedOnDevice = true,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
         )
 
@@ -1241,6 +1248,7 @@ internal class PaymentMethodMetadataTest {
                 isPaymentMethodSetAsDefaultEnabled = false
             ),
             isGooglePayReady = true,
+            isGooglePaySupportedOnDevice = true,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             linkConfiguration = PaymentSheet.LinkConfiguration(),
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
@@ -1261,6 +1269,8 @@ internal class PaymentMethodMetadataTest {
             ),
             attestOnIntentConfirmation = false,
             appearance = configuration.appearance,
+            onBehalfOf = null,
+            integrationMetadata = IntegrationMetadata.CustomerSheet,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -1331,10 +1341,12 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = listOf(),
             externalPaymentMethodSpecs = listOf(),
             isGooglePayReady = false,
+            isGooglePaySupportedOnDevice = false,
             linkStateResult = null,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            paymentElementCallbacks = PaymentElementCallbacks.Builder().build(),
         )
     }
 
@@ -1384,6 +1396,8 @@ internal class PaymentMethodMetadataTest {
             merchantLogoUrl = null,
             passiveCaptcha = passiveCaptchaParams,
             elementsSessionConfigId = null,
+            accountId = "acct_1SGP1sPvdtoA7EjP",
+            merchantId = "acct_1SGP1sPvdtoA7EjP",
         )
     }
 
@@ -2039,6 +2053,7 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = emptyList(),
             externalPaymentMethodSpecs = emptyList(),
             isGooglePayReady = isGooglePayReady,
+            isGooglePaySupportedOnDevice = isGooglePayReady,
             linkStateResult = if (hasLinkState) {
                 LinkState(
                     configuration = mock(),
@@ -2051,6 +2066,7 @@ internal class PaymentMethodMetadataTest {
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            paymentElementCallbacks = PaymentElementCallbacks.Builder().build(),
         )
 
         assertThat(metadata.availableWallets)
@@ -2107,10 +2123,12 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = emptyList(),
             externalPaymentMethodSpecs = emptyList(),
             isGooglePayReady = false,
+            isGooglePaySupportedOnDevice = false,
             linkStateResult = null,
             customerMetadata = null,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            paymentElementCallbacks = PaymentElementCallbacks.Builder().build(),
         )
     }
 
@@ -2135,6 +2153,7 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             sharedDataSpecs = emptyList(),
             isGooglePayReady = false,
+            isGooglePaySupportedOnDevice = false,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
         )
     }
@@ -2163,7 +2182,6 @@ internal class PaymentMethodMetadataTest {
             passthroughModeEnabled = false,
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,
-            initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
             elementsSessionId = "session_1234",
             linkMode = LinkMode.LinkPaymentMethod,
             allowDefaultOptIn = false,

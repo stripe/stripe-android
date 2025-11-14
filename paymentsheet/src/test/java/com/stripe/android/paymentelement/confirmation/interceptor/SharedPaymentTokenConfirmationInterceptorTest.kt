@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.interceptor
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -16,7 +17,6 @@ import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationD
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import kotlinx.coroutines.CompletableDeferred
@@ -39,7 +39,7 @@ class SharedPaymentTokenConfirmationInterceptorTest {
             val providedShippingAddress = SHIPPING_ADDRESS
 
             val interceptor = createIntentConfirmationInterceptor(
-                initializationMode = DEFAULT_SPT_INTENT,
+                integrationMetadata = DEFAULT_INTEGRATION_METADATA,
                 stripeRepository = stripeRepositoryReturning(
                     onCreatePaymentMethodId = "pm_1234",
                     onRetrievePaymentMethodId = "pm_5678",
@@ -68,7 +68,6 @@ class SharedPaymentTokenConfirmationInterceptorTest {
                 ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                     intent = intent,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
-                    isConfirmationToken = false,
                     completedFullPaymentFlow = false,
                 )
             )
@@ -95,7 +94,7 @@ class SharedPaymentTokenConfirmationInterceptorTest {
             val createSavedPaymentMethodRadarSessionCalls = Turbine<CreateSavedPaymentMethodRadarSessionCall>()
 
             val interceptor = createIntentConfirmationInterceptor(
-                initializationMode = DEFAULT_SPT_INTENT,
+                integrationMetadata = DEFAULT_INTEGRATION_METADATA,
                 stripeRepository = stripeRepositoryReturning(
                     onCreatePaymentMethodId = "pm_1234",
                     onRetrievePaymentMethodId = "pm_5678",
@@ -116,7 +115,6 @@ class SharedPaymentTokenConfirmationInterceptorTest {
                 ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                     intent = intent,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
-                    isConfirmationToken = false,
                     completedFullPaymentFlow = false,
                 )
             )
@@ -143,7 +141,7 @@ class SharedPaymentTokenConfirmationInterceptorTest {
             val eventReporter = FakeErrorReporter()
 
             val interceptor = createIntentConfirmationInterceptor(
-                initializationMode = DEFAULT_SPT_INTENT,
+                integrationMetadata = DEFAULT_INTEGRATION_METADATA,
                 stripeRepository = stripeRepositoryReturning(
                     onCreatePaymentMethodId = "pm_1234",
                     onRetrievePaymentMethodId = "pm_5678",
@@ -166,7 +164,6 @@ class SharedPaymentTokenConfirmationInterceptorTest {
                 ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                     intent = intent,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
-                    isConfirmationToken = false,
                     completedFullPaymentFlow = false,
                 )
             )
@@ -221,7 +218,7 @@ class SharedPaymentTokenConfirmationInterceptorTest {
     }
 
     private companion object {
-        val DEFAULT_SPT_INTENT = InitializationMode.DeferredIntent(
+        val DEFAULT_INTEGRATION_METADATA = IntegrationMetadata.DeferredIntentWithSharedPaymentToken(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 1099L,

@@ -55,7 +55,6 @@ internal class ConfirmationMediator<
                     confirmationOption = params.confirmationOption,
                     confirmationArgs = params.confirmationArgs,
                     deferredIntentConfirmationType = params.deferredIntentConfirmationType,
-                    isConfirmationToken = params.isConfirmationToken,
                     result = result
                 )
             } ?: run {
@@ -109,7 +108,6 @@ internal class ConfirmationMediator<
                                 confirmationOption = confirmationOption,
                                 confirmationArgs = arguments,
                                 deferredIntentConfirmationType = action.deferredIntentConfirmationType,
-                                isConfirmationToken = action.isConfirmationToken,
                             )
 
                             definition.launch(
@@ -137,7 +135,6 @@ internal class ConfirmationMediator<
                 Action.Complete(
                     intent = action.intent,
                     deferredIntentConfirmationType = action.deferredIntentConfirmationType,
-                    isConfirmationToken = action.isConfirmationToken,
                     completedFullPaymentFlow = action.completedFullPaymentFlow,
                 )
             }
@@ -166,7 +163,6 @@ internal class ConfirmationMediator<
         data class Complete(
             val intent: StripeIntent,
             val deferredIntentConfirmationType: DeferredIntentConfirmationType? = null,
-            val isConfirmationToken: Boolean,
             val completedFullPaymentFlow: Boolean,
         ) : Action
     }
@@ -176,7 +172,6 @@ internal class ConfirmationMediator<
         val confirmationOption: TConfirmationOption,
         val confirmationArgs: ConfirmationHandler.Args,
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        val isConfirmationToken: Boolean,
     ) : Parcelable
 
     companion object {

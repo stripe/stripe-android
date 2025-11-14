@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.interceptor
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -10,7 +11,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.createIntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.RadarOptionsFactory
 import com.stripe.android.testing.SetupIntentFactory
@@ -24,7 +24,7 @@ class IntentFirstConfirmationInterceptorTest {
     @Test
     fun `Returns confirm as next step if invoked with client secret for existing payment method`() =
         runInterceptorScenario(
-            initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+            integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_4321"),
         ) { interceptor ->
 
             val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -47,7 +47,7 @@ class IntentFirstConfirmationInterceptorTest {
     @Test
     fun `Returns confirm as next step if invoked with client secret for new payment method`() =
         runInterceptorScenario(
-            initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+            integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_4321"),
         ) { interceptor ->
 
             val createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
@@ -70,7 +70,7 @@ class IntentFirstConfirmationInterceptorTest {
     @Test
     fun `Returns confirm params with 'setup_future_usage' set to 'off_session' when requires save on confirmation`() =
         runInterceptorScenario(
-            initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+            integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_4321"),
         ) { interceptor ->
             val nextStep = interceptor.intercept(
                 intent = PaymentIntentFactory.create(),
@@ -122,7 +122,7 @@ class IntentFirstConfirmationInterceptorTest {
     @Test
     fun `hCaptchaToken is not set for new payment method confirmation option`() =
         runInterceptorScenario(
-            initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+            integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_4321"),
         ) { interceptor ->
             val nextStep = interceptor.intercept(
                 confirmationOption = PaymentMethodConfirmationOption.New(
@@ -159,7 +159,7 @@ class IntentFirstConfirmationInterceptorTest {
     @Test
     fun `Returns confirm params with androidVerificationToken set to null for Saved pm with no attestation token`() =
         runInterceptorScenario(
-            initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+            integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_4321"),
         ) { interceptor ->
             val hCaptchaToken = "test-hcaptcha-token"
             val nextStep = interceptor.intercept(
@@ -190,7 +190,7 @@ class IntentFirstConfirmationInterceptorTest {
         hCaptchaToken: String?
     ): ConfirmPaymentIntentParams? {
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+            integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_4321"),
         )
 
         val nextStep = interceptor.intercept(
@@ -211,7 +211,7 @@ class IntentFirstConfirmationInterceptorTest {
         hCaptchaToken: String?
     ): ConfirmSetupIntentParams? {
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = InitializationMode.SetupIntent("seti_1234_secret_4321"),
+            integrationMetadata = IntegrationMetadata.IntentFirst("seti_1234_secret_4321"),
         )
 
         val nextStep = interceptor.intercept(

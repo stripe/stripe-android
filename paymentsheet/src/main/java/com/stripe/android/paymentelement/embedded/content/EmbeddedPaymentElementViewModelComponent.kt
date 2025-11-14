@@ -21,10 +21,8 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
-import com.stripe.android.paymentelement.embedded.DefaultEmbeddedConfirmationSaver
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
-import com.stripe.android.paymentelement.embedded.EmbeddedConfirmationSaver
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
@@ -164,9 +162,6 @@ internal interface EmbeddedPaymentElementViewModelModule {
         factory: DefaultPrefsRepository.Factory
     ): PrefsRepository.Factory
 
-    @Binds
-    fun bindsConfirmationSaver(saver: DefaultEmbeddedConfirmationSaver): EmbeddedConfirmationSaver
-
     @Suppress("TooManyFunctions")
     companion object {
         @Provides
@@ -175,22 +170,17 @@ internal interface EmbeddedPaymentElementViewModelModule {
         }
 
         @Provides
-        fun providesPaymentMethodMetadata(stateHolder: EmbeddedConfirmationStateHolder): PaymentMethodMetadata? {
-            return stateHolder.state?.paymentMethodMetadata
-        }
-
-        @Provides
-        fun providesInitializationMode(
-            stateHolder: EmbeddedConfirmationStateHolder
-        ): PaymentElementLoader.InitializationMode? {
-            return stateHolder.state?.initializationMode
+        fun providePaymentMethodMetadataValue(
+            confirmationStateHolder: EmbeddedConfirmationStateHolder,
+        ): PaymentMethodMetadata? {
+            return confirmationStateHolder.state?.paymentMethodMetadata
         }
 
         @Provides
         @Named(IS_LIVE_MODE)
         fun providesIsLiveMode(
             paymentConfiguration: Provider<PaymentConfiguration>
-        ): () -> Boolean = { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
+        ): () -> Boolean = { paymentConfiguration.get().isLiveMode() }
 
         @Provides
         @Singleton

@@ -19,6 +19,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
@@ -64,6 +65,7 @@ internal data class PaymentMethodMetadata(
     val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
     val customerMetadata: CustomerMetadata?,
     val isGooglePayReady: Boolean,
+    val isGooglePaySupportedOnDevice: Boolean,
     val linkConfiguration: PaymentSheet.LinkConfiguration,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val linkMode: LinkMode?,
@@ -80,6 +82,8 @@ internal data class PaymentMethodMetadata(
     val clientAttributionMetadata: ClientAttributionMetadata,
     val attestOnIntentConfirmation: Boolean,
     val appearance: PaymentSheet.Appearance,
+    val onBehalfOf: String?,
+    val integrationMetadata: IntegrationMetadata,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -319,10 +323,12 @@ internal data class PaymentMethodMetadata(
             sharedDataSpecs: List<SharedDataSpec>,
             externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
             isGooglePayReady: Boolean,
+            isGooglePaySupportedOnDevice: Boolean,
             linkStateResult: LinkStateResult?,
             customerMetadata: CustomerMetadata?,
             initializationMode: PaymentElementLoader.InitializationMode,
             clientAttributionMetadata: ClientAttributionMetadata,
+            paymentElementCallbacks: PaymentElementCallbacks?,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
@@ -356,6 +362,7 @@ internal data class PaymentMethodMetadata(
                 linkStateResult = linkStateResult,
                 paymentMethodIncentive = linkSettings?.linkConsumerIncentive?.toPaymentMethodIncentive(),
                 isGooglePayReady = isGooglePayReady,
+                isGooglePaySupportedOnDevice = isGooglePaySupportedOnDevice,
                 displayableCustomPaymentMethods = elementsSession.toDisplayableCustomPaymentMethods(configuration),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
@@ -369,6 +376,8 @@ internal data class PaymentMethodMetadata(
                 clientAttributionMetadata = clientAttributionMetadata,
                 attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation,
                 appearance = configuration.appearance,
+                onBehalfOf = elementsSession.onBehalfOf,
+                integrationMetadata = initializationMode.integrationMetadata(paymentElementCallbacks),
             )
         }
 
@@ -378,6 +387,7 @@ internal data class PaymentMethodMetadata(
             paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
+            isGooglePaySupportedOnDevice: Boolean,
             customerMetadata: CustomerMetadata,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
@@ -404,6 +414,7 @@ internal data class PaymentMethodMetadata(
                 customerMetadata = customerMetadata,
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
+                isGooglePaySupportedOnDevice = isGooglePaySupportedOnDevice,
                 paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
                 linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = elementsSession.linkSettings?.linkMode,
@@ -430,6 +441,8 @@ internal data class PaymentMethodMetadata(
                 ),
                 attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation,
                 appearance = configuration.appearance,
+                onBehalfOf = elementsSession.onBehalfOf,
+                integrationMetadata = IntegrationMetadata.CustomerSheet,
             )
         }
     }

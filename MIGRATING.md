@@ -11,14 +11,21 @@ Features that are deprecated at Stripe or in the SDK. You must migrate away or s
 - **Giropay**: Removed. Use alternative payment methods. See [this page](https://support.stripe.com/questions/availability-of-giropay-june-2024-update) for more information.
 
 **Removed APIs:**
-- **CardParams**: Legacy `CardParams` removed from `CardWidget`. Use `PaymentMethodCreateParams` instead.
+- **CardParams**: Legacy `CardParams` removed from `CardWidget`. Use `PaymentMethodCreateParams` to create PaymentMethods instead of tokens.
+
+    **For creating PaymentMethods (recommended):**
     ```kotlin
-    // before
+    // before - creating tokens with CardParams
     val cardParams = cardWidget.cardParams
-  
-    // after
+    val token = stripe.createCardToken(cardParams)
+
+    // after - creating payment methods with PaymentMethodCreateParams
     val params = cardWidget.paymentMethodCreateParams
+    val paymentMethod = stripe.createPaymentMethod(params)
     ```
+
+    **Note:** Stripe recommends using PaymentMethods instead of tokens. PaymentMethods provide a unified API for supporting multiple payment types, simplified payment lifecycle management, and better error handling. They are compatible with modern payment flows like Payment Element and are Stripe's recommended path for all new integrations. See [Transitioning from Source and Tokens to PaymentMethod](https://docs.stripe.com/payments/payment-methods/transitioning) for more details.
+
 - **Deprecated Google Pay APIs**: `GooglePayPaymentMethodLauncherContract` and `rememberLauncher()` removed. Use GooglePayPaymentMethodLauncher directly or `rememberGooglePayPaymentMethodLauncher`, `rememberGooglePayLauncher` for compose.
     ```kotlin
     // before
@@ -67,16 +74,14 @@ APIs that are no longer publicly exposed. If you need access to any of these int
 - Some constructors were made internal (ie `PaymentSheetResult`). We don't expect merchants to create these, they should only be created from the Stripe SDK
 
 ### 3. CardScan Module Removal
-All CardScan modules have been completely removed. CardScan feature in our UI surfaces has migrated to [Google Pay Card Recognition](https://developers.google.com/pay/payment-card-recognition/debit-credit-card-recognition), which is now the default. 
-Opt-in by [requesting production access](https://developers.google.com/pay/api/android/guides/test-and-deploy/request-prod-access) to the Google Pay API using the [Google Pay & Wallet Console](https://pay.google.com/business/console?utm_source=devsite&utm_medium=devsite&utm_campaign=devsite)
-
 - The `stripecardscan` module has been removed:
     * `CardScanSheet` class and its methods (`create()`, `present()`, `attachCardScanFragment()`, `removeCardScanFragment()`) have been removed
     * `CardScanSheetResult` and its implementations (`Completed`, `Canceled`, `Failed`) have been removed
     * `CardScanSheet.CardScanResultCallback` has been removed
     * `ScannedCard` has been removed
     * `CancellationReason` and its implementations (`Closed`, `Back`, `UserCannotScan`, `CameraPermissionDenied`) have been removed                                                                                                      
-- If you don't use PaymentSheet, you can integrate [Google Payment Card Recognition API](https://developers.google.com/pay/payment-card-recognition/debit-credit-card-recognition) directly into your app.
+- The CardScan feature in our UI surfaces has been migrated to [Google Pay Card Recognition](https://developers.google.com/pay/payment-card-recognition/debit-credit-card-recognition), which requires your application to have production access to the Google Pay API. If you previously used the CardScan feature, you can continue using it by [requesting production access](https://developers.google.com/pay/api/android/guides/test-and-deploy/request-prod-access) to the Google Pay API using the [Google Pay & Wallet Console](https://pay.google.com/business/console?utm_source=devsite&utm_medium=devsite&utm_campaign=devsite)
+- If you integrate with the cardscan module directly, you can [migrate to Google Payment Card Recognition API](stripecardscan/MIGRATION_GUIDE.md).
 
 ### 4. Other Breaking Changes
 **Data Class Removal**

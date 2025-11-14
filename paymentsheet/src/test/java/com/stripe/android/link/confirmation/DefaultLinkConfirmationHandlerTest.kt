@@ -61,7 +61,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
 
@@ -103,7 +102,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
 
@@ -219,7 +217,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
 
@@ -259,7 +256,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
 
@@ -280,6 +276,38 @@ internal class DefaultLinkConfirmationHandlerTest {
     }
 
     @Test
+    fun `confirm with saved LinkPaymentDetails uses PaymentMethod directly`() = runTest(dispatcher) {
+        val configuration = TestFactory.LINK_CONFIGURATION
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(
+            confirmationHandler = confirmationHandler,
+            configuration = configuration
+        )
+
+        confirmationHandler.awaitResultTurbine.add(
+            item = ConfirmationHandler.Result.Succeeded(
+                intent = configuration.stripeIntent,
+                deferredIntentConfirmationType = null,
+            )
+        )
+
+        val savedPaymentDetailsWithBilling = TestFactory.LINK_SAVED_PAYMENT_DETAILS_WITH_BILLING
+        val result = handler.confirm(
+            paymentDetails = savedPaymentDetailsWithBilling,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = CVC,
+            billingPhone = null
+        )
+
+        assertThat(result).isEqualTo(Result.Succeeded)
+        val args = confirmationHandler.startTurbine.awaitItem()
+
+        val option = args.confirmationOption as PaymentMethodConfirmationOption.Saved
+        // Verify the PaymentMethod is used directly, not reconstructed
+        assertThat(option.paymentMethod).isEqualTo(savedPaymentDetailsWithBilling.paymentMethod)
+    }
+
+    @Test
     fun `confirm with saved LinkPaymentDetails in passthrough mode omits CVC`() = runTest(dispatcher) {
         val configuration = TestFactory.LINK_CONFIGURATION.copy(passthroughModeEnabled = true)
         val confirmationHandler = FakeConfirmationHandler()
@@ -292,7 +320,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
 
@@ -325,7 +352,6 @@ internal class DefaultLinkConfirmationHandlerTest {
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
 
@@ -362,7 +388,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
 
@@ -405,7 +430,6 @@ internal class DefaultLinkConfirmationHandlerTest {
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
 
@@ -442,7 +466,6 @@ internal class DefaultLinkConfirmationHandlerTest {
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
 
@@ -479,7 +502,6 @@ internal class DefaultLinkConfirmationHandlerTest {
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
 
@@ -541,7 +563,6 @@ internal class DefaultLinkConfirmationHandlerTest {
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
 
@@ -584,7 +605,6 @@ internal class DefaultLinkConfirmationHandlerTest {
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
 
@@ -628,7 +648,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         )
         assertThat(paymentMethodMetadata.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
         assertThat(paymentMethodMetadata.shippingDetails).isEqualTo(configuration.shippingDetails)
-        assertThat(initializationMode).isEqualTo(configuration.initializationMode)
     }
 
     private fun ConfirmationHandler.Args.assertSavedConfirmationArgs(
@@ -645,7 +664,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         val optionsCard = option.optionsParams as? PaymentMethodOptionsParams.Card
         assertThat(optionsCard?.cvc).isEqualTo(cvc)
         assertThat(paymentMethodMetadata.shippingDetails).isEqualTo(configuration.shippingDetails)
-        assertThat(initializationMode).isEqualTo(configuration.initializationMode)
     }
 
     private suspend fun createHandler(

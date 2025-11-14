@@ -118,8 +118,6 @@ data class Source internal constructor(
 
     private val _weChat: WeChat? = null,
 
-    private val _klarna: Klarna? = null,
-
     /**
      * Information about the items and shipping associated with the source. Required for
      * transactional credit (for example Klarna) sources before you can charge it.
@@ -142,20 +140,11 @@ data class Source internal constructor(
             return requireNotNull(_weChat)
         }
 
-    val klarna: Klarna
-        get() {
-            check(SourceType.KLARNA == type) {
-                "Source type must be '${SourceType.KLARNA}'"
-            }
-
-            return requireNotNull(_klarna)
-        }
-
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(
         SourceType.ALIPAY, SourceType.CARD, SourceType.THREE_D_SECURE,
         SourceType.SEPA_DEBIT, SourceType.IDEAL, SourceType.BANCONTACT,
-        SourceType.P24, SourceType.EPS, SourceType.MULTIBANCO, SourceType.WECHAT, SourceType.KLARNA,
+        SourceType.P24, SourceType.EPS, SourceType.MULTIBANCO, SourceType.WECHAT,
         SourceType.UNKNOWN
     )
     annotation class SourceType {
@@ -170,7 +159,6 @@ data class Source internal constructor(
             const val EPS: String = "eps"
             const val MULTIBANCO: String = "multibanco"
             const val WECHAT: String = "wechat"
-            const val KLARNA: String = "klarna"
             const val UNKNOWN: String = "unknown"
         }
     }
@@ -393,29 +381,6 @@ data class Source internal constructor(
          * or settlement. They cannot be set or mutated.
          */
         val verifiedPhone: String?
-    ) : StripeModel
-
-    @Parcelize
-    @Poko
-    class Klarna(
-        val firstName: String?,
-        val lastName: String?,
-        val purchaseCountry: String?,
-        val clientToken: String?,
-        val payNowAssetUrlsDescriptive: String?,
-        val payNowAssetUrlsStandard: String?,
-        val payNowName: String?,
-        val payNowRedirectUrl: String?,
-        val payLaterAssetUrlsDescriptive: String?,
-        val payLaterAssetUrlsStandard: String?,
-        val payLaterName: String?,
-        val payLaterRedirectUrl: String?,
-        val payOverTimeAssetUrlsDescriptive: String?,
-        val payOverTimeAssetUrlsStandard: String?,
-        val payOverTimeName: String?,
-        val payOverTimeRedirectUrl: String?,
-        val paymentMethodCategories: Set<String>,
-        val customPaymentMethods: Set<String>
     ) : StripeModel
 
     companion object {

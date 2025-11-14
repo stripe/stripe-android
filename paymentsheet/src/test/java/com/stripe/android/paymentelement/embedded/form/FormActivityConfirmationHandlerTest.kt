@@ -51,7 +51,6 @@ internal class FormActivityConfirmationHandlerTest {
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-                isConfirmationToken = false,
             )
         )
 
@@ -84,7 +83,6 @@ internal class FormActivityConfirmationHandlerTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
 
         val confirmationHelper = DefaultFormActivityConfirmationHelper(
-            initializationMode = embeddedState.initializationMode,
             paymentMethodMetadata = paymentMethodMetadata,
             confirmationHandler = confirmationHandler,
             configuration = embeddedState.configuration,

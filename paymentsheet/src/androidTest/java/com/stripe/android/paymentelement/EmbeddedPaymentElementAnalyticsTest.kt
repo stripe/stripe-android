@@ -34,7 +34,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class EmbeddedPaymentElementAnalyticsTest {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
-        validationTimeout = 1.seconds, // Analytics requests happen async.
+        validationTimeout = 5.seconds, // Analytics requests happen async.
     )
     private val analyticEventRule = AnalyticEventRule()
 
@@ -152,6 +152,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         )
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
         validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
+        validateAnalyticsRequest(eventName = "mc_dismiss")
 
         formPage.clickPrimaryButton()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
@@ -256,6 +257,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             eventName = "mc_embedded_payment_success",
             query("is_confirmation_tokens", "true")
         )
+        validateAnalyticsRequest(eventName = "mc_dismiss")
 
         formPage.clickPrimaryButton()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
@@ -385,6 +387,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         managePage.clickEdit(card1.id)
         editPage.waitUntilVisible()
         validateAnalyticsRequest(eventName = "mc_cancel_edit_screen")
+        validateAnalyticsRequest(eventName = "mc_dismiss")
         Espresso.pressBack()
         managePage.waitUntilVisible()
         managePage.clickDone()

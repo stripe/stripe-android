@@ -34,7 +34,6 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
     ): Boolean {
         return !confirmationOption.optionsParams.hasAlreadyRecollectedCvc() && handler.requiresCVCRecollection(
             stripeIntent = confirmationArgs.intent,
-            initializationMode = confirmationArgs.initializationMode,
             paymentMethod = confirmationOption.paymentMethod,
             optionsParams = confirmationOption.optionsParams,
         ) && !confirmationOption.originatedFromWallet
@@ -48,7 +47,6 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
             launcherArguments = Unit,
             receivesResultInProcess = true,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
         )
     }
 
@@ -83,7 +81,6 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        isConfirmationToken: Boolean,
         result: CvcRecollectionResult
     ): ConfirmationDefinition.Result {
         return when (result) {

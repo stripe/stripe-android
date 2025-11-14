@@ -30,7 +30,6 @@ import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.testing.DummyActivityResultCaller
@@ -110,7 +109,6 @@ class GooglePayConfirmationDefinitionTest {
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = GooglePayPaymentMethodLauncher.Result.Completed(
                 paymentMethod = paymentMethod,
             ),
@@ -140,7 +138,6 @@ class GooglePayConfirmationDefinitionTest {
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = GooglePayPaymentMethodLauncher.Result.Failed(
                 errorCode = 400,
                 error = exception
@@ -165,7 +162,6 @@ class GooglePayConfirmationDefinitionTest {
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = GooglePayPaymentMethodLauncher.Result.Failed(
                 errorCode = GooglePayPaymentMethodLauncher.NETWORK_ERROR,
                 error = exception
@@ -192,7 +188,6 @@ class GooglePayConfirmationDefinitionTest {
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = GooglePayPaymentMethodLauncher.Result.Canceled,
         )
 
@@ -206,9 +201,6 @@ class GooglePayConfirmationDefinitionTest {
     @Test
     fun `'Fail' action should be returned if currency code is not provided with a setup intent`() =
         runActionTest(
-            initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
-                clientSecret = "si_123_secret_123",
-            ),
             merchantCurrencyCode = null,
             test = ::assertFailActionFromCurrencyFailure,
         )
@@ -216,11 +208,7 @@ class GooglePayConfirmationDefinitionTest {
     @Test
     fun `'Fail' action should be returned if currency code is not provided with a deferred intent in setup mode`() =
         runActionTest(
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
-                ),
-            ),
+            intent = SetupIntentFactory.createDeferredIntent(),
             merchantCurrencyCode = null,
             test = ::assertFailActionFromCurrencyFailure,
         )
@@ -228,9 +216,6 @@ class GooglePayConfirmationDefinitionTest {
     @Test
     fun `'Launch' action should be returned if currency code is provided with a setup intent`() =
         runActionTest(
-            initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
-                clientSecret = "si_123_secret_123",
-            ),
             merchantCurrencyCode = "USD",
             test = ::assertLaunchAction,
         )
@@ -238,11 +223,7 @@ class GooglePayConfirmationDefinitionTest {
     @Test
     fun `'Launch' action should be returned if currency code is provided with a deferred intent in setup mode`() =
         runActionTest(
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
-                ),
-            ),
+            intent = SetupIntentFactory.createDeferredIntent(),
             merchantCurrencyCode = "USD",
             test = ::assertLaunchAction,
         )
@@ -250,9 +231,6 @@ class GooglePayConfirmationDefinitionTest {
     @Test
     fun `'Launch' action should be returned if currency code is not provided with a payment intent`() =
         runActionTest(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
             merchantCurrencyCode = null,
             intent = PaymentIntentFactory.create(),
             test = ::assertLaunchAction,
@@ -261,9 +239,7 @@ class GooglePayConfirmationDefinitionTest {
     @Test
     fun `'Launch' action should be returned if currency code is provided with a payment intent`() =
         runActionTest(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
+            intent = PaymentIntentFactory.create(),
             merchantCurrencyCode = "USD",
             test = ::assertLaunchAction,
         )
@@ -271,30 +247,15 @@ class GooglePayConfirmationDefinitionTest {
     @Test
     fun `'Launch' action should be returned if currency code is not provided with deferred intent in payment mode`() =
         runActionTest(
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 1099,
-                        currency = "USD",
-                    ),
-                ),
-            ),
             merchantCurrencyCode = null,
-            intent = PaymentIntentFactory.create(id = null),
+            intent = PaymentIntentFactory.createDeferred(),
             test = ::assertLaunchAction,
         )
 
     @Test
     fun `'Launch' action should be returned if currency code is provided with deferred intent in payment mode`() =
         runActionTest(
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 1099,
-                        currency = "USD",
-                    ),
-                ),
-            ),
+            intent = PaymentIntentFactory.createDeferred(),
             merchantCurrencyCode = "USD",
             test = ::assertLaunchAction,
         )
@@ -399,19 +360,6 @@ class GooglePayConfirmationDefinitionTest {
             definition.launch(
                 confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
                 confirmationArgs = CONFIRMATION_PARAMETERS.copy(
-                    initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                        intentConfiguration = PaymentSheet.IntentConfiguration(
-                            sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                                amount = 5000,
-                                currency = "CAD",
-                            ),
-                            sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
-                                businessName = "My business, Inc.",
-                                networkId = "network_123",
-                                externalId = "external_123"
-                            )
-                        )
-                    ),
                     paymentMethodMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.copy(
                         sellerBusinessName = "My business, Inc.",
                     ),
@@ -536,7 +484,6 @@ class GooglePayConfirmationDefinitionTest {
     }
 
     private fun runActionTest(
-        initializationMode: PaymentElementLoader.InitializationMode,
         merchantCurrencyCode: String?,
         intent: StripeIntent = SetupIntentFactory.create(),
         test: (scenario: ActionScenario) -> Unit,
@@ -551,7 +498,6 @@ class GooglePayConfirmationDefinitionTest {
                 ),
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS.copy(
-                initializationMode = initializationMode,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = intent
                 ),

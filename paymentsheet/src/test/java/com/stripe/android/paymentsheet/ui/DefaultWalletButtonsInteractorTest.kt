@@ -36,7 +36,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -1052,8 +1051,6 @@ class DefaultWalletButtonsInteractorTest {
             > = emptyMap(),
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
-        initializationMode: PaymentElementLoader.InitializationMode =
-            PaymentElementLoader.InitializationMode.SetupIntent(clientSecret = "seti_123_secret_123"),
         attestOnIntentConfirmation: Boolean = false
     ): DefaultWalletButtonsInteractor.Arguments {
         return DefaultWalletButtonsInteractor.Arguments(
@@ -1075,7 +1072,6 @@ class DefaultWalletButtonsInteractorTest {
                 ),
             ),
             appearance = appearance,
-            initializationMode = initializationMode,
             paymentSelection = null,
         )
     }

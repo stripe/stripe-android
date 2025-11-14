@@ -665,7 +665,7 @@ class CustomerAdapterTest {
             }
         }
         val savedPaymentOption = CustomerAdapter.PaymentOption.StripeId(
-            PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.id
         )
         val savedSelection = savedPaymentOption.toPaymentSelection(paymentMethodProvider)
         assertThat(savedSelection)

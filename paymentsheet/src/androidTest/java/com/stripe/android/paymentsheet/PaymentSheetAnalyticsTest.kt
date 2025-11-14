@@ -40,7 +40,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class PaymentSheetAnalyticsTest {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
-        validationTimeout = 1.seconds, // Analytics requests happen async.
+        validationTimeout = 5.seconds, // Analytics requests happen async.
     )
     private val analyticEventRule = AnalyticEventRule()
 
@@ -98,6 +98,7 @@ internal class PaymentSheetAnalyticsTest {
             query("hidden_payment_methods", Uri.encode("cashapp,affirm,alipay")),
             query("visible_payment_methods", Uri.encode("link,card,afterpay_clearpay,klarna")),
         )
+        testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
@@ -109,7 +110,6 @@ internal class PaymentSheetAnalyticsTest {
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
-        testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         testContext.validateAnalyticsRequest(eventName = "mc_form_interacted")
         testContext.validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
@@ -178,6 +178,7 @@ internal class PaymentSheetAnalyticsTest {
             query("hidden_payment_methods", Uri.encode("cashapp,affirm,alipay")),
             query("visible_payment_methods", Uri.encode("card,afterpay_clearpay,klarna")),
         )
+        testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
 
         testContext.configureFlowController {
             configureWithPaymentIntent(
@@ -194,7 +195,6 @@ internal class PaymentSheetAnalyticsTest {
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
-        testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         testContext.validateAnalyticsRequest(eventName = "mc_custom_paymentoption_newpm_select")
         testContext.validateAnalyticsRequest(eventName = "mc_form_interacted")
         testContext.validateAnalyticsRequest(eventName = "mc_card_number_completed")
@@ -258,6 +258,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
         testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check_succeeded")
+        testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
@@ -268,7 +269,6 @@ internal class PaymentSheetAnalyticsTest {
 
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
-        testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         testContext.validateAnalyticsRequest(eventName = "mc_form_interacted")
         testContext.validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
@@ -333,6 +333,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
         testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check_succeeded")
+        testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
 
         testContext.configureFlowController {
             configureWithPaymentIntent(
@@ -347,7 +348,6 @@ internal class PaymentSheetAnalyticsTest {
         }
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
-        testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         testContext.validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
         testContext.validateAnalyticsRequest(eventName = "mc_custom_paymentoption_newpm_select")
         testContext.validateAnalyticsRequest(eventName = "mc_form_interacted")
@@ -418,6 +418,12 @@ internal class PaymentSheetAnalyticsTest {
             query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
         )
 
+        testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        testContext.validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
+        testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check_succeeded")
+        testContext.validateAnalyticsRequest(eventName = "mc_initial_displayed_payment_methods")
+
         testContext.presentPaymentSheet {
             presentWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -429,11 +435,7 @@ internal class PaymentSheetAnalyticsTest {
                 configuration = horizontalModeConfiguration
             )
         }
-        testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
-        testContext.validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
-        testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
-        testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check_succeeded")
-        testContext.validateAnalyticsRequest(eventName = "mc_initial_displayed_payment_methods")
+
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
@@ -513,6 +515,12 @@ internal class PaymentSheetAnalyticsTest {
             eventName = "mc_custom_init_default",
             query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
         )
+        testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        testContext.validateAnalyticsRequest(eventName = "mc_custom_paymentoption_newpm_select")
+        testContext.validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
+        testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check_succeeded")
+        testContext.validateAnalyticsRequest(eventName = "mc_initial_displayed_payment_methods")
 
         testContext.configureFlowController {
             configureWithIntentConfiguration(
@@ -530,12 +538,7 @@ internal class PaymentSheetAnalyticsTest {
                 }
             )
         }
-        testContext.validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
-        testContext.validateAnalyticsRequest(eventName = "mc_custom_paymentoption_newpm_select")
-        testContext.validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
-        testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
-        testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check_succeeded")
-        testContext.validateAnalyticsRequest(eventName = "mc_initial_displayed_payment_methods")
+
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 

@@ -3,6 +3,8 @@ package com.stripe.android.crypto.onramp
 import android.content.ContentResolver
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.exception.APIException
@@ -14,13 +16,18 @@ import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
+import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.crypto.onramp.ui.VerifyKycActivityArgs
+import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
+import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
@@ -56,6 +63,13 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private val currentLinkAccount: LinkController.LinkAccount?
         get() = interactor.state.value.linkControllerState?.internalLinkAccount
 
+    private val verifyKycResultLauncher: ActivityResultLauncher<VerifyKycActivityArgs> =
+        activity.activityResultRegistry.register(
+            key = "OnrampPresenterCoordinator_VerifyKycResultLauncher",
+            contract = VerifyKycInfoActivityContract(),
+            callback = ::handleVerifyKycResult
+        )
+
     init {
         // Observe Link controller state
         lifecycleOwner.lifecycleScope.launch {
@@ -72,6 +86,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 .distinctUntilChangedBy { it.checkoutState }
                 .collect { it.checkoutState?.let(::handleCheckoutStateChange) }
         }
+
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    verifyKycResultLauncher.unregister()
+                }
+            }
+        )
     }
 
     fun authenticateUser() {
@@ -104,6 +126,23 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 is OnrampStartVerificationResult.Failed -> {
                     onrampCallbacks.verifyIdentityCallback.onResult(
                         OnrampVerifyIdentityResult.Failed(verification.error)
+                    )
+                }
+            }
+        }
+    }
+
+    fun verifyKycInfo(updatedAddress: PaymentSheet.Address? = null) {
+        coroutineScope.launch {
+            when (val verification = interactor.startKycVerification(updatedAddress)) {
+                is OnrampStartKycVerificationResult.Completed -> {
+                    verifyKycResultLauncher.launch(
+                        VerifyKycActivityArgs(verification.response, verification.appearance)
+                    )
+                }
+                is OnrampStartKycVerificationResult.Failed -> {
+                    onrampCallbacks.verifyKycCallback.onResult(
+                        OnrampVerifyKycInfoResult.Failed(verification.error)
                     )
                 }
             }
@@ -199,6 +238,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     OnrampCheckoutResult.Failed(paymentResult.throwable)
                 )
             }
+        }
+    }
+
+    private fun handleVerifyKycResult(result: VerifyKycActivityResult) {
+        coroutineScope.launch {
+            onrampCallbacks.verifyKycCallback.onResult(
+                interactor.handleVerifyKycResult(result)
+            )
         }
     }
 

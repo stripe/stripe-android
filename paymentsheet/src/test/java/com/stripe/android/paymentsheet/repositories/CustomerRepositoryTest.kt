@@ -437,7 +437,7 @@ internal class CustomerRepositoryTest {
 
             repository.detachPaymentMethod(
                 customerInfo = FAKE_CUSTOMER_INFO,
-                paymentMethodId = paymentMethodToRemove.id!!,
+                paymentMethodId = paymentMethodToRemove.id,
                 canRemoveDuplicates = true,
             )
 
@@ -462,7 +462,7 @@ internal class CustomerRepositoryTest {
 
             repository.detachPaymentMethod(
                 customerInfo = FAKE_CUSTOMER_INFO,
-                paymentMethodId = usBankAccount.id!!,
+                paymentMethodId = usBankAccount.id,
                 canRemoveDuplicates = true,
             )
 
@@ -486,7 +486,7 @@ internal class CustomerRepositoryTest {
 
             repository.detachPaymentMethod(
                 customerInfo = FAKE_CUSTOMER_INFO,
-                paymentMethodId = paymentMethodToRemove.id!!,
+                paymentMethodId = paymentMethodToRemove.id,
                 canRemoveDuplicates = false,
             )
 
@@ -515,7 +515,7 @@ internal class CustomerRepositoryTest {
 
             val result = repository.detachPaymentMethod(
                 customerInfo = FAKE_CUSTOMER_INFO,
-                paymentMethodId = paymentMethods.first().id!!,
+                paymentMethodId = paymentMethods.first().id,
                 canRemoveDuplicates = true,
             )
 

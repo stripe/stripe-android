@@ -34,9 +34,6 @@ internal object PaymentOptionLabelsFactory {
             is PaymentSelection.New.Card -> {
                 newCard(context, selection)
             }
-            is PaymentSelection.New.LinkInline -> {
-                newCard(context, selection)
-            }
             is PaymentSelection.New.USBankAccount -> {
                 newUSBankAccount(context, selection)
             }
@@ -57,16 +54,6 @@ internal object PaymentOptionLabelsFactory {
     private fun newCard(
         context: Context,
         selection: PaymentSelection.New.Card,
-    ): PaymentOption.Labels {
-        return PaymentOption.Labels(
-            label = selection.brand.displayName,
-            sublabel = selection.label.resolve(context),
-        )
-    }
-
-    private fun newCard(
-        context: Context,
-        selection: PaymentSelection.New.LinkInline,
     ): PaymentOption.Labels {
         return PaymentOption.Labels(
             label = selection.brand.displayName,

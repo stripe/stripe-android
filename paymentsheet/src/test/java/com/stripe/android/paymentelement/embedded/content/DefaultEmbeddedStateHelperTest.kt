@@ -20,7 +20,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.state.CustomerState
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -251,14 +250,6 @@ internal class DefaultEmbeddedStateHelperTest {
                 confirmationState = EmbeddedConfirmationStateHolder.State(
                     paymentMethodMetadata = paymentMethodMetadata,
                     selection = selection,
-                    initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                        intentConfiguration = PaymentSheet.IntentConfiguration(
-                            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                                amount = 5050,
-                                currency = "USD"
-                            )
-                        ),
-                    ),
                     configuration = configuration,
                 ),
                 customer = customer,

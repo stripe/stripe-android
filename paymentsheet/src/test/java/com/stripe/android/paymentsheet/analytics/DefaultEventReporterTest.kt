@@ -17,6 +17,9 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.ui.LinkButtonState
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
@@ -285,7 +288,6 @@ class DefaultEventReporterTest {
         completeEventReporter.onPaymentSuccess(
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
         )
 
         verify(analyticsRequestExecutor).executeAsync(
@@ -316,7 +318,6 @@ class DefaultEventReporterTest {
                     walletType = PaymentSelection.Saved.WalletType.GooglePay,
                 ),
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
 
             analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
@@ -347,7 +348,6 @@ class DefaultEventReporterTest {
                     walletType = PaymentSelection.Saved.WalletType.Link,
                 ),
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
 
             verify(analyticsRequestExecutor).executeAsync(
@@ -362,7 +362,16 @@ class DefaultEventReporterTest {
     fun `onPaymentSuccess() with confirmation token should include isConfirmationToken in analytics`() =
         runTest(testDispatcher) {
             // Log initial event so that duration is tracked
-            val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            val completeEventReporter = createEventReporter(
+                mode = EventReporter.Mode.Complete,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    integrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(
+                        intentConfiguration = PaymentSheet.IntentConfiguration(
+                            mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+                        )
+                    )
+                )
+            ) {
                 simulateSuccessfulSetup()
                 onShowExistingPaymentOptions()
             }
@@ -371,7 +380,6 @@ class DefaultEventReporterTest {
             completeEventReporter.onPaymentSuccess(
                 paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = true,
             )
 
             verify(analyticsRequestExecutor).executeAsync(
@@ -823,6 +831,7 @@ class DefaultEventReporterTest {
             analyticEventCallbackProvider = analyticEventCallbackRule,
             workContext = testDispatcher,
             logger = fakeUserFacingLogger,
+            paymentMethodMetadataProvider = { null },
         )
     }
 
@@ -1074,7 +1083,6 @@ class DefaultEventReporterTest {
         completeEventReporter.onPaymentSuccess(
             paymentSelection = selection,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
         )
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
@@ -1094,7 +1102,6 @@ class DefaultEventReporterTest {
         completeEventReporter.onPaymentSuccess(
             paymentSelection = selection,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
         )
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
@@ -1114,7 +1121,6 @@ class DefaultEventReporterTest {
         completeEventReporter.onPaymentSuccess(
             paymentSelection = selection,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
         )
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
@@ -1280,8 +1286,20 @@ class DefaultEventReporterTest {
         expectedIsSptValue: Boolean,
     ) {
         analyticEventCallbackRule.setCallback(null)
+        val paymentMethodMetadata = if (expectedIsSptValue) {
+            PaymentMethodMetadataFactory.create(
+                integrationMetadata = IntegrationMetadata.DeferredIntentWithSharedPaymentToken(
+                    intentConfiguration = intentConfiguration
+                )
+            )
+        } else {
+            null
+        }
 
-        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+        val completeEventReporter = createEventReporter(
+            mode = EventReporter.Mode.Complete,
+            paymentMethodMetadata = paymentMethodMetadata,
+        ) {
             simulateSuccessfulSetup(
                 initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                     intentConfiguration = intentConfiguration,
@@ -1541,8 +1559,9 @@ class DefaultEventReporterTest {
     private fun createEventReporter(
         mode: EventReporter.Mode,
         duration: Duration = 1.seconds,
-        configure: EventReporter.() -> Unit = {},
-    ): EventReporter {
+        paymentMethodMetadata: PaymentMethodMetadata? = null,
+        configure: DefaultEventReporter.() -> Unit = {},
+    ): DefaultEventReporter {
         val reporter = DefaultEventReporter(
             context = ApplicationProvider.getApplicationContext(),
             mode = mode,
@@ -1553,6 +1572,7 @@ class DefaultEventReporterTest {
             analyticEventCallbackProvider = analyticEventCallbackRule,
             workContext = testDispatcher,
             logger = fakeUserFacingLogger,
+            paymentMethodMetadataProvider = { paymentMethodMetadata },
         )
 
         reporter.configure()
@@ -1566,8 +1586,8 @@ class DefaultEventReporterTest {
     private fun createEventReporter(
         mode: EventReporter.Mode,
         durationProvider: DurationProvider,
-        configure: EventReporter.() -> Unit = {},
-    ): EventReporter {
+        configure: DefaultEventReporter.() -> Unit = {},
+    ): DefaultEventReporter {
         val reporter = DefaultEventReporter(
             context = ApplicationProvider.getApplicationContext(),
             mode = mode,
@@ -1578,6 +1598,7 @@ class DefaultEventReporterTest {
             analyticEventCallbackProvider = analyticEventCallbackRule,
             workContext = testDispatcher,
             logger = fakeUserFacingLogger,
+            paymentMethodMetadataProvider = { null },
         )
 
         reporter.configure()
@@ -1587,7 +1608,7 @@ class DefaultEventReporterTest {
         return reporter
     }
 
-    private fun EventReporter.simulateInit() {
+    private fun DefaultEventReporter.simulateInit() {
         onInit(
             commonConfiguration = configuration.asCommonConfiguration(),
             appearance = configuration.appearance,
@@ -1597,7 +1618,7 @@ class DefaultEventReporterTest {
         )
     }
 
-    private fun EventReporter.simulateSuccessfulSetup(
+    private fun DefaultEventReporter.simulateSuccessfulSetup(
         paymentSelection: PaymentSelection = PaymentSelection.GooglePay,
         linkEnabled: Boolean = true,
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,

@@ -42,7 +42,6 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
                 onSuccess = { state ->
                     handleLoadedState(
                         state = state,
-                        intentConfiguration = intentConfiguration,
                         configuration = configuration,
                     )
                     ConfigureResult.Succeeded()
@@ -56,7 +55,6 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
 
     private fun handleLoadedState(
         state: PaymentElementLoader.State,
-        intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ) {
         val newPaymentSelection = selectionChooser.choose(
@@ -71,9 +69,6 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
             confirmationState = EmbeddedConfirmationStateHolder.State(
                 paymentMethodMetadata = state.paymentMethodMetadata,
                 selection = newPaymentSelection,
-                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                    intentConfiguration
-                ),
                 configuration = configuration,
             ),
             customer = state.customer,

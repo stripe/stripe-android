@@ -10,8 +10,6 @@ import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodMessageImage
 import com.stripe.android.model.PaymentMethodMessageLearnMore
-import com.stripe.android.model.PaymentMethodMessageMultiPartner
-import com.stripe.android.model.PaymentMethodMessageSinglePartner
 import com.stripe.android.paymentmethodmessaging.R
 import com.stripe.android.screenshottesting.PaparazziRule
 import org.junit.Rule
@@ -27,9 +25,9 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getSinglePartner(
-                    message = "Buy stuff in increments with {partner}"
+                    message = "Buy stuff in increments with {partner}",
                 )
-            )
+            ) {}
             content.Content(PaymentMethodMessagingElement.Appearance().build())
         }
     }
@@ -41,7 +39,7 @@ class PaymentMethodMessagingContentScreenshotTest {
                 getSinglePartner(
                     message = "Buy stuff in increments with {partner}"
                 )
-            )
+            ) {}
             Box(Modifier.background(Color.Black)) {
                 content.Content(appearance = darkAppearance.build())
             }
@@ -55,7 +53,7 @@ class PaymentMethodMessagingContentScreenshotTest {
                 getSinglePartner(
                     message = "Buy stuff in increments with {partner}"
                 )
-            )
+            ) {}
             content.Content(flatAppearance.build())
         }
     }
@@ -67,7 +65,7 @@ class PaymentMethodMessagingContentScreenshotTest {
                 getSinglePartner(
                     message = "This is a lonnnnnnngggggggg messsssaaaaaaaaaaaaage forrrrrrrrrrrrrrrrrrrrrrrr {partner}"
                 )
-            )
+            ) {}
             content.Content(PaymentMethodMessagingElement.Appearance().build())
         }
     }
@@ -79,7 +77,7 @@ class PaymentMethodMessagingContentScreenshotTest {
                 getSinglePartner(
                     message = "Buy stuff in increments with {partner}"
                 )
-            )
+            ) {}
             content.Content(crazyAppearance.build())
         }
     }
@@ -89,7 +87,7 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getMultiPartner("Buy stuff in increments of money")
-            )
+            ) {}
             content.Content(PaymentMethodMessagingElement.Appearance().build())
         }
     }
@@ -99,7 +97,7 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getMultiPartner("Buy stuff in increments of money")
-            )
+            ) {}
             Box(Modifier.background(Color.Black)) {
                 content.Content(darkAppearance.build())
             }
@@ -111,7 +109,7 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getMultiPartner("Buy stuff in increments of money")
-            )
+            ) {}
             content.Content(flatAppearance.build())
         }
     }
@@ -121,7 +119,7 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getMultiPartner("Buyyyyyyyyyyyyyy stufffffffffffffffff innnnnn incrementssssss of moneyyyyyyyyy")
-            )
+            ) {}
             content.Content(PaymentMethodMessagingElement.Appearance().build())
         }
     }
@@ -131,42 +129,36 @@ class PaymentMethodMessagingContentScreenshotTest {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
                 getMultiPartner("Buy stuff in increments of money")
-            )
+            ) {}
             content.Content(crazyAppearance.build())
         }
     }
 
     private fun getSinglePartner(message: String): PaymentMethodMessage {
-        return PaymentMethodMessage(
-            paymentMethods = listOf(),
-            singlePartner = PaymentMethodMessageSinglePartner(
-                inlinePartnerPromotion = message,
-                lightImage = PaymentMethodMessageImage("", "", "", ""),
-                darkImage = PaymentMethodMessageImage("", "", "", ""),
-                flatImage = PaymentMethodMessageImage("", "", "", ""),
-                learnMore = PaymentMethodMessageLearnMore(
-                    url = "",
-                    message = ""
-                )
+        return PaymentMethodMessage.SinglePartner(
+            inlinePartnerPromotion = message,
+            lightImage = PaymentMethodMessageImage("", "", "", ""),
+            darkImage = PaymentMethodMessageImage("", "", "", ""),
+            flatImage = PaymentMethodMessageImage("", "", "", ""),
+            learnMore = PaymentMethodMessageLearnMore(
+                url = "",
+                message = ""
             ),
-            multiPartner = null
+            paymentMethods = listOf()
         )
     }
 
     private fun getMultiPartner(message: String): PaymentMethodMessage {
-        return PaymentMethodMessage(
-            paymentMethods = listOf(),
-            singlePartner = null,
-            multiPartner = PaymentMethodMessageMultiPartner(
-                promotion = message,
-                lightImages = listOf(),
-                darkImages = listOf(),
-                flatImages = listOf(),
-                learnMore = PaymentMethodMessageLearnMore(
-                    url = "",
-                    message = ""
-                )
-            )
+        return PaymentMethodMessage.MultiPartner(
+            promotion = message,
+            lightImages = listOf(),
+            darkImages = listOf(),
+            flatImages = listOf(),
+            learnMore = PaymentMethodMessageLearnMore(
+                url = "",
+                message = ""
+            ),
+            paymentMethods = listOf()
         )
     }
 

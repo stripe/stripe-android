@@ -22,6 +22,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.navigation.NavController
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.framework.image.longerEdge
+import com.stripe.android.camera.framework.util.NANOS_PER_MILLI
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.model.StripeFilePurpose
@@ -383,11 +384,19 @@ internal class IdentityViewModel(
         errorCause.removeObserver(errorCauseObServer)
     }
 
-    // Store camera lens model for document uploads
+    // Store camera metadata for document uploads
     private var currentCameraLensModel: String? = null
+    private var currentExposureIso: Float? = null
+    private var currentFocalLength: Float? = null
+    private var currentExposureDuration: Long? = null
+    private var currentIsVirtualCamera: Boolean? = null
 
-    // Store camera lens model for selfie uploads
+    // Store camera lens/model + BEST-frame metadata for selfie uploads
     private var selfieCameraLensModel: String? = null
+    private var selfieBestExposureIso: Float? = null
+    private var selfieBestFocalLength: Float? = null
+    private var selfieBestExposureDuration: Long? = null
+    private var selfieBestIsVirtualCamera: Boolean? = null
 
     /**
      * Set the camera lens model for subsequent uploads.
@@ -396,12 +405,31 @@ internal class IdentityViewModel(
         currentCameraLensModel = cameraLensModel
     }
 
+    fun setCameraExposureIso(exposureIso: Float?) {
+        currentExposureIso = exposureIso
+    }
+
+    fun setCameraFocalLength(focalLength: Float?) {
+        currentFocalLength = focalLength
+    }
+
+    fun setCameraExposureDuration(exposureDuration: Long?) {
+        currentExposureDuration = exposureDuration
+    }
+
+    fun setIsVirtualCamera(isVirtual: Boolean?) {
+        currentIsVirtualCamera = isVirtual
+    }
+
     /**
      * Set the camera lens model for selfie uploads.
      */
     fun setSelfieCameraLensModel(cameraManager: IdentityCameraManager?) {
         selfieCameraLensModel = cameraManager?.getCameraLensModel()
-        Log.d(TAG, "Selfie camera lens model set to: $selfieCameraLensModel")
+    }
+
+    fun setSelfieIsVirtualCamera(isVirtual: Boolean?) {
+        selfieBestIsVirtualCamera = isVirtual
     }
 
     /**
@@ -534,6 +562,17 @@ internal class IdentityViewModel(
             "FaceDetectorTransitioner incorrectly collected ${filteredFrames.size} frames " +
                 "instead of ${FaceDetectorTransitioner.NUM_FILTERED_FRAMES} frames"
         }
+
+        // Extract camera metadata from the exact BEST frame
+        val bestInput = filteredFrames[FaceDetectorTransitioner.INDEX_BEST].first
+        val bestIso = bestInput.cameraPreviewImage.exposureIso
+        val bestFocal = bestInput.cameraPreviewImage.focalLength
+        val bestExpMs = bestInput.cameraPreviewImage.exposureDurationNs?.let { it / NANOS_PER_MILLI }
+        val bestIsVirtual = bestInput.cameraPreviewImage.isVirtualCamera
+        selfieBestExposureIso = bestIso
+        selfieBestFocalLength = bestFocal
+        selfieBestExposureDuration = bestExpMs
+        selfieBestIsVirtualCamera = bestIsVirtual
 
         listOf(
             (FaceDetectorTransitioner.Selfie.FIRST),
@@ -1577,13 +1616,21 @@ internal class IdentityViewModel(
                         CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
                             frontHighResResult = requireNotNull(uploadedState.highResResult.data),
                             frontLowResResult = requireNotNull(uploadedState.lowResResult.data),
-                            cameraLensModel = currentCameraLensModel
+                            cameraLensModel = currentCameraLensModel,
+                            exposureIso = currentExposureIso,
+                            focalLength = currentFocalLength,
+                            exposureDuration = currentExposureDuration,
+                            isVirtualCamera = currentIsVirtualCamera
                         )
                     } else {
                         CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
                             backHighResResult = requireNotNull(uploadedState.highResResult.data),
                             backLowResResult = requireNotNull(uploadedState.lowResResult.data),
-                            cameraLensModel = currentCameraLensModel
+                            cameraLensModel = currentCameraLensModel,
+                            exposureIso = currentExposureIso,
+                            focalLength = currentFocalLength,
+                            exposureDuration = currentExposureDuration,
+                            isVirtualCamera = currentIsVirtualCamera
                         )
                     },
                     fromRoute = route,
@@ -1622,7 +1669,12 @@ internal class IdentityViewModel(
                                     highResImage = requireNotNull(front.uploadedStripeFile.id) {
                                         "front uploaded file id is null"
                                     },
-                                    uploadMethod = requireNotNull(front.uploadMethod)
+                                    uploadMethod = requireNotNull(front.uploadMethod),
+                                    cameraLensModel = currentCameraLensModel,
+                                    exposureIso = currentExposureIso,
+                                    focalLength = currentFocalLength,
+                                    exposureDuration = currentExposureDuration,
+                                    isVirtualCamera = currentIsVirtualCamera
                                 )
                             ),
                             fromRoute = DocumentUploadDestination.ROUTE.route
@@ -1645,7 +1697,12 @@ internal class IdentityViewModel(
                                     highResImage = requireNotNull(back.uploadedStripeFile.id) {
                                         "back uploaded file id is null"
                                     },
-                                    uploadMethod = requireNotNull(back.uploadMethod)
+                                    uploadMethod = requireNotNull(back.uploadMethod),
+                                    cameraLensModel = currentCameraLensModel,
+                                    exposureIso = currentExposureIso,
+                                    focalLength = currentFocalLength,
+                                    exposureDuration = currentExposureDuration,
+                                    isVirtualCamera = currentIsVirtualCamera
                                 )
                             ),
                             fromRoute = DocumentUploadDestination.ROUTE.route
@@ -1689,7 +1746,11 @@ internal class IdentityViewModel(
                                 faceScoreVariance = faceDetectorTransitioner.scoreVariance,
                                 bestFaceScore = faceDetectorTransitioner.bestFaceScore,
                                 numFrames = faceDetectorTransitioner.numFrames,
-                                bestCameraLensModel = selfieCameraLensModel
+                                bestCameraLensModel = selfieCameraLensModel,
+                                bestExposureIso = selfieBestExposureIso,
+                                bestFocalLength = selfieBestFocalLength,
+                                bestExposureDuration = selfieBestExposureDuration,
+                                bestIsVirtualCamera = selfieBestIsVirtualCamera
                             ),
                             fromRoute = SelfieDestination.ROUTE.route
                         ) {

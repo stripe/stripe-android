@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEventReporter
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.utils.collectAsState
 import java.util.Locale
@@ -17,8 +18,13 @@ import javax.inject.Inject
 @PaymentMethodMessagingElementPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentMethodMessagingElement @Inject internal constructor(
-    private val messagingCoordinator: PaymentMethodMessagingCoordinator
+    private val messagingCoordinator: PaymentMethodMessagingCoordinator,
+    private val eventReporter: PaymentMethodMessagingEventReporter
 ) {
+
+    init {
+        eventReporter.onInit()
+    }
 
     /**
      * Call this method to configure [PaymentMethodMessagingElement] or when the [Configuration] values
@@ -36,7 +42,9 @@ class PaymentMethodMessagingElement @Inject internal constructor(
     @Composable
     fun Content(appearance: Appearance = Appearance()) {
         val content by messagingCoordinator.messagingContent.collectAsState()
-        content?.Content(appearance.build())
+        val appearanceState = appearance.build()
+        eventReporter.onElementDisplayed(appearanceState)
+        content?.Content(appearanceState)
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -175,7 +183,7 @@ class PaymentMethodMessagingElement @Inject internal constructor(
             this.colors = colors.build()
         }
 
-        internal class State(
+        internal data class State(
             val theme: Theme,
             val font: Font.State?,
             val colors: Colors.State,
@@ -232,7 +240,7 @@ class PaymentMethodMessagingElement @Inject internal constructor(
                 this.letterSpacingSp = letterSpacingSp
             }
 
-            internal class State(
+            internal data class State(
                 @FontRes
                 val fontFamily: Int? = null,
                 val fontSizeSp: Float? = null,
@@ -267,7 +275,7 @@ class PaymentMethodMessagingElement @Inject internal constructor(
                 this.infoIconColor = infoIconColor
             }
 
-            internal class State(
+            internal data class State(
                 @ColorInt
                 val textColor: Int,
                 @ColorInt

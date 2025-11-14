@@ -128,4 +128,34 @@ class SimpleTextFieldConfigTest {
         assertThat(state.shouldShowError(hasFocus = true, isValidating = true)).isFalse()
         assertThat(state.shouldShowError(hasFocus = false, isValidating = true)).isFalse()
     }
+
+    @Test
+    fun `test allowEmojis as false handles various emoji types`() {
+        val textConfig = SimpleTextFieldConfig(
+            label = resolvableString("Address"),
+            keyboard = KeyboardType.Text,
+            allowsEmojis = false
+        )
+
+        // Test miscellaneous symbols
+        assertThat(textConfig.filter("Weather ☀️ ⛈ 1")).isEqualTo("Weather   1")
+
+        // Test emoticons
+        assertThat(textConfig.filter("Happy 😀 Face")).isEqualTo("Happy  Face")
+
+        // Test combined text and emojis
+        assertThat(textConfig.filter("Building 🏢 Floor 5")).isEqualTo("Building  Floor 5")
+    }
+
+    @Test
+    fun `test allowEmojis as true allows emojis`() {
+        val textConfig = SimpleTextFieldConfig(
+            label = resolvableString("Address"),
+            keyboard = KeyboardType.Text,
+            allowsEmojis = true
+        )
+
+        assertThat(textConfig.filter("123 Main St 🏠")).isEqualTo("123 Main St 🏠")
+        assertThat(textConfig.filter("Hello 😊 World 🌍")).isEqualTo("Hello 😊 World 🌍")
+    }
 }

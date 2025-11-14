@@ -10,8 +10,6 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertCanceled
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
-import com.stripe.android.paymentelement.embedded.FakeEmbeddedConfirmationSaver
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -42,14 +40,11 @@ class EmbeddedConfirmationStarterTest {
     @Test
     fun `on confirm, should call 'start' on confirmation handler`() = test {
         val arguments = ConfirmationHandler.Args(
+            confirmationOption = FakeConfirmationOption(),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFactory.create(
                     paymentMethod = PaymentMethodFactory.card(random = true),
                 )
-            ),
-            confirmationOption = FakeConfirmationOption(),
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
             ),
         )
 
@@ -59,7 +54,6 @@ class EmbeddedConfirmationStarterTest {
 
         assertThat(startCall.confirmationOption).isEqualTo(arguments.confirmationOption)
         assertThat(startCall.intent).isEqualTo(arguments.intent)
-        assertThat(startCall.initializationMode).isEqualTo(arguments.initializationMode)
         assertThat(startCall.paymentMethodMetadata).isEqualTo(arguments.paymentMethodMetadata)
     }
 
@@ -95,7 +89,6 @@ class EmbeddedConfirmationStarterTest {
                 result = ConfirmationHandler.Result.Succeeded(
                     intent = intent,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 ),
             ),
         ) {
@@ -113,8 +106,6 @@ class EmbeddedConfirmationStarterTest {
             confirmationStarter.result.test {
                 expectNoEvents()
             }
-
-            assertThat(confirmationSaver.saveTurbine.awaitItem()).isEqualTo(intent)
         }
     }
 
@@ -149,25 +140,19 @@ class EmbeddedConfirmationStarterTest {
             state = MutableStateFlow(confirmationState)
         )
 
-        val confirmationSaver = FakeEmbeddedConfirmationSaver()
-
         Scenario(
             confirmationStarter = EmbeddedConfirmationStarter(
                 confirmationHandler = confirmationHandler,
                 coroutineScope = backgroundScope,
-                confirmationSaver = confirmationSaver,
             ),
             confirmationHandler = confirmationHandler,
-            confirmationSaver = confirmationSaver,
         ).block()
 
         confirmationHandler.validate()
-        confirmationSaver.validate()
     }
 
     private class Scenario(
         val confirmationStarter: EmbeddedConfirmationStarter,
         val confirmationHandler: FakeConfirmationHandler,
-        val confirmationSaver: FakeEmbeddedConfirmationSaver,
     )
 }

@@ -7,11 +7,11 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
-import com.stripe.android.crypto.onramp.model.DateOfBirth
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
+import com.stripe.android.model.DateOfBirth
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.test.runTest
@@ -213,7 +213,7 @@ class CryptoApiRepositoryTest {
                         "address": {
                             "line1": "123 Main St",
                             "line2": "Apt 4B",
-                            "zip": "32801",
+                            "postal_code": "32801",
                             "country": "US",
                             "city": "Orlando",
                             "state": "FL"
@@ -299,6 +299,7 @@ class CryptoApiRepositoryTest {
                     lastName = "User",
                     idNumberLastFour = "7777",
                     dateOfBirth = DateOfBirth(day = 1, month = 3, year = 1975),
+                    idType = "social_security_number",
                     address = PaymentSheet.Address(city = "Orlando", state = "FL")
                 ),
                 consumerSessionClientSecret = "test-secret"
@@ -324,10 +325,10 @@ class CryptoApiRepositoryTest {
             assertThat(params["birth_city"]).isNull()
             assertThat(params["city"]).isEqualTo("Orlando")
             assertThat(params["state"]).isEqualTo("FL")
-            assertThat(params["country"]).isNull()
-            assertThat(params["line1"]).isNull()
-            assertThat(params["line2"]).isNull()
-            assertThat(params["zip"]).isNull()
+            assertThat(params["country"]).isEqualTo("")
+            assertThat(params["line1"]).isEqualTo("")
+            assertThat(params["line2"]).isEqualTo("")
+            assertThat(params["zip"]).isEqualTo("")
 
             assertThat(params["credentials"]).isEqualTo(
                 mapOf("consumer_session_client_secret" to "test-secret")
@@ -356,6 +357,7 @@ class CryptoApiRepositoryTest {
                     lastName = "User",
                     idNumberLastFour = "7777",
                     dateOfBirth = DateOfBirth(day = 1, month = 3, year = 1975),
+                    idType = "social_security_number",
                     address = PaymentSheet.Address(city = "Orlando", state = "FL")
                 ),
                 consumerSessionClientSecret = "test-secret"

@@ -244,9 +244,6 @@ class ConfirmationTokenParamsTest {
 
     @Test
     fun toParamMap_withComprehensiveClientContext_shouldCreateExpectedMap() {
-        val paymentMethodOptions = PaymentMethodOptionsParams.Card(
-            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-        )
         val clientContext = ConfirmationTokenClientContextParams(
             mode = "payment",
             currency = "usd",
@@ -256,7 +253,7 @@ class ConfirmationTokenParamsTest {
             onBehalfOf = "acct_123",
             paymentMethodConfiguration = "pmc_123",
             customer = "cus_123",
-            paymentMethodOptions = paymentMethodOptions
+            paymentMethodOptionsJson = """{"card":{"setup_future_usage":"off_session"}}""",
         )
         val params = ConfirmationTokenParams(
             paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,

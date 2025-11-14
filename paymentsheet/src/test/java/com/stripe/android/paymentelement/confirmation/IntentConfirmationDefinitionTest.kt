@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -22,7 +23,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakePaymentLauncher
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.test.runTest
@@ -131,7 +131,6 @@ class IntentConfirmationDefinitionTest {
 
         assertThat(completeAction.intent).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
-        assertThat(completeAction.isConfirmationToken).isEqualTo(false)
     }
 
     @Test
@@ -156,7 +155,6 @@ class IntentConfirmationDefinitionTest {
 
             assertThat(completeAction.intent).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
             assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
-            assertThat(completeAction.isConfirmationToken).isEqualTo(false)
             assertThat(completeAction.completedFullPaymentFlow).isFalse()
         }
 
@@ -189,8 +187,9 @@ class IntentConfirmationDefinitionTest {
 
     @Test
     fun `On 'IntentConfirmationInterceptor' next step, should return 'Launch' confirmation action`() = runTest {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
-            enqueueNextActionStep(clientSecret = "pi_123")
+            enqueueNextActionStep(intent = paymentIntent)
         }
         val definition = createIntentConfirmationDefinition(
             intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
@@ -205,11 +204,10 @@ class IntentConfirmationDefinitionTest {
 
         assertThat(launchAction.launcherArguments).isEqualTo(
             IntentConfirmationDefinition.Args.NextAction(
-                clientSecret = "pi_123"
+                intent = paymentIntent
             )
         )
         assertThat(launchAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
-        assertThat(launchAction.isConfirmationToken).isEqualTo(false)
     }
 
     @Test
@@ -239,7 +237,6 @@ class IntentConfirmationDefinitionTest {
             )
         )
         assertThat(launchAction.deferredIntentConfirmationType).isNull()
-        assertThat(launchAction.isConfirmationToken).isFalse()
     }
 
     @Test
@@ -270,6 +267,7 @@ class IntentConfirmationDefinitionTest {
     @Test
     fun `On launch with next step action and 'SetupIntent', should launch with expected params`() = runTest {
         val launcher = FakePaymentLauncher()
+        val setupIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
 
         val definition = createIntentConfirmationDefinition(
             paymentLauncher = launcher,
@@ -277,13 +275,15 @@ class IntentConfirmationDefinitionTest {
 
         definition.launch(
             launcher = launcher,
-            arguments = IntentConfirmationDefinition.Args.NextAction(clientSecret = "si_123"),
+            arguments = IntentConfirmationDefinition.Args.NextAction(
+                intent = setupIntent
+            ),
             confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
         )
 
         assertThat(launcher.calls.awaitItem()).isEqualTo(
-            FakePaymentLauncher.Call.HandleNextAction.SetupIntent(clientSecret = "si_123")
+            FakePaymentLauncher.Call.HandleNextActionWithIntent.Intent(setupIntent)
         )
     }
 
@@ -315,6 +315,7 @@ class IntentConfirmationDefinitionTest {
     @Test
     fun `On launch with next step action and 'PaymentIntent', should launch with expected params`() = runTest {
         val launcher = FakePaymentLauncher()
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
         val definition = createIntentConfirmationDefinition(
             paymentLauncher = launcher,
@@ -322,13 +323,63 @@ class IntentConfirmationDefinitionTest {
 
         definition.launch(
             launcher = launcher,
-            arguments = IntentConfirmationDefinition.Args.NextAction(clientSecret = "pi_123"),
+            arguments = IntentConfirmationDefinition.Args.NextAction(
+                intent = paymentIntent
+            ),
             confirmationArgs = CONFIRMATION_PARAMETERS,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
         )
 
         assertThat(launcher.calls.awaitItem()).isEqualTo(
-            FakePaymentLauncher.Call.HandleNextAction.PaymentIntent(clientSecret = "pi_123")
+            FakePaymentLauncher.Call.HandleNextActionWithIntent.Intent(paymentIntent)
+        )
+    }
+
+    @Test
+    fun `On launch with next step action and 'PaymentIntent' with intent, should use optimized path`() = runTest {
+        val launcher = FakePaymentLauncher()
+
+        val definition = createIntentConfirmationDefinition(
+            paymentLauncher = launcher,
+        )
+
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+
+        definition.launch(
+            launcher = launcher,
+            arguments = IntentConfirmationDefinition.Args.NextAction(
+                intent = paymentIntent
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
+        )
+
+        assertThat(launcher.calls.awaitItem()).isEqualTo(
+            FakePaymentLauncher.Call.HandleNextActionWithIntent.Intent(paymentIntent)
+        )
+    }
+
+    @Test
+    fun `On launch with next step action and 'SetupIntent' with intent, should use optimized path`() = runTest {
+        val launcher = FakePaymentLauncher()
+
+        val definition = createIntentConfirmationDefinition(
+            paymentLauncher = launcher,
+        )
+
+        val setupIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+
+        definition.launch(
+            launcher = launcher,
+            arguments = IntentConfirmationDefinition.Args.NextAction(
+                intent = setupIntent
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
+            confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
+        )
+
+        assertThat(launcher.calls.awaitItem()).isEqualTo(
+            FakePaymentLauncher.Call.HandleNextActionWithIntent.Intent(setupIntent)
         )
     }
 
@@ -344,7 +395,6 @@ class IntentConfirmationDefinitionTest {
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-            isConfirmationToken = false,
             result = InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED),
         )
 
@@ -352,7 +402,6 @@ class IntentConfirmationDefinitionTest {
 
         assertThat(succeededResult.intent).isEqualTo(PaymentIntentFixtures.PI_SUCCEEDED)
         assertThat(succeededResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
-        assertThat(succeededResult.isConfirmationToken).isEqualTo(false)
         assertThat(succeededResult.completedFullPaymentFlow).isTrue()
     }
 
@@ -370,7 +419,6 @@ class IntentConfirmationDefinitionTest {
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = InternalPaymentResult.Failed(exception),
         )
 
@@ -393,7 +441,6 @@ class IntentConfirmationDefinitionTest {
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = InternalPaymentResult.Canceled,
         )
 
@@ -406,7 +453,7 @@ class IntentConfirmationDefinitionTest {
         intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory =
             object : IntentConfirmationInterceptor.Factory {
                 override suspend fun create(
-                    initializationMode: PaymentElementLoader.InitializationMode,
+                    integrationMetadata: IntegrationMetadata,
                     customerId: String?,
                     ephemeralKeySecret: String?,
                     clientAttributionMetadata: ClientAttributionMetadata,

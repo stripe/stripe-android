@@ -2,28 +2,32 @@ package com.stripe.android.paymentelement.confirmation.interceptor
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.createIntentConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.intent.ConfirmationTokenConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.IntentFirstConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.SharedPaymentTokenConfirmationInterceptor
-import com.stripe.android.paymentelement.confirmation.interceptor.DeferredIntentConfirmationInterceptorTest.Companion.DEFAULT_DEFERRED_INTENT
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
+@RunWith(RobolectricTestRunner::class)
 internal class DefaultIntentConfirmationInterceptorFactoryTest {
 
     @Test
     fun `create() with sharedPaymentToken returns SharedPaymentTokenConfirmationInterceptor`() =
         runScenario(
-            initializationMode = InitializationMode.DeferredIntent(
+            integrationMetadata = IntegrationMetadata.DeferredIntentWithSharedPaymentToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
@@ -44,7 +48,14 @@ internal class DefaultIntentConfirmationInterceptorFactoryTest {
     @Test
     fun `create() with DeferredIntent returns DeferredIntentConfirmationInterceptor`() =
         runScenario(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                    ),
+                ),
+            ),
             intentCreationCallbackProvider = Provider {
                 CreateIntentCallback { _, _ ->
                     CreateIntentResult.Success(clientSecret = "pi_123")
@@ -55,17 +66,29 @@ internal class DefaultIntentConfirmationInterceptorFactoryTest {
         }
 
     @Test
-    fun `create() with PaymentIntent returns IntentFirstConfirmationInterceptor`() =
+    fun `create() with DeferredIntent returns ConfirmationTokenConfirmationInterceptor`() =
         runScenario(
-            initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+            integrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                    ),
+                ),
+            ),
+            intentCreationConfirmationTokenCallbackProvider = Provider {
+                CreateIntentWithConfirmationTokenCallback { _ ->
+                    CreateIntentResult.Success(clientSecret = "pi_123")
+                }
+            },
         ) {
-            assertThat(interceptor).isInstanceOf(IntentFirstConfirmationInterceptor::class.java)
+            assertThat(interceptor).isInstanceOf(ConfirmationTokenConfirmationInterceptor::class.java)
         }
 
     @Test
-    fun `create() with SetupIntent returns IntentFirstConfirmationInterceptor`() =
+    fun `create() with IntentFirst returns IntentFirstConfirmationInterceptor`() =
         runScenario(
-            initializationMode = InitializationMode.SetupIntent("cs_123")
+            integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_4321"),
         ) {
             assertThat(interceptor).isInstanceOf(IntentFirstConfirmationInterceptor::class.java)
         }
@@ -75,16 +98,19 @@ internal class DefaultIntentConfirmationInterceptorFactoryTest {
     )
 
     private fun runScenario(
-        initializationMode: InitializationMode,
+        integrationMetadata: IntegrationMetadata,
         intentCreationCallbackProvider: Provider<CreateIntentCallback?> = Provider { null },
+        intentCreationConfirmationTokenCallbackProvider: Provider<CreateIntentWithConfirmationTokenCallback?> =
+            Provider { null },
         preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?> = Provider { null },
         block: suspend Scenario.() -> Unit,
     ) {
         runTest {
             Scenario(
                 interceptor = createIntentConfirmationInterceptor(
-                    initializationMode = initializationMode,
+                    integrationMetadata = integrationMetadata,
                     intentCreationCallbackProvider = intentCreationCallbackProvider,
+                    intentCreationConfirmationTokenCallbackProvider = intentCreationConfirmationTokenCallbackProvider,
                     preparePaymentMethodHandlerProvider = preparePaymentMethodHandlerProvider,
                 ),
             ).block()

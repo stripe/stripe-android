@@ -182,7 +182,6 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 eventReporter = FakeEventReporter(),
                 paymentElementLoader = paymentElementLoader,
                 customerRepository = FakeCustomerRepository(customer?.paymentMethods ?: emptyList()),
-                prefsRepository = FakePrefsRepository(),
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,

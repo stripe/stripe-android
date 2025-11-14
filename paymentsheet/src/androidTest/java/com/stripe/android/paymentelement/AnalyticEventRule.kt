@@ -2,6 +2,9 @@ package com.stripe.android.paymentelement
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.newSingleThreadContext
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -23,9 +26,12 @@ class AnalyticEventRule : TestRule, AnalyticEventCallback {
             override fun evaluate() {
                 events = Turbine()
                 try {
+                    @OptIn(DelicateCoroutinesApi::class)
+                    DefaultEventReporter.analyticEventCoroutineContext = newSingleThreadContext("AnalyticEventRule")
                     base.evaluate()
                     events.ensureAllEventsConsumed()
                 } finally {
+                    DefaultEventReporter.analyticEventCoroutineContext = null
                     events.close()
                 }
             }

@@ -8,6 +8,7 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -80,6 +81,20 @@ class StripePaymentLauncher @AssistedInject internal constructor(
                 productUsage = productUsage,
                 includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
                 setupIntentClientSecret = clientSecret,
+                statusBarColor = statusBarColor,
+            )
+        )
+    }
+
+    override fun handleNextActionForStripeIntent(intent: StripeIntent) {
+        hostActivityLauncher.launch(
+            PaymentLauncherContract.Args.StripeIntentNextActionWithIntentArgs(
+                publishableKey = publishableKeyProvider(),
+                stripeAccountId = stripeAccountIdProvider(),
+                enableLogging = enableLogging,
+                productUsage = productUsage,
+                includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
+                stripeIntent = intent,
                 statusBarColor = statusBarColor,
             )
         )

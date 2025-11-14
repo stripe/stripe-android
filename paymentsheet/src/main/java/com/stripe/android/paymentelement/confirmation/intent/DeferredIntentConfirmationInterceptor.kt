@@ -151,7 +151,6 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                     ConfirmationDefinition.Action.Complete(
                         intent = intent,
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
-                        isConfirmationToken = false,
                         completedFullPaymentFlow = true,
                     )
                 } else {
@@ -194,7 +193,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         ).mapCatching { intent ->
             when {
                 intent.isConfirmed -> handleConfirmedIntent(intent, confirmationOption)
-                intent.requiresAction() -> handleIntentRequiringAction(clientSecret, intent, paymentMethod)
+                intent.requiresAction() -> handleIntentRequiringAction(intent, paymentMethod)
                 else -> handleIntentConfirmation(
                     clientSecret = clientSecret,
                     intent = intent,
@@ -223,23 +222,20 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         return ConfirmationDefinition.Action.Complete(
             intent = intent,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-            isConfirmationToken = false,
             completedFullPaymentFlow = true,
         )
     }
 
     private fun handleIntentRequiringAction(
-        clientSecret: String,
         intent: StripeIntent,
         paymentMethod: PaymentMethod
     ): ConfirmationDefinition.Action<Args> {
         return runCatching<ConfirmationDefinition.Action<Args>> {
             DeferredIntentValidator.validatePaymentMethod(intent, paymentMethod)
             ConfirmationDefinition.Action.Launch(
-                launcherArguments = Args.NextAction(clientSecret),
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                isConfirmationToken = false,
+                launcherArguments = Args.NextAction(intent),
                 receivesResultInProcess = false,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
             )
         }.getOrElse {
             ConfirmationDefinition.Action.Fail(
@@ -266,7 +262,6 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
             intent,
             shippingValues,
             isDeferred = true,
-            isConfirmationToken = false,
         ) {
             create(
                 paymentMethod = paymentMethod,

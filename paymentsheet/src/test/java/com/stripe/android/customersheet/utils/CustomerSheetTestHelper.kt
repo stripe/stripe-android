@@ -28,6 +28,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -42,7 +43,6 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -88,7 +88,7 @@ internal object CustomerSheetTestHelper {
         intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory =
             object : IntentConfirmationInterceptor.Factory {
                 override suspend fun create(
-                    initializationMode: PaymentElementLoader.InitializationMode,
+                    integrationMetadata: IntegrationMetadata,
                     customerId: String?,
                     ephemeralKeySecret: String?,
                     clientAttributionMetadata: ClientAttributionMetadata,

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
@@ -8,6 +9,7 @@ import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
@@ -18,6 +20,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata.Permissions.Companion.createForPaymentSheetCustomerSession
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata.Permissions.Companion.createForPaymentSheetLegacyEphemeralKey
 import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.create
@@ -27,12 +30,15 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -51,6 +57,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -77,6 +84,7 @@ internal interface PaymentElementLoader {
 
     sealed class InitializationMode : Parcelable {
         abstract fun validate()
+        abstract fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata
 
         @Parcelize
         data class PaymentIntent(
@@ -85,6 +93,10 @@ internal interface PaymentElementLoader {
 
             override fun validate() {
                 PaymentIntentClientSecret(clientSecret).validate()
+            }
+
+            override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
+                return IntegrationMetadata.IntentFirst(clientSecret)
             }
         }
 
@@ -95,6 +107,10 @@ internal interface PaymentElementLoader {
 
             override fun validate() {
                 SetupIntentClientSecret(clientSecret).validate()
+            }
+
+            override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
+                return IntegrationMetadata.IntentFirst(clientSecret)
             }
         }
 
@@ -111,6 +127,33 @@ internal interface PaymentElementLoader {
                         )
                     }
                 }
+            }
+
+            @OptIn(SharedPaymentTokenSessionPreview::class)
+            override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
+                return when {
+                    paymentElementCallbacks?.preparePaymentMethodHandler != null -> {
+                        IntegrationMetadata.DeferredIntentWithSharedPaymentToken(intentConfiguration)
+                    }
+                    paymentElementCallbacks?.createIntentWithConfirmationTokenCallback != null -> {
+                        IntegrationMetadata.DeferredIntentWithConfirmationToken(intentConfiguration)
+                    }
+                    paymentElementCallbacks?.createIntentCallback != null -> {
+                        IntegrationMetadata.DeferredIntentWithPaymentMethod(intentConfiguration)
+                    }
+                    else -> throw IllegalStateException("No callback for deferred intent.")
+                }
+            }
+        }
+
+        @Parcelize
+        object CryptoOnramp : InitializationMode() {
+            override fun validate() {
+                // Nothing to validate.
+            }
+
+            override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
+                return IntegrationMetadata.CryptoOnramp
             }
         }
     }
@@ -144,7 +187,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val customerRepository: CustomerRepository,
     private val lpmRepository: LpmRepository,
     private val logger: Logger,
-    private val eventReporter: EventReporter,
+    private val eventReporter: LoadingEventReporter,
     private val errorReporter: ErrorReporter,
     @IOContext private val workContext: CoroutineContext,
     private val createLinkState: CreateLinkState,
@@ -153,6 +196,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val userFacingLogger: UserFacingLogger,
     private val cvcRecollectionHandler: CvcRecollectionHandler,
     private val integrityRequestManager: IntegrityRequestManager,
+    @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
 ) : PaymentElementLoader {
 
     @Suppress("LongMethod")
@@ -161,7 +206,18 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration: CommonConfiguration,
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
+        // Validate configuration before loading
+        initializationMode.validate()
+        configuration.validate(isLiveModeProvider(), paymentElementCallbackIdentifier)
+
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
+
+        val isGooglePaySupportedOnDevice = async {
+            isGooglePaySupportedOnDevice()
+        }
+        val isGooglePaySupportedByConfiguration = async {
+            configuration.isGooglePayReady()
+        }
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
         val elementsSession = retrieveElementsSession(
@@ -185,7 +241,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession = elementsSession,
         )
 
-        val isGooglePayReady = isGooglePayReady(configuration, elementsSession)
+        val isGooglePayReady = isGooglePayReady(configuration, elementsSession, isGooglePaySupportedByConfiguration)
 
         val savedSelection = async {
             retrieveSavedSelection(
@@ -218,6 +274,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customerInfo = customerInfo,
                 linkStateResult = linkState.await(),
                 isGooglePayReady = isGooglePayReady,
+                isGooglePaySupportedOnDevice = isGooglePaySupportedOnDevice.await(),
                 initializationMode = initializationMode,
                 clientAttributionMetadata = clientAttributionMetadata,
             )
@@ -270,7 +327,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession = elementsSession,
             state = state,
             isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
-            isGooglePaySupported = isGooglePaySupported(),
+            isGooglePaySupported = isGooglePaySupportedOnDevice.await(),
             linkDisplay = configuration.link.display,
             initializationMode = initializationMode,
             customerInfo = customerInfo,
@@ -330,6 +387,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customerInfo: CustomerInfo?,
         linkStateResult: LinkStateResult,
         isGooglePayReady: Boolean,
+        isGooglePaySupportedOnDevice: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): PaymentMethodMetadata {
@@ -359,6 +417,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
+            isGooglePaySupportedOnDevice = isGooglePaySupportedOnDevice,
             linkStateResult = linkStateResult,
             customerMetadata = getCustomerMetadata(
                 configuration = configuration,
@@ -367,6 +426,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             ),
             initializationMode = initializationMode,
             clientAttributionMetadata = clientAttributionMetadata,
+            paymentElementCallbacks = PaymentElementCallbackReferences[paymentElementCallbackIdentifier],
         )
     }
 
@@ -531,6 +591,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private suspend fun isGooglePayReady(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
+        isGooglePaySupportedByConfiguration: Deferred<Boolean>,
     ): Boolean {
         if (!elementsSession.isGooglePayEnabled) {
             userFacingLogger.logWarningWithoutPii(
@@ -540,7 +601,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             userFacingLogger.logWarningWithoutPii(
                 "GooglePayConfiguration is not set."
             )
-        } else if (!configuration.isGooglePayReady()) {
+        } else if (!isGooglePaySupportedByConfiguration.await()) {
             @Suppress("MaxLineLength")
             userFacingLogger.logWarningWithoutPii(
                 """
@@ -552,7 +613,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 """.trimIndent()
             )
         }
-        return elementsSession.isGooglePayEnabled && configuration.isGooglePayReady()
+        return elementsSession.isGooglePayEnabled && isGooglePaySupportedByConfiguration.await()
     }
 
     private suspend fun CommonConfiguration.isGooglePayReady(): Boolean {
@@ -568,7 +629,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }?.isReady()?.first() ?: false
     }
 
-    private suspend fun isGooglePaySupported(): Boolean {
+    private suspend fun isGooglePaySupportedOnDevice(): Boolean {
         return googlePayRepositoryFactory(GooglePayEnvironment.Production).isReady().first()
     }
 
@@ -736,7 +797,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 orderedLpms = state.paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
                 requireCvcRecollection = cvcRecollectionHandler.cvcRecollectionEnabled(
                     state.paymentMethodMetadata.stripeIntent,
-                    initializationMode
                 ),
                 hasDefaultPaymentMethod = hasDefaultPaymentMethod,
                 setAsDefaultEnabled = setAsDefaultEnabled,

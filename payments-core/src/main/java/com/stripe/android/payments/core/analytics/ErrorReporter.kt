@@ -282,6 +282,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         HCAPTCHA_UNEXPECTED_FAILURE(
             partialEventName = "elements.captcha.passive.unexpected_failure"
         ),
+        PAYMENT_METHOD_MESSAGING_ELEMENT_UNABLE_TO_PARSE_RESPONSE(
+            partialEventName = "paymentmethodmessaging.element.unable_to_parse_response"
+        )
         ;
 
         override val eventName: String

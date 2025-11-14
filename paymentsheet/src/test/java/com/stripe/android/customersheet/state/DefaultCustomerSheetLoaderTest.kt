@@ -92,7 +92,7 @@ internal class DefaultCustomerSheetLoaderTest {
     fun `load with configuration should return expected result`() = runTest {
         val loader = createCustomerSheetLoader(
             savedSelection = SavedSelection.PaymentMethod(
-                id = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
+                id = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id
             ),
             paymentMethods = listOf(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -203,7 +203,7 @@ internal class DefaultCustomerSheetLoaderTest {
         val loader = createCustomerSheetLoader(
             paymentMethods = expectedPaymentMethods,
             // Setting a saved selection here so we can validate that it is not used.
-            savedSelection = SavedSelection.PaymentMethod(expectedPaymentMethods[1].id!!),
+            savedSelection = SavedSelection.PaymentMethod(expectedPaymentMethods[1].id),
             isPaymentMethodSyncDefaultEnabled = true,
             defaultPaymentMethodId = defaultPaymentMethod.id,
         )
@@ -226,7 +226,7 @@ internal class DefaultCustomerSheetLoaderTest {
         val loader = createCustomerSheetLoader(
             paymentMethods = expectedPaymentMethods,
             // Setting a saved selection here so we can validate that it is not used.
-            savedSelection = SavedSelection.PaymentMethod(expectedPaymentMethods[1].id!!),
+            savedSelection = SavedSelection.PaymentMethod(expectedPaymentMethods[1].id),
             isPaymentMethodSyncDefaultEnabled = true,
             defaultPaymentMethodId = null,
         )
@@ -722,6 +722,8 @@ internal class DefaultCustomerSheetLoaderTest {
             passiveCaptcha = null,
             merchantLogoUrl = null,
             elementsSessionConfigId = null,
+            accountId = "acct_1SGP1sPvdtoA7EjP",
+            merchantId = "acct_1SGP1sPvdtoA7EjP",
         )
     }
 

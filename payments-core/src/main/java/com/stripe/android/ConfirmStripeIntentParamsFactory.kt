@@ -57,7 +57,7 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
         clientAttributionMetadata: ClientAttributionMetadata?
     ): T {
         return create(
-            paymentMethodId = paymentMethod.id.orEmpty(),
+            paymentMethodId = paymentMethod.id,
             paymentMethodType = requireNotNull(paymentMethod.type),
             optionsParams = optionsParams,
             extraParams = extraParams,

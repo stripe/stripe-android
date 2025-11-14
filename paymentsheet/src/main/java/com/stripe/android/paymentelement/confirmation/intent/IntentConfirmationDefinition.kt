@@ -6,8 +6,6 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -40,7 +38,7 @@ internal class IntentConfirmationDefinition(
         val interceptor: IntentConfirmationInterceptor
         try {
             interceptor = intentConfirmationInterceptorFactory.create(
-                initializationMode = confirmationArgs.initializationMode,
+                integrationMetadata = confirmationArgs.paymentMethodMetadata.integrationMetadata,
                 customerId = paymentMethodMetadata.customerMetadata?.id,
                 ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.ephemeralKeySecret,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
@@ -90,7 +88,7 @@ internal class IntentConfirmationDefinition(
     ) {
         when (arguments) {
             is Args.Confirm -> launchConfirm(launcher, arguments.confirmNextParams)
-            is Args.NextAction -> launchNextAction(launcher, arguments.clientSecret, confirmationArgs.intent)
+            is Args.NextAction -> launcher.handleNextActionForStripeIntent(arguments.intent)
         }
     }
 
@@ -98,14 +96,12 @@ internal class IntentConfirmationDefinition(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        isConfirmationToken: Boolean,
         result: InternalPaymentResult
     ): ConfirmationDefinition.Result {
         return when (result) {
             is InternalPaymentResult.Completed -> ConfirmationDefinition.Result.Succeeded(
                 intent = result.intent,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
-                isConfirmationToken = isConfirmationToken,
             )
             is InternalPaymentResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,
@@ -115,21 +111,6 @@ internal class IntentConfirmationDefinition(
             is InternalPaymentResult.Canceled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
             )
-        }
-    }
-
-    private fun launchNextAction(
-        launcher: PaymentLauncher,
-        clientSecret: String,
-        intent: StripeIntent,
-    ) {
-        when (intent) {
-            is PaymentIntent -> {
-                launcher.handleNextActionForPaymentIntent(clientSecret)
-            }
-            is SetupIntent -> {
-                launcher.handleNextActionForSetupIntent(clientSecret)
-            }
         }
     }
 
@@ -148,7 +129,9 @@ internal class IntentConfirmationDefinition(
     }
 
     sealed interface Args {
-        data class NextAction(val clientSecret: String) : Args
+        data class NextAction(
+            val intent: StripeIntent,
+        ) : Args
 
         data class Confirm(val confirmNextParams: ConfirmStripeIntentParams) : Args
     }

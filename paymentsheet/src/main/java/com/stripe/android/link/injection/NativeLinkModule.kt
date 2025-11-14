@@ -49,6 +49,8 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
+import com.stripe.android.paymentsheet.DefaultPrefsRepository
+import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
 import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceContext
 import com.stripe.android.paymentsheet.addresselement.AutocompleteLauncher
@@ -138,6 +140,11 @@ internal interface NativeLinkModule {
     @Binds
     @NativeLinkScope
     fun bindsAutocompleteLauncher(impl: DefaultAutocompleteLauncher): AutocompleteLauncher
+
+    @Binds
+    fun bindsPrefsRepositoryFactory(
+        factory: DefaultPrefsRepository.Factory
+    ): PrefsRepository.Factory
 
     @SuppressWarnings("TooManyFunctions")
     companion object {

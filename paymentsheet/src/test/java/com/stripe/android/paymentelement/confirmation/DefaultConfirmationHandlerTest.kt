@@ -5,18 +5,22 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -61,13 +65,11 @@ class DefaultConfirmationHandlerTest {
             launcherArguments = SomeConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = true,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
         ),
         someOtherDefinitionAction = ConfirmationDefinition.Action.Launch(
             launcherArguments = SomeOtherConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = true,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
         ),
     ) {
         val activityResultCaller = mock<ActivityResultCaller>()
@@ -223,7 +225,6 @@ class DefaultConfirmationHandlerTest {
         someDefinitionAction = ConfirmationDefinition.Action.Complete(
             intent = UPDATED_PAYMENT_INTENT,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-            isConfirmationToken = false,
             completedFullPaymentFlow = true,
         ),
     ) {
@@ -241,10 +242,11 @@ class DefaultConfirmationHandlerTest {
             assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
             assertThat(successResult.deferredIntentConfirmationType)
                 .isEqualTo(DeferredIntentConfirmationType.Client)
-            assertThat(successResult.isConfirmationToken).isFalse()
             assertThat(successResult.completedFullPaymentFlow).isTrue()
 
             confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
+
+            assertThat(confirmationSaverTurbine.awaitItem()).isNotNull()
         }
     }
 
@@ -253,7 +255,6 @@ class DefaultConfirmationHandlerTest {
         someDefinitionAction = ConfirmationDefinition.Action.Complete(
             intent = UPDATED_PAYMENT_INTENT,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-            isConfirmationToken = false,
             completedFullPaymentFlow = false,
         ),
     ) {
@@ -271,10 +272,11 @@ class DefaultConfirmationHandlerTest {
             assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
             assertThat(successResult.deferredIntentConfirmationType)
                 .isEqualTo(DeferredIntentConfirmationType.Client)
-            assertThat(successResult.isConfirmationToken).isFalse()
             assertThat(successResult.completedFullPaymentFlow).isFalse()
 
             confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
+
+            assertThat(confirmationSaverTurbine.awaitItem()).isNotNull()
         }
     }
 
@@ -291,7 +293,6 @@ class DefaultConfirmationHandlerTest {
         result = ConfirmationDefinition.Result.Succeeded(
             intent = UPDATED_PAYMENT_INTENT,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-            isConfirmationToken = false,
             completedFullPaymentFlow = true,
         ),
     ) { completeState ->
@@ -299,8 +300,9 @@ class DefaultConfirmationHandlerTest {
 
         assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
         assertThat(successResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
-        assertThat(successResult.isConfirmationToken).isFalse()
         assertThat(successResult.completedFullPaymentFlow).isTrue()
+
+        assertThat(confirmationSaverTurbine.awaitItem()).isNotNull()
     }
 
     @Test
@@ -309,7 +311,6 @@ class DefaultConfirmationHandlerTest {
             result = ConfirmationDefinition.Result.Succeeded(
                 intent = UPDATED_PAYMENT_INTENT,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                isConfirmationToken = false,
                 completedFullPaymentFlow = false,
             ),
         ) { completeState ->
@@ -317,8 +318,9 @@ class DefaultConfirmationHandlerTest {
 
             assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
             assertThat(successResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
-            assertThat(successResult.isConfirmationToken).isFalse()
             assertThat(successResult.completedFullPaymentFlow).isFalse()
+
+            assertThat(confirmationSaverTurbine.awaitItem()).isNotNull()
         }
 
     @Test
@@ -390,7 +392,6 @@ class DefaultConfirmationHandlerTest {
             launcherArguments = SomeConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = true,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
         ),
         someDefinitionResult = ConfirmationDefinition.Result.NextStep(
             confirmationOption = SomeOtherConfirmationDefinition.Option,
@@ -400,12 +401,10 @@ class DefaultConfirmationHandlerTest {
             launcherArguments = SomeOtherConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = true,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
         ),
         someOtherDefinitionResult = ConfirmationDefinition.Result.Succeeded(
             intent = PAYMENT_INTENT,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
         ),
     ) {
         confirmationHandler.state.test {
@@ -430,9 +429,12 @@ class DefaultConfirmationHandlerTest {
 
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
             assertThat(successResult.deferredIntentConfirmationType).isNull()
-            assertThat(successResult.isConfirmationToken).isFalse()
 
             confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
+
+            val (onSuccessIntent, onSuccessOption) = confirmationSaverTurbine.awaitItem()
+            assertThat(onSuccessIntent).isEqualTo(PAYMENT_INTENT)
+            assertThat(onSuccessOption).isEqualTo(SomeConfirmationDefinition.Option)
         }
     }
 
@@ -445,7 +447,6 @@ class DefaultConfirmationHandlerTest {
             someDefinitionResult = ConfirmationDefinition.Result.Succeeded(
                 intent = PAYMENT_INTENT,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             ),
             dispatcher = dispatcher,
         ) {
@@ -464,7 +465,6 @@ class DefaultConfirmationHandlerTest {
 
                 assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
                 assertThat(successResult.deferredIntentConfirmationType).isNull()
-                assertThat(successResult.isConfirmationToken).isFalse()
 
                 confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
             }
@@ -510,7 +510,6 @@ class DefaultConfirmationHandlerTest {
             someDefinitionResult = ConfirmationDefinition.Result.Succeeded(
                 intent = PAYMENT_INTENT,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             ),
             dispatcher = dispatcher,
         ) {
@@ -529,7 +528,6 @@ class DefaultConfirmationHandlerTest {
 
                 assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
                 assertThat(successResult.deferredIntentConfirmationType).isNull()
-                assertThat(successResult.isConfirmationToken).isFalse()
 
                 confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
             }
@@ -550,12 +548,10 @@ class DefaultConfirmationHandlerTest {
                 launcherArguments = SomeOtherConfirmationDefinition.LauncherArgs,
                 receivesResultInProcess = false,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             ),
             someOtherDefinitionResult = ConfirmationDefinition.Result.Succeeded(
                 intent = UPDATED_PAYMENT_INTENT,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             ),
             dispatcher = dispatcher,
         ) {
@@ -580,7 +576,6 @@ class DefaultConfirmationHandlerTest {
 
                 assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
                 assertThat(successResult.deferredIntentConfirmationType).isNull()
-                assertThat(successResult.isConfirmationToken).isFalse()
 
                 confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
             }
@@ -605,12 +600,10 @@ class DefaultConfirmationHandlerTest {
                 launcherArguments = SomeConfirmationDefinition.LauncherArgs,
                 receivesResultInProcess = true,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             ),
             someDefinitionResult = ConfirmationDefinition.Result.Succeeded(
                 intent = PAYMENT_INTENT,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             ),
             dispatcher = dispatcher,
         ) {
@@ -621,7 +614,6 @@ class DefaultConfirmationHandlerTest {
 
                 assertThat(result.intent).isEqualTo(PAYMENT_INTENT)
                 assertThat(result.deferredIntentConfirmationType).isNull()
-                assertThat(result.isConfirmationToken).isFalse()
             }
 
             dispatcher.scheduler.advanceUntilIdle()
@@ -645,6 +637,8 @@ class DefaultConfirmationHandlerTest {
 
                 assertThat(job.isCompleted).isTrue()
             }
+
+            assertThat(confirmationSaverTurbine.awaitItem()).isNotNull()
         }
     }
 
@@ -664,13 +658,12 @@ class DefaultConfirmationHandlerTest {
 
     private fun launcherResultTest(
         result: ConfirmationDefinition.Result,
-        test: (ConfirmationHandler.State.Complete) -> Unit,
+        test: suspend Scenario.(ConfirmationHandler.State.Complete) -> Unit,
     ) = test(
         someDefinitionAction = ConfirmationDefinition.Action.Launch(
             launcherArguments = SomeConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = true,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-            isConfirmationToken = false,
         ),
         someDefinitionResult = result,
     ) {
@@ -698,7 +691,6 @@ class DefaultConfirmationHandlerTest {
             launcherArguments = SomeConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = receivesResultInProcess,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-            isConfirmationToken = false,
         ),
     ) {
         confirmationHandler.state.test {
@@ -726,7 +718,6 @@ class DefaultConfirmationHandlerTest {
 
             assertThat(parameters?.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
             assertThat(parameters?.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
-            assertThat(parameters?.isConfirmationToken).isEqualTo(false)
         }
     }
 
@@ -782,7 +773,8 @@ class DefaultConfirmationHandlerTest {
                 var someOtherDefinitionOnResult: ((SomeOtherConfirmationDefinition.LauncherResult) -> Unit)? = null
 
                 val errorReporter = FakeErrorReporter()
-                val confirmationHandler = createDefaultConfirmationHandler(
+                val confirmationSaverTurbine = Turbine<Pair<StripeIntent, ConfirmationHandler.Option>>()
+                val confirmationHandler = DefaultConfirmationHandler(
                     mediators = listOf(
                         ConfirmationMediator(
                             savedStateHandle = savedStateHandle,
@@ -793,9 +785,14 @@ class DefaultConfirmationHandlerTest {
                             definition = someOtherDefinitionScenario.definition,
                         ),
                     ),
+                    coroutineScope = CoroutineScope(dispatcher),
                     errorReporter = errorReporter,
-                    dispatcher = dispatcher,
                     savedStateHandle = savedStateHandle,
+                    ioContext = dispatcher,
+                    logger = FakeLogger(),
+                    confirmationSaver = { intent, option, alwaysSave ->
+                        confirmationSaverTurbine.add(Pair(intent, option))
+                    },
                 ).apply {
                     if (shouldRegister) {
                         val activityResultCaller = DummyActivityResultCaller.noOp()
@@ -831,30 +828,13 @@ class DefaultConfirmationHandlerTest {
                         someOtherDefinitionOnResult = someOtherDefinitionOnResult,
                         savedStateHandle = savedStateHandle,
                         errorReporter = errorReporter,
+                        confirmationSaverTurbine = confirmationSaverTurbine,
                     )
                 )
+
+                confirmationSaverTurbine.ensureAllEventsConsumed()
             }
         }
-    }
-
-    private fun createDefaultConfirmationHandler(
-        dispatcher: CoroutineDispatcher,
-        savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        mediators: List<ConfirmationMediator<*, *, *, *>> = listOf(
-            ConfirmationMediator(
-                savedStateHandle = savedStateHandle,
-                definition = SomeConfirmationDefinition(isConfirmable = true)
-            )
-        ),
-        errorReporter: ErrorReporter = FakeErrorReporter()
-    ): DefaultConfirmationHandler {
-        return DefaultConfirmationHandler(
-            mediators = mediators,
-            coroutineScope = CoroutineScope(dispatcher),
-            errorReporter = errorReporter,
-            savedStateHandle = savedStateHandle,
-            ioContext = dispatcher
-        )
     }
 
     private fun createArguments(option: ConfirmationHandler.Option): ConfirmationHandler.Args {
@@ -880,7 +860,6 @@ class DefaultConfirmationHandlerTest {
                 confirmationOption = SomeConfirmationDefinition.Option,
                 confirmationArgs = CONFIRMATION_PARAMETERS,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
     }
@@ -1056,6 +1035,7 @@ class DefaultConfirmationHandlerTest {
             SomeOtherConfirmationDefinition.LauncherResult,
             >,
         val someOtherDefinitionOnResult: ((SomeOtherConfirmationDefinition.LauncherResult) -> Unit)?,
+        val confirmationSaverTurbine: ReceiveTurbine<Pair<StripeIntent, ConfirmationHandler.Option>>,
     )
 
     private class SomeConfirmationDefinition(

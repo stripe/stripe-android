@@ -20,7 +20,6 @@ import com.stripe.android.paymentelement.confirmation.asSucceeded
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
@@ -157,7 +156,6 @@ class CustomPaymentMethodConfirmationDefinitionTest {
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = InternalCustomPaymentMethodResult.Completed,
         )
 
@@ -166,7 +164,6 @@ class CustomPaymentMethodConfirmationDefinitionTest {
         val succeededResult = result.asSucceeded()
         assertThat(succeededResult.intent).isEqualTo(CONFIRMATION_PARAMETERS.intent)
         assertThat(succeededResult.deferredIntentConfirmationType).isNull()
-        assertThat(succeededResult.isConfirmationToken).isFalse()
         assertThat(succeededResult.completedFullPaymentFlow).isTrue()
     }
 
@@ -179,7 +176,6 @@ class CustomPaymentMethodConfirmationDefinitionTest {
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = InternalCustomPaymentMethodResult.Failed(exception),
         )
 
@@ -200,7 +196,6 @@ class CustomPaymentMethodConfirmationDefinitionTest {
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = InternalCustomPaymentMethodResult.Canceled,
         )
 
@@ -245,12 +240,9 @@ class CustomPaymentMethodConfirmationDefinitionTest {
 
     companion object {
         private val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
+            confirmationOption = FakeConfirmationOption(),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFactory.create(),
-            ),
-            confirmationOption = FakeConfirmationOption(),
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
             ),
         )
 

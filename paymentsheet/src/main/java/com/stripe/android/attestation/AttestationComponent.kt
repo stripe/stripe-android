@@ -26,19 +26,16 @@ import javax.inject.Singleton
 internal interface AttestationComponent {
     val attestationViewModel: AttestationViewModel
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun publishableKeyProvider(
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String
-        ): Builder
-
-        @BindsInstance
-        fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
-
-        fun build(): AttestationComponent
+    @Component.Factory
+    interface Factory {
+        fun build(
+            @BindsInstance application: Application,
+            @BindsInstance
+            @Named(PUBLISHABLE_KEY)
+            publishableKeyProvider: () -> String,
+            @BindsInstance
+            @Named(PRODUCT_USAGE)
+            productUsage: Set<String>,
+        ): AttestationComponent
     }
 }

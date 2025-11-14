@@ -133,7 +133,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     ConfirmationDefinition.Action.Complete(
                         intent = intent,
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
-                        isConfirmationToken = true,
                         completedFullPaymentFlow = true,
                     )
                 } else {
@@ -172,15 +171,13 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 ConfirmationDefinition.Action.Complete(
                     intent = intent,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                    isConfirmationToken = true,
                     completedFullPaymentFlow = true,
                 )
             } else if (intent.requiresAction()) {
                 ConfirmationDefinition.Action.Launch<Args>(
-                    launcherArguments = Args.NextAction(clientSecret),
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                    isConfirmationToken = true,
+                    launcherArguments = Args.NextAction(intent),
                     receivesResultInProcess = false,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                 )
             } else {
                 confirmActionHelper.createConfirmAction(
@@ -188,7 +185,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     intent,
                     shippingValues,
                     isDeferred = true,
-                    isConfirmationToken = true,
                 ) {
                     create(
                         confirmationTokenId = confirmationTokenId,
@@ -254,17 +250,18 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     private fun prepareConfirmationTokenClientContextParams(paymentMethodOptions: PaymentMethodOptionsParams?):
         ConfirmationTokenClientContextParams {
         return with(intentConfiguration.toDeferredIntentParams()) {
+            val paymentMode = (mode as? DeferredIntentParams.Mode.Payment)
+
             ConfirmationTokenClientContextParams(
                 mode = mode.code,
                 currency = mode.currency,
                 setupFutureUsage = resolveSetupFutureUsage(paymentMethodOptions),
-                captureMethod = (mode as? DeferredIntentParams.Mode.Payment)?.captureMethod?.code,
+                captureMethod = paymentMode?.captureMethod?.code,
                 paymentMethodTypes = paymentMethodTypes,
                 onBehalfOf = onBehalfOf,
                 paymentMethodConfiguration = paymentMethodConfigurationId,
                 customer = customerId,
-                paymentMethodOptions = paymentMethodOptions,
-                requireCvcRecollection = intentConfiguration.requireCvcRecollection
+                paymentMethodOptionsJson = paymentMode?.paymentMethodOptionsJsonString,
             )
         }
     }

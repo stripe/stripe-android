@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.model
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.DateOfBirth
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -20,6 +21,7 @@ internal data class KycRefreshRequest(
     @SerialName("id_type")
     val idType: String?,
     @SerialName("dob")
+    @Serializable(with = DateOfBirthSerializer::class)
     val dateOfBirth: DateOfBirth,
     @SerialName("city")
     val city: String?,
@@ -39,6 +41,11 @@ internal data class KycRefreshRequest(
     companion object Companion {
         /**
          * Converts SDK KycInfo model to an internal API refresh request model.
+         *
+         * Clearing behavior:
+         * - Any nullable property provided as `null` that is part of `address` is treated
+         *   as an explicit request to clear its previously stored value. Internally `null`
+         *   is normalized to an empty string (`""`) when encoded so the backend clears the field.
          */
         fun fromRefreshKycInfo(
             kycInfo: RefreshKycInfo,
@@ -50,12 +57,12 @@ internal data class KycRefreshRequest(
                 idNumberLastFour = kycInfo.idNumberLastFour,
                 idType = SOCIAL_SECURITY_NUMBER,
                 dateOfBirth = kycInfo.dateOfBirth,
-                city = kycInfo.address.city,
-                country = kycInfo.address.country,
-                line1 = kycInfo.address.line1,
-                line2 = kycInfo.address.line2,
-                postalCode = kycInfo.address.postalCode,
-                state = kycInfo.address.state,
+                city = kycInfo.address.city ?: "",
+                country = kycInfo.address.country ?: "",
+                line1 = kycInfo.address.line1 ?: "",
+                line2 = kycInfo.address.line2 ?: "",
+                postalCode = kycInfo.address.postalCode ?: "",
+                state = kycInfo.address.state ?: "",
                 credentials = credentials
             )
         }
