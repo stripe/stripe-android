@@ -1398,7 +1398,7 @@ class PaymentSheet internal constructor(
                     ) : Parcelable {
 
                         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                        class Builder private constructor (
+                        class Builder private constructor(
                             private var separatorColor: Int,
                             private var selectedColor: Int,
                             private var unselectedColor: Int,
@@ -1859,7 +1859,7 @@ class PaymentSheet internal constructor(
                             }
 
                             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                            fun build() : Colors {
+                            fun build(): Colors {
                                 return Colors(
                                     separatorColor = separatorColor,
                                     disclosureColor = disclosureColor
@@ -2175,28 +2175,19 @@ class PaymentSheet internal constructor(
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Suppress("TooManyFunctions")
-        class Builder {
-            @ColorInt private var primary: Int? = null
-
-            @ColorInt private var surface: Int? = null
-
-            @ColorInt private var component: Int? = null
-
-            @ColorInt private var componentBorder: Int? = null
-
-            @ColorInt private var componentDivider: Int? = null
-
-            @ColorInt private var onComponent: Int? = null
-
-            @ColorInt private var subtitle: Int? = null
-
-            @ColorInt private var placeholderText: Int? = null
-
-            @ColorInt private var onSurface: Int? = null
-
-            @ColorInt private var appBarIcon: Int? = null
-
-            @ColorInt private var error: Int? = null
+        class Builder private constructor(
+            @ColorInt private var primary: Int,
+            @ColorInt private var surface: Int,
+            @ColorInt private var component: Int,
+            @ColorInt private var componentBorder: Int,
+            @ColorInt private var componentDivider: Int,
+            @ColorInt private var onComponent: Int,
+            @ColorInt private var subtitle: Int,
+            @ColorInt private var placeholderText: Int,
+            @ColorInt private var onSurface: Int,
+            @ColorInt private var appBarIcon: Int,
+            @ColorInt private var error: Int,
+        ) {
 
             /**
              * The primary color used throughout PaymentSheet.
@@ -2421,36 +2412,51 @@ class PaymentSheet internal constructor(
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            fun buildLight(): Colors {
+            fun build(): Colors {
                 return Colors(
-                    primary = primary ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
-                    surface = surface ?: StripeThemeDefaults.colorsLight.materialColors.surface.toArgb(),
-                    component = component ?: StripeThemeDefaults.colorsLight.component.toArgb(),
-                    componentBorder = componentBorder ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                    componentDivider = componentDivider ?: StripeThemeDefaults.colorsLight.componentDivider.toArgb(),
-                    onComponent = onComponent ?: StripeThemeDefaults.colorsLight.onComponent.toArgb(),
-                    subtitle = subtitle ?: StripeThemeDefaults.colorsLight.subtitle.toArgb(),
-                    placeholderText = placeholderText ?: StripeThemeDefaults.colorsLight.placeholderText.toArgb(),
-                    onSurface = onSurface ?: StripeThemeDefaults.colorsLight.materialColors.onSurface.toArgb(),
-                    appBarIcon = appBarIcon ?: StripeThemeDefaults.colorsLight.appBarIcon.toArgb(),
-                    error = error ?: StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
+                    primary = primary,
+                    surface = surface,
+                    component = component,
+                    componentBorder = componentBorder,
+                    componentDivider = componentDivider,
+                    onComponent = onComponent,
+                    subtitle = subtitle,
+                    placeholderText = placeholderText,
+                    onSurface = onSurface,
+                    appBarIcon = appBarIcon,
+                    error = error
                 )
             }
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            fun buildDark(): Colors {
-                return Colors(
-                    primary = primary ?: StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
-                    surface = surface ?: StripeThemeDefaults.colorsDark.materialColors.surface.toArgb(),
-                    component = component ?: StripeThemeDefaults.colorsDark.component.toArgb(),
-                    componentBorder = componentBorder ?: StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                    componentDivider = componentDivider ?: StripeThemeDefaults.colorsDark.componentDivider.toArgb(),
-                    onComponent = onComponent ?: StripeThemeDefaults.colorsDark.onComponent.toArgb(),
-                    subtitle = subtitle ?: StripeThemeDefaults.colorsDark.subtitle.toArgb(),
-                    placeholderText = placeholderText ?: StripeThemeDefaults.colorsDark.placeholderText.toArgb(),
-                    onSurface = onSurface ?: StripeThemeDefaults.colorsDark.materialColors.onSurface.toArgb(),
-                    appBarIcon = appBarIcon ?: StripeThemeDefaults.colorsDark.appBarIcon.toArgb(),
-                    error = error ?: StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
+            companion object {
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                fun light(): Builder = Builder(
+                    primary = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
+                    surface = StripeThemeDefaults.colorsLight.materialColors.surface.toArgb(),
+                    component = StripeThemeDefaults.colorsLight.component.toArgb(),
+                    componentBorder = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                    componentDivider = StripeThemeDefaults.colorsLight.componentDivider.toArgb(),
+                    onComponent = StripeThemeDefaults.colorsLight.onComponent.toArgb(),
+                    subtitle = StripeThemeDefaults.colorsLight.subtitle.toArgb(),
+                    placeholderText = StripeThemeDefaults.colorsLight.placeholderText.toArgb(),
+                    onSurface = StripeThemeDefaults.colorsLight.materialColors.onSurface.toArgb(),
+                    appBarIcon = StripeThemeDefaults.colorsLight.appBarIcon.toArgb(),
+                    error = StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
+                )
+
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                fun dark(): Builder = Builder(
+                    primary = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
+                    surface = StripeThemeDefaults.colorsDark.materialColors.surface.toArgb(),
+                    component = StripeThemeDefaults.colorsDark.component.toArgb(),
+                    componentBorder = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                    componentDivider = StripeThemeDefaults.colorsDark.componentDivider.toArgb(),
+                    onComponent = StripeThemeDefaults.colorsDark.onComponent.toArgb(),
+                    subtitle = StripeThemeDefaults.colorsDark.subtitle.toArgb(),
+                    placeholderText = StripeThemeDefaults.colorsDark.placeholderText.toArgb(),
+                    onSurface = StripeThemeDefaults.colorsDark.materialColors.onSurface.toArgb(),
+                    appBarIcon = StripeThemeDefaults.colorsDark.appBarIcon.toArgb(),
+                    error = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
                 )
             }
         }
