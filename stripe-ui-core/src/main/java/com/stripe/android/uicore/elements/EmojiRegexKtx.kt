@@ -60,7 +60,9 @@ private const val EmojiPresentation =
         "\\uD83D\\uDE80-\\uD83D\\uDFF0" +
         "\\uD83E\\uDD0C-\\uD83E\\uDDFF" +
         "\\uD83E\\uDE70-\\uD83E\\uDEF8" +
+        "\\uD83C\\uDC00-\\uD83F\\uDFFD" +
         "]|" +
+        "[\\uD83C\\uDC00\\uFE0F-\\uD83F\\uDFFD\\uFE0F]|" +
         "[\\u0023\\u002A\\u0030-\\u0039]\\uFE0F\\u20E3"
 
 /*
