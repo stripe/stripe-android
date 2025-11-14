@@ -2,13 +2,11 @@
 
 package com.stripe.android.paymentmethodmessaging.element
 
-import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
-import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networktesting.NetworkRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,11 +27,10 @@ internal fun runPaymentMethodMessagingElementTest(
     networkRule: NetworkRule,
     block: suspend (PaymentMethodMessagingElementTestRunnerContext) -> Unit
 ) {
-    val application = ApplicationProvider.getApplicationContext<Application>()
-    PaymentConfiguration.init(application, "pk_test_123")
-    val element = PaymentMethodMessagingElement.create(application)
     val factory: (ComponentActivity) -> PaymentMethodMessagingElement = {
+        lateinit var element: PaymentMethodMessagingElement
         it.setContent {
+            element = PaymentMethodMessagingElement.create(it.application)
             Column {
                 element.Content()
             }
@@ -46,6 +43,7 @@ internal fun runPaymentMethodMessagingElementTest(
 
         lateinit var paymentMethodMessagingElement: PaymentMethodMessagingElement
         scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
             paymentMethodMessagingElement = factory(it)
         }
 
