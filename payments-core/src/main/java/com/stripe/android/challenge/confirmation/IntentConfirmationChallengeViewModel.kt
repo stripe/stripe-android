@@ -36,6 +36,12 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
         }
     }
 
+    fun handleWebViewError(error: WebViewError) {
+        viewModelScope.launch {
+            _result.emit(IntentConfirmationChallengeActivityResult.Failed(error))
+        }
+    }
+
     private suspend fun listenToEvents() {
         bridgeHandler.event.collectLatest { event ->
             when (event) {

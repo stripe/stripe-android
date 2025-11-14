@@ -2,6 +2,7 @@ package com.stripe.android.challenge.confirmation
 
 import android.content.Context
 import android.view.ViewGroup
+import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.CircularProgressIndicator
@@ -13,8 +14,10 @@ import androidx.compose.ui.viewinterop.AndroidView
 
 @Composable
 internal fun IntentConfirmationChallengeUI(
+    hostUrl: String,
     bridgeHandler: ConfirmationChallengeBridgeHandler,
     showProgressIndicator: Boolean,
+    webViewClientFactory: () -> WebViewClient,
     webViewFactory: (Context) -> IntentConfirmationChallengeWebView = { context ->
         IntentConfirmationChallengeWebView(
             context = context
@@ -38,8 +41,9 @@ internal fun IntentConfirmationChallengeUI(
                 .testTag(INTENT_CONFIRMATION_CHALLENGE_WEB_VIEW_TAG),
             factory = { context ->
                 webViewFactory(context).apply {
+                    this.webViewClient = webViewClientFactory()
                     addBridgeHandler(bridgeHandler)
-                    loadUrl("http://10.0.2.2:3004")
+                    loadUrl(hostUrl)
                 }
             },
             update = { view ->
