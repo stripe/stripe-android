@@ -71,8 +71,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
+@Singleton
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     internal val args: PaymentSheetContract.Args,
@@ -264,7 +266,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             // PaymentSheet and return a `Completed` result to the caller.
             handlePaymentCompleted(
                 deferredIntentConfirmationType = pendingResult.deferredIntentConfirmationType,
-                isConfirmationToken = pendingResult.isConfirmationToken,
                 finishImmediately = true,
             )
         } else if (state.validationError != null) {
@@ -562,14 +563,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun handlePaymentCompleted(
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         finishImmediately: Boolean,
-        isConfirmationToken: Boolean
     ) {
         val currentSelection = inProgressSelection
         currentSelection?.let { paymentSelection ->
             eventReporter.onPaymentSuccess(
                 paymentSelection = paymentSelection,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
-                isConfirmationToken = isConfirmationToken,
             )
         }
 
@@ -593,7 +592,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> handlePaymentCompleted(
                 deferredIntentConfirmationType = result.deferredIntentConfirmationType,
-                isConfirmationToken = result.isConfirmationToken,
                 finishImmediately = false,
             )
             is ConfirmationHandler.Result.Failed -> processConfirmationFailure(result)

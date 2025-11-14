@@ -32,9 +32,8 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         val nextStep: ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> =
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = IntentConfirmationDefinition.Args.Confirm(confirmParams),
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Client.takeIf { isDeferred },
-                isConfirmationToken = false,
                 receivesResultInProcess = false,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Client.takeIf { isDeferred },
             )
         channel.trySend(nextStep)
     }
@@ -52,7 +51,6 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
                 } else {
                     DeferredIntentConfirmationType.Server
                 },
-                isConfirmationToken = false,
                 completedFullPaymentFlow = completedFullPaymentFlow,
             )
         )
@@ -62,9 +60,8 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         channel.trySend(
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = IntentConfirmationDefinition.Args.NextAction(intent),
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                isConfirmationToken = false,
                 receivesResultInProcess = false,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
             )
         )
     }

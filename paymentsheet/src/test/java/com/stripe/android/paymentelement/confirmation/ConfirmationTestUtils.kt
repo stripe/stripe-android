@@ -79,7 +79,6 @@ internal fun <
                 confirmationOption = confirmationOption,
                 confirmationArgs = parameters,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
     }

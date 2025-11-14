@@ -77,9 +77,8 @@ class LinkConfirmationFlowTest {
                 "LinkParameters",
                 Parameters(
                     confirmationOption = LINK_CONFIRMATION_OPTION,
-                    deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                     confirmationArgs = CONFIRMATION_PARAMETERS,
+                    deferredIntentConfirmationType = null,
                 )
             )
         }

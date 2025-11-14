@@ -18,7 +18,6 @@ internal class ConfirmActionHelper(private val isLiveMode: Boolean) {
         intent: StripeIntent,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         isDeferred: Boolean,
-        isConfirmationToken: Boolean,
         confirmParamsCreation:
         ConfirmStripeIntentParamsFactory<ConfirmStripeIntentParams>.() -> ConfirmStripeIntentParams
     ): ConfirmationDefinition.Action<Args> {
@@ -35,9 +34,8 @@ internal class ConfirmActionHelper(private val isLiveMode: Boolean) {
         val confirmParams = factory.confirmParamsCreation()
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = Args.Confirm(confirmParams),
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client.takeIf { isDeferred },
-            isConfirmationToken = isConfirmationToken,
             receivesResultInProcess = false,
+            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client.takeIf { isDeferred },
         )
     }
 

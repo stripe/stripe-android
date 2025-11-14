@@ -156,7 +156,6 @@ class CustomPaymentMethodConfirmationDefinitionTest {
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = InternalCustomPaymentMethodResult.Completed,
         )
 
@@ -165,7 +164,6 @@ class CustomPaymentMethodConfirmationDefinitionTest {
         val succeededResult = result.asSucceeded()
         assertThat(succeededResult.intent).isEqualTo(CONFIRMATION_PARAMETERS.intent)
         assertThat(succeededResult.deferredIntentConfirmationType).isNull()
-        assertThat(succeededResult.isConfirmationToken).isFalse()
         assertThat(succeededResult.completedFullPaymentFlow).isTrue()
     }
 
@@ -178,7 +176,6 @@ class CustomPaymentMethodConfirmationDefinitionTest {
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = InternalCustomPaymentMethodResult.Failed(exception),
         )
 
@@ -199,7 +196,6 @@ class CustomPaymentMethodConfirmationDefinitionTest {
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = InternalCustomPaymentMethodResult.Canceled,
         )
 

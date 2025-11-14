@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import android.content.Context
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -28,4 +29,9 @@ internal class PaymentOptionsViewModelModule {
     @Provides
     @Named(PRODUCT_USAGE)
     fun provideProductUsage(args: PaymentOptionContract.Args): Set<String> = args.productUsage
+
+    @Provides
+    fun providePaymentMethodMetadata(args: PaymentOptionContract.Args): PaymentMethodMetadata {
+        return args.state.paymentMethodMetadata
+    }
 }

@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentsheet.PaymentSheet
 import javax.inject.Inject
@@ -19,6 +20,7 @@ internal class ShopPayActivityContract @Inject constructor(
         return ShopPayActivity.createIntent(
             context,
             ShopPayArgs(
+                paymentMethodMetadata = input.paymentMethodMetadata,
                 shopPayConfiguration = input.shopPayConfiguration,
                 publishableKey = configuration.publishableKey,
                 stripeAccountId = configuration.stripeAccountId,
@@ -37,6 +39,7 @@ internal class ShopPayActivityContract @Inject constructor(
     }
 
     data class Args(
+        val paymentMethodMetadata: PaymentMethodMetadata,
         val shopPayConfiguration: PaymentSheet.ShopPayConfiguration,
         val customerSessionClientSecret: String,
         val businessName: String

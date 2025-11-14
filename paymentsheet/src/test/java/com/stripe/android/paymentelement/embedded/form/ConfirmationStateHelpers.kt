@@ -21,7 +21,6 @@ internal fun confirmationStateComplete(succeeded: Boolean): ConfirmationHandler.
         ConfirmationHandler.Result.Succeeded(
             PaymentIntentFixtures.PI_SUCCEEDED,
             null,
-            false,
         )
     } else {
         ConfirmationHandler.Result.Failed(

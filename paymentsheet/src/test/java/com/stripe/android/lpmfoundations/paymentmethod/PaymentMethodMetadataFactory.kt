@@ -63,6 +63,7 @@ internal object PaymentMethodMetadataFactory {
         appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
         onBehalfOf: String? = null,
         integrationMetadata: IntegrationMetadata = stripeIntent.integrationMetadata(),
+        sellerBusinessName: String? = null,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -74,7 +75,7 @@ internal object PaymentMethodMetadataFactory {
             paymentMethodOrder = paymentMethodOrder,
             cbcEligibility = cbcEligibility,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-            sellerBusinessName = null,
+            sellerBusinessName = sellerBusinessName,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             customerMetadata = if (hasCustomerConfiguration) {

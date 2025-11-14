@@ -200,7 +200,6 @@ internal class DefaultConfirmationHandler(
                         intent = action.intent,
                         deferredIntentConfirmationType = action.deferredIntentConfirmationType,
                         completedFullPaymentFlow = action.completedFullPaymentFlow,
-                        isConfirmationToken = action.isConfirmationToken,
                     )
                 )
             }
@@ -226,7 +225,6 @@ internal class DefaultConfirmationHandler(
                 intent = result.intent,
                 deferredIntentConfirmationType = result.deferredIntentConfirmationType,
                 completedFullPaymentFlow = result.completedFullPaymentFlow,
-                isConfirmationToken = result.isConfirmationToken,
             )
             is ConfirmationDefinition.Result.Failed -> ConfirmationHandler.Result.Failed(
                 cause = result.cause,

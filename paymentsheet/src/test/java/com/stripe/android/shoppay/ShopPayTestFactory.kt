@@ -1,6 +1,7 @@
 package com.stripe.android.shoppay
 
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.shoppay.bridge.ECEBillingDetails
 import com.stripe.android.shoppay.bridge.ECEDeliveryEstimate
 import com.stripe.android.shoppay.bridge.ECEFullAddress
@@ -81,6 +82,10 @@ internal object ShopPayTestFactory {
     )
 
     val SHOP_PAY_ARGS = ShopPayArgs(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            sellerBusinessName = "Test Business",
+            shopPayConfiguration = SHOP_PAY_CONFIGURATION,
+        ),
         publishableKey = "pk_1234",
         shopPayConfiguration = SHOP_PAY_CONFIGURATION,
         customerSessionClientSecret = "css_test_123",

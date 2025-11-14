@@ -170,6 +170,13 @@ internal interface EmbeddedPaymentElementViewModelModule {
         }
 
         @Provides
+        fun providePaymentMethodMetadataValue(
+            confirmationStateHolder: EmbeddedConfirmationStateHolder,
+        ): PaymentMethodMetadata? {
+            return confirmationStateHolder.state?.paymentMethodMetadata
+        }
+
+        @Provides
         @Named(IS_LIVE_MODE)
         fun providesIsLiveMode(
             paymentConfiguration: Provider<PaymentConfiguration>

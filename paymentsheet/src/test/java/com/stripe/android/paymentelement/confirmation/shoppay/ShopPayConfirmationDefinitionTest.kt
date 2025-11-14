@@ -141,7 +141,6 @@ internal class ShopPayConfirmationDefinitionTest {
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = ShopPayActivityResult.Completed,
         )
 
@@ -151,7 +150,6 @@ internal class ShopPayConfirmationDefinitionTest {
 
         assertThat(succeededResult.intent).isEqualTo(CONFIRMATION_PARAMETERS.intent)
         assertThat(succeededResult.deferredIntentConfirmationType).isNull()
-        assertThat(succeededResult.isConfirmationToken).isFalse()
         assertThat(succeededResult.completedFullPaymentFlow).isFalse()
     }
 
@@ -164,7 +162,6 @@ internal class ShopPayConfirmationDefinitionTest {
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = ShopPayActivityResult.Failed(exception),
         )
 
@@ -185,7 +182,6 @@ internal class ShopPayConfirmationDefinitionTest {
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = ShopPayActivityResult.Canceled,
         )
 
@@ -205,7 +201,6 @@ internal class ShopPayConfirmationDefinitionTest {
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = ShopPayActivityResult.Failed(exception),
         )
 

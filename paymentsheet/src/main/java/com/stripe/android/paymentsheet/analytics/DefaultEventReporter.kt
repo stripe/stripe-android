@@ -10,6 +10,8 @@ import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.LinkMode
@@ -49,10 +51,15 @@ internal class DefaultEventReporter @Inject internal constructor(
     private val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>,
     @IOContext private val workContext: CoroutineContext,
     private val logger: UserFacingLogger,
+    private val paymentMethodMetadataProvider: Provider<PaymentMethodMetadata?>,
 ) : EventReporter, LoadingEventReporter {
 
-    private var isDeferred: Boolean = false
-    private var isSpt: Boolean = false
+    private var isDeferredValue: Boolean = false
+    private val isDeferred: Boolean
+        get() = paymentMethodMetadataProvider.get()?.integrationMetadata?.isDeferred() ?: isDeferredValue
+    private var isSptValue: Boolean = false
+    private val isSpt: Boolean
+        get() = paymentMethodMetadataProvider.get()?.integrationMetadata?.isSpt() ?: isDeferredValue
     private var linkEnabled: Boolean = false
     private var linkMode: LinkMode? = null
     private var googlePaySupported: Boolean = false
@@ -72,7 +79,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         configurationSpecificPayload: PaymentSheetEvent.ConfigurationSpecificPayload,
         isDeferred: Boolean,
     ) {
-        this.isDeferred = isDeferred
+        this.isDeferredValue = isDeferred
 
         fireEvent(
             PaymentSheetEvent.Init(
@@ -82,7 +89,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 primaryButtonColor = primaryButtonColor,
                 configurationSpecificPayload = configurationSpecificPayload,
                 isDeferred = isDeferred,
-                isSpt = isSpt,
+                isSpt = isSptValue,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 isAnalyticEventCallbackSet = analyticEventCallbackProvider.get() != null,
@@ -125,7 +132,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         this.currency = currency
         this.linkEnabled = linkEnabled
         this.linkMode = linkMode
-        this.isSpt = initializationMode is PaymentElementLoader.InitializationMode.DeferredIntent &&
+        this.isSptValue = initializationMode is PaymentElementLoader.InitializationMode.DeferredIntent &&
             initializationMode.intentConfiguration.intentBehavior is
             PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken
         this.googlePaySupported = googlePaySupported
@@ -382,7 +389,6 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onPaymentSuccess(
         paymentSelection: PaymentSelection,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        isConfirmationToken: Boolean,
     ) {
         // Wallets are treated as a saved payment method after confirmation, so we need
         // to "reset" to the correct PaymentSelection for accurate reporting.
@@ -391,6 +397,9 @@ internal class DefaultEventReporter @Inject internal constructor(
         val realSelection = savedSelection?.walletType?.paymentSelection ?: paymentSelection
         val duration = durationProvider.end(DurationProvider.Key.Checkout)
 
+        val isConfirmationToken = paymentMethodMetadataProvider.get()?.integrationMetadata is
+            IntegrationMetadata.DeferredIntentWithConfirmationToken
+
         fireEvent(
             PaymentSheetEvent.Payment(
                 mode = mode,
@@ -398,7 +407,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 duration = duration,
                 result = PaymentSheetEvent.Payment.Result.Success,
                 currency = currency,
-                isDeferred = deferredIntentConfirmationType != null,
+                isDeferred = isDeferred,
                 isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
@@ -414,6 +423,9 @@ internal class DefaultEventReporter @Inject internal constructor(
     ) {
         val duration = durationProvider.end(DurationProvider.Key.Checkout)
 
+        val isConfirmationToken = paymentMethodMetadataProvider.get()?.integrationMetadata is
+            IntegrationMetadata.DeferredIntentWithConfirmationToken
+
         fireEvent(
             PaymentSheetEvent.Payment(
                 mode = mode,
@@ -422,7 +434,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 result = PaymentSheetEvent.Payment.Result.Failure(error),
                 currency = currency,
                 isDeferred = isDeferred,
-                isConfirmationToken = null,
+                isConfirmationToken = isConfirmationToken,
                 isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
@@ -810,4 +822,17 @@ internal class DefaultEventReporter @Inject internal constructor(
         @Volatile
         var analyticEventCoroutineContext: CoroutineContext? = null
     }
+}
+
+private fun IntegrationMetadata.isSpt(): Boolean {
+    return this is IntegrationMetadata.DeferredIntentWithSharedPaymentToken
+}
+
+private fun IntegrationMetadata.isDeferred(): Boolean = when (this) {
+    is IntegrationMetadata.IntentFirst -> false
+    IntegrationMetadata.CryptoOnramp -> true
+    IntegrationMetadata.CustomerSheet -> true
+    is IntegrationMetadata.DeferredIntentWithConfirmationToken -> true
+    is IntegrationMetadata.DeferredIntentWithPaymentMethod -> true
+    is IntegrationMetadata.DeferredIntentWithSharedPaymentToken -> true
 }

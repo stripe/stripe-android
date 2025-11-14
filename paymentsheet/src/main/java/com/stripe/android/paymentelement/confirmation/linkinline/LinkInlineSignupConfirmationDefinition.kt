@@ -45,7 +45,6 @@ internal class LinkInlineSignupConfirmationDefinition(
             launcherArguments = LauncherArguments(nextConfirmationOption),
             receivesResultInProcess = true,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
         )
     }
 
@@ -69,7 +68,6 @@ internal class LinkInlineSignupConfirmationDefinition(
         confirmationOption: LinkInlineSignupConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        isConfirmationToken: Boolean,
         result: Result,
     ): ConfirmationDefinition.Result {
         return ConfirmationDefinition.Result.NextStep(

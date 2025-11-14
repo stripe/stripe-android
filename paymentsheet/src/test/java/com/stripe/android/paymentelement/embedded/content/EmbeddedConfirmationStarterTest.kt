@@ -89,7 +89,6 @@ class EmbeddedConfirmationStarterTest {
                 result = ConfirmationHandler.Result.Succeeded(
                     intent = intent,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 ),
             ),
         ) {
