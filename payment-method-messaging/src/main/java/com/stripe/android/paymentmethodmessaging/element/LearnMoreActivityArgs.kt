@@ -10,6 +10,7 @@ import kotlinx.parcelize.Parcelize
 @OptIn(PaymentMethodMessagingElementPreview::class)
 internal data class LearnMoreActivityArgs(
     val learnMoreUrl: String,
+    val theme: PaymentMethodMessagingElement.Appearance.Theme
 ) : Parcelable {
     companion object {
         private const val LEARN_MORE_ARGS: String = "learn_more_args"
@@ -32,7 +33,7 @@ internal data class LearnMoreActivityArgs(
                 PaymentMethodMessagingElement.Appearance.Theme.DARK -> "&theme=night"
                 PaymentMethodMessagingElement.Appearance.Theme.FLAT -> "&theme=flat"
             }
-            return LearnMoreActivityArgs(url + themeParam)
+            return LearnMoreActivityArgs(url + themeParam, theme)
         }
     }
 }
