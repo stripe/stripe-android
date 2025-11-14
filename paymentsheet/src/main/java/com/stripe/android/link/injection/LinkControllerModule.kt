@@ -11,6 +11,8 @@ import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.DefaultLinkConfigurationLoader
 import com.stripe.android.link.LinkConfigurationLoader
+import com.stripe.android.link.LinkControllerInteractor
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
@@ -53,6 +55,12 @@ internal interface LinkControllerModule {
         @Provides
         @Singleton
         fun provideAppContext(application: Application): Context = application.applicationContext
+
+        @Provides
+        @Singleton
+        fun providePaymentMethodMetadata(interactor: LinkControllerInteractor): PaymentMethodMetadata? {
+            return interactor.paymentMethodMetadata
+        }
 
         // TODO
         @Provides

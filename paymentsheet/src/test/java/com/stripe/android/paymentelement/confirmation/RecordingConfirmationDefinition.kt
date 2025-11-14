@@ -50,7 +50,6 @@ internal class RecordingConfirmationDefinition<
         confirmationOption: TConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        isConfirmationToken: Boolean,
         result: TLauncherResult
     ): ConfirmationDefinition.Result {
         toResultCalls.add(
@@ -66,7 +65,6 @@ internal class RecordingConfirmationDefinition<
             confirmationOption = confirmationOption,
             confirmationArgs = confirmationArgs,
             deferredIntentConfirmationType = deferredIntentConfirmationType,
-            isConfirmationToken = isConfirmationToken,
             result = result
         )
     }

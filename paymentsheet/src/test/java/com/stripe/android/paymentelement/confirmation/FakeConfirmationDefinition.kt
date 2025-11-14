@@ -54,7 +54,6 @@ internal abstract class FakeConfirmationDefinition<
         confirmationOption: TConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        isConfirmationToken: Boolean,
         result: TLauncherResult
     ): ConfirmationDefinition.Result {
         return this.result

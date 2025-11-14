@@ -154,7 +154,6 @@ internal interface EventReporter : CardScanEventsReporter {
     fun onPaymentSuccess(
         paymentSelection: PaymentSelection,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        isConfirmationToken: Boolean,
     )
 
     /**

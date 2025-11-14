@@ -154,7 +154,6 @@ internal interface ConfirmationHandler {
         data class Succeeded(
             val intent: StripeIntent,
             val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-            val isConfirmationToken: Boolean,
             val completedFullPaymentFlow: Boolean = true,
         ) : Result {
             override fun log(logger: Logger) {

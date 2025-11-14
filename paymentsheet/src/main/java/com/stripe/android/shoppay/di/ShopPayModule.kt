@@ -12,6 +12,7 @@ import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.AnalyticEventCallback
@@ -92,6 +93,11 @@ internal interface ShopPayModule {
     ): AnalyticsRequestFactory
 
     companion object {
+        @Provides
+        fun providePaymentMethodMetadata(args: ShopPayArgs): PaymentMethodMetadata {
+            return args.paymentMethodMetadata
+        }
+
         @OptIn(ShopPayPreview::class)
         @Provides
         fun provideShopPayHandlers(

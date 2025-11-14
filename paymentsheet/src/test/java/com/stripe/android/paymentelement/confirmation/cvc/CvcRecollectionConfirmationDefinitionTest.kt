@@ -174,7 +174,6 @@ class CvcRecollectionConfirmationDefinitionTest {
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = CvcRecollectionResult.Confirmed(
                 cvc = "444",
             ),
@@ -209,7 +208,6 @@ class CvcRecollectionConfirmationDefinitionTest {
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = CvcRecollectionResult.Confirmed(
                 cvc = "555",
             ),
@@ -241,7 +239,6 @@ class CvcRecollectionConfirmationDefinitionTest {
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = CvcRecollectionResult.Cancelled,
         )
 

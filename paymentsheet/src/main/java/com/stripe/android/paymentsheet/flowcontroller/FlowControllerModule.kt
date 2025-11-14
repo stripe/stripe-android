@@ -10,6 +10,7 @@ import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -127,6 +128,11 @@ internal object FlowControllerModule {
     @Named(IS_LIVE_MODE)
     fun provideIsLiveMode(paymentConfiguration: Provider<PaymentConfiguration>): () -> Boolean {
         return { paymentConfiguration.get().isLiveMode() }
+    }
+
+    @Provides
+    fun providePaymentMethodMetadata(viewModel: FlowControllerViewModel): PaymentMethodMetadata? {
+        return viewModel.state?.paymentSheetState?.paymentMethodMetadata
     }
 
     @Module
