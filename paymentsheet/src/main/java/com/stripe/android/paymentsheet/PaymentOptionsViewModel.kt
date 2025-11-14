@@ -418,17 +418,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
             val savedStateHandle = extras.createSavedStateHandle()
             val starterArgs = starterArgsSupplier()
 
-            val component = DaggerPaymentOptionsViewModelFactoryComponent.builder()
-                .application(application)
-                .context(application)
-                .productUsage(starterArgs.productUsage)
-                .savedStateHandle(savedStateHandle)
-                .paymentElementCallbackIdentifier(starterArgs.paymentElementCallbackIdentifier)
-                .build()
-                .paymentOptionsViewModelSubcomponentBuilder
-                .application(application)
-                .args(starterArgs)
-                .build()
+            val component = DaggerPaymentOptionsViewModelFactoryComponent.factory()
+                .build(
+                    application = application,
+                    handle = savedStateHandle,
+                    args = starterArgs,
+                )
 
             return component.viewModel as T
         }

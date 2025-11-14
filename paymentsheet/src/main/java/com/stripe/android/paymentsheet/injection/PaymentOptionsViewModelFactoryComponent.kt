@@ -1,18 +1,16 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
-import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
-import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
+import com.stripe.android.paymentsheet.PaymentOptionContract
+import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
@@ -28,27 +26,17 @@ import javax.inject.Singleton
     ]
 )
 internal interface PaymentOptionsViewModelFactoryComponent {
-    val paymentOptionsViewModelSubcomponentBuilder: PaymentOptionsViewModelSubcomponent.Builder
+    val viewModel: PaymentOptionsViewModel
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun savedStateHandle(handle: SavedStateHandle): Builder
-
-        @BindsInstance
-        fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
-
-        @BindsInstance
-        fun paymentElementCallbackIdentifier(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String
-        ): Builder
-
-        fun build(): PaymentOptionsViewModelFactoryComponent
+    @Component.Factory
+    interface Factory {
+        fun build(
+            @BindsInstance
+            application: Application,
+            @BindsInstance
+            handle: SavedStateHandle,
+            @BindsInstance
+            args: PaymentOptionContract.Args,
+        ): PaymentOptionsViewModelFactoryComponent
     }
 }

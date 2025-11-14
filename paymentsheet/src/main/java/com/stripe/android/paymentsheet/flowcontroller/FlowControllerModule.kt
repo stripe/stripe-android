@@ -17,7 +17,6 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.FLOW_CONTROLLER_LINK_LAUNCHER
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.WALLETS_BUTTON_LINK_LAUNCHER
-import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.DefaultWalletButtonsInteractor
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -32,9 +31,6 @@ import javax.inject.Singleton
 @Module(
     includes = [
         FlowControllerModule.Bindings::class,
-    ],
-    subcomponents = [
-        PaymentOptionsViewModelSubcomponent::class,
     ]
 )
 internal object FlowControllerModule {
