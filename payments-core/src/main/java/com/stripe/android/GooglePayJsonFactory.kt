@@ -523,7 +523,8 @@ class GooglePayJsonFactory internal constructor(
     }
 
     @Parcelize
-    internal data class SoftwareInfo(
+    @Poko
+    internal class SoftwareInfo(
         val id: SoftwareId
     ) : Parcelable {
         /**
@@ -552,7 +553,7 @@ class GooglePayJsonFactory internal constructor(
      */
     @Parcelize
     @Poko
-    class MerchantInfo(
+    class MerchantInfo internal constructor(
         /**
          * Merchant name encoded as UTF-8. Merchant name is rendered in the payment sheet.
          * In TEST environment, or if a merchant isn't recognized, a "Pay Unverified Merchant"
