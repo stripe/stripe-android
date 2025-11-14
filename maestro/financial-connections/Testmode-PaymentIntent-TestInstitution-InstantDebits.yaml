@@ -48,7 +48,7 @@ tags:
     timeout: 60000
 - tapOn: "Success"
 - tapOn: "Connect account"
-- assertVisible: "Your account was connected."
+- assertVisible: "Your account was connected"
 - tapOn:
     id: "done_button"
 - scrollUntilVisible:
@@ -72,7 +72,7 @@ tags:
 # Select previously networked account and complete
 - tapOn: "Success"
 - tapOn: "Connect account"
-- assertVisible: "Your account was connected."
+- assertVisible: "Your account was connected"
 - tapOn:
     id: "done_button"
 - scrollUntilVisible:

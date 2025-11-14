@@ -203,7 +203,7 @@ private fun LazyListScope.accountPickerContent(
         } else {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = "Retrieving accounts",
+                text = stringResource(R.string.stripe_account_picker_retrieving_accounts),
                 style = FinancialConnectionsTheme.typography.headingXLarge
             )
         }
