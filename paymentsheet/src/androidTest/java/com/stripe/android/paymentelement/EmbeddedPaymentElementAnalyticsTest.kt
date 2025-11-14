@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -17,7 +18,6 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.clientAttributionMetadataParamsForDeferredIntent
-import com.stripe.android.paymentsheet.utils.AdvancedFraudSignalsTestRule
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
