@@ -1428,6 +1428,7 @@ class PaymentSheet internal constructor(
                                 this.unselectedColor = color
                             }
 
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun build(): Colors {
                                 return Colors(
                                     separatorColor = separatorColor,
@@ -1436,6 +1437,7 @@ class PaymentSheet internal constructor(
                                 )
                             }
 
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             companion object {
 
                                 /**
@@ -1611,6 +1613,7 @@ class PaymentSheet internal constructor(
                                 )
                             }
 
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             companion object {
 
                                 /**
@@ -1866,13 +1869,20 @@ class PaymentSheet internal constructor(
                                 )
                             }
 
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             companion object {
+                                /**
+                                 * Creates a [Builder] prepopulated with default light mode values.
+                                 */
                                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                                 fun light(): Builder = Builder(
                                     separatorColor = StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
                                     disclosureColor = StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
                                 )
 
+                                /**
+                                 * Creates a [Builder] prepopulated with default dark mode values.
+                                 */
                                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                                 fun dark(): Builder = Builder(
                                     separatorColor = StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
@@ -2428,7 +2438,11 @@ class PaymentSheet internal constructor(
                 )
             }
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             companion object {
+                /**
+                 * Creates a [Builder] prepopulated with default light mode values.
+                 */
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 fun light(): Builder = Builder(
                     primary = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
@@ -2444,6 +2458,9 @@ class PaymentSheet internal constructor(
                     error = StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
                 )
 
+                /**
+                 * Creates a [Builder] prepopulated with default dark mode values.
+                 */
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 fun dark(): Builder = Builder(
                     primary = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
@@ -2964,6 +2981,7 @@ class PaymentSheet internal constructor(
                 )
             }
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             companion object {
 
                 /**
