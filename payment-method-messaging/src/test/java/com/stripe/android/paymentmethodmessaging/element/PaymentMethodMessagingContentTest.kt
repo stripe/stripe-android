@@ -14,6 +14,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElement.Appearance.Theme
 import com.stripe.android.paymentmethodmessaging.element.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
@@ -75,7 +76,8 @@ internal class PaymentMethodMessagingContentTest {
                     hasExtra(
                         "learn_more_args",
                         LearnMoreActivityArgs(
-                            learnMoreUrl = "www.test.com&theme=stripe"
+                            learnMoreUrl = "www.test.com&theme=stripe",
+                            theme = Theme.LIGHT
                         )
                     ),
                     hasComponent(LearnMoreActivity::class.java.name),
