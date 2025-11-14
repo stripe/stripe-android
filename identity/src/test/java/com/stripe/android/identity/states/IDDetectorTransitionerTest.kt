@@ -72,14 +72,16 @@ internal class IDDetectorTransitionerTest {
             isFromLegacyDetector = true
         )
 
-        // send a low IOU result
-        assertThat(
-            transitioner.transitionFromFound(
-                foundState,
-                mock(),
-                createLegacyAnalyzerOutputWithLowIOU(BLURRY_ID_FRONT_OUTPUT)
-            )
-        ).isSameInstanceAs(foundState)
+        // send a low IOU result with blur
+        val resultState = transitioner.transitionFromFound(
+            foundState,
+            mock(),
+            createLegacyAnalyzerOutputWithLowIOU(BLURRY_ID_FRONT_OUTPUT)
+        )
+        assertThat(resultState).isInstanceOf(IdentityScanState.Found::class.java)
+        assertThat(resultState).isNotSameInstanceAs(foundState)
+        assertThat((resultState as IdentityScanState.Found).feedbackRes)
+            .isEqualTo(com.stripe.android.identity.R.string.stripe_reduce_blur)
 
         // verify timer is reset
         assertThat(foundState.reachedStateAt).isNotSameInstanceAs(mockReachedStateAt)
