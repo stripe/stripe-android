@@ -1398,7 +1398,7 @@ class PaymentSheet internal constructor(
                     ) : Parcelable {
 
                         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                        class Builder internal constructor (
+                        class Builder private constructor (
                             private var separatorColor: Int,
                             private var selectedColor: Int,
                             private var unselectedColor: Int,
@@ -1582,7 +1582,7 @@ class PaymentSheet internal constructor(
                     ) : Parcelable {
 
                         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                        class Builder internal constructor(
+                        class Builder private constructor(
                             private var separatorColor: Int,
                             private var checkmarkColor: Int,
                         ) {
@@ -2829,7 +2829,7 @@ class PaymentSheet internal constructor(
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Suppress("TooManyFunctions")
-        class Builder internal constructor(
+        class Builder private constructor(
             @ColorInt private var background: Int?,
             @ColorInt private var onBackground: Int,
             @ColorInt private var border: Int,
