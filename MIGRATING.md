@@ -80,10 +80,10 @@ APIs that are no longer publicly exposed. If you need access to any of these int
     * `CardScanSheet.CardScanResultCallback` has been removed
     * `ScannedCard` has been removed
     * `CancellationReason` and its implementations (`Closed`, `Back`, `UserCannotScan`, `CameraPermissionDenied`) have been removed                                                                                                      
-- The CardScan feature in our UI surfaces has been migrated to [Google Pay Card Recognition](https://developers.google.com/pay/payment-card-recognition/debit-credit-card-recognition), which requires your application to have production access to the Google Pay API. 
-  - If you have enabled Google Pay, CardScan is available in our UI surfaces automatically on eligible devices. To learn more about eligible devices, see [API constraints](https://developers.google.com/pay/payment-card-recognition/debit-credit-card-recognition)
-  - If you previously used the CardScan feature but have not enabled Google Pay, you can continue using our CardScan feature by [requesting production access](https://developers.google.com/pay/api/android/guides/test-and-deploy/request-prod-access) to the Google Pay API using the [Google Pay & Wallet Console](https://pay.google.com/business/console?utm_source=devsite&utm_medium=devsite&utm_campaign=devsite)
-- If you integrate with the cardscan module directly, you can [migrate to Google Payment Card Recognition API](stripecardscan/MIGRATION_GUIDE.md).
+- The card scanning feature in our UI surfaces has been migrated to [Google Pay Card Recognition](https://developers.google.com/pay/payment-card-recognition/debit-credit-card-recognition), which requires your application to have production access to the Google Pay API. 
+  - If you have enabled Google Pay, the card scanning feature is available in our UI surfaces automatically on eligible devices. To learn more about eligible devices, see the [Google Pay API constraints](https://developers.google.com/pay/payment-card-recognition/debit-credit-card-recognition)
+  - If you previously used the card scanning feature but have not enabled Google Pay, you can continue using our card scanning feature by [requesting production access](https://developers.google.com/pay/api/android/guides/test-and-deploy/request-prod-access) to the Google Pay API using the [Google Pay & Wallet Console](https://pay.google.com/business/console?utm_source=devsite&utm_medium=devsite&utm_campaign=devsite)
+- If you integrate with the `stripecardscan` module directly, you can [migrate to Google Payment Card Recognition API](stripecardscan/MIGRATION_GUIDE.md).
 
 ### 4. Other Breaking Changes
 **Data Class Removal**
