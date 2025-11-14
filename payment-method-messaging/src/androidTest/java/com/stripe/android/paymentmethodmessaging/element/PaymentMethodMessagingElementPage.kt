@@ -12,6 +12,21 @@ import androidx.compose.ui.test.performClick
 class PaymentMethodMessagingElementPage(
     private val composeTestRule: ComposeTestRule
 ) {
+    fun verifyNoContentDisplayed() {
+        composeTestRule.onNodeWithContentDescription("Learn more").assertDoesNotExist()
+        composeTestRule.onNodeWithText(
+            text = "multi partner promotion",
+            substring = true
+        ).assertDoesNotExist()
+        composeTestRule.onNodeWithText(
+            text = "single partner inline_partner_promotion",
+            substring = true
+        ).assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription("Klarna").assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription("Affirm").assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription("Cash App Afterpay").assertDoesNotExist()
+    }
+
     fun verifySinglePartner() {
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText("single partner inline_partner_promotion", substring = true).assertExists()

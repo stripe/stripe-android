@@ -45,7 +45,7 @@ class PaymentMethodMessagingElementTest {
 
         val result = testContext.configure()
         assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.NoContent::class.java)
-        composeTestRule.onNodeWithContentDescription("Learn more").assertDoesNotExist()
+        page.verifyNoContentDisplayed()
     }
 
     @Test
@@ -59,11 +59,10 @@ class PaymentMethodMessagingElementTest {
         }
 
         val result = testContext.configure()
-
         assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
         page.verifySinglePartner()
         page.openAndCloseLearnMoreActivity()
-        composeTestRule.onNodeWithText("single partner inline_partner_promotion", substring = true).assertExists()
+        page.verifySinglePartner()
     }
 
     @Test
@@ -81,6 +80,7 @@ class PaymentMethodMessagingElementTest {
         assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
         page.verifyMultiPartner()
         page.openAndCloseLearnMoreActivity()
+        page.verifyMultiPartner()
     }
 
     @Test
@@ -100,7 +100,8 @@ class PaymentMethodMessagingElementTest {
         assertThat(
             (result as PaymentMethodMessagingElement.ConfigureResult.Failed).error.message
         ).isEqualTo("unsupported_currency")
-        composeTestRule.onNodeWithContentDescription("Learn more").assertDoesNotExist()
+
+        page.verifyNoContentDisplayed()
     }
 
     @Test
@@ -114,7 +115,6 @@ class PaymentMethodMessagingElementTest {
         }
 
         testContext.configure()
-
         page.verifySinglePartner()
 
         networkRule.enqueue(
@@ -126,7 +126,6 @@ class PaymentMethodMessagingElementTest {
         }
 
         testContext.configure()
-
         page.verifyMultiPartner()
 
         networkRule.enqueue(
@@ -138,15 +137,21 @@ class PaymentMethodMessagingElementTest {
         }
 
         testContext.configure()
+        page.verifyNoContentDisplayed()
+    }
 
-        composeTestRule.onNodeWithText(
-            text = "multi partner promotion",
-            substring = true
-        ).assertDoesNotExist()
-        composeTestRule.onNodeWithText(
-            text = "single partner inline_partner_promotion",
-            substring = true
-        ).assertDoesNotExist()
-        composeTestRule.onNodeWithContentDescription("Learn more").assertDoesNotExist()
+    @Test
+    fun testMalformedResponse() = runPaymentMethodMessagingElementTest { testContext ->
+        networkRule.enqueue(
+            host("ppm.stripe.com"),
+            method("GET"),
+            path("/config"),
+        ) { response ->
+            response.setBody("{}")
+        }
+
+        val result = testContext.configure()
+        assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.NoContent::class.java)
+        page.verifyNoContentDisplayed()
     }
 }
