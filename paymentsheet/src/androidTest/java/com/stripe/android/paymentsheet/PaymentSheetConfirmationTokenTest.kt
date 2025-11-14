@@ -199,7 +199,9 @@ internal class PaymentSheetConfirmationTokenTest {
                         page.fillCvcRecollection("123")
                     }
                     PaymentMethodType.CashAppWithSetupFutureUsage -> {
-                        // We do not test this payment method with returning customer
+                        throw NotImplementedError(
+                            "We do not test this payment method with returning customer"
+                        )
                     }
                 }
             }
