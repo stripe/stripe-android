@@ -36,6 +36,7 @@ stages:
       - test: { }
       - run-instrumentation-tests: { }
       - run-paymentsheet-instrumentation-tests: { }
+      - run-paymentsheet-instrumentation-tests-with-google-account: { }
       - run-example-instrumentation-tests: { }
       - run-financial-connections-instrumentation-tests: { }
       - run-connections-e2e-payments-tests-on-push: { }
@@ -264,15 +265,32 @@ workflows:
     after_run:
       - conclude_all
     steps:
-      - virtual-device-testing-for-android@1:
-          inputs:
-            - auto_google_login: true
-            - test_type: instrumentation
       - script@1:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
             - content: ./scripts/retry.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33DebugAndroidTest
+    meta:
+      bitrise.io:
+        stack: linux-docker-android-22.04
+        machine_type_id: g2.linux.x-large
+  run-paymentsheet-instrumentation-tests-with-google-account:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - android-build-for-ui-testing@0:
+          inputs:
+            - module: paymentsheet
+            - variant: debug
+            - arguments: ":paymentsheet-example:assembleDebug"
+      - virtual-device-testing-for-android@1:
+          inputs:
+            - app_path: $BITRISE_TEST_APK_PATH
+            - auto_google_login: true
+            - test_type: instrumentation
+            - test_devices: Pixel2.arm,33,en,portrait
     meta:
       bitrise.io:
         stack: linux-docker-android-22.04
