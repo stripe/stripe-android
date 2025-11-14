@@ -59,7 +59,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         get() = paymentMethodMetadataProvider.get()?.integrationMetadata?.isDeferred() ?: isDeferredValue
     private var isSptValue: Boolean = false
     private val isSpt: Boolean
-        get() = paymentMethodMetadataProvider.get()?.integrationMetadata?.isSpt() ?: isDeferredValue
+        get() = paymentMethodMetadataProvider.get()?.integrationMetadata?.isSpt() ?: isSptValue
     private var linkEnabled: Boolean = false
     private var linkMode: LinkMode? = null
     private var googlePaySupported: Boolean = false
