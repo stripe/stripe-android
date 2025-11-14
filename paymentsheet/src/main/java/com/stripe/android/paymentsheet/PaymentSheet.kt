@@ -1398,10 +1398,11 @@ class PaymentSheet internal constructor(
                     ) : Parcelable {
 
                         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                        class Builder {
-                            private var separatorColor: Int? = null
-                            private var selectedColor: Int? = null
-                            private var unselectedColor: Int? = null
+                        class Builder private constructor(
+                            private var separatorColor: Int,
+                            private var selectedColor: Int,
+                            private var unselectedColor: Int,
+                        ) {
 
                             /**
                              * The color of the separator line between rows.
@@ -1428,26 +1429,35 @@ class PaymentSheet internal constructor(
                             }
 
                             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                            fun buildLight(): Colors {
+                            fun build(): Colors {
                                 return Colors(
-                                    separatorColor = separatorColor
-                                        ?: StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
-                                    selectedColor = selectedColor
-                                        ?: StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
+                                    separatorColor = separatorColor,
+                                    selectedColor = selectedColor,
                                     unselectedColor = unselectedColor
-                                        ?: StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb()
                                 )
                             }
 
                             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                            fun buildDark(): Colors {
-                                return Colors(
-                                    separatorColor = separatorColor
-                                        ?: StripeThemeDefaults.radioColorsDark.separatorColor.toArgb(),
-                                    selectedColor = selectedColor
-                                        ?: StripeThemeDefaults.radioColorsDark.selectedColor.toArgb(),
-                                    unselectedColor = unselectedColor
-                                        ?: StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
+                            companion object {
+
+                                /**
+                                 * Creates a [Builder] prepopulated with default light mode values.
+                                 */
+                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                                fun light(): Builder = Builder(
+                                    separatorColor = StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
+                                    selectedColor = StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
+                                    unselectedColor = StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb()
+                                )
+
+                                /**
+                                 * Creates a [Builder] prepopulated with default dark mode values.
+                                 */
+                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                                fun dark(): Builder = Builder(
+                                    separatorColor = StripeThemeDefaults.radioColorsDark.separatorColor.toArgb(),
+                                    selectedColor = StripeThemeDefaults.radioColorsDark.selectedColor.toArgb(),
+                                    unselectedColor = StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
                                 )
                             }
                         }
@@ -1466,8 +1476,8 @@ class PaymentSheet internal constructor(
                         private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
                             .additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
-                        private var colorsLight = Colors.Builder().buildLight()
-                        private var colorsDark = Colors.Builder().buildDark()
+                        private var colorsLight = Colors.Builder.light().build()
+                        private var colorsDark = Colors.Builder.dark().build()
 
                         /**
                          * The thickness of the separator line between rows.
@@ -1574,9 +1584,10 @@ class PaymentSheet internal constructor(
                     ) : Parcelable {
 
                         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                        class Builder {
-                            private var separatorColor: Int? = null
-                            private var checkmarkColor: Int? = null
+                        class Builder private constructor(
+                            private var separatorColor: Int,
+                            private var checkmarkColor: Int,
+                        ) {
 
                             /**
                              * The color of the separator line between rows.
@@ -1595,22 +1606,32 @@ class PaymentSheet internal constructor(
                             }
 
                             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                            fun buildLight(): Colors {
+                            fun build(): Colors {
                                 return Colors(
-                                    separatorColor = separatorColor
-                                        ?: StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
+                                    separatorColor = separatorColor,
                                     checkmarkColor = checkmarkColor
-                                        ?: StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb()
                                 )
                             }
 
                             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                            fun buildDark(): Colors {
-                                return Colors(
-                                    separatorColor = separatorColor
-                                        ?: StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb(),
-                                    checkmarkColor = checkmarkColor
-                                        ?: StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb()
+                            companion object {
+
+                                /**
+                                 * Creates a [Builder] prepopulated with default light mode values.
+                                 */
+                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                                fun light(): Builder = Builder(
+                                    separatorColor = StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
+                                    checkmarkColor = StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb()
+                                )
+
+                                /**
+                                 * Creates a [Builder] prepopulated with default dark mode values.
+                                 */
+                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                                fun dark(): Builder = Builder(
+                                    separatorColor = StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb(),
+                                    checkmarkColor = StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb()
                                 )
                             }
                         }
@@ -1634,8 +1655,8 @@ class PaymentSheet internal constructor(
                         private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
                             .additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
-                        private var colorsLight = Colors.Builder().buildLight()
-                        private var colorsDark = Colors.Builder().buildDark()
+                        private var colorsLight = Colors.Builder.light().build()
+                        private var colorsDark = Colors.Builder.dark().build()
 
                         /**
                          * The thickness of the separator line between rows.
@@ -1819,9 +1840,10 @@ class PaymentSheet internal constructor(
                     ) : Parcelable {
 
                         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                        class Builder {
-                            private var separatorColor: Int? = null
-                            private var disclosureColor: Int? = null
+                        class Builder private constructor(
+                            private var separatorColor: Int,
+                            private var disclosureColor: Int,
+                        ) {
 
                             /**
                              * The color of the separator line between rows.
@@ -1840,22 +1862,31 @@ class PaymentSheet internal constructor(
                             }
 
                             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                            fun buildLight(): Colors {
+                            fun build(): Colors {
                                 return Colors(
-                                    separatorColor = separatorColor
-                                        ?: StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
+                                    separatorColor = separatorColor,
                                     disclosureColor = disclosureColor
-                                        ?: StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
                                 )
                             }
 
                             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                            fun buildDark(): Colors {
-                                return Colors(
-                                    separatorColor = separatorColor
-                                        ?: StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
-                                    disclosureColor = disclosureColor
-                                        ?: StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
+                            companion object {
+                                /**
+                                 * Creates a [Builder] prepopulated with default light mode values.
+                                 */
+                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                                fun light(): Builder = Builder(
+                                    separatorColor = StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
+                                    disclosureColor = StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
+                                )
+
+                                /**
+                                 * Creates a [Builder] prepopulated with default dark mode values.
+                                 */
+                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                                fun dark(): Builder = Builder(
+                                    separatorColor = StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
+                                    disclosureColor = StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
                                 )
                             }
                         }
@@ -1878,8 +1909,8 @@ class PaymentSheet internal constructor(
                         private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
                             .additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
-                        private var colorsLight = Colors.Builder().buildLight()
-                        private var colorsDark = Colors.Builder().buildDark()
+                        private var colorsLight = Colors.Builder.light().build()
+                        private var colorsDark = Colors.Builder.dark().build()
                         private var disclosureIconRes: Int = R.drawable.stripe_ic_chevron_right
 
                         /**
@@ -2154,28 +2185,19 @@ class PaymentSheet internal constructor(
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Suppress("TooManyFunctions")
-        class Builder {
-            @ColorInt private var primary: Int? = null
-
-            @ColorInt private var surface: Int? = null
-
-            @ColorInt private var component: Int? = null
-
-            @ColorInt private var componentBorder: Int? = null
-
-            @ColorInt private var componentDivider: Int? = null
-
-            @ColorInt private var onComponent: Int? = null
-
-            @ColorInt private var subtitle: Int? = null
-
-            @ColorInt private var placeholderText: Int? = null
-
-            @ColorInt private var onSurface: Int? = null
-
-            @ColorInt private var appBarIcon: Int? = null
-
-            @ColorInt private var error: Int? = null
+        class Builder private constructor(
+            @ColorInt private var primary: Int,
+            @ColorInt private var surface: Int,
+            @ColorInt private var component: Int,
+            @ColorInt private var componentBorder: Int,
+            @ColorInt private var componentDivider: Int,
+            @ColorInt private var onComponent: Int,
+            @ColorInt private var subtitle: Int,
+            @ColorInt private var placeholderText: Int,
+            @ColorInt private var onSurface: Int,
+            @ColorInt private var appBarIcon: Int,
+            @ColorInt private var error: Int,
+        ) {
 
             /**
              * The primary color used throughout PaymentSheet.
@@ -2400,36 +2422,58 @@ class PaymentSheet internal constructor(
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            fun buildLight(): Colors {
+            fun build(): Colors {
                 return Colors(
-                    primary = primary ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
-                    surface = surface ?: StripeThemeDefaults.colorsLight.materialColors.surface.toArgb(),
-                    component = component ?: StripeThemeDefaults.colorsLight.component.toArgb(),
-                    componentBorder = componentBorder ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                    componentDivider = componentDivider ?: StripeThemeDefaults.colorsLight.componentDivider.toArgb(),
-                    onComponent = onComponent ?: StripeThemeDefaults.colorsLight.onComponent.toArgb(),
-                    subtitle = subtitle ?: StripeThemeDefaults.colorsLight.subtitle.toArgb(),
-                    placeholderText = placeholderText ?: StripeThemeDefaults.colorsLight.placeholderText.toArgb(),
-                    onSurface = onSurface ?: StripeThemeDefaults.colorsLight.materialColors.onSurface.toArgb(),
-                    appBarIcon = appBarIcon ?: StripeThemeDefaults.colorsLight.appBarIcon.toArgb(),
-                    error = error ?: StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
+                    primary = primary,
+                    surface = surface,
+                    component = component,
+                    componentBorder = componentBorder,
+                    componentDivider = componentDivider,
+                    onComponent = onComponent,
+                    subtitle = subtitle,
+                    placeholderText = placeholderText,
+                    onSurface = onSurface,
+                    appBarIcon = appBarIcon,
+                    error = error
                 )
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            fun buildDark(): Colors {
-                return Colors(
-                    primary = primary ?: StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
-                    surface = surface ?: StripeThemeDefaults.colorsDark.materialColors.surface.toArgb(),
-                    component = component ?: StripeThemeDefaults.colorsDark.component.toArgb(),
-                    componentBorder = componentBorder ?: StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                    componentDivider = componentDivider ?: StripeThemeDefaults.colorsDark.componentDivider.toArgb(),
-                    onComponent = onComponent ?: StripeThemeDefaults.colorsDark.onComponent.toArgb(),
-                    subtitle = subtitle ?: StripeThemeDefaults.colorsDark.subtitle.toArgb(),
-                    placeholderText = placeholderText ?: StripeThemeDefaults.colorsDark.placeholderText.toArgb(),
-                    onSurface = onSurface ?: StripeThemeDefaults.colorsDark.materialColors.onSurface.toArgb(),
-                    appBarIcon = appBarIcon ?: StripeThemeDefaults.colorsDark.appBarIcon.toArgb(),
-                    error = error ?: StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
+            companion object {
+                /**
+                 * Creates a [Builder] prepopulated with default light mode values.
+                 */
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                fun light(): Builder = Builder(
+                    primary = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
+                    surface = StripeThemeDefaults.colorsLight.materialColors.surface.toArgb(),
+                    component = StripeThemeDefaults.colorsLight.component.toArgb(),
+                    componentBorder = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                    componentDivider = StripeThemeDefaults.colorsLight.componentDivider.toArgb(),
+                    onComponent = StripeThemeDefaults.colorsLight.onComponent.toArgb(),
+                    subtitle = StripeThemeDefaults.colorsLight.subtitle.toArgb(),
+                    placeholderText = StripeThemeDefaults.colorsLight.placeholderText.toArgb(),
+                    onSurface = StripeThemeDefaults.colorsLight.materialColors.onSurface.toArgb(),
+                    appBarIcon = StripeThemeDefaults.colorsLight.appBarIcon.toArgb(),
+                    error = StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
+                )
+
+                /**
+                 * Creates a [Builder] prepopulated with default dark mode values.
+                 */
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                fun dark(): Builder = Builder(
+                    primary = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
+                    surface = StripeThemeDefaults.colorsDark.materialColors.surface.toArgb(),
+                    component = StripeThemeDefaults.colorsDark.component.toArgb(),
+                    componentBorder = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                    componentDivider = StripeThemeDefaults.colorsDark.componentDivider.toArgb(),
+                    onComponent = StripeThemeDefaults.colorsDark.onComponent.toArgb(),
+                    subtitle = StripeThemeDefaults.colorsDark.subtitle.toArgb(),
+                    placeholderText = StripeThemeDefaults.colorsDark.placeholderText.toArgb(),
+                    onSurface = StripeThemeDefaults.colorsDark.materialColors.onSurface.toArgb(),
+                    appBarIcon = StripeThemeDefaults.colorsDark.appBarIcon.toArgb(),
+                    error = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
                 )
             }
         }
@@ -2808,16 +2852,13 @@ class PaymentSheet internal constructor(
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Suppress("TooManyFunctions")
-        class Builder {
-            @ColorInt private var background: Int? = null
-
-            @ColorInt private var onBackground: Int? = null
-
-            @ColorInt private var border: Int? = null
-
-            @ColorInt private var successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb()
-
-            @ColorInt private var onSuccessBackgroundColor: Int? = null
+        class Builder private constructor(
+            @ColorInt private var background: Int?,
+            @ColorInt private var onBackground: Int,
+            @ColorInt private var border: Int,
+            @ColorInt private var successBackgroundColor: Int,
+            @ColorInt private var onSuccessBackgroundColor: Int,
+        ) {
 
             /**
              * The background color of the primary button.
@@ -2843,22 +2884,26 @@ class PaymentSheet internal constructor(
 
             /**
              * The color of the text and icon in the primary button.
+             * Note: This also overrides the [onSuccessBackgroundColor] to match this value.
              *
              * @param onBackground The on-background color as an [ColorInt].
              */
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun onBackground(@ColorInt onBackground: Int) = apply {
                 this.onBackground = onBackground
+                this.onSuccessBackgroundColor = onBackground
             }
 
             /**
              * The color of the text and icon in the primary button.
+             * Note: This also overrides the [onSuccessBackgroundColor] to match this value.
              *
              * @param onBackground The on-background [Color].
              */
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun onBackground(onBackground: Color) = apply {
                 this.onBackground = onBackground.toArgb()
+                this.onSuccessBackgroundColor = onBackground.toArgb()
             }
 
             /**
@@ -2926,37 +2971,48 @@ class PaymentSheet internal constructor(
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            fun buildLight(): PrimaryButtonColors {
+            fun build(): PrimaryButtonColors {
                 return PrimaryButtonColors(
                     background = background,
-                    onBackground = onBackground
-                        ?: StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                    border = border
-                        ?: StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
+                    onBackground = onBackground,
+                    border = border,
                     successBackgroundColor = successBackgroundColor,
-                    onSuccessBackgroundColor = onSuccessBackgroundColor
-                        ?: (onBackground ?: StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb()),
+                    onSuccessBackgroundColor = onSuccessBackgroundColor,
                 )
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            fun buildDark(): PrimaryButtonColors {
-                return PrimaryButtonColors(
-                    background = background,
-                    onBackground = onBackground
-                        ?: StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-                    border = border
-                        ?: StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
-                    successBackgroundColor = successBackgroundColor,
-                    onSuccessBackgroundColor = onSuccessBackgroundColor
-                        ?: (onBackground ?: StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb()),
+            companion object {
+
+                /**
+                 * Creates a [Builder] prepopulated with default light mode values.
+                 */
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                fun light(): Builder = Builder(
+                    background = null,
+                    onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                    border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
+                    successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                    onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                )
+
+                /**
+                 * Creates a [Builder] prepopulated with default dark mode values.
+                 */
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                fun dark(): Builder = Builder(
+                    background = null,
+                    onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+                    border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
+                    successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                    onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
                 )
             }
         }
 
         companion object {
-            val defaultLight: PrimaryButtonColors = Builder().buildLight()
-            val defaultDark: PrimaryButtonColors = Builder().buildDark()
+            val defaultLight: PrimaryButtonColors = Builder.light().build()
+            val defaultDark: PrimaryButtonColors = Builder.dark().build()
         }
     }
 
