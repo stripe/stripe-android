@@ -1132,9 +1132,7 @@ class PaymentSheet internal constructor(
              * By default, the payment sheet offers a card scan button within the new card entry form.
              * When opensCardScannerAutomatically is set to true, the card entry form will
              * initialize with the card scanner already open.
-             * **Note**: The stripecardscan dependency must be added to set `opensCardScannerAutomatically` to true
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun opensCardScannerAutomatically(opensCardScannerAutomatically: Boolean) = apply {
                 this.opensCardScannerAutomatically = opensCardScannerAutomatically
             }
