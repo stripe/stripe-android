@@ -3,10 +3,9 @@
 package com.stripe.android.paymentmethodmessaging.element
 
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithText
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.composite
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -33,12 +32,16 @@ class PaymentMethodMessagingElementTest {
         .around(RetryRule(5))
         .around(AdvancedFraudSignalsTestRule())
 
+    private val compositeRequestMatcher = composite(
+        host("ppm.stripe.com"),
+        method("GET"),
+        path("/config"),
+    )
+
     @Test
     fun testNoContent() = runPaymentMethodMessagingElementTest { testContext ->
         networkRule.enqueue(
-            host("ppm.stripe.com"),
-            method("GET"),
-            path("/config"),
+            compositeRequestMatcher
         ) { response ->
             response.testBodyFromFile("no-content.json")
         }
@@ -51,9 +54,7 @@ class PaymentMethodMessagingElementTest {
     @Test
     fun testSinglePartner() = runPaymentMethodMessagingElementTest { testContext ->
         networkRule.enqueue(
-            host("ppm.stripe.com"),
-            method("GET"),
-            path("/config"),
+            compositeRequestMatcher
         ) { response ->
             response.testBodyFromFile("single-partner.json")
         }
@@ -68,16 +69,14 @@ class PaymentMethodMessagingElementTest {
     @Test
     fun testMultiPartner() = runPaymentMethodMessagingElementTest { testContext ->
         networkRule.enqueue(
-            host("ppm.stripe.com"),
-            method("GET"),
-            path("/config"),
+            compositeRequestMatcher
         ) { response ->
             response.testBodyFromFile("multi-partner.json")
         }
 
         val result = testContext.configure()
-
         assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
+
         page.verifyMultiPartner()
         page.openAndCloseLearnMoreActivity()
         page.verifyMultiPartner()
@@ -86,16 +85,13 @@ class PaymentMethodMessagingElementTest {
     @Test
     fun testError() = runPaymentMethodMessagingElementTest { testContext ->
         networkRule.enqueue(
-            host("ppm.stripe.com"),
-            method("GET"),
-            path("/config"),
+            compositeRequestMatcher
         ) { response ->
             response.setResponseCode(400)
             response.testBodyFromFile("error-invalid-currency.json")
         }
 
         val result = testContext.configure()
-
         assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Failed::class.java)
         assertThat(
             (result as PaymentMethodMessagingElement.ConfigureResult.Failed).error.message
@@ -107,9 +103,7 @@ class PaymentMethodMessagingElementTest {
     @Test
     fun testUpdatesContentOnConfigChange() = runPaymentMethodMessagingElementTest { testContext ->
         networkRule.enqueue(
-            host("ppm.stripe.com"),
-            method("GET"),
-            path("/config"),
+            compositeRequestMatcher
         ) { response ->
             response.testBodyFromFile("single-partner.json")
         }
@@ -118,9 +112,7 @@ class PaymentMethodMessagingElementTest {
         page.verifySinglePartner()
 
         networkRule.enqueue(
-            host("ppm.stripe.com"),
-            method("GET"),
-            path("/config"),
+            compositeRequestMatcher
         ) { response ->
             response.testBodyFromFile("multi-partner.json")
         }
@@ -129,9 +121,7 @@ class PaymentMethodMessagingElementTest {
         page.verifyMultiPartner()
 
         networkRule.enqueue(
-            host("ppm.stripe.com"),
-            method("GET"),
-            path("/config"),
+            compositeRequestMatcher
         ) { response ->
             response.testBodyFromFile("no-content.json")
         }
@@ -143,15 +133,14 @@ class PaymentMethodMessagingElementTest {
     @Test
     fun testMalformedResponse() = runPaymentMethodMessagingElementTest { testContext ->
         networkRule.enqueue(
-            host("ppm.stripe.com"),
-            method("GET"),
-            path("/config"),
+            compositeRequestMatcher
         ) { response ->
             response.setBody("{}")
         }
 
         val result = testContext.configure()
         assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.NoContent::class.java)
+
         page.verifyNoContentDisplayed()
     }
 }
