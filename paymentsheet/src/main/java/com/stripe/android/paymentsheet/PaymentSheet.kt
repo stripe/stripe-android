@@ -1837,9 +1837,10 @@ class PaymentSheet internal constructor(
                     ) : Parcelable {
 
                         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                        class Builder {
-                            private var separatorColor: Int? = null
-                            private var disclosureColor: Int? = null
+                        class Builder private constructor(
+                            private var separatorColor: Int,
+                            private var disclosureColor: Int,
+                        ) {
 
                             /**
                              * The color of the separator line between rows.
@@ -1858,22 +1859,24 @@ class PaymentSheet internal constructor(
                             }
 
                             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                            fun buildLight(): Colors {
+                            fun build() : Colors {
                                 return Colors(
-                                    separatorColor = separatorColor
-                                        ?: StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
+                                    separatorColor = separatorColor,
                                     disclosureColor = disclosureColor
-                                        ?: StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
                                 )
                             }
 
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-                            fun buildDark(): Colors {
-                                return Colors(
-                                    separatorColor = separatorColor
-                                        ?: StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
-                                    disclosureColor = disclosureColor
-                                        ?: StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
+                            companion object {
+                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                                fun light(): Builder = Builder(
+                                    separatorColor = StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
+                                    disclosureColor = StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
+                                )
+
+                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                                fun dark(): Builder = Builder(
+                                    separatorColor = StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
+                                    disclosureColor = StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
                                 )
                             }
                         }
@@ -1896,8 +1899,8 @@ class PaymentSheet internal constructor(
                         private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
                             .additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
-                        private var colorsLight = Colors.Builder().buildLight()
-                        private var colorsDark = Colors.Builder().buildDark()
+                        private var colorsLight = Colors.Builder.light().build()
+                        private var colorsDark = Colors.Builder.dark().build()
                         private var disclosureIconRes: Int = R.drawable.stripe_ic_chevron_right
 
                         /**
