@@ -22,6 +22,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel.AnalyticsEvent.Finished
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
@@ -843,10 +844,15 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             is PaymentSelection.GooglePay -> "googlepay"
             is PaymentSelection.Saved -> "savedpm"
             is PaymentSelection.Link,
-            is PaymentSelection.New.LinkInline -> "link"
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.CustomPaymentMethod,
-            is PaymentSelection.New -> "newpm"
+            is PaymentSelection.New -> {
+                if (paymentSelection.isLink) {
+                    "link"
+                } else {
+                    "newpm"
+                }
+            }
             null -> "unknown"
             is PaymentSelection.ShopPay -> "shop_pay"
         }

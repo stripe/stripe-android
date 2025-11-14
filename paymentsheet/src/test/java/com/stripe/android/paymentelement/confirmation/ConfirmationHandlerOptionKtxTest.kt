@@ -304,13 +304,22 @@ class ConfirmationHandlerOptionKtxTest {
     }
 
     @Test
-    fun `On new Link inline selection without config, should return null`() {
+    fun `On new Link inline selection without config, should return new payment method confirmation option`() {
+        val linkInlineSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION_WITH_LINK
+
         assertThat(
-            PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION.toConfirmationOption(
+            linkInlineSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
             )
-        ).isNull()
+        ).isEqualTo(
+            PaymentMethodConfirmationOption.New(
+                createParams = linkInlineSelection.paymentMethodCreateParams,
+                optionsParams = linkInlineSelection.paymentMethodOptionsParams,
+                extraParams = linkInlineSelection.paymentMethodExtraParams,
+                shouldSave = false,
+            )
+        )
     }
 
     @Test
@@ -376,7 +385,7 @@ class ConfirmationHandlerOptionKtxTest {
     fun `Extra params are passed through from LinkInline payment selection to confirmation option`() {
         val paymentMethodExtraParams = PaymentMethodExtraParams.Card(setAsDefault = true)
 
-        val linkInlinePaymentSelection = createLinkInlinePaymentSelection(
+        val linkInlinePaymentSelection = createCardPaymentSelectionWithLink(
             paymentMethodExtraParams = paymentMethodExtraParams
         )
         val confirmationOption = linkInlinePaymentSelection.toConfirmationOption(
@@ -505,7 +514,7 @@ class ConfirmationHandlerOptionKtxTest {
         )
 
         assertThat(
-            createLinkInlinePaymentSelection(customerRequestedSave)
+            createCardPaymentSelectionWithLink(customerRequestedSave)
                 .toConfirmationOption(
                     configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                     linkConfiguration = LINK_CONFIGURATION,
@@ -522,11 +531,11 @@ class ConfirmationHandlerOptionKtxTest {
         )
     }
 
-    private fun createLinkInlinePaymentSelection(
+    private fun createCardPaymentSelectionWithLink(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave =
             PaymentSelection.CustomerRequestedSave.NoRequest,
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
-    ): PaymentSelection.New.LinkInline {
+    ): PaymentSelection.New.Card {
         val paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
         val userInput = UserInput.SignUp(
             email = "email@email.com",
@@ -536,13 +545,13 @@ class ConfirmationHandlerOptionKtxTest {
             consentAction = SignUpConsentAction.Checkbox,
         )
 
-        return PaymentSelection.New.LinkInline(
+        return PaymentSelection.New.Card(
             paymentMethodCreateParams = paymentMethodCreateParams,
             brand = CardBrand.Visa,
             customerRequestedSave = customerRequestedSave,
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = paymentMethodExtraParams,
-            input = userInput,
+            linkInput = userInput,
         )
     }
 

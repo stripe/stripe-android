@@ -64,7 +64,7 @@ class PaymentOptionLabelsFactoryTest {
     fun `create with Link Inline payment selection returns correct labels`() {
         val labels = PaymentOptionLabelsFactory.create(
             context = context,
-            selection = PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
+            selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION_WITH_LINK
         )
 
         assertThat(labels.label).isEqualTo("Visa")

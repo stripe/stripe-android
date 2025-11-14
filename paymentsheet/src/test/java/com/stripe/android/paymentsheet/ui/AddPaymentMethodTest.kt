@@ -8,6 +8,10 @@ import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.ui.inline.InlineSignupViewState
+import com.stripe.android.link.ui.inline.LinkSignupMode
+import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -539,6 +543,72 @@ internal class AddPaymentMethodTest {
         val options = sepaDebitPaymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.SepaDebit
         assertThat(sepaDebitPaymentSelection.customerRequestedSave).isEqualTo(customerRequestedSave)
         assertThat(options?.setupFutureUsage).isNull()
+    }
+
+    @Test
+    fun `transformToPaymentSelection returns selection with Link input if required`() {
+        val userInput = UserInput.SignUp(
+            email = "email@email.com",
+            phone = "1234567890",
+            country = "CA",
+            name = "John Doe",
+            consentAction = SignUpConsentAction.Checkbox,
+        )
+
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
+            ),
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+        )
+
+        val paymentSelection = formFieldValues.transformToPaymentSelection(
+            paymentMethod = requireNotNull(metadata.supportedPaymentMethodForCode("card")),
+            paymentMethodMetadata = metadata,
+            inlineSignupViewState = InlineSignupViewState(
+                merchantName = "Merchant Inc.",
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                fields = emptyList(),
+                prefillEligibleFields = emptySet(),
+                userInput = userInput,
+                isExpanded = true,
+                allowsDefaultOptIn = false,
+                linkSignUpOptInFeatureEnabled = false,
+            )
+        )
+
+        assertThat(paymentSelection).isInstanceOf<PaymentSelection.New.Card>()
+
+        val cardSelection = paymentSelection as PaymentSelection.New.Card
+
+        assertThat(cardSelection.linkInput).isEqualTo(userInput)
+    }
+
+    @Test
+    fun `transformToPaymentSelection returns null if Link required but no input`() {
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
+            ),
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+        )
+
+        val paymentSelection = formFieldValues.transformToPaymentSelection(
+            paymentMethod = requireNotNull(metadata.supportedPaymentMethodForCode("card")),
+            paymentMethodMetadata = metadata,
+            inlineSignupViewState = InlineSignupViewState(
+                merchantName = "Merchant Inc.",
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                fields = emptyList(),
+                prefillEligibleFields = emptySet(),
+                userInput = null,
+                isExpanded = true,
+                allowsDefaultOptIn = false,
+                linkSignUpOptInFeatureEnabled = false,
+            )
+        )
+
+        assertThat(paymentSelection).isNull()
     }
 
     @Test

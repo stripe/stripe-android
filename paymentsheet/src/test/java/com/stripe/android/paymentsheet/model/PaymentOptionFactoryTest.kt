@@ -146,13 +146,13 @@ class PaymentOptionFactoryTest {
     @Test
     fun `create() with card and Link inline signup should return card icon and label`() {
         val paymentOption = factory.create(
-            PaymentSelection.New.LinkInline(
+            PaymentSelection.New.Card(
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
                     billingDetails = PAYMENT_METHOD_BILLING_DETAILS
                 ),
                 brand = CardBrand.Visa,
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
-                input = UserInput.SignUp(
+                linkInput = UserInput.SignUp(
                     email = "new_user@link.com",
                     phone = "+15555555555",
                     country = "US",

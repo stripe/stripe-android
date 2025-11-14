@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
@@ -106,7 +107,8 @@ internal fun FormFieldValues.transformToExtraParams(
 internal fun FormFieldValues.transformToPaymentSelection(
     paymentMethod: SupportedPaymentMethod,
     paymentMethodMetadata: PaymentMethodMetadata,
-): PaymentSelection {
+    inlineSignupViewState: InlineSignupViewState? = null,
+): PaymentSelection? {
     val setupFutureUsage = userRequestedReuse.getSetupFutureUseValue(
         paymentMethodMetadata.hasIntentToSetup(paymentMethod.code)
     )
@@ -114,12 +116,23 @@ internal fun FormFieldValues.transformToPaymentSelection(
     val options = transformToPaymentMethodOptionsParams(paymentMethod.code, setupFutureUsage)
     val extras = transformToExtraParams(paymentMethod.code)
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
+        if (
+            inlineSignupViewState != null &&
+            inlineSignupViewState.useLink &&
+            inlineSignupViewState.userInput == null
+        ) {
+            return null
+        }
+
         PaymentSelection.New.Card(
             paymentMethodOptionsParams = options,
             paymentMethodCreateParams = params,
             paymentMethodExtraParams = extras,
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
             customerRequestedSave = userRequestedReuse,
+            linkInput = inlineSignupViewState?.userInput?.takeIf {
+                inlineSignupViewState.useLink
+            },
         )
     } else if (paymentMethodMetadata.isExternalPaymentMethod(paymentMethod.code)) {
         PaymentSelection.ExternalPaymentMethod(

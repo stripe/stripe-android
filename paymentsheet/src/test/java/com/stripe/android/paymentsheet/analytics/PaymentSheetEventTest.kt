@@ -13,7 +13,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-import com.stripe.android.model.PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
+import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION_WITH_LINK
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -803,7 +803,7 @@ class PaymentSheetEventTest {
     @Test
     fun `Inline Link payment method event should return expected event`() {
         val inlineLinkEvent = paymentMethodEvent(
-            paymentSelection = LINK_INLINE_PAYMENT_SELECTION,
+            paymentSelection = CARD_PAYMENT_SELECTION_WITH_LINK,
             result = PaymentSheetEvent.Payment.Result.Success,
         )
         assertThat(
@@ -1127,7 +1127,7 @@ class PaymentSheetEventTest {
     @Test
     fun `Inline Link payment method failure event should return expected event`() {
         val inlineLinkEvent = paymentMethodEvent(
-            paymentSelection = LINK_INLINE_PAYMENT_SELECTION,
+            paymentSelection = CARD_PAYMENT_SELECTION_WITH_LINK,
             result = PaymentSheetEvent.Payment.Result.Failure(
                 error = PaymentSheetConfirmationError.Stripe(APIException()),
             ),

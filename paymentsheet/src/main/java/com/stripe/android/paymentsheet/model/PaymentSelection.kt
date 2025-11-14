@@ -232,6 +232,7 @@ internal sealed class PaymentSelection : Parcelable {
             override val customerRequestedSave: CustomerRequestedSave,
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
             override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+            val linkInput: UserInput? = null,
         ) : New() {
             @IgnoredOnParcel
             val last4: String = paymentMethodCreateParams.cardLast4().orEmpty()
@@ -271,19 +272,6 @@ internal sealed class PaymentSelection : Parcelable {
                 val address: Address?,
                 val saveForFutureUse: Boolean,
             ) : Parcelable
-        }
-
-        @Parcelize
-        data class LinkInline(
-            override val paymentMethodCreateParams: PaymentMethodCreateParams,
-            val brand: CardBrand,
-            override val customerRequestedSave: CustomerRequestedSave,
-            override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
-            override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
-            val input: UserInput,
-        ) : New() {
-            @IgnoredOnParcel
-            val last4: String = paymentMethodCreateParams.cardLast4().orEmpty()
         }
 
         @Parcelize
@@ -362,7 +350,7 @@ internal val PaymentSelection.isLink: Boolean
     get() = when (this) {
         is PaymentSelection.GooglePay -> false
         is PaymentSelection.Link -> true
-        is PaymentSelection.New.LinkInline -> true
+        is PaymentSelection.New.Card -> linkInput != null
         is PaymentSelection.New -> false
         is PaymentSelection.Saved -> walletType == PaymentSelection.Saved.WalletType.Link
         is PaymentSelection.CustomPaymentMethod,
@@ -384,7 +372,6 @@ internal val PaymentSelection.drawableResourceId: Int
         is PaymentSelection.Link -> getLinkIcon(iconOnly = true)
         is PaymentSelection.New.Card -> brand.getCardBrandIcon()
         is PaymentSelection.New.GenericPaymentMethod -> iconResource
-        is PaymentSelection.New.LinkInline -> brand.getCardBrandIcon()
         is PaymentSelection.New.USBankAccount -> iconResource
         is PaymentSelection.Saved -> getSavedIcon(this)
         is PaymentSelection.ShopPay -> R.drawable.stripe_shop_pay_logo_white
@@ -398,7 +385,6 @@ internal val PaymentSelection.drawableResourceIdNight: Int
         is PaymentSelection.Link -> getLinkIcon(iconOnly = true)
         is PaymentSelection.New.Card -> brand.getCardBrandIcon()
         is PaymentSelection.New.GenericPaymentMethod -> iconResourceNight ?: iconResource
-        is PaymentSelection.New.LinkInline -> brand.getCardBrandIcon()
         is PaymentSelection.New.USBankAccount -> iconResource
         is PaymentSelection.Saved -> getSavedIcon(this)
         is PaymentSelection.ShopPay -> R.drawable.stripe_shop_pay_logo_white
@@ -429,7 +415,6 @@ internal val PaymentSelection.lightThemeIconUrl: String?
         is PaymentSelection.Link -> null
         is PaymentSelection.New.Card -> null
         is PaymentSelection.New.GenericPaymentMethod -> lightThemeIconUrl
-        is PaymentSelection.New.LinkInline -> null
         is PaymentSelection.New.USBankAccount -> null
         is PaymentSelection.Saved -> null
         is PaymentSelection.ShopPay -> null
@@ -443,7 +428,6 @@ internal val PaymentSelection.darkThemeIconUrl: String?
         is PaymentSelection.Link -> null
         is PaymentSelection.New.Card -> null
         is PaymentSelection.New.GenericPaymentMethod -> darkThemeIconUrl
-        is PaymentSelection.New.LinkInline -> null
         is PaymentSelection.New.USBankAccount -> null
         is PaymentSelection.Saved -> null
         is PaymentSelection.ShopPay -> null
@@ -457,7 +441,6 @@ internal val PaymentSelection.label: ResolvableString
         is PaymentSelection.Link -> StripeR.string.stripe_link.resolvableString
         is PaymentSelection.New.Card -> createCardLabel(last4).orEmpty()
         is PaymentSelection.New.GenericPaymentMethod -> label
-        is PaymentSelection.New.LinkInline -> createCardLabel(last4).orEmpty()
         is PaymentSelection.New.USBankAccount -> label.resolvableString
         is PaymentSelection.Saved -> getSavedLabel(this).orEmpty()
         is PaymentSelection.ShopPay -> StripeR.string.stripe_shop_pay.resolvableString

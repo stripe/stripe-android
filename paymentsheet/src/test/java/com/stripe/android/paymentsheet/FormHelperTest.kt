@@ -312,7 +312,7 @@ internal class FormHelperTest {
             ),
         ) {
             assertThat(expectMostRecentItem()).isEqualTo(
-                PaymentSelection.New.LinkInline(
+                PaymentSelection.New.Card(
                     paymentMethodCreateParams = formFieldValues.transformToPaymentMethodCreateParams(
                         paymentMethodCode = "card",
                         paymentMethodMetadata = PaymentMethodMetadataFactory.create()
@@ -325,7 +325,7 @@ internal class FormHelperTest {
                     ),
                     brand = CardBrand.Visa,
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
-                    input = userInput,
+                    linkInput = userInput,
                 )
             )
         }
