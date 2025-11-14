@@ -34,7 +34,6 @@ internal class PaymentMethodMessagingElementAnalyticsTest {
     val testRule: RuleChain = RuleChain.emptyRuleChain()
         .around(composeTestRule)
         .around(networkRule)
-        .around(ShampooRule(500))
         .around(RetryRule(5))
         .around(AdvancedFraudSignalsTestRule())
 
