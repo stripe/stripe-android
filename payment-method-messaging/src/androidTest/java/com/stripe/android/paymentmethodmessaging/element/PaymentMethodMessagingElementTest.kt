@@ -12,7 +12,6 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.testing.RetryRule
-import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -126,10 +125,5 @@ class PaymentMethodMessagingElementTest {
         assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.NoContent::class.java)
 
         page.verifyNoContentDisplayed()
-    }
-
-    @Test
-    fun testFailure() {
-        assertThat(true).isFalse()
     }
 }
