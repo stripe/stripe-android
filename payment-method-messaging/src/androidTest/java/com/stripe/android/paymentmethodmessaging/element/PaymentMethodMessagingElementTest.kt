@@ -127,4 +127,9 @@ class PaymentMethodMessagingElementTest {
 
         page.verifyNoContentDisplayed()
     }
+
+    @Test
+    fun testFailure() {
+        assertThat(true).isFalse()
+    }
 }
