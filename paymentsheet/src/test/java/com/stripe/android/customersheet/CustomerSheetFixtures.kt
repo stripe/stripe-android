@@ -64,6 +64,7 @@ internal object CustomerSheetFixtures {
         .allowsRemovalOfLastSavedPaymentMethod(false)
         .paymentMethodOrder(listOf("klarna", "afterpay", "card"))
         .googlePayEnabled(googlePayEnabled = true)
+        .opensCardScannerAutomatically(true)
         .build()
 
     fun createCustomerSheetSession(
