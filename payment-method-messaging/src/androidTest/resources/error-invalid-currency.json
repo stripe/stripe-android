@@ -1,0 +1,7 @@
+{
+  "error": {
+    "param": "currency",
+    "message": "unsupported_currency",
+    "type": "invalid_request_error"
+  }
+}
