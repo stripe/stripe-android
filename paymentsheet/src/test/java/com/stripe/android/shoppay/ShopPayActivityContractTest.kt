@@ -36,7 +36,6 @@ internal class ShopPayActivityContractTest {
         val args = ShopPayActivityContract.Args(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 sellerBusinessName = "Example Inc.",
-                shopPayConfiguration = shopPayConfiguration,
             ),
             shopPayConfiguration = shopPayConfiguration,
             customerSessionClientSecret = "customer_secret",

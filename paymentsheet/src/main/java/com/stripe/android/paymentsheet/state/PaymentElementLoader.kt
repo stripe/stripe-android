@@ -274,7 +274,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customerInfo = customerInfo,
                 linkStateResult = linkState.await(),
                 isGooglePayReady = isGooglePayReady,
-                isGooglePaySupportedOnDevice = isGooglePaySupportedOnDevice.await(),
                 initializationMode = initializationMode,
                 clientAttributionMetadata = clientAttributionMetadata,
             )
@@ -387,7 +386,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customerInfo: CustomerInfo?,
         linkStateResult: LinkStateResult,
         isGooglePayReady: Boolean,
-        isGooglePaySupportedOnDevice: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): PaymentMethodMetadata {
@@ -417,7 +415,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
-            isGooglePaySupportedOnDevice = isGooglePaySupportedOnDevice,
             linkStateResult = linkStateResult,
             customerMetadata = getCustomerMetadata(
                 configuration = configuration,
