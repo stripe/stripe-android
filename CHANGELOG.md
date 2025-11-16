@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payment Method Messaging
+* [Added] Payment Method Messaging Element is now available in public preview.
+
 ### Financial Connections
 
 * [Added] `StripeFinancialConnections` SDK is now localized!
