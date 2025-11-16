@@ -78,18 +78,14 @@ internal interface PaymentElementLoader {
         val initializedViaCompose: Boolean,
     )
 
-    interface IntentFirst {
-        val clientSecret: String
-    }
-
     sealed class InitializationMode : Parcelable {
         abstract fun validate()
         abstract fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata
 
         @Parcelize
         data class PaymentIntent(
-            override val clientSecret: String,
-        ) : InitializationMode(), IntentFirst {
+            val clientSecret: String,
+        ) : InitializationMode() {
 
             override fun validate() {
                 PaymentIntentClientSecret(clientSecret).validate()
@@ -102,8 +98,8 @@ internal interface PaymentElementLoader {
 
         @Parcelize
         data class SetupIntent(
-            override val clientSecret: String,
-        ) : InitializationMode(), IntentFirst {
+            val clientSecret: String,
+        ) : InitializationMode() {
 
             override fun validate() {
                 SetupIntentClientSecret(clientSecret).validate()
