@@ -2,7 +2,6 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PassiveCaptchaParams
@@ -39,7 +38,6 @@ internal object PaymentMethodMetadataFactory {
         externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec> = emptyList(),
         displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod> = emptyList(),
         isGooglePayReady: Boolean = false,
-        isGooglePaySupportedOnDevice: Boolean = isGooglePayReady,
         paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         linkConfiguration: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
@@ -48,12 +46,10 @@ internal object PaymentMethodMetadataFactory {
         defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(),
         paymentMethodIncentive: PaymentMethodIncentive? = null,
         isPaymentMethodSetAsDefaultEnabled: Boolean = IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
-        elementsSessionId: String = "session_1234",
         financialConnectionsAvailability: FinancialConnectionsAvailability? = FinancialConnectionsAvailability.Lite,
         customerMetadataPermissions: CustomerMetadata.Permissions =
             PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
         customerSessionClientSecret: String? = null,
-        shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = SHOP_PAY_CONFIGURATION,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
         passiveCaptchaParams: PassiveCaptchaParams? = null,
@@ -92,15 +88,12 @@ internal object PaymentMethodMetadataFactory {
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             displayableCustomPaymentMethods = displayableCustomPaymentMethods,
             isGooglePayReady = isGooglePayReady,
-            isGooglePaySupportedOnDevice = isGooglePaySupportedOnDevice,
             linkConfiguration = linkConfiguration,
             linkMode = linkMode,
             linkStateResult = linkState,
             cardBrandFilter = cardBrandFilter,
             paymentMethodIncentive = paymentMethodIncentive,
-            elementsSessionId = elementsSessionId,
             financialConnectionsAvailability = financialConnectionsAvailability,
-            shopPayConfiguration = shopPayConfiguration,
             termsDisplay = termsDisplay,
             forceSetupFutureUseBehaviorAndNewMandate = forceSetupFutureUseBehaviorAndNewMandate,
             passiveCaptchaParams = passiveCaptchaParams,

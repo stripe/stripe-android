@@ -1107,7 +1107,6 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = false,
-            isGooglePaySupportedOnDevice = false,
             linkStateResult = LinkState(
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
                 configuration = createLinkConfiguration(),
@@ -1160,7 +1159,6 @@ internal class PaymentMethodMetadataTest {
             ),
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             isGooglePayReady = false,
-            isGooglePaySupportedOnDevice = false,
             linkConfiguration = PaymentSheet.LinkConfiguration(),
             linkMode = null,
             linkStateResult = LinkState(
@@ -1170,9 +1168,7 @@ internal class PaymentMethodMetadataTest {
             ),
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
-            elementsSessionId = "session_1234",
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-            shopPayConfiguration = null,
             termsDisplay = emptyMap(),
             forceSetupFutureUseBehaviorAndNewMandate = false,
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
@@ -1222,7 +1218,6 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
-            isGooglePaySupportedOnDevice = true,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
         )
 
@@ -1248,7 +1243,6 @@ internal class PaymentMethodMetadataTest {
                 isPaymentMethodSetAsDefaultEnabled = false
             ),
             isGooglePayReady = true,
-            isGooglePaySupportedOnDevice = true,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             linkConfiguration = PaymentSheet.LinkConfiguration(),
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
@@ -1256,8 +1250,6 @@ internal class PaymentMethodMetadataTest {
             linkStateResult = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
-            elementsSessionId = "session_1234",
-            shopPayConfiguration = null,
             termsDisplay = emptyMap(),
             forceSetupFutureUseBehaviorAndNewMandate = false,
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
@@ -1341,7 +1333,6 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = listOf(),
             externalPaymentMethodSpecs = listOf(),
             isGooglePayReady = false,
-            isGooglePaySupportedOnDevice = false,
             linkStateResult = null,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
@@ -2053,7 +2044,6 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = emptyList(),
             externalPaymentMethodSpecs = emptyList(),
             isGooglePayReady = isGooglePayReady,
-            isGooglePaySupportedOnDevice = isGooglePayReady,
             linkStateResult = if (hasLinkState) {
                 LinkState(
                     configuration = mock(),
@@ -2123,7 +2113,6 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = emptyList(),
             externalPaymentMethodSpecs = emptyList(),
             isGooglePayReady = false,
-            isGooglePaySupportedOnDevice = false,
             linkStateResult = null,
             customerMetadata = null,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
@@ -2153,7 +2142,6 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             sharedDataSpecs = emptyList(),
             isGooglePayReady = false,
-            isGooglePaySupportedOnDevice = false,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
         )
     }
