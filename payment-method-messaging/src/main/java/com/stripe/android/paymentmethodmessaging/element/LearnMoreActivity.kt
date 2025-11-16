@@ -38,6 +38,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -146,6 +147,7 @@ internal class LearnMoreActivity : AppCompatActivity() {
                             .clickable {
                                 onDismiss()
                             }
+                            .testTag(CLOSE_BUTTON_TEST_TAG)
                     )
                 }
                 AndroidView(
@@ -197,5 +199,6 @@ internal class LearnMoreActivity : AppCompatActivity() {
         val darkBackgroundColor = Color(0xFF30313D)
         val flatBackgroundColor = Color(0xFFF1F1F1)
         const val SCREEN_HEIGHT_DIVIDER = 3
+        const val CLOSE_BUTTON_TEST_TAG = "close_button"
     }
 }
