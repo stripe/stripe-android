@@ -2801,7 +2801,6 @@ class PaymentSheet internal constructor(
             onSuccessBackgroundColor = onSuccessBackgroundColor.toArgb(),
         )
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Suppress("TooManyFunctions")
         class Builder private constructor(
             @ColorInt private var background: Int?,
@@ -2817,7 +2816,6 @@ class PaymentSheet internal constructor(
              *
              * @param background The background color as an [ColorInt].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun background(@ColorInt background: Int?) = apply {
                 this.background = background
             }
@@ -2828,7 +2826,6 @@ class PaymentSheet internal constructor(
              *
              * @param background The background [Color].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun background(background: Color?) = apply {
                 this.background = background?.toArgb()
             }
@@ -2839,7 +2836,6 @@ class PaymentSheet internal constructor(
              *
              * @param onBackground The on-background color as an [ColorInt].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun onBackground(@ColorInt onBackground: Int) = apply {
                 this.onBackground = onBackground
                 this.onSuccessBackgroundColor = onBackground
@@ -2851,7 +2847,6 @@ class PaymentSheet internal constructor(
              *
              * @param onBackground The on-background [Color].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun onBackground(onBackground: Color) = apply {
                 this.onBackground = onBackground.toArgb()
                 this.onSuccessBackgroundColor = onBackground.toArgb()
@@ -2862,7 +2857,6 @@ class PaymentSheet internal constructor(
              *
              * @param border The border color as an [ColorInt].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun border(@ColorInt border: Int) = apply {
                 this.border = border
             }
@@ -2872,7 +2866,6 @@ class PaymentSheet internal constructor(
              *
              * @param border The border [Color].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun border(border: Color) = apply {
                 this.border = border.toArgb()
             }
@@ -2883,7 +2876,6 @@ class PaymentSheet internal constructor(
              *
              * @param successBackgroundColor The success background color as an [ColorInt].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun successBackgroundColor(@ColorInt successBackgroundColor: Int) = apply {
                 this.successBackgroundColor = successBackgroundColor
             }
@@ -2894,7 +2886,6 @@ class PaymentSheet internal constructor(
              *
              * @param successBackgroundColor The success background [Color].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun successBackgroundColor(successBackgroundColor: Color) = apply {
                 this.successBackgroundColor = successBackgroundColor.toArgb()
             }
@@ -2905,7 +2896,6 @@ class PaymentSheet internal constructor(
              *
              * @param onSuccessBackgroundColor The on-success background color as an [ColorInt].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun onSuccessBackgroundColor(@ColorInt onSuccessBackgroundColor: Int) = apply {
                 this.onSuccessBackgroundColor = onSuccessBackgroundColor
             }
@@ -2916,12 +2906,10 @@ class PaymentSheet internal constructor(
              *
              * @param onSuccessBackgroundColor The on-success background [Color].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun onSuccessBackgroundColor(onSuccessBackgroundColor: Color) = apply {
                 this.onSuccessBackgroundColor = onSuccessBackgroundColor.toArgb()
             }
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun build(): PrimaryButtonColors {
                 return PrimaryButtonColors(
                     background = background,
@@ -2932,13 +2920,11 @@ class PaymentSheet internal constructor(
                 )
             }
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             companion object {
 
                 /**
                  * Creates a [Builder] prepopulated with default light mode values.
                  */
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 fun light(): Builder = Builder(
                     background = null,
                     onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
@@ -2950,7 +2936,6 @@ class PaymentSheet internal constructor(
                 /**
                  * Creates a [Builder] prepopulated with default dark mode values.
                  */
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 fun dark(): Builder = Builder(
                     background = null,
                     onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
