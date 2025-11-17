@@ -42,8 +42,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_card_type_unknown">Targeta %1$s</string>
   <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
   <string name="stripe_link_confirm_payment_title">Confirmeu els detalls del pagament</string>
-  <!-- Email suggestion prompt shown when we detect a typo. The %1$s is a placeholder for the suggested email address. -->
-  <string name="stripe_link_email_suggestion">Volíeu dir %1$s?</string>
   <!-- CTA text for accepting the suggested email correction -->
   <string name="stripe_link_email_suggestion_update">Sí, actualitzar</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
@@ -78,8 +76,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_update_card_default_card">Aquesta és la teva opció per defecte</string>
   <!-- Title for the update card screen in Link native -->
   <string name="stripe_link_update_card_title">Actualitzar la targeta</string>
-  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message"></string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message_short">Introduïu el codi que us hem enviat a %s.</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
@@ -228,11 +224,11 @@ to be saved and used in future checkout sessions. -->
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">La marca de la targeta no s\'ha actualitzat. Torneu-ho a provar.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
-  <string name="stripe_paynow_confirm_payment">Per completar la compra, confirmeu el pagament al banc o a l\'aplicació de pagament dins de %.</string>
+  <string name="stripe_paynow_confirm_payment">Per completar la compra, confirmeu el pagament al banc o a l\'aplicació de pagament dins de %s.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Configura com a mètode de pagament per defecte</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->
-  <string name="stripe_qrcode_lpm_confirm_payment">Per completar la compra, confirmeu el pagament al banc o a l\'aplicació de pagament dins de %.</string>
+  <string name="stripe_qrcode_lpm_confirm_payment">Per completar la compra, confirmeu el pagament al banc o a l\'aplicació de pagament dins de %s.</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Elimina el compte bancari que acaba en %s</string>
   <!-- Accessibility description for a button that launches Shop Pay. -->
