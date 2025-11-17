@@ -341,11 +341,14 @@ internal class IDDetectorTransitioner(
         const val DEFAULT_DISPLAY_SATISFIED_DURATION = 0
         const val DEFAULT_DISPLAY_UNSATISFIED_DURATION = 0
         const val DEFAULT_BLUR_THRESHOLD = 0f
+
         // Only show blur feedback when blur is worse than this fraction of the gating threshold
         const val BLUR_FEEDBACK_RATIO = 0.85f
+
         // Distance feedback thresholds based on area coverage of the frame
         const val MIN_BOX_COVERAGE_FEEDBACK = 0.18f
         const val MAX_BOX_COVERAGE_FEEDBACK = 0.78f
+
         val TAG: String = IDDetectorTransitioner::class.java.simpleName
     }
 
