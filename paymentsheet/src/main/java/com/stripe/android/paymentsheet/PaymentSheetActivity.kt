@@ -36,13 +36,25 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val validationResult = initializeArgs()
 
-        val validatedArgs = validationResult.getOrNull()
-        if (validatedArgs == null) {
-            finishWithError(error = validationResult.exceptionOrNull())
+        val starterArgs = this.starterArgs
+        if (starterArgs == null) {
+            finishWithError(defaultInitializationError())
             return
+        } else {
+            try {
+                starterArgs.initializationMode.validate()
+                starterArgs.config.asCommonConfiguration().validate(
+                    viewModel.isLiveModeProvider(),
+                    starterArgs.paymentElementCallbackIdentifier
+                )
+            } catch (e: IllegalArgumentException) {
+                finishWithError(e)
+                return
+            }
         }
+
+        starterArgs.config.appearance.parseAppearance()
 
         viewModel.registerForActivityResult(
             activityResultCaller = this,
@@ -78,29 +90,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 }
             }
         }
-    }
-
-    private fun initializeArgs(): Result<PaymentSheetContract.Args?> {
-        val starterArgs = this.starterArgs
-
-        val result = if (starterArgs == null) {
-            Result.failure(defaultInitializationError())
-        } else {
-            try {
-                starterArgs.initializationMode.validate()
-                starterArgs.config.asCommonConfiguration().validate(
-                    viewModel.isLiveModeProvider(),
-                    starterArgs.paymentElementCallbackIdentifier
-                )
-                starterArgs.config.appearance.parseAppearance()
-                Result.success(starterArgs)
-            } catch (e: IllegalArgumentException) {
-                Result.failure(e)
-            }
-        }
-
-        earlyExitDueToIllegalState = result.isFailure
-        return result
     }
 
     override fun setActivityResult(result: PaymentSheetResult) {
