@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 22.2.0 - 2025-11-17
+
 ### Financial Connections
 
 * [Added] `StripeFinancialConnections` SDK is now localized!
