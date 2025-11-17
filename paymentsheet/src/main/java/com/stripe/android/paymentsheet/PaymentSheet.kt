@@ -1397,7 +1397,6 @@ class PaymentSheet internal constructor(
                         internal val unselectedColor: Int,
                     ) : Parcelable {
 
-                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                         class Builder private constructor(
                             private var separatorColor: Int,
                             private var selectedColor: Int,
@@ -1407,7 +1406,6 @@ class PaymentSheet internal constructor(
                             /**
                              * The color of the separator line between rows.
                              */
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun separatorColor(@ColorInt color: Int) = apply {
                                 this.separatorColor = color
                             }
@@ -1415,7 +1413,6 @@ class PaymentSheet internal constructor(
                             /**
                              * The color of the radio button when selected.
                              */
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun selectedColor(@ColorInt color: Int) = apply {
                                 this.selectedColor = color
                             }
@@ -1423,12 +1420,10 @@ class PaymentSheet internal constructor(
                             /**
                              * The color of the radio button when unselected.
                              */
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun unselectedColor(@ColorInt color: Int) = apply {
                                 this.unselectedColor = color
                             }
 
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun build(): Colors {
                                 return Colors(
                                     separatorColor = separatorColor,
@@ -1437,13 +1432,11 @@ class PaymentSheet internal constructor(
                                 )
                             }
 
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             companion object {
 
                                 /**
                                  * Creates a [Builder] prepopulated with default light mode values.
                                  */
-                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                                 fun light(): Builder = Builder(
                                     separatorColor = StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
                                     selectedColor = StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
@@ -1453,7 +1446,6 @@ class PaymentSheet internal constructor(
                                 /**
                                  * Creates a [Builder] prepopulated with default dark mode values.
                                  */
-                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                                 fun dark(): Builder = Builder(
                                     separatorColor = StripeThemeDefaults.radioColorsDark.separatorColor.toArgb(),
                                     selectedColor = StripeThemeDefaults.radioColorsDark.selectedColor.toArgb(),
