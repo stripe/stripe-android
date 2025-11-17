@@ -326,7 +326,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession = elementsSession,
             state = state,
             isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
-            isGooglePaySupported = isGooglePaySupportedOnDevice.await(),
+            isGooglePaySupported = isGooglePaySupportedOnDevice.completeResultOrNull() ?: false,
             linkDisplay = configuration.link.display,
             initializationMode = initializationMode,
             customerInfo = customerInfo,
@@ -911,4 +911,10 @@ private fun StripeIntent.paymentMethodOptionsSetupFutureUsageMap(): Boolean {
 private fun StripeIntent.setupFutureUsage(): StripeIntent.Usage? = when (this) {
     is SetupIntent -> usage
     is PaymentIntent -> setupFutureUsage
+}
+
+private suspend fun <T> Deferred<T>.completeResultOrNull(): T? = if (isCompleted) {
+    await()
+} else {
+    null
 }
