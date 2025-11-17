@@ -6,3 +6,73 @@ public final class com/stripe/android/paymentmethodmessaging/element/LearnMoreAc
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Companion;
+	public final fun Content (Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance;Landroidx/compose/runtime/Composer;II)V
+	public final fun configure (Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Configuration;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun colors (Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Colors;)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance;
+	public final fun font (Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Font;)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance;
+	public final fun theme (Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Theme;)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance;
+}
+
+public final class com/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Colors {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun infoIconColor (I)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Colors;
+	public final fun textColor (I)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Colors;
+}
+
+public final class com/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Font {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun fontFamily (Ljava/lang/Integer;)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Font;
+	public final fun fontSizeSp (Ljava/lang/Float;)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Font;
+	public final fun fontWeight (Ljava/lang/Integer;)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Font;
+	public final fun letterSpacingSp (Ljava/lang/Float;)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Font;
+}
+
+public final class com/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Theme : java/lang/Enum {
+	public static final field DARK Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Theme;
+	public static final field FLAT Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Theme;
+	public static final field LIGHT Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Theme;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Theme;
+	public static fun values ()[Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Theme;
+}
+
+public final class com/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Companion {
+	public final fun create (Landroid/app/Application;)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement;
+}
+
+public final class com/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Configuration {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun amount (J)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Configuration;
+	public final fun countryCode (Ljava/lang/String;)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Configuration;
+	public final fun currency (Ljava/lang/String;)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Configuration;
+	public final fun locale (Ljava/lang/String;)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Configuration;
+	public final fun paymentMethodTypes (Ljava/util/List;)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Configuration;
+}
+
+public abstract interface class com/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$ConfigureResult {
+}
+
+public final class com/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$ConfigureResult$Failed : com/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$ConfigureResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public final class com/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$ConfigureResult$NoContent : com/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$ConfigureResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$ConfigureResult$Succeeded : com/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$ConfigureResult {
+	public static final field $stable I
+}
+

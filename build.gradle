@@ -102,6 +102,7 @@ dependencies {
     dokka(project(":paymentsheet"))
     dokka(project(":payments-core"))
     dokka(project(":payments-model"))
+    dokka(project(":payment-method-messaging"))
 }
 
 apiValidation {
