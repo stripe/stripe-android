@@ -1575,7 +1575,6 @@ class PaymentSheet internal constructor(
                         internal val checkmarkColor: Int,
                     ) : Parcelable {
 
-                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                         class Builder private constructor(
                             private var separatorColor: Int,
                             private var checkmarkColor: Int,
@@ -1584,7 +1583,6 @@ class PaymentSheet internal constructor(
                             /**
                              * The color of the separator line between rows.
                              */
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun separatorColor(@ColorInt color: Int) = apply {
                                 this.separatorColor = color
                             }
@@ -1592,12 +1590,10 @@ class PaymentSheet internal constructor(
                             /**
                              * The color of the checkmark.
                              */
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun checkmarkColor(@ColorInt color: Int) = apply {
                                 this.checkmarkColor = color
                             }
 
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun build(): Colors {
                                 return Colors(
                                     separatorColor = separatorColor,
@@ -1605,13 +1601,11 @@ class PaymentSheet internal constructor(
                                 )
                             }
 
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             companion object {
 
                                 /**
                                  * Creates a [Builder] prepopulated with default light mode values.
                                  */
-                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                                 fun light(): Builder = Builder(
                                     separatorColor = StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
                                     checkmarkColor = StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb()
@@ -1620,7 +1614,6 @@ class PaymentSheet internal constructor(
                                 /**
                                  * Creates a [Builder] prepopulated with default dark mode values.
                                  */
-                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                                 fun dark(): Builder = Builder(
                                     separatorColor = StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb(),
                                     checkmarkColor = StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb()
