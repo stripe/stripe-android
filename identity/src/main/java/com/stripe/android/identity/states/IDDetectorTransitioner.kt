@@ -149,7 +149,7 @@ internal class IDDetectorTransitioner(
         }
 
         isBlurry(analyzerOutput.blurScore) -> {
-            // reset timer of the foundState and show blur feedback only if it's severely blurry
+            // reset timer of the foundState and show blur feedback
             foundState.reachedStateAt = TimeSource.Monotonic.markNow()
             val feedbackThreshold = if (blurThreshold > 0f) blurThreshold * BLUR_FEEDBACK_RATIO else 0f
             if (analyzerOutput.blurScore <= feedbackThreshold) {
