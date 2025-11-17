@@ -174,6 +174,20 @@ internal class IDDetectorTransitioner(
             )
         }
 
+        // Distance gating: if the detected document is too small or too large, keep in Found and reset timer
+        isNormalizedBox(analyzerOutput.boundingBox) && tooSmall(analyzerOutput.boundingBox) -> {
+            foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+            foundState.withFeedback(
+                com.stripe.android.identity.R.string.stripe_move_closer
+            )
+        }
+        isNormalizedBox(analyzerOutput.boundingBox) && tooLarge(analyzerOutput.boundingBox) -> {
+            foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+            foundState.withFeedback(
+                com.stripe.android.identity.R.string.stripe_move_farther
+            )
+        }
+
         moreResultsRequired(foundState) -> foundState
         else -> {
             Satisfied(foundState.type, foundState.transitioner)
@@ -270,6 +284,21 @@ internal class IDDetectorTransitioner(
         return foundState.reachedStateAt.elapsedNow() < timeRequired.milliseconds
     }
 
+    // Returns true if the bounding box looks normalized to [0, 1]
+    private fun isNormalizedBox(box: BoundingBox): Boolean {
+        return box.left in 0f..1f && box.top in 0f..1f && box.width in 0f..1f && box.height in 0f..1f
+    }
+
+    private fun coverage(box: BoundingBox): Float {
+        // area fraction relative to the frame
+        val w = box.width.coerceIn(0f, 1f)
+        val h = box.height.coerceIn(0f, 1f)
+        return w * h
+    }
+
+    private fun tooSmall(box: BoundingBox): Boolean = coverage(box) < MIN_BOX_COVERAGE_FEEDBACK
+    private fun tooLarge(box: BoundingBox): Boolean = coverage(box) > MAX_BOX_COVERAGE_FEEDBACK
+
     /**
      * Calculate IoU of two boxes, see https://stackoverflow.com/a/41660682/802372
      */
@@ -313,6 +342,9 @@ internal class IDDetectorTransitioner(
         const val DEFAULT_BLUR_THRESHOLD = 0f
         // Only show blur feedback when blur is worse than this fraction of the gating threshold
         const val BLUR_FEEDBACK_RATIO = 0.85f
+        // Distance feedback thresholds based on area coverage of the frame
+        const val MIN_BOX_COVERAGE_FEEDBACK = 0.18f
+        const val MAX_BOX_COVERAGE_FEEDBACK = 0.78f
         val TAG: String = IDDetectorTransitioner::class.java.simpleName
     }
 
