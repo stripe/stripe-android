@@ -21,6 +21,7 @@ import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.customersheet.CustomerSheetViewState
@@ -62,6 +63,7 @@ internal fun CustomerSheetScreen(
         viewState = viewState,
         viewActionHandler = viewModel::handleViewAction,
         paymentMethodNameProvider = viewModel::providePaymentMethodName,
+        userFacingLogger = viewModel.userFacingLogger,
     )
 }
 
@@ -72,6 +74,7 @@ internal fun CustomerSheetScreen(
     modifier: Modifier = Modifier,
     viewActionHandler: (CustomerSheetViewAction) -> Unit = {},
     paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString,
+    userFacingLogger: UserFacingLogger,
 ) {
     BottomSheetScaffold(
         topBar = {
@@ -106,6 +109,7 @@ internal fun CustomerSheetScreen(
                         AddPaymentMethod(
                             viewState = viewState,
                             viewActionHandler = viewActionHandler,
+                            userFacingLogger = userFacingLogger,
                             displayForm = displayAddForm,
                         )
                         PaymentSheetContentPadding()
@@ -204,6 +208,7 @@ internal fun SelectPaymentMethod(
 internal fun AddPaymentMethod(
     viewState: CustomerSheetViewState.AddPaymentMethod,
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
+    userFacingLogger: UserFacingLogger,
     displayForm: Boolean,
 ) {
     val horizontalPadding = StripeTheme.getOuterFormInsets()
@@ -244,8 +249,8 @@ internal fun AddPaymentMethod(
         DefaultAnalyticsEventReporter(viewActionHandler)
     }
 
-    val cardScanEventReporter = remember(viewActionHandler) {
-        DefaultCardScanEventReporter(viewActionHandler)
+    val cardScanEventReporter = remember(viewActionHandler, userFacingLogger) {
+        DefaultCardScanEventReporter(viewActionHandler, userFacingLogger)
     }
 
     if (displayForm) {
@@ -377,7 +382,8 @@ private class DefaultCardBrandDisallowedReporter(
 }
 
 private class DefaultCardScanEventReporter(
-    private val viewActionHandler: (event: CustomerSheetViewAction) -> Unit
+    private val viewActionHandler: (event: CustomerSheetViewAction) -> Unit,
+    private val userFacingLogger: UserFacingLogger,
 ) : CardScanEventsReporter {
     val durationProvider = DefaultDurationProvider.instance
     override fun onCardScanStarted(implementation: String) {
@@ -412,6 +418,9 @@ private class DefaultCardScanEventReporter(
                 )
             )
         )
+        error?.message?.let {
+            userFacingLogger.logWarningWithoutPii("Card scan check failed: $it")
+        }
     }
 
     override fun onCardScanCancelled(implementation: String) {
