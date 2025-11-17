@@ -613,6 +613,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         visiblePaymentMethods: List<String>,
         hiddenPaymentMethods: List<String>,
         walletsState: WalletsState?,
+        isVerticalLayout: Boolean,
     ) {
         val isGooglePayVisible = walletsState?.googlePay(WalletLocation.HEADER) != null &&
             walletsState.buttonsEnabled
@@ -633,6 +634,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+                isVerticalLayout = isVerticalLayout,
             )
         )
     }

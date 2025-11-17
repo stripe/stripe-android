@@ -1510,14 +1510,16 @@ class DefaultEventReporterTest {
         completeEventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
             visiblePaymentMethods = listOf("card", "klarna", "paypal"),
             hiddenPaymentMethods = listOf("affirm", "afterpay"),
-            walletsState = null
+            walletsState = null,
+            isVerticalLayout = true,
         )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_initial_displayed_payment_methods" &&
                     req.params["visible_payment_methods"] == "card,klarna,paypal" &&
-                    req.params["hidden_payment_methods"] == "affirm,afterpay"
+                    req.params["hidden_payment_methods"] == "affirm,afterpay" &&
+                    req.params["payment_method_layout"] == "vertical"
             }
         )
     }
@@ -1531,6 +1533,7 @@ class DefaultEventReporterTest {
         completeEventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
             visiblePaymentMethods = listOf("google_pay", "card", "klarna", "paypal"),
             hiddenPaymentMethods = listOf("affirm", "afterpay"),
+            isVerticalLayout = false,
             walletsState = WalletsState(
                 link = WalletsState.Link(state = LinkButtonState.Default),
                 googlePay = WalletsState.GooglePay(
@@ -1550,7 +1553,8 @@ class DefaultEventReporterTest {
             argWhere { req ->
                 req.params["event"] == "mc_initial_displayed_payment_methods" &&
                     req.params["visible_payment_methods"] == "link,google_pay,card,klarna,paypal" &&
-                    req.params["hidden_payment_methods"] == "affirm,afterpay"
+                    req.params["hidden_payment_methods"] == "affirm,afterpay" &&
+                    req.params["payment_method_layout"] == "horizontal"
             }
         )
     }

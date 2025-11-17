@@ -78,7 +78,8 @@ class CustomPaymentMethodsAnalyticsTest {
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", ""),
-            query("visible_payment_methods", Uri.encode("cpmt_123,card"))
+            query("visible_payment_methods", Uri.encode("cpmt_123,card")),
+            query("payment_method_layout", "horizontal"),
         )
 
         context.presentPaymentSheet {

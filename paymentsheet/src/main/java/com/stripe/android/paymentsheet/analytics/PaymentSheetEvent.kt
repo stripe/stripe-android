@@ -812,6 +812,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class InitialDisplayedPaymentMethods(
         visiblePaymentMethods: List<String>,
         hiddenPaymentMethods: List<String>,
+        isVerticalLayout: Boolean,
         override val isDeferred: Boolean,
         override val isSpt: Boolean,
         override val linkEnabled: Boolean,
@@ -821,6 +822,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = buildMap {
             put(FIELD_VISIBLE_PAYMENT_METHODS, visiblePaymentMethods.joinToString(","))
             put(FIELD_HIDDEN_PAYMENT_METHODS, hiddenPaymentMethods.joinToString(","))
+            put(FIELD_PAYMENT_METHOD_LAYOUT, if (isVerticalLayout) "vertical" else "horizontal")
         }
     }
 
