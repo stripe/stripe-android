@@ -2505,7 +2505,6 @@ class PaymentSheet internal constructor(
             bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusDp),
         )
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Builder {
             private var cornerRadiusDp: Float = StripeThemeDefaults.shapes.cornerRadius
             private var borderStrokeWidthDp: Float = StripeThemeDefaults.shapes.borderStrokeWidth
@@ -2516,7 +2515,6 @@ class PaymentSheet internal constructor(
              *
              * @param cornerRadiusDp The corner radius in dp.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun cornerRadiusDp(cornerRadiusDp: Float) = apply {
                 this.cornerRadiusDp = cornerRadiusDp
             }
@@ -2526,7 +2524,6 @@ class PaymentSheet internal constructor(
              *
              * @param cornerRadiusRes The corner radius resource ID.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun cornerRadiusDp(context: Context, @DimenRes cornerRadiusRes: Int) = apply {
                 this.cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusRes)
             }
@@ -2536,7 +2533,6 @@ class PaymentSheet internal constructor(
              *
              * @param borderStrokeWidthDp The border width in dp.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun borderStrokeWidthDp(borderStrokeWidthDp: Float) = apply {
                 this.borderStrokeWidthDp = borderStrokeWidthDp
             }
@@ -2546,7 +2542,6 @@ class PaymentSheet internal constructor(
              *
              * @param borderStrokeWidthRes The border width resource ID.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun borderStrokeWidthDp(context: Context, @DimenRes borderStrokeWidthRes: Int) = apply {
                 this.borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthRes)
             }
@@ -2555,7 +2550,6 @@ class PaymentSheet internal constructor(
              * The corner radius used for specifically for the sheets displayed by Payment Element. Be default, this is
              * set to the same value as [cornerRadiusDp].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun bottomSheetCornerRadiusDp(bottomSheetCornerRadiusDp: Float) = apply {
                 this.bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp
             }
@@ -2566,7 +2560,6 @@ class PaymentSheet internal constructor(
              *
              * @param bottomSheetCornerRadiusRes The bottom sheet corner radius resource ID.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun bottomSheetCornerRadiusDp(
                 context: Context,
                 @DimenRes bottomSheetCornerRadiusRes: Int
@@ -2576,7 +2569,6 @@ class PaymentSheet internal constructor(
             }
 
             @OptIn(AppearanceAPIAdditionsPreview::class)
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun build(): Shapes {
                 return Shapes(
                     cornerRadiusDp = cornerRadiusDp,
