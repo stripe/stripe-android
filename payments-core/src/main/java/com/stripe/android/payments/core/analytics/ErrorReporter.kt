@@ -155,6 +155,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         BROWSER_LAUNCHER_NULL_ARGS(
             eventName = "payments.browserlauncher.null_args"
         ),
+        GOOGLE_PAY_SKIPPED_DURING_LOAD(
+            eventName = "google_pay.skipped_during_load"
+        ),
         GOOGLE_PAY_FAILED(
             eventName = "google_pay.confirm.error"
         ),

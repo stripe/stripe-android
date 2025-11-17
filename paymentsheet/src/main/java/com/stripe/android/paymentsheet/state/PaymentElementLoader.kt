@@ -322,7 +322,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession = elementsSession,
             state = state,
             isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
-            isGooglePaySupported = isGooglePaySupportedOnDevice.completeResultOrNull() ?: false,
+            isGooglePaySupported = isGooglePaySupportedOnDevice.completeResultOrNull {
+                errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
+            } ?: false,
             linkDisplay = configuration.link.display,
             initializationMode = initializationMode,
             customerInfo = customerInfo,
@@ -909,8 +911,11 @@ private fun StripeIntent.setupFutureUsage(): StripeIntent.Usage? = when (this) {
     is PaymentIntent -> setupFutureUsage
 }
 
-private suspend fun <T> Deferred<T>.completeResultOrNull(): T? = if (isCompleted) {
+private suspend fun <T> Deferred<T>.completeResultOrNull(
+    skippedCallback: () -> Unit,
+): T? = if (isCompleted) {
     await()
 } else {
+    skippedCallback()
     null
 }
