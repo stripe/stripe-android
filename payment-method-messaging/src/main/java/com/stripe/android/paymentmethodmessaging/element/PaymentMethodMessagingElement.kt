@@ -3,7 +3,6 @@ package com.stripe.android.paymentmethodmessaging.element
 import android.app.Application
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
-import androidx.annotation.RestrictTo
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
