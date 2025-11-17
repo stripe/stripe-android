@@ -173,9 +173,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         CUSTOM_PAYMENT_METHOD_CONFIRM_HANDLER_NULL(
             eventName = "paymentsheet.custom_payment_method.confirm_handler_is_null"
         ),
-        EXTERNAL_PAYMENT_METHOD_LAUNCHER_NULL(
-            eventName = "paymentsheet.external_payment_method.launcher_is_null"
-        ),
         CREATE_INTENT_CALLBACK_NULL(
             eventName = "paymentsheet.create_intent_callback.is_null"
         ),
@@ -191,9 +188,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
     enum class UnexpectedErrorEvent(val partialEventName: String) : ErrorEvent {
         AUTH_WEB_VIEW_BLANK_CLIENT_SECRET(
             partialEventName = "payments.auth_web_view.blank_client_secret"
-        ),
-        MISSING_CARDSCAN_DEPENDENCY(
-            partialEventName = "cardscan.missing_dependency"
         ),
         MISSING_HOSTED_VOUCHER_URL(
             partialEventName = "payments.missing_hosted_voucher_url"
@@ -231,9 +225,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         LINK_WEB_FAILED_TO_PARSE_RESULT_URI(
             partialEventName = "link.web.result.parsing_failed"
         ),
-        LINK_NATIVE_FAILED_TO_ATTEST_SIGNUP_REQUEST(
-            partialEventName = "link.native.signup.failed_to_attest_request"
-        ),
         PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND(
             partialEventName = "paymentsheet.authenticators.not_found"
         ),
@@ -257,9 +248,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         EXTERNAL_PAYMENT_METHOD_UNEXPECTED_RESULT_CODE(
             partialEventName = "paymentsheet.external_payment_method.unexpected_result_code"
-        ),
-        CVC_RECOLLECTION_UNEXPECTED_PAYMENT_SELECTION(
-            partialEventName = "payments.cvc_recollection_unexpected_payment_selection"
         ),
         CUSTOMER_SHEET_ATTACH_CALLED_WITH_CUSTOMER_SESSION(
             partialEventName = "customersheet.customer_session.attach_called"
