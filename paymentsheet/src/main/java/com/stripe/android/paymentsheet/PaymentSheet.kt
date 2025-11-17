@@ -2161,7 +2161,6 @@ class PaymentSheet internal constructor(
             error = error.toArgb()
         )
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Suppress("TooManyFunctions")
         class Builder private constructor(
             @ColorInt private var primary: Int,
@@ -2182,7 +2181,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The primary [Color].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun primary(color: Color) = apply {
                 this.primary = color.toArgb()
             }
@@ -2192,7 +2190,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The primary color as an [ColorInt].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun primary(@ColorInt color: Int) = apply {
                 this.primary = color
             }
@@ -2202,7 +2199,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The surface [Color].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun surface(color: Color) = apply {
                 this.surface = color.toArgb()
             }
@@ -2212,7 +2208,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The surface color as an [ColorInt].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun surface(@ColorInt color: Int) = apply {
                 this.surface = color
             }
@@ -2222,7 +2217,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The component background [Color].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun component(color: Color) = apply {
                 this.component = color.toArgb()
             }
@@ -2232,7 +2226,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The component background color as an [ColorInt].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun component(@ColorInt color: Int) = apply {
                 this.component = color
             }
@@ -2242,7 +2235,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The component border [Color].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun componentBorder(color: Color) = apply {
                 this.componentBorder = color.toArgb()
             }
@@ -2252,7 +2244,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The component border color as an [ColorInt].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun componentBorder(@ColorInt color: Int) = apply {
                 this.componentBorder = color
             }
@@ -2262,7 +2253,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The component divider [Color].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun componentDivider(color: Color) = apply {
                 this.componentDivider = color.toArgb()
             }
@@ -2272,7 +2262,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The component divider color as an [ColorInt].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun componentDivider(@ColorInt color: Int) = apply {
                 this.componentDivider = color
             }
@@ -2282,7 +2271,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The on-component [Color].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun onComponent(color: Color) = apply {
                 this.onComponent = color.toArgb()
             }
@@ -2292,7 +2280,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The on-component color as an [ColorInt].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun onComponent(@ColorInt color: Int) = apply {
                 this.onComponent = color
             }
@@ -2303,7 +2290,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The subtitle [Color].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun subtitle(color: Color) = apply {
                 this.subtitle = color.toArgb()
             }
@@ -2314,7 +2300,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The subtitle color as an [ColorInt].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun subtitle(@ColorInt color: Int) = apply {
                 this.subtitle = color
             }
@@ -2324,7 +2309,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The placeholder text [Color].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun placeholderText(color: Color) = apply {
                 this.placeholderText = color.toArgb()
             }
@@ -2334,7 +2318,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The placeholder text color as an [ColorInt].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun placeholderText(@ColorInt color: Int) = apply {
                 this.placeholderText = color
             }
@@ -2344,7 +2327,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The on-surface [Color].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun onSurface(color: Color) = apply {
                 this.onSurface = color.toArgb()
             }
@@ -2354,7 +2336,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The on-surface color as an [ColorInt].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun onSurface(@ColorInt color: Int) = apply {
                 this.onSurface = color
             }
@@ -2364,7 +2345,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The app bar icon [Color].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun appBarIcon(color: Color) = apply {
                 this.appBarIcon = color.toArgb()
             }
@@ -2374,7 +2354,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The app bar icon color as an [ColorInt].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun appBarIcon(@ColorInt color: Int) = apply {
                 this.appBarIcon = color
             }
@@ -2384,7 +2363,6 @@ class PaymentSheet internal constructor(
              *
              * @param color The error [Color].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun error(color: Color) = apply {
                 this.error = color.toArgb()
             }
@@ -2394,12 +2372,10 @@ class PaymentSheet internal constructor(
              *
              * @param color The error color as an [ColorInt].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun error(@ColorInt color: Int) = apply {
                 this.error = color
             }
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun build(): Colors {
                 return Colors(
                     primary = primary,
@@ -2416,12 +2392,10 @@ class PaymentSheet internal constructor(
                 )
             }
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             companion object {
                 /**
                  * Creates a [Builder] prepopulated with default light mode values.
                  */
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 fun light(): Builder = Builder(
                     primary = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
                     surface = StripeThemeDefaults.colorsLight.materialColors.surface.toArgb(),
@@ -2439,7 +2413,6 @@ class PaymentSheet internal constructor(
                 /**
                  * Creates a [Builder] prepopulated with default dark mode values.
                  */
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 fun dark(): Builder = Builder(
                     primary = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
                     surface = StripeThemeDefaults.colorsDark.materialColors.surface.toArgb(),
