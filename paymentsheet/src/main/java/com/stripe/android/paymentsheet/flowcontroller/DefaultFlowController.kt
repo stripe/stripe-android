@@ -462,11 +462,17 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     override fun confirm() {
-        val state = viewModel.state ?: error(
-            "FlowController must be successfully initialized " +
-                "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
-                "configureWithIntentConfiguration() before calling confirm()."
-        )
+        val state = viewModel.state
+
+        if (state == null) {
+            val error = IllegalStateException(
+                "FlowController must be successfully initialized " +
+                    "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
+                    "configureWithIntentConfiguration() before calling confirm()."
+            )
+            onPaymentResult(PaymentResult.Failed(error))
+            return
+        }
 
         if (!configurationHandler.isConfigured) {
             val error = IllegalStateException(
