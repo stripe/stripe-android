@@ -1724,6 +1724,20 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Builder {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Builder$Companion;
+	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;
+	public final fun checkmarkColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Builder;
+	public final fun separatorColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Builder;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Builder$Companion {
+	public final fun dark ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Builder;
+	public final fun light ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Builder;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;
@@ -1777,6 +1791,20 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Builder {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Builder$Companion;
+	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors;
+	public final fun disclosureColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Builder;
+	public final fun separatorColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Builder;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Builder$Companion {
+	public final fun dark ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Builder;
+	public final fun light ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Builder;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors;
@@ -1827,6 +1855,21 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Builder {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Builder$Companion;
+	public synthetic fun <init> (IIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;
+	public final fun selectedColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Builder;
+	public final fun separatorColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Builder;
+	public final fun unselectedColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Builder;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Builder$Companion {
+	public final fun dark ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Builder;
+	public final fun light ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Builder;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Creator : android/os/Parcelable$Creator {
@@ -2062,6 +2105,40 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Colors : android
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Colors$Builder {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder$Companion;
+	public synthetic fun <init> (IIIIIIIIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun appBarIcon (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun appBarIcon-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Colors;
+	public final fun component (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun component-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun componentBorder (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun componentBorder-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun componentDivider (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun componentDivider-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun error (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun error-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun onComponent (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun onComponent-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun onSurface (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun onSurface-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun placeholderText (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun placeholderText-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun primary (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun primary-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun subtitle (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun subtitle-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun surface (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun surface-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Colors$Builder$Companion {
+	public final fun dark ()Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun light ()Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Colors$Companion {
@@ -2609,6 +2686,28 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonCol
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder$Companion;
+	public synthetic fun <init> (Ljava/lang/Integer;IIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun background (Ljava/lang/Integer;)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun background-Y2TPw74 (Landroidx/compose/ui/graphics/Color;)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun border (I)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun border-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
+	public final fun onBackground (I)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun onBackground-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun onSuccessBackgroundColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun onSuccessBackgroundColor-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun successBackgroundColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun successBackgroundColor-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder$Companion {
+	public final fun dark ()Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun light ()Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Companion {
 	public final fun getDefaultDark ()Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
 	public final fun getDefaultLight ()Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
@@ -2681,6 +2780,18 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Shapes : android
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Shapes$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun borderStrokeWidthDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes$Builder;
+	public final fun borderStrokeWidthDp (Landroid/content/Context;I)Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes$Builder;
+	public final fun bottomSheetCornerRadiusDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes$Builder;
+	public final fun bottomSheetCornerRadiusDp (Landroid/content/Context;I)Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes$Builder;
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes;
+	public final fun cornerRadiusDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes$Builder;
+	public final fun cornerRadiusDp (Landroid/content/Context;I)Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes$Builder;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Shapes$Companion {
@@ -2880,6 +2991,15 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Typography : and
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Typography$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Typography;
+	public final fun custom (Lcom/stripe/android/paymentsheet/PaymentSheet$Typography$Custom;)Lcom/stripe/android/paymentsheet/PaymentSheet$Typography$Builder;
+	public final fun fontResId (Ljava/lang/Integer;)Lcom/stripe/android/paymentsheet/PaymentSheet$Typography$Builder;
+	public final fun sizeScaleFactor (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Typography$Builder;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Typography$Companion {
