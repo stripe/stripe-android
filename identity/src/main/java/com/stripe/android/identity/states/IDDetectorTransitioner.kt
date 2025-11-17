@@ -121,6 +121,7 @@ internal class IDDetectorTransitioner(
         }
     }
 
+    @Suppress("CyclomaticComplexMethod", "MagicNumber")
     private fun transitionFromFoundLegacy(
         foundState: Found,
         analyzerOutput: IDDetectorOutput.Legacy
