@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
@@ -12,7 +11,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 @Poko
-class MandateDataParams constructor(
+class MandateDataParams(
     private val type: Type
 ) : StripeParamsModel, Parcelable {
     override fun toParamMap(): Map<String, Any> {
@@ -84,7 +83,6 @@ class MandateDataParams constructor(
                 }
             }
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
             companion object {
                 private const val PARAM_IP_ADDRESS = "ip_address"
                 private const val PARAM_USER_AGENT = "user_agent"

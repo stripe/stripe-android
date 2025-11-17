@@ -2607,6 +2607,7 @@ public abstract class com/stripe/android/model/MandateDataParams$Type : android/
 public final class com/stripe/android/model/MandateDataParams$Type$Online : com/stripe/android/model/MandateDataParams$Type {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Companion Lcom/stripe/android/model/MandateDataParams$Type$Online$Companion;
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun describeContents ()I
@@ -2615,6 +2616,10 @@ public final class com/stripe/android/model/MandateDataParams$Type$Online : com/
 	public fun toParamMap ()Ljava/util/Map;
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/MandateDataParams$Type$Online$Companion {
+	public final fun getDEFAULT ()Lcom/stripe/android/model/MandateDataParams$Type$Online;
 }
 
 public final class com/stripe/android/model/MandateDataParams$Type$Online$Creator : android/os/Parcelable$Creator {
