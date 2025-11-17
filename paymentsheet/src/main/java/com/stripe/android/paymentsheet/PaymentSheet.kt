@@ -1824,7 +1824,6 @@ class PaymentSheet internal constructor(
                         internal val disclosureColor: Int,
                     ) : Parcelable {
 
-                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                         class Builder private constructor(
                             private var separatorColor: Int,
                             private var disclosureColor: Int,
@@ -1833,7 +1832,6 @@ class PaymentSheet internal constructor(
                             /**
                              * The color of the separator line between rows.
                              */
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun separatorColor(@ColorInt color: Int) = apply {
                                 this.separatorColor = color
                             }
@@ -1841,12 +1839,10 @@ class PaymentSheet internal constructor(
                             /**
                              * The color of the disclosure icon.
                              */
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun disclosureColor(@ColorInt color: Int) = apply {
                                 this.disclosureColor = color
                             }
 
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             fun build(): Colors {
                                 return Colors(
                                     separatorColor = separatorColor,
@@ -1854,12 +1850,10 @@ class PaymentSheet internal constructor(
                                 )
                             }
 
-                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                             companion object {
                                 /**
                                  * Creates a [Builder] prepopulated with default light mode values.
                                  */
-                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                                 fun light(): Builder = Builder(
                                     separatorColor = StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
                                     disclosureColor = StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
@@ -1868,7 +1862,6 @@ class PaymentSheet internal constructor(
                                 /**
                                  * Creates a [Builder] prepopulated with default dark mode values.
                                  */
-                                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                                 fun dark(): Builder = Builder(
                                     separatorColor = StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
                                     disclosureColor = StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
