@@ -2600,7 +2600,6 @@ class PaymentSheet internal constructor(
         internal val custom: Custom,
     ) : Parcelable {
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Builder {
             private var sizeScaleFactor: Float = StripeThemeDefaults.typography.fontSizeMultiplier
 
@@ -2614,7 +2613,6 @@ class PaymentSheet internal constructor(
              * The scale factor for all fonts in PaymentSheet, the default value is 1.0.
              * When this value increases fonts will increase in size and decrease when this value is lowered.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun sizeScaleFactor(sizeScaleFactor: Float) = apply {
                 this.sizeScaleFactor = sizeScaleFactor
             }
@@ -2622,7 +2620,6 @@ class PaymentSheet internal constructor(
             /**
              * The font used in text. This should be a resource ID value.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun fontResId(@FontRes fontResId: Int?) = apply {
                 this.fontResId = fontResId
             }
@@ -2631,13 +2628,11 @@ class PaymentSheet internal constructor(
              * Custom font configuration for specific text styles
              * Note: When set, these fonts override the default font calculations for their respective text styles
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @OptIn(AppearanceAPIAdditionsPreview::class)
             fun custom(custom: Custom) = apply {
                 this.custom = custom
             }
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @OptIn(AppearanceAPIAdditionsPreview::class)
             fun build(): Typography {
                 return Typography(
