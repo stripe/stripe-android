@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
+import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -153,6 +154,7 @@ internal class CustomerSheetScreenshotTest {
             CustomerSheetScreen(
                 viewState = selectPaymentMethodViewState,
                 paymentMethodNameProvider = { it!!.resolvableString },
+                userFacingLogger = FakeUserFacingLogger(),
             )
         }
     }
@@ -187,6 +189,7 @@ internal class CustomerSheetScreenshotTest {
                     counter++
                     "424$counter".resolvableString
                 },
+                userFacingLogger = FakeUserFacingLogger(),
             )
         }
     }
@@ -223,6 +226,7 @@ internal class CustomerSheetScreenshotTest {
                     counter++
                     "424$counter".resolvableString
                 },
+                userFacingLogger = FakeUserFacingLogger(),
             )
         }
     }
@@ -238,6 +242,7 @@ internal class CustomerSheetScreenshotTest {
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = { it!!.resolvableString },
+                userFacingLogger = FakeUserFacingLogger(),
             )
         }
     }
@@ -260,6 +265,7 @@ internal class CustomerSheetScreenshotTest {
                     mandateText = "Some mandate text.".resolvableString
                 ),
                 paymentMethodNameProvider = { it!!.resolvableString },
+                userFacingLogger = FakeUserFacingLogger(),
             )
         }
     }
@@ -271,6 +277,7 @@ internal class CustomerSheetScreenshotTest {
                 CustomerSheetScreen(
                     viewState = addPaymentMethodViewState,
                     paymentMethodNameProvider = { it!!.resolvableString },
+                    userFacingLogger = FakeUserFacingLogger(),
                 )
             }
         }
@@ -285,6 +292,7 @@ internal class CustomerSheetScreenshotTest {
                         errorMessage = resolvableString("Something went wrong!")
                     ),
                     paymentMethodNameProvider = { it!!.resolvableString },
+                    userFacingLogger = FakeUserFacingLogger(),
                 )
             }
         }
@@ -302,6 +310,7 @@ internal class CustomerSheetScreenshotTest {
                     showMandateAbovePrimaryButton = true,
                 ),
                 paymentMethodNameProvider = { it!!.resolvableString },
+                userFacingLogger = FakeUserFacingLogger(),
                 displayAddForm = false,
             )
         }
@@ -319,6 +328,7 @@ internal class CustomerSheetScreenshotTest {
                     showMandateAbovePrimaryButton = false,
                 ),
                 paymentMethodNameProvider = { it!!.resolvableString },
+                userFacingLogger = FakeUserFacingLogger(),
                 displayAddForm = false,
             )
         }
@@ -333,6 +343,7 @@ internal class CustomerSheetScreenshotTest {
                     displayDismissConfirmationModal = true,
                 ),
                 paymentMethodNameProvider = { it!!.resolvableString },
+                userFacingLogger = FakeUserFacingLogger(),
                 displayAddForm = false,
             )
         }
@@ -343,6 +354,7 @@ internal class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = createUpdatePaymentMethodViewState(canRemove = true),
+                userFacingLogger = FakeUserFacingLogger(),
                 paymentMethodNameProvider = { it!!.resolvableString },
             )
         }
@@ -353,6 +365,7 @@ internal class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = createUpdatePaymentMethodViewState(canRemove = false),
+                userFacingLogger = FakeUserFacingLogger(),
                 paymentMethodNameProvider = { it!!.resolvableString },
             )
         }

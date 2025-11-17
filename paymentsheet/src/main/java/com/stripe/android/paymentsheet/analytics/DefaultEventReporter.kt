@@ -763,6 +763,9 @@ internal class DefaultEventReporter @Inject internal constructor(
                 googlePaySupported = googlePaySupported,
             )
         )
+        error?.message?.let {
+            logger.logWarningWithoutPii("Card scan check failed: $it")
+        }
     }
 
     private fun fireEvent(event: PaymentSheetEvent) {
