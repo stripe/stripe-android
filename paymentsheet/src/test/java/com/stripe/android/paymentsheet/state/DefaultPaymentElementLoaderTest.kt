@@ -75,11 +75,10 @@ import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_ELEMENTS_SESSION_CONFIG_ID
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.mockito.ArgumentCaptor
-import org.mockito.Captor
-import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.doReturn
@@ -88,47 +87,14 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
 @OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class DefaultPaymentElementLoaderTest {
 
-    private val testDispatcher = UnconfinedTestDispatcher()
-    private val eventReporter = FakeLoadingEventReporter()
-
-    private val customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
-    private val lpmRepository = LpmRepository()
-
-    private val prefsRepository = FakePrefsRepository()
-
-    @Captor
-    private lateinit var paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>
-
-    private val readyGooglePayRepository = mock<GooglePayRepository>()
-    private val unreadyGooglePayRepository = mock<GooglePayRepository>()
-
-    @BeforeTest
-    fun setup() {
-        MockitoAnnotations.openMocks(this)
-
-        whenever(readyGooglePayRepository.isReady()).thenReturn(
-            flow {
-                emit(true)
-            }
-        )
-
-        whenever(unreadyGooglePayRepository.isReady()).thenReturn(
-            flow {
-                emit(false)
-            }
-        )
-    }
-
     @AfterTest
     fun tearDown() {
-        eventReporter.validate()
         PaymentElementCallbackReferences.clear()
     }
 
@@ -2327,7 +2293,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
-    private suspend fun testLinkEnablementWithCardBrandFiltering(
+    private suspend fun Scenario.testLinkEnablementWithCardBrandFiltering(
         passthroughModeEnabled: Boolean,
         useNativeLink: Boolean,
         expectedEnabled: Boolean,
@@ -4034,7 +4000,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
-    private suspend fun testExternalPaymentMethods(
+    private suspend fun Scenario.testExternalPaymentMethods(
         requestedExternalPaymentMethods: List<String>,
         externalPaymentMethodData: String?,
         expectedExternalPaymentMethods: List<String>?,
@@ -4177,7 +4143,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
-    private suspend fun testSuccessfulLoadSendsEventsCorrectly(paymentSelection: PaymentSelection?) {
+    private suspend fun Scenario.testSuccessfulLoadSendsEventsCorrectly(paymentSelection: PaymentSelection?) {
         prefsRepository.setSavedSelection(paymentSelection?.toSavedSelection())
 
         val loader = createPaymentElementLoader(
@@ -4338,7 +4304,6 @@ internal class DefaultPaymentElementLoaderTest {
     private fun runScenario(
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        customerRepo: CustomerRepository = customerRepository,
         linkAccountState: AccountStatus = AccountStatus.Verified(true, null),
         error: Throwable? = null,
         linkSettings: ElementsSession.LinkSettings? = null,
@@ -4352,7 +4317,26 @@ internal class DefaultPaymentElementLoaderTest {
         logLinkHoldbackExperiment: LogLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
-        elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
+        userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
+        integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
+        isLiveMode: Boolean = false,
+        block: suspend Scenario.() -> Unit
+    ) {
+        val testDispatcher = UnconfinedTestDispatcher()
+        val eventReporter = FakeLoadingEventReporter()
+        val customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
+        val lpmRepository = LpmRepository()
+        val prefsRepository = FakePrefsRepository()
+        val paymentMethodTypeCaptor = ArgumentCaptor.forClass(List::class.java) as ArgumentCaptor<List<PaymentMethod.Type>>
+
+        val readyGooglePayRepository = mock<GooglePayRepository>().also {
+            whenever(it.isReady()).thenReturn(flow { emit(true) })
+        }
+        val unreadyGooglePayRepository = mock<GooglePayRepository>().also {
+            whenever(it.isReady()).thenReturn(flow { emit(false) })
+        }
+
+        val elementsSessionRepository = FakeElementsSessionRepository(
             stripeIntent = stripeIntent,
             error = error,
             sessionsError = fallbackError,
@@ -4362,13 +4346,9 @@ internal class DefaultPaymentElementLoaderTest {
             cardBrandChoice = cardBrandChoice,
             customPaymentMethods = customPaymentMethods,
             externalPaymentMethodData = externalPaymentMethodData,
-        ),
-        userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
-        integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
-        isLiveMode: Boolean = false,
-        block: suspend Scenario.() -> Unit
-    ) {
-        val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(customerRepo)
+        )
+
+        val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(customerRepository)
         val createLinkState = DefaultCreateLinkState(
             accountStatusProvider = { linkAccountState },
             retrieveCustomerEmail = retrieveCustomerEmailImpl,
@@ -4382,7 +4362,7 @@ internal class DefaultPaymentElementLoaderTest {
                 if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
             },
             elementsSessionRepository = elementsSessionRepository,
-            customerRepository = customerRepo,
+            customerRepository = customerRepository,
             lpmRepository = lpmRepository,
             logger = Logger.noop(),
             eventReporter = eventReporter,
@@ -4401,14 +4381,23 @@ internal class DefaultPaymentElementLoaderTest {
         Scenario(
             loader = loader,
             elementsSessionRepository = elementsSessionRepository,
-            customerRepo = customerRepo,
+            customerRepo = customerRepository,
             linkStore = linkStore,
             errorReporter = errorReporter,
             userFacingLogger = userFacingLogger,
+            testDispatcher = testDispatcher,
+            eventReporter = eventReporter,
+            customerRepository = customerRepository,
+            lpmRepository = lpmRepository,
+            prefsRepository = prefsRepository,
+            paymentMethodTypeCaptor = paymentMethodTypeCaptor,
+            readyGooglePayRepository = readyGooglePayRepository,
+            unreadyGooglePayRepository = unreadyGooglePayRepository,
         ).apply {
             runTest {
                 block()
             }
+            eventReporter.validate()
         }
     }
 
@@ -4419,12 +4408,20 @@ internal class DefaultPaymentElementLoaderTest {
         val linkStore: LinkStore,
         val errorReporter: ErrorReporter,
         val userFacingLogger: FakeUserFacingLogger,
+        val testDispatcher: TestDispatcher,
+        val eventReporter: FakeLoadingEventReporter,
+        val customerRepository: CustomerRepository,
+        val lpmRepository: LpmRepository,
+        val prefsRepository: FakePrefsRepository,
+        val paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>,
+        val readyGooglePayRepository: GooglePayRepository,
+        val unreadyGooglePayRepository: GooglePayRepository,
     )
 
-    private fun createPaymentElementLoader(
+    private fun Scenario.createPaymentElementLoader(
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        customerRepo: CustomerRepository = customerRepository,
+        customerRepo: CustomerRepository = this.customerRepository,
         linkAccountState: AccountStatus = AccountStatus.Verified(true, null),
         error: Throwable? = null,
         linkSettings: ElementsSession.LinkSettings? = null,
@@ -4462,9 +4459,9 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         return DefaultPaymentElementLoader(
-            prefsRepositoryFactory = { prefsRepository },
+            prefsRepositoryFactory = { this.prefsRepository },
             googlePayRepositoryFactory = {
-                if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
+                if (isGooglePayReady) this.readyGooglePayRepository else this.unreadyGooglePayRepository
             },
             elementsSessionRepository = elementsSessionRepository,
             customerRepository = customerRepo,
@@ -4544,7 +4541,7 @@ internal class DefaultPaymentElementLoaderTest {
         PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "d4", customerId = "dan")
     )
 
-    private suspend fun getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+    private suspend fun Scenario.getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
         lastUsedPaymentMethod: PaymentMethod?,
         defaultPaymentMethod: PaymentMethod?,
     ): PaymentElementLoader.State {
