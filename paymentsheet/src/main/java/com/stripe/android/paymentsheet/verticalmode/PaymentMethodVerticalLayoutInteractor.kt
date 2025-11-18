@@ -544,7 +544,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     )
 
     private fun updatePaymentMethodVisibility(itemCode: String, layoutCoordinates: LayoutCoordinates) {
-        if (visibilityTracker.getHasDispatched()) {
+        if (visibilityTracker.hasDispatched) {
             return
         }
 
