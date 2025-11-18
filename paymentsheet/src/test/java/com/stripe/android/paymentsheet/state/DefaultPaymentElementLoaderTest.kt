@@ -74,7 +74,7 @@ import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_ELEMENTS_SESSION_CONFIG_ID
 import com.stripe.attestation.IntegrityRequestManager
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -311,7 +311,6 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
             isGooglePayReady = true,
-            customerRepo = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS),
         )
 
         val state = loader.load(
@@ -339,7 +338,6 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
             isGooglePayReady = true,
-            customerRepo = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS),
         )
 
         val result = loader.load(
@@ -4285,62 +4283,21 @@ internal class DefaultPaymentElementLoaderTest {
     )
 
     private fun runScenario(
-        stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        error: Throwable? = null,
-        linkSettings: ElementsSession.LinkSettings? = null,
-        isGooglePayEnabledFromBackend: Boolean = true,
-        fallbackError: Throwable? = null,
-        cardBrandChoice: ElementsSession.CardBrandChoice? = null,
-        linkStore: LinkStore = mock(),
-        customer: ElementsSession.Customer? = null,
-        externalPaymentMethodData: String? = null,
-        errorReporter: ErrorReporter = FakeErrorReporter(),
-        customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
-        userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
         block: suspend Scenario.() -> Unit
     ) {
         val testDispatcher = UnconfinedTestDispatcher()
         val eventReporter = FakeLoadingEventReporter()
-        val customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
-        val lpmRepository = LpmRepository()
         val prefsRepository = FakePrefsRepository()
 
         @Suppress("UNCHECKED_CAST")
         val paymentMethodTypeCaptor = ArgumentCaptor.forClass(List::class.java)
             as ArgumentCaptor<List<PaymentMethod.Type>>
 
-        val readyGooglePayRepository = mock<GooglePayRepository>().also {
-            whenever(it.isReady()).thenReturn(flow { emit(true) })
-        }
-        val unreadyGooglePayRepository = mock<GooglePayRepository>().also {
-            whenever(it.isReady()).thenReturn(flow { emit(false) })
-        }
-
-        val elementsSessionRepository = FakeElementsSessionRepository(
-            stripeIntent = stripeIntent,
-            error = error,
-            sessionsError = fallbackError,
-            linkSettings = linkSettings,
-            sessionsCustomer = customer,
-            isGooglePayEnabled = isGooglePayEnabledFromBackend,
-            cardBrandChoice = cardBrandChoice,
-            customPaymentMethods = customPaymentMethods,
-            externalPaymentMethodData = externalPaymentMethodData,
-        )
-
         Scenario(
-            elementsSessionRepository = elementsSessionRepository,
-            linkStore = linkStore,
             testDispatcher = testDispatcher,
             eventReporter = eventReporter,
-            customerRepository = customerRepository,
-            lpmRepository = lpmRepository,
             prefsRepository = prefsRepository,
             paymentMethodTypeCaptor = paymentMethodTypeCaptor,
-            readyGooglePayRepository = readyGooglePayRepository,
-            unreadyGooglePayRepository = unreadyGooglePayRepository,
-            errorReporter = errorReporter,
-            userFacingLogger = userFacingLogger,
         ).apply {
             runTest {
                 block()
@@ -4350,24 +4307,16 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private data class Scenario(
-        val elementsSessionRepository: ElementsSessionRepository,
-        val linkStore: LinkStore,
         val testDispatcher: TestDispatcher,
         val eventReporter: FakeLoadingEventReporter,
-        val customerRepository: CustomerRepository,
-        val lpmRepository: LpmRepository,
         val prefsRepository: FakePrefsRepository,
         val paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>,
-        val readyGooglePayRepository: GooglePayRepository,
-        val unreadyGooglePayRepository: GooglePayRepository,
-        val errorReporter: ErrorReporter,
-        val userFacingLogger: FakeUserFacingLogger,
     )
 
     private fun Scenario.createPaymentElementLoader(
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        customerRepo: CustomerRepository = customerRepository,
+        customerRepo: CustomerRepository = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS),
         linkAccountState: AccountStatus = AccountStatus.Verified(true, null),
         error: Throwable? = null,
         linkSettings: ElementsSession.LinkSettings? = null,
@@ -4407,11 +4356,11 @@ internal class DefaultPaymentElementLoaderTest {
         return DefaultPaymentElementLoader(
             prefsRepositoryFactory = { prefsRepository },
             googlePayRepositoryFactory = {
-                if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
+                GooglePayRepository { flowOf(isGooglePayReady) }
             },
             elementsSessionRepository = elementsSessionRepository,
             customerRepository = customerRepo,
-            lpmRepository = lpmRepository,
+            lpmRepository = LpmRepository(),
             logger = Logger.noop(),
             eventReporter = eventReporter,
             errorReporter = errorReporter,
