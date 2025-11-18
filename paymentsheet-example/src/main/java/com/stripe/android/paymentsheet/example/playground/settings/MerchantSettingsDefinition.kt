@@ -56,40 +56,41 @@ internal object MerchantSettingsDefinition :
     }
 
     override fun valueUpdated(value: Merchant, playgroundSettings: PlaygroundSettings) {
-        // When the country changes via the UI, update the currency to be the default currency for
-        // that country.
-        val countriesToCurrencyMap: Map<Merchant, Currency> = mapOf(
-            Merchant.GB to Currency.GBP,
-            Merchant.FR to Currency.EUR,
-            Merchant.AU to Currency.AUD,
-            Merchant.US to Currency.USD,
-            Merchant.IN to Currency.INR,
-            Merchant.SG to Currency.SGD,
-            Merchant.MY to Currency.MYR,
-            Merchant.MX to Currency.MXN,
-            Merchant.BR to Currency.BRL,
-            Merchant.JP to Currency.JPY,
-            Merchant.CN to Currency.CNY,
-            Merchant.DE to Currency.EUR,
-            Merchant.IT to Currency.EUR,
-            Merchant.TH to Currency.THB,
-            Merchant.StripeShop to Currency.USD,
-        )
-
-        countriesToCurrencyMap[value]?.let { currency ->
-            playgroundSettings[CurrencySettingsDefinition] = currency
-        }
+        // When the merchant changes via the UI, update the currency to be the default currency for
+        // that merchant.
+        playgroundSettings[CurrencySettingsDefinition] = value.currency
 
         if (value != Merchant.US) {
             playgroundSettings[CustomerSessionOnBehalfOfSettingsDefinition] =
                 CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.NO_CONNECTED_ACCOUNT
         }
 
-        // When the changes via the UI, reset the customer.
+        // When the merchant changes via the UI, reset the customer.
         if (playgroundSettings[CustomerSettingsDefinition].value is CustomerType.Existing) {
             playgroundSettings[CustomerSettingsDefinition] = CustomerType.NEW
         }
     }
+
+    private val Merchant.currency: Currency
+        get() {
+            return when (this) {
+                Merchant.US -> Currency.USD
+                Merchant.GB -> Currency.GBP
+                Merchant.AU -> Currency.AUD
+                Merchant.FR -> Currency.EUR
+                Merchant.IN -> Currency.INR
+                Merchant.SG -> Currency.SGD
+                Merchant.MY -> Currency.MYR
+                Merchant.MX -> Currency.MXN
+                Merchant.BR -> Currency.BRL
+                Merchant.JP -> Currency.JPY
+                Merchant.CN -> Currency.CNY
+                Merchant.DE -> Currency.EUR
+                Merchant.IT -> Currency.EUR
+                Merchant.TH -> Currency.THB
+                Merchant.StripeShop -> Currency.USD
+            }
+        }
 }
 
 enum class Merchant(override val value: String) : ValueEnum {
