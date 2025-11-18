@@ -164,8 +164,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `load with empty merchantDisplayName returns failure`() = runScenario {
-        // loader configured in runScenario
-
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
@@ -186,8 +184,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `load with empty client secret returns failure`() = runScenario {
-        // loader configured in runScenario
-
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = " ",
@@ -208,8 +204,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `load with empty customer id returns failure`() = runScenario {
-        // loader configured in runScenario
-
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
@@ -236,8 +230,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `load with conflicting ephemeral key returns failure`() = runScenario {
-        // loader configured in runScenario
-
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
@@ -971,8 +963,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Populates Link configuration correctly from billing details`() = runScenario {
-        // loader configured in runScenario
-
         val billingDetails = PaymentSheet.BillingDetails(
             address = PaymentSheet.Address(country = "CA"),
             name = "Till",
@@ -1005,8 +995,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Populates Link configuration with shipping details if checkbox is selected`() = runScenario {
-        // loader configured in runScenario
-
         val shippingDetails = AddressDetails(
             name = "Not Till",
             address = PaymentSheet.Address(country = "US"),
@@ -1376,8 +1364,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Uses shipping address phone number if checkbox is selected`() = runScenario {
-        // loader configured in runScenario
-
         val billingDetails = PaymentSheet.BillingDetails(phone = "123-456-7890")
 
         val shippingDetails = AddressDetails(
@@ -2756,8 +2742,6 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `When 'LegacyEphemeralKey' config is provided, permissions should always be enabled and remove duplicates, payment method update should be disabled`() =
         runScenario {
-            // loader configured in runScenario
-
             val state = loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
@@ -4300,7 +4284,6 @@ internal class DefaultPaymentElementLoaderTest {
         ),
     )
 
-
     private fun runScenario(
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -4327,7 +4310,8 @@ internal class DefaultPaymentElementLoaderTest {
         val customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
         val lpmRepository = LpmRepository()
         val prefsRepository = FakePrefsRepository()
-        val paymentMethodTypeCaptor = ArgumentCaptor.forClass(List::class.java) as ArgumentCaptor<List<PaymentMethod.Type>>
+        val paymentMethodTypeCaptor = ArgumentCaptor.forClass(List::class.java)
+            as ArgumentCaptor<List<PaymentMethod.Type>>
 
         val readyGooglePayRepository = mock<GooglePayRepository>().also {
             whenever(it.isReady()).thenReturn(flow { emit(true) })
@@ -4421,7 +4405,7 @@ internal class DefaultPaymentElementLoaderTest {
     private fun Scenario.createPaymentElementLoader(
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        customerRepo: CustomerRepository = this.customerRepository,
+        customerRepo: CustomerRepository = customerRepository,
         linkAccountState: AccountStatus = AccountStatus.Verified(true, null),
         error: Throwable? = null,
         linkSettings: ElementsSession.LinkSettings? = null,
@@ -4459,9 +4443,9 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         return DefaultPaymentElementLoader(
-            prefsRepositoryFactory = { this.prefsRepository },
+            prefsRepositoryFactory = { prefsRepository },
             googlePayRepositoryFactory = {
-                if (isGooglePayReady) this.readyGooglePayRepository else this.unreadyGooglePayRepository
+                if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
             },
             elementsSessionRepository = elementsSessionRepository,
             customerRepository = customerRepo,
