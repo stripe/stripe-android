@@ -58,7 +58,7 @@ internal class IDDetectorTransitioner(
         return this
     }
 
-    @Suppress("Indentation")
+    @Suppress("NestedBlockDepth")
     override suspend fun transitionFromInitial(
         initialState: Initial,
         analyzerInput: AnalyzerInput,
@@ -97,22 +97,31 @@ internal class IDDetectorTransitioner(
                 } else {
                     // Detected a document but wrong side: show side-specific guidance while staying in Initial
                     val feedbackRes =
-                        if (
-                            initialState.type == ScanType.DOC_FRONT &&
-                            analyzerOutput.category == Category.ID_BACK
-                        ) {
-                            com.stripe.android.identity.R.string.stripe_front_of_id_not_detected
-                        } else if (
-                            initialState.type == ScanType.DOC_BACK &&
-                            (
-                                analyzerOutput.category == Category.ID_FRONT ||
+                        when (initialState.type) {
+                            ScanType.DOC_FRONT -> {
+                                if (analyzerOutput.category == Category.ID_BACK) {
+                                    com.stripe.android.identity.R.string.stripe_front_of_id_not_detected
+                                } else {
+                                    // Fallback to generic flip copy
+                                    com.stripe.android.identity.R.string.stripe_incorrect_side_flip
+                                }
+                            }
+
+                            ScanType.DOC_BACK -> {
+                                if (analyzerOutput.category == Category.ID_FRONT ||
                                     analyzerOutput.category == Category.PASSPORT
-                                )
-                        ) {
-                            com.stripe.android.identity.R.string.stripe_back_of_id_not_detected
-                        } else {
-                            // Fallback to generic flip copy
-                            com.stripe.android.identity.R.string.stripe_incorrect_side_flip
+                                ) {
+                                    com.stripe.android.identity.R.string.stripe_back_of_id_not_detected
+                                } else {
+                                    // Fallback to generic flip copy
+                                    com.stripe.android.identity.R.string.stripe_incorrect_side_flip
+                                }
+                            }
+
+                            ScanType.SELFIE -> {
+                                // Shouldn't happen for document capture, fall back to generic copy
+                                com.stripe.android.identity.R.string.stripe_incorrect_side_flip
+                            }
                         }
 
                     initialState.withFeedback(feedbackRes)
