@@ -628,6 +628,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 
         fireEvent(
             PaymentSheetEvent.InitialDisplayedPaymentMethods(
+                mode = mode,
                 visiblePaymentMethods = visiblePaymentMethodsWithWallets,
                 hiddenPaymentMethods = hiddenPaymentMethods,
                 isDeferred = isDeferred,

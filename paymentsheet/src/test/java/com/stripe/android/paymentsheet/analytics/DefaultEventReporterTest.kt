@@ -1516,7 +1516,7 @@ class DefaultEventReporterTest {
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_initial_displayed_payment_methods" &&
+                req.params["event"] == "mc_complete_initial_displayed_payment_methods" &&
                     req.params["visible_payment_methods"] == "card,klarna,paypal" &&
                     req.params["hidden_payment_methods"] == "affirm,afterpay" &&
                     req.params["payment_method_layout"] == "vertical"
@@ -1551,7 +1551,7 @@ class DefaultEventReporterTest {
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_initial_displayed_payment_methods" &&
+                req.params["event"] == "mc_complete_initial_displayed_payment_methods" &&
                     req.params["visible_payment_methods"] == "link,google_pay,card,klarna,paypal" &&
                     req.params["hidden_payment_methods"] == "affirm,afterpay" &&
                     req.params["payment_method_layout"] == "horizontal"

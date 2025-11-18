@@ -810,6 +810,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     }
 
     class InitialDisplayedPaymentMethods(
+        mode: EventReporter.Mode,
         visiblePaymentMethods: List<String>,
         hiddenPaymentMethods: List<String>,
         isVerticalLayout: Boolean,
@@ -818,7 +819,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
     ) : PaymentSheetEvent() {
-        override val eventName: String = "mc_initial_displayed_payment_methods"
+        override val eventName: String = formatEventName(mode, "initial_displayed_payment_methods")
         override val additionalParams: Map<String, Any?> = buildMap {
             put(FIELD_VISIBLE_PAYMENT_METHODS, visiblePaymentMethods.joinToString(","))
             put(FIELD_HIDDEN_PAYMENT_METHODS, hiddenPaymentMethods.joinToString(","))

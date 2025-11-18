@@ -1866,6 +1866,7 @@ class PaymentSheetEventTest {
         val hiddenPaymentMethods = listOf("crypto", "klarna", "alipay")
 
         val initialDisplayedPaymentMethodsEvent = PaymentSheetEvent.InitialDisplayedPaymentMethods(
+            mode = EventReporter.Mode.Complete,
             visiblePaymentMethods = visiblePaymentMethods,
             hiddenPaymentMethods = hiddenPaymentMethods,
             isDeferred = true,
