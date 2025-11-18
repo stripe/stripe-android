@@ -14,7 +14,7 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelected
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
@@ -137,7 +137,7 @@ internal class PaymentSheetActivityTest {
     val rule = InstantTaskExecutorRule()
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<PaymentSheetActivity>()
+    val composeTestRule = createEmptyComposeRule()
 
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
