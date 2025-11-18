@@ -4304,6 +4304,7 @@ internal class DefaultPaymentElementLoaderTest {
         val customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
         val lpmRepository = LpmRepository()
         val prefsRepository = FakePrefsRepository()
+
         @Suppress("UNCHECKED_CAST")
         val paymentMethodTypeCaptor = ArgumentCaptor.forClass(List::class.java)
             as ArgumentCaptor<List<PaymentMethod.Type>>
