@@ -110,6 +110,10 @@
   <string name="stripe_flip_id_document">Flip your government-issued photo ID over to the other side</string>
   <!-- Instructional text when the opposite side of the ID is shown (iOS copy parity) -->
   <string name="stripe_incorrect_side_flip">Incorrect side detected, flip document over</string>
+  <!-- Instructional text when the front of the ID is not detected while scanning front -->
+  <string name="stripe_front_of_id_not_detected">Front of ID not detected</string>
+  <!-- Instructional text when the back of the ID is not detected while scanning back -->
+  <string name="stripe_back_of_id_not_detected">Back of ID not detected</string>
   <!-- Title for scan screen when front of all ID types is shown -->
   <string name="stripe_front_of_all_id_types">Front of driver\'s license, passport, or government-issued photo ID</string>
   <!-- Description of front of driver's license image -->
@@ -167,7 +171,7 @@
   <!-- Instructional text when camera is too close to a document -->
   <string name="stripe_move_farther">Move ID farther back</string>
   <!-- Instructional text when the document is not centered in the frame -->
-  <string name="stripe_move_id_to_center">Move ID to the center</string>
+  <string name="stripe_move_id_to_center">Center ID in view</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">NRIC or FIN</string>
   <!-- No comment provided by engineer. -->
