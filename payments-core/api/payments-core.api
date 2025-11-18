@@ -2134,6 +2134,7 @@ public final class com/stripe/android/model/ConfirmationToken$PaymentMethodPrevi
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final field allowRedisplay Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;
 	public final field billingDetails Lcom/stripe/android/model/PaymentMethod$BillingDetails;
+	public final field card Lcom/stripe/android/model/PaymentMethod$Card;
 	public final field customerId Ljava/lang/String;
 	public final field type Lcom/stripe/android/model/PaymentMethod$Type;
 	public final fun describeContents ()I

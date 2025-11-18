@@ -108,4 +108,46 @@ class PaymentMethodPreviewJsonParserTest {
         val result = parser.parse(json)
         assertThat(result).isNull()
     }
+
+    @Test
+    fun parse_withCardFields_shouldParseCardCorrectly() {
+        val json = JSONObject(
+            """
+            {
+                "type": "card",
+                "card": {
+                    "brand": "visa",
+                    "country": "US",
+                    "exp_month": 12,
+                    "exp_year": 2025,
+                    "fingerprint": "abc123",
+                    "funding": "credit",
+                    "last4": "4242"
+                }
+            }
+            """.trimIndent()
+        )
+
+        val paymentMethodPreview = requireNotNull(parser.parse(json))
+
+        assertThat(paymentMethodPreview.type).isEqualTo(PaymentMethod.Type.Card)
+        val card = requireNotNull(paymentMethodPreview.card)
+        assertThat(card.brand.code).isEqualTo("visa")
+        assertThat(card.country).isEqualTo("US")
+        assertThat(card.expiryMonth).isEqualTo(12)
+        assertThat(card.expiryYear).isEqualTo(2025)
+        assertThat(card.fingerprint).isEqualTo("abc123")
+        assertThat(card.funding).isEqualTo("credit")
+        assertThat(card.last4).isEqualTo("4242")
+    }
+
+    @Test
+    fun parse_withCardType_butNoCardField_shouldReturnNull() {
+        val json = JSONObject("""{"type": "card"}""")
+
+        val paymentMethodPreview = requireNotNull(parser.parse(json))
+
+        assertThat(paymentMethodPreview.type).isEqualTo(PaymentMethod.Type.Card)
+        assertThat(paymentMethodPreview.card).isNull()
+    }
 }
