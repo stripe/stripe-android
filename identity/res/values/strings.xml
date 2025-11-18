@@ -108,8 +108,6 @@
   <string name="stripe_flip_driver_license_or_id">Flip your driver\'s license or government-issued photo ID over to the other side</string>
   <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
   <string name="stripe_flip_id_document">Flip your government-issued photo ID over to the other side</string>
-  <!-- Instructional text when the opposite side of the ID is shown (iOS copy parity) -->
-  <string name="stripe_incorrect_side_flip">Incorrect side detected, flip document over</string>
   <!-- Instructional text when the front of the ID is not detected while scanning front -->
   <string name="stripe_front_of_id_not_detected">Front of ID not detected</string>
   <!-- Instructional text when the back of the ID is not detected while scanning back -->

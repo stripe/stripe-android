@@ -58,7 +58,7 @@ internal class IDDetectorTransitioner(
         return this
     }
 
-    @Suppress("NestedBlockDepth")
+    @Suppress("NestedBlockDepth", "LongMethod")
     override suspend fun transitionFromInitial(
         initialState: Initial,
         analyzerInput: AnalyzerInput,
@@ -102,8 +102,7 @@ internal class IDDetectorTransitioner(
                                 if (analyzerOutput.category == Category.ID_BACK) {
                                     com.stripe.android.identity.R.string.stripe_front_of_id_not_detected
                                 } else {
-                                    // Fallback to generic flip copy
-                                    com.stripe.android.identity.R.string.stripe_incorrect_side_flip
+                                    null
                                 }
                             }
 
@@ -113,18 +112,20 @@ internal class IDDetectorTransitioner(
                                 ) {
                                     com.stripe.android.identity.R.string.stripe_back_of_id_not_detected
                                 } else {
-                                    // Fallback to generic flip copy
-                                    com.stripe.android.identity.R.string.stripe_incorrect_side_flip
+                                    null
                                 }
                             }
 
                             ScanType.SELFIE -> {
-                                // Shouldn't happen for document capture, fall back to generic copy
-                                com.stripe.android.identity.R.string.stripe_incorrect_side_flip
+                                null
                             }
                         }
 
-                    initialState.withFeedback(feedbackRes)
+                    if (feedbackRes != null) {
+                        initialState.withFeedback(feedbackRes)
+                    } else {
+                        initialState
+                    }
                 }
             }
         }
