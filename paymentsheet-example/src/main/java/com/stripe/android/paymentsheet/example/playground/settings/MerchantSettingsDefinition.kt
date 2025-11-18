@@ -113,7 +113,20 @@ enum class Merchant(override val value: String) : ValueEnum {
 val Merchant.countryCode: String
     get() {
         return when (this) {
+            Merchant.US -> value
+            Merchant.GB -> value
+            Merchant.AU -> value
+            Merchant.FR -> value
+            Merchant.IN -> value
+            Merchant.SG -> value
+            Merchant.MY -> value
+            Merchant.MX -> value
+            Merchant.BR -> value
+            Merchant.JP -> value
+            Merchant.CN -> value
+            Merchant.DE -> value
+            Merchant.IT -> value
+            Merchant.TH -> value
             Merchant.StripeShop -> "US"
-            else -> value
         }
     }
