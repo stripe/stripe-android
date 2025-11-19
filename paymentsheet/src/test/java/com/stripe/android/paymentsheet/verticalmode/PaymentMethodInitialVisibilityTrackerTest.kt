@@ -21,7 +21,11 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodInitialVisibilityTrackerTest {
 
-    private val TIME_ADVANCE_1S = 1000L
+    private val DEBOUNCE_DELAY = 50
+
+    private val TIME_ADVANCE_LESSER_THAN_DEBOUNCE_DELAY = DEBOUNCE_DELAY - 10L
+
+    private val TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY = DEBOUNCE_DELAY + 10L
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -41,7 +45,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
         tracker.updateVisibility("unknown_method", coordinates)
 
         // Should not affect tracking since item is not expected
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
         verifyNoCallback(callback)
     }
 
@@ -57,7 +61,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
 
         tracker.updateVisibility("card", coordinates)
 
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
         verifyNoCallback(callback)
     }
 
@@ -77,7 +81,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
         tracker.updateVisibility("card", coordinates1)
         tracker.updateVisibility("card", coordinates1)
 
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
 
         verify(callback).invoke(listOf("card"), emptyList())
     }
@@ -99,7 +103,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
         tracker.updateVisibility("card", coordinates1)
 
         // Should not dispatch because no items are visible
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
         verifyNoCallback(callback)
     }
 
@@ -120,7 +124,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
         tracker.updateVisibility("card", coordinates1)
 
         // Should dispatch because item meets visibility threshold
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
         verify(callback).invoke(listOf("card"), emptyList())
     }
 
@@ -141,7 +145,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
         tracker.updateVisibility("card", coordinates1)
 
         // Should not dispatch because item doesn't meet visibility threshold
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
         verifyNoCallback(callback)
     }
 
@@ -163,7 +167,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
         tracker.updateVisibility("card", coordinates1)
         tracker.updateVisibility("card", coordinates2) // Changes position
 
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
         verifyNoCallback(callback)
     }
 
@@ -183,7 +187,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
         verifyNoCallback(callback)
 
         // Should dispatch after debounce delay
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
         verify(callback).invoke(listOf("card"), emptyList())
     }
 
@@ -202,16 +206,16 @@ class PaymentMethodInitialVisibilityTrackerTest {
         // Should not dispatch immediately
         verifyNoCallback(callback)
 
-        advanceTimeBy(500)
+        advanceTimeBy(TIME_ADVANCE_LESSER_THAN_DEBOUNCE_DELAY)
         verifyNoCallback(callback)
 
         tracker.updateVisibility("card", coordinates)
 
-        advanceTimeBy(500)
+        advanceTimeBy(TIME_ADVANCE_LESSER_THAN_DEBOUNCE_DELAY)
         verifyNoCallback(callback)
 
         // Should dispatch after debounce delay
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
         verify(callback).invoke(listOf("card"), emptyList())
     }
 
@@ -227,12 +231,12 @@ class PaymentMethodInitialVisibilityTrackerTest {
         tracker.updateVisibility("card", coordinates)
         tracker.updateVisibility("card", coordinates)
 
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
         verify(callback, times(1)).invoke(listOf("card"), emptyList())
 
         // Further updates should not trigger additional dispatches
         tracker.updateVisibility("card", coordinates)
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
     }
 
     @Test
@@ -250,7 +254,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
         tracker.updateVisibility("klarna", coordinates) // Make stable
 
         // Should not dispatch yet (missing paypal)
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
         verifyNoCallback(callback)
 
         // Add the third item
@@ -258,7 +262,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
         tracker.updateVisibility("paypal", coordinates) // Make stable
 
         // Now should dispatch
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
         verify(callback).invoke(listOf("card", "klarna", "paypal"), emptyList())
     }
 
@@ -277,7 +281,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
         tracker.reset()
 
         // Should not dispatch even after delay
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
         verifyNoCallback(callback)
     }
 
@@ -297,7 +301,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
         tracker.updateVisibility("klarna", hiddenCoordinates)
         tracker.updateVisibility("klarna", hiddenCoordinates)
 
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
 
         verify(callback).invoke(listOf("card"), listOf("klarna"))
     }
@@ -318,7 +322,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
         tracker.updateVisibility("klarna", hiddenCoordinates)
         tracker.updateVisibility("klarna", hiddenCoordinates)
 
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
 
         verify(callback).invoke(listOf("card"), listOf("klarna"))
     }
@@ -341,7 +345,7 @@ class PaymentMethodInitialVisibilityTrackerTest {
         tracker.updateVisibility("klarna", fullyHiddenCoordinates)
         tracker.updateVisibility("paypal", fullyHiddenCoordinates)
 
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
         verifyNoCallback(callback)
 
         val fullyVisibleCoordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
@@ -350,14 +354,14 @@ class PaymentMethodInitialVisibilityTrackerTest {
         tracker.updateVisibility("klarna", partiallyHiddenCoordinates)
         tracker.updateVisibility("paypal", fullyHiddenCoordinates)
 
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
         verifyNoCallback(callback)
 
         tracker.updateVisibility("card", fullyVisibleCoordinates)
         tracker.updateVisibility("klarna", partiallyHiddenCoordinates)
         tracker.updateVisibility("paypal", fullyHiddenCoordinates)
 
-        advanceTimeBy(TIME_ADVANCE_1S)
+        advanceTimeBy(TIME_ADVANCE_GREATER_THAN_DEBOUNCE_DELAY)
 
         verify(callback).invoke(listOf("card"), listOf("klarna", "paypal"))
     }

@@ -46,7 +46,6 @@ internal interface LoadingEventReporter {
         setAsDefaultEnabled: Boolean?,
         paymentMethodOptionsSetupFutureUsage: Boolean,
         setupFutureUsage: StripeIntent.Usage?,
-        openCardScanAutomatically: Boolean,
     )
 
     /**
@@ -253,6 +252,7 @@ internal interface EventReporter : CardScanEventsReporter {
         visiblePaymentMethods: List<String>,
         hiddenPaymentMethods: List<String>,
         walletsState: WalletsState?,
+        isVerticalLayout: Boolean,
     )
 
     /**

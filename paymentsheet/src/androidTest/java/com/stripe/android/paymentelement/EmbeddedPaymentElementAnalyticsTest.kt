@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -17,7 +18,6 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.clientAttributionMetadataParamsForDeferredIntent
-import com.stripe.android.paymentsheet.utils.AdvancedFraudSignalsTestRule
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
@@ -90,6 +90,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
                 "visible_payment_methods",
                 Uri.encode("link,card,afterpay_clearpay,klarna,cashapp,affirm,alipay")
             ),
+            query("payment_method_layout", "vertical")
         )
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
@@ -296,6 +297,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", ""),
             query("visible_payment_methods", Uri.encode("saved,card,cashapp")),
+            query("payment_method_layout", "vertical")
         )
 
         testContext.configure {
@@ -370,6 +372,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", ""),
             query("visible_payment_methods", Uri.encode("saved,card,cashapp")),
+            query("payment_method_layout", "vertical"),
         )
 
         testContext.configure {
@@ -427,6 +430,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", ""),
             query("visible_payment_methods", Uri.encode("saved,card,cashapp")),
+            query("payment_method_layout", "vertical"),
         )
 
         testContext.configure {

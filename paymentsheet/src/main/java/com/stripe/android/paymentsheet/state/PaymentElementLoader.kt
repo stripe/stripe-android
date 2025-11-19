@@ -78,18 +78,14 @@ internal interface PaymentElementLoader {
         val initializedViaCompose: Boolean,
     )
 
-    interface IntentFirst {
-        val clientSecret: String
-    }
-
     sealed class InitializationMode : Parcelable {
         abstract fun validate()
         abstract fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata
 
         @Parcelize
         data class PaymentIntent(
-            override val clientSecret: String,
-        ) : InitializationMode(), IntentFirst {
+            val clientSecret: String,
+        ) : InitializationMode() {
 
             override fun validate() {
                 PaymentIntentClientSecret(clientSecret).validate()
@@ -102,8 +98,8 @@ internal interface PaymentElementLoader {
 
         @Parcelize
         data class SetupIntent(
-            override val clientSecret: String,
-        ) : InitializationMode(), IntentFirst {
+            val clientSecret: String,
+        ) : InitializationMode() {
 
             override fun validate() {
                 SetupIntentClientSecret(clientSecret).validate()
@@ -274,7 +270,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customerInfo = customerInfo,
                 linkStateResult = linkState.await(),
                 isGooglePayReady = isGooglePayReady,
-                isGooglePaySupportedOnDevice = isGooglePaySupportedOnDevice.await(),
                 initializationMode = initializationMode,
                 clientAttributionMetadata = clientAttributionMetadata,
             )
@@ -327,7 +322,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession = elementsSession,
             state = state,
             isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
-            isGooglePaySupported = isGooglePaySupportedOnDevice.await(),
+            isGooglePaySupported = isGooglePaySupportedOnDevice.completeResultOrNull {
+                errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
+            } ?: false,
             linkDisplay = configuration.link.display,
             initializationMode = initializationMode,
             customerInfo = customerInfo,
@@ -387,7 +384,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customerInfo: CustomerInfo?,
         linkStateResult: LinkStateResult,
         isGooglePayReady: Boolean,
-        isGooglePaySupportedOnDevice: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): PaymentMethodMetadata {
@@ -417,7 +413,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
-            isGooglePaySupportedOnDevice = isGooglePaySupportedOnDevice,
             linkStateResult = linkStateResult,
             customerMetadata = getCustomerMetadata(
                 configuration = configuration,
@@ -803,7 +798,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 setupFutureUsage = elementsSession.stripeIntent.setupFutureUsage(),
                 paymentMethodOptionsSetupFutureUsage = elementsSession.stripeIntent
                     .paymentMethodOptionsSetupFutureUsageMap(),
-                openCardScanAutomatically = state.paymentMethodMetadata.openCardScanAutomatically
             )
         }
     }
@@ -915,4 +909,13 @@ private fun StripeIntent.paymentMethodOptionsSetupFutureUsageMap(): Boolean {
 private fun StripeIntent.setupFutureUsage(): StripeIntent.Usage? = when (this) {
     is SetupIntent -> usage
     is PaymentIntent -> setupFutureUsage
+}
+
+private suspend fun <T> Deferred<T>.completeResultOrNull(
+    skippedCallback: () -> Unit,
+): T? = if (isCompleted) {
+    await()
+} else {
+    skippedCallback()
+    null
 }

@@ -13,6 +13,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.FakeErrorReporter
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -21,7 +22,9 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.whenever
+import java.util.concurrent.CountDownLatch
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.seconds
 
 @RunWith(AndroidJUnit4::class)
 class GooglePayRepositoryTest {
@@ -83,6 +86,34 @@ class GooglePayRepositoryTest {
 
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `when google pay times out, 'isReady' should return false`() = runTest {
+        val paymentsClient = mock<PaymentsClient>()
+        val errorReporter = FakeErrorReporter()
+        val countDownLatch = CountDownLatch(1)
+
+        whenever(paymentsClient.isReadyToPay(any())) doReturn Tasks.call {
+            countDownLatch.await() // This latch never gets counted down.
+            throw AssertionError("Should not reach this point.")
+        }
+
+        val repository = createGooglePayRepository(paymentsClient, errorReporter)
+
+        repository.isReady().test {
+            advanceTimeBy(29.seconds)
+            expectNoEvents()
+            advanceTimeBy(2.seconds)
+            assertEquals(false, awaitItem())
+            awaitComplete()
+        }
+
+        assertEquals(1, errorReporter.getLoggedErrors().size)
+        assertEquals(
+            ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_IS_READY_TIMEOUT.eventName,
+            errorReporter.getLoggedErrors().first(),
+        )
     }
 
     private fun createGooglePayRepository(

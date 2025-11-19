@@ -1,0 +1,129 @@
+@file:OptIn(PaymentMethodMessagingElementPreview::class)
+
+package com.stripe.android.paymentmethodmessaging.element
+
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
+import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.composite
+import com.stripe.android.networktesting.RequestMatchers.host
+import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.testing.RetryRule
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.RuleChain
+
+class PaymentMethodMessagingElementTest {
+    private val networkRule = NetworkRule(
+        hostsToTrack = listOf("https://ppm.stripe.com")
+    )
+    private val composeTestRule = createEmptyComposeRule()
+
+    private val page = PaymentMethodMessagingElementPage(composeTestRule)
+
+    @get:Rule
+    val testRule: RuleChain = RuleChain.emptyRuleChain()
+        .around(composeTestRule)
+        .around(networkRule)
+        .around(RetryRule(5))
+        .around(AdvancedFraudSignalsTestRule())
+
+    private val getConfigRequestMatcher = composite(
+        host("ppm.stripe.com"),
+        method("GET"),
+        path("/config"),
+    )
+
+    @Test
+    fun testNoContent() = runPaymentMethodMessagingElementTest { testContext ->
+        networkRule.enqueue(getConfigRequestMatcher) { response ->
+            response.testBodyFromFile("no-content.json")
+        }
+
+        val result = testContext.configure()
+        assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.NoContent::class.java)
+        page.verifyNoContentDisplayed()
+    }
+
+    @Test
+    fun testSinglePartner() = runPaymentMethodMessagingElementTest { testContext ->
+        networkRule.enqueue(getConfigRequestMatcher) { response ->
+            response.testBodyFromFile("single-partner.json")
+        }
+
+        val result = testContext.configure()
+        assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
+        page.verifySinglePartner()
+        page.openAndCloseLearnMoreActivity()
+        page.verifySinglePartner()
+    }
+
+    @Test
+    fun testMultiPartner() = runPaymentMethodMessagingElementTest { testContext ->
+        networkRule.enqueue(getConfigRequestMatcher) { response ->
+            response.testBodyFromFile("multi-partner.json")
+        }
+
+        val result = testContext.configure()
+        assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
+
+        page.verifyMultiPartner()
+        page.openAndCloseLearnMoreActivity()
+        page.verifyMultiPartner()
+    }
+
+    @Test
+    fun testError() = runPaymentMethodMessagingElementTest { testContext ->
+        networkRule.enqueue(getConfigRequestMatcher) { response ->
+            response.setResponseCode(400)
+            response.testBodyFromFile("error-invalid-currency.json")
+        }
+
+        val result = testContext.configure()
+        assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Failed::class.java)
+        assertThat(
+            (result as PaymentMethodMessagingElement.ConfigureResult.Failed).error.message
+        ).isEqualTo("unsupported_currency")
+
+        page.verifyNoContentDisplayed()
+    }
+
+    @Test
+    fun testUpdatesContentOnConfigChange() = runPaymentMethodMessagingElementTest { testContext ->
+        networkRule.enqueue(getConfigRequestMatcher) { response ->
+            response.testBodyFromFile("single-partner.json")
+        }
+
+        testContext.configure()
+        page.verifySinglePartner()
+
+        networkRule.enqueue(getConfigRequestMatcher) { response ->
+            response.testBodyFromFile("multi-partner.json")
+        }
+
+        testContext.configure()
+        page.verifyMultiPartner()
+
+        networkRule.enqueue(getConfigRequestMatcher) { response ->
+            response.testBodyFromFile("no-content.json")
+        }
+
+        testContext.configure()
+        page.verifyNoContentDisplayed()
+    }
+
+    @Test
+    fun testMalformedResponse() = runPaymentMethodMessagingElementTest { testContext ->
+        networkRule.enqueue(getConfigRequestMatcher) { response ->
+            response.setBody("{}")
+        }
+
+        val result = testContext.configure()
+        assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.NoContent::class.java)
+
+        page.verifyNoContentDisplayed()
+    }
+}

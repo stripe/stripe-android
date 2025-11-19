@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 class CardDetailsSectionElement(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     initialValues: Map<IdentifierSpec, String?>,
-    elementsSessionId: String? = null,
     automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
     private val collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
@@ -27,7 +26,6 @@ class CardDetailsSectionElement(
         collectName = collectName,
         cbcEligibility = cbcEligibility,
         cardBrandFilter = cardBrandFilter,
-        elementsSessionId = elementsSessionId,
         automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
     )
 ) : FormElement {

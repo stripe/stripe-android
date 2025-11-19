@@ -127,7 +127,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         setAsDefaultEnabled: Boolean?,
         paymentMethodOptionsSetupFutureUsage: Boolean,
         setupFutureUsage: StripeIntent.Usage?,
-        openCardScanAutomatically: Boolean,
     ) {
         this.currency = currency
         this.linkEnabled = linkEnabled
@@ -162,7 +161,6 @@ internal class DefaultEventReporter @Inject internal constructor(
                 setAsDefaultEnabled = setAsDefaultEnabled,
                 paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupFutureUsage,
                 setupFutureUsage = setupFutureUsage,
-                openCardScanAutomatically = openCardScanAutomatically,
             )
         )
     }
@@ -615,6 +613,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         visiblePaymentMethods: List<String>,
         hiddenPaymentMethods: List<String>,
         walletsState: WalletsState?,
+        isVerticalLayout: Boolean,
     ) {
         val isGooglePayVisible = walletsState?.googlePay(WalletLocation.HEADER) != null &&
             walletsState.buttonsEnabled
@@ -635,6 +634,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+                isVerticalLayout = isVerticalLayout,
             )
         )
     }
@@ -765,6 +765,9 @@ internal class DefaultEventReporter @Inject internal constructor(
                 googlePaySupported = googlePaySupported,
             )
         )
+        error?.message?.let {
+            logger.logWarningWithoutPii("Card scan check failed: $it")
+        }
     }
 
     private fun fireEvent(event: PaymentSheetEvent) {

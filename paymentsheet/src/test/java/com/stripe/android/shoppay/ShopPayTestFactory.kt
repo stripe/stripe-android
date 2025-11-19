@@ -84,7 +84,6 @@ internal object ShopPayTestFactory {
     val SHOP_PAY_ARGS = ShopPayArgs(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             sellerBusinessName = "Test Business",
-            shopPayConfiguration = SHOP_PAY_CONFIGURATION,
         ),
         publishableKey = "pk_1234",
         shopPayConfiguration = SHOP_PAY_CONFIGURATION,

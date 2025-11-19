@@ -88,7 +88,8 @@ internal object PaymentSheetFixtures {
             phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
             address = AddressCollectionMode.Full,
             attachDefaultsToPaymentMethod = true,
-        )
+        ),
+        opensCardScannerAutomatically = true,
     )
 
     const val DEFAULT_EPHEMERAL_KEY = "ek_123"

@@ -36,13 +36,15 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionsActivity
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
-        val starterArgs = initializeStarterArgs()
         super.onCreate(savedInstanceState)
 
+        val starterArgs = this.starterArgs
         if (starterArgs == null) {
             finish()
             return
         }
+
+        starterArgs.configuration.appearance.parseAppearance()
 
         if (!applicationIsTaskOwner()) {
             viewModel.analyticsListener.cannotProperlyReturnFromLinkAndOtherLPMs()
@@ -78,12 +80,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionsActivity
                 }
             }
         }
-    }
-
-    private fun initializeStarterArgs(): PaymentOptionContract.Args? {
-        starterArgs?.configuration?.appearance?.parseAppearance()
-        earlyExitDueToIllegalState = starterArgs == null
-        return starterArgs
     }
 
     override fun setActivityResult(result: PaymentOptionsActivityResult) {

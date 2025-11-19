@@ -270,6 +270,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     visiblePaymentMethods = visiblePaymentMethods,
                     hiddenPaymentMethods = hiddenPaymentMethods,
                     walletsState = walletsState.value,
+                    isVerticalLayout = true,
                 )
             },
         )

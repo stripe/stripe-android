@@ -23,6 +23,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
@@ -114,6 +115,7 @@ internal class CustomerSheetViewModel(
     private val customerSheetLoader: CustomerSheetLoader,
     private val errorReporter: ErrorReporter,
     private val savedStateHandle: SavedStateHandle,
+    internal val userFacingLogger: UserFacingLogger,
 ) : ViewModel() {
 
     @Inject
@@ -133,6 +135,7 @@ internal class CustomerSheetViewModel(
         customerSheetLoader: CustomerSheetLoader,
         errorReporter: ErrorReporter,
         savedStateHandle: SavedStateHandle,
+        userFacingLogger: UserFacingLogger,
     ) : this(
         application = application,
         originalPaymentSelection = originalPaymentSelection,
@@ -152,6 +155,7 @@ internal class CustomerSheetViewModel(
         customerSheetLoader = customerSheetLoader,
         errorReporter = errorReporter,
         savedStateHandle = savedStateHandle,
+        userFacingLogger = userFacingLogger,
     )
 
     private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(

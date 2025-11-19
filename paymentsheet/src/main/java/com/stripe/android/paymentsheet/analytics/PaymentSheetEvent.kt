@@ -106,7 +106,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         setAsDefaultEnabled: Boolean? = null,
         setupFutureUsage: StripeIntent.Usage? = null,
         paymentMethodOptionsSetupFutureUsage: Boolean,
-        openCardScanAutomatically: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
         override val additionalParams: Map<String, Any?> = buildMap {
@@ -124,7 +123,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             setAsDefaultEnabled?.let {
                 put(FIELD_SET_AS_DEFAULT_ENABLED, it)
             }
-            put(FIELD_OPEN_CARD_SCAN_AUTOMATICALLY, openCardScanAutomatically)
             put(FIELD_LINK_DISPLAY, linkDisplay.analyticsValue)
             putIfNotEmpty(FIELD_LINK_DISABLED_REASONS, linkDisabledReasons?.map { it.value })
             putIfNotEmpty(FIELD_LINK_SIGNUP_DISABLED_REASONS, linkSignupDisabledReasons?.map { it.value })
@@ -232,6 +230,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_EXTERNAL_PAYMENT_METHODS to configuration.getExternalPaymentMethodsAnalyticsValue(),
                     FIELD_CARD_BRAND_ACCEPTANCE to configuration.cardBrandAcceptance.toAnalyticsValue(),
                     FIELD_ANALYTIC_CALLBACK_SET to isAnalyticEventCallbackSet,
+                    FIELD_OPEN_CARD_SCAN_AUTOMATICALLY to configuration.opensCardScannerAutomatically,
                 ).plus(configurationSpecificPayload.payload)
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -813,6 +812,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class InitialDisplayedPaymentMethods(
         visiblePaymentMethods: List<String>,
         hiddenPaymentMethods: List<String>,
+        isVerticalLayout: Boolean,
         override val isDeferred: Boolean,
         override val isSpt: Boolean,
         override val linkEnabled: Boolean,
@@ -822,6 +822,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = buildMap {
             put(FIELD_VISIBLE_PAYMENT_METHODS, visiblePaymentMethods.joinToString(","))
             put(FIELD_HIDDEN_PAYMENT_METHODS, hiddenPaymentMethods.joinToString(","))
+            put(FIELD_PAYMENT_METHOD_LAYOUT, if (isVerticalLayout) "vertical" else "horizontal")
         }
     }
 

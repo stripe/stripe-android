@@ -9,8 +9,7 @@ MODULES=(
   "stripe-ui-core"
   "stripe-core"
   "identity"
-  # Add back financial-connections when we're ready to release the localized SDK!
-  # "financial-connections"
+  "financial-connections"
   "stripecardscan"
 )
 

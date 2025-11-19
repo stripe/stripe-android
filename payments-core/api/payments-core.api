@@ -237,6 +237,14 @@ public final class com/stripe/android/GooglePayJsonFactory$ShippingAddressParame
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/GooglePayJsonFactory$SoftwareInfo$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/GooglePayJsonFactory$SoftwareInfo;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/GooglePayJsonFactory$SoftwareInfo;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/GooglePayJsonFactory$TransactionInfo : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -2126,6 +2134,7 @@ public final class com/stripe/android/model/ConfirmationToken$PaymentMethodPrevi
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final field allowRedisplay Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;
 	public final field billingDetails Lcom/stripe/android/model/PaymentMethod$BillingDetails;
+	public final field card Lcom/stripe/android/model/PaymentMethod$Card;
 	public final field customerId Ljava/lang/String;
 	public final field type Lcom/stripe/android/model/PaymentMethod$Type;
 	public final fun describeContents ()I

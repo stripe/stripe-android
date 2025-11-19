@@ -2,6 +2,18 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [Added][12011](https://github.com/stripe/stripe-android/pull/12011) Builder APIs for PaymentSheet appearance customization (Colors, Shapes, Typography, PrimaryButtonColors, and embedded row styles)
+
+### Payments
+* [Added][12014](https://github.com/stripe/stripe-android/pull/12014) `ConfirmationToken.PaymentMethodPreview` now includes structured `Card` field with detailed card information (brand, country, expiry, funding, last4, etc.)
+
+## 22.2.0 - 2025-11-17
+
+### Financial Connections
+
+* [Added] `StripeFinancialConnections` SDK is now localized!
+
 ## 22.1.1 - 2025-11-13
 
 * [UPDATED] Additional APIs and improvements to support the development of the React Native StripeCryptoOnramp SDK.

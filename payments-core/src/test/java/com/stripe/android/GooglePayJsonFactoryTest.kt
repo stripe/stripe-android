@@ -136,7 +136,11 @@ class GooglePayJsonFactoryTest {
                     "phoneNumberRequired": true
                 },
                 "merchantInfo": {
-                    "merchantName": "Widget Store"
+                    "merchantName": "Widget Store",
+                    "softwareInfo": {
+                        "id": "android/stripe-launcher",
+                        "version": "${StripeSdkVersion.VERSION_NAME}"
+                    }
                 }
             }
             """.trimIndent()
@@ -158,7 +162,10 @@ class GooglePayJsonFactoryTest {
                 isPhoneNumberRequired = true
             ),
             merchantInfo = GooglePayJsonFactory.MerchantInfo(
-                merchantName = "Widget Store"
+                merchantName = "Widget Store",
+                softwareInfo = GooglePayJsonFactory.SoftwareInfo(
+                    id = GooglePayJsonFactory.SoftwareInfo.SoftwareId.Launcher
+                )
             ),
             shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
                 isRequired = true,
@@ -605,5 +612,55 @@ class GooglePayJsonFactoryTest {
         // Regular payment request should only include filtered card networks
         assertThat(paymentDataAllowedCardNetworks)
             .containsExactly("MASTERCARD", "VISA")
+    }
+
+    @Test
+    fun `'merchantInfo' should have 'stripe-manual-api' by default when software identifier not provided`() {
+        val factory = GooglePayJsonFactory(
+            googlePayConfig = googlePayConfig,
+        )
+
+        val createCardPaymentMethodRequestJson = factory.createPaymentDataRequest(
+            billingAddressParameters = null,
+            allowCreditCards = true,
+            transactionInfo = GooglePayJsonFactory.TransactionInfo(
+                currencyCode = "CAD",
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final
+            ),
+            merchantInfo = null,
+        )
+
+        val softwareInfo = createCardPaymentMethodRequestJson
+            .getJSONObject("merchantInfo")
+            .getJSONObject("softwareInfo")
+
+        assertThat(softwareInfo.getString("id")).isEqualTo("android/stripe-manual-api")
+    }
+
+    @Test
+    fun `'merchantInfo' should have 'stripe-elements' when specific software identifier is provided`() {
+        val factory = GooglePayJsonFactory(
+            googlePayConfig = googlePayConfig,
+        )
+
+        val createCardPaymentMethodRequestJson = factory.createPaymentDataRequest(
+            billingAddressParameters = null,
+            allowCreditCards = true,
+            transactionInfo = GooglePayJsonFactory.TransactionInfo(
+                currencyCode = "CAD",
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final
+            ),
+            merchantInfo = GooglePayJsonFactory.MerchantInfo(
+                softwareInfo = GooglePayJsonFactory.SoftwareInfo(
+                    id = GooglePayJsonFactory.SoftwareInfo.SoftwareId.Elements,
+                )
+            ),
+        )
+
+        val softwareInfo = createCardPaymentMethodRequestJson
+            .getJSONObject("merchantInfo")
+            .getJSONObject("softwareInfo")
+
+        assertThat(softwareInfo.getString("id")).isEqualTo("android/stripe-elements")
     }
 }
