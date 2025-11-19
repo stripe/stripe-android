@@ -80,12 +80,12 @@ internal class PaymentSheetAnalyticsTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
+        validateAnalyticsRequest(eventName = "mc_complete_init")
+        validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(
-            eventName = "mc_complete_init_default",
+            eventName = "mc_load_succeeded",
             query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
         )
-        validateAnalyticsRequest(eventName = "mc_load_started")
-        validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_form_shown")
         // cardscan is not available in test mode
@@ -162,7 +162,7 @@ internal class PaymentSheetAnalyticsTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        validateAnalyticsRequest(eventName = "mc_complete_init_default")
+        validateAnalyticsRequest(eventName = "mc_complete_init")
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
@@ -238,7 +238,7 @@ internal class PaymentSheetAnalyticsTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-
+        validateAnalyticsRequest(eventName = "mc_complete_init")
         validateAnalyticsRequest(eventName = "mc_load_started")
         networkRule.enqueue(
             method("GET"),
@@ -246,10 +246,13 @@ internal class PaymentSheetAnalyticsTest {
         ) { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
-        validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(
-            eventName = "mc_complete_init_default",
+            eventName = "mc_load_succeeded",
             query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
+            query(Uri.encode("mpe_config[payment_method_layout]"), "horizontal"),
+            query(Uri.encode("is_confirmation_tokens"), "true"),
+            query(Uri.encode("is_decoupled"), "true"),
+            query(Uri.encode("intent_type"), "deferred_payment_intent"),
         )
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
@@ -342,7 +345,7 @@ internal class PaymentSheetAnalyticsTest {
             response.testBodyFromFile("elements-sessions-requires_cvc_recollection.json")
         }
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
-        validateAnalyticsRequest(eventName = "mc_complete_init_customer")
+        validateAnalyticsRequest(eventName = "mc_complete_init")
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
         validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")

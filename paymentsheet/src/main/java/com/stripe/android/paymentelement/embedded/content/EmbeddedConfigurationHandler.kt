@@ -8,8 +8,6 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -29,7 +27,6 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
     private val paymentElementLoader: PaymentElementLoader,
     private val savedStateHandle: SavedStateHandle,
     private val sheetStateHolder: SheetStateHolder,
-    private val eventReporter: EventReporter,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
 ) : EmbeddedConfigurationHandler {
 
@@ -49,16 +46,6 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
         configuration: EmbeddedPaymentElement.Configuration,
     ): Result<PaymentElementLoader.State> {
         val targetConfiguration = configuration.asCommonConfiguration()
-        eventReporter.onInit(
-            commonConfiguration = targetConfiguration,
-            appearance = configuration.appearance,
-            isDeferred = true,
-            primaryButtonColor = null,
-            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(
-                configuration = configuration,
-                isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null
-            ),
-        )
 
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
 
@@ -96,7 +83,10 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
                 coroutineScope.async {
                     paymentElementLoader.load(
                         initializationMode = initializationMode,
-                        configuration = targetConfiguration,
+                        integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
+                            isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null,
+                            configuration = configuration,
+                        ),
                         metadata = PaymentElementLoader.Metadata(
                             isReloadingAfterProcessDeath = false,
                             initializedViaCompose = true,

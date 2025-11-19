@@ -2397,7 +2397,6 @@ internal class DefaultFlowControllerTest {
             configurationHandler = FlowControllerConfigurationHandler(
                 paymentElementLoader = paymentElementLoader,
                 uiContext = testDispatcher,
-                eventReporter = eventReporter,
                 viewModel = viewModel,
                 paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
                 confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
