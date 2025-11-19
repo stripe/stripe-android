@@ -64,9 +64,10 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onLoadStarted(initializedViaCompose: Boolean) {
         durationProvider.start(DurationProvider.Key.Loading)
         fireEvent(
-            PaymentSheetEvent.LoadStarted(
+            event = PaymentSheetEvent.LoadStarted(
                 initializedViaCompose = initializedViaCompose
-            )
+            ),
+            paymentMethodMetadata = null, // We don't have these details until load is complete.
         )
     }
 
@@ -93,18 +94,20 @@ internal class DefaultEventReporter @Inject internal constructor(
     ) {
         val duration = durationProvider.end(DurationProvider.Key.Loading)
         fireEvent(
-            PaymentSheetEvent.LoadFailed(
+            event = PaymentSheetEvent.LoadFailed(
                 duration = duration,
                 error = error,
-            )
+            ),
+            paymentMethodMetadata = null, // We don't have these details until load is completed successfully.
         )
     }
 
     override fun onElementsSessionLoadFailed(error: Throwable) {
         fireEvent(
-            PaymentSheetEvent.ElementsSessionLoadFailed(
+            event = PaymentSheetEvent.ElementsSessionLoadFailed(
                 error = error,
-            )
+            ),
+            paymentMethodMetadata = null, // We don't have these details until load is completed successfully.
         )
     }
 
@@ -273,9 +276,10 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onLpmSpecFailure(errorMessage: String?) {
         fireEvent(
-            PaymentSheetEvent.LpmSerializeFailureEvent(
+            event = PaymentSheetEvent.LpmSerializeFailureEvent(
                 errorMessage = errorMessage
-            )
+            ),
+            paymentMethodMetadata = null, // We don't have these details until load is completed successfully.
         )
     }
 
@@ -413,7 +417,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = emptyMap(),
+                    additionalParams = defaultParams(paymentMethodMetadataProvider.get()),
                 )
             )
         }
