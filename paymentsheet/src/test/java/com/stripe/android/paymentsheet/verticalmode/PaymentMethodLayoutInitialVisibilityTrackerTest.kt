@@ -36,7 +36,6 @@ class PaymentMethodLayoutInitialVisibilityTrackerTest {
         verify(callback).invoke()
     }
 
-
     @Test
     fun `hidden item does not invoke callback`() = runTest {
         val tracker = getTracker()
@@ -90,7 +89,6 @@ class PaymentMethodLayoutInitialVisibilityTrackerTest {
             EMBEDDED_PAYMENT_METHOD_LAYOUT_NAME,
             FakeLayoutCoordinatesFixtures.getCoordinatesBasedOnPercentVisible(0.12F)
         )
-
 
         tracker.updateVisibility(
             EMBEDDED_PAYMENT_METHOD_LAYOUT_NAME,

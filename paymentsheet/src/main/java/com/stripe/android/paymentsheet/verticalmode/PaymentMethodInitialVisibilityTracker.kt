@@ -23,7 +23,7 @@ internal class PaymentMethodInitialVisibilityTracker(
     expectedItems: List<String>,
     dispatcher: CoroutineContext = Dispatchers.Default,
     private val renderedLpmCallback: (List<String>, List<String>) -> Unit,
-): LayoutCoordinateInitialVisibilityTracker(
+) : LayoutCoordinateInitialVisibilityTracker(
     expectedItems = expectedItems,
     visibilityThreshold = DEFAULT_VISIBILITY_THRESHOLD_PERCENT
 ) {

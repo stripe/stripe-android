@@ -31,7 +31,6 @@ internal object FakeLayoutCoordinatesFixtures {
     }
 
     fun getBoundsBasedOnPercentVisible(percentVisible: Float): Rect {
-        return Rect(0f, 0f, 100f,  percentVisible * 50f)
+        return Rect(0f, 0f, 100f, percentVisible * 50f)
     }
-
 }

@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 internal class PaymentMethodLayoutInitialVisibilityTracker(
     private val callback: () -> Unit,
-): LayoutCoordinateInitialVisibilityTracker(
+) : LayoutCoordinateInitialVisibilityTracker(
     expectedItems = listOf(EMBEDDED_PAYMENT_METHOD_LAYOUT_NAME),
     visibilityThreshold = VISIBILITY_THRESHOLD_PERCENT_FOR_EMBEDDED_LAYOUT_TRACKING
 ) {
@@ -12,7 +12,7 @@ internal class PaymentMethodLayoutInitialVisibilityTracker(
         coordinateSnapshot: CoordinateSnapshot,
         isVisible: Boolean,
     ) {
-        if(isVisible) {
+        if (isVisible) {
             hasDispatched = true
             callback()
         }

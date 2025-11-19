@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.IntSize
 internal abstract class LayoutCoordinateInitialVisibilityTracker(
     var expectedItems: List<String>,
     val visibilityThreshold: Int,
-){
+) {
 
     protected data class CoordinateSnapshot(
         val positionInWindow: Offset,
@@ -66,6 +66,7 @@ internal abstract class LayoutCoordinateInitialVisibilityTracker(
         isVisible: Boolean,
     )
 
+    @Suppress("MagicNumber")
     private fun calculateVisibility(
         coordinates: CoordinateSnapshot,
         visibilityThresholdPercentage: Int,
