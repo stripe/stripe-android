@@ -291,7 +291,7 @@ workflows:
             - auto_google_login: true
             - inst_test_targets: class com.stripe.android.paymentsheet.PaymentSheetAnalyticsTest
             - test_type: instrumentation
-            - test_devices: Pixel2.arm,33,en_US,portrait
+            - test_devices: MediumPhone.arm,34,en_US,portrait
     meta:
       bitrise.io:
         stack: linux-docker-android-22.04
