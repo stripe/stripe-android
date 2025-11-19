@@ -1,6 +1,18 @@
 # CHANGELOG
 
-## XX.XX.XX - 20XX-XX-XX
+## 22.4.0 - 2025-12-01
+
+### CustomerSheet
+
+* [Added] opensCardScannerAutomatically configuration is now available.
+
+### PaymentElement
+
+* [Added] opensCardScannerAutomatically configuration is now available.
+
+### PaymentSheet
+
+* [Added] opensCardScannerAutomatically configuration is now available.
 
 ### PaymentSheet
 * [Added][12011](https://github.com/stripe/stripe-android/pull/12011) Builder APIs for PaymentSheet appearance customization (Colors, Shapes, Typography, PrimaryButtonColors, and embedded row styles)
@@ -17,18 +29,6 @@
 ## 22.1.1 - 2025-11-13
 
 * [UPDATED] Additional APIs and improvements to support the development of the React Native StripeCryptoOnramp SDK.
-
-### CustomerSheet
-
-* [Added] opensCardScannerAutomatically configuration is now available.
-
-### PaymentElement
-
-* [Added] opensCardScannerAutomatically configuration is now available.
-
-### PaymentSheet
-
-* [Added] opensCardScannerAutomatically configuration is now available.
 
 ## 22.1.0 - 2025-11-10
 
