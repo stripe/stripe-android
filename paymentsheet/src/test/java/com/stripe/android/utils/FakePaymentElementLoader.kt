@@ -1,6 +1,5 @@
 package com.stripe.android.utils
 
-import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.ClientAttributionMetadata
@@ -44,13 +43,14 @@ internal class FakePaymentElementLoader(
 
     override suspend fun load(
         initializationMode: PaymentElementLoader.InitializationMode,
-        configuration: CommonConfiguration,
+        integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> {
         delay(delay)
         return if (shouldFail) {
             Result.failure(IllegalStateException("oh no"))
         } else {
+            val configuration = integrationConfiguration.commonConfiguration
             Result.success(
                 PaymentElementLoader.State(
                     config = configuration,

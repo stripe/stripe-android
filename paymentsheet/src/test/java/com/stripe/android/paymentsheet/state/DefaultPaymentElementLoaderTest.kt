@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
-import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
@@ -22,6 +21,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode.AlongsideSaveForFutureUse
 import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUse
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -57,7 +57,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.MERCHANT_DISPLAY_NAM
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.FakeLoadingEventReporter
 import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
@@ -1642,21 +1641,6 @@ internal class DefaultPaymentElementLoaderTest {
         val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
         assertThat(loadSucceededCall.paymentSelection)
             .isEqualTo(PaymentSelection.Saved(paymentMethod = PAYMENT_METHODS.first()))
-        assertThat(loadSucceededCall.linkEnabled).isTrue()
-        assertThat(loadSucceededCall.linkMode).isEqualTo(LinkMode.LinkPaymentMethod)
-        assertThat(loadSucceededCall.linkDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkSignupDisabledReasons).isNull()
-        assertThat(loadSucceededCall.googlePaySupported).isTrue()
-        assertThat(loadSucceededCall.currency).isEqualTo("usd")
-        assertThat(loadSucceededCall.initializationMode).isEqualTo(initializationMode)
-        assertThat(loadSucceededCall.orderedLpms).isEqualTo(listOf("card", "link"))
-        assertThat(loadSucceededCall.requireCvcRecollection).isFalse()
-        assertThat(loadSucceededCall.hasDefaultPaymentMethod).isNull()
-        assertThat(loadSucceededCall.setAsDefaultEnabled).isNull()
-        assertThat(loadSucceededCall.linkDisplay).isEqualTo(PaymentSheet.LinkConfiguration.Display.Automatic)
-        assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
-        assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isFalse()
-        assertThat(loadSucceededCall.setupFutureUsage).isNull()
     }
 
     @Test
@@ -1712,21 +1696,6 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadStartedTurbine.awaitItem().initializedViaCompose).isTrue()
         val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
         assertThat(loadSucceededCall.paymentSelection).isNull()
-        assertThat(loadSucceededCall.linkEnabled).isTrue()
-        assertThat(loadSucceededCall.linkMode).isEqualTo(LinkMode.LinkPaymentMethod)
-        assertThat(loadSucceededCall.linkDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkSignupDisabledReasons).isNull()
-        assertThat(loadSucceededCall.googlePaySupported).isTrue()
-        assertThat(loadSucceededCall.currency).isEqualTo("usd")
-        assertThat(loadSucceededCall.initializationMode).isEqualTo(initializationMode)
-        assertThat(loadSucceededCall.orderedLpms).isEqualTo(listOf("card", "link"))
-        assertThat(loadSucceededCall.requireCvcRecollection).isFalse()
-        assertThat(loadSucceededCall.hasDefaultPaymentMethod).isNull()
-        assertThat(loadSucceededCall.setAsDefaultEnabled).isNull()
-        assertThat(loadSucceededCall.linkDisplay).isEqualTo(PaymentSheet.LinkConfiguration.Display.Automatic)
-        assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
-        assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isFalse()
-        assertThat(loadSucceededCall.setupFutureUsage).isNull()
     }
 
     @Test
@@ -2214,14 +2183,20 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"
             ),
-            configuration = CommonConfigurationFactory.create(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    allowedCountries = emptySet(),
-                ),
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                    id = "cus_1",
-                    clientSecret = "cuss_123",
-                ),
+            integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(
+                PaymentSheet.Configuration.Builder("Example, Inc.")
+                    .billingDetailsCollectionConfiguration(
+                        PaymentSheet.BillingDetailsCollectionConfiguration(
+                            allowedCountries = emptySet(),
+                        )
+                    )
+                    .customer(
+                        PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "cus_1",
+                            clientSecret = "cuss_123",
+                        )
+                    )
+                    .build()
             ),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
@@ -2251,14 +2226,20 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"
             ),
-            configuration = CommonConfigurationFactory.create(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    allowedCountries = setOf("CA", "mx"),
-                ),
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                    id = "cus_1",
-                    clientSecret = "cuss_123",
-                ),
+            integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(
+                PaymentSheet.Configuration.Builder("Example, Inc.")
+                    .billingDetailsCollectionConfiguration(
+                        PaymentSheet.BillingDetailsCollectionConfiguration(
+                            allowedCountries = setOf("CA", "mx"),
+                        )
+                    )
+                    .customer(
+                        PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "cus_1",
+                            clientSecret = "cuss_123",
+                        )
+                    )
+                    .build()
             ),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
@@ -3348,162 +3329,6 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `Emits correct loaded event when Link is unavailable`() = runScenario {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card"),
-            )
-        )
-
-        loader.load(
-            initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = true,
-            ),
-        )
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.paymentSelection).isNull()
-        assertThat(loadSucceededCall.linkEnabled).isFalse()
-        assertThat(loadSucceededCall.linkMode).isNull()
-        assertThat(loadSucceededCall.linkDisabledReasons)
-            .containsExactly(LinkDisabledReason.NotSupportedInElementsSession)
-        assertThat(loadSucceededCall.linkSignupDisabledReasons).isNull()
-        assertThat(loadSucceededCall.googlePaySupported).isTrue()
-        assertThat(loadSucceededCall.currency).isEqualTo("usd")
-        assertThat(loadSucceededCall.initializationMode).isEqualTo(DEFAULT_INITIALIZATION_MODE)
-        assertThat(loadSucceededCall.orderedLpms).isEqualTo(listOf("card"))
-        assertThat(loadSucceededCall.requireCvcRecollection).isFalse()
-        assertThat(loadSucceededCall.hasDefaultPaymentMethod).isNull()
-        assertThat(loadSucceededCall.setAsDefaultEnabled).isNull()
-        assertThat(loadSucceededCall.linkDisplay).isEqualTo(PaymentSheet.LinkConfiguration.Display.Automatic)
-        assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
-        assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isFalse()
-        assertThat(loadSucceededCall.setupFutureUsage).isNull()
-    }
-
-    @Test
-    fun `Emits correct event when Link is in payment method mode`() = runScenario {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "link"),
-            ),
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
-        )
-
-        loader.load(
-            initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = true,
-            ),
-        )
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.paymentSelection).isNull()
-        assertThat(loadSucceededCall.linkEnabled).isTrue()
-        assertThat(loadSucceededCall.linkMode).isEqualTo(LinkMode.LinkPaymentMethod)
-        assertThat(loadSucceededCall.linkDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkSignupDisabledReasons).isNull()
-        assertThat(loadSucceededCall.googlePaySupported).isTrue()
-        assertThat(loadSucceededCall.currency).isEqualTo("usd")
-        assertThat(loadSucceededCall.initializationMode).isEqualTo(DEFAULT_INITIALIZATION_MODE)
-        assertThat(loadSucceededCall.orderedLpms).isEqualTo(listOf("card", "link"))
-        assertThat(loadSucceededCall.requireCvcRecollection).isFalse()
-        assertThat(loadSucceededCall.hasDefaultPaymentMethod).isNull()
-        assertThat(loadSucceededCall.setAsDefaultEnabled).isNull()
-        assertThat(loadSucceededCall.linkDisplay).isEqualTo(PaymentSheet.LinkConfiguration.Display.Automatic)
-        assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
-        assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isFalse()
-        assertThat(loadSucceededCall.setupFutureUsage).isNull()
-    }
-
-    @Test
-    fun `Emits correct event when Link is in passthrough mode`() = runScenario {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "link"),
-            ),
-            linkSettings = createLinkSettings(passthroughModeEnabled = true),
-        )
-
-        loader.load(
-            initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = true,
-            ),
-        )
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.linkEnabled).isTrue()
-        assertThat(loadSucceededCall.linkMode).isEqualTo(LinkMode.Passthrough)
-        assertThat(loadSucceededCall.linkDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkSignupDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkDisplay).isEqualTo(PaymentSheet.LinkConfiguration.Display.Automatic)
-        assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
-    }
-
-    @Test
-    fun `Emits correct event when CVC recollection is required`() = runScenario {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
-        )
-
-        loader.load(
-            initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = true,
-            ),
-        )
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.requireCvcRecollection).isTrue()
-    }
-
-    @Test
-    fun `Emits correct event when CVC recollection is required for deferred`() = runScenario {
-        PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER] = PaymentElementCallbacks.Builder()
-            .createIntentCallback { _ ->
-                error("Should not be called.")
-            }
-            .build()
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
-        )
-
-        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                    amount = 100L,
-                    currency = "usd"
-                ),
-                requireCvcRecollection = true
-            )
-        )
-
-        loader.load(
-            initializationMode = initializationMode,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = true,
-            ),
-        )
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.requireCvcRecollection).isTrue()
-    }
-
-    @Test
     fun `Should filter out saved cards with disallowed brands`() = runScenario {
         prefsRepository.setSavedSelection(null)
 
@@ -3660,39 +3485,6 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Emits correct load event if Link display is set to 'automatic'`() = runScenario {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        )
-
-        val config = PaymentSheet.Configuration(
-            merchantDisplayName = MERCHANT_DISPLAY_NAME,
-            link = PaymentSheet.LinkConfiguration(
-                display = PaymentSheet.LinkConfiguration.Display.Automatic,
-            ),
-        )
-
-        loader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = config,
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.linkEnabled).isTrue()
-        assertThat(loadSucceededCall.linkMode).isNull()
-        assertThat(loadSucceededCall.linkDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkSignupDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkDisplay).isEqualTo(PaymentSheet.LinkConfiguration.Display.Automatic)
-        assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
-    }
-
-    @Test
     fun `Hides Link if Link display is set to 'never'`() = runScenario {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -3757,62 +3549,6 @@ internal class DefaultPaymentElementLoaderTest {
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
-    }
-
-    @Test
-    fun `Emits correct load event if Link display is set to 'never'`() = runScenario {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        )
-
-        val config = PaymentSheet.Configuration(
-            merchantDisplayName = MERCHANT_DISPLAY_NAME,
-            link = PaymentSheet.LinkConfiguration(
-                display = PaymentSheet.LinkConfiguration.Display.Never,
-            ),
-        )
-
-        loader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = config,
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.linkEnabled).isFalse()
-        assertThat(loadSucceededCall.linkMode).isNull()
-        assertThat(loadSucceededCall.linkDisabledReasons).isEqualTo(listOf(LinkDisabledReason.LinkConfiguration))
-        assertThat(loadSucceededCall.linkSignupDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkDisplay).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
-        assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
-    }
-
-    @Test
-    fun `Emits correct load event for PMO setup future usage`() = runScenario {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
-            ),
-        )
-
-        loader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isTrue()
     }
 
     @Test
@@ -3909,29 +3645,6 @@ internal class DefaultPaymentElementLoaderTest {
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
-    }
-
-    @Test
-    fun `Emits correct load event for setup future usage'`() = runScenario {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                setupFutureUsage = StripeIntent.Usage.OffSession
-            ),
-        )
-
-        loader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.setupFutureUsage).isEqualTo(StripeIntent.Usage.OffSession)
     }
 
     private fun removeLastPaymentMethodTest(
@@ -4092,6 +3805,104 @@ internal class DefaultPaymentElementLoaderTest {
         eventReporter.loadSucceededTurbine.awaitItem()
     }
 
+    @Test
+    fun `analyticsMetadataFactory is called with correct parameters`() = runScenario {
+        val analyticsMetadataFactory = FakeDefaultPaymentElementLoaderAnalyticsMetadataFactory {
+            AnalyticsMetadata(emptyMap())
+        }
+
+        val loader = createPaymentElementLoader(
+            isGooglePayReady = true,
+            analyticsMetadataFactory = analyticsMetadataFactory
+        )
+
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+        )
+
+        loader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = config,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        val createCall = analyticsMetadataFactory.createCall.awaitItem()
+        assertThat(createCall.initializationMode).isEqualTo(initializationMode)
+        assertThat(createCall.configuration).isEqualTo(
+            PaymentElementLoader.Configuration.PaymentSheet(config)
+        )
+        assertThat(createCall.isGooglePaySupported).isTrue()
+        assertThat(createCall.customerMetadata).isNotNull()
+        assertThat(createCall.integrationMetadata).isEqualTo(
+            IntegrationMetadata.IntentFirst(PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value)
+        )
+        assertThat(createCall.elementsSession).isNotNull()
+        assertThat(createCall.linkStateResult).isNotNull()
+        analyticsMetadataFactory.validate()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `analyticsMetadataFactory is called with correct parameters without customer`() = runScenario {
+        PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _ ->
+                error("Should not be called.")
+            }
+            .build()
+
+        val analyticsMetadataFactory = FakeDefaultPaymentElementLoaderAnalyticsMetadataFactory {
+            AnalyticsMetadata(emptyMap())
+        }
+
+        val loader = createPaymentElementLoader(
+            isGooglePayReady = false,
+            linkAccountState = AccountStatus.SignedOut,
+            analyticsMetadataFactory = analyticsMetadataFactory
+        )
+
+        val config = PaymentSheet.Configuration(
+            merchantDisplayName = "Merchant"
+        )
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 5000,
+                    currency = "USD"
+                ),
+            ),
+        )
+
+        loader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = config,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        val createCall = analyticsMetadataFactory.createCall.awaitItem()
+        assertThat(createCall.initializationMode).isEqualTo(initializationMode)
+        assertThat(createCall.configuration).isEqualTo(
+            PaymentElementLoader.Configuration.PaymentSheet(config)
+        )
+        assertThat(createCall.isGooglePaySupported).isFalse()
+        assertThat(createCall.customerMetadata).isNull()
+        assertThat(createCall.integrationMetadata).isEqualTo(
+            IntegrationMetadata.DeferredIntentWithConfirmationToken(initializationMode.intentConfiguration)
+        )
+        assertThat(createCall.elementsSession).isNotNull()
+        assertThat(createCall.linkStateResult).isNotNull()
+        analyticsMetadataFactory.validate()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
     private fun testCustomPaymentMethods(
         requestedCustomPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         returnedCustomPaymentMethods: List<ElementsSession.CustomPaymentMethod>,
@@ -4155,21 +3966,6 @@ internal class DefaultPaymentElementLoaderTest {
 
         val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
         assertThat(loadSucceededCall.paymentSelection).isEqualTo(paymentSelection)
-        assertThat(loadSucceededCall.linkEnabled).isTrue()
-        assertThat(loadSucceededCall.linkMode).isEqualTo(LinkMode.LinkPaymentMethod)
-        assertThat(loadSucceededCall.linkDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkSignupDisabledReasons).isNull()
-        assertThat(loadSucceededCall.googlePaySupported).isTrue()
-        assertThat(loadSucceededCall.currency).isEqualTo("usd")
-        assertThat(loadSucceededCall.initializationMode).isEqualTo(initializationMode)
-        assertThat(loadSucceededCall.orderedLpms).isEqualTo(listOf("card", "link"))
-        assertThat(loadSucceededCall.requireCvcRecollection).isFalse()
-        assertThat(loadSucceededCall.hasDefaultPaymentMethod).isNull()
-        assertThat(loadSucceededCall.setAsDefaultEnabled).isNull()
-        assertThat(loadSucceededCall.linkDisplay).isEqualTo(PaymentSheet.LinkConfiguration.Display.Automatic)
-        assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
-        assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isFalse()
-        assertThat(loadSucceededCall.setupFutureUsage).isNull()
     }
 
     private fun createLinkSettings(
@@ -4344,6 +4140,10 @@ internal class DefaultPaymentElementLoaderTest {
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
         isLiveMode: Boolean = false,
+        analyticsMetadataFactory: DefaultPaymentElementLoader.AnalyticsMetadataFactory =
+            FakeDefaultPaymentElementLoaderAnalyticsMetadataFactory {
+                AnalyticsMetadata(emptyMap())
+            },
     ): PaymentElementLoader {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(customerRepo)
         val createLinkState = DefaultCreateLinkState(
@@ -4369,10 +4169,10 @@ internal class DefaultPaymentElementLoaderTest {
             logLinkHoldbackExperiment = logLinkHoldbackExperiment,
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
-            cvcRecollectionHandler = CvcRecollectionHandlerImpl(),
             integrityRequestManager = integrityRequestManager,
             isLiveModeProvider = { isLiveMode },
             paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
+            analyticsMetadataFactory = analyticsMetadataFactory,
         )
     }
 
@@ -4418,7 +4218,7 @@ internal class DefaultPaymentElementLoaderTest {
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> = load(
         initializationMode = initializationMode,
-        configuration = paymentSheetConfiguration.asCommonConfiguration(),
+        integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(paymentSheetConfiguration),
         metadata = metadata,
     )
 

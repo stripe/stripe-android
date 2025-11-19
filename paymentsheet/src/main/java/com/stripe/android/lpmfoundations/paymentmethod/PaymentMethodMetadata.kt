@@ -19,7 +19,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
@@ -81,6 +80,7 @@ internal data class PaymentMethodMetadata(
     val appearance: PaymentSheet.Appearance,
     val onBehalfOf: String?,
     val integrationMetadata: IntegrationMetadata,
+    val analyticsMetadata: AnalyticsMetadata,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -324,7 +324,8 @@ internal data class PaymentMethodMetadata(
             customerMetadata: CustomerMetadata?,
             initializationMode: PaymentElementLoader.InitializationMode,
             clientAttributionMetadata: ClientAttributionMetadata,
-            paymentElementCallbacks: PaymentElementCallbacks?,
+            integrationMetadata: IntegrationMetadata,
+            analyticsMetadata: AnalyticsMetadata,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
@@ -370,7 +371,8 @@ internal data class PaymentMethodMetadata(
                 attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation,
                 appearance = configuration.appearance,
                 onBehalfOf = elementsSession.onBehalfOf,
-                integrationMetadata = initializationMode.integrationMetadata(paymentElementCallbacks),
+                integrationMetadata = integrationMetadata,
+                analyticsMetadata = analyticsMetadata,
             )
         }
 
@@ -432,6 +434,7 @@ internal data class PaymentMethodMetadata(
                 appearance = configuration.appearance,
                 onBehalfOf = elementsSession.onBehalfOf,
                 integrationMetadata = IntegrationMetadata.CustomerSheet,
+                analyticsMetadata = AnalyticsMetadata(emptyMap()), // This is unused in customer sheet.
             )
         }
     }

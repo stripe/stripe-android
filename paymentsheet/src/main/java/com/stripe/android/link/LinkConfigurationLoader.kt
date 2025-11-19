@@ -1,6 +1,5 @@
 package com.stripe.android.link
 
-import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.link.gate.LinkGate
@@ -22,7 +21,7 @@ internal class DefaultLinkConfigurationLoader @Inject constructor(
     override suspend fun load(configuration: LinkController.Configuration): Result<LinkMetadata> {
         return paymentElementLoader.load(
             initializationMode = PaymentElementLoader.InitializationMode.CryptoOnramp,
-            configuration = configuration.asCommonConfiguration(),
+            integrationConfiguration = PaymentElementLoader.Configuration.CryptoOnramp(configuration),
             metadata = PaymentElementLoader.Metadata(
                 isReloadingAfterProcessDeath = false,
                 initializedViaCompose = false,

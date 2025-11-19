@@ -419,7 +419,6 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         const val FIELD_OPEN_CARD_SCAN_AUTOMATICALLY_ENABLED = "open_card_scan_automatically_enabled"
         const val FIELD_SELECTED_LPM = "selected_lpm"
         const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
-        const val FIELD_CUSTOMER_ACCESS_PROVIDER = "customer_access_provider"
         const val FIELD_HAS_DEFAULT_PAYMENT_METHOD = "has_default_payment_method"
         const val FIELD_IMPLEMENTATION = "implementation"
 

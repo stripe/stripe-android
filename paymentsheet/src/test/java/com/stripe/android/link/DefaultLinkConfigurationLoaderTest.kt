@@ -2,7 +2,6 @@ package com.stripe.android.link
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -115,13 +114,13 @@ internal class DefaultLinkConfigurationLoaderTest {
             .build()
         loader.load(controllerConfig)
 
-        val commonConfigCaptor = argumentCaptor<CommonConfiguration>()
+        val configCaptor = argumentCaptor<PaymentElementLoader.Configuration>()
         verify(paymentElementLoader).load(
             initializationMode = any(),
-            configuration = commonConfigCaptor.capture(),
+            integrationConfiguration = configCaptor.capture(),
             metadata = any(),
         )
-        val commonConfig = commonConfigCaptor.firstValue
+        val commonConfig = configCaptor.firstValue.commonConfiguration
         assertThat(commonConfig.merchantDisplayName).isEqualTo(TestFactory.MERCHANT_NAME)
         assertThat(commonConfig.defaultBillingDetails).isEqualTo(defaultBillingDetails)
         assertThat(commonConfig.billingDetailsCollectionConfiguration).isEqualTo(billingDetailsCollectionConfiguration)

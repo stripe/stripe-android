@@ -1,6 +1,5 @@
 package com.stripe.android.utils
 
-import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.StripeIntent
@@ -42,7 +41,7 @@ internal class RelayingPaymentElementLoader : PaymentElementLoader {
 
     override suspend fun load(
         initializationMode: PaymentElementLoader.InitializationMode,
-        onfiguration: CommonConfiguration,
+        integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> {
         return results.receive()

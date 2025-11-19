@@ -64,6 +64,8 @@ internal class FlowControllerViewModel(
     private val restartSession = SessionSavedStateHandler.attachTo(this, handle)
 
     init {
+        flowControllerStateComponent.eventReporter.onInit()
+
         viewModelScope.launch {
             stateFlow.collectLatest { state ->
                 flowControllerStateComponent.linkHandler.setupLink(
