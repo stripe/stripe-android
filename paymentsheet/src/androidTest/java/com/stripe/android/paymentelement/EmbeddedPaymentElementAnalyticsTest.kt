@@ -461,6 +461,9 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         managePage.waitUntilGone(card1.id)
         managePage.clickDone()
 
+        validateAnalyticsRequest("mc_dismiss")
+        Espresso.pressBack()
+
         testContext.markTestSucceeded()
     }
 
