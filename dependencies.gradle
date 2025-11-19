@@ -70,6 +70,7 @@ ext.versions = [
         showkase                    : '1.0.0-beta18',
         litert                      : '1.4.0',
         testParameterInjector       : '1.18',
+        terminal                    : '4.7.3',
         truth                       : '1.4.4',
         turbine                     : '1.2.0',
         uiAutomator                 : '2.3.0',
@@ -174,6 +175,10 @@ ext.libs = [
                 coroutinesPlayServices: "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:${versions.playServicesCoroutines}",
                 serialization         : "org.jetbrains.kotlinx:kotlinx-serialization-json:${versions.kotlinSerialization}",
                 parcelizeRuntimePlugin: "org.jetbrains.kotlin:kotlin-parcelize-runtime:${versions.kotlin}",
+        ],
+        terminal                            : [
+                core                        : "com.stripe:stripeterminal-core:${versions.terminal}",
+                tapToPay                    : "com.stripe:stripeterminal-taptopay:${versions.terminal}"
         ],
         lint                                : "com.android.tools.lint:lint-api:${versions.lint}",
         lintChecks                          : "com.android.tools.lint:lint-checks:${versions.lint}",

@@ -182,6 +182,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         HCAPTCHA_FAILURE(
             eventName = "elements.captcha.passive.expected_failure"
         ),
+        TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE(
+            eventName = "elements.tap_to_add.discover_readers_call.failure"
+        ),
+        TAP_TO_ADD_CONNECT_READER_CALL_FAILURE(
+            eventName = "elements.tap_to_add.connect_reader_call.success"
+        )
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -278,8 +284,13 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         PAYMENT_METHOD_MESSAGING_ELEMENT_UNABLE_TO_PARSE_RESPONSE(
             partialEventName = "paymentmethodmessaging.element.unable_to_parse_response"
-        )
-        ;
+        ),
+        TAP_TO_ADD_LOCATION_PERMISSIONS_FAILURE(
+            partialEventName = "elements.tap_to_add.location_permission_required_unexpectedly"
+        ),
+        TAP_TO_ADD_NO_READER_FOUND(
+            partialEventName = "elements.tap_to_add.no_reader_found"
+        );
 
         override val eventName: String
             get() = "unexpected_error.$partialEventName"
@@ -334,6 +345,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         FOUND_PREPARE_PAYMENT_METHOD_HANDLER_WHILE_POLLING(
             eventName = "paymentsheet.polling_for_prepare_payment_method_handler.found"
         ),
+        TAP_TO_ADD_DISCOVER_READERS_CALL_SUCCESS(
+            eventName = "elements.tap_to_add.discover_readers_call.success"
+        ),
+        TAP_TO_ADD_CONNECT_READER_CALL_SUCCESS(
+            eventName = "elements.tap_to_add.connect_reader_call.success"
+        )
     }
 }
 
