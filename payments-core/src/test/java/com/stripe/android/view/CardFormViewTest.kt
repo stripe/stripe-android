@@ -19,8 +19,11 @@ import com.stripe.android.CardNumberFixtures.CO_BRAND_CARTES_MASTERCARD_WITH_SPA
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.databinding.StripeCardFormViewBinding
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -75,6 +78,36 @@ internal class CardFormViewTest {
     }
 
     @Test
+    fun `when all fields are valid then cardParams should return correctly and errors is empty`() {
+        runCardFormViewTest {
+            binding.populate(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, VALID_CVC, VALID_US_ZIP)
+
+            assertThat(cardFormView.cardParams)
+                .isEqualTo(
+                    CardParams(
+                        brand = CardBrand.Visa,
+                        loggingTokens = setOf(CardFormView.CARD_FORM_VIEW),
+                        number = CardNumberFixtures.VISA_NO_SPACES,
+                        expMonth = 12,
+                        expYear = 2050,
+                        cvc = VALID_CVC,
+                        address = Address.Builder()
+                            .setCountryCode(CountryCode.US)
+                            .setPostalCode(VALID_US_ZIP)
+                            .build()
+                    )
+                )
+
+            idleLooper()
+
+            binding.let {
+                assertThat(it.errors.text).isEqualTo("")
+                assertThat(it.errors.isVisible).isFalse()
+            }
+        }
+    }
+
+    @Test
     fun `when all fields are valid then paymentMethodCreateParams should return correctly and errors is empty`() {
         runCardFormViewTest {
             binding.populate(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, VALID_CVC, VALID_US_ZIP)
@@ -102,6 +135,17 @@ internal class CardFormViewTest {
     }
 
     @Test
+    fun `when preferred network is set then cardParams should return contain preferred network`() {
+        runCardFormViewTest {
+            binding.populate(CO_BRAND_CARTES_MASTERCARD_WITH_SPACES, VALID_MONTH, VALID_YEAR, VALID_CVC, VALID_US_ZIP)
+
+            binding.cardMultilineWidget.setPreferredNetworks(listOf(CardBrand.CartesBancaires))
+
+            assertThat(cardFormView.cardParams?.networks?.preferred).isEqualTo(CardBrand.CartesBancaires.code)
+        }
+    }
+
+    @Test
     fun `when preferred network is set then paymentMethodCreateParams should return contain preferred network`() {
         runCardFormViewTest {
             binding.populate(CO_BRAND_CARTES_MASTERCARD_WITH_SPACES, VALID_MONTH, VALID_YEAR, VALID_CVC, VALID_US_ZIP)
@@ -110,6 +154,22 @@ internal class CardFormViewTest {
 
             assertThat(cardFormView.paymentMethodCreateParams?.card?.networks?.preferred)
                 .isEqualTo(CardBrand.CartesBancaires.code)
+        }
+    }
+
+    @Test
+    fun `when postal field is invalid then cardParams should return null and errors is not empty`() {
+        runCardFormViewTest {
+            binding.populate(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, VALID_CVC, INVALID_US_ZIP)
+
+            assertThat(cardFormView.cardParams).isNull()
+
+            idleLooper()
+
+            binding.let {
+                assertThat(it.errors.text).isEqualTo(context.getString(UiCoreR.string.stripe_address_zip_invalid))
+                assertThat(it.errors.isVisible).isTrue()
+            }
         }
     }
 
@@ -124,6 +184,22 @@ internal class CardFormViewTest {
 
             binding.let {
                 assertThat(it.errors.text).isEqualTo(context.getString(UiCoreR.string.stripe_address_zip_invalid))
+                assertThat(it.errors.isVisible).isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun `when card number is invalid then cardParams should return null and errors is not empty`() {
+        runCardFormViewTest {
+            binding.populate(INVALID_VISA, VALID_MONTH, VALID_YEAR, VALID_CVC, VALID_US_ZIP)
+
+            assertThat(cardFormView.cardParams).isNull()
+
+            idleLooper()
+
+            binding.let {
+                assertThat(it.errors.text).isEqualTo(context.getString(R.string.stripe_invalid_card_number))
                 assertThat(it.errors.isVisible).isTrue()
             }
         }
@@ -146,6 +222,22 @@ internal class CardFormViewTest {
     }
 
     @Test
+    fun `when expiration is invalid then cardParams should return null and errors is not empty`() {
+        runCardFormViewTest {
+            binding.populate(VISA_WITH_SPACES, VALID_MONTH, INVALID_YEAR, VALID_CVC, VALID_US_ZIP)
+
+            assertThat(cardFormView.cardParams).isNull()
+
+            idleLooper()
+
+            binding.let {
+                assertThat(it.errors.text).isEqualTo(context.getString(UiCoreR.string.stripe_invalid_expiry_year))
+                assertThat(it.errors.isVisible).isTrue()
+            }
+        }
+    }
+
+    @Test
     fun `when expiration is invalid then paymentMethodCreateParams should return null and errors is not empty`() {
         runCardFormViewTest {
             binding.populate(VISA_WITH_SPACES, VALID_MONTH, INVALID_YEAR, VALID_CVC, VALID_US_ZIP)
@@ -156,6 +248,22 @@ internal class CardFormViewTest {
 
             binding.let {
                 assertThat(it.errors.text).isEqualTo(context.getString(UiCoreR.string.stripe_invalid_expiry_year))
+                assertThat(it.errors.isVisible).isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun `when cvc is invalid then cardParams should return null and errors is not empty`() {
+        runCardFormViewTest {
+            binding.populate(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, INVALID_CVC, VALID_US_ZIP)
+
+            assertThat(cardFormView.cardParams).isNull()
+
+            idleLooper()
+
+            binding.let {
+                assertThat(it.errors.text).isEqualTo(context.getString(R.string.stripe_invalid_cvc))
                 assertThat(it.errors.isVisible).isTrue()
             }
         }
