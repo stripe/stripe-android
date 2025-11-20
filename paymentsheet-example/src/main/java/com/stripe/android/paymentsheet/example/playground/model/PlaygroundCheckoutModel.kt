@@ -53,6 +53,8 @@ class CheckoutRequest private constructor(
     val paymentMethodOptionsSetupFutureUsage: Map<String, String>?,
     @SerialName("is_confirmation_token")
     val isConfirmationToken: Boolean?,
+    @SerialName("allows_tap_to_add")
+    val allowsTapToAdd: Boolean?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -91,6 +93,7 @@ class CheckoutRequest private constructor(
         private var paymentMethodOptionsSetupFutureUsage: Map<String, String>? = null
         private var overridePaymentMethodOptionsSetupFutureUsage: Map<String, String>? = null
         private var isConfirmationToken: Boolean? = null
+        private var allowsTapToAdd: Boolean? = null
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -180,6 +183,10 @@ class CheckoutRequest private constructor(
             this.isConfirmationToken = isConfirmationToken
         }
 
+        fun allowsTapToAdd(allowsTapToAdd: Boolean?) = apply {
+            this.allowsTapToAdd = allowsTapToAdd
+        }
+
         fun onBehalfOf(onBehalfOf: String?) = apply {
             this.onBehalfOf = onBehalfOf
         }
@@ -211,7 +218,8 @@ class CheckoutRequest private constructor(
                 paymentMethodOverrideRedisplay = paymentMethodOverrideRedisplay,
                 paymentMethodOptionsSetupFutureUsage = overridePaymentMethodOptionsSetupFutureUsage
                     ?: paymentMethodOptionsSetupFutureUsage,
-                isConfirmationToken = isConfirmationToken
+                isConfirmationToken = isConfirmationToken,
+                allowsTapToAdd = allowsTapToAdd,
             )
         }
     }
@@ -229,6 +237,8 @@ data class CheckoutResponse(
     val customerEphemeralKeySecret: String? = null,
     @SerialName("customerSessionClientSecret")
     val customerSessionClientSecret: String? = null,
+    @SerialName("terminalLocationId")
+    val terminalLocationId: String? = null,
     @SerialName("amount")
     val amount: Long,
     @SerialName("paymentMethodTypes")
