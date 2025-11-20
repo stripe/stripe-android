@@ -45,7 +45,7 @@ internal data class CommonConfiguration(
     fun validate(@PaymentElementCallbackIdentifier callbackIdentifier: String) {
         customerAndMerchantValidate()
         externalPaymentMethodsValidate()
-        confirmationTokenValidate( callbackIdentifier)
+        confirmationTokenValidate(callbackIdentifier)
 
         customer?.accessType?.let { customerAccessType ->
             customerAccessTypeValidate(customerAccessType)

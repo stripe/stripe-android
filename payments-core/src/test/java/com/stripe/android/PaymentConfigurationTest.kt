@@ -71,4 +71,15 @@ class PaymentConfigurationTest {
         assertThat(ParcelUtils.create(paymentConfig))
             .isEqualTo(paymentConfig)
     }
+
+    @Test
+    fun `isLiveMode is true when publishable key is live`() {
+        assertThat(PaymentConfiguration(publishableKey = "pk_test_123").isLiveMode()).isFalse()
+        assertThat(PaymentConfiguration(publishableKey = "pk_live_123").isLiveMode()).isTrue()
+        assertThat(
+            PaymentConfiguration(
+                publishableKey = "pk_test_51HvTI7Lu5o3livep6t5AgBSkMvWoTtA0nyA7pV"
+            ).isLiveMode()
+        ).isFalse()
+    }
 }

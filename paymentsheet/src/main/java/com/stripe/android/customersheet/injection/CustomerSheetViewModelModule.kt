@@ -9,7 +9,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
@@ -105,12 +104,6 @@ internal interface CustomerSheetViewModelModule {
         fun provideStripeAccountId(
             paymentConfiguration: Provider<PaymentConfiguration>
         ): () -> String? = { paymentConfiguration.get().stripeAccountId }
-
-        @Provides
-        @Named(IS_LIVE_MODE)
-        fun isLiveMode(
-            paymentConfiguration: Provider<PaymentConfiguration>
-        ): () -> Boolean = { paymentConfiguration.get().isLiveMode() }
 
         @Provides
         internal fun providesErrorReporter(

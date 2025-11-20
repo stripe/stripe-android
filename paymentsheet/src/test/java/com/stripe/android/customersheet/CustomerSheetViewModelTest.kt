@@ -18,7 +18,6 @@ import com.stripe.android.customersheet.data.CustomerSheetDataResult
 import com.stripe.android.customersheet.data.FakeCustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetSavedSelectionDataSource
-import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
 import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.isInstanceOf
@@ -82,33 +81,6 @@ class CustomerSheetViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
-
-    @Test
-    fun `isLiveMode is true when publishable key is live`() {
-        var isLiveMode = CustomerSheetViewModelModule.isLiveMode {
-            PaymentConfiguration(
-                publishableKey = "pk_test_123"
-            )
-        }
-
-        assertThat(isLiveMode()).isFalse()
-
-        isLiveMode = CustomerSheetViewModelModule.isLiveMode {
-            PaymentConfiguration(
-                publishableKey = "pk_live_123"
-            )
-        }
-
-        assertThat(isLiveMode()).isTrue()
-
-        isLiveMode = CustomerSheetViewModelModule.isLiveMode {
-            PaymentConfiguration(
-                publishableKey = "pk_test_51HvTI7Lu5o3livep6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"
-            )
-        }
-
-        assertThat(isLiveMode()).isFalse()
-    }
 
     @Test
     fun `init emits CustomerSheetViewState#AddPaymentMethod when no payment methods available`() = runTest(testDispatcher) {
