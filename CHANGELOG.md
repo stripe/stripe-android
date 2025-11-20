@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 22.2.1 - 2025-11-20
+
 ### PaymentSheet
 * [Added][12011](https://github.com/stripe/stripe-android/pull/12011) Builder APIs for PaymentSheet appearance customization (Colors, Shapes, Typography, PrimaryButtonColors, and embedded row styles)
 
