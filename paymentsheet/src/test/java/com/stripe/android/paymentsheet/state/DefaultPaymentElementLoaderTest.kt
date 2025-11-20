@@ -2757,9 +2757,7 @@ internal class DefaultPaymentElementLoaderTest {
 
             val loader = createPaymentElementLoader(
                 errorReporter = errorReporter,
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    isLiveMode = false
-                )
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
             )
 
             val exception = loader.load(
@@ -2802,7 +2800,6 @@ internal class DefaultPaymentElementLoaderTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     isLiveMode = true
                 ),
-                isLiveMode = true,
             )
 
             val state = loader.load(
@@ -4139,7 +4136,6 @@ internal class DefaultPaymentElementLoaderTest {
         ),
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
-        isLiveMode: Boolean = false,
         analyticsMetadataFactory: DefaultPaymentElementLoader.AnalyticsMetadataFactory =
             FakeDefaultPaymentElementLoaderAnalyticsMetadataFactory {
                 AnalyticsMetadata(emptyMap())
@@ -4170,7 +4166,6 @@ internal class DefaultPaymentElementLoaderTest {
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
             integrityRequestManager = integrityRequestManager,
-            isLiveModeProvider = { isLiveMode },
             paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
             analyticsMetadataFactory = analyticsMetadataFactory,
         )
