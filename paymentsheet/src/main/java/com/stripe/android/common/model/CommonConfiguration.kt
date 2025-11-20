@@ -42,10 +42,10 @@ internal data class CommonConfiguration(
     val appearance: PaymentSheet.Appearance,
 ) : Parcelable {
 
-    fun validate(isLiveMode: Boolean, @PaymentElementCallbackIdentifier callbackIdentifier: String) {
+    fun validate(@PaymentElementCallbackIdentifier callbackIdentifier: String) {
         customerAndMerchantValidate()
-        externalPaymentMethodsValidate(isLiveMode)
-        confirmationTokenValidate(isLiveMode, callbackIdentifier)
+        externalPaymentMethodsValidate()
+        confirmationTokenValidate( callbackIdentifier)
 
         customer?.accessType?.let { customerAccessType ->
             customerAccessTypeValidate(customerAccessType)
@@ -73,9 +73,9 @@ internal data class CommonConfiguration(
 
     // These exception messages are not localized as they are not intended to be displayed to a user.
     @Suppress("ThrowsCount")
-    private fun externalPaymentMethodsValidate(isLiveMode: Boolean) {
+    private fun externalPaymentMethodsValidate() {
         externalPaymentMethods.forEach { externalPaymentMethod ->
-            if (!externalPaymentMethod.startsWith("external_") && isLiveMode.not()) {
+            if (!externalPaymentMethod.startsWith("external_")) {
                 throw IllegalArgumentException(
                     "External payment method '$externalPaymentMethod' does not start with 'external_'. " +
                         "All external payment methods must use the 'external_' prefix. " +
@@ -89,13 +89,11 @@ internal data class CommonConfiguration(
     // These exception messages are not localized as they are not intended to be displayed to a user.
     @Suppress("ThrowsCount")
     private fun confirmationTokenValidate(
-        isLiveMode: Boolean,
         @PaymentElementCallbackIdentifier callbackIdentifier: String
     ) {
         if (
             PaymentElementCallbackReferences[callbackIdentifier]?.createIntentWithConfirmationTokenCallback != null &&
-            customer?.accessType is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey &&
-            isLiveMode.not()
+            customer?.accessType is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
         ) {
             throw IllegalArgumentException(
                 "createIntentWithConfirmationTokenCallback must be used with CustomerSession."

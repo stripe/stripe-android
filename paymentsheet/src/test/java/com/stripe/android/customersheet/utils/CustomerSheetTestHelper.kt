@@ -127,7 +127,6 @@ internal object CustomerSheetTestHelper {
             stripeRepository = stripeRepository,
             configuration = configuration,
             integrationType = integrationType,
-            isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
             productUsage = emptySet(),
             confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(

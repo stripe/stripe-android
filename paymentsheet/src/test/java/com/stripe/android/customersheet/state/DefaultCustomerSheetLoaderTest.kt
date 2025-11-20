@@ -30,7 +30,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -259,7 +258,6 @@ internal class DefaultCustomerSheetLoaderTest {
     @Test
     fun `When the FC unavailable, flag disabled, us bank not in intent, then us bank account is not available`() = runTest {
         val loader = createCustomerSheetLoader(
-            isFinancialConnectionsAvailable = { false },
             intent = STRIPE_INTENT.copy(
                 paymentMethodTypes = listOf("card")
             ),
@@ -275,7 +273,6 @@ internal class DefaultCustomerSheetLoaderTest {
     @Test
     fun `When the FC unavailable, flag disabled, us bank in intent, then us bank account is not available`() = runTest {
         val loader = createCustomerSheetLoader(
-            isFinancialConnectionsAvailable = { false },
             intent = STRIPE_INTENT.copy(
                 paymentMethodTypes = listOf("card", "us_bank_account")
             ),
@@ -291,7 +288,6 @@ internal class DefaultCustomerSheetLoaderTest {
     @Test
     fun `When the FC unavailable, flag enabled, us bank not in intent, then us bank account is not available`() = runTest {
         val loader = createCustomerSheetLoader(
-            isFinancialConnectionsAvailable = { false },
             intent = STRIPE_INTENT.copy(
                 paymentMethodTypes = listOf("card")
             ),
@@ -307,7 +303,6 @@ internal class DefaultCustomerSheetLoaderTest {
     @Test
     fun `When the FC unavailable, flag enabled, us bank in intent, then us bank account is not available`() = runTest {
         val loader = createCustomerSheetLoader(
-            isFinancialConnectionsAvailable = { false },
             intent = STRIPE_INTENT.copy(
                 paymentMethodTypes = listOf("card", "us_bank_account")
             ),
@@ -323,7 +318,6 @@ internal class DefaultCustomerSheetLoaderTest {
     @Test
     fun `When the FC available, flag disabled, us bank not in intent, then us bank account is not available`() = runTest {
         val loader = createCustomerSheetLoader(
-            isFinancialConnectionsAvailable = { true },
             intent = STRIPE_INTENT.copy(
                 paymentMethodTypes = listOf("card")
             ),
@@ -339,7 +333,6 @@ internal class DefaultCustomerSheetLoaderTest {
     @Test
     fun `When the FC available, flag disabled, us bank in intent, then us bank account is not available`() = runTest {
         val loader = createCustomerSheetLoader(
-            isFinancialConnectionsAvailable = { true },
             intent = STRIPE_INTENT.copy(
                 paymentMethodTypes = listOf("card", "us_bank_account")
             ),
@@ -355,7 +348,6 @@ internal class DefaultCustomerSheetLoaderTest {
     @Test
     fun `When the FC available, flag enabled, us bank not in intent, then us bank account is not available`() = runTest {
         val loader = createCustomerSheetLoader(
-            isFinancialConnectionsAvailable = { true },
             intent = STRIPE_INTENT.copy(
                 paymentMethodTypes = listOf("card"),
             ),
@@ -371,7 +363,6 @@ internal class DefaultCustomerSheetLoaderTest {
     @Test
     fun `When the FC available, flag enabled, us bank in intent, then us bank account is available`() = runTest {
         val loader = createCustomerSheetLoader(
-            isFinancialConnectionsAvailable = { true },
             intent = STRIPE_INTENT.copy(
                 clientSecret = null,
                 paymentMethodTypes = listOf("card", "us_bank_account"),
@@ -420,11 +411,9 @@ internal class DefaultCustomerSheetLoaderTest {
 
         val configuration = CustomerSheet.Configuration(merchantDisplayName = "Merchant, Inc.")
         val loader = DefaultCustomerSheetLoader(
-            isLiveModeProvider = { false },
             googlePayRepositoryFactory = { readyGooglePayRepository },
             initializationDataSourceProvider = initDataSource,
             lpmRepository = lpmRepository,
-            isFinancialConnectionsAvailable = { false },
             eventReporter = FakeCustomerSheetEventReporter(),
             errorReporter = FakeErrorReporter(),
             workContext = coroutineContext,
@@ -461,10 +450,8 @@ internal class DefaultCustomerSheetLoaderTest {
     fun `Fails if awaiting InitializationDataSource times out`() = runTest {
         val configuration = CustomerSheet.Configuration(merchantDisplayName = "Merchant, Inc.")
         val loader = DefaultCustomerSheetLoader(
-            isLiveModeProvider = { false },
             googlePayRepositoryFactory = { readyGooglePayRepository },
             lpmRepository = lpmRepository,
-            isFinancialConnectionsAvailable = { false },
             eventReporter = FakeCustomerSheetEventReporter(),
             errorReporter = FakeErrorReporter(),
             workContext = coroutineContext,
@@ -631,10 +618,7 @@ internal class DefaultCustomerSheetLoaderTest {
 
     private fun createCustomerSheetLoader(
         isGooglePayReady: Boolean = true,
-        isLiveModeProvider: () -> Boolean = { false },
         isCbcEligible: Boolean? = null,
-        isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable =
-            IsFinancialConnectionsSdkAvailable { false },
         intent: StripeIntent = STRIPE_INTENT,
         paymentMethods: List<PaymentMethod> = listOf(),
         savedSelection: SavedSelection? = null,
@@ -672,8 +656,6 @@ internal class DefaultCustomerSheetLoaderTest {
         return createCustomerSheetLoader(
             initializationDataSourceProvider = CompletableSingle(initializationDataSource),
             isGooglePayReady = isGooglePayReady,
-            isLiveModeProvider = isLiveModeProvider,
-            isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             lpmRepository = lpmRepository,
             errorReporter = errorReporter,
             eventReporter = eventReporter,
@@ -730,22 +712,17 @@ internal class DefaultCustomerSheetLoaderTest {
     private fun createCustomerSheetLoader(
         initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>,
         isGooglePayReady: Boolean = true,
-        isLiveModeProvider: () -> Boolean = { false },
-        isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable =
-            IsFinancialConnectionsSdkAvailable { false },
         lpmRepository: LpmRepository = this.lpmRepository,
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: CustomerSheetEventReporter = FakeCustomerSheetEventReporter(),
         workContext: CoroutineContext = UnconfinedTestDispatcher()
     ): CustomerSheetLoader {
         return DefaultCustomerSheetLoader(
-            isLiveModeProvider = isLiveModeProvider,
             googlePayRepositoryFactory = {
                 if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
             },
             initializationDataSourceProvider = initializationDataSourceProvider,
             lpmRepository = lpmRepository,
-            isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             eventReporter = eventReporter,
             errorReporter = errorReporter,
             workContext = workContext,
