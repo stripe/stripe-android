@@ -79,10 +79,12 @@ afterEvaluate { project ->
                     }
                 }
 
+                def apiDeps = configurations.findByName("api")?.getDependencies() ?: []
+                def implDeps = configurations.findByName("implementation")?.getDependencies() ?: []
+
                 pom.withXml {
                     final dependenciesNode = asNode().appendNode("dependencies")
-                    ext.addDependency = { dep, scope ->
-                        logger.lifecycle("updating dep $dep")
+                    def addDependency = { dep, scope ->
                         if (dep.group == null || dep.version == null || dep.name == null || dep.name == "unspecified") {
                             return // invalid dependencies should be ignored
                         }
@@ -106,12 +108,8 @@ afterEvaluate { project ->
 
                     }
 
-                    if (configurations.hasProperty("api")) {
-                        configurations.api.getDependencies().each { dep -> addDependency(dep, "compile") }
-                    }
-                    if (configurations.hasProperty("implementation")) {
-                        configurations.implementation.getDependencies().each { dep -> addDependency(dep, "runtime") }
-                    }
+                    apiDeps.each { dep -> addDependency(dep, "compile") }
+                    implDeps.each { dep -> addDependency(dep, "runtime") }
                 }
 
             }
