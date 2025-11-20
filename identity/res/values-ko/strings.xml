@@ -197,8 +197,6 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">프레임 중앙에 얼굴을 놓으십시오.</string>
   <!-- Instructional text when the document is too blurry -->
-  <string name="stripe_reduce_blur">신분증의 초점이 맞지 않음</string>
-  <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">세부사항이 보이지 않음</string>
   <string name="stripe_reduce_glare_2">반사광을 줄이고 신분증이 보이도록 해 주십시오</string>
   <!-- Button text displayed to the user to retake photo -->

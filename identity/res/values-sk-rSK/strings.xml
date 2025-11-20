@@ -197,8 +197,6 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Umiestnite tvár do stredu rámika.</string>
   <!-- Instructional text when the document is too blurry -->
-  <string name="stripe_reduce_blur">Doklad totožnosti nie je zaostrený</string>
-  <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Podrobnosti nie sú viditeľné</string>
   <string name="stripe_reduce_glare_2">Skúste obmedziť odlesky a zviditeľnite doklad totožnosti</string>
   <!-- Button text displayed to the user to retake photo -->

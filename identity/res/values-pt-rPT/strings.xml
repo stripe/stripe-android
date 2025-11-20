@@ -197,8 +197,6 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Posicione o seu rosto no centro da moldura.</string>
   <!-- Instructional text when the document is too blurry -->
-  <string name="stripe_reduce_blur">O documento de identificação não está focado</string>
-  <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Detalhes não visíveis</string>
   <string name="stripe_reduce_glare_2">Tente reduzir o brilho para tornar a identificação visível</string>
   <!-- Button text displayed to the user to retake photo -->

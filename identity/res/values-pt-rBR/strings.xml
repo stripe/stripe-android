@@ -196,8 +196,6 @@
   <string name="stripe_position_passport_or_id">Posicione seu passaporte ou documento de identificação oficial com foto no centro da marcação</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Posicione seu rosto no centro do quadro.</string>
-  <!-- Instructional text when the document is too blurry -->
-  <string name="stripe_reduce_blur">Documento fora de foco</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Detalhes não visíveis</string>
   <string name="stripe_reduce_glare_2">Tente reduzir o brilho e tornar o documento visível</string>
