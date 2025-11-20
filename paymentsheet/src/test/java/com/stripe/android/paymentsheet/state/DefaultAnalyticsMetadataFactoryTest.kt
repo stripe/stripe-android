@@ -728,7 +728,7 @@ class DefaultAnalyticsMetadataFactoryTest {
             configuration = configuration,
             customerMetadata = customerMetadata,
             linkStateResult = linkStateResult,
-        ).asMapOfAny()
+        ).paramsMap
     }
 
     private fun createElementsSession(

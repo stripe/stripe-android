@@ -501,27 +501,8 @@ internal class DefaultEventReporter @Inject internal constructor(
         }
     }
 
-    @Volatile
-    private var analyticsCache: Pair<PaymentMethodMetadata, Map<String, Any>>? = null
-
     private fun defaultParams(paymentMethodMetadata: PaymentMethodMetadata?): Map<String, Any> {
-        val localAnalyticsCache = analyticsCache
-        return if (localAnalyticsCache != null) {
-            if (localAnalyticsCache.first == paymentMethodMetadata) {
-                // It matched so return the previous value
-                localAnalyticsCache.second
-            } else {
-                // We have new PaymentMethodMetadata, store it and return it
-                paymentMethodMetadata?.analyticsMetadata?.asMapOfAny()?.also {
-                    analyticsCache = Pair(paymentMethodMetadata, it)
-                } ?: emptyMap()
-            }
-        } else {
-            // We have new PaymentMethodMetadata, store it and return it
-            paymentMethodMetadata?.analyticsMetadata?.asMapOfAny()?.also {
-                analyticsCache = Pair(paymentMethodMetadata, it)
-            } ?: emptyMap()
-        }
+        return paymentMethodMetadata?.analyticsMetadata?.paramsMap ?: emptyMap()
     }
 
     private fun fireEvent(

@@ -5,15 +5,15 @@ import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata.Value.N
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata.Value.SimpleBoolean
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata.Value.SimpleString
 import com.stripe.android.utils.filterNotNullValues
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class AnalyticsMetadata(
     private val values: Map<String, Value?>,
 ) : Parcelable {
-    fun asMapOfAny(): Map<String, Any> {
-        return values.asMapOfAny()
-    }
+    @IgnoredOnParcel
+    val paramsMap: Map<String, Any> = values.asMapOfAny()
 
     private fun Map<String, Value?>.asMapOfAny(): Map<String, Any> {
         return mapValues {
