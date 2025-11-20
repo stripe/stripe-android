@@ -4,8 +4,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
@@ -25,7 +25,7 @@ internal class TestBoleto : BasePlaygroundTest() {
         paymentMethodCode = "boleto",
     ) { settings ->
         settings[CustomerSettingsDefinition] = CustomerType.GUEST
-        settings[CountrySettingsDefinition] = Country.BR
+        settings[MerchantSettingsDefinition] = Merchant.BR
         settings[CurrencySettingsDefinition] = Currency.BRL
         settings[DelayedPaymentMethodsSettingsDefinition] = true
         settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off

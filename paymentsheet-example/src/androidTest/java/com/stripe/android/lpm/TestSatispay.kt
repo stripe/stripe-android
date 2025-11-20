@@ -4,8 +4,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.test.core.TestParameters
@@ -17,7 +17,7 @@ internal class TestSatispay : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "satispay",
     ) { settings ->
-        settings[CountrySettingsDefinition] = Country.IT
+        settings[MerchantSettingsDefinition] = Merchant.IT
         settings[CurrencySettingsDefinition] = Currency.EUR
     }
 
