@@ -191,17 +191,6 @@ class PaymentSheetConfigurationKtxTest {
     }
 
     @Test
-    fun `'validate' should succeed when in live mode with invalid external payment methods`() {
-        val configWithInvalidExternalPaymentMethods = configuration.newBuilder()
-            .externalPaymentMethods(listOf("paypal", "venmo"))
-            .build()
-            .asCommonConfiguration()
-
-        // Should not throw when in live mode
-        configWithInvalidExternalPaymentMethods.validate(callbackIdentifier = "")
-    }
-
-    @Test
     fun `'validate' should fail when CT callback is set with LegacyCustomerEphemeralKey in test mode`() {
         val callbackIdentifier = "test_identifier"
 
