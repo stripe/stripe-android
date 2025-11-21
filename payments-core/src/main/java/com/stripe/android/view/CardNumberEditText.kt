@@ -38,7 +38,7 @@ import androidx.appcompat.R as AppCompatR
  * A [StripeEditText] that handles spacing out the digits of a credit card.
  */
 @SuppressWarnings("LongParameterList")
-class CardNumberEditText internal constructor(
+open class CardNumberEditText internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = AppCompatR.attr.editTextStyle,

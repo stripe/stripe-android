@@ -8,7 +8,7 @@ import android.util.AttributeSet
 import com.stripe.android.R
 import androidx.appcompat.R as AppCompatR
 
-internal class BecsDebitBsbEditText @JvmOverloads constructor(
+open class BecsDebitBsbEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = AppCompatR.attr.editTextStyle
