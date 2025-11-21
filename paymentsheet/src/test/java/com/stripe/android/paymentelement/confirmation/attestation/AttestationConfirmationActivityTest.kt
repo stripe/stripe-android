@@ -56,11 +56,6 @@ internal class AttestationConfirmationActivityTest {
             InternalPaymentResult.Completed(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
         )
 
-        // Bootstrap the confirmation handler with attestation enabled
-        confirmationHandler.bootstrap(
-            PaymentMethodMetadataFactory.create(attestOnIntentConfirmation = true)
-        )
-
         confirmationHandler.state.test {
             awaitItem().assertIdle()
 
@@ -74,7 +69,7 @@ internal class AttestationConfirmationActivityTest {
 
             val confirmingWithAttestationToken = awaitItem().assertConfirming()
 
-            // Verify the token was attached to the payment method
+            // Verify the token was attached to the payment method and attestation is marked complete
             val optionWithToken = confirmingWithAttestationToken.option as PaymentMethodConfirmationOption.New
             assertThat(optionWithToken.createParams.radarOptions)
                 .isEqualTo(
@@ -85,6 +80,7 @@ internal class AttestationConfirmationActivityTest {
                         )
                     )
                 )
+            assertThat(optionWithToken.attestationComplete).isTrue()
 
             intendedPaymentConfirmationToBeLaunched()
 
@@ -105,11 +101,6 @@ internal class AttestationConfirmationActivityTest {
             InternalPaymentResult.Completed(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
         )
 
-        // Bootstrap the confirmation handler with attestation enabled
-        confirmationHandler.bootstrap(
-            PaymentMethodMetadataFactory.create(attestOnIntentConfirmation = true)
-        )
-
         confirmationHandler.state.test {
             awaitItem().assertIdle()
 
@@ -123,9 +114,10 @@ internal class AttestationConfirmationActivityTest {
 
             val confirmingWithAttestationToken = awaitItem().assertConfirming()
 
-            // Verify the token was attached to the saved payment method option
+            // Verify the token was attached to the saved payment method option and attestation is marked complete
             val optionWithToken = confirmingWithAttestationToken.option as PaymentMethodConfirmationOption.Saved
             assertThat(optionWithToken.attestationToken).isEqualTo(testToken)
+            assertThat(optionWithToken.attestationComplete).isTrue()
 
             intendedPaymentConfirmationToBeLaunched()
 
@@ -146,11 +138,6 @@ internal class AttestationConfirmationActivityTest {
             InternalPaymentResult.Completed(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
         )
 
-        // Bootstrap the confirmation handler with attestation enabled
-        confirmationHandler.bootstrap(
-            PaymentMethodMetadataFactory.create(attestOnIntentConfirmation = true)
-        )
-
         confirmationHandler.state.test {
             awaitItem().assertIdle()
 
@@ -162,9 +149,15 @@ internal class AttestationConfirmationActivityTest {
 
             intendedAttestationToBeLaunched()
 
-            val successResult = awaitItem().assertComplete().result.assertSucceeded()
+            // Even on failure, attestation marks the option as complete
+            val confirmingAfterAttestation = awaitItem().assertConfirming()
+            val optionAfterAttestation = confirmingAfterAttestation.option as PaymentMethodConfirmationOption.New
+            assertThat(optionAfterAttestation.attestationComplete).isTrue()
 
             intendedPaymentConfirmationToBeLaunched()
+
+            val successResult = awaitItem().assertComplete().result.assertSucceeded()
+
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
             assertThat(successResult.deferredIntentConfirmationType).isNull()
         }
@@ -180,11 +173,6 @@ internal class AttestationConfirmationActivityTest {
             InternalPaymentResult.Completed(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
         )
 
-        // Bootstrap the confirmation handler with attestation enabled
-        confirmationHandler.bootstrap(
-            PaymentMethodMetadataFactory.create(attestOnIntentConfirmation = true)
-        )
-
         confirmationHandler.state.test {
             awaitItem().assertIdle()
 
@@ -196,9 +184,15 @@ internal class AttestationConfirmationActivityTest {
 
             intendedAttestationToBeLaunched()
 
-            val successResult = awaitItem().assertComplete().result.assertSucceeded()
+            // Even on failure, attestation marks the option as complete
+            val confirmingAfterAttestation = awaitItem().assertConfirming()
+            val optionAfterAttestation = confirmingAfterAttestation.option as PaymentMethodConfirmationOption.Saved
+            assertThat(optionAfterAttestation.attestationComplete).isTrue()
 
             intendedPaymentConfirmationToBeLaunched()
+
+            val successResult = awaitItem().assertComplete().result.assertSucceeded()
+
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
             assertThat(successResult.deferredIntentConfirmationType).isNull()
         }
@@ -261,6 +255,7 @@ internal class AttestationConfirmationActivityTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 shippingDetails = AddressDetails(),
                 stripeIntent = PAYMENT_INTENT,
+                attestOnIntentConfirmation = true,
             ),
         )
 
@@ -269,6 +264,7 @@ internal class AttestationConfirmationActivityTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 shippingDetails = AddressDetails(),
                 stripeIntent = PAYMENT_INTENT,
+                attestOnIntentConfirmation = true,
             ),
         )
 
