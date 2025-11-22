@@ -41,15 +41,12 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     > {
     override val key = "Attestation"
 
-    private var attestOnIntentConfirmation: Boolean = false
-
     override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption? {
         return confirmationOption as? PaymentMethodConfirmationOption
     }
 
     override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
-        attestOnIntentConfirmation = paymentMethodMetadata.attestOnIntentConfirmation
-        if (attestOnIntentConfirmation.not()) return
+        if (paymentMethodMetadata.attestOnIntentConfirmation.not()) return
         coroutineScope.launch(workContext) {
             attestationAnalyticsEventsReporter.prepare()
             integrityRequestManager.prepare()
@@ -69,7 +66,9 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args
     ): Boolean {
-        return attestOnIntentConfirmation && confirmationOption.hasToken().not()
+        return confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation &&
+            confirmationOption.attestationComplete.not() &&
+            confirmationOption.hasToken().not()
     }
 
     override fun toResult(
@@ -114,9 +113,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args
     ): ConfirmationDefinition.Action<AttestationActivityContract.Args> {
-        if (attestOnIntentConfirmation) {
-            // Disable attestation after first call to prevent multiple attestations
-            attestOnIntentConfirmation = false
+        if (confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation) {
             return ConfirmationDefinition.Action.Launch(
                 launcherArguments = AttestationActivityContract.Args(
                     publishableKey = publishableKeyProvider(),
@@ -153,11 +150,15 @@ internal class AttestationConfirmationDefinition @Inject constructor(
                                 )
                             )
                         }
-                    )
+                    ),
+                    attestationComplete = true
                 )
             }
             is PaymentMethodConfirmationOption.Saved -> {
-                copy(attestationToken = token)
+                copy(
+                    attestationToken = token,
+                    attestationComplete = true
+                )
             }
         }
     }

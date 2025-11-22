@@ -69,14 +69,10 @@ internal class AttestationConfirmationDefinitionTest {
     @Test
     fun `'canConfirm' should return true when attestation is enabled`() {
         val definition = createAttestationConfirmationDefinition()
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            attestOnIntentConfirmation = true
-        )
-        definition.bootstrap(paymentMethodMetadata)
 
         val result = definition.canConfirm(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-            confirmationArgs = CONFIRMATION_PARAMETERS
+            confirmationArgs = confirmationParametersWithAttestation(enabled = true)
         )
 
         assertThat(result).isTrue()
@@ -85,21 +81,17 @@ internal class AttestationConfirmationDefinitionTest {
     @Test
     fun `'canConfirm' should return false when attestation is disabled`() {
         val definition = createAttestationConfirmationDefinition()
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            attestOnIntentConfirmation = false
-        )
-        definition.bootstrap(paymentMethodMetadata)
 
         val result = definition.canConfirm(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-            confirmationArgs = CONFIRMATION_PARAMETERS
+            confirmationArgs = confirmationParametersWithAttestation(enabled = false)
         )
 
         assertThat(result).isFalse()
     }
 
     @Test
-    fun `'canConfirm' should return false before bootstrap is called`() {
+    fun `'canConfirm' should return false when attestation is disabled in confirmationArgs`() {
         val definition = createAttestationConfirmationDefinition()
 
         val result = definition.canConfirm(
@@ -140,14 +132,10 @@ internal class AttestationConfirmationDefinitionTest {
     @Test
     fun `'action' should return expected 'Launch' action when attestation is enabled`() = runTest {
         val definition = createAttestationConfirmationDefinition()
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            attestOnIntentConfirmation = true
-        )
-        definition.bootstrap(paymentMethodMetadata)
 
         val action = definition.action(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-            confirmationArgs = CONFIRMATION_PARAMETERS,
+            confirmationArgs = confirmationParametersWithAttestation(enabled = true),
         )
 
         assertThat(action)
@@ -164,14 +152,10 @@ internal class AttestationConfirmationDefinitionTest {
     @Test
     fun `'action' should return 'Fail' action when attestation is disabled`() = runTest {
         val definition = createAttestationConfirmationDefinition()
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            attestOnIntentConfirmation = false
-        )
-        definition.bootstrap(paymentMethodMetadata)
 
         val action = definition.action(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-            confirmationArgs = CONFIRMATION_PARAMETERS,
+            confirmationArgs = confirmationParametersWithAttestation(enabled = false),
         )
 
         assertThat(action)
@@ -189,14 +173,10 @@ internal class AttestationConfirmationDefinitionTest {
     fun `'action' should report error when attestation is disabled`() = runTest {
         val fakeErrorReporter = FakeErrorReporter()
         val definition = createAttestationConfirmationDefinition(fakeErrorReporter)
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            attestOnIntentConfirmation = false
-        )
-        definition.bootstrap(paymentMethodMetadata)
 
         definition.action(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-            confirmationArgs = CONFIRMATION_PARAMETERS,
+            confirmationArgs = confirmationParametersWithAttestation(enabled = false),
         )
 
         val reportedErrors = fakeErrorReporter.getLoggedErrors()
@@ -255,7 +235,8 @@ internal class AttestationConfirmationDefinitionTest {
                         androidVerificationToken = testToken
                     )
                 )
-            )
+            ),
+            attestationComplete = true
         )
 
         assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
@@ -279,7 +260,8 @@ internal class AttestationConfirmationDefinitionTest {
         val nextStepResult = result.asNextStep()
 
         val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
-            attestationToken = testToken
+            attestationToken = testToken,
+            attestationComplete = true
         )
 
         assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
@@ -302,8 +284,11 @@ internal class AttestationConfirmationDefinitionTest {
 
         val nextStepResult = result.asNextStep()
 
-        // When attestation fails, continue without the token (no radarOptions attached)
-        assertThat(nextStepResult.confirmationOption).isEqualTo(PAYMENT_METHOD_CONFIRMATION_OPTION_NEW)
+        // When attestation fails, continue without the token but mark attestation as complete
+        val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
+            attestationComplete = true
+        )
+        assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
         assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
@@ -323,7 +308,11 @@ internal class AttestationConfirmationDefinitionTest {
 
         val nextStepResult = result.asNextStep()
 
-        assertThat(nextStepResult.confirmationOption).isEqualTo(PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED)
+        // When attestation fails, continue without the token but mark attestation as complete
+        val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
+            attestationComplete = true
+        )
+        assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
         assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
@@ -331,14 +320,10 @@ internal class AttestationConfirmationDefinitionTest {
     fun `'action' should work with Saved PaymentMethodConfirmationOption when attestation is enabled`() =
         runTest {
             val definition = createAttestationConfirmationDefinition()
-            val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                attestOnIntentConfirmation = true
-            )
-            definition.bootstrap(paymentMethodMetadata)
 
             val action = definition.action(
                 confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
-                confirmationArgs = CONFIRMATION_PARAMETERS,
+                confirmationArgs = confirmationParametersWithAttestation(enabled = true),
             )
 
             assertThat(action)
@@ -372,106 +357,8 @@ internal class AttestationConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'bootstrap' should store attestOnIntentConfirmation flag`() {
-        val definition = createAttestationConfirmationDefinition()
-
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            attestOnIntentConfirmation = true
-        )
-
-        definition.bootstrap(paymentMethodMetadata)
-
-        val result = definition.canConfirm(
-            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-            confirmationArgs = CONFIRMATION_PARAMETERS
-        )
-
-        assertThat(result).isTrue()
-    }
-
-    @Test
-    fun `'bootstrap' should handle disabled attestation`() {
-        val definition = createAttestationConfirmationDefinition()
-
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            attestOnIntentConfirmation = false
-        )
-
-        definition.bootstrap(paymentMethodMetadata)
-
-        val result = definition.canConfirm(
-            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-            confirmationArgs = CONFIRMATION_PARAMETERS
-        )
-
-        assertThat(result).isFalse()
-    }
-
-    @Test
-    fun `'action' should become disabled after first successful call`() = runTest {
-        val definition = createAttestationConfirmationDefinition()
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            attestOnIntentConfirmation = true
-        )
-        definition.bootstrap(paymentMethodMetadata)
-
-        // First call should succeed
-        val firstAction = definition.action(
-            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-            confirmationArgs = CONFIRMATION_PARAMETERS,
-        )
-
-        assertThat(firstAction)
-            .isInstanceOf<ConfirmationDefinition.Action.Launch<AttestationActivityContract.Args>>()
-
-        // Second call should fail
-        val secondAction = definition.action(
-            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-            confirmationArgs = CONFIRMATION_PARAMETERS,
-        )
-
-        assertThat(secondAction)
-            .isInstanceOf<ConfirmationDefinition.Action.Fail<AttestationActivityContract.Args>>()
-    }
-
-    @Test
-    fun `'canConfirm' should return false after calling action`() = runTest {
-        val definition = createAttestationConfirmationDefinition()
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            attestOnIntentConfirmation = true
-        )
-        definition.bootstrap(paymentMethodMetadata)
-
-        // Verify it can confirm before action is called
-        assertThat(
-            definition.canConfirm(
-                confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-                confirmationArgs = CONFIRMATION_PARAMETERS
-            )
-        ).isTrue()
-
-        // Call action
-        definition.action(
-            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-            confirmationArgs = CONFIRMATION_PARAMETERS,
-        )
-
-        // Verify it can no longer confirm after action is called
-        assertThat(
-            definition.canConfirm(
-                confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
-                confirmationArgs = CONFIRMATION_PARAMETERS
-            )
-        ).isFalse()
-    }
-
-    @Test
     fun `'canConfirm' should return false when New option already has a token`() {
         val definition = createAttestationConfirmationDefinition()
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            attestOnIntentConfirmation = true
-        )
-        definition.bootstrap(paymentMethodMetadata)
 
         val optionWithToken = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
             createParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
@@ -483,7 +370,7 @@ internal class AttestationConfirmationDefinitionTest {
 
         val result = definition.canConfirm(
             confirmationOption = optionWithToken,
-            confirmationArgs = CONFIRMATION_PARAMETERS
+            confirmationArgs = confirmationParametersWithAttestation(enabled = true)
         )
 
         assertThat(result).isFalse()
@@ -492,10 +379,6 @@ internal class AttestationConfirmationDefinitionTest {
     @Test
     fun `'canConfirm' should return false when Saved option already has a token`() {
         val definition = createAttestationConfirmationDefinition()
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            attestOnIntentConfirmation = true
-        )
-        definition.bootstrap(paymentMethodMetadata)
 
         val optionWithToken = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
             attestationToken = "existing_token"
@@ -503,7 +386,23 @@ internal class AttestationConfirmationDefinitionTest {
 
         val result = definition.canConfirm(
             confirmationOption = optionWithToken,
-            confirmationArgs = CONFIRMATION_PARAMETERS
+            confirmationArgs = confirmationParametersWithAttestation(enabled = true)
+        )
+
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `'canConfirm' should return false when attestationComplete is true`() {
+        val definition = createAttestationConfirmationDefinition()
+
+        val optionWithAttestationComplete = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
+            attestationComplete = true
+        )
+
+        val result = definition.canConfirm(
+            confirmationOption = optionWithAttestationComplete,
+            confirmationArgs = confirmationParametersWithAttestation(enabled = true)
         )
 
         assertThat(result).isFalse()
@@ -690,6 +589,13 @@ internal class AttestationConfirmationDefinitionTest {
         private val launcherArgs = AttestationActivityContract.Args(
             publishableKey = "pk_123",
             productUsage = setOf("PaymentSheet")
+        )
+
+        private fun confirmationParametersWithAttestation(enabled: Boolean) = CONFIRMATION_PARAMETERS.copy(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PAYMENT_INTENT,
+                attestOnIntentConfirmation = enabled
+            )
         )
     }
 }
