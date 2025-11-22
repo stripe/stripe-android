@@ -29,6 +29,8 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountForm
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.utils.isOnlyOneNonCardPaymentMethod
+import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormHeaderUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.getOuterFormInsets
@@ -76,6 +78,8 @@ internal fun PaymentElement(
                 modifier = Modifier.padding(bottom = 12.dp),
                 updatePaymentMethodVisibility = updatePaymentMethodVisibility,
             )
+        } else if (supportedPaymentMethods.isOnlyOneNonCardPaymentMethod()) {
+            VerticalModeFormHeaderUI(enabled, supportedPaymentMethods.first().asFormHeaderInformation(incentive))
         }
 
         FormElement(
