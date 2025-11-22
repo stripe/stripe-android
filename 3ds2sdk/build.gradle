@@ -3,8 +3,6 @@ apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
 android {
     defaultConfig {
-        // Required by Section 2.2 Minimum Supported Platform Versions of SDK—Device Information
-        minSdkVersion 21
         consumerProguardFiles "consumer-rules.pro"
 
         vectorDrawables.useSupportLibrary = true

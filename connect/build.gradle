@@ -106,7 +106,8 @@ android {
     kotlinOptions {
         freeCompilerArgs += [
                 "-opt-in=kotlinx.coroutines.FlowPreview",
-                "-Xcontext-receivers",
+                "-Xcontext-parameters",
+                "-Xannotation-default-target=param-property"
         ]
         if (gradle.ext.isCi) {
             kotlinOptions.allWarningsAsErrors = true

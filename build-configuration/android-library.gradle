@@ -33,7 +33,7 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion rootProject.ext.compileSdkVersion
         consumerProguardFiles "consumer-rules.txt"
 
