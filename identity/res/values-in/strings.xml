@@ -197,8 +197,6 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Posisikan wajah Anda di tengah bingkai.</string>
   <!-- Instructional text when the document is too blurry -->
-  <string name="stripe_reduce_blur">Identitas tidak terfokus</string>
-  <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Detail tidak terlihat</string>
   <string name="stripe_reduce_glare_2">Coba kurangi silau cahaya dan pastikan identitas terlihat</string>
   <!-- Button text displayed to the user to retake photo -->
