@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.taptoadd.TapToAddModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -47,6 +48,7 @@ import kotlin.coroutines.CoroutineContext
     includes = [
         StripeRepositoryModule::class,
         CoreCommonModule::class,
+        TapToAddModule::class,
         PaymentsIntegrityModule::class,
         PaymentElementRequestSurfaceModule::class,
     ],

@@ -44,6 +44,10 @@ dependencies {
     implementation libs.compose.navigation
     implementation libs.accompanist.systemUiController
 
+    // Terminal
+    compileOnly libs.terminal.core
+    compileOnly libs.terminal.tapToPay
+
     // Other
     implementation libs.playServicesWallet
     implementation libs.payButtonCompose
@@ -84,6 +88,7 @@ dependencies {
     testImplementation testLibs.truth
     testImplementation testLibs.turbine
     testImplementation testLibs.espresso.intents
+    testImplementation libs.terminal.core
 
     // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
     testImplementation testLibs.espresso.core
