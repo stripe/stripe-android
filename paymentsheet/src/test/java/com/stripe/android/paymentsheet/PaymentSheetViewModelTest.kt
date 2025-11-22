@@ -3442,7 +3442,6 @@ internal class PaymentSheetViewModelTest {
                         return cvcRecollectionInteractor
                     }
                 },
-                isLiveModeProvider = { false }
             )
         }
     }
