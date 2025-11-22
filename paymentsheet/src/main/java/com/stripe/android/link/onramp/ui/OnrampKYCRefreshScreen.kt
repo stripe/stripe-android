@@ -1,6 +1,5 @@
 package com.stripe.android.link.onramp.ui
 
-import android.os.Build
 import android.text.format.DateFormat
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
@@ -26,7 +25,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -240,13 +239,7 @@ data class VerifyKYCInfo(
 
 @Composable
 private fun getLocalizedDob(dateOfBirth: DateOfBirth): String {
-    val context = LocalContext.current
-    val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        context.resources.configuration.locales[0]
-    } else {
-        @Suppress("DEPRECATION")
-        context.resources.configuration.locale
-    }
+    val locale = LocalResources.current.configuration.locales[0]
 
     val calendar = Calendar.getInstance().apply {
         set(dateOfBirth.year, dateOfBirth.month - 1, dateOfBirth.day)
