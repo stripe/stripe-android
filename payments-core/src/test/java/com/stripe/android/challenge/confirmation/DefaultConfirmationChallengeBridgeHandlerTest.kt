@@ -18,7 +18,7 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
     private val testArgs = IntentConfirmationChallengeArgs(
         publishableKey = "pk_test_123",
         intent = PaymentIntentFixtures.PI_SUCCEEDED,
-        productUsage = listOf("PaymentSheet")
+        productUsage = listOf("PaymentSheet"),
     )
 
     @Test

@@ -7,6 +7,8 @@ import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.core.os.BundleCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -161,6 +163,39 @@ internal class IntentConfirmationChallengeActivityTest {
         scenario.close()
     }
 
+    @Test
+    fun `analytics start event is fired when activity starts`() = runTest {
+        val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
+        val analyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventsReporter()
+
+        val factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return IntentConfirmationChallengeViewModel(
+                    bridgeHandler = bridgeHandler,
+                    workContext = testDispatcher,
+                    intentConfirmationChallengeAnalyticsEventsReporter = analyticsReporter
+                ) as T
+            }
+        }
+
+        val scenario = injectableActivityScenario<IntentConfirmationChallengeActivity> {
+            injectActivity {
+                viewModelFactory = factory
+            }
+        }.apply {
+            launchForResult(createIntent())
+        }
+
+        advanceUntilIdle()
+
+        assertThat(analyticsReporter.calls.first()).isEqualTo(
+            FakeIntentConfirmationChallengeAnalyticsEventsReporter.Call.Start
+        )
+
+        scenario.close()
+    }
+
     private fun createTestArgs(): IntentConfirmationChallengeArgs {
         return IntentConfirmationChallengeArgs(
             publishableKey = "pk_test_123",
@@ -177,7 +212,8 @@ internal class IntentConfirmationChallengeActivityTest {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return IntentConfirmationChallengeViewModel(
                     bridgeHandler = bridgeHandler,
-                    workContext = testDispatcher
+                    workContext = testDispatcher,
+                    intentConfirmationChallengeAnalyticsEventsReporter = FakeIntentConfirmationChallengeAnalyticsEventsReporter()
                 ) as T
             }
         }

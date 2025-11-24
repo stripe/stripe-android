@@ -29,6 +29,7 @@ internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        lifecycle.addObserver(viewModel)
         listenForActivityResult()
 
         setContent {
