@@ -22,7 +22,9 @@ interface DurationProvider {
         CaptchaAttach,
         PaymentLauncher,
         PrepareAttestation,
-        Attest
+        Attest,
+        IntentConfirmationChallenge,
+        IntentConfirmationChallengeWebViewLoaded
     }
 }
 
