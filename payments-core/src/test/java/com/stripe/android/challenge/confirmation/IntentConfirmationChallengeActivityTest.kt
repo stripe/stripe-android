@@ -7,8 +7,6 @@ import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.core.os.BundleCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -166,7 +164,7 @@ internal class IntentConfirmationChallengeActivityTest {
     @Test
     fun `analytics start event is fired when activity starts`() = runTest {
         val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val analyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventsReporter()
+        val analyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
 
         val factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
@@ -174,7 +172,7 @@ internal class IntentConfirmationChallengeActivityTest {
                 return IntentConfirmationChallengeViewModel(
                     bridgeHandler = bridgeHandler,
                     workContext = testDispatcher,
-                    intentConfirmationChallengeAnalyticsEventsReporter = analyticsReporter
+                    analyticsEventReporter = analyticsReporter
                 ) as T
             }
         }
@@ -190,7 +188,7 @@ internal class IntentConfirmationChallengeActivityTest {
         advanceUntilIdle()
 
         assertThat(analyticsReporter.calls.first()).isEqualTo(
-            FakeIntentConfirmationChallengeAnalyticsEventsReporter.Call.Start
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Start
         )
 
         scenario.close()
@@ -213,7 +211,7 @@ internal class IntentConfirmationChallengeActivityTest {
                 return IntentConfirmationChallengeViewModel(
                     bridgeHandler = bridgeHandler,
                     workContext = testDispatcher,
-                    intentConfirmationChallengeAnalyticsEventsReporter = FakeIntentConfirmationChallengeAnalyticsEventsReporter()
+                    analyticsEventReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
                 ) as T
             }
         }

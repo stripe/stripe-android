@@ -11,7 +11,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventsReporter
+import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventReporter
 import com.stripe.android.challenge.confirmation.di.DaggerIntentConfirmationChallengeComponent
 import com.stripe.android.core.injection.UIContext
 import kotlinx.coroutines.flow.Flow
@@ -25,7 +25,7 @@ import kotlin.coroutines.CoroutineContext
 internal class IntentConfirmationChallengeViewModel @Inject constructor(
     val bridgeHandler: ConfirmationChallengeBridgeHandler,
     @UIContext private val workContext: CoroutineContext,
-    private val intentConfirmationChallengeAnalyticsEventsReporter: IntentConfirmationChallengeAnalyticsEventsReporter
+    private val analyticsEventReporter: IntentConfirmationChallengeAnalyticsEventReporter
 ) : ViewModel(), DefaultLifecycleObserver {
 
     private val _bridgeReady = MutableSharedFlow<Unit>()
@@ -41,12 +41,12 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
     }
 
     override fun onStart(owner: LifecycleOwner) {
-        intentConfirmationChallengeAnalyticsEventsReporter.start()
+        analyticsEventReporter.start()
         super.onStart(owner)
     }
 
     fun handleWebViewError(error: WebViewError) {
-        intentConfirmationChallengeAnalyticsEventsReporter.error(
+        analyticsEventReporter.error(
             error = error,
             errorType = error.webViewErrorType,
             errorCode = error.errorCode.toString(),
@@ -61,11 +61,11 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
         bridgeHandler.event.collectLatest { event ->
             when (event) {
                 is ConfirmationChallengeBridgeEvent.Ready -> {
-                    intentConfirmationChallengeAnalyticsEventsReporter.webViewLoaded()
+                    analyticsEventReporter.webViewLoaded()
                     _bridgeReady.emit(Unit)
                 }
                 is ConfirmationChallengeBridgeEvent.Success -> {
-                    intentConfirmationChallengeAnalyticsEventsReporter.success()
+                    analyticsEventReporter.success()
                     _result.emit(
                         IntentConfirmationChallengeActivityResult.Success(
                             clientSecret = event.clientSecret
@@ -73,7 +73,7 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
                     )
                 }
                 is ConfirmationChallengeBridgeEvent.Error -> {
-                    intentConfirmationChallengeAnalyticsEventsReporter.error(
+                    analyticsEventReporter.error(
                         error = event.cause,
                         errorType = null,
                         errorCode = null,

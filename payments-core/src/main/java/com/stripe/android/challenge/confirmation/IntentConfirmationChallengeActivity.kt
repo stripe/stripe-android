@@ -29,8 +29,8 @@ internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        lifecycle.addObserver(viewModel)
         listenForActivityResult()
+        lifecycle.addObserver(viewModel)
 
         setContent {
             var showProgressIndicator by remember { mutableStateOf(true) }

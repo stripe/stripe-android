@@ -1,6 +1,6 @@
 package com.stripe.android.challenge.confirmation.analytics
 
-internal interface IntentConfirmationChallengeAnalyticsEventsReporter {
+internal interface IntentConfirmationChallengeAnalyticsEventReporter {
     fun start()
 
     fun success()

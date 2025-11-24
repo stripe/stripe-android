@@ -8,8 +8,8 @@ import com.stripe.android.challenge.confirmation.BridgeSuccessParamsJsonParser
 import com.stripe.android.challenge.confirmation.ConfirmationChallengeBridgeHandler
 import com.stripe.android.challenge.confirmation.DefaultConfirmationChallengeBridgeHandler
 import com.stripe.android.challenge.confirmation.IntentConfirmationChallengeArgs
-import com.stripe.android.challenge.confirmation.analytics.DefaultIntentConfirmationChallengeAnalyticsEventsReporter
-import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventsReporter
+import com.stripe.android.challenge.confirmation.analytics.DefaultIntentConfirmationChallengeAnalyticsEventReporter
+import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventReporter
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.model.parsers.ModelJsonParser
@@ -56,8 +56,8 @@ internal interface IntentConfirmationChallengeModule {
 
     @Binds
     fun bindAnalyticsReporter(
-        analyticsReporter: DefaultIntentConfirmationChallengeAnalyticsEventsReporter
-    ): IntentConfirmationChallengeAnalyticsEventsReporter
+        analyticsReporter: DefaultIntentConfirmationChallengeAnalyticsEventReporter
+    ): IntentConfirmationChallengeAnalyticsEventReporter
 
     @Binds
     fun bindAnalyticsRequestExecutor(

@@ -7,11 +7,11 @@ import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
-internal class DefaultIntentConfirmationChallengeAnalyticsEventsReporter @Inject constructor(
+internal class DefaultIntentConfirmationChallengeAnalyticsEventReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
-) : IntentConfirmationChallengeAnalyticsEventsReporter {
+) : IntentConfirmationChallengeAnalyticsEventReporter {
 
     override fun start() {
         durationProvider.start(DurationProvider.Key.IntentConfirmationChallenge)

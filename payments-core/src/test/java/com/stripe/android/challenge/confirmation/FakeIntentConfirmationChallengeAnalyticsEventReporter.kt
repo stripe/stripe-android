@@ -1,9 +1,9 @@
 package com.stripe.android.challenge.confirmation
 
-import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventsReporter
+import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventReporter
 
-internal class FakeIntentConfirmationChallengeAnalyticsEventsReporter :
-    IntentConfirmationChallengeAnalyticsEventsReporter {
+internal class FakeIntentConfirmationChallengeAnalyticsEventReporter :
+    IntentConfirmationChallengeAnalyticsEventReporter {
 
     private val _calls = mutableListOf<Call>()
     val calls: List<Call> get() = _calls
