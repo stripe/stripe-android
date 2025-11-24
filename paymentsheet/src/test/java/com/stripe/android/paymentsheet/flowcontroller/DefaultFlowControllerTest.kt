@@ -191,6 +191,7 @@ internal class DefaultFlowControllerTest {
             .onPaymentSuccess(
                 paymentSelection = isA<PaymentSelection.New>(),
                 deferredIntentConfirmationType = isNull(),
+                intentId = isNull(),
             )
     }
 
@@ -1868,6 +1869,7 @@ internal class DefaultFlowControllerTest {
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
             deferredIntentConfirmationType = isNull(),
+            intentId = any(),
         )
     }
 
@@ -1898,6 +1900,7 @@ internal class DefaultFlowControllerTest {
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Client),
+                intentId = any(),
             )
         }
 
@@ -1928,6 +1931,7 @@ internal class DefaultFlowControllerTest {
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Server),
+                intentId = any(),
             )
         }
 

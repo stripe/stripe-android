@@ -238,6 +238,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onPaymentSuccess(
         paymentSelection: PaymentSelection,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        intentId: String?,
     ) {
         // Wallets are treated as a saved payment method after confirmation, so we need
         // to "reset" to the correct PaymentSelection for accurate reporting.
@@ -253,6 +254,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 duration = duration,
                 result = PaymentSheetEvent.Payment.Result.Success,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
+                intentId = intentId,
             )
         )
     }
@@ -270,6 +272,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 duration = duration,
                 result = PaymentSheetEvent.Payment.Result.Failure(error),
                 deferredIntentConfirmationType = null,
+                intentId = null,
             )
         )
     }

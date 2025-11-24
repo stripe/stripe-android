@@ -257,6 +257,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             handlePaymentCompleted(
                 deferredIntentConfirmationType = pendingResult.deferredIntentConfirmationType,
                 finishImmediately = true,
+                intentId = pendingResult.intent.id,
             )
         } else if (state.validationError != null) {
             handlePaymentSheetStateLoadFailure(state.validationError)
@@ -553,12 +554,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun handlePaymentCompleted(
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         finishImmediately: Boolean,
+        intentId: String?,
     ) {
         val currentSelection = inProgressSelection
         currentSelection?.let { paymentSelection ->
             eventReporter.onPaymentSuccess(
                 paymentSelection = paymentSelection,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
+                intentId = intentId,
             )
         }
 
@@ -583,6 +586,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is ConfirmationHandler.Result.Succeeded -> handlePaymentCompleted(
                 deferredIntentConfirmationType = result.deferredIntentConfirmationType,
                 finishImmediately = false,
+                intentId = result.intent.id,
             )
             is ConfirmationHandler.Result.Failed -> processConfirmationFailure(result)
             is ConfirmationHandler.Result.Canceled,

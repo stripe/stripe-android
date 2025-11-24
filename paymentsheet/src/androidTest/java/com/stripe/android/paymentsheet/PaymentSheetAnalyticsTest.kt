@@ -139,7 +139,8 @@ internal class PaymentSheetAnalyticsTest {
         )
         validateAnalyticsRequest(
             eventName = "mc_complete_payment_newpm_success",
-            hasQueryParam("duration")
+            hasQueryParam("duration"),
+            query("intent_id", "pi_example"),
         )
 
         page.clickPrimaryButton()
@@ -323,7 +324,8 @@ internal class PaymentSheetAnalyticsTest {
         )
         validateAnalyticsRequest(
             eventName = "mc_complete_payment_newpm_success",
-            query("is_confirmation_tokens", "true")
+            query("is_confirmation_tokens", "true"),
+            query("intent_id", "pi_example"),
         )
         page.clickPrimaryButton()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
