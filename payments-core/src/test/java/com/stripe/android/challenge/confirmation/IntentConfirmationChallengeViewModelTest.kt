@@ -5,7 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventsReporter
+import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -26,7 +26,7 @@ internal class IntentConfirmationChallengeViewModelTest {
     @Test
     fun `when Ready event is received, bridgeReady emits value`() = runTest {
         val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventsReporter()
+        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
         val viewModel = createViewModel(fakeBridgeHandler, fakeAnalyticsReporter)
 
         viewModel.bridgeReady.test {
@@ -45,14 +45,14 @@ internal class IntentConfirmationChallengeViewModelTest {
         // Verify analytics
         assertThat(fakeAnalyticsReporter.calls).hasSize(1)
         assertThat(fakeAnalyticsReporter.calls.last()).isEqualTo(
-            FakeIntentConfirmationChallengeAnalyticsEventsReporter.Call.WebViewLoaded
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.WebViewLoaded
         )
     }
 
     @Test
     fun `when Success event is received, result emits Success with clientSecret`() = runTest {
         val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventsReporter()
+        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
         val viewModel = createViewModel(fakeBridgeHandler, fakeAnalyticsReporter)
         val expectedClientSecret = "pi_test_secret_123"
 
@@ -72,14 +72,14 @@ internal class IntentConfirmationChallengeViewModelTest {
         // Verify analytics
         assertThat(fakeAnalyticsReporter.calls).hasSize(1)
         assertThat(fakeAnalyticsReporter.calls.last()).isEqualTo(
-            FakeIntentConfirmationChallengeAnalyticsEventsReporter.Call.Success
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Success
         )
     }
 
     @Test
     fun `when Error event is received, result emits Failed with error`() = runTest {
         val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventsReporter()
+        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
         val viewModel = createViewModel(fakeBridgeHandler, fakeAnalyticsReporter)
         val expectedError = IOException("Network error")
 
@@ -98,7 +98,8 @@ internal class IntentConfirmationChallengeViewModelTest {
 
         // Verify analytics
         assertThat(fakeAnalyticsReporter.calls).hasSize(1)
-        val errorCall = fakeAnalyticsReporter.calls.last() as FakeIntentConfirmationChallengeAnalyticsEventsReporter.Call.Error
+        val errorCall =
+            fakeAnalyticsReporter.calls.last() as FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Error
         assertThat(errorCall.error).isEqualTo(expectedError)
         assertThat(errorCall.errorType).isNull()
         assertThat(errorCall.errorCode).isNull()
@@ -108,7 +109,7 @@ internal class IntentConfirmationChallengeViewModelTest {
     @Test
     fun `when handleWebViewError is called, result emits Failed with WebViewError`() = runTest {
         val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventsReporter()
+        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
         val viewModel = createViewModel(fakeBridgeHandler, fakeAnalyticsReporter)
         val webViewError = WebViewError(
             message = "net::ERR_FAILED",
@@ -131,7 +132,8 @@ internal class IntentConfirmationChallengeViewModelTest {
 
         // Verify analytics
         assertThat(fakeAnalyticsReporter.calls).hasSize(1)
-        val errorCall = fakeAnalyticsReporter.calls.last() as FakeIntentConfirmationChallengeAnalyticsEventsReporter.Call.Error
+        val errorCall =
+            fakeAnalyticsReporter.calls.last() as FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Error
         assertThat(errorCall.error).isEqualTo(webViewError)
         assertThat(errorCall.errorType).isEqualTo("generic_resource_error")
         assertThat(errorCall.errorCode).isEqualTo("-2")
@@ -141,7 +143,7 @@ internal class IntentConfirmationChallengeViewModelTest {
     @Test
     fun `when onStart is called, analytics start is reported`() = runTest {
         val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventsReporter()
+        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
         val viewModel = createViewModel(fakeBridgeHandler, fakeAnalyticsReporter)
         val lifecycleOwner = object : LifecycleOwner {
             private val registry = LifecycleRegistry(this)
@@ -157,16 +159,17 @@ internal class IntentConfirmationChallengeViewModelTest {
 
         assertThat(fakeAnalyticsReporter.calls).hasSize(1)
         assertThat(fakeAnalyticsReporter.calls.first()).isEqualTo(
-            FakeIntentConfirmationChallengeAnalyticsEventsReporter.Call.Start
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Start
         )
     }
 
     private fun createViewModel(
         bridgeHandler: ConfirmationChallengeBridgeHandler,
-        analyticsReporter: IntentConfirmationChallengeAnalyticsEventsReporter = FakeIntentConfirmationChallengeAnalyticsEventsReporter()
+        analyticsReporter: IntentConfirmationChallengeAnalyticsEventReporter =
+            FakeIntentConfirmationChallengeAnalyticsEventReporter()
     ) = IntentConfirmationChallengeViewModel(
         bridgeHandler = bridgeHandler,
         workContext = testDispatcher,
-        intentConfirmationChallengeAnalyticsEventsReporter = analyticsReporter
+        analyticsEventReporter = analyticsReporter
     )
 }

@@ -122,7 +122,8 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventsReporterTest {
         assertThat(loggedRequests[0].params).containsEntry("event", "elements.intent_confirmation_challenge.start")
 
         // Verify webview loaded event with 5ms duration
-        assertThat(loggedRequests[1].params).containsEntry("event", "elements.intent_confirmation_challenge.web_view_loaded")
+        assertThat(loggedRequests[1].params)
+            .containsEntry("event", "elements.intent_confirmation_challenge.web_view_loaded")
         assertThat(loggedRequests[1].params).containsEntry("duration", 5f)
 
         // Verify success event with 10ms total duration
@@ -132,10 +133,10 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventsReporterTest {
 
     private fun runScenario(
         durationProvider: DurationProvider = DefaultDurationProvider.instance,
-        testBlock: (DefaultIntentConfirmationChallengeAnalyticsEventsReporter, FakeAnalyticsRequestExecutor) -> Unit
+        testBlock: (DefaultIntentConfirmationChallengeAnalyticsEventReporter, FakeAnalyticsRequestExecutor) -> Unit
     ) {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-        val eventsReporter = DefaultIntentConfirmationChallengeAnalyticsEventsReporter(
+        val eventsReporter = DefaultIntentConfirmationChallengeAnalyticsEventReporter(
             analyticsRequestExecutor = analyticsRequestExecutor,
             analyticsRequestFactory = AnalyticsRequestFactory(
                 packageManager = null,

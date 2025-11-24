@@ -2,7 +2,7 @@ package com.stripe.android.challenge.confirmation.analytics
 
 import com.stripe.android.core.networking.AnalyticsEvent
 
-internal sealed interface IntentConfirmationChallengeAnalyticsEvent: AnalyticsEvent {
+internal sealed interface IntentConfirmationChallengeAnalyticsEvent : AnalyticsEvent {
     val params: Map<String, Any?>
 
     class Start : IntentConfirmationChallengeAnalyticsEvent {
