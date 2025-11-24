@@ -273,6 +273,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE(
             partialEventName = "intent_confirmation_handler.attestation.failed_to_prepare"
         ),
+        INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_SUCCESS_CALLBACK_PARAMS(
+            partialEventName = "intent_confirmation_challenge.failed_to_parse_success_callback_params"
+        ),
+        INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_ERROR_CALLBACK_PARAMS(
+            partialEventName = "intent_confirmation_challenge.failed_to_parse_error_callback_params"
+        ),
         HCAPTCHA_UNEXPECTED_FAILURE(
             partialEventName = "elements.captcha.passive.unexpected_failure"
         ),
