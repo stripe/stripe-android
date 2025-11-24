@@ -356,7 +356,11 @@ class OnrampInteractorTest {
 
     @Test
     fun testAttachKycInfoFailsMissingSecret() = runTest {
-        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount(mockLinkAccountWithoutSecret())))
+        whenever(
+            linkController.state(any())
+        ).thenReturn(
+            MutableStateFlow(mockLinkStateWithAccount(mockLinkAccountWithoutSecret()))
+        )
 
         val kycInfo = KycInfo(
             firstName = "A",
@@ -375,7 +379,11 @@ class OnrampInteractorTest {
 
     @Test
     fun testRegisterWalletAddressFailsMissingSecret() = runTest {
-        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount(mockLinkAccountWithoutSecret())))
+        whenever(
+            linkController.state(any())
+        ).thenReturn(
+            MutableStateFlow(mockLinkStateWithAccount(mockLinkAccountWithoutSecret()))
+        )
 
         val result = interactor.registerWalletAddress(
             walletAddress = "0xabc",
@@ -450,7 +458,11 @@ class OnrampInteractorTest {
 
     @Test
     fun testHandleVerifyKycResultConfirmedMissingSecret() = runTest {
-        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount(mockLinkAccountWithoutSecret())))
+        whenever(
+            linkController.state(any())
+        ).thenReturn(
+            MutableStateFlow(mockLinkStateWithAccount(mockLinkAccountWithoutSecret()))
+        )
 
         val refreshInfo = RefreshKycInfo(
             firstName = "Jane",
@@ -483,7 +495,9 @@ class OnrampInteractorTest {
         assertThat(failed.error).isInstanceOf(MissingCryptoCustomerException::class.java)
     }
 
-    private fun mockLinkStateWithAccount(account: LinkController.LinkAccount = mockLinkAccount()): LinkController.State = LinkController.State(
+    private fun mockLinkStateWithAccount(
+        account: LinkController.LinkAccount = mockLinkAccount()
+    ): LinkController.State = LinkController.State(
         internalLinkAccount = account,
         merchantLogoUrl = null,
         selectedPaymentMethodPreview = null,
