@@ -1023,6 +1023,7 @@ internal class PaymentSheetViewModelTest {
                 .onPaymentSuccess(
                     paymentSelection = selection,
                     deferredIntentConfirmationType = null,
+                    intentId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
                 )
 
             resultTurbine.cancel()
@@ -2139,6 +2140,7 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
             deferredIntentConfirmationType = isNull(),
+            intentId = any(),
         )
     }
 
@@ -2173,6 +2175,7 @@ internal class PaymentSheetViewModelTest {
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.None),
+                intentId = any(),
             )
         }
 
@@ -2207,6 +2210,7 @@ internal class PaymentSheetViewModelTest {
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Client),
+                intentId = any(),
             )
         }
 
@@ -2241,6 +2245,7 @@ internal class PaymentSheetViewModelTest {
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Server),
+                intentId = any(),
             )
         }
 

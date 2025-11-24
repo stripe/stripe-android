@@ -784,6 +784,7 @@ class DefaultEventReporterTest {
         eventReporter.onPaymentSuccess(
             paymentSelection = PaymentSelection.GooglePay,
             deferredIntentConfirmationType = null,
+            intentId = null,
         )
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
@@ -806,6 +807,7 @@ class DefaultEventReporterTest {
         eventReporter.onPaymentSuccess(
             paymentSelection = PaymentSelection.GooglePay,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+            intentId = null,
         )
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()

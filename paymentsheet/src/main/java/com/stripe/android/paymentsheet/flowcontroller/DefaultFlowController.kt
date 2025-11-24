@@ -607,6 +607,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
                         deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                        intentId = result.intent.id,
                     )
                 }
 
@@ -615,6 +616,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     deferredIntentConfirmationType = result.deferredIntentConfirmationType,
                     shouldLog = false,
                     shouldResetOnCompleted = result.completedFullPaymentFlow,
+                    intentId = result.intent.id,
                 )
             }
             is ConfirmationHandler.Result.Failed -> {
@@ -660,9 +662,10 @@ internal class DefaultFlowController @Inject internal constructor(
         deferredIntentConfirmationType: DeferredIntentConfirmationType? = null,
         shouldLog: Boolean = true,
         shouldResetOnCompleted: Boolean = true,
+        intentId: String? = null,
     ) {
         if (shouldLog) {
-            logPaymentResult(paymentResult, deferredIntentConfirmationType)
+            logPaymentResult(paymentResult, deferredIntentConfirmationType, intentId)
         }
 
         val selection = viewModel.paymentSelection
@@ -708,7 +711,8 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private fun logPaymentResult(
         paymentResult: PaymentResult?,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?
+        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        intentId: String?,
     ) {
         when (paymentResult) {
             is PaymentResult.Completed -> {
@@ -716,6 +720,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
                         deferredIntentConfirmationType = deferredIntentConfirmationType,
+                        intentId = intentId,
                     )
                 }
             }
