@@ -46,48 +46,16 @@ internal class DefaultConfirmationChallengeBridgeHandler @Inject constructor(
             val successParams = successParamsParser.parse(jsonObject)
             val clientSecret = successParams?.clientSecret
                 ?: args.intent.clientSecret
-            handleSuccessCallback(
-                clientSecret = clientSecret,
+                ?: throw IllegalArgumentException("Missing client secret")
+            _event.tryEmit(
+                ConfirmationChallengeBridgeEvent.Success(clientSecret)
             )
         }.onFailure { error ->
-            handleSuccessCallbackWithError(args.intent.clientSecret, error)
-        }
-    }
-
-    private fun handleSuccessCallback(
-        clientSecret: String?,
-    ) {
-        if (clientSecret != null) {
-            _event.tryEmit(
-                ConfirmationChallengeBridgeEvent.Success(clientSecret)
+            errorReporter.report(
+                UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_SUCCESS_CALLBACK_PARAMS,
+                stripeException = StripeException.create(error)
             )
-        } else {
-            _event.tryEmit(
-                ConfirmationChallengeBridgeEvent.Error(
-                    cause = IllegalArgumentException("Missing client secret")
-                )
-            )
-        }
-    }
-
-    private fun handleSuccessCallbackWithError(
-        clientSecret: String?,
-        error: Throwable
-    ) {
-        errorReporter.report(
-            UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_SUCCESS_CALLBACK_PARAMS,
-            stripeException = StripeException.create(error)
-        )
-        if (clientSecret != null) {
-            _event.tryEmit(
-                ConfirmationChallengeBridgeEvent.Success(clientSecret)
-            )
-        } else {
-            _event.tryEmit(
-                ConfirmationChallengeBridgeEvent.Error(
-                    cause = IllegalArgumentException("Missing client secret")
-                )
-            )
+            _event.tryEmit(ConfirmationChallengeBridgeEvent.Error(error))
         }
     }
 
@@ -98,7 +66,7 @@ internal class DefaultConfirmationChallengeBridgeHandler @Inject constructor(
             val jsonObject = JSONObject(errorMessage)
             val errorParams = errorParamsParser.parse(jsonObject)
             val bridgeError = BridgeError(
-                message = errorParams?.message ?: errorMessage,
+                message = errorParams?.message,
                 type = errorParams?.type,
                 code = errorParams?.code
             )
@@ -112,10 +80,9 @@ internal class DefaultConfirmationChallengeBridgeHandler @Inject constructor(
                 UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_ERROR_CALLBACK_PARAMS,
                 stripeException = StripeException.create(error)
             )
-            // If parsing fails, fallback to using the raw message
             _event.tryEmit(
                 ConfirmationChallengeBridgeEvent.Error(
-                    cause = Exception(errorMessage)
+                    cause = error
                 )
             )
         }

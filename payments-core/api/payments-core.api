@@ -901,6 +901,22 @@ public abstract interface class com/stripe/android/cards/CardAccountRangeReposit
 	public abstract fun createWithStripeRepository (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;)Lcom/stripe/android/cards/CardAccountRangeRepository;
 }
 
+public final class com/stripe/android/challenge/confirmation/BridgeErrorParams$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/confirmation/BridgeErrorParams;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/challenge/confirmation/BridgeErrorParams;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/challenge/confirmation/BridgeSuccessParams$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/confirmation/BridgeSuccessParams;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/challenge/confirmation/BridgeSuccessParams;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/challenge/confirmation/IntentConfirmationChallengeActivityResult$Failed$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/confirmation/IntentConfirmationChallengeActivityResult$Failed;

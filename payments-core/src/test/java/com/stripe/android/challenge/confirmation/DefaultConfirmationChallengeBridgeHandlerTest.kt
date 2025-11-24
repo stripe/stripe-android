@@ -17,7 +17,8 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
 
     private val testArgs = IntentConfirmationChallengeArgs(
         publishableKey = "pk_test_123",
-        intent = PaymentIntentFixtures.PI_SUCCEEDED
+        intent = PaymentIntentFixtures.PI_SUCCEEDED,
+        productUsage = listOf("PaymentSheet")
     )
 
     @Test
@@ -98,26 +99,6 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
     }
 
     @Test
-    fun `onSuccess with invalid JSON emits Success event`() = runTest {
-        val parser = FakeBridgeSuccessParamsJsonParser()
-            .apply {
-                willThrow(Throwable("oops"))
-            }
-        val handler = createHandler(
-            successParamsParser = parser
-        )
-
-        handler.event.test {
-            handler.onSuccess("")
-
-            val event = awaitItem()
-            assertThat(event).isInstanceOf(ConfirmationChallengeBridgeEvent.Success::class.java)
-            val successEvent = event as ConfirmationChallengeBridgeEvent.Success
-            assertThat(successEvent.clientSecret).isEqualTo(PaymentIntentFixtures.PI_SUCCEEDED.clientSecret)
-        }
-    }
-
-    @Test
     fun `onSuccess with missing client secret emits Error event`() = runTest {
         val argsWithNoClientSecret = testArgs.copy(
             intent = PaymentIntentFixtures.PI_SUCCEEDED.copy(clientSecret = null)
@@ -136,22 +117,6 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
             val errorEvent = event as ConfirmationChallengeBridgeEvent.Error
             assertThat(errorEvent.cause).isInstanceOf(IllegalArgumentException::class.java)
             assertThat(errorEvent.cause.message).isEqualTo("Missing client secret")
-        }
-    }
-
-    @Test
-    fun `onError emits Error event with message`() = runTest {
-        val handler = createHandler()
-        val errorMessage = "Something went wrong"
-
-        handler.event.test {
-            handler.onError(errorMessage)
-
-            val event = awaitItem()
-            assertThat(event).isInstanceOf(ConfirmationChallengeBridgeEvent.Error::class.java)
-            val errorEvent = event as ConfirmationChallengeBridgeEvent.Error
-            assertThat(errorEvent.cause).isInstanceOf(Exception::class.java)
-            assertThat(errorEvent.cause.message).isEqualTo(errorMessage)
         }
     }
 
@@ -187,116 +152,39 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
     }
 
     @Test
-    fun `onError with JSON error object but no message field uses raw error message`() = runTest {
+    fun `onSuccess when parser throws emits Error event`() = runTest {
+        val parsingException = RuntimeException("Parser failed")
+        val successParser = FakeBridgeSuccessParamsJsonParser().apply {
+            willThrow(parsingException)
+        }
+        val handler = createHandler(successParamsParser = successParser)
+
+        handler.event.test {
+            handler.onSuccess("""{"some": "data"}""")
+
+            val event = awaitItem()
+            assertThat(event).isInstanceOf(ConfirmationChallengeBridgeEvent.Error::class.java)
+            val errorEvent = event as ConfirmationChallengeBridgeEvent.Error
+            assertThat(errorEvent.cause).isEqualTo(parsingException)
+        }
+    }
+
+    @Test
+    fun `onError when parser throws emits Error event`() = runTest {
+        val parsingException = RuntimeException("Parser failed")
         val errorParser = FakeBridgeErrorParamsJsonParser().apply {
-            willReturn(
-                BridgeErrorParams(
-                    message = null,
-                    type = "card_error",
-                    code = "card_declined"
-                )
-            )
+            willThrow(parsingException)
         }
         val handler = createHandler(errorParamsParser = errorParser)
-        val errorJson = """
-            {
-                "type": "card_error",
-                "code": "card_declined"
-            }
-        """.trimIndent()
 
         handler.event.test {
-            handler.onError(errorJson)
+            handler.onError("""{"some": "error"}""")
 
             val event = awaitItem()
             assertThat(event).isInstanceOf(ConfirmationChallengeBridgeEvent.Error::class.java)
             val errorEvent = event as ConfirmationChallengeBridgeEvent.Error
-            assertThat(errorEvent.cause).isInstanceOf(BridgeError::class.java)
-            assertThat(errorEvent.cause.message).isEqualTo(errorJson)
+            assertThat(errorEvent.cause).isEqualTo(parsingException)
         }
-    }
-
-    @Test
-    fun `onSuccess when parser throws exception falls back to intent client secret`() = runTest {
-        val successParser = FakeBridgeSuccessParamsJsonParser().apply {
-            willThrow(RuntimeException("Parser failed"))
-        }
-        val errorReporter = FakeErrorReporter()
-        val handler = createHandler(successParamsParser = successParser, errorReporter = errorReporter)
-        val paymentIntentJson = """{"client_secret": "pi_test_secret"}"""
-
-        handler.event.test {
-            handler.onSuccess(paymentIntentJson)
-
-            val event = awaitItem()
-            assertThat(event).isInstanceOf(ConfirmationChallengeBridgeEvent.Success::class.java)
-            val successEvent = event as ConfirmationChallengeBridgeEvent.Success
-            assertThat(successEvent.clientSecret).isEqualTo(PaymentIntentFixtures.PI_SUCCEEDED.clientSecret)
-        }
-
-        assertThat(errorReporter.getLoggedErrors()).hasSize(1)
-        assertThat(errorReporter.getLoggedErrors().first())
-            .isEqualTo(
-                ErrorReporter.UnexpectedErrorEvent
-                    .INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_SUCCESS_CALLBACK_PARAMS.eventName
-            )
-    }
-
-    @Test
-    fun `onSuccess when parser throws exception and no fallback client secret emits Error event`() = runTest {
-        val argsWithNoClientSecret = testArgs.copy(
-            intent = PaymentIntentFixtures.PI_SUCCEEDED.copy(clientSecret = null)
-        )
-        val successParser = FakeBridgeSuccessParamsJsonParser().apply {
-            willThrow(RuntimeException("Parser failed"))
-        }
-        val errorReporter = FakeErrorReporter()
-        val handler = createHandler(
-            args = argsWithNoClientSecret,
-            successParamsParser = successParser,
-            errorReporter = errorReporter
-        )
-        val paymentIntentJson = """{"client_secret": "pi_test_secret"}"""
-
-        handler.event.test {
-            handler.onSuccess(paymentIntentJson)
-
-            val event = awaitItem()
-            assertThat(event).isInstanceOf(ConfirmationChallengeBridgeEvent.Error::class.java)
-            val errorEvent = event as ConfirmationChallengeBridgeEvent.Error
-            assertThat(errorEvent.cause).isInstanceOf(IllegalArgumentException::class.java)
-            assertThat(errorEvent.cause.message).isEqualTo("Missing client secret")
-        }
-
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.UnexpectedErrorEvent
-                .INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_SUCCESS_CALLBACK_PARAMS.eventName
-        )
-    }
-
-    @Test
-    fun `onError when parser throws exception falls back to raw message`() = runTest {
-
-        val errorReporter = FakeErrorReporter()
-        val errorParser = FakeBridgeErrorParamsJsonParser().apply {
-            willThrow(RuntimeException("Parser failed"))
-        }
-        val handler = createHandler(errorParamsParser = errorParser, errorReporter = errorReporter)
-        val errorJson = """{"message": "Payment failed"}"""
-
-        handler.event.test {
-            handler.onError(errorJson)
-
-            val event = awaitItem()
-            assertThat(event).isInstanceOf(ConfirmationChallengeBridgeEvent.Error::class.java)
-            val errorEvent = event as ConfirmationChallengeBridgeEvent.Error
-            assertThat(errorEvent.cause).isInstanceOf(Exception::class.java)
-            assertThat(errorEvent.cause.message).isEqualTo(errorJson)
-        }
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.UnexpectedErrorEvent
-                .INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_ERROR_CALLBACK_PARAMS.eventName
-        )
     }
 
     private fun createHandler(

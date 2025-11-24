@@ -4,4 +4,4 @@ import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class BridgeSuccessParams(val clientSecret: String) : StripeModel
+internal data class BridgeSuccessParams(val clientSecret: String) : StripeModel

@@ -33,7 +33,8 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
         DummyActivityResultCaller.test {
             val handler = IntentConfirmationChallengeNextActionHandler(
                 publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-                uiContext = testDispatcher
+                uiContext = testDispatcher,
+                productUsageTokens = PRODUCT_USAGE
             )
 
             val resultCallback = mutableListOf<PaymentFlowResult.Unvalidated>()
@@ -64,7 +65,8 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
     fun `performNextActionOnResumed uses Legacy starter when launcher is null`() = runTest {
         val handler = IntentConfirmationChallengeNextActionHandler(
             publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-            uiContext = testDispatcher
+            uiContext = testDispatcher,
+            productUsageTokens = PRODUCT_USAGE
         )
         val host = FakeAuthActivityStarterHost()
 
@@ -86,7 +88,8 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
         DummyActivityResultCaller.test {
             val handler = IntentConfirmationChallengeNextActionHandler(
                 publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-                uiContext = testDispatcher
+                uiContext = testDispatcher,
+                productUsageTokens = PRODUCT_USAGE
             )
 
             val resultCallback = mutableListOf<PaymentFlowResult.Unvalidated>()
@@ -119,7 +122,8 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
         DummyActivityResultCaller.test {
             val handler = IntentConfirmationChallengeNextActionHandler(
                 publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-                uiContext = testDispatcher
+                uiContext = testDispatcher,
+                productUsageTokens = PRODUCT_USAGE
             )
 
             val resultCallback = mutableListOf<PaymentFlowResult.Unvalidated>()
@@ -153,7 +157,8 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
         DummyActivityResultCaller.test {
             val handler = IntentConfirmationChallengeNextActionHandler(
                 publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-                uiContext = testDispatcher
+                uiContext = testDispatcher,
+                productUsageTokens = PRODUCT_USAGE
             )
 
             handler.onNewActivityResultCaller(
@@ -205,5 +210,7 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccount = ACCOUNT_ID
         )
+
+        private val PRODUCT_USAGE = setOf("PaymentSheet")
     }
 }

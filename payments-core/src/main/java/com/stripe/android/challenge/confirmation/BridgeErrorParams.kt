@@ -4,7 +4,7 @@ import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class BridgeErrorParams(
+internal data class BridgeErrorParams(
     val message: String?,
     val type: String?,
     val code: String?

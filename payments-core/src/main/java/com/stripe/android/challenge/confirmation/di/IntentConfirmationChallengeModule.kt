@@ -68,7 +68,7 @@ internal interface IntentConfirmationChallengeModule {
         @Provides
         @Named(PRODUCT_USAGE)
         fun provideProductUsage(args: IntentConfirmationChallengeArgs): Set<String> {
-            return emptySet()
+            return args.productUsage.toSet()
         }
     }
 }
