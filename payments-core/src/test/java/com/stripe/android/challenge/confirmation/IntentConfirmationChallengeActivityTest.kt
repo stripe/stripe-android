@@ -117,7 +117,7 @@ internal class IntentConfirmationChallengeActivityTest {
 
     @Test
     fun `finishes with Failed result when bridge handler emits Error event`() = runTest {
-        val error = RuntimeException("Confirmation challenge failed")
+        val error = BridgeException(RuntimeException("Confirmation challenge failed"))
         val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
             .apply {
                 emitEvent(ConfirmationChallengeBridgeEvent.Error(cause = error))
@@ -133,7 +133,6 @@ internal class IntentConfirmationChallengeActivityTest {
         assertThat(result).isInstanceOf<IntentConfirmationChallengeActivityResult.Failed>()
         val failedResult = result as IntentConfirmationChallengeActivityResult.Failed
         assertThat(failedResult.error).isEqualTo(error)
-        assertThat(failedResult.error.message).isEqualTo("Confirmation challenge failed")
 
         scenario.close()
     }

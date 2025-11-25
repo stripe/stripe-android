@@ -17,14 +17,12 @@ internal class FakeIntentConfirmationChallengeAnalyticsEventReporter :
     }
 
     override fun error(
-        error: Throwable?,
         errorType: String?,
         errorCode: String?,
         fromBridge: Boolean
     ) {
         _calls.add(
             Call.Error(
-                error = error,
                 errorType = errorType,
                 errorCode = errorCode,
                 fromBridge = fromBridge
@@ -44,7 +42,6 @@ internal class FakeIntentConfirmationChallengeAnalyticsEventReporter :
         data object Start : Call
         data object Success : Call
         data class Error(
-            val error: Throwable?,
             val errorType: String?,
             val errorCode: String?,
             val fromBridge: Boolean

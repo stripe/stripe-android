@@ -25,7 +25,6 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventReporter @Inject 
     }
 
     override fun error(
-        error: Throwable?,
         errorType: String?,
         errorCode: String?,
         fromBridge: Boolean
@@ -37,7 +36,6 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventReporter @Inject 
                 errorType = errorType,
                 errorCode = errorCode,
                 fromBridge = fromBridge,
-                error = error
             )
         )
     }
