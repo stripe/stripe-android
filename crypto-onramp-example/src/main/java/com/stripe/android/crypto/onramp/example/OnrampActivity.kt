@@ -55,6 +55,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -345,6 +346,7 @@ internal fun LoginSignupScreen(
                 imeAction = ImeAction.Next
             ),
             modifier = Modifier
+                .testTag(LOGIN_EMAIL_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
                 .onPreviewKeyEvent {
@@ -367,6 +369,7 @@ internal fun LoginSignupScreen(
                 imeAction = ImeAction.Done
             ),
             modifier = Modifier
+                .testTag(LOGIN_PASSWORD_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
         )
@@ -374,6 +377,7 @@ internal fun LoginSignupScreen(
         Button(
             onClick = { onLogin(email, password) },
             modifier = Modifier.fillMaxWidth()
+                .testTag(LOGIN_LOGIN_BUTTON_TAG)
                 .padding(bottom = 16.dp)
         ) {
             Text("Login")
@@ -382,6 +386,7 @@ internal fun LoginSignupScreen(
         Button(
             onClick = { onRegister(email, password) },
             modifier = Modifier.fillMaxWidth()
+                .testTag(LOGIN_REGISTER_BUTTON_TAG)
         ) {
             Text("Register")
         }
@@ -679,6 +684,7 @@ fun AuthenticateSection(
     Button(
         onClick = { onAuthenticate(oauthScopes) },
         modifier = Modifier
+            .testTag(AUTHENTICATE_BUTTON_TAG)
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     ) {
@@ -856,6 +862,7 @@ private fun AuthenticatedOperationsScreen(
         Button(
             onClick = { onRegisterWalletAddress(walletAddressInput, selectedNetwork) },
             modifier = Modifier
+                .testTag(REGISTER_WALLET_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 24.dp)
         ) {
@@ -898,6 +905,7 @@ private fun AuthenticatedOperationsScreen(
         Button(
             onClick = { onCollectPayment(PaymentMethodType.Card) },
             modifier = Modifier
+                .testTag(COLLECT_CARD_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
@@ -916,6 +924,7 @@ private fun AuthenticatedOperationsScreen(
         Button(
             onClick = onCreatePaymentToken,
             modifier = Modifier
+                .testTag(CREATE_CRYPTO_TOKEN_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
@@ -925,6 +934,7 @@ private fun AuthenticatedOperationsScreen(
         Button(
             onClick = onCreateSession,
             modifier = Modifier
+                .testTag(CREATE_SESSION_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
@@ -935,6 +945,7 @@ private fun AuthenticatedOperationsScreen(
             onClick = onPerformCheckout,
             enabled = onrampSessionResponse != null,
             modifier = Modifier
+                .testTag(CHECKOUT_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
@@ -1100,3 +1111,14 @@ fun OnrampExampleTheme(
         content = content,
     )
 }
+
+internal const val LOGIN_EMAIL_TAG = "LoginEmailTag"
+internal const val LOGIN_PASSWORD_TAG = "LoginPasswordTag"
+internal const val LOGIN_LOGIN_BUTTON_TAG = "LoginLoginButtonTag"
+internal const val LOGIN_REGISTER_BUTTON_TAG = "LoginRegisterButtonTag"
+internal const val AUTHENTICATE_BUTTON_TAG = "AuthenticateButtonTag"
+internal const val REGISTER_WALLET_BUTTON_TAG = "RegisterWalletButtonTag"
+internal const val COLLECT_CARD_BUTTON_TAG = "CollectCardButtonTag"
+internal const val CREATE_CRYPTO_TOKEN_BUTTON_TAG = "CreateCryptoTokenButtonTag"
+internal const val CREATE_SESSION_BUTTON_TAG = "CreateSessionButtonTag"
+internal const val CHECKOUT_BUTTON_TAG = "CheckoutButtonTag"
