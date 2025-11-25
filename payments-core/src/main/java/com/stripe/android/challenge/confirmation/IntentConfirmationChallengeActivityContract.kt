@@ -17,6 +17,7 @@ internal class IntentConfirmationChallengeActivityContract :
             context,
             IntentConfirmationChallengeArgs(
                 input.publishableKey,
+                input.productUsage.toList(),
                 input.intent
             )
         )
@@ -31,6 +32,7 @@ internal class IntentConfirmationChallengeActivityContract :
 
     data class Args(
         val publishableKey: String,
+        val productUsage: Set<String>,
         val intent: StripeIntent
     )
 

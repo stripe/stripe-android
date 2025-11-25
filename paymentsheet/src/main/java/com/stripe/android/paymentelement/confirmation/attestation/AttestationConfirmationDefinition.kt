@@ -34,22 +34,19 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : ConfirmationDefinition<
-    PaymentMethodConfirmationOption,
+    PaymentMethodConfirmationOption.New,
     ActivityResultLauncher<AttestationActivityContract.Args>,
     AttestationActivityContract.Args,
     AttestationActivityResult
     > {
     override val key = "Attestation"
 
-    private var attestOnIntentConfirmation: Boolean = false
-
-    override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption? {
-        return confirmationOption as? PaymentMethodConfirmationOption
+    override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption.New? {
+        return confirmationOption as? PaymentMethodConfirmationOption.New
     }
 
     override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
-        attestOnIntentConfirmation = paymentMethodMetadata.attestOnIntentConfirmation
-        if (attestOnIntentConfirmation.not()) return
+        if (paymentMethodMetadata.attestOnIntentConfirmation.not()) return
         coroutineScope.launch(workContext) {
             attestationAnalyticsEventsReporter.prepare()
             integrityRequestManager.prepare()
@@ -66,14 +63,17 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     }
 
     override fun canConfirm(
-        confirmationOption: PaymentMethodConfirmationOption,
+        confirmationOption: PaymentMethodConfirmationOption.New,
         confirmationArgs: ConfirmationHandler.Args
     ): Boolean {
-        return attestOnIntentConfirmation && confirmationOption.hasToken().not()
+        return confirmationOption.createParams.typeCode == "card" &&
+            confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation &&
+            confirmationOption.attestationComplete.not() &&
+            confirmationOption.hasToken().not()
     }
 
     override fun toResult(
-        confirmationOption: PaymentMethodConfirmationOption,
+        confirmationOption: PaymentMethodConfirmationOption.New,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: AttestationActivityResult
@@ -104,19 +104,17 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     override fun launch(
         launcher: ActivityResultLauncher<AttestationActivityContract.Args>,
         arguments: AttestationActivityContract.Args,
-        confirmationOption: PaymentMethodConfirmationOption,
+        confirmationOption: PaymentMethodConfirmationOption.New,
         confirmationArgs: ConfirmationHandler.Args
     ) {
         launcher.launch(arguments)
     }
 
     override suspend fun action(
-        confirmationOption: PaymentMethodConfirmationOption,
+        confirmationOption: PaymentMethodConfirmationOption.New,
         confirmationArgs: ConfirmationHandler.Args
     ): ConfirmationDefinition.Action<AttestationActivityContract.Args> {
-        if (attestOnIntentConfirmation) {
-            // Disable attestation after first call to prevent multiple attestations
-            attestOnIntentConfirmation = false
+        if (confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation) {
             return ConfirmationDefinition.Action.Launch(
                 launcherArguments = AttestationActivityContract.Args(
                     publishableKey = publishableKeyProvider(),
@@ -140,26 +138,20 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         )
     }
 
-    private fun PaymentMethodConfirmationOption.attachToken(token: String?): PaymentMethodConfirmationOption {
-        return when (this) {
-            is PaymentMethodConfirmationOption.New -> {
-                copy(
-                    createParams = createParams.copy(
-                        radarOptions = token?.let {
-                            RadarOptions(
-                                hCaptchaToken = null,
-                                androidVerificationObject = AndroidVerificationObject(
-                                    androidVerificationToken = it
-                                )
-                            )
-                        }
+    private fun PaymentMethodConfirmationOption.New.attachToken(token: String?): PaymentMethodConfirmationOption {
+        return copy(
+            createParams = createParams.copy(
+                radarOptions = token?.let {
+                    RadarOptions(
+                        hCaptchaToken = null,
+                        androidVerificationObject = AndroidVerificationObject(
+                            androidVerificationToken = it
+                        )
                     )
-                )
-            }
-            is PaymentMethodConfirmationOption.Saved -> {
-                copy(attestationToken = token)
-            }
-        }
+                }
+            ),
+            attestationComplete = true
+        )
     }
 
     private fun PaymentMethodConfirmationOption.hasToken(): Boolean {

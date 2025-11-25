@@ -60,6 +60,7 @@ internal object PaymentMethodMetadataFactory {
         onBehalfOf: String? = null,
         integrationMetadata: IntegrationMetadata = stripeIntent.integrationMetadata(),
         sellerBusinessName: String? = null,
+        analyticsMetadata: AnalyticsMetadata = AnalyticsMetadata(emptyMap()),
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -104,6 +105,7 @@ internal object PaymentMethodMetadataFactory {
             appearance = appearance,
             onBehalfOf = onBehalfOf,
             integrationMetadata = integrationMetadata,
+            analyticsMetadata = analyticsMetadata,
         )
     }
 

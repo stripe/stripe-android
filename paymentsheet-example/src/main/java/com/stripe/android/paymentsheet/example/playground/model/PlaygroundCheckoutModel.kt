@@ -25,8 +25,8 @@ class CheckoutRequest private constructor(
     val automaticPaymentMethods: Boolean?,
     @SerialName("use_link")
     val useLink: Boolean?,
-    @SerialName("merchant_country_code")
-    val merchantCountryCode: String?,
+    @SerialName("merchant")
+    val merchant: String?,
     @SerialName("supported_payment_methods")
     val supportedPaymentMethods: List<String>?,
     @SerialName("payment_method_configuration")
@@ -53,6 +53,8 @@ class CheckoutRequest private constructor(
     val paymentMethodOptionsSetupFutureUsage: Map<String, String>?,
     @SerialName("is_confirmation_token")
     val isConfirmationToken: Boolean?,
+    @SerialName("allows_tap_to_add")
+    val allowsTapToAdd: Boolean?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -73,7 +75,7 @@ class CheckoutRequest private constructor(
         private var setShippingAddress: Boolean? = null
         private var automaticPaymentMethods: Boolean? = null
         private var useLink: Boolean? = null
-        private var merchantCountryCode: String? = null
+        private var merchant: String? = null
         private var supportedPaymentMethods: List<String>? = null
         private var paymentMethodConfigurationId: String? = null
         private var requireCvcRecollection: Boolean? = null
@@ -91,6 +93,7 @@ class CheckoutRequest private constructor(
         private var paymentMethodOptionsSetupFutureUsage: Map<String, String>? = null
         private var overridePaymentMethodOptionsSetupFutureUsage: Map<String, String>? = null
         private var isConfirmationToken: Boolean? = null
+        private var allowsTapToAdd: Boolean? = null
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -124,8 +127,8 @@ class CheckoutRequest private constructor(
             this.useLink = useLink
         }
 
-        fun merchantCountryCode(merchantCountryCode: String?) = apply {
-            this.merchantCountryCode = merchantCountryCode
+        fun merchant(merchant: String?) = apply {
+            this.merchant = merchant
         }
 
         fun supportedPaymentMethods(supportedPaymentMethods: List<String>?) = apply {
@@ -180,6 +183,10 @@ class CheckoutRequest private constructor(
             this.isConfirmationToken = isConfirmationToken
         }
 
+        fun allowsTapToAdd(allowsTapToAdd: Boolean?) = apply {
+            this.allowsTapToAdd = allowsTapToAdd
+        }
+
         fun onBehalfOf(onBehalfOf: String?) = apply {
             this.onBehalfOf = onBehalfOf
         }
@@ -195,7 +202,7 @@ class CheckoutRequest private constructor(
                 setShippingAddress = setShippingAddress,
                 automaticPaymentMethods = automaticPaymentMethods,
                 useLink = useLink,
-                merchantCountryCode = merchantCountryCode,
+                merchant = merchant,
                 supportedPaymentMethods = supportedPaymentMethods,
                 paymentMethodConfigurationId = paymentMethodConfigurationId,
                 requireCvcRecollection = requireCvcRecollection,
@@ -211,7 +218,8 @@ class CheckoutRequest private constructor(
                 paymentMethodOverrideRedisplay = paymentMethodOverrideRedisplay,
                 paymentMethodOptionsSetupFutureUsage = overridePaymentMethodOptionsSetupFutureUsage
                     ?: paymentMethodOptionsSetupFutureUsage,
-                isConfirmationToken = isConfirmationToken
+                isConfirmationToken = isConfirmationToken,
+                allowsTapToAdd = allowsTapToAdd,
             )
         }
     }
@@ -229,6 +237,8 @@ data class CheckoutResponse(
     val customerEphemeralKeySecret: String? = null,
     @SerialName("customerSessionClientSecret")
     val customerSessionClientSecret: String? = null,
+    @SerialName("terminalLocationId")
+    val terminalLocationId: String? = null,
     @SerialName("amount")
     val amount: Long,
     @SerialName("paymentMethodTypes")

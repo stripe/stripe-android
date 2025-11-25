@@ -26,6 +26,7 @@ import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.ManagePage
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
@@ -53,6 +54,11 @@ internal class EmbeddedPaymentElementAnalyticsTest {
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
 
+    @Before
+    fun before() {
+        validateAnalyticsRequest(eventName = "mc_embedded_init")
+    }
+
     @Test
     fun testSuccessfulCardPayment() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
@@ -73,12 +79,17 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        validateAnalyticsRequest(
-            eventName = "mc_embedded_init",
-            query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
-        )
         validateAnalyticsRequest(eventName = "mc_load_started")
-        validateAnalyticsRequest(eventName = "mc_load_succeeded")
+        validateAnalyticsRequest(
+            eventName = "mc_load_succeeded",
+            query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
+            query(Uri.encode("mpe_config[form_sheet_action]"), "confirm"),
+            query(Uri.encode("mpe_config[row_selection_behavior]"), "default"),
+            query(Uri.encode("mpe_config[embedded_view_displays_mandate_text]"), "true"),
+            query(Uri.encode("mpe_config[open_card_scan_automatically]"), "false"),
+            query(Uri.encode("mpe_config[appearance][embedded_payment_element][row_style]"), "flat_with_radio"),
+            query(Uri.encode("mpe_config[appearance][colorsDark]"), "false"),
+        )
         validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
         validateAnalyticsRequest(eventName = "mc_form_shown")
@@ -91,6 +102,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
                 "visible_payment_methods",
                 Uri.encode("link,card,afterpay_clearpay,klarna,cashapp,affirm,alipay")
             ),
+            query("payment_method_layout", "vertical")
         )
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
@@ -152,7 +164,10 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             query("payment_method_type", "card"),
         )
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
-        validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
+        validateAnalyticsRequest(
+            eventName = "mc_embedded_payment_success",
+            query("intent_id", "pi_example"),
+        )
         validateAnalyticsRequest(eventName = "mc_dismiss")
 
         formPage.clickPrimaryButton()
@@ -182,12 +197,11 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
+        validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(
-            eventName = "mc_embedded_init",
+            eventName = "mc_load_succeeded",
             query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
         )
-        validateAnalyticsRequest(eventName = "mc_load_started")
-        validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
         validateAnalyticsRequest(eventName = "mc_form_shown")
@@ -288,7 +302,6 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         }
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
 
-        validateAnalyticsRequest(eventName = "mc_embedded_init")
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
@@ -298,6 +311,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", ""),
             query("visible_payment_methods", Uri.encode("saved,card,cashapp")),
+            query("payment_method_layout", "vertical")
         )
 
         testContext.configure {
@@ -362,7 +376,6 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         }
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
 
-        validateAnalyticsRequest(eventName = "mc_embedded_init")
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
@@ -372,6 +385,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", ""),
             query("visible_payment_methods", Uri.encode("saved,card,cashapp")),
+            query("payment_method_layout", "vertical"),
         )
 
         testContext.configure {
@@ -419,7 +433,6 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         }
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
 
-        validateAnalyticsRequest(eventName = "mc_embedded_init")
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
@@ -429,6 +442,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", ""),
             query("visible_payment_methods", Uri.encode("saved,card,cashapp")),
+            query("payment_method_layout", "vertical"),
         )
 
         testContext.configure {

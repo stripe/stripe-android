@@ -101,6 +101,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         GOOGLE_PAY_IS_READY_API_CALL(
             eventName = "elements.google_pay_repository.is_ready_request_api_call_failure"
         ),
+        GOOGLE_PAY_IS_READY_TIMEOUT(
+            eventName = "elements.google_pay_repository.is_ready_timeout"
+        ),
         CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE(
             eventName = "elements.customer_sheet.elements_session.load_failure"
         ),
@@ -152,6 +155,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         BROWSER_LAUNCHER_NULL_ARGS(
             eventName = "payments.browserlauncher.null_args"
         ),
+        GOOGLE_PAY_SKIPPED_DURING_LOAD(
+            eventName = "google_pay.skipped_during_load"
+        ),
         GOOGLE_PAY_FAILED(
             eventName = "google_pay.confirm.error"
         ),
@@ -166,9 +172,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         CUSTOM_PAYMENT_METHOD_CONFIRM_HANDLER_NULL(
             eventName = "paymentsheet.custom_payment_method.confirm_handler_is_null"
-        ),
-        EXTERNAL_PAYMENT_METHOD_LAUNCHER_NULL(
-            eventName = "paymentsheet.external_payment_method.launcher_is_null"
         ),
         CREATE_INTENT_CALLBACK_NULL(
             eventName = "paymentsheet.create_intent_callback.is_null"
@@ -185,9 +188,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
     enum class UnexpectedErrorEvent(val partialEventName: String) : ErrorEvent {
         AUTH_WEB_VIEW_BLANK_CLIENT_SECRET(
             partialEventName = "payments.auth_web_view.blank_client_secret"
-        ),
-        MISSING_CARDSCAN_DEPENDENCY(
-            partialEventName = "cardscan.missing_dependency"
         ),
         MISSING_HOSTED_VOUCHER_URL(
             partialEventName = "payments.missing_hosted_voucher_url"
@@ -225,9 +225,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         LINK_WEB_FAILED_TO_PARSE_RESULT_URI(
             partialEventName = "link.web.result.parsing_failed"
         ),
-        LINK_NATIVE_FAILED_TO_ATTEST_SIGNUP_REQUEST(
-            partialEventName = "link.native.signup.failed_to_attest_request"
-        ),
         PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND(
             partialEventName = "paymentsheet.authenticators.not_found"
         ),
@@ -252,9 +249,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         EXTERNAL_PAYMENT_METHOD_UNEXPECTED_RESULT_CODE(
             partialEventName = "paymentsheet.external_payment_method.unexpected_result_code"
         ),
-        CVC_RECOLLECTION_UNEXPECTED_PAYMENT_SELECTION(
-            partialEventName = "payments.cvc_recollection_unexpected_payment_selection"
-        ),
         CUSTOMER_SHEET_ATTACH_CALLED_WITH_CUSTOMER_SESSION(
             partialEventName = "customersheet.customer_session.attach_called"
         ),
@@ -278,6 +272,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE(
             partialEventName = "intent_confirmation_handler.attestation.failed_to_prepare"
+        ),
+        INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_SUCCESS_CALLBACK_PARAMS(
+            partialEventName = "intent_confirmation_challenge.failed_to_parse_success_callback_params"
+        ),
+        INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_ERROR_CALLBACK_PARAMS(
+            partialEventName = "intent_confirmation_challenge.failed_to_parse_error_callback_params"
         ),
         HCAPTCHA_UNEXPECTED_FAILURE(
             partialEventName = "elements.captcha.passive.unexpected_failure"

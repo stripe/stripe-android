@@ -14,8 +14,10 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.seconds
 
 fun interface GooglePayRepository {
     fun isReady(): Flow<Boolean>
@@ -118,7 +120,11 @@ internal class DefaultGooglePayRepository(
         }
 
         val isReady = runCatching {
-            googlePayAvailabilityClient.isReady(request)
+            withTimeoutOrNull(30.seconds) {
+                googlePayAvailabilityClient.isReady(request)
+            } ?: false.also {
+                errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_IS_READY_TIMEOUT)
+            }
         }.onFailure {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_IS_READY_API_CALL,

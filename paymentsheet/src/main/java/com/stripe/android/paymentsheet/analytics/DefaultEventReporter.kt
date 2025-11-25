@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.analytics
 
 import android.content.Context
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
-import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -10,27 +9,20 @@ import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.LinkMode
-import com.stripe.android.model.LinkSignupDisabledReason
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.BankAccountCollectorFinished
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.BankAccountCollectorStarted
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isSaved
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsState
 import kotlinx.coroutines.CoroutineScope
@@ -54,114 +46,46 @@ internal class DefaultEventReporter @Inject internal constructor(
     private val paymentMethodMetadataProvider: Provider<PaymentMethodMetadata?>,
 ) : EventReporter, LoadingEventReporter {
 
-    private var isDeferredValue: Boolean = false
-    private val isDeferred: Boolean
-        get() = paymentMethodMetadataProvider.get()?.integrationMetadata?.isDeferred() ?: isDeferredValue
-    private var isSptValue: Boolean = false
-    private val isSpt: Boolean
-        get() = paymentMethodMetadataProvider.get()?.integrationMetadata?.isSpt() ?: isSptValue
-    private var linkEnabled: Boolean = false
-    private var linkMode: LinkMode? = null
-    private var googlePaySupported: Boolean = false
-    private var currency: String? = null
-    private var financialConnectionsAvailability: FinancialConnectionsAvailability? = null
-
     private val analyticsRequestV2Factory = AnalyticsRequestV2Factory(
         context,
         clientId = CLIENT_ID,
         origin = ORIGIN,
     )
 
-    override fun onInit(
-        commonConfiguration: CommonConfiguration,
-        appearance: PaymentSheet.Appearance,
-        primaryButtonColor: Boolean?,
-        configurationSpecificPayload: PaymentSheetEvent.ConfigurationSpecificPayload,
-        isDeferred: Boolean,
-    ) {
-        this.isDeferredValue = isDeferred
-
+    override fun onInit() {
         fireEvent(
-            PaymentSheetEvent.Init(
+            event = PaymentSheetEvent.Init(
                 mode = mode,
-                configuration = commonConfiguration,
-                appearance = appearance,
-                primaryButtonColor = primaryButtonColor,
-                configurationSpecificPayload = configurationSpecificPayload,
-                isDeferred = isDeferred,
-                isSpt = isSptValue,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-                isAnalyticEventCallbackSet = analyticEventCallbackProvider.get() != null,
-            )
+            ),
+            paymentMethodMetadata = null, // We won't have a value on init, and using null prevents a stack overflow.
         )
     }
 
     override fun onLoadStarted(initializedViaCompose: Boolean) {
         durationProvider.start(DurationProvider.Key.Loading)
         fireEvent(
-            PaymentSheetEvent.LoadStarted(
-                isDeferred = isDeferred,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-                isSpt = isSpt,
+            event = PaymentSheetEvent.LoadStarted(
                 initializedViaCompose = initializedViaCompose
-            )
+            ),
+            paymentMethodMetadata = null, // We don't have these details until load is complete.
         )
     }
 
     override fun onLoadSucceeded(
         paymentSelection: PaymentSelection?,
-        linkEnabled: Boolean,
-        linkMode: LinkMode?,
-        linkDisabledReasons: List<LinkDisabledReason>?,
-        linkSignupDisabledReasons: List<LinkSignupDisabledReason>?,
-        googlePaySupported: Boolean,
-        linkDisplay: PaymentSheet.LinkConfiguration.Display,
-        currency: String?,
-        initializationMode: PaymentElementLoader.InitializationMode,
-        financialConnectionsAvailability: FinancialConnectionsAvailability?,
-        orderedLpms: List<String>,
-        requireCvcRecollection: Boolean,
-        hasDefaultPaymentMethod: Boolean?,
-        setAsDefaultEnabled: Boolean?,
-        paymentMethodOptionsSetupFutureUsage: Boolean,
-        setupFutureUsage: StripeIntent.Usage?,
+        paymentMethodMetadata: PaymentMethodMetadata,
     ) {
-        this.currency = currency
-        this.linkEnabled = linkEnabled
-        this.linkMode = linkMode
-        this.isSptValue = initializationMode is PaymentElementLoader.InitializationMode.DeferredIntent &&
-            initializationMode.intentConfiguration.intentBehavior is
-            PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken
-        this.googlePaySupported = googlePaySupported
-        this.financialConnectionsAvailability = financialConnectionsAvailability
-
         durationProvider.start(DurationProvider.Key.Checkout)
 
         val duration = durationProvider.end(DurationProvider.Key.Loading)
 
         fireEvent(
-            PaymentSheetEvent.LoadSucceeded(
+            event = PaymentSheetEvent.LoadSucceeded(
                 paymentSelection = paymentSelection,
                 duration = duration,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                linkMode = linkMode,
-                linkDisabledReasons = linkDisabledReasons,
-                linkSignupDisabledReasons = linkSignupDisabledReasons,
-                googlePaySupported = googlePaySupported,
-                linkDisplay = linkDisplay,
-                initializationMode = initializationMode,
-                orderedLpms = orderedLpms,
-                requireCvcRecollection = requireCvcRecollection,
-                hasDefaultPaymentMethod = hasDefaultPaymentMethod,
-                financialConnectionsAvailability = financialConnectionsAvailability,
-                setAsDefaultEnabled = setAsDefaultEnabled,
-                paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupFutureUsage,
-                setupFutureUsage = setupFutureUsage,
-            )
+                orderedLpms = paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code }
+            ),
+            paymentMethodMetadata = paymentMethodMetadata,
         )
     }
 
@@ -170,38 +94,25 @@ internal class DefaultEventReporter @Inject internal constructor(
     ) {
         val duration = durationProvider.end(DurationProvider.Key.Loading)
         fireEvent(
-            PaymentSheetEvent.LoadFailed(
+            event = PaymentSheetEvent.LoadFailed(
                 duration = duration,
                 error = error,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-            )
+            ),
+            paymentMethodMetadata = null, // We don't have these details until load is completed successfully.
         )
     }
 
     override fun onElementsSessionLoadFailed(error: Throwable) {
         fireEvent(
-            PaymentSheetEvent.ElementsSessionLoadFailed(
+            event = PaymentSheetEvent.ElementsSessionLoadFailed(
                 error = error,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-            )
+            ),
+            paymentMethodMetadata = null, // We don't have these details until load is completed successfully.
         )
     }
 
     override fun onDismiss() {
-        fireEvent(
-            PaymentSheetEvent.Dismiss(
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-            )
-        )
+        fireEvent(PaymentSheetEvent.Dismiss())
     }
 
     override fun onShowExistingPaymentOptions() {
@@ -209,11 +120,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.ShowExistingPaymentOptions(
                 mode = mode,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-                currency = currency,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
             )
         )
     }
@@ -222,11 +128,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.ShowManagePaymentMethods(
                 mode = mode,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-                currency = currency,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
             )
         )
     }
@@ -236,11 +137,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.ShowNewPaymentOptions(
                 mode = mode,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-                currency = currency,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
             )
         )
     }
@@ -252,13 +148,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.SelectPaymentMethod(
                 code = code,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                currency = currency,
-                linkEnabled = linkEnabled,
                 linkContext = determineLinkContextForPaymentMethodType(code),
-                financialConnectionsAvailability = financialConnectionsAvailability,
-                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -269,11 +159,6 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.RemovePaymentOption(
                 mode = mode,
                 code = code,
-                currency = currency,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -285,10 +170,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.ShowPaymentOptionForm(
                 code = code,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -298,10 +179,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.PaymentOptionFormInteraction(
                 code = code,
-                isDeferred = isDeferred,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-                isSpt = isSpt,
             )
         )
     }
@@ -315,23 +192,12 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.PaymentMethodFormCompleted(
                 code = code,
-                isDeferred = isDeferred,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-                isSpt = isSpt,
             )
         )
     }
 
     override fun onCardNumberCompleted() {
-        fireEvent(
-            PaymentSheetEvent.CardNumberCompleted(
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-            )
-        )
+        fireEvent(PaymentSheetEvent.CardNumberCompleted())
     }
 
     override fun onSelectPaymentOption(
@@ -344,11 +210,6 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.SelectPaymentOption(
                 mode = mode,
                 paymentSelection = paymentSelection,
-                currency = currency,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -357,10 +218,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.CardBrandDisallowed(
                 cardBrand = brand,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -371,15 +228,9 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireAnalyticEvent(AnalyticEvent.TappedConfirmButton(paymentSelection.code()))
         fireEvent(
             PaymentSheetEvent.PressConfirmButton(
-                currency = currency,
                 duration = duration,
                 selectedLpm = paymentSelection.code(),
                 linkContext = paymentSelection.linkContext(),
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-                financialConnectionsAvailability = financialConnectionsAvailability,
             )
         )
     }
@@ -387,6 +238,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onPaymentSuccess(
         paymentSelection: PaymentSelection,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        intentId: String?,
     ) {
         // Wallets are treated as a saved payment method after confirmation, so we need
         // to "reset" to the correct PaymentSelection for accurate reporting.
@@ -395,22 +247,14 @@ internal class DefaultEventReporter @Inject internal constructor(
         val realSelection = savedSelection?.walletType?.paymentSelection ?: paymentSelection
         val duration = durationProvider.end(DurationProvider.Key.Checkout)
 
-        val isConfirmationToken = paymentMethodMetadataProvider.get()?.integrationMetadata is
-            IntegrationMetadata.DeferredIntentWithConfirmationToken
-
         fireEvent(
             PaymentSheetEvent.Payment(
                 mode = mode,
                 paymentSelection = realSelection,
                 duration = duration,
                 result = PaymentSheetEvent.Payment.Result.Success,
-                currency = currency,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-                isConfirmationToken = isConfirmationToken,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
+                intentId = intentId,
             )
         )
     }
@@ -421,35 +265,24 @@ internal class DefaultEventReporter @Inject internal constructor(
     ) {
         val duration = durationProvider.end(DurationProvider.Key.Checkout)
 
-        val isConfirmationToken = paymentMethodMetadataProvider.get()?.integrationMetadata is
-            IntegrationMetadata.DeferredIntentWithConfirmationToken
-
         fireEvent(
             PaymentSheetEvent.Payment(
                 mode = mode,
                 paymentSelection = paymentSelection,
                 duration = duration,
                 result = PaymentSheetEvent.Payment.Result.Failure(error),
-                currency = currency,
-                isDeferred = isDeferred,
-                isConfirmationToken = isConfirmationToken,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
                 deferredIntentConfirmationType = null,
+                intentId = null,
             )
         )
     }
 
     override fun onLpmSpecFailure(errorMessage: String?) {
         fireEvent(
-            PaymentSheetEvent.LpmSerializeFailureEvent(
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
+            event = PaymentSheetEvent.LpmSerializeFailureEvent(
                 errorMessage = errorMessage
-            )
+            ),
+            paymentMethodMetadata = null, // We don't have these details until load is completed successfully.
         )
     }
 
@@ -459,34 +292,16 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.AutofillEvent(
                 type = type,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
             )
         )
     }
 
     override fun onShowEditablePaymentOption() {
-        fireEvent(
-            PaymentSheetEvent.ShowEditablePaymentOption(
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-            )
-        )
+        fireEvent(PaymentSheetEvent.ShowEditablePaymentOption())
     }
 
     override fun onHideEditablePaymentOption() {
-        fireEvent(
-            PaymentSheetEvent.HideEditablePaymentOption(
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-            )
-        )
+        fireEvent(PaymentSheetEvent.HideEditablePaymentOption())
     }
 
     override fun onBrandChoiceSelected(source: EventReporter.CardBrandChoiceEventSource, selectedBrand: CardBrand) {
@@ -501,10 +316,6 @@ internal class DefaultEventReporter @Inject internal constructor(
                     }
                 },
                 selectedBrand = selectedBrand,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported
             )
         )
     }
@@ -515,10 +326,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.UpdatePaymentOptionSucceeded(
                 selectedBrand = selectedBrand,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -531,10 +338,6 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.UpdatePaymentOptionFailed(
                 selectedBrand = selectedBrand,
                 error = error,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -544,10 +347,6 @@ internal class DefaultEventReporter @Inject internal constructor(
     ) {
         fireEvent(
             PaymentSheetEvent.SetAsDefaultPaymentMethodSucceeded(
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
                 paymentMethodType = paymentMethodType,
             )
         )
@@ -559,10 +358,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireV2Event(
             PaymentSheetEvent.ExperimentExposure(
                 experiment = experiment,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -574,10 +369,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.SetAsDefaultPaymentMethodFailed(
                 error = error,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
                 paymentMethodType = paymentMethodType,
             )
         )
@@ -589,21 +380,10 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onUsBankAccountFormEvent(event: USBankAccountFormViewModel.AnalyticsEvent) {
         val analyticsEvent = when (event) {
-            is USBankAccountFormViewModel.AnalyticsEvent.Started -> BankAccountCollectorStarted(
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-                financialConnectionsAvailability = financialConnectionsAvailability
-            )
+            is USBankAccountFormViewModel.AnalyticsEvent.Started -> BankAccountCollectorStarted()
 
             is USBankAccountFormViewModel.AnalyticsEvent.Finished -> BankAccountCollectorFinished(
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
                 event = event,
-                financialConnectionsAvailability = financialConnectionsAvailability,
             )
         }
         fireEvent(analyticsEvent)
@@ -613,6 +393,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         visiblePaymentMethods: List<String>,
         hiddenPaymentMethods: List<String>,
         walletsState: WalletsState?,
+        isVerticalLayout: Boolean,
     ) {
         val isGooglePayVisible = walletsState?.googlePay(WalletLocation.HEADER) != null &&
             walletsState.buttonsEnabled
@@ -629,10 +410,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.InitialDisplayedPaymentMethods(
                 visiblePaymentMethods = visiblePaymentMethodsWithWallets,
                 hiddenPaymentMethods = hiddenPaymentMethods,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
+                isVerticalLayout = isVerticalLayout,
             )
         )
     }
@@ -642,41 +420,23 @@ internal class DefaultEventReporter @Inject internal constructor(
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = emptyMap(),
+                    additionalParams = defaultParams(paymentMethodMetadataProvider.get()),
                 )
             )
         }
     }
 
     override fun onShopPayWebViewLoadAttempt() {
-        fireEvent(
-            PaymentSheetEvent.ShopPayWebviewLoadAttempt(
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-            )
-        )
+        fireEvent(PaymentSheetEvent.ShopPayWebviewLoadAttempt())
     }
 
     override fun onShopPayWebViewConfirmSuccess() {
-        fireEvent(
-            PaymentSheetEvent.ShopPayWebviewConfirmSuccess(
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-            )
-        )
+        fireEvent(PaymentSheetEvent.ShopPayWebviewConfirmSuccess())
     }
 
     override fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean) {
         fireEvent(
             PaymentSheetEvent.ShopPayWebviewCancelled(
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
                 didReceiveECEClick = didReceiveECEClick,
             )
         )
@@ -687,10 +447,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.CardScanStarted(
                 implementation = implementation,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -701,10 +457,6 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.CardScanSucceeded(
                 implementation = implementation,
                 duration = duration,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -716,10 +468,6 @@ internal class DefaultEventReporter @Inject internal constructor(
                 implementation = implementation,
                 duration = duration,
                 error = error,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -732,10 +480,6 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.CardScanCancelled(
                 implementation = implementation,
                 duration = duration,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -744,10 +488,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.CardScanApiCheckSucceeded(
                 implementation = implementation,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -757,20 +497,26 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.CardScanApiCheckFailed(
                 implementation = implementation,
                 error = error,
-                isDeferred = isDeferred,
-                isSpt = isSpt,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
             )
         )
+        error?.message?.let {
+            logger.logWarningWithoutPii("Card scan check failed: $it")
+        }
     }
 
-    private fun fireEvent(event: PaymentSheetEvent) {
+    private fun defaultParams(paymentMethodMetadata: PaymentMethodMetadata?): Map<String, Any> {
+        return paymentMethodMetadata?.analyticsMetadata?.paramsMap ?: emptyMap()
+    }
+
+    private fun fireEvent(
+        event: PaymentSheetEvent,
+        paymentMethodMetadata: PaymentMethodMetadata? = paymentMethodMetadataProvider.get(),
+    ) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = event.params,
+                    additionalParams = defaultParams(paymentMethodMetadata) + event.params,
                 )
             )
         }
@@ -778,10 +524,11 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     private fun fireV2Event(event: PaymentSheetEvent) {
         CoroutineScope(workContext).launch {
+            val paymentMethodMetadata = paymentMethodMetadataProvider.get()
             analyticsRequestV2Executor.enqueue(
                 analyticsRequestV2Factory.createRequest(
                     eventName = event.eventName,
-                    additionalParams = event.params,
+                    additionalParams = defaultParams(paymentMethodMetadata) + event.params,
                 )
             )
         }
@@ -803,7 +550,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     private fun determineLinkContextForPaymentMethodType(code: String): String? {
         return if (code == "link") {
-            if (linkMode == LinkMode.LinkCardBrand) {
+            if (paymentMethodMetadataProvider.get()?.linkMode == LinkMode.LinkCardBrand) {
                 "link_card_brand"
             } else {
                 "instant_debits"
@@ -820,17 +567,4 @@ internal class DefaultEventReporter @Inject internal constructor(
         @Volatile
         var analyticEventCoroutineContext: CoroutineContext? = null
     }
-}
-
-private fun IntegrationMetadata.isSpt(): Boolean {
-    return this is IntegrationMetadata.DeferredIntentWithSharedPaymentToken
-}
-
-private fun IntegrationMetadata.isDeferred(): Boolean = when (this) {
-    is IntegrationMetadata.IntentFirst -> false
-    IntegrationMetadata.CryptoOnramp -> true
-    IntegrationMetadata.CustomerSheet -> true
-    is IntegrationMetadata.DeferredIntentWithConfirmationToken -> true
-    is IntegrationMetadata.DeferredIntentWithPaymentMethod -> true
-    is IntegrationMetadata.DeferredIntentWithSharedPaymentToken -> true
 }

@@ -19,6 +19,7 @@ import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
@@ -52,6 +53,7 @@ internal interface FlowControllerStateComponent {
     val confirmationHandler: ConfirmationHandler
     val linkHandler: LinkHandler
     val errorReporter: ErrorReporter
+    val eventReporter: EventReporter
     val walletButtonsContent: WalletButtonsContent
     val linkInlineInteractor: DefaultLinkInlineInteractor
     val linkAccountHolder: LinkAccountHolder

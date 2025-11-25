@@ -67,18 +67,19 @@ class CustomPaymentMethodsAnalyticsTest {
             response.testBodyFromFile("elements-sessions-cpms.json")
         }
 
+        validateAnalyticsRequest(eventName = "mc_complete_init")
+        validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(
-            eventName = "mc_complete_init_default",
+            eventName = "mc_load_succeeded",
             query(urlEncode("mpe_config[custom_payment_methods]"), "cpmt_123")
         )
-        validateAnalyticsRequest(eventName = "mc_load_started")
-        validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_form_shown")
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", ""),
-            query("visible_payment_methods", Uri.encode("cpmt_123,card"))
+            query("visible_payment_methods", Uri.encode("cpmt_123,card")),
+            query("payment_method_layout", "horizontal"),
         )
 
         context.presentPaymentSheet {

@@ -11,8 +11,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.ConfirmationTokenSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSaveSettingsDefinition
@@ -98,7 +98,7 @@ internal class TestConfirmationToken : BasePlaygroundTest() {
     @Test
     fun testBankAccountWithConfirmationTokenInCustomFlow_withCSC() {
         val testParameters = createConfirmationTokenParams("us_bank_account") { settings ->
-            settings[CountrySettingsDefinition] = Country.US
+            settings[MerchantSettingsDefinition] = Merchant.US
             settings[CurrencySettingsDefinition] = Currency.USD
             settings[DelayedPaymentMethodsSettingsDefinition] = true
             settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
@@ -113,7 +113,7 @@ internal class TestConfirmationToken : BasePlaygroundTest() {
     @Test
     fun testCashAppWithConfirmationTokenInEmbedded_withSSC_andSFU() {
         val testParameters = createConfirmationTokenParams("cashapp") { settings ->
-            settings[CountrySettingsDefinition] = Country.US
+            settings[MerchantSettingsDefinition] = Merchant.US
             settings[CurrencySettingsDefinition] = Currency.USD
             settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
             settings[SupportedPaymentMethodsSettingsDefinition] = listOf(

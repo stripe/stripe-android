@@ -5,8 +5,8 @@ import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
@@ -20,7 +20,7 @@ internal class TestAuBecsDD : BasePlaygroundTest() {
         paymentMethodCode = "au_becs_debit",
     ) { settings ->
         settings[DelayedPaymentMethodsSettingsDefinition] = true
-        settings[CountrySettingsDefinition] = Country.AU
+        settings[MerchantSettingsDefinition] = Merchant.AU
         settings[CurrencySettingsDefinition] = Currency.AUD
     }.copy(
         authorizationAction = null,

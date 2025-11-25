@@ -191,6 +191,7 @@ internal class DefaultFlowControllerTest {
             .onPaymentSuccess(
                 paymentSelection = isA<PaymentSelection.New>(),
                 deferredIntentConfirmationType = isNull(),
+                intentId = isNull(),
             )
     }
 
@@ -1738,6 +1739,24 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `Returns failure if attempting to confirm before configuring`() = runTest {
+        val mockLoader = RelayingPaymentElementLoader()
+        val flowController = createFlowController(paymentElementLoader = mockLoader)
+
+        flowController.confirm()
+
+        val expectedError = "FlowController must be successfully initialized " +
+            "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
+            "configureWithIntentConfiguration() before calling confirm()."
+
+        val argumentCaptor = argumentCaptor<PaymentSheetResult>()
+        verify(paymentResultCallback).onPaymentSheetResult(argumentCaptor.capture())
+
+        val result = argumentCaptor.firstValue as? PaymentSheetResult.Failed
+        assertThat(result?.error?.message).isEqualTo(expectedError)
+    }
+
+    @Test
     fun `Returns failure if attempting to confirm if last configure call has failed`() = runTest {
         val mockLoader = RelayingPaymentElementLoader()
         val flowController = createFlowController(paymentElementLoader = mockLoader)
@@ -1850,6 +1869,7 @@ internal class DefaultFlowControllerTest {
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
             deferredIntentConfirmationType = isNull(),
+            intentId = any(),
         )
     }
 
@@ -1880,6 +1900,7 @@ internal class DefaultFlowControllerTest {
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Client),
+                intentId = any(),
             )
         }
 
@@ -1910,6 +1931,7 @@ internal class DefaultFlowControllerTest {
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Server),
+                intentId = any(),
             )
         }
 
@@ -2379,7 +2401,6 @@ internal class DefaultFlowControllerTest {
             configurationHandler = FlowControllerConfigurationHandler(
                 paymentElementLoader = paymentElementLoader,
                 uiContext = testDispatcher,
-                eventReporter = eventReporter,
                 viewModel = viewModel,
                 paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
                 confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),

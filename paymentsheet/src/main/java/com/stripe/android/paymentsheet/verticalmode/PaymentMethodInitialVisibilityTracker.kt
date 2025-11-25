@@ -52,6 +52,10 @@ internal class PaymentMethodInitialVisibilityTracker(
         }
     }
 
+    fun getHasDispatched(): Boolean {
+        return this.hasDispatched
+    }
+
     /**
      * When this function is called from onGloballyPositioned
      * it is guaranteed to be called twice on any given stable coordinate
@@ -191,9 +195,9 @@ internal class PaymentMethodInitialVisibilityTracker(
 
         /**
          * Debounce delay after UI stabilizes before dispatching analytics event.
-         * 800ms allows bottom sheet animations and layout settling to complete
+         * 50ms allows bottom sheet animations and layout settling to complete
          * before capturing final visibility state.
          */
-        private const val DEFAULT_DEBOUNCE_DELAY_MS = 800L
+        private const val DEFAULT_DEBOUNCE_DELAY_MS = 50L
     }
 }

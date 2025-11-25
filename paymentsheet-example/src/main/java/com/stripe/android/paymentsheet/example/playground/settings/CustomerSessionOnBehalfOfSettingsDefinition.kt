@@ -43,7 +43,7 @@ internal object CustomerSessionOnBehalfOfSettingsDefinition :
                 playgroundSettings[CustomerSessionSettingsDefinition] = true
 
                 // Only the US platform account is configured with connected accounts
-                playgroundSettings[CountrySettingsDefinition] = Country.US
+                playgroundSettings[MerchantSettingsDefinition] = Merchant.US
                 // You will not see CartesBancaires if the currency is not Euros
                 if (value == OnBehalfOf.FR_CONNECTED_ACCOUNT) {
                     playgroundSettings[CurrencySettingsDefinition] = Currency.EUR

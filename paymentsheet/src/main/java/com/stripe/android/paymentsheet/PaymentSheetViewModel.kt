@@ -34,8 +34,6 @@ import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
-import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -220,15 +218,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
-        val isDeferred = args.initializationMode is PaymentElementLoader.InitializationMode.DeferredIntent
-
-        eventReporter.onInit(
-            commonConfiguration = config.asCommonConfiguration(),
-            primaryButtonColor = config.primaryButtonColorUsage(),
-            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
-            isDeferred = isDeferred,
-            appearance = config.appearance
-        )
+        eventReporter.onInit()
 
         viewModelScope.launch(workContext) {
             loadPaymentSheetState()
@@ -239,7 +229,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         val result = withContext(workContext) {
             paymentElementLoader.load(
                 initializationMode = args.initializationMode,
-                configuration = args.config.asCommonConfiguration(),
+                integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(args.config),
                 metadata = PaymentElementLoader.Metadata(
                     isReloadingAfterProcessDeath = confirmationHandler.hasReloadedFromProcessDeath,
                     initializedViaCompose = args.initializedViaCompose,
@@ -267,6 +257,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             handlePaymentCompleted(
                 deferredIntentConfirmationType = pendingResult.deferredIntentConfirmationType,
                 finishImmediately = true,
+                intentId = pendingResult.intent.id,
             )
         } else if (state.validationError != null) {
             handlePaymentSheetStateLoadFailure(state.validationError)
@@ -563,12 +554,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun handlePaymentCompleted(
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         finishImmediately: Boolean,
+        intentId: String?,
     ) {
         val currentSelection = inProgressSelection
         currentSelection?.let { paymentSelection ->
             eventReporter.onPaymentSuccess(
                 paymentSelection = paymentSelection,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
+                intentId = intentId,
             )
         }
 
@@ -593,6 +586,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is ConfirmationHandler.Result.Succeeded -> handlePaymentCompleted(
                 deferredIntentConfirmationType = result.deferredIntentConfirmationType,
                 finishImmediately = false,
+                intentId = result.intent.id,
             )
             is ConfirmationHandler.Result.Failed -> processConfirmationFailure(result)
             is ConfirmationHandler.Result.Canceled,

@@ -128,6 +128,7 @@ internal class DefaultAddPaymentMethodInteractor(
                         hiddenPaymentMethods = hiddenPaymentMethods,
                         // Flow Controller does not show wallet header in AddPaymentMethod
                         walletsState = viewModel.walletsState.value?.takeIf { viewModel.isCompleteFlow },
+                        isVerticalLayout = false,
                     )
                 }
             )

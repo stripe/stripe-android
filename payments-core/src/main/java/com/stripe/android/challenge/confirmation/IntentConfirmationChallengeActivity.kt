@@ -73,7 +73,7 @@ internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
     companion object {
         internal const val EXTRA_ARGS = "intent_confirmation_challenge_args"
         internal const val RESULT_COMPLETE = 4639
-        internal const val HOST_URL = "http://10.0.2.2:3004"
+        internal const val HOST_URL = "https://b.stripecdn.com/mobile-confirmation-challenge/assets/index.html?v=1"
 
         internal fun createIntent(
             context: Context,

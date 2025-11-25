@@ -2,20 +2,13 @@ package com.stripe.android.paymentsheet.analytics
 
 import androidx.annotation.Keep
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
-import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.LinkDisabledReason
-import com.stripe.android.model.LinkMode
-import com.stripe.android.model.LinkSignupDisabledReason
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
 
@@ -31,21 +24,7 @@ internal interface LoadingEventReporter {
      */
     fun onLoadSucceeded(
         paymentSelection: PaymentSelection?,
-        linkEnabled: Boolean,
-        linkMode: LinkMode?,
-        linkDisabledReasons: List<LinkDisabledReason>?,
-        linkSignupDisabledReasons: List<LinkSignupDisabledReason>?,
-        googlePaySupported: Boolean,
-        linkDisplay: PaymentSheet.LinkConfiguration.Display,
-        currency: String?,
-        initializationMode: PaymentElementLoader.InitializationMode,
-        financialConnectionsAvailability: FinancialConnectionsAvailability?,
-        orderedLpms: List<String>,
-        requireCvcRecollection: Boolean,
-        hasDefaultPaymentMethod: Boolean?,
-        setAsDefaultEnabled: Boolean?,
-        paymentMethodOptionsSetupFutureUsage: Boolean,
-        setupFutureUsage: StripeIntent.Usage?,
+        paymentMethodMetadata: PaymentMethodMetadata,
     )
 
     /**
@@ -70,13 +49,7 @@ internal interface EventReporter : CardScanEventsReporter {
     /**
      * PaymentSheet has been instantiated or FlowController has finished its configuration.
      */
-    fun onInit(
-        commonConfiguration: CommonConfiguration,
-        appearance: PaymentSheet.Appearance,
-        primaryButtonColor: Boolean?,
-        configurationSpecificPayload: PaymentSheetEvent.ConfigurationSpecificPayload,
-        isDeferred: Boolean,
-    )
+    fun onInit()
 
     /**
      * PaymentSheet has been dismissed by pressing the close button.
@@ -153,6 +126,7 @@ internal interface EventReporter : CardScanEventsReporter {
     fun onPaymentSuccess(
         paymentSelection: PaymentSelection,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        intentId: String?,
     )
 
     /**
@@ -252,6 +226,7 @@ internal interface EventReporter : CardScanEventsReporter {
         visiblePaymentMethods: List<String>,
         hiddenPaymentMethods: List<String>,
         walletsState: WalletsState?,
+        isVerticalLayout: Boolean,
     )
 
     /**
