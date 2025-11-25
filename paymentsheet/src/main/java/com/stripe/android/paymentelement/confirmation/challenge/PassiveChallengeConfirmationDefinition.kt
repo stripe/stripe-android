@@ -26,15 +26,15 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : ConfirmationDefinition<
-    PaymentMethodConfirmationOption,
+    PaymentMethodConfirmationOption.New,
     ActivityResultLauncher<PassiveChallengeActivityContract.Args>,
     PassiveChallengeActivityContract.Args,
     PassiveChallengeActivityResult
     > {
     override val key = "ChallengePassive"
 
-    override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption? {
-        return confirmationOption as? PaymentMethodConfirmationOption
+    override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption.New? {
+        return confirmationOption as? PaymentMethodConfirmationOption.New
     }
 
     override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
@@ -47,7 +47,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     }
 
     override fun canConfirm(
-        confirmationOption: PaymentMethodConfirmationOption,
+        confirmationOption: PaymentMethodConfirmationOption.New,
         confirmationArgs: ConfirmationHandler.Args
     ): Boolean {
         return confirmationArgs.paymentMethodMetadata.passiveCaptchaParams != null &&
@@ -56,7 +56,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     }
 
     override fun toResult(
-        confirmationOption: PaymentMethodConfirmationOption,
+        confirmationOption: PaymentMethodConfirmationOption.New,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: PassiveChallengeActivityResult
@@ -88,14 +88,14 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     override fun launch(
         launcher: ActivityResultLauncher<PassiveChallengeActivityContract.Args>,
         arguments: PassiveChallengeActivityContract.Args,
-        confirmationOption: PaymentMethodConfirmationOption,
+        confirmationOption: PaymentMethodConfirmationOption.New,
         confirmationArgs: ConfirmationHandler.Args
     ) {
         launcher.launch(arguments)
     }
 
     override suspend fun action(
-        confirmationOption: PaymentMethodConfirmationOption,
+        confirmationOption: PaymentMethodConfirmationOption.New,
         confirmationArgs: ConfirmationHandler.Args
     ): ConfirmationDefinition.Action<PassiveChallengeActivityContract.Args> {
         val passiveCaptchaParams = confirmationArgs.paymentMethodMetadata.passiveCaptchaParams
@@ -124,28 +124,18 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         )
     }
 
-    private fun PaymentMethodConfirmationOption.attachToken(token: String?): PaymentMethodConfirmationOption {
-        return when (this) {
-            is PaymentMethodConfirmationOption.New -> {
-                copy(
-                    createParams = createParams.copy(
-                        radarOptions = token?.let {
-                            RadarOptions(
-                                hCaptchaToken = it,
-                                androidVerificationObject = null
-                            )
-                        }
-                    ),
-                    passiveChallengeComplete = true,
-                )
-            }
-            is PaymentMethodConfirmationOption.Saved -> {
-                copy(
-                    hCaptchaToken = token,
-                    passiveChallengeComplete = true,
-                )
-            }
-        }
+    private fun PaymentMethodConfirmationOption.New.attachToken(token: String?): PaymentMethodConfirmationOption {
+        return copy(
+            createParams = createParams.copy(
+                radarOptions = token?.let {
+                    RadarOptions(
+                        hCaptchaToken = it,
+                        androidVerificationObject = null
+                    )
+                }
+            ),
+            passiveChallengeComplete = true,
+        )
     }
 
     override fun unregister(launcher: ActivityResultLauncher<PassiveChallengeActivityContract.Args>) {
