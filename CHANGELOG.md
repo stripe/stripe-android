@@ -2,8 +2,12 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### All SDKs
+* [CHANGED][12036](https://github.com/stripe/stripe-android/pull/12036) Updates the minSDK version to 24
+
 ### PaymentSheet
 * [Added][12011](https://github.com/stripe/stripe-android/pull/12011) Builder APIs for PaymentSheet appearance customization (Colors, Shapes, Typography, PrimaryButtonColors, and embedded row styles)
+* [CHANGED][12036](https://github.com/stripe/stripe-android/pull/12036) Updates the google places SDK from 3.5.0 to 5.1.1
 
 ### Payments
 * [Added][12014](https://github.com/stripe/stripe-android/pull/12014) `ConfirmationToken.PaymentMethodPreview` now includes structured `Card` field with detailed card information (brand, country, expiry, funding, last4, etc.)
