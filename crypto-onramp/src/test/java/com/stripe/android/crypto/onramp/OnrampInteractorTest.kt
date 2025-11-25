@@ -10,6 +10,7 @@ import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
 import com.stripe.android.crypto.onramp.model.KycInfo
+import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
@@ -393,6 +394,33 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampRegisterWalletAddressResult.Failed::class.java)
         val failed = result as OnrampRegisterWalletAddressResult.Failed
         assertThat(failed.error).isInstanceOf(MissingConsumerSecretException::class.java)
+    }
+
+    @Test
+    fun testStartKycVerificationIsSuccessful() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+
+        val response = KycRetrieveResponse(
+            firstName = "Test",
+            lastName = "User",
+            idNumberLastFour = "7777",
+            idType = "SOCIAL_SECURITY_NUMBER",
+            dateOfBirth = DateOfBirth(1, 1, 1990),
+            address = PaymentSheet.Address(city = "City")
+        )
+
+        whenever(
+            cryptoApiRepository.retrieveKycInfo(
+                consumerSessionClientSecret = any()
+            )
+        ).thenReturn(Result.success(response))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.startKycVerification(null)
+        assert(result is OnrampStartKycVerificationResult.Completed)
+
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.KycVerificationStarted)
     }
 
     @Test
