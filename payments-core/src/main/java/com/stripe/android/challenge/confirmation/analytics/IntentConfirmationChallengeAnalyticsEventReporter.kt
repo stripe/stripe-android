@@ -6,7 +6,6 @@ internal interface IntentConfirmationChallengeAnalyticsEventReporter {
     fun success()
 
     fun error(
-        error: Throwable?,
         errorType: String?,
         errorCode: String?,
         fromBridge: Boolean

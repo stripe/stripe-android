@@ -146,7 +146,7 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
             val event = awaitItem()
             assertThat(event).isInstanceOf(ConfirmationChallengeBridgeEvent.Error::class.java)
             val errorEvent = event as ConfirmationChallengeBridgeEvent.Error
-            assertThat(errorEvent.cause).isInstanceOf(BridgeError::class.java)
+            assertThat(errorEvent.cause).isInstanceOf(BridgeException::class.java)
             assertThat(errorEvent.cause.message).isEqualTo("Payment declined")
         }
     }

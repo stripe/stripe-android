@@ -81,7 +81,7 @@ internal class IntentConfirmationChallengeViewModelTest {
         val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
         val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
         val viewModel = createViewModel(fakeBridgeHandler, fakeAnalyticsReporter)
-        val expectedError = IOException("Network error")
+        val expectedError = BridgeException(IOException("Network error"))
 
         viewModel.result.test {
             fakeBridgeHandler.emitEvent(
@@ -100,7 +100,6 @@ internal class IntentConfirmationChallengeViewModelTest {
         assertThat(fakeAnalyticsReporter.calls).hasSize(1)
         val errorCall =
             fakeAnalyticsReporter.calls.last() as FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Error
-        assertThat(errorCall.error).isEqualTo(expectedError)
         assertThat(errorCall.errorType).isNull()
         assertThat(errorCall.errorCode).isNull()
         assertThat(errorCall.fromBridge).isTrue()
@@ -134,7 +133,6 @@ internal class IntentConfirmationChallengeViewModelTest {
         assertThat(fakeAnalyticsReporter.calls).hasSize(1)
         val errorCall =
             fakeAnalyticsReporter.calls.last() as FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Error
-        assertThat(errorCall.error).isEqualTo(webViewError)
         assertThat(errorCall.errorType).isEqualTo("generic_resource_error")
         assertThat(errorCall.errorCode).isEqualTo("-2")
         assertThat(errorCall.fromBridge).isFalse()

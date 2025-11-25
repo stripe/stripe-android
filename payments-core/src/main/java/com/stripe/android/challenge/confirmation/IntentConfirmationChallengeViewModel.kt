@@ -47,7 +47,6 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
 
     fun handleWebViewError(error: WebViewError) {
         analyticsEventReporter.error(
-            error = error,
             errorType = error.webViewErrorType,
             errorCode = error.errorCode.toString(),
             fromBridge = false,
@@ -74,9 +73,8 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
                 }
                 is ConfirmationChallengeBridgeEvent.Error -> {
                     analyticsEventReporter.error(
-                        error = event.cause,
-                        errorType = null,
-                        errorCode = null,
+                        errorType = event.cause.type,
+                        errorCode = event.cause.code,
                         fromBridge = true
                     )
                     _result.emit(

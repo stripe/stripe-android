@@ -18,7 +18,6 @@ internal sealed interface IntentConfirmationChallengeAnalyticsEvent : AnalyticsE
     }
 
     class Error(
-        val error: Throwable?,
         val duration: Float,
         val errorType: String?,
         val errorCode: String?,
