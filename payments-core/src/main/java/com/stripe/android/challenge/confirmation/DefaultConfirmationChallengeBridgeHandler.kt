@@ -70,20 +70,14 @@ internal class DefaultConfirmationChallengeBridgeHandler @Inject constructor(
                 type = errorParams?.type,
                 code = errorParams?.code
             )
-            _event.tryEmit(
-                ConfirmationChallengeBridgeEvent.Error(
-                    cause = bridgeError
-                )
-            )
+            _event.tryEmit(ConfirmationChallengeBridgeEvent.Error(bridgeError))
         }.onFailure { error ->
             errorReporter.report(
                 UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_ERROR_CALLBACK_PARAMS,
                 stripeException = StripeException.create(error)
             )
             _event.tryEmit(
-                ConfirmationChallengeBridgeEvent.Error(
-                    cause = error
-                )
+                ConfirmationChallengeBridgeEvent.Error(error)
             )
         }
     }
