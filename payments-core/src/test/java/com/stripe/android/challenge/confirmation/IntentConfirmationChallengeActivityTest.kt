@@ -120,7 +120,7 @@ internal class IntentConfirmationChallengeActivityTest {
         val error = BridgeException(RuntimeException("Confirmation challenge failed"))
         val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
             .apply {
-                emitEvent(ConfirmationChallengeBridgeEvent.Error(cause = error))
+                emitEvent(ConfirmationChallengeBridgeEvent.Error(error = error))
             }
 
         val scenario = launchActivityWithBridgeHandler(bridgeHandler)
