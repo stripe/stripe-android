@@ -98,7 +98,6 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventsReporterTest {
         assertThat(loggedParams).containsEntry("event", "elements.intent_confirmation_challenge.web_view_loaded")
         assertThat(loggedParams).containsEntry("duration", 8f)
     }
-    
     private fun runScenario(
         durationProvider: DurationProvider = DefaultDurationProvider.instance,
         testBlock: (DefaultIntentConfirmationChallengeAnalyticsEventReporter, FakeAnalyticsRequestExecutor) -> Unit

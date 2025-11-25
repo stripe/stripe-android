@@ -7,7 +7,7 @@ internal class BridgeException(
     override val cause: Throwable? = null,
 ) : Throwable() {
     constructor(cause: Throwable?) : this(
-        message = null,
+        message = cause?.message,
         type = null,
         code = null,
         cause = cause

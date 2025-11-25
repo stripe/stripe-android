@@ -85,7 +85,7 @@ internal class IntentConfirmationChallengeViewModelTest {
 
         viewModel.result.test {
             fakeBridgeHandler.emitEvent(
-                ConfirmationChallengeBridgeEvent.Error(cause = expectedError)
+                ConfirmationChallengeBridgeEvent.Error(error = expectedError)
             )
 
             val result = awaitItem()

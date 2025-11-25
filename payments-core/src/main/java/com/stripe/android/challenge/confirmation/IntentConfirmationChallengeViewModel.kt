@@ -73,13 +73,13 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
                 }
                 is ConfirmationChallengeBridgeEvent.Error -> {
                     analyticsEventReporter.error(
-                        errorType = event.cause.type,
-                        errorCode = event.cause.code,
+                        errorType = event.error.type,
+                        errorCode = event.error.code,
                         fromBridge = true
                     )
                     _result.emit(
                         IntentConfirmationChallengeActivityResult.Failed(
-                            error = event.cause
+                            error = event.error
                         )
                     )
                 }
