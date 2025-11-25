@@ -14,7 +14,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentelement.confirmation.isCard
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import javax.inject.Inject
@@ -51,7 +50,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         confirmationArgs: ConfirmationHandler.Args
     ): Boolean {
         return confirmationArgs.paymentMethodMetadata.passiveCaptchaParams != null &&
-            confirmationOption.isCard() &&
+            confirmationOption.createParams.typeCode == "card" &&
             !confirmationOption.passiveChallengeComplete
     }
 

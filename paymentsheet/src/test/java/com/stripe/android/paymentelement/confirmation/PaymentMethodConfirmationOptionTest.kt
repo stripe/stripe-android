@@ -147,48 +147,4 @@ class PaymentMethodConfirmationOptionTest {
 
         assertThat(option.shouldSaveAsDefault()).isFalse()
     }
-
-    @Test
-    fun `isCard returns true for New option with card`() {
-        val option = PaymentMethodConfirmationOption.New(
-            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            optionsParams = null,
-            extraParams = null,
-            shouldSave = false,
-        )
-
-        assertThat(option.isCard()).isTrue()
-    }
-
-    @Test
-    fun `isCard returns false for New option without card`() {
-        val option = PaymentMethodConfirmationOption.New(
-            createParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
-            optionsParams = null,
-            extraParams = null,
-            shouldSave = false,
-        )
-
-        assertThat(option.isCard()).isFalse()
-    }
-
-    @Test
-    fun `isCard returns true for Saved option with card payment method`() {
-        val option = PaymentMethodConfirmationOption.Saved(
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            optionsParams = null,
-        )
-
-        assertThat(option.isCard()).isTrue()
-    }
-
-    @Test
-    fun `isCard returns false for Saved option with non-card payment method`() {
-        val option = PaymentMethodConfirmationOption.Saved(
-            paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT,
-            optionsParams = null,
-        )
-
-        assertThat(option.isCard()).isFalse()
-    }
 }

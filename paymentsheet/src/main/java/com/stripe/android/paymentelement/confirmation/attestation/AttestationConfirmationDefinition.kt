@@ -16,7 +16,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentelement.confirmation.isCard
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.attestation.IntegrityRequestManager
@@ -67,7 +66,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         confirmationOption: PaymentMethodConfirmationOption.New,
         confirmationArgs: ConfirmationHandler.Args
     ): Boolean {
-        return confirmationOption.isCard() &&
+        return confirmationOption.createParams.typeCode == "card" &&
             confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation &&
             confirmationOption.attestationComplete.not() &&
             confirmationOption.hasToken().not()

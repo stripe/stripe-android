@@ -12,7 +12,6 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
-import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
@@ -52,7 +51,6 @@ internal class ConfirmWithAttestationTest {
         ) { testContext ->
             setupNewPaymentMethodTest(testContext)
         }
-
 
     @Test
     fun paymentMethodCreation_withAttestationEnabled_includesAndroidVerificationObjectInCreateRequest() =

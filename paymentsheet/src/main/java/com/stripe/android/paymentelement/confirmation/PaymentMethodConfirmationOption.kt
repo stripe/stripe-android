@@ -74,10 +74,3 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         }
     }
 }
-
-internal fun PaymentMethodConfirmationOption.isCard(): Boolean {
-    return when (this) {
-        is PaymentMethodConfirmationOption.New -> createParams.card != null
-        is PaymentMethodConfirmationOption.Saved -> paymentMethod.type == PaymentMethod.Type.Card
-    }
-}
