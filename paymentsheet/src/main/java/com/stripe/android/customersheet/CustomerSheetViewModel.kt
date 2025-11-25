@@ -31,7 +31,6 @@ import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
 import com.stripe.android.customersheet.data.failureOrNull
-import com.stripe.android.customersheet.data.mapCatching
 import com.stripe.android.customersheet.data.onFailure
 import com.stripe.android.customersheet.data.onSuccess
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelScope
@@ -1009,44 +1008,14 @@ internal class CustomerSheetViewModel(
     private fun attachPaymentMethodToCustomer(paymentMethod: PaymentMethod) {
         viewModelScope.launch(workContext) {
             if (awaitIntentDataSource().canCreateSetupIntents) {
-                attachWithSetupIntent(paymentMethod = paymentMethod)
+                confirmSetupIntent(paymentMethod = paymentMethod)
             } else {
                 attachPaymentMethod(id = paymentMethod.id)
             }
         }
     }
 
-    private suspend fun attachWithSetupIntent(paymentMethod: PaymentMethod) {
-        awaitIntentDataSource().retrieveSetupIntentClientSecret()
-            .mapCatching { clientSecret ->
-                handleStripeIntent(clientSecret, paymentMethod)
-            }.onFailure { cause, displayMessage ->
-                eventReporter.onAttachPaymentMethodFailed(
-                    style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
-                )
-
-                logger.error(
-                    msg = "Failed to attach payment method to SetupIntent: $paymentMethod",
-                    t = cause,
-                )
-
-                withContext(viewModelScope.coroutineContext) {
-                    updateViewState<CustomerSheetViewState.AddPaymentMethod> {
-                        it.copy(
-                            errorMessage = displayMessage?.resolvableString ?: cause.stripeErrorMessage(),
-                            enabled = true,
-                            primaryButtonEnabled = it.formFieldValues != null && !it.isProcessing,
-                            isProcessing = false,
-                        )
-                    }
-                }
-            }
-    }
-
-    private suspend fun handleStripeIntent(
-        clientSecret: String,
-        paymentMethod: PaymentMethod
-    ) {
+    private suspend fun confirmSetupIntent(paymentMethod: PaymentMethod) {
         val metadata = requireNotNull(customerState.value.metadata)
         confirmationHandler.start(
             arguments = ConfirmationHandler.Args(
@@ -1055,7 +1024,7 @@ internal class CustomerSheetViewModel(
                     optionsParams = null,
                 ),
                 paymentMethodMetadata = metadata.copy(
-                    integrationMetadata = IntegrationMetadata.IntentFirst(clientSecret = clientSecret)
+                    integrationMetadata = IntegrationMetadata.CustomerSheet
                 ),
             )
         )

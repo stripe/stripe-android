@@ -8,7 +8,6 @@ import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.confirmation.injection.CustomerSheetConfirmationModule
-import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
@@ -18,7 +17,6 @@ import javax.inject.Named
 @CustomerSheetViewModelScope
 @Component(
     modules = [
-        DefaultConfirmationModule::class,
         CustomerSheetConfirmationModule::class,
         CustomerSheetViewModelModule::class,
         StripeRepositoryModule::class,
