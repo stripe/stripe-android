@@ -59,7 +59,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
             IntegrationMetadata.CustomerSheet -> {
                 // CustomerSheet doesn't call confirm with IntegrationMetadata.CustomerSheet.
                 // CustomerSheet calls confirm with an IntegrationMetadata.IntentFirst setup intent.
-                throw IllegalStateException("No intent confirmation interceptor for CustomerSheet.")
+                throw IllegalStateException("CustomerSheet not supported by default confirmation interceptor!")
             }
             IntegrationMetadata.CryptoOnramp -> {
                 // CryptoOnRamp doesn't call confirm.
