@@ -11,6 +11,7 @@ sealed interface ElementsSessionParams : Parcelable {
 
     val type: String
     val clientSecret: String?
+    val checkoutSessionId: String?
     val customerSessionClientSecret: String?
     val legacyCustomerEphemeralKey: String?
     val mobileSessionId: String?
@@ -48,6 +49,9 @@ sealed interface ElementsSessionParams : Parcelable {
 
         override val sellerDetails: SellerDetails?
             get() = null
+
+        override val checkoutSessionId: String?
+            get() = null
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -74,6 +78,9 @@ sealed interface ElementsSessionParams : Parcelable {
 
         override val sellerDetails: SellerDetails?
             get() = null
+
+        override val checkoutSessionId: String?
+            get() = null
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -91,6 +98,7 @@ sealed interface ElementsSessionParams : Parcelable {
         override val sellerDetails: SellerDetails? = null,
         override val link: Link = Link(),
         override val countryOverride: String? = null,
+        override val checkoutSessionId: String? = null,
     ) : ElementsSessionParams {
 
         override val clientSecret: String?

@@ -48,6 +48,7 @@ import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.CardException
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
+import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -71,6 +72,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.model.PaymentPageConfirmParams
 import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
@@ -82,6 +84,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
+import com.stripe.android.model.parsers.CheckoutSessionResponseJsonParser
 import com.stripe.android.model.parsers.ConfirmationTokenJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsShareJsonParser
@@ -113,6 +116,7 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.security.Security
 import java.util.Locale
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
@@ -1671,6 +1675,41 @@ class StripeApiRepository @JvmOverloads internal constructor(
         )
     }
 
+    override suspend fun fetchPaymentPage(
+        checkoutSessionId: String,
+        options: ApiRequest.Options,
+    ): Result<CheckoutSessionResponse> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = fetchPaymentPageUrl(checkoutSessionId),
+                options = options,
+                // TODO: We should get this without hard coding.
+                params = mapOf(
+                    "browser_locale" to "en-US",
+                    "browser_timezone" to "America/Denver",
+                    "eid" to UUID.randomUUID().toString(),
+                    "redirect_type" to "embedded",
+                )
+            ),
+            jsonParser = CheckoutSessionResponseJsonParser(),
+        )
+    }
+
+    override suspend fun confirmPaymentPage(
+        checkoutSessionId: String,
+        params: PaymentPageConfirmParams,
+        options: ApiRequest.Options
+    ): Result<CheckoutSessionResponse> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = confirmPaymentPageUrl(checkoutSessionId),
+                options = options,
+                params = params.asMap(),
+            ),
+            jsonParser = CheckoutSessionResponseJsonParser()
+        )
+    }
+
     private suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
         options: ApiRequest.Options,
@@ -1692,6 +1731,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             this["type"] = params.type
             this["mobile_app_id"] = params.appId
             params.clientSecret?.let { this["client_secret"] = it }
+            params.checkoutSessionId?.let { this["checkout_session_id"] = it }
             params.locale.let { this["locale"] = it }
             params.customerSessionClientSecret?.let { this["customer_session_client_secret"] = it }
             params.legacyCustomerEphemeralKey?.let { this["legacy_customer_ephemeral_key"] = it }
@@ -2321,6 +2361,18 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         private fun getMerchantUiUrl(path: String): String {
             return "https://merchant-ui-api.stripe.com/elements/$path"
+        }
+
+        private fun fetchPaymentPageUrl(
+            checkoutSessionId: String,
+        ): String {
+            return getApiUrl("payment_pages/$checkoutSessionId/init")
+        }
+
+        private fun confirmPaymentPageUrl(
+            checkoutSessionId: String,
+        ): String {
+            return getApiUrl("payment_pages/$checkoutSessionId/confirm")
         }
 
         private fun createExpandParam(expandFields: List<String>): Map<String, List<String>> {

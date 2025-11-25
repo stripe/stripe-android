@@ -459,6 +459,17 @@ class PaymentSheet internal constructor(
         )
     }
 
+    @JvmOverloads
+    fun presentWithCheckoutSession(
+        checkoutSessionId: String,
+        configuration: Configuration? = null,
+    ) {
+        paymentSheetLauncher.present(
+            mode = InitializationMode.CheckoutSession(checkoutSessionId),
+            configuration = configuration,
+        )
+    }
+
     /**
      * Contains information needed to render [PaymentSheet]. The values are used to calculate
      * the payment methods displayed and influence the UI.

@@ -243,6 +243,7 @@ private val PaymentElementLoader.InitializationMode.defaultAnalyticsValue: Strin
         }
         is PaymentElementLoader.InitializationMode.PaymentIntent -> "payment_intent"
         is PaymentElementLoader.InitializationMode.SetupIntent -> "setup_intent"
+        is PaymentElementLoader.InitializationMode.CheckoutSession -> "checkout_session"
     }
 
 private fun IntegrationMetadata.isDeferred(): Boolean = when (this) {
@@ -252,6 +253,7 @@ private fun IntegrationMetadata.isDeferred(): Boolean = when (this) {
     is IntegrationMetadata.DeferredIntentWithConfirmationToken -> true
     is IntegrationMetadata.DeferredIntentWithPaymentMethod -> true
     is IntegrationMetadata.DeferredIntentWithSharedPaymentToken -> true
+    is IntegrationMetadata.CheckoutSession -> false
 }
 
 private fun IntegrationMetadata.isSpt(): Boolean {
