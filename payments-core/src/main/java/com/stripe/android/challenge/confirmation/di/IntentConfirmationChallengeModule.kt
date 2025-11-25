@@ -47,11 +47,6 @@ internal interface IntentConfirmationChallengeModule {
     ): ModelJsonParser<BridgeErrorParams>
 
     @Binds
-    fun bindsAnalyticsRequestFactory(
-        paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
-    ): AnalyticsRequestFactory
-
-    @Binds
     fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
 
     @Binds
@@ -63,7 +58,6 @@ internal interface IntentConfirmationChallengeModule {
     fun bindAnalyticsRequestExecutor(
         analyticsRequestExecutor: DefaultAnalyticsRequestExecutor
     ): AnalyticsRequestExecutor
-
 
     @Binds
     fun bindAnalyticsRequestFactory(
