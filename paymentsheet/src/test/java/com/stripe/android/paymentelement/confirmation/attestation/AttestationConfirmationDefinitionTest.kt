@@ -52,11 +52,11 @@ internal class AttestationConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'option' return casted 'PaymentMethodConfirmationOption Saved'`() {
+    fun `'option' return null for 'PaymentMethodConfirmationOption Saved'`() {
         val definition = createAttestationConfirmationDefinition()
 
         assertThat(definition.option(PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED))
-            .isEqualTo(PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED)
+            .isNull()
     }
 
     @Test
@@ -244,31 +244,6 @@ internal class AttestationConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'toResult' should return 'NextStep' with attestationToken for Success result with Saved option`() {
-        val definition = createAttestationConfirmationDefinition()
-        val testToken = "test_token"
-
-        val result = definition.toResult(
-            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
-            confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
-            result = AttestationActivityResult.Success(testToken),
-        )
-
-        assertThat(result).isInstanceOf<ConfirmationDefinition.Result.NextStep>()
-
-        val nextStepResult = result.asNextStep()
-
-        val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
-            attestationToken = testToken,
-            attestationComplete = true
-        )
-
-        assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
-        assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
-    }
-
-    @Test
     fun `'toResult' should return 'NextStep' unchanged for Failed result with New option`() {
         val definition = createAttestationConfirmationDefinition()
         val exception = RuntimeException("Attestation failed")
@@ -293,70 +268,6 @@ internal class AttestationConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'toResult' should return 'NextStep' unchanged for Failed result with Saved option`() {
-        val definition = createAttestationConfirmationDefinition()
-        val exception = RuntimeException("Attestation failed")
-
-        val result = definition.toResult(
-            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
-            confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
-            result = AttestationActivityResult.Failed(exception),
-        )
-
-        assertThat(result).isInstanceOf<ConfirmationDefinition.Result.NextStep>()
-
-        val nextStepResult = result.asNextStep()
-
-        // When attestation fails, continue without the token but mark attestation as complete
-        val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
-            attestationComplete = true
-        )
-        assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
-        assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
-    }
-
-    @Test
-    fun `'action' should work with Saved PaymentMethodConfirmationOption when attestation is enabled`() =
-        runTest {
-            val definition = createAttestationConfirmationDefinition()
-
-            val action = definition.action(
-                confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
-                confirmationArgs = confirmationParametersWithAttestation(enabled = true),
-            )
-
-            assertThat(action)
-                .isInstanceOf<ConfirmationDefinition.Action.Launch<AttestationActivityContract.Args>>()
-
-            val launchAction = action.asLaunch()
-
-            assertThat(launchAction.launcherArguments.publishableKey).isEqualTo(launcherArgs.publishableKey)
-            assertThat(launchAction.launcherArguments.productUsage).isEqualTo(launcherArgs.productUsage)
-            assertThat(launchAction.receivesResultInProcess).isFalse()
-            assertThat(launchAction.deferredIntentConfirmationType).isNull()
-        }
-
-    @Test
-    fun `'launch' should work with Saved PaymentMethodConfirmationOption`() = runTest {
-        val definition = createAttestationConfirmationDefinition()
-
-        val launcher = FakeActivityResultLauncher<AttestationActivityContract.Args>()
-
-        definition.launch(
-            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
-            confirmationArgs = CONFIRMATION_PARAMETERS,
-            launcher = launcher,
-            arguments = launcherArgs,
-        )
-
-        val launchCall = launcher.calls.awaitItem()
-
-        assertThat(launchCall.input.publishableKey).isEqualTo(launcherArgs.publishableKey)
-        assertThat(launchCall.input.productUsage).isEqualTo(launcherArgs.productUsage)
-    }
-
-    @Test
     fun `'canConfirm' should return false when New option already has a token`() {
         val definition = createAttestationConfirmationDefinition()
 
@@ -366,22 +277,6 @@ internal class AttestationConfirmationDefinitionTest {
                     hCaptchaToken = null
                 )
             )
-        )
-
-        val result = definition.canConfirm(
-            confirmationOption = optionWithToken,
-            confirmationArgs = confirmationParametersWithAttestation(enabled = true)
-        )
-
-        assertThat(result).isFalse()
-    }
-
-    @Test
-    fun `'canConfirm' should return false when Saved option already has a token`() {
-        val definition = createAttestationConfirmationDefinition()
-
-        val optionWithToken = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
-            attestationToken = "existing_token"
         )
 
         val result = definition.canConfirm(
@@ -564,32 +459,6 @@ internal class AttestationConfirmationDefinitionTest {
             optionsParams = null,
             extraParams = null,
             shouldSave = false,
-        )
-
-        val result = definition.canConfirm(
-            confirmationOption = nonCardOption,
-            confirmationArgs = CONFIRMATION_PARAMETERS
-        )
-
-        assertThat(result).isFalse()
-    }
-
-    @Test
-    fun `'canConfirm' should return false when payment method is not a card for Saved option`() {
-        val definition = createAttestationConfirmationDefinition()
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            attestOnIntentConfirmation = true
-        )
-        definition.bootstrap(paymentMethodMetadata)
-
-        val nonCardPaymentMethod = PAYMENT_INTENT.paymentMethod!!.copy(
-            type = com.stripe.android.model.PaymentMethod.Type.USBankAccount
-        )
-        val nonCardOption = PaymentMethodConfirmationOption.Saved(
-            paymentMethod = nonCardPaymentMethod,
-            optionsParams = null,
-            originatedFromWallet = false,
-            hCaptchaToken = null,
         )
 
         val result = definition.canConfirm(

@@ -53,15 +53,6 @@ internal class ConfirmWithAttestationTest {
             setupNewPaymentMethodTest(testContext)
         }
 
-    @Test
-    fun savedPaymentMethod_withAttestationEnabled_includesAndroidVerificationObjectInConfirmRequest() =
-        runProductIntegrationTest(
-            networkRule = networkRule,
-            integrationType = ProductIntegrationType.PaymentSheet,
-            resultCallback = ::assertCompleted,
-        ) { testContext ->
-            setupSavedPaymentMethodTest(testContext)
-        }
 
     @Test
     fun paymentMethodCreation_withAttestationEnabled_includesAndroidVerificationObjectInCreateRequest() =
@@ -92,41 +83,7 @@ internal class ConfirmWithAttestationTest {
         paymentSheetPage.clickPrimaryButton()
     }
 
-    private fun setupSavedPaymentMethodTest(testContext: ProductIntegrationTestRunnerContext) {
-        enqueueElementsSessionWithAttestationForSavedCards(networkRule)
-        enqueuePaymentMethodsGet()
-
-        intendedActivityResult(AttestationActivityResult.Success(ATTESTATION_TOKEN))
-
-        testContext.launch(configuration = createCustomerConfiguration())
-
-        enqueuePaymentIntentConfirmWithAttestation(SAVED_PM_ATTESTATION_TOKEN_PATH)
-
-        val paymentSheetPage = createPaymentSheetPage()
-        paymentSheetPage.fillCvcRecollection(CVC_VALUE)
-        paymentSheetPage.clickPrimaryButton()
-    }
-
     private fun createPaymentSheetPage() = PaymentSheetPage(testRules.compose)
-
-    private fun createCustomerConfiguration() = PaymentSheet.Configuration(
-        merchantDisplayName = MERCHANT_DISPLAY_NAME,
-        customer = PaymentSheet.CustomerConfiguration(
-            id = CUSTOMER_ID,
-            ephemeralKeySecret = EPHEMERAL_KEY_SECRET,
-        ),
-        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal
-    )
-
-    private fun enqueuePaymentMethodsGet() {
-        networkRule.enqueue(
-            host(API_HOST),
-            method("GET"),
-            path("/v1/payment_methods"),
-        ) { response ->
-            response.testBodyFromFile(PAYMENT_METHODS_GET_FILE)
-        }
-    }
 
     private fun setupPaymentMethodCreateWithDeferredTest(testContext: ProductIntegrationTestRunnerContext) {
         enqueueElementsSessionWithAttestation(networkRule, isDeferredIntent = true)
@@ -161,14 +118,6 @@ internal class ConfirmWithAttestationTest {
                 STANDARD_ELEMENTS_SESSION_FILE
             },
             additionalReplacements = EMPTY_PAYMENT_METHODS_REPLACEMENTS
-        )
-    }
-
-    private fun enqueueElementsSessionWithAttestationForSavedCards(networkRule: NetworkRule) {
-        enqueueElementsSessionWithAttestationEnabled(
-            networkRule = networkRule,
-            baseFile = CVC_RECOLLECTION_ELEMENTS_SESSION_FILE,
-            additionalReplacements = emptyList()
         )
     }
 
@@ -248,19 +197,12 @@ internal class ConfirmWithAttestationTest {
             "payment_method_data[radar_options][android_verification_object][android_verification_token]"
         private const val SAVED_PM_ATTESTATION_TOKEN_PATH =
             "radar_options[android_verification_object][android_verification_token]"
-        private const val CVC_VALUE = "123"
-        private const val MERCHANT_DISPLAY_NAME = "Merchant, Inc."
-        private const val CUSTOMER_ID = "cus_1"
-        private const val EPHEMERAL_KEY_SECRET = "ek_123"
-        private const val API_HOST = "api.stripe.com"
 
         private const val STANDARD_ELEMENTS_SESSION_FILE = "elements-sessions-with_pi_and_default_pms_enabled.json"
         private const val DEFERRED_INTENT_ELEMENTS_SESSION_FILE =
             "elements-sessions-deferred_intent_and_default_pms_enabled.json"
-        private const val CVC_RECOLLECTION_ELEMENTS_SESSION_FILE = "elements-sessions-requires_cvc_recollection.json"
         private const val PAYMENT_INTENT_CONFIRM_FILE = "payment-intent-confirm.json"
         private const val PAYMENT_METHOD_CREATE_FILE = "payment-methods-create.json"
-        private const val PAYMENT_METHODS_GET_FILE = "payment-methods-get-success.json"
         private const val PAYMENT_INTENT_GET_FILE = "payment-intent-get-requires_payment_method.json"
 
         private const val PAYMENT_INTENT_CONFIRM_PATH = "/v1/payment_intents/pi_example/confirm"
