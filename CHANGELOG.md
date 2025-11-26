@@ -9,6 +9,9 @@
 ### Payments
 * [Added][12014](https://github.com/stripe/stripe-android/pull/12014) `ConfirmationToken.PaymentMethodPreview` now includes structured `Card` field with detailed card information (brand, country, expiry, funding, last4, etc.)
 
+### Identity
+* [Added] More live feedback during document capture. 
+
 ## 22.2.0 - 2025-11-17
 
 ### Financial Connections
