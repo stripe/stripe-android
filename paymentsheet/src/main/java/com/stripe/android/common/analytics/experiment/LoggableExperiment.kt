@@ -1,5 +1,6 @@
 package com.stripe.android.common.analytics.experiment
 
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.utils.filterNotNullValues
 
@@ -12,6 +13,29 @@ internal sealed class LoggableExperiment(
     open val group: String,
     open val dimensions: Map<String, String>
 ) {
+
+    data class OcsMobileHorizontal2To3LpmsAA(
+        override val experiment: ExperimentAssignment,
+        override val group: String,
+        val experimentsData: ElementsSession.ExperimentsData,
+    ) : LoggableExperiment(
+        experiment = experiment,
+        arbId = experimentsData.arbId,
+        group = group,
+        dimensions = emptyMap(),
+    )
+
+    data class OcsMobileHorizontal2To3LpmsAB(
+        override val experiment: ExperimentAssignment,
+        override val group: String,
+        val experimentsData: ElementsSession.ExperimentsData,
+    ) : LoggableExperiment(
+        experiment = experiment,
+        arbId = experimentsData.arbId,
+        group = group,
+        dimensions = emptyMap(),
+    )
+
     data class LinkHoldback(
         override val arbId: String,
         override val group: String,

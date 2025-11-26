@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.lpmfoundations.FormHeaderInformation
@@ -81,6 +82,7 @@ internal data class PaymentMethodMetadata(
     val onBehalfOf: String?,
     val integrationMetadata: IntegrationMetadata,
     val analyticsMetadata: AnalyticsMetadata,
+    val experimentsData: ElementsSession.ExperimentsData?,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -313,6 +315,45 @@ internal data class PaymentMethodMetadata(
         )
     }
 
+    fun getPaymentMethodLayout(
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+    ): PaymentSheet.PaymentMethodLayout {
+        val eligibleForExperiment = (supportedPaymentMethodTypes().size == 2 || supportedPaymentMethodTypes().size == 3) && paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Automatic
+        if (!eligibleForExperiment) {
+            return paymentMethodLayout
+        }
+        experimentsData?.experimentAssignments?.get(ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_2_TO_3_LPMS_AA)?.let {
+            experimentAssignment ->
+            if (experimentAssignment == "control" || experimentAssignment == "treatment") {
+                val loggableExperiment = LoggableExperiment.OcsMobileHorizontal2To3LpmsAA(
+                    experiment = ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_2_TO_3_LPMS_AA,
+                    group = experimentAssignment,
+                    experimentsData = experimentsData,
+                )
+                // TODO: log exposure. For this we'd create a similar logger to LogLinkHoldbackExperiment.kt
+                return paymentMethodLayout
+            }
+        }
+
+        experimentsData?.experimentAssignments?.get(ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_2_TO_3_LPMS_AA)?.let {
+                experimentAssignment ->
+            val loggableExperiment = LoggableExperiment.OcsMobileHorizontal2To3LpmsAA(
+                experiment = ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_2_TO_3_LPMS_AA,
+                group = experimentAssignment,
+                experimentsData = experimentsData,
+            )
+            if (experimentAssignment == "control") {
+                // TODO: log exposure.
+                return paymentMethodLayout
+            } else if (experimentAssignment == "treatment") {
+                // TODO: log exposure
+                return PaymentSheet.PaymentMethodLayout.Horizontal
+            }
+        }
+
+        return paymentMethodLayout
+    }
+
     internal companion object {
         internal fun createForPaymentElement(
             elementsSession: ElementsSession,
@@ -373,6 +414,7 @@ internal data class PaymentMethodMetadata(
                 onBehalfOf = elementsSession.onBehalfOf,
                 integrationMetadata = integrationMetadata,
                 analyticsMetadata = analyticsMetadata,
+                experimentsData = elementsSession.experimentsData,
             )
         }
 
@@ -434,7 +476,8 @@ internal data class PaymentMethodMetadata(
                 appearance = configuration.appearance,
                 onBehalfOf = elementsSession.onBehalfOf,
                 integrationMetadata = IntegrationMetadata.CustomerSheet,
-                analyticsMetadata = AnalyticsMetadata(emptyMap()), // This is unused in customer sheet.
+                analyticsMetadata = AnalyticsMetadata(emptyMap()),
+                experimentsData = null, // This is unused in customer sheet.
             )
         }
     }

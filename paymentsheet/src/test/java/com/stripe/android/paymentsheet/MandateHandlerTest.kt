@@ -139,7 +139,7 @@ class MandateHandlerTest {
                     coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
                     selection = selection,
                     merchantDisplayName = "Example, Inc.",
-                    isVerticalMode = isVerticalMode,
+                    isVerticalModeProvider = { isVerticalMode },
                     isSetupFlowProvider = isSetupFlowProvider,
                 ),
                 selection = selection,

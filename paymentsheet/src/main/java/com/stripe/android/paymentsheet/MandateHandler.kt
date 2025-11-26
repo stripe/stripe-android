@@ -16,7 +16,7 @@ internal class MandateHandler(
     coroutineScope: CoroutineScope,
     private val selection: StateFlow<PaymentSelection?>,
     private val merchantDisplayName: String,
-    private val isVerticalMode: Boolean,
+    private val isVerticalModeProvider: () -> Boolean,
     private val isSetupFlowProvider: () -> Boolean,
 ) {
     private val _mandateText = MutableStateFlow<MandateText?>(null)
@@ -40,7 +40,7 @@ internal class MandateHandler(
         _mandateText.value = if (mandateText != null) {
             MandateText(
                 text = mandateText,
-                showAbovePrimaryButton = showAbove || isVerticalMode,
+                showAbovePrimaryButton = showAbove || isVerticalModeProvider(),
             )
         } else {
             null
@@ -53,7 +53,7 @@ internal class MandateHandler(
                 coroutineScope = viewModel.viewModelScope,
                 selection = viewModel.selection,
                 merchantDisplayName = viewModel.config.merchantDisplayName,
-                isVerticalMode = viewModel.config.paymentMethodLayout != PaymentMethodLayout.Horizontal,
+                isVerticalModeProvider = { viewModel.paymentMethodMetadata.value?.getPaymentMethodLayout(viewModel.config.paymentMethodLayout) != PaymentMethodLayout.Horizontal },
                 isSetupFlowProvider = { viewModel.paymentMethodMetadata.value?.stripeIntent is SetupIntent },
             )
         }
