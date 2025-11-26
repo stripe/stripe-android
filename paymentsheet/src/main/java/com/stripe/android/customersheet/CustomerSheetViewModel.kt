@@ -27,7 +27,6 @@ import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
-import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
 import com.stripe.android.customersheet.data.failureOrNull
@@ -100,7 +99,6 @@ internal class CustomerSheetViewModel(
     private var originalPaymentSelection: PaymentSelection?,
     private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
     private val paymentMethodDataSourceProvider: Single<CustomerSheetPaymentMethodDataSource>,
-    private val intentDataSourceProvider: Single<CustomerSheetIntentDataSource>,
     private val savedSelectionDataSourceProvider: Single<CustomerSheetSavedSelectionDataSource>,
     private val configuration: CustomerSheet.Configuration,
     private val integrationType: CustomerSheetIntegration.Type,
@@ -140,7 +138,6 @@ internal class CustomerSheetViewModel(
         originalPaymentSelection = originalPaymentSelection,
         paymentConfigurationProvider = paymentConfigurationProvider,
         paymentMethodDataSourceProvider = CustomerSheetHacks.paymentMethodDataSource,
-        intentDataSourceProvider = CustomerSheetHacks.intentDataSource,
         savedSelectionDataSourceProvider = CustomerSheetHacks.savedSelectionDataSource,
         configuration = configuration,
         integrationType = integrationType,
@@ -732,6 +729,30 @@ internal class CustomerSheetViewModel(
                     return
                 }
 
+                val metadata = customerState.value.metadata
+
+                if (metadata == null) {
+                    errorReporter.report(
+                        ErrorReporter.UnexpectedErrorEvent.CUSTOMER_SHEET_METADATA_NULL_ON_CONFIRM
+                    )
+
+                    _result.value = InternalCustomerSheetResult.Error(
+                        exception = IllegalStateException("No customer metadata available on confirmation!")
+                    )
+
+                    return
+                }
+
+                val integrationMetadata = metadata.integrationMetadata
+
+                if (integrationMetadata !is IntegrationMetadata.CustomerSheet) {
+                    _result.value = InternalCustomerSheetResult.Error(
+                        exception = IllegalStateException("Invalid customer metadata available on confirmation!")
+                    )
+
+                    return
+                }
+
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     it.copy(
                         isProcessing = true,
@@ -751,7 +772,7 @@ internal class CustomerSheetViewModel(
                     )
                 }
 
-                createAndAttach(createParams)
+                createAndAttach(createParams, metadata, integrationMetadata)
             }
             is CustomerSheetViewState.SelectPaymentMethod -> {
                 setSelectionConfirmationState { state ->
@@ -772,6 +793,8 @@ internal class CustomerSheetViewModel(
 
     private fun createAndAttach(
         paymentMethodCreateParams: PaymentMethodCreateParams,
+        metadata: PaymentMethodMetadata,
+        integrationMetadata: IntegrationMetadata.CustomerSheet,
     ) {
         viewModelScope.launch(workContext) {
             createPaymentMethod(paymentMethodCreateParams)
@@ -783,7 +806,7 @@ internal class CustomerSheetViewModel(
                             )
                         )
                     } else {
-                        attachPaymentMethodToCustomer(paymentMethod)
+                        attachPaymentMethodToCustomer(paymentMethod, metadata, integrationMetadata)
                     }
                 }.onFailure { throwable ->
                     logger.error(
@@ -1005,27 +1028,31 @@ internal class CustomerSheetViewModel(
         )
     }
 
-    private fun attachPaymentMethodToCustomer(paymentMethod: PaymentMethod) {
+    private fun attachPaymentMethodToCustomer(
+        paymentMethod: PaymentMethod,
+        metadata: PaymentMethodMetadata,
+        integrationMetadata: IntegrationMetadata.CustomerSheet,
+    ) {
         viewModelScope.launch(workContext) {
-            if (awaitIntentDataSource().canCreateSetupIntents) {
-                confirmSetupIntent(paymentMethod = paymentMethod)
-            } else {
-                attachPaymentMethod(id = paymentMethod.id)
+            when (integrationMetadata.attachmentStyle) {
+                IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent -> {
+                    confirmSetupIntent(paymentMethod = paymentMethod, metadata = metadata)
+                }
+                IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach -> {
+                    attachPaymentMethod(id = paymentMethod.id)
+                }
             }
         }
     }
 
-    private suspend fun confirmSetupIntent(paymentMethod: PaymentMethod) {
-        val metadata = requireNotNull(customerState.value.metadata)
+    private suspend fun confirmSetupIntent(paymentMethod: PaymentMethod, metadata: PaymentMethodMetadata) {
         confirmationHandler.start(
             arguments = ConfirmationHandler.Args(
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = paymentMethod,
                     optionsParams = null,
                 ),
-                paymentMethodMetadata = metadata.copy(
-                    integrationMetadata = IntegrationMetadata.CustomerSheet
-                ),
+                paymentMethodMetadata = metadata,
             )
         )
 
@@ -1262,10 +1289,6 @@ internal class CustomerSheetViewModel(
 
     private suspend fun awaitPaymentMethodDataSource(): CustomerSheetPaymentMethodDataSource {
         return paymentMethodDataSourceProvider.await()
-    }
-
-    private suspend fun awaitIntentDataSource(): CustomerSheetIntentDataSource {
-        return intentDataSourceProvider.await()
     }
 
     private suspend fun awaitSavedSelectionDataSource(): CustomerSheetSavedSelectionDataSource {

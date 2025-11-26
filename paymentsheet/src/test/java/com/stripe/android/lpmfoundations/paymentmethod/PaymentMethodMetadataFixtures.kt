@@ -24,6 +24,10 @@ internal object PaymentMethodMetadataFixtures {
         permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS
     )
 
+    internal val DEFAULT_CUSTOMER_INTEGRATION_METADATA = IntegrationMetadata.CustomerSheet(
+        attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
+    )
+
     internal val CLIENT_ATTRIBUTION_METADATA = ClientAttributionMetadata(
         elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,

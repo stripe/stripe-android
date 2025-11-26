@@ -15,7 +15,6 @@ import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMeth
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
-import com.stripe.android.customersheet.data.FakeCustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetSavedSelectionDataSource
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule
@@ -23,6 +22,7 @@ import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createView
 import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -799,9 +799,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = false,
-            ),
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach,
             paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 onAttachPaymentMethod = {
                     CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
@@ -966,9 +964,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = true,
-            ),
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
             stripeRepository = FakeStripeRepository(
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
             ),
@@ -1009,9 +1005,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = false,
-            ),
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach,
             paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 onAttachPaymentMethod = {
                     CustomerSheetDataResult.failure(
@@ -1129,11 +1123,6 @@ class CustomerSheetViewModelTest {
             paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 paymentMethods = CustomerSheetDataResult.success(listOf(CARD_PAYMENT_METHOD)),
             ),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.success("seti_123")
-                }
-            )
         )
 
         viewModel.handleViewAction(
@@ -1684,9 +1673,7 @@ class CustomerSheetViewModelTest {
                     CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
                 },
             ),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = false,
-            ),
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach,
             customerPaymentMethods = listOf(),
             isGooglePayAvailable = false,
             eventReporter = eventReporter,
@@ -1725,9 +1712,7 @@ class CustomerSheetViewModelTest {
                     )
                 },
             ),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = false,
-            ),
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach,
             customerPaymentMethods = listOf(),
             isGooglePayAvailable = false,
             eventReporter = eventReporter,
@@ -1758,12 +1743,7 @@ class CustomerSheetViewModelTest {
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
                 retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.success("seti_123")
-                },
-                canCreateSetupIntents = true,
-            ),
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
             customerPaymentMethods = listOf(),
             isGooglePayAvailable = false,
             eventReporter = eventReporter,
@@ -1797,9 +1777,7 @@ class CustomerSheetViewModelTest {
             ),
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = true,
-            ),
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
             confirmationHandler = confirmationHandler,
             eventReporter = eventReporter,
         )
@@ -1836,12 +1814,7 @@ class CustomerSheetViewModelTest {
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
                 retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.success("seti_123")
-                },
-                canCreateSetupIntents = true,
-            ),
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
             intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
                 enqueueFailureStep(
                     cause = Exception("Unable to confirm setup intent"),
@@ -2153,12 +2126,7 @@ class CustomerSheetViewModelTest {
             paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 paymentMethods = CustomerSheetDataResult.success(listOf(US_BANK_ACCOUNT_VERIFIED)),
             ),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.success("seti_123")
-                },
-                canCreateSetupIntents = true,
-            ),
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
         )
 
         viewModel.viewState.test {
@@ -2597,9 +2565,7 @@ class CustomerSheetViewModelTest {
     fun `When confirming a card, the card form should be reset when trying to add another card`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = false,
-            ),
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach,
             paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 onAttachPaymentMethod = {
                     CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
@@ -2648,12 +2614,7 @@ class CustomerSheetViewModelTest {
                 createPaymentMethodResult = Result.success(US_BANK_ACCOUNT),
                 retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.success("seti_123")
-                },
-                canCreateSetupIntents = true,
-            ),
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
         )
 
         viewModel.handleViewAction(CustomerSheetViewAction.OnFormFieldValuesCompleted(TEST_FORM_VALUES))
@@ -2813,9 +2774,7 @@ class CustomerSheetViewModelTest {
                         preferredNetworks = listOf(CardBrand.CartesBancaires)
                     ),
                 ),
-                intentDataSource = FakeCustomerSheetIntentDataSource(
-                    canCreateSetupIntents = false,
-                ),
+                attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach,
                 paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                     onAttachPaymentMethod = {
                         CustomerSheetDataResult.success(CARD_WITH_NETWORKS_PAYMENT_METHOD)
@@ -3143,9 +3102,7 @@ class CustomerSheetViewModelTest {
             stripeRepository = FakeStripeRepository(
                 createPaymentMethodResult = Result.success(acceptedCardPaymentMethod),
             ),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = false
-            )
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach,
         )
 
         // Call refreshAndUpdatePaymentMethods indirectly through the attachment flow
@@ -3221,12 +3178,7 @@ class CustomerSheetViewModelTest {
                     createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
                     retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
                 ),
-                intentDataSource = FakeCustomerSheetIntentDataSource(
-                    onRetrieveSetupIntentClientSecret = {
-                        CustomerSheetDataResult.success("seti_123")
-                    },
-                    canCreateSetupIntents = true,
-                ),
+                attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
                 intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
             )
 
@@ -3618,9 +3570,7 @@ class CustomerSheetViewModelTest {
     fun `After confirming a card, the card scan should be shown when trying to add another card`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = false,
-            ),
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach,
             paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 onAttachPaymentMethod = {
                     CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
@@ -3677,9 +3627,7 @@ class CustomerSheetViewModelTest {
     fun `After leaving card form, the card scan should be shown when trying to add another card`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = false,
-            ),
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach,
             paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 onAttachPaymentMethod = {
                     CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
@@ -3779,12 +3727,11 @@ class CustomerSheetViewModelTest {
             isGooglePayAvailable = false,
             errorReporter = errorReporter,
             savedPaymentSelection = originalSelection,
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = attachWithSetupIntent,
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.success("seti_123")
-                }
-            ),
+            attachmentStyle = if (attachWithSetupIntent) {
+                IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent
+            } else {
+                IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach
+            },
             paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 paymentMethods = if (shouldFailRefresh) {
                     CustomerSheetDataResult.failure(
