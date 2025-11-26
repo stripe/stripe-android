@@ -3,7 +3,6 @@ package com.stripe.android.crypto.onramp.example
 import android.R
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -35,6 +34,10 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Snackbar
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
@@ -53,7 +56,6 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -79,10 +81,6 @@ import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.launch
-import androidx.compose.material.SnackbarHostState
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.Snackbar
-import androidx.compose.material.SnackbarDuration
 
 internal class OnrampActivity : ComponentActivity() {
 
@@ -436,7 +434,6 @@ internal fun OnrampScreen(
     onVerifyKyc: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
 
     BackHandler(enabled = uiState.screen != Screen.LoginSignup) {
         viewModel.onBackToLoginSignup()

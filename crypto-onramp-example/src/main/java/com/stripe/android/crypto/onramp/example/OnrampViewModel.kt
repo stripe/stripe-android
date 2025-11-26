@@ -776,4 +776,4 @@ data class OnrampUserData(
     val token: String
 )
 
-internal val ONRAMP_PREFS_NAME = "onramp_prefs"
+internal const val ONRAMP_PREFS_NAME = "onramp_prefs"
