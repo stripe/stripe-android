@@ -60,7 +60,6 @@ internal object CustomerSheetTestHelper {
     internal val application = ApplicationProvider.getApplicationContext<Application>()
 
     internal fun createViewModel(
-        isLiveMode: Boolean = false,
         workContext: CoroutineContext = EmptyCoroutineContext,
         integrationType: CustomerSheetIntegration.Type = CustomerSheetIntegration.Type.CustomerAdapter,
         isGooglePayAvailable: Boolean = true,
@@ -127,7 +126,6 @@ internal object CustomerSheetTestHelper {
             stripeRepository = stripeRepository,
             configuration = configuration,
             integrationType = integrationType,
-            isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
             productUsage = emptySet(),
             confirmationHandlerFactory = confirmationHandler?.let { ConfirmationHandler.Factory { _ -> it } }

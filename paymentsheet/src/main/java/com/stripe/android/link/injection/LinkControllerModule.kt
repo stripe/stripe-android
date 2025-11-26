@@ -2,12 +2,10 @@ package com.stripe.android.link.injection
 
 import android.app.Application
 import android.content.Context
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
-import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.DefaultLinkConfigurationLoader
 import com.stripe.android.link.LinkConfigurationLoader
@@ -24,7 +22,6 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(
@@ -71,11 +68,5 @@ internal interface LinkControllerModule {
         @Singleton
         @Named(PRODUCT_USAGE)
         fun provideProductUsageTokens() = setOf("LinkPaymentMethodLauncher")
-
-        @Provides
-        @Named(IS_LIVE_MODE)
-        fun isLiveMode(
-            paymentConfiguration: Provider<PaymentConfiguration>
-        ): () -> Boolean = { paymentConfiguration.get().isLiveMode() }
     }
 }

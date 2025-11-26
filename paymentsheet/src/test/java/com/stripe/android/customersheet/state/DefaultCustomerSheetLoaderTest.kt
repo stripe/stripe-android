@@ -420,7 +420,6 @@ internal class DefaultCustomerSheetLoaderTest {
 
         val configuration = CustomerSheet.Configuration(merchantDisplayName = "Merchant, Inc.")
         val loader = DefaultCustomerSheetLoader(
-            isLiveModeProvider = { false },
             googlePayRepositoryFactory = { readyGooglePayRepository },
             initializationDataSourceProvider = initDataSource,
             lpmRepository = lpmRepository,
@@ -461,7 +460,6 @@ internal class DefaultCustomerSheetLoaderTest {
     fun `Fails if awaiting InitializationDataSource times out`() = runTest {
         val configuration = CustomerSheet.Configuration(merchantDisplayName = "Merchant, Inc.")
         val loader = DefaultCustomerSheetLoader(
-            isLiveModeProvider = { false },
             googlePayRepositoryFactory = { readyGooglePayRepository },
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = { false },
@@ -631,7 +629,6 @@ internal class DefaultCustomerSheetLoaderTest {
 
     private fun createCustomerSheetLoader(
         isGooglePayReady: Boolean = true,
-        isLiveModeProvider: () -> Boolean = { false },
         isCbcEligible: Boolean? = null,
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable =
             IsFinancialConnectionsSdkAvailable { false },
@@ -672,7 +669,6 @@ internal class DefaultCustomerSheetLoaderTest {
         return createCustomerSheetLoader(
             initializationDataSourceProvider = CompletableSingle(initializationDataSource),
             isGooglePayReady = isGooglePayReady,
-            isLiveModeProvider = isLiveModeProvider,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             lpmRepository = lpmRepository,
             errorReporter = errorReporter,
@@ -730,7 +726,6 @@ internal class DefaultCustomerSheetLoaderTest {
     private fun createCustomerSheetLoader(
         initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>,
         isGooglePayReady: Boolean = true,
-        isLiveModeProvider: () -> Boolean = { false },
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable =
             IsFinancialConnectionsSdkAvailable { false },
         lpmRepository: LpmRepository = this.lpmRepository,
@@ -739,7 +734,6 @@ internal class DefaultCustomerSheetLoaderTest {
         workContext: CoroutineContext = UnconfinedTestDispatcher()
     ): CustomerSheetLoader {
         return DefaultCustomerSheetLoader(
-            isLiveModeProvider = isLiveModeProvider,
             googlePayRepositoryFactory = {
                 if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
             },
