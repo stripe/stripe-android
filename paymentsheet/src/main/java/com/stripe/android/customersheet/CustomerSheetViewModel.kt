@@ -806,7 +806,7 @@ internal class CustomerSheetViewModel(
                             )
                         )
                     } else {
-                        attachPaymentMethodToCustomer(paymentMethod, metadata, integrationMetadata)
+                        savePaymentMethod(paymentMethod, metadata, integrationMetadata)
                     }
                 }.onFailure { throwable ->
                     logger.error(
@@ -1028,24 +1028,11 @@ internal class CustomerSheetViewModel(
         )
     }
 
-    private fun attachPaymentMethodToCustomer(
+    private suspend fun savePaymentMethod(
         paymentMethod: PaymentMethod,
         metadata: PaymentMethodMetadata,
         integrationMetadata: IntegrationMetadata.CustomerSheet,
     ) {
-        viewModelScope.launch(workContext) {
-            when (integrationMetadata.attachmentStyle) {
-                IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent -> {
-                    confirmSetupIntent(paymentMethod = paymentMethod, metadata = metadata)
-                }
-                IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach -> {
-                    attachPaymentMethod(id = paymentMethod.id)
-                }
-            }
-        }
-    }
-
-    private suspend fun confirmSetupIntent(paymentMethod: PaymentMethod, metadata: PaymentMethodMetadata) {
         confirmationHandler.start(
             arguments = ConfirmationHandler.Args(
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
@@ -1056,23 +1043,16 @@ internal class CustomerSheetViewModel(
             )
         )
 
+        val analyticsAttachmentStyle = integrationMetadata.attachmentStyle.toAnalyticsStyle()
+
         when (val result = confirmationHandler.awaitResult()) {
             is ConfirmationHandler.Result.Succeeded -> {
-                eventReporter.onAttachPaymentMethodSucceeded(
-                    style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
-                )
+                eventReporter.onAttachPaymentMethodSucceeded(analyticsAttachmentStyle)
 
                 refreshAndUpdatePaymentMethods(paymentMethod)
             }
             is ConfirmationHandler.Result.Failed -> {
-                eventReporter.onAttachPaymentMethodFailed(
-                    style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
-                )
-
-                logger.error(
-                    msg = "Failed to attach payment method to SetupIntent: $paymentMethod",
-                    t = result.cause,
-                )
+                eventReporter.onAttachPaymentMethodFailed(analyticsAttachmentStyle)
 
                 withContext(viewModelScope.coroutineContext) {
                     updateViewState<CustomerSheetViewState.AddPaymentMethod> {
@@ -1095,31 +1075,6 @@ internal class CustomerSheetViewModel(
                 }
             }
         }
-    }
-
-    private suspend fun attachPaymentMethod(id: String) {
-        awaitPaymentMethodDataSource().attachPaymentMethod(id)
-            .onSuccess { attachedPaymentMethod ->
-                eventReporter.onAttachPaymentMethodSucceeded(
-                    style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
-                )
-                refreshAndUpdatePaymentMethods(attachedPaymentMethod)
-            }.onFailure { cause, displayMessage ->
-                eventReporter.onAttachPaymentMethodFailed(
-                    style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
-                )
-                logger.error(
-                    msg = "Failed to attach payment method $id to customer",
-                    t = cause,
-                )
-                updateViewState<CustomerSheetViewState.AddPaymentMethod> {
-                    it.copy(
-                        errorMessage = displayMessage?.resolvableString,
-                        primaryButtonEnabled = it.formFieldValues != null,
-                        isProcessing = false,
-                    )
-                }
-            }
     }
 
     private suspend fun refreshAndUpdatePaymentMethods(
@@ -1284,6 +1239,16 @@ internal class CustomerSheetViewModel(
                     it
                 }
             }
+        }
+    }
+
+    private fun IntegrationMetadata.CustomerSheet.AttachmentStyle.toAnalyticsStyle():
+        CustomerSheetEventReporter.AddPaymentMethodStyle {
+        return when (this) {
+            IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent ->
+                CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
+            IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach ->
+                CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
         }
     }
 

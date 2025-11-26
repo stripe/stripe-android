@@ -1,6 +1,9 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
+import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
+import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -13,10 +16,24 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import javax.inject.Inject
 
-internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
-    @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
+internal class CustomerSheetConfirmationInterceptor(
+    private val clientAttributionMetadata: ClientAttributionMetadata,
+    private val intentDataSourceProvider: Single<CustomerSheetIntentDataSource>,
     private val setupIntentInterceptorFactory: CustomerSheetSetupIntentInterceptor.Factory,
+    private val attachPaymentMethodInterceptorFactory: CustomerSheetAttachPaymentMethodInterceptor.Factory,
 ) : IntentConfirmationInterceptor {
+    @AssistedInject
+    constructor(
+        @Assisted clientAttributionMetadata: ClientAttributionMetadata,
+        setupIntentInterceptorFactory: CustomerSheetSetupIntentInterceptor.Factory,
+        attachPaymentMethodInterceptorFactory: CustomerSheetAttachPaymentMethodInterceptor.Factory,
+    ) : this(
+        clientAttributionMetadata = clientAttributionMetadata,
+        intentDataSourceProvider = CustomerSheetHacks.intentDataSource,
+        setupIntentInterceptorFactory = setupIntentInterceptorFactory,
+        attachPaymentMethodInterceptorFactory = attachPaymentMethodInterceptorFactory,
+    )
+
     override suspend fun intercept(
         intent: StripeIntent,
         confirmationOption: PaymentMethodConfirmationOption.New,
@@ -38,13 +55,23 @@ internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> {
-        val setupIntentInterceptor = setupIntentInterceptorFactory.create(clientAttributionMetadata)
+        return if (intentDataSourceProvider.await().canCreateSetupIntents) {
+            val setupIntentInterceptor = setupIntentInterceptorFactory.create(clientAttributionMetadata)
 
-        return setupIntentInterceptor.intercept(
-            intent = intent,
-            confirmationOption = confirmationOption,
-            shippingValues = null,
-        )
+            setupIntentInterceptor.intercept(
+                intent = intent,
+                confirmationOption = confirmationOption,
+                shippingValues = null,
+            )
+        } else {
+            val attachPaymentMethodInterceptor = attachPaymentMethodInterceptorFactory.create()
+
+            attachPaymentMethodInterceptor.intercept(
+                intent = intent,
+                confirmationOption = confirmationOption,
+                shippingValues = null,
+            )
+        }
     }
 
     @AssistedFactory
