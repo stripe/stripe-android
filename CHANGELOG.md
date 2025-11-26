@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payment Method Messaging
+* [Added] Payment Method Messaging Element is now available in public preview.
+
 ### PaymentSheet
 * [Added][12011](https://github.com/stripe/stripe-android/pull/12011) Builder APIs for PaymentSheet appearance customization (Colors, Shapes, Typography, PrimaryButtonColors, and embedded row styles)
 * [Added] opensCardScannerAutomatically configuration is now available.
