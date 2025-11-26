@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata.Value.Nested
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata.Value.SimpleBoolean
@@ -31,6 +32,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
     private val cvcRecollectionHandler: CvcRecollectionHandler,
     private val mode: EventReporter.Mode,
     private val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>,
+    private val linkGateFactory: LinkGate.Factory,
 ) : DefaultPaymentElementLoader.AnalyticsMetadataFactory {
     override fun create(
         initializationMode: PaymentElementLoader.InitializationMode,
@@ -108,6 +110,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         putNonEmpty("link_disabled_reasons", disabledReasons)
         val signupDisabledReasons = linkState?.signupModeResult?.disabledReasons?.map { it.value }
         putNonEmpty("link_signup_disabled_reasons", signupDisabledReasons)
+        put("link_native_available", SimpleBoolean(deviceCanUseNativeLink(elementsSession, linkGateFactory)))
     }
 
     private fun defaultPaymentMethods(
@@ -322,4 +325,16 @@ private fun MutableMap<String, AnalyticsMetadata.Value>.putNonEmpty(key: String,
     if (!list.isNullOrEmpty()) {
         put(key, SimpleString(list.joinToString(",")))
     }
+}
+
+/**
+ * Check if native Link is available on this device.
+ * Uses LinkGate.Factory to determine native Link availability.
+ */
+private fun deviceCanUseNativeLink(
+    elementsSession: ElementsSession,
+    linkGateFactory: LinkGate.Factory
+): Boolean {
+    val linkGate = linkGateFactory.create(elementsSession)
+    return linkGate.useNativeLink
 }
