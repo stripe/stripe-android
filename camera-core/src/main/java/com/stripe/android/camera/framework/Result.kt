@@ -173,20 +173,21 @@ abstract class ResultAggregator<
     override suspend fun onResult(result: AnalyzerResult, data: DataFrame): Boolean = when {
         isPaused -> false
         isCanceled || isFinished -> true
-        else -> withContext(Dispatchers.Default) {
-            frameRateTracker.trackFrameProcessed()
+        else -> finalResultMutex.withLock {
+            val (interimResult, finalResult) = withContext(Dispatchers.Default) {
+                frameRateTracker.trackFrameProcessed()
+                aggregateResult(data, result)
+            }
 
-            finalResultMutex.withLock {
-                val (interimResult, finalResult) = aggregateResult(data, result)
-
+            withContext(Dispatchers.Main) {
                 listener.onInterimResult(interimResult)
 
                 if (!isFinished && finalResult != null) {
                     isFinished = true
                     listener.onResult(finalResult)
                 }
-                isFinished
             }
+            isFinished
         }
     }
 
