@@ -1750,6 +1750,7 @@ class CustomerSheetViewModelTest {
             customerPaymentMethods = listOf(),
             isGooglePayAvailable = false,
             eventReporter = eventReporter,
+            confirmationHandler = handler,
         )
 
         viewModel.handleViewAction(

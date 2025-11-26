@@ -3,9 +3,8 @@ package com.stripe.android.paymentelement.confirmation.intent
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
-import com.stripe.android.customersheet.data.FakeCustomerSheetIntentDataSource
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentCreationFlow
@@ -59,8 +58,8 @@ class CustomerSheetConfirmationInterceptorTest {
 
     @Test
     fun `Creates and confirms setup intent when canCreateSetupIntents is true`() = test(
-        intentDataSource = FakeCustomerSheetIntentDataSource(
-            canCreateSetupIntents = true,
+        integrationMetadata = IntegrationMetadata.CustomerSheet(
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
         ),
         setupInterceptAction = ConfirmationDefinition.Action.Complete(
             intent = SetupIntentFactory.create().copy(paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD),
@@ -92,8 +91,8 @@ class CustomerSheetConfirmationInterceptorTest {
 
     @Test
     fun `Attaches payment method when canCreateSetupIntents is false`() = test(
-        intentDataSource = FakeCustomerSheetIntentDataSource(
-            canCreateSetupIntents = false,
+        integrationMetadata = IntegrationMetadata.CustomerSheet(
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach,
         ),
         attachInterceptAction = ConfirmationDefinition.Action.Complete(
             intent = SetupIntentFactory.create().copy(paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD),
@@ -130,8 +129,8 @@ class CustomerSheetConfirmationInterceptorTest {
 
     @Test
     fun `Fails when setup intent creation fails`() = test(
-        intentDataSource = FakeCustomerSheetIntentDataSource(
-            canCreateSetupIntents = true,
+        integrationMetadata = IntegrationMetadata.CustomerSheet(
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
         ),
         setupInterceptAction = ConfirmationDefinition.Action.Fail(
             cause = Exception("Failed to create setup intent"),
@@ -160,8 +159,8 @@ class CustomerSheetConfirmationInterceptorTest {
 
     @Test
     fun `Fails when attach payment method fails`() = test(
-        intentDataSource = FakeCustomerSheetIntentDataSource(
-            canCreateSetupIntents = false,
+        integrationMetadata = IntegrationMetadata.CustomerSheet(
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach,
         ),
         attachInterceptAction = ConfirmationDefinition.Action.Fail(
             cause = Exception("Failed to attach payment method"),
@@ -189,7 +188,9 @@ class CustomerSheetConfirmationInterceptorTest {
     }
 
     private fun test(
-        intentDataSource: CustomerSheetIntentDataSource = FakeCustomerSheetIntentDataSource(),
+        integrationMetadata: IntegrationMetadata.CustomerSheet = IntegrationMetadata.CustomerSheet(
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent
+        ),
         setupInterceptAction: ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> =
             ConfirmationDefinition.Action.Fail(
                 cause = IllegalStateException("No action!"),
@@ -212,7 +213,7 @@ class CustomerSheetConfirmationInterceptorTest {
 
         val interceptor = CustomerSheetConfirmationInterceptor(
             clientAttributionMetadata = clientAttributionMetadata,
-            intentDataSourceProvider = { intentDataSource },
+            integrationMetadata = integrationMetadata,
             setupIntentInterceptorFactory = setupIntentInterceptorFactory,
             attachPaymentMethodInterceptorFactory = attachPaymentMethodInterceptorFactory,
         )
