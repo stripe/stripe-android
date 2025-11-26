@@ -42,10 +42,10 @@ class OnrampFlowTest {
         waitForTag(LOGIN_EMAIL_TAG)
 
         composeRule.onNodeWithTag(LOGIN_EMAIL_TAG)
-            .performTextInput("twig@lickability.net")
+            .performTextInput("onramptest@stripe.com")
 
         composeRule.onNodeWithTag(LOGIN_PASSWORD_TAG)
-            .performTextInput("test1234")
+            .performTextInput("testing1234")
 
         performClickOnNode(LOGIN_LOGIN_BUTTON_TAG)
         performClickOnNode(AUTHENTICATE_BUTTON_TAG)
