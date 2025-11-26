@@ -72,6 +72,7 @@ class GooglePayConfirmationFlowTest {
                     transactionId = "pi_12345",
                     label = null,
                     clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+                    isElements = true,
                 )
             }
         }

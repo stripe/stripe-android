@@ -4,8 +4,10 @@ import android.app.Application
 import android.content.Context
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IS_LIVE_MODE
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
@@ -16,11 +18,7 @@ import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
 
-@Module(
-    subcomponents = [
-        PaymentSheetViewModelSubcomponent::class,
-    ]
-)
+@Module
 internal abstract class PaymentSheetLauncherModule {
     @Binds
     abstract fun bindsApplicationForContext(application: Application): Context
@@ -50,6 +48,11 @@ internal abstract class PaymentSheetLauncherModule {
         @Named(IS_LIVE_MODE)
         fun isLiveMode(
             paymentConfiguration: Provider<PaymentConfiguration>
-        ): () -> Boolean = { !paymentConfiguration.get().publishableKey.contains("test") }
+        ): () -> Boolean = { paymentConfiguration.get().isLiveMode() }
+
+        @Provides
+        fun providePaymentMethodMetadata(viewModel: PaymentSheetViewModel): PaymentMethodMetadata? {
+            return viewModel.paymentMethodMetadata.value
+        }
     }
 }

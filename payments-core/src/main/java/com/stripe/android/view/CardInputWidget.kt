@@ -30,13 +30,13 @@ import androidx.core.view.doOnPreDraw
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.Cvc
 import com.stripe.android.databinding.StripeCardInputWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardParams
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -177,6 +177,68 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
     internal var viewModelStoreOwner: ViewModelStoreOwner? = null
+
+    /**
+     * A [CardParams] representing the card details and postal code if all fields are valid;
+     * otherwise `null`. If a field is invalid focus will shift to the invalid field.
+     */
+    @Deprecated("Use paymentMethodCreateParams instead")
+    override val cardParams: CardParams?
+        get() {
+            val cardNumber = cardNumberEditText.validatedCardNumber
+            val expirationDate = expiryDateEditText.validatedDate
+            val cvc = this.cvc
+
+            cardNumberEditText.shouldShowError = cardNumber == null
+            expiryDateEditText.shouldShowError = expirationDate == null
+            cvcEditText.shouldShowError = cvc == null
+            postalCodeEditText.shouldShowError =
+                (postalCodeRequired || usZipCodeRequired) &&
+                postalCodeEditText.postalCode.isNullOrBlank()
+
+            // Announce error messages for accessibility
+            currentFields
+                .filter { it.shouldShowError }
+                .forEach { editText ->
+                    editText.errorMessage?.let { errorMessage ->
+                        editText.announceForAccessibility(errorMessage)
+                    }
+                }
+
+            when {
+                cardNumber == null -> {
+                    cardNumberEditText.requestFocus()
+                }
+                expirationDate == null -> {
+                    expiryDateEditText.requestFocus()
+                }
+                cvc == null -> {
+                    cvcEditText.requestFocus()
+                }
+                postalCodeEditText.shouldShowError -> {
+                    postalCodeEditText.requestFocus()
+                }
+                else -> {
+                    shouldShowErrorIcon = false
+                    return CardParams(
+                        brand = brand,
+                        loggingTokens = setOf(LOGGING_TOKEN),
+                        number = cardNumber.value,
+                        expMonth = expirationDate.month,
+                        expYear = expirationDate.year,
+                        cvc = cvc.value,
+                        address = Address.Builder()
+                            .setPostalCode(postalCodeValue.takeUnless { it.isNullOrBlank() })
+                            .build(),
+                        networks = cardBrandView.cardParamsNetworks()
+                    )
+                }
+            }
+
+            shouldShowErrorIcon = true
+
+            return null
+        }
 
     /**
      * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;

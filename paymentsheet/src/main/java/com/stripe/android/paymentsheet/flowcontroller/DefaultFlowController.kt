@@ -113,9 +113,6 @@ internal class DefaultFlowController @Inject internal constructor(
      */
     lateinit var flowControllerComponent: FlowControllerComponent
 
-    private val initializationMode: PaymentElementLoader.InitializationMode?
-        get() = viewModel.previousConfigureRequest?.initializationMode
-
     override var shippingDetails: AddressDetails?
         get() = viewModel.state?.config?.shippingDetails
         set(value) {
@@ -465,11 +462,17 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     override fun confirm() {
-        val state = viewModel.state ?: error(
-            "FlowController must be successfully initialized " +
-                "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
-                "configureWithIntentConfiguration() before calling confirm()."
-        )
+        val state = viewModel.state
+
+        if (state == null) {
+            val error = IllegalStateException(
+                "FlowController must be successfully initialized " +
+                    "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
+                    "configureWithIntentConfiguration() before calling confirm()."
+            )
+            onPaymentResult(PaymentResult.Failed(error))
+            return
+        }
 
         if (!configurationHandler.isConfigured) {
             val error = IllegalStateException(
@@ -481,11 +484,8 @@ internal class DefaultFlowController @Inject internal constructor(
             return
         }
 
-        val initializationMode = requireNotNull(initializationMode)
-
         when (val paymentSelection = viewModel.paymentSelection) {
             is Link,
-            is PaymentSelection.New.LinkInline,
             is PaymentSelection.GooglePay,
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.CustomPaymentMethod,
@@ -494,12 +494,10 @@ internal class DefaultFlowController @Inject internal constructor(
             null -> confirmPaymentSelection(
                 paymentSelection = paymentSelection,
                 state = state.paymentSheetState,
-                initializationMode = initializationMode,
             )
             is PaymentSelection.Saved -> confirmSavedPaymentMethod(
                 paymentSelection = paymentSelection,
                 state = state.paymentSheetState,
-                initializationMode = initializationMode,
             )
         }
     }
@@ -507,7 +505,6 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun confirmSavedPaymentMethod(
         paymentSelection: PaymentSelection.Saved,
         state: PaymentSheetState.Full,
-        initializationMode: PaymentElementLoader.InitializationMode,
     ) {
         if (paymentSelection.paymentMethod.type == PaymentMethod.Type.SepaDebit &&
             viewModel.paymentSelection?.hasAcknowledgedSepaMandate == false
@@ -521,7 +518,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 )
             )
         } else {
-            confirmPaymentSelection(paymentSelection, state, initializationMode)
+            confirmPaymentSelection(paymentSelection, state)
         }
     }
 
@@ -529,7 +526,6 @@ internal class DefaultFlowController @Inject internal constructor(
     fun confirmPaymentSelection(
         paymentSelection: PaymentSelection?,
         state: PaymentSheetState.Full,
-        initializationMode: PaymentElementLoader.InitializationMode,
     ) {
         viewModelScope.launch {
             val confirmationOption = paymentSelection?.toConfirmationOption(
@@ -541,7 +537,6 @@ internal class DefaultFlowController @Inject internal constructor(
                 confirmationHandler.start(
                     arguments = ConfirmationHandler.Args(
                         confirmationOption = option,
-                        initializationMode = initializationMode,
                         paymentMethodMetadata = state.paymentMethodMetadata,
                     )
                 )
@@ -612,7 +607,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
                         deferredIntentConfirmationType = result.deferredIntentConfirmationType,
-                        isConfirmationToken = result.isConfirmationToken,
+                        intentId = result.intent.id,
                     )
                 }
 
@@ -621,6 +616,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     deferredIntentConfirmationType = result.deferredIntentConfirmationType,
                     shouldLog = false,
                     shouldResetOnCompleted = result.completedFullPaymentFlow,
+                    intentId = result.intent.id,
                 )
             }
             is ConfirmationHandler.Result.Failed -> {
@@ -666,9 +662,10 @@ internal class DefaultFlowController @Inject internal constructor(
         deferredIntentConfirmationType: DeferredIntentConfirmationType? = null,
         shouldLog: Boolean = true,
         shouldResetOnCompleted: Boolean = true,
+        intentId: String? = null,
     ) {
         if (shouldLog) {
-            logPaymentResult(paymentResult, deferredIntentConfirmationType)
+            logPaymentResult(paymentResult, deferredIntentConfirmationType, intentId)
         }
 
         val selection = viewModel.paymentSelection
@@ -714,7 +711,8 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private fun logPaymentResult(
         paymentResult: PaymentResult?,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?
+        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        intentId: String?,
     ) {
         when (paymentResult) {
             is PaymentResult.Completed -> {
@@ -722,7 +720,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
                         deferredIntentConfirmationType = deferredIntentConfirmationType,
-                        isConfirmationToken = false,
+                        intentId = intentId,
                     )
                 }
             }

@@ -1,5 +1,6 @@
 package com.stripe.android.challenge.confirmation
 
+import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -35,19 +36,24 @@ internal class IntentConfirmationChallengeUITest {
     @Test
     fun `addBridgeHandler and loadUrl are called in correct order`() = runTest {
         val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
+        val webViewClient = WebViewClient()
         var fakeWebView: FakeIntentConfirmationChallengeWebView? = null
 
         composeTestRule.setContent {
             IntentConfirmationChallengeUI(
+                hostUrl = "http://10.0.2.2:3004",
                 bridgeHandler = bridgeHandler,
                 showProgressIndicator = false,
                 webViewFactory = { context ->
                     FakeIntentConfirmationChallengeWebView(context)
                         .also { fakeWebView = it }
-                }
+                },
+                webViewClientFactory = { webViewClient }
             )
         }
 
+        assertThat(fakeWebView?.awaitCall())
+            .isEqualTo(FakeIntentConfirmationChallengeWebView.Call.SetWebViewClient(webViewClient))
         assertThat(fakeWebView?.awaitCall())
             .isEqualTo(FakeIntentConfirmationChallengeWebView.Call.AddBridgeHandler(bridgeHandler))
         assertThat(fakeWebView?.awaitCall())
@@ -57,8 +63,10 @@ internal class IntentConfirmationChallengeUITest {
 
     private fun setContent(showProgressIndicator: Boolean) = composeTestRule.setContent {
         IntentConfirmationChallengeUI(
+            hostUrl = "http://10.0.2.2:3004",
             bridgeHandler = FakeConfirmationChallengeBridgeHandler(),
-            showProgressIndicator = showProgressIndicator
+            showProgressIndicator = showProgressIndicator,
+            webViewClientFactory = { WebViewClient() }
         )
     }
 

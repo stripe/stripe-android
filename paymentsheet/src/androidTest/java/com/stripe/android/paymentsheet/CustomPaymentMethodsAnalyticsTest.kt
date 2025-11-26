@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -17,7 +18,6 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CustomPaymentMethodResult
 import com.stripe.android.paymentelement.CustomPaymentMethodResultHandler
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentsheet.utils.AdvancedFraudSignalsTestRule
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -33,7 +33,7 @@ import kotlin.time.Duration.Companion.seconds
 class CustomPaymentMethodsAnalyticsTest {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
-        validationTimeout = 1.seconds, // Analytics requests happen async.
+        validationTimeout = 5.seconds, // Analytics requests happen async.
     )
     private val applicationContext = ApplicationProvider.getApplicationContext<Context>()
 
@@ -67,18 +67,19 @@ class CustomPaymentMethodsAnalyticsTest {
             response.testBodyFromFile("elements-sessions-cpms.json")
         }
 
+        validateAnalyticsRequest(eventName = "mc_complete_init")
+        validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(
-            eventName = "mc_complete_init_default",
+            eventName = "mc_load_succeeded",
             query(urlEncode("mpe_config[custom_payment_methods]"), "cpmt_123")
         )
-        validateAnalyticsRequest(eventName = "mc_load_started")
-        validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_form_shown")
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", ""),
-            query("visible_payment_methods", Uri.encode("cpmt_123,card"))
+            query("visible_payment_methods", Uri.encode("cpmt_123,card")),
+            query("payment_method_layout", "horizontal"),
         )
 
         context.presentPaymentSheet {

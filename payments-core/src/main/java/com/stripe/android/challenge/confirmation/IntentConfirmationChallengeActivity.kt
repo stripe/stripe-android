@@ -41,8 +41,17 @@ internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
             }
 
             IntentConfirmationChallengeUI(
+                hostUrl = HOST_URL,
                 bridgeHandler = viewModel.bridgeHandler,
-                showProgressIndicator = showProgressIndicator
+                showProgressIndicator = showProgressIndicator,
+                webViewClientFactory = {
+                    IntentConfirmationWebViewClient(
+                        hostUrl = HOST_URL,
+                        errorHandler = { error ->
+                            viewModel.handleWebViewError(error)
+                        }
+                    )
+                }
             )
         }
     }
@@ -64,6 +73,7 @@ internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
     companion object {
         internal const val EXTRA_ARGS = "intent_confirmation_challenge_args"
         internal const val RESULT_COMPLETE = 4639
+        internal const val HOST_URL = "https://b.stripecdn.com/mobile-confirmation-challenge/assets/index.html?v=1"
 
         internal fun createIntent(
             context: Context,

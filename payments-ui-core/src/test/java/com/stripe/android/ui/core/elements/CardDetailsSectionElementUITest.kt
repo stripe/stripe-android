@@ -140,7 +140,6 @@ internal class CardDetailsSectionElementUITest {
             collectName = false,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             cardBrandFilter = DefaultCardBrandFilter,
-            elementsSessionId = "test_session",
             automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper
         )
         return output

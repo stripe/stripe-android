@@ -42,12 +42,22 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_card_type_unknown">%1$s Kort</string>
   <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
   <string name="stripe_link_confirm_payment_title">Bekräfta betalningsuppgifter</string>
-  <!-- Email suggestion prompt shown when we detect a typo. The %1$s is a placeholder for the suggested email address. -->
-  <string name="stripe_link_email_suggestion">Menade du %1$s?</string>
   <!-- CTA text for accepting the suggested email correction -->
   <string name="stripe_link_email_suggestion_update">Ja, uppdatera</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Logga in eller registrera dig</string>
+  <!-- Title for the address field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_address_field_title">Adress</string>
+  <!-- Text displayed in a confirmation button when gathering kyc information -->
+  <string name="stripe_link_onramp_kyc_verification_confirm_button_text">Bekräfta</string>
+  <!-- Title for the date of birth field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_dob_field_title">Födelsedatum</string>
+  <!-- Title for the name field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_name_field_title">Namn</string>
+  <!-- Title of the screen responsible for confirming kyc information -->
+  <string name="stripe_link_onramp_kyc_verification_screen_title">Bekräfta informationen</string>
+  <!-- Title for the SSN field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_ssn_field_title">Sista 4 siffrorna i SSN</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Godkänn och fortsätt</string>
   <!-- Title for the Link signup screen -->

@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -232,7 +233,7 @@ private fun LazyListScope.loadingContent() {
     item {
         Text(
             modifier = Modifier.fillMaxWidth(),
-            text = "Retrieving accounts",
+            text = stringResource(R.string.stripe_account_picker_retrieving_accounts),
             style = typography.headingXLarge
         )
         Spacer(modifier = Modifier.size(8.dp))

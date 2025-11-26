@@ -237,6 +237,14 @@ public final class com/stripe/android/GooglePayJsonFactory$ShippingAddressParame
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/GooglePayJsonFactory$SoftwareInfo$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/GooglePayJsonFactory$SoftwareInfo;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/GooglePayJsonFactory$SoftwareInfo;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/GooglePayJsonFactory$TransactionInfo : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -891,6 +899,22 @@ public final class com/stripe/android/analytics/Session$Owner$Creator : android/
 public abstract interface class com/stripe/android/cards/CardAccountRangeRepository$Factory {
 	public abstract fun create ()Lcom/stripe/android/cards/CardAccountRangeRepository;
 	public abstract fun createWithStripeRepository (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;)Lcom/stripe/android/cards/CardAccountRangeRepository;
+}
+
+public final class com/stripe/android/challenge/confirmation/BridgeErrorParams$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/confirmation/BridgeErrorParams;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/challenge/confirmation/BridgeErrorParams;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/challenge/confirmation/BridgeSuccessParams$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/confirmation/BridgeSuccessParams;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/challenge/confirmation/BridgeSuccessParams;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/challenge/confirmation/IntentConfirmationChallengeActivityResult$Failed$Creator : android/os/Parcelable$Creator {
@@ -2126,6 +2150,7 @@ public final class com/stripe/android/model/ConfirmationToken$PaymentMethodPrevi
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final field allowRedisplay Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;
 	public final field billingDetails Lcom/stripe/android/model/PaymentMethod$BillingDetails;
+	public final field card Lcom/stripe/android/model/PaymentMethod$Card;
 	public final field customerId Ljava/lang/String;
 	public final field type Lcom/stripe/android/model/PaymentMethod$Type;
 	public final fun describeContents ()I
@@ -6582,6 +6607,7 @@ public final class com/stripe/android/view/CardFormView : android/widget/LinearL
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getBrand ()Lcom/stripe/android/model/CardBrand;
+	public final fun getCardParams ()Lcom/stripe/android/model/CardParams;
 	public final fun getOnBehalfOf ()Ljava/lang/String;
 	public final fun getPaymentMethodCreateParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun setCardValidCallback (Lcom/stripe/android/view/CardValidCallback;)V
@@ -6616,6 +6642,7 @@ public final class com/stripe/android/view/CardInputWidget : android/widget/Line
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
 	public final fun getBrand ()Lcom/stripe/android/model/CardBrand;
+	public fun getCardParams ()Lcom/stripe/android/model/CardParams;
 	public final fun getOnBehalfOf ()Ljava/lang/String;
 	public fun getPaymentMethodCard ()Lcom/stripe/android/model/PaymentMethodCreateParams$Card;
 	public fun getPaymentMethodCreateParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -6652,6 +6679,7 @@ public final class com/stripe/android/view/CardMultilineWidget : android/widget/
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
 	public final synthetic fun getBrand ()Lcom/stripe/android/model/CardBrand;
+	public fun getCardParams ()Lcom/stripe/android/model/CardParams;
 	public final fun getOnBehalfOf ()Ljava/lang/String;
 	public final fun getPaymentMethodBillingDetails ()Lcom/stripe/android/model/PaymentMethod$BillingDetails;
 	public final fun getPaymentMethodBillingDetailsBuilder ()Lcom/stripe/android/model/PaymentMethod$BillingDetails$Builder;

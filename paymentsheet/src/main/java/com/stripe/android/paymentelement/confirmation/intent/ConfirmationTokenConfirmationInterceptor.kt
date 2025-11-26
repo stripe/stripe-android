@@ -133,7 +133,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     ConfirmationDefinition.Action.Complete(
                         intent = intent,
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
-                        isConfirmationToken = true,
                         completedFullPaymentFlow = true,
                     )
                 } else {
@@ -172,15 +171,13 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 ConfirmationDefinition.Action.Complete(
                     intent = intent,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                    isConfirmationToken = true,
                     completedFullPaymentFlow = true,
                 )
             } else if (intent.requiresAction()) {
                 ConfirmationDefinition.Action.Launch<Args>(
-                    launcherArguments = Args.NextAction(clientSecret, intent),
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                    isConfirmationToken = true,
+                    launcherArguments = Args.NextAction(intent),
                     receivesResultInProcess = false,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                 )
             } else {
                 confirmActionHelper.createConfirmAction(
@@ -188,7 +185,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     intent,
                     shippingValues,
                     isDeferred = true,
-                    isConfirmationToken = true,
                 ) {
                     create(
                         confirmationTokenId = confirmationTokenId,

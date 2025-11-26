@@ -71,8 +71,6 @@ internal data class PaymentMethodMetadata(
     val paymentMethodIncentive: PaymentMethodIncentive?,
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val cardBrandFilter: CardBrandFilter,
-    val elementsSessionId: String,
-    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay>,
     val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
     val passiveCaptchaParams: PassiveCaptchaParams?,
@@ -81,6 +79,8 @@ internal data class PaymentMethodMetadata(
     val attestOnIntentConfirmation: Boolean,
     val appearance: PaymentSheet.Appearance,
     val onBehalfOf: String?,
+    val integrationMetadata: IntegrationMetadata,
+    val analyticsMetadata: AnalyticsMetadata,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -324,6 +324,8 @@ internal data class PaymentMethodMetadata(
             customerMetadata: CustomerMetadata?,
             initializationMode: PaymentElementLoader.InitializationMode,
             clientAttributionMetadata: ClientAttributionMetadata,
+            integrationMetadata: IntegrationMetadata,
+            analyticsMetadata: AnalyticsMetadata,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
@@ -360,8 +362,6 @@ internal data class PaymentMethodMetadata(
                 displayableCustomPaymentMethods = elementsSession.toDisplayableCustomPaymentMethods(configuration),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
-                elementsSessionId = elementsSession.elementsSessionId,
-                shopPayConfiguration = configuration.shopPayConfiguration,
                 termsDisplay = configuration.termsDisplay,
                 forceSetupFutureUseBehaviorAndNewMandate = elementsSession
                     .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
@@ -371,6 +371,8 @@ internal data class PaymentMethodMetadata(
                 attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation,
                 appearance = configuration.appearance,
                 onBehalfOf = elementsSession.onBehalfOf,
+                integrationMetadata = integrationMetadata,
+                analyticsMetadata = analyticsMetadata,
             )
         }
 
@@ -414,9 +416,7 @@ internal data class PaymentMethodMetadata(
                 externalPaymentMethodSpecs = emptyList(),
                 displayableCustomPaymentMethods = emptyList(),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
-                elementsSessionId = elementsSession.elementsSessionId,
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
-                shopPayConfiguration = null,
                 termsDisplay = emptyMap(),
                 forceSetupFutureUseBehaviorAndNewMandate = elementsSession
                     .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
@@ -433,6 +433,8 @@ internal data class PaymentMethodMetadata(
                 attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation,
                 appearance = configuration.appearance,
                 onBehalfOf = elementsSession.onBehalfOf,
+                integrationMetadata = IntegrationMetadata.CustomerSheet,
+                analyticsMetadata = AnalyticsMetadata(emptyMap()), // This is unused in customer sheet.
             )
         }
     }

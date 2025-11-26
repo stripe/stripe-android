@@ -13,7 +13,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedConfigurationHandler.ConfigurationCache
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.Dispatchers
@@ -293,12 +292,10 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
             val loader = FakePaymentElementLoader()
             val savedStateHandle = SavedStateHandle()
             val sheetStateHolder = SheetStateHolder(savedStateHandle)
-            val eventReporter = FakeEventReporter()
             val handler = DefaultEmbeddedConfigurationHandler(
                 loader,
                 savedStateHandle,
                 sheetStateHolder,
-                eventReporter,
                 internalRowSelectionCallback = { null },
             )
             Scenario(
@@ -360,7 +357,7 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
 
         override suspend fun load(
             initializationMode: PaymentElementLoader.InitializationMode,
-            configuration: CommonConfiguration,
+            integrationConfiguration: PaymentElementLoader.Configuration,
             metadata: PaymentElementLoader.Metadata,
         ): Result<PaymentElementLoader.State> {
             loadCalledTurbine.add(initializationMode)

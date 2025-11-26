@@ -19,8 +19,6 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.manage.ManageActivity
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.paymentelementtestpages.FormPage
@@ -83,12 +81,6 @@ internal class FormActivityTest {
         hasSavedPaymentMethods: Boolean = false,
         configuration: EmbeddedPaymentElement.Configuration =
             EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-        intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                amount = 5000,
-                currency = "USD",
-            ),
-        ),
         block: () -> Unit,
     ) {
         ActivityScenario.launchActivityForResult<FormActivity>(
@@ -99,7 +91,6 @@ internal class FormActivityTest {
                     paymentMethodMetadata = paymentMethodMetadata,
                     hasSavedPaymentMethods = hasSavedPaymentMethods,
                     configuration = configuration,
-                    initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
                     paymentSelection = null,

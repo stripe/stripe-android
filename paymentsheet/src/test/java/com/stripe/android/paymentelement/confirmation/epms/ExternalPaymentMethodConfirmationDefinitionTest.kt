@@ -94,7 +94,6 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
             confirmationOption = EPM_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = PaymentResult.Completed,
         )
 
@@ -116,7 +115,6 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
             confirmationOption = EPM_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = PaymentResult.Failed(exception),
         )
 
@@ -137,7 +135,6 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
             confirmationOption = EPM_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = PaymentResult.Canceled,
         )
 

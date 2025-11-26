@@ -45,7 +45,6 @@ class ExternalPaymentMethodConfirmationFlowTest {
         definitionResult = ConfirmationDefinition.Result.Succeeded(
             intent = PAYMENT_INTENT,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
         )
     )
 

@@ -23,12 +23,12 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.databinding.StripeCardMultilineWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardParams
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -158,6 +158,39 @@ class CardMultilineWidget @JvmOverloads constructor(
         (postalCodeRequired || usZipCodeRequired) && shouldShowPostalCode
 
     internal var viewModelStoreOwner: ViewModelStoreOwner? = null
+
+    /**
+     * A [CardParams] representing the card details and postal code if all fields are valid;
+     * otherwise `null`
+     */
+    @Deprecated("Use paymentMethodCreateParams instead")
+    override val cardParams: CardParams?
+        get() {
+            if (!validateAllFields()) {
+                shouldShowErrorIcon = true
+                return null
+            }
+
+            shouldShowErrorIcon = false
+
+            val expirationDate = requireNotNull(expiryDateEditText.validatedDate)
+            val cvcValue = cvcEditText.text?.toString()
+            val postalCode = postalCodeEditText.text?.toString()
+                .takeIf { shouldShowPostalCode }
+
+            return CardParams(
+                brand = brand,
+                loggingTokens = setOf(CARD_MULTILINE_TOKEN),
+                number = validatedCardNumber?.value.orEmpty(),
+                expMonth = expirationDate.month,
+                expYear = expirationDate.year,
+                cvc = cvcValue,
+                address = Address.Builder()
+                    .setPostalCode(postalCode.takeUnless { it.isNullOrBlank() })
+                    .build(),
+                networks = cardBrandView.cardParamsNetworks()
+            )
+        }
 
     /**
      * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;

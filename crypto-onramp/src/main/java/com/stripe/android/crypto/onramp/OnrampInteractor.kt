@@ -408,7 +408,7 @@ internal class OnrampInteractor @Inject constructor(
                         // Create a crypto payment token
                         cryptoApiRepository.createPaymentToken(
                             cryptoCustomerId = cryptoCustomerId,
-                            paymentMethod = result.paymentMethod.id!!,
+                            paymentMethod = result.paymentMethod.id,
                         )
                     }
                     is LinkController.CreatePaymentMethodResult.Failed -> {

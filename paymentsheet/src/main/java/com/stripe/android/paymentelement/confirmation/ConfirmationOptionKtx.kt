@@ -24,7 +24,7 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.ExternalPaymentMethod -> toConfirmationOption()
         is PaymentSelection.CustomPaymentMethod -> toConfirmationOption(configuration)
         is PaymentSelection.New.USBankAccount -> toConfirmationOption()
-        is PaymentSelection.New.LinkInline -> toConfirmationOption(linkConfiguration)
+        is PaymentSelection.New.Card -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.New -> toConfirmationOption()
         is PaymentSelection.GooglePay -> toConfirmationOption(
             configuration,
@@ -66,10 +66,10 @@ private fun PaymentSelection.New.USBankAccount.toConfirmationOption(): PaymentMe
     }
 }
 
-private fun PaymentSelection.New.LinkInline.toConfirmationOption(
+private fun PaymentSelection.New.Card.toConfirmationOption(
     linkConfiguration: LinkConfiguration?,
-): LinkInlineSignupConfirmationOption? {
-    return linkConfiguration?.let {
+): ConfirmationHandler.Option {
+    return if (linkInput != null && linkConfiguration != null) {
         LinkInlineSignupConfirmationOption(
             createParams = paymentMethodCreateParams,
             optionsParams = paymentMethodOptionsParams,
@@ -83,8 +83,10 @@ private fun PaymentSelection.New.LinkInline.toConfirmationOption(
                     LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest
             },
             linkConfiguration = linkConfiguration,
-            userInput = input,
+            userInput = linkInput,
         )
+    } else {
+        toConfirmationOption()
     }
 }
 

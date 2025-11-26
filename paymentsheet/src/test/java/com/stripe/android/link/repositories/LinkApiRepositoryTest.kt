@@ -5,7 +5,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.FakeConsumersApiService
-import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
@@ -599,7 +598,7 @@ class LinkApiRepositoryTest {
         )
 
         assertThat(result.isSuccess).isTrue()
-        val savedLinkPaymentDetails = result.getOrThrow() as LinkPaymentDetails.Saved
+        val savedLinkPaymentDetails = result.getOrThrow()
 
         verify(stripeRepository).sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionSecret,
@@ -616,7 +615,7 @@ class LinkApiRepositoryTest {
                 ConsumerPaymentDetails.Passthrough(
                     id = paymentDetailsId,
                     last4 = cardPaymentMethodCreateParams.cardLast4().orEmpty(),
-                    paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!,
+                    paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
                     billingEmailAddress = "jenny.rosen@example.com",
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
                         name = "Jenny Rosen",
@@ -632,7 +631,7 @@ class LinkApiRepositoryTest {
         assertThat(savedLinkPaymentDetails.paymentMethodCreateParams)
             .isEqualTo(
                 PaymentMethodCreateParams.createLink(
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!,
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
                     consumerSessionSecret,
                     PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                     extraParams = mapOf("card" to mapOf("cvc" to "123")),

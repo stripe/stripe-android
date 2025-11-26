@@ -5,6 +5,7 @@ import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.wallets.Wallet
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -95,7 +96,10 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             }
         }
 
-        return builder.build()
+        val paymentMethod = builder.build()
+        return paymentMethod.copy(
+            isLinkPassthroughMode = paymentMethod.card?.wallet?.walletType == Wallet.Type.Link,
+        )
     }
 
     internal class BillingDetails : ModelJsonParser<PaymentMethod.BillingDetails> {

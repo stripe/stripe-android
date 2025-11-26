@@ -159,6 +159,7 @@ public final class com/stripe/android/customersheet/CustomerSheet$Configuration$
 	public final fun defaultBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun googlePayEnabled (Z)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun headerTextForSelectionScreen (Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public final fun opensCardScannerAutomatically (Z)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun paymentMethodOrder (Ljava/util/List;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun preferredNetworks (Ljava/util/List;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 }
@@ -755,6 +756,38 @@ public final class com/stripe/android/link/verification/VerificationState$Render
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/lpmfoundations/paymentmethod/AnalyticsMetadata$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/AnalyticsMetadata;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/AnalyticsMetadata;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/lpmfoundations/paymentmethod/AnalyticsMetadata$Value$Nested$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/AnalyticsMetadata$Value$Nested;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/AnalyticsMetadata$Value$Nested;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/lpmfoundations/paymentmethod/AnalyticsMetadata$Value$SimpleBoolean$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/AnalyticsMetadata$Value$SimpleBoolean;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/AnalyticsMetadata$Value$SimpleBoolean;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/lpmfoundations/paymentmethod/AnalyticsMetadata$Value$SimpleString$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/AnalyticsMetadata$Value$SimpleString;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/AnalyticsMetadata$Value$SimpleString;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/lpmfoundations/paymentmethod/CustomerMetadata$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/CustomerMetadata;
@@ -776,6 +809,54 @@ public final class com/stripe/android/lpmfoundations/paymentmethod/DisplayableCu
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/DisplayableCustomPaymentMethod;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/DisplayableCustomPaymentMethod;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$CryptoOnramp$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$CryptoOnramp;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$CryptoOnramp;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$CustomerSheet$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$CustomerSheet;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$CustomerSheet;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$DeferredIntentWithConfirmationToken$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$DeferredIntentWithConfirmationToken;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$DeferredIntentWithConfirmationToken;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$DeferredIntentWithPaymentMethod$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$DeferredIntentWithPaymentMethod;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$DeferredIntentWithPaymentMethod;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$DeferredIntentWithSharedPaymentToken$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$DeferredIntentWithSharedPaymentToken;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$DeferredIntentWithSharedPaymentToken;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$IntentFirst$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$IntentFirst;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/IntegrationMetadata$IntentFirst;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -1013,6 +1094,7 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Conf
 	public final fun formSheetAction (Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$FormSheetAction;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun googlePay (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun link (Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun opensCardScannerAutomatically (Z)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun paymentMethodOrder (Ljava/util/List;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun preferredNetworks (Ljava/util/List;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun primaryButtonLabel (Ljava/lang/String;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
@@ -1676,6 +1758,20 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Builder {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Builder$Companion;
+	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;
+	public final fun checkmarkColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Builder;
+	public final fun separatorColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Builder;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Builder$Companion {
+	public final fun dark ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Builder;
+	public final fun light ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Builder;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;
@@ -1729,6 +1825,20 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Builder {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Builder$Companion;
+	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors;
+	public final fun disclosureColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Builder;
+	public final fun separatorColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Builder;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Builder$Companion {
+	public final fun dark ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Builder;
+	public final fun light ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Builder;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithDisclosure$Colors;
@@ -1779,6 +1889,21 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Builder {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Builder$Companion;
+	public synthetic fun <init> (IIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;
+	public final fun selectedColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Builder;
+	public final fun separatorColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Builder;
+	public final fun unselectedColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Builder;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Builder$Companion {
+	public final fun dark ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Builder;
+	public final fun light ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Builder;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors$Creator : android/os/Parcelable$Creator {
@@ -2016,6 +2141,40 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Colors : android
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$Colors$Builder {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder$Companion;
+	public synthetic fun <init> (IIIIIIIIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun appBarIcon (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun appBarIcon-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Colors;
+	public final fun component (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun component-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun componentBorder (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun componentBorder-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun componentDivider (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun componentDivider-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun error (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun error-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun onComponent (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun onComponent-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun onSurface (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun onSurface-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun placeholderText (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun placeholderText-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun primary (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun primary-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun subtitle (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun subtitle-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun surface (I)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun surface-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Colors$Builder$Companion {
+	public final fun dark ()Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+	public final fun light ()Lcom/stripe/android/paymentsheet/PaymentSheet$Colors$Builder;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$Colors$Companion {
 	public final fun getDefaultDark ()Lcom/stripe/android/paymentsheet/PaymentSheet$Colors;
 	public final fun getDefaultLight ()Lcom/stripe/android/paymentsheet/PaymentSheet$Colors;
@@ -2073,6 +2232,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration$Bu
 	public final fun googlePlacesApiKey (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun link (Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun merchantDisplayName (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun opensCardScannerAutomatically (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun paymentMethodLayout (Lcom/stripe/android/paymentsheet/PaymentSheet$PaymentMethodLayout;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun paymentMethodOrder (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun preferredNetworks (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
@@ -2561,6 +2721,28 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonCol
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder$Companion;
+	public synthetic fun <init> (Ljava/lang/Integer;IIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun background (Ljava/lang/Integer;)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun background-Y2TPw74 (Landroidx/compose/ui/graphics/Color;)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun border (I)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun border-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
+	public final fun onBackground (I)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun onBackground-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun onSuccessBackgroundColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun onSuccessBackgroundColor-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun successBackgroundColor (I)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun successBackgroundColor-8_81llA (J)Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder$Companion {
+	public final fun dark ()Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+	public final fun light ()Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Builder;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors$Companion {
 	public final fun getDefaultDark ()Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
 	public final fun getDefaultLight ()Lcom/stripe/android/paymentsheet/PaymentSheet$PrimaryButtonColors;
@@ -2633,6 +2815,18 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Shapes : android
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Shapes$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun borderStrokeWidthDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes$Builder;
+	public final fun borderStrokeWidthDp (Landroid/content/Context;I)Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes$Builder;
+	public final fun bottomSheetCornerRadiusDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes$Builder;
+	public final fun bottomSheetCornerRadiusDp (Landroid/content/Context;I)Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes$Builder;
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes;
+	public final fun cornerRadiusDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes$Builder;
+	public final fun cornerRadiusDp (Landroid/content/Context;I)Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes$Builder;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Shapes$Companion {
@@ -2832,6 +3026,15 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Typography : and
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Typography$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Typography;
+	public final fun custom (Lcom/stripe/android/paymentsheet/PaymentSheet$Typography$Custom;)Lcom/stripe/android/paymentsheet/PaymentSheet$Typography$Builder;
+	public final fun fontResId (Ljava/lang/Integer;)Lcom/stripe/android/paymentsheet/PaymentSheet$Typography$Builder;
+	public final fun sizeScaleFactor (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Typography$Builder;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Typography$Companion {
@@ -3547,14 +3750,6 @@ public final class com/stripe/android/paymentsheet/model/PaymentSelection$New$Ge
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/model/PaymentSelection$New$LinkInline$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$LinkInline;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$LinkInline;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/paymentsheet/model/PaymentSelection$New$USBankAccount$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$New$USBankAccount;
@@ -3824,6 +4019,14 @@ public final class com/stripe/android/paymentsheet/state/LinkState$Creator : and
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/LinkState;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/LinkState;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/state/PaymentElementLoader$InitializationMode$CryptoOnramp$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/PaymentElementLoader$InitializationMode$CryptoOnramp;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/PaymentElementLoader$InitializationMode$CryptoOnramp;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

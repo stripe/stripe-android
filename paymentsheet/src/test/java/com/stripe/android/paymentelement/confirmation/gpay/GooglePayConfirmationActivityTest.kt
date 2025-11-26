@@ -33,7 +33,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Rule
@@ -258,9 +257,9 @@ internal class GooglePayConfirmationActivityTest {
         val PAYMENT_INTENT = PaymentIntentFactory.create(
             paymentMethodOptionsJsonString = """
                 {"card": {"require_cvc_recollection": true}}
-            """.trimIndent()
-        ).copy(
+            """.trimIndent(),
             id = "pm_1",
+            clientSecret = "pi_123_secret_123",
             amount = 5000,
             currency = "CAD",
         )
@@ -281,9 +280,6 @@ internal class GooglePayConfirmationActivityTest {
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123"
-            ),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PAYMENT_INTENT,
                 shippingDetails = AddressDetails(),

@@ -38,7 +38,7 @@ internal class IntentConfirmationDefinition(
         val interceptor: IntentConfirmationInterceptor
         try {
             interceptor = intentConfirmationInterceptorFactory.create(
-                initializationMode = confirmationArgs.initializationMode,
+                integrationMetadata = confirmationArgs.paymentMethodMetadata.integrationMetadata,
                 customerId = paymentMethodMetadata.customerMetadata?.id,
                 ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.ephemeralKeySecret,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
@@ -96,14 +96,12 @@ internal class IntentConfirmationDefinition(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        isConfirmationToken: Boolean,
         result: InternalPaymentResult
     ): ConfirmationDefinition.Result {
         return when (result) {
             is InternalPaymentResult.Completed -> ConfirmationDefinition.Result.Succeeded(
                 intent = result.intent,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
-                isConfirmationToken = isConfirmationToken,
             )
             is InternalPaymentResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,
@@ -132,7 +130,6 @@ internal class IntentConfirmationDefinition(
 
     sealed interface Args {
         data class NextAction(
-            val clientSecret: String,
             val intent: StripeIntent,
         ) : Args
 

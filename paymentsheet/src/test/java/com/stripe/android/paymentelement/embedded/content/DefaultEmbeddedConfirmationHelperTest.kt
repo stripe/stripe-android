@@ -18,7 +18,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.CoroutineScope
@@ -57,7 +56,6 @@ internal class DefaultEmbeddedConfirmationHelperTest {
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
         assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNull()
@@ -125,14 +123,6 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         return EmbeddedConfirmationStateHolder.State(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             selection = PaymentSelection.GooglePay,
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 5000,
-                        currency = "USD",
-                    ),
-                ),
-            ),
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
                 .googlePay(
                     PaymentSheet.GooglePayConfiguration(

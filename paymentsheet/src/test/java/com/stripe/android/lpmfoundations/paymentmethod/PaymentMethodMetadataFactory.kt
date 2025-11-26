@@ -2,12 +2,13 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -45,12 +46,10 @@ internal object PaymentMethodMetadataFactory {
         defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(),
         paymentMethodIncentive: PaymentMethodIncentive? = null,
         isPaymentMethodSetAsDefaultEnabled: Boolean = IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
-        elementsSessionId: String = "session_1234",
         financialConnectionsAvailability: FinancialConnectionsAvailability? = FinancialConnectionsAvailability.Lite,
         customerMetadataPermissions: CustomerMetadata.Permissions =
             PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
         customerSessionClientSecret: String? = null,
-        shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = SHOP_PAY_CONFIGURATION,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
         passiveCaptchaParams: PassiveCaptchaParams? = null,
@@ -59,6 +58,9 @@ internal object PaymentMethodMetadataFactory {
         attestOnIntentConfirmation: Boolean = false,
         appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
         onBehalfOf: String? = null,
+        integrationMetadata: IntegrationMetadata = stripeIntent.integrationMetadata(),
+        sellerBusinessName: String? = null,
+        analyticsMetadata: AnalyticsMetadata = AnalyticsMetadata(emptyMap()),
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -70,7 +72,7 @@ internal object PaymentMethodMetadataFactory {
             paymentMethodOrder = paymentMethodOrder,
             cbcEligibility = cbcEligibility,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-            sellerBusinessName = null,
+            sellerBusinessName = sellerBusinessName,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             customerMetadata = if (hasCustomerConfiguration) {
@@ -92,9 +94,7 @@ internal object PaymentMethodMetadataFactory {
             linkStateResult = linkState,
             cardBrandFilter = cardBrandFilter,
             paymentMethodIncentive = paymentMethodIncentive,
-            elementsSessionId = elementsSessionId,
             financialConnectionsAvailability = financialConnectionsAvailability,
-            shopPayConfiguration = shopPayConfiguration,
             termsDisplay = termsDisplay,
             forceSetupFutureUseBehaviorAndNewMandate = forceSetupFutureUseBehaviorAndNewMandate,
             passiveCaptchaParams = passiveCaptchaParams,
@@ -104,6 +104,8 @@ internal object PaymentMethodMetadataFactory {
             attestOnIntentConfirmation = attestOnIntentConfirmation,
             appearance = appearance,
             onBehalfOf = onBehalfOf,
+            integrationMetadata = integrationMetadata,
+            analyticsMetadata = analyticsMetadata,
         )
     }
 
@@ -111,5 +113,30 @@ internal object PaymentMethodMetadataFactory {
         val inputStream = PaymentMethodMetadataFactory::class.java.classLoader!!.getResourceAsStream("lpms.json")
         val specsString = inputStream.bufferedReader().use { it.readText() }
         return LpmSerializer.deserializeList(specsString).getOrThrow()
+    }
+
+    private fun StripeIntent.integrationMetadata(): IntegrationMetadata {
+        clientSecret?.let { return IntegrationMetadata.IntentFirst(it) }
+        return when (this) {
+            is PaymentIntent -> {
+                IntegrationMetadata.DeferredIntentWithPaymentMethod(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            amount = amount ?: 5000,
+                            currency = currency ?: "usd"
+                        )
+                    )
+                )
+            }
+            is SetupIntent -> {
+                IntegrationMetadata.DeferredIntentWithPaymentMethod(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Setup(
+                            currency = "usd"
+                        )
+                    )
+                )
+            }
+        }
     }
 }

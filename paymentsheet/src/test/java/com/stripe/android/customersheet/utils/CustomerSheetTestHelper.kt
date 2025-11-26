@@ -28,6 +28,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -42,7 +43,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -88,7 +89,7 @@ internal object CustomerSheetTestHelper {
         intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory =
             object : IntentConfirmationInterceptor.Factory {
                 override suspend fun create(
-                    initializationMode: PaymentElementLoader.InitializationMode,
+                    integrationMetadata: IntegrationMetadata,
                     customerId: String?,
                     ephemeralKeySecret: String?,
                     clientAttributionMetadata: ClientAttributionMetadata,
@@ -112,7 +113,7 @@ internal object CustomerSheetTestHelper {
             permissions = customerPermissions,
         ),
         errorReporter: ErrorReporter = FakeErrorReporter(),
-        confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
+        confirmationHandler: ConfirmationHandler? = null,
     ): CustomerSheetViewModel {
         val savedStateHandle = SavedStateHandle()
         return CustomerSheetViewModel(
@@ -129,45 +130,48 @@ internal object CustomerSheetTestHelper {
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
             productUsage = emptySet(),
-            confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(
-                paymentElementCallbackIdentifier = "CustomerSheetTestIdentifier",
-                intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
-                paymentConfiguration = paymentConfiguration,
-                bacsMandateConfirmationLauncherFactory = {
-                    FakeBacsMandateConfirmationLauncher()
-                },
-                stripePaymentLauncherAssistedFactory = object : StripePaymentLauncherAssistedFactory {
-                    override fun create(
-                        publishableKey: () -> String,
-                        stripeAccountId: () -> String?,
-                        statusBarColor: Int?,
-                        includePaymentSheetNextHandlers: Boolean,
-                        hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
-                    ): StripePaymentLauncher {
-                        return mock()
-                    }
-                },
-                googlePayPaymentMethodLauncherFactory = object : GooglePayPaymentMethodLauncherFactory {
-                    override fun create(
-                        lifecycleScope: CoroutineScope,
-                        config: GooglePayPaymentMethodLauncher.Config,
-                        readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
-                        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-                        skipReadyCheck: Boolean,
-                        cardBrandFilter: CardBrandFilter
-                    ): GooglePayPaymentMethodLauncher = mock()
-                },
-                statusBarColor = null,
-                savedStateHandle = savedStateHandle,
-                errorReporter = FakeErrorReporter(),
-                linkLauncher = RecordingLinkPaymentLauncher.noOp(),
-                linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-                cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp()
-            ),
+            confirmationHandlerFactory = confirmationHandler?.let { ConfirmationHandler.Factory { _ -> it } }
+                ?: createTestConfirmationHandlerFactory(
+                    paymentElementCallbackIdentifier = "CustomerSheetTestIdentifier",
+                    intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
+                    paymentConfiguration = paymentConfiguration,
+                    bacsMandateConfirmationLauncherFactory = {
+                        FakeBacsMandateConfirmationLauncher()
+                    },
+                    stripePaymentLauncherAssistedFactory = object : StripePaymentLauncherAssistedFactory {
+                        override fun create(
+                            publishableKey: () -> String,
+                            stripeAccountId: () -> String?,
+                            statusBarColor: Int?,
+                            includePaymentSheetNextHandlers: Boolean,
+                            hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
+                        ): StripePaymentLauncher {
+                            return mock()
+                        }
+                    },
+                    googlePayPaymentMethodLauncherFactory = object : GooglePayPaymentMethodLauncherFactory {
+                        override fun create(
+                            lifecycleScope: CoroutineScope,
+                            config: GooglePayPaymentMethodLauncher.Config,
+                            readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
+                            activityResultLauncher:
+                            ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
+                            skipReadyCheck: Boolean,
+                            cardBrandFilter: CardBrandFilter
+                        ): GooglePayPaymentMethodLauncher = mock()
+                    },
+                    statusBarColor = null,
+                    savedStateHandle = savedStateHandle,
+                    errorReporter = FakeErrorReporter(),
+                    linkLauncher = RecordingLinkPaymentLauncher.noOp(),
+                    linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+                    cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp()
+                ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
             errorReporter = errorReporter,
             savedStateHandle = savedStateHandle,
+            userFacingLogger = FakeUserFacingLogger(),
         ).apply {
             registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
         }

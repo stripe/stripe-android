@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -26,7 +27,6 @@ import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationD
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
@@ -49,12 +49,12 @@ internal data class InterceptorTestScenario(
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
 internal fun runInterceptorScenario(
-    initializationMode: PaymentElementLoader.InitializationMode,
+    integrationMetadata: IntegrationMetadata,
     scenario: InterceptorTestScenario = InterceptorTestScenario(),
     test: suspend (interceptor: IntentConfirmationInterceptor) -> Unit
 ) = runTest {
     val interceptor = createIntentConfirmationInterceptor(
-        initializationMode = initializationMode,
+        integrationMetadata = integrationMetadata,
         ephemeralKeySecret = scenario.ephemeralKeySecret,
         stripeRepository = scenario.stripeRepository,
         publishableKeyProvider = scenario.publishableKeyProvider,

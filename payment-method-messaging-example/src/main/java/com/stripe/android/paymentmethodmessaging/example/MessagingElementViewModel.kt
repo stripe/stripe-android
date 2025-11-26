@@ -24,14 +24,15 @@ internal class MessagingElementViewModel(
     private val _config = MutableStateFlow(Config())
     val config: StateFlow<Config> = _config.asStateFlow()
 
+    private val _appearanceSettings = MutableStateFlow(AppearanceSettings())
+    val appearanceSetting: StateFlow<AppearanceSettings> = _appearanceSettings
+
     private val settings = Settings(getApplication())
 
     fun configurePaymentMethodMessagingElement() {
         val pmTypes = config.value.paymentMethods.mapNotNull {
             PaymentMethod.Type.fromCode(it)
         }
-
-        initPaymentConfig()
 
         viewModelScope.launch {
             _configureResult.value = paymentMethodMessagingElement.configure(
@@ -47,10 +48,15 @@ internal class MessagingElementViewModel(
 
     fun updateConfigState(config: Config) {
         _config.value = config
+        initPaymentConfig()
+    }
+
+    fun updateAppearance(appearanceSettings: AppearanceSettings) {
+        _appearanceSettings.value = appearanceSettings
     }
 
     private fun initPaymentConfig() {
-        val pk = _config.value.publishableKey.ifBlank {
+        val pk = _config.value.publishableKey.key.ifBlank {
             settings.publishableKey
         }
         val accountId = _config.value.stripeAccountId?.ifBlank {
@@ -65,7 +71,7 @@ internal class MessagingElementViewModel(
         val locale: String = "en",
         val countryCode: String = "US",
         val paymentMethods: List<String> = listOf("affirm", "klarna", "afterpay_clearpay"),
-        val publishableKey: String = "",
+        val publishableKey: PublishableKeySetting = PublishableKeySetting.US,
         val stripeAccountId: String? = ""
     )
 }

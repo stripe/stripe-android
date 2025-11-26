@@ -78,6 +78,30 @@ internal class IntentConfirmationChallengeViewModelTest {
         }
     }
 
+    @Test
+    fun `when handleWebViewError is called, result emits Failed with WebViewError`() = runTest {
+        val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
+        val viewModel = createViewModel(fakeBridgeHandler)
+        val webViewError = WebViewError(
+            message = "net::ERR_FAILED",
+            url = "https://example.com/payment",
+            errorCode = -2,
+            webViewErrorType = "generic_resource_error"
+        )
+
+        viewModel.result.test {
+            viewModel.handleWebViewError(webViewError)
+
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(IntentConfirmationChallengeActivityResult.Failed::class.java)
+            val failedResult = result as IntentConfirmationChallengeActivityResult.Failed
+            assertThat(failedResult.error).isEqualTo(webViewError)
+            assertThat(failedResult.error).isInstanceOf(WebViewError::class.java)
+
+            ensureAllEventsConsumed()
+        }
+    }
+
     private fun createViewModel(
         bridgeHandler: ConfirmationChallengeBridgeHandler
     ) = IntentConfirmationChallengeViewModel(

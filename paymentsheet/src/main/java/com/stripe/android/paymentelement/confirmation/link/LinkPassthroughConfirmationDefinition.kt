@@ -39,7 +39,6 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
                     launcherArguments = LauncherArguments(nextConfirmationOption),
                     receivesResultInProcess = true,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             },
             onFailure = { error ->
@@ -72,7 +71,6 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
         confirmationOption: LinkPassthroughConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-        isConfirmationToken: Boolean,
         result: Result,
     ): ConfirmationDefinition.Result {
         return ConfirmationDefinition.Result.NextStep(

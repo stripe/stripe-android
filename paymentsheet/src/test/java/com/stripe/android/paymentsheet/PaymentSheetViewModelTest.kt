@@ -10,7 +10,6 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
@@ -75,8 +74,6 @@ import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
-import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -137,7 +134,6 @@ import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
@@ -190,14 +186,7 @@ internal class PaymentSheetViewModelTest {
     fun `init should fire analytics event`() {
         val beforeSessionId = AnalyticsRequestFactory.sessionId
         createViewModel()
-        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        verify(eventReporter).onInit(
-            commonConfiguration = eq(config.asCommonConfiguration()),
-            appearance = eq(config.appearance),
-            primaryButtonColor = eq(config.primaryButtonColorUsage()),
-            configurationSpecificPayload = eq(PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config)),
-            isDeferred = eq(false),
-        )
+        verify(eventReporter).onInit()
 
         // Creating the view model should regenerate the analytics sessionId.
         assertThat(beforeSessionId).isNotEqualTo(AnalyticsRequestFactory.sessionId)
@@ -869,7 +858,6 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
 
@@ -886,7 +874,7 @@ internal class PaymentSheetViewModelTest {
             val viewModel = createLinkViewModel()
 
             viewModel.updateSelection(
-                createLinkInlinePaymentSelection(
+                createCardPaymentSelectionWithLink(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
                     input = UserInput.SignUp(
                         email = "email@email.com",
@@ -917,7 +905,7 @@ internal class PaymentSheetViewModelTest {
             val viewModel = createLinkViewModel()
 
             viewModel.updateSelection(
-                createLinkInlinePaymentSelection(
+                createCardPaymentSelectionWithLink(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
                     input = UserInput.SignUp(
                         email = "email@email.com",
@@ -981,7 +969,6 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
 
@@ -1017,7 +1004,6 @@ internal class PaymentSheetViewModelTest {
                 result = ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
 
@@ -1037,7 +1023,7 @@ internal class PaymentSheetViewModelTest {
                 .onPaymentSuccess(
                     paymentSelection = selection,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
+                    intentId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
                 )
 
             resultTurbine.cancel()
@@ -2030,7 +2016,6 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
 
@@ -2085,13 +2070,7 @@ internal class PaymentSheetViewModelTest {
     fun `Sends correct analytics event when using normal intent`() = runTest {
         createViewModel()
 
-        verify(eventReporter).onInit(
-            commonConfiguration = anyOrNull(),
-            appearance = anyOrNull(),
-            primaryButtonColor = anyOrNull(),
-            configurationSpecificPayload = any(),
-            isDeferred = eq(false),
-        )
+        verify(eventReporter).onInit()
     }
 
     @Test
@@ -2110,13 +2089,7 @@ internal class PaymentSheetViewModelTest {
 
         createViewModelForDeferredIntent()
 
-        verify(eventReporter).onInit(
-            commonConfiguration = anyOrNull(),
-            appearance = anyOrNull(),
-            primaryButtonColor = anyOrNull(),
-            configurationSpecificPayload = any(),
-            isDeferred = eq(true),
-        )
+        verify(eventReporter).onInit()
     }
 
     @Test
@@ -2135,13 +2108,7 @@ internal class PaymentSheetViewModelTest {
 
         createViewModelForDeferredIntent()
 
-        verify(eventReporter).onInit(
-            commonConfiguration = anyOrNull(),
-            appearance = anyOrNull(),
-            primaryButtonColor = anyOrNull(),
-            configurationSpecificPayload = any(),
-            isDeferred = eq(true),
-        )
+        verify(eventReporter).onInit()
     }
 
     @Test
@@ -2167,14 +2134,13 @@ internal class PaymentSheetViewModelTest {
             result = ConfirmationHandler.Result.Succeeded(
                 intent = PAYMENT_INTENT,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
 
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
             deferredIntentConfirmationType = isNull(),
-            isConfirmationToken = eq(false),
+            intentId = any(),
         )
     }
 
@@ -2203,14 +2169,13 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
-                    isConfirmationToken = false,
                 )
             )
 
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.None),
-                isConfirmationToken = eq(false),
+                intentId = any(),
             )
         }
 
@@ -2239,14 +2204,13 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
-                    isConfirmationToken = false,
                 )
             )
 
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Client),
-                isConfirmationToken = eq(false),
+                intentId = any(),
             )
         }
 
@@ -2275,14 +2239,13 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                    isConfirmationToken = false,
                 )
             )
 
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Server),
-                isConfirmationToken = eq(false),
+                intentId = any(),
             )
         }
 
@@ -2600,7 +2563,6 @@ internal class PaymentSheetViewModelTest {
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
 
@@ -2681,7 +2643,6 @@ internal class PaymentSheetViewModelTest {
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
 
@@ -2757,7 +2718,6 @@ internal class PaymentSheetViewModelTest {
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
 
@@ -3050,7 +3010,6 @@ internal class PaymentSheetViewModelTest {
 
         val arguments = startTurbine.awaitItem()
 
-        assertThat(arguments.initializationMode).isEqualTo(initializationMode)
         assertThat(arguments.confirmationOption).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = CARD_PAYMENT_METHOD,
@@ -3343,7 +3302,6 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Succeeded(
                     intent = stripeIntent,
                     deferredIntentConfirmationType = null,
-                    isConfirmationToken = false,
                 )
             )
         }
@@ -3564,15 +3522,15 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
-    private fun createLinkInlinePaymentSelection(
+    private fun createCardPaymentSelectionWithLink(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
         input: UserInput,
-    ): PaymentSelection.New.LinkInline {
-        return PaymentSelection.New.LinkInline(
+    ): PaymentSelection.New.Card {
+        return PaymentSelection.New.Card(
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             brand = CardBrand.Visa,
             customerRequestedSave = customerRequestedSave,
-            input = input,
+            linkInput = input,
         )
     }
 

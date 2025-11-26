@@ -150,7 +150,7 @@ class SavedPaymentMethodMutatorTest {
         var calledDetach = false
         val customerRepository = FakeCustomerRepository(
             onDetachPaymentMethod = { paymentMethodId ->
-                assertThat(paymentMethodId).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!)
+                assertThat(paymentMethodId).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id)
                 calledDetach = true
                 Result.failure(IllegalStateException())
             }
@@ -346,7 +346,7 @@ class SavedPaymentMethodMutatorTest {
         val calledDetach = Turbine<Boolean>()
         val customerRepository = FakeCustomerRepository(
             onDetachPaymentMethod = { paymentMethodId ->
-                assertThat(paymentMethodId).isEqualTo(displayableSavedPaymentMethod.paymentMethod.id!!)
+                assertThat(paymentMethodId).isEqualTo(displayableSavedPaymentMethod.paymentMethod.id)
                 calledDetach.add(true)
                 Result.success(displayableSavedPaymentMethod.paymentMethod)
             }
@@ -380,7 +380,7 @@ class SavedPaymentMethodMutatorTest {
         val calledDetach = Turbine<Boolean>()
         val customerRepository = FakeCustomerRepository(
             onDetachPaymentMethod = { paymentMethodId ->
-                assertThat(paymentMethodId).isEqualTo(displayableSavedPaymentMethod.paymentMethod.id!!)
+                assertThat(paymentMethodId).isEqualTo(displayableSavedPaymentMethod.paymentMethod.id)
                 calledDetach.add(true)
                 Result.success(displayableSavedPaymentMethod.paymentMethod)
             }
@@ -412,7 +412,7 @@ class SavedPaymentMethodMutatorTest {
         val calledDetach = Turbine<Boolean>()
         val customerRepository = FakeCustomerRepository(
             onDetachPaymentMethod = { paymentMethodId ->
-                assertThat(paymentMethodId).isEqualTo(displayableSavedPaymentMethod.paymentMethod.id!!)
+                assertThat(paymentMethodId).isEqualTo(displayableSavedPaymentMethod.paymentMethod.id)
                 calledDetach.add(true)
                 Result.failure(IllegalStateException("Test failure."))
             }
@@ -882,7 +882,7 @@ class SavedPaymentMethodMutatorTest {
 
             assertThat(repository.detachRequests.awaitItem()).isEqualTo(
                 FakeCustomerRepository.DetachRequest(
-                    paymentMethodId = paymentMethod.id!!,
+                    paymentMethodId = paymentMethod.id,
                     customerInfo = CustomerRepository.CustomerInfo(
                         id = "cus_123",
                         ephemeralKeySecret = "ek_123",

@@ -823,6 +823,11 @@ internal class PaymentSheetTest {
     fun testTermsDisplayNeverHidesMandate() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
+        builder = {
+            createIntentCallback { _ ->
+                error("Not expected to be called.")
+            }
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -886,6 +891,11 @@ internal class PaymentSheetTest {
     fun testOBO_PassedToElementsSessionCall() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
+        builder = {
+            createIntentCallback { _ ->
+                error("Not expected to be called.")
+            }
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         val oboMerchantID = "acct_connected_1234"

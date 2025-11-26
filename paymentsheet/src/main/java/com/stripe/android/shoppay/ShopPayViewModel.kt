@@ -208,18 +208,11 @@ internal class ShopPayViewModel @Inject constructor(
                 val handle: SavedStateHandle = savedStateHandle ?: createSavedStateHandle()
                 val app = this[APPLICATION_KEY] as Application
                 val args: ShopPayArgs = getArgs(handle) ?: throw NoArgsException()
-                DaggerShopPayComponent
-                    .builder()
-                    .context(app)
-                    .paymentElementCallbackIdentifier(args.paymentElementCallbackIdentifier)
-                    .shopPayArgs(args)
-                    .stripeAccountIdProvider {
-                        args.stripeAccountId
-                    }
-                    .publishableKeyProvider {
-                        args.publishableKey
-                    }
-                    .build()
+                DaggerShopPayComponent.factory()
+                    .build(
+                        context = app,
+                        shopPayArgs = args,
+                    )
                     .viewModel
             }
         }

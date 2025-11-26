@@ -4,8 +4,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.test.core.TestParameters
@@ -17,7 +17,7 @@ internal class TestUpi : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "upi",
     ) { settings ->
-        settings[CountrySettingsDefinition] = Country.IN
+        settings[MerchantSettingsDefinition] = Merchant.IN
         settings[CurrencySettingsDefinition] = Currency.INR
     }.copy(
         authorizationAction = null,

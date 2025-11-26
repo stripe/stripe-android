@@ -95,9 +95,7 @@ internal class SharedPaymentTokenPlaygroundRequester(
 
         val request = SharedPaymentTokenCreateIntentRequest(
             customerId = customerId,
-            paymentMethod = paymentMethod.id ?: throw IllegalStateException(
-                "No payment method ID was found when creating SPT!"
-            ),
+            paymentMethod = paymentMethod.id,
             shipping = null,
         )
 

@@ -46,8 +46,8 @@ import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.Layout
@@ -356,14 +356,14 @@ internal class PlaygroundTestDriver(
     }
 
     fun confirmWithGooglePay(
-        country: Country,
+        merchant: Merchant,
         checkoutMode: CheckoutMode = CheckoutMode.PAYMENT,
     ) {
         setup(
             TestParameters.create(
                 paymentMethodCode = "card",
             ) { settings ->
-                settings[CountrySettingsDefinition] = country
+                settings[MerchantSettingsDefinition] = merchant
                 settings[CheckoutModeSettingsDefinition] = checkoutMode
             }
         )

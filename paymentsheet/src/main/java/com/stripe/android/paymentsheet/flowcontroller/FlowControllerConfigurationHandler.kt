@@ -1,11 +1,7 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
-import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -22,7 +18,6 @@ import kotlin.coroutines.CoroutineContext
 internal class FlowControllerConfigurationHandler @Inject constructor(
     private val paymentElementLoader: PaymentElementLoader,
     @UIContext private val uiContext: CoroutineContext,
-    private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val paymentSelectionUpdater: PaymentSelectionUpdater,
     private val confirmationHandler: FlowControllerConfirmationHandler,
@@ -86,7 +81,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
         paymentElementLoader.load(
             initializationMode = initializationMode,
-            configuration = configuration.asCommonConfiguration(),
+            integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(configuration),
             metadata = PaymentElementLoader.Metadata(
                 isReloadingAfterProcessDeath = false,
                 initializedViaCompose = initializedViaCompose,
@@ -97,7 +92,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
                     onConfigured(state.validationError)
                 } else {
                     viewModel.previousConfigureRequest = configureRequest
-                    onInitSuccess(PaymentSheetState.Full(state), configuration, configureRequest)
+                    onInitSuccess(PaymentSheetState.Full(state), configuration)
                     onConfigured()
                 }
             },
@@ -110,18 +105,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     private suspend fun onInitSuccess(
         state: PaymentSheetState.Full,
         configuration: PaymentSheet.Configuration,
-        configureRequest: ConfigureRequest,
     ) {
-        val isDecoupling = configureRequest.initializationMode is PaymentElementLoader.InitializationMode.DeferredIntent
-
-        eventReporter.onInit(
-            commonConfiguration = configuration.asCommonConfiguration(),
-            primaryButtonColor = configuration.primaryButtonColorUsage(),
-            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(configuration),
-            isDeferred = isDecoupling,
-            appearance = configuration.appearance
-        )
-
         viewModel.paymentSelection = paymentSelectionUpdater(
             selection = viewModel.paymentSelection,
             previousConfig = viewModel.state?.config,

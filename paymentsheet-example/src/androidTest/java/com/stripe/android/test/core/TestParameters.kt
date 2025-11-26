@@ -3,8 +3,8 @@ package com.stripe.android.test.core
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
@@ -61,7 +61,7 @@ internal data class TestParameters(
             settings[CustomerSettingsDefinition] = CustomerType.NEW
             settings[CustomerSessionSettingsDefinition] = false
             settings[LinkSettingsDefinition] = false
-            settings[CountrySettingsDefinition] = Country.GB
+            settings[MerchantSettingsDefinition] = Merchant.GB
             settings[CurrencySettingsDefinition] = Currency.EUR
             settings[DefaultShippingAddressSettingsDefinition] = false
             settings[DelayedPaymentMethodsSettingsDefinition] = false

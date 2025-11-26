@@ -32,9 +32,8 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         val nextStep: ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> =
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = IntentConfirmationDefinition.Args.Confirm(confirmParams),
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Client.takeIf { isDeferred },
-                isConfirmationToken = false,
                 receivesResultInProcess = false,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Client.takeIf { isDeferred },
             )
         channel.trySend(nextStep)
     }
@@ -52,19 +51,17 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
                 } else {
                     DeferredIntentConfirmationType.Server
                 },
-                isConfirmationToken = false,
                 completedFullPaymentFlow = completedFullPaymentFlow,
             )
         )
     }
 
-    fun enqueueNextActionStep(clientSecret: String, intent: StripeIntent) {
+    fun enqueueNextActionStep(intent: StripeIntent) {
         channel.trySend(
             ConfirmationDefinition.Action.Launch(
-                launcherArguments = IntentConfirmationDefinition.Args.NextAction(clientSecret, intent),
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                isConfirmationToken = false,
+                launcherArguments = IntentConfirmationDefinition.Args.NextAction(intent),
                 receivesResultInProcess = false,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
             )
         )
     }

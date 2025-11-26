@@ -14,16 +14,10 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     val linkHandler: LinkHandler
         get() = viewModel.linkHandler
 
-    protected var earlyExitDueToIllegalState: Boolean = false
-
     abstract fun setActivityResult(result: ResultType)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        if (earlyExitDueToIllegalState) {
-            return
-        }
 
         renderEdgeToEdge()
 

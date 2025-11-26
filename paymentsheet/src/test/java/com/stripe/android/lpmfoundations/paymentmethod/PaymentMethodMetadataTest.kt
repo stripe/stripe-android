@@ -1114,6 +1114,8 @@ internal class PaymentMethodMetadataTest {
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1166,9 +1168,7 @@ internal class PaymentMethodMetadataTest {
             ),
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
-            elementsSessionId = "session_1234",
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-            shopPayConfiguration = null,
             termsDisplay = emptyMap(),
             forceSetupFutureUseBehaviorAndNewMandate = false,
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
@@ -1177,6 +1177,8 @@ internal class PaymentMethodMetadataTest {
             attestOnIntentConfirmation = false,
             appearance = configuration.appearance,
             onBehalfOf = null,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1249,8 +1251,6 @@ internal class PaymentMethodMetadataTest {
             linkStateResult = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
-            elementsSessionId = "session_1234",
-            shopPayConfiguration = null,
             termsDisplay = emptyMap(),
             forceSetupFutureUseBehaviorAndNewMandate = false,
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
@@ -1263,6 +1263,8 @@ internal class PaymentMethodMetadataTest {
             attestOnIntentConfirmation = false,
             appearance = configuration.appearance,
             onBehalfOf = null,
+            integrationMetadata = IntegrationMetadata.CustomerSheet,
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -1337,6 +1339,8 @@ internal class PaymentMethodMetadataTest {
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
         )
     }
 
@@ -2055,6 +2059,8 @@ internal class PaymentMethodMetadataTest {
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
         )
 
         assertThat(metadata.availableWallets)
@@ -2115,6 +2121,8 @@ internal class PaymentMethodMetadataTest {
             customerMetadata = null,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
         )
     }
 
@@ -2167,7 +2175,6 @@ internal class PaymentMethodMetadataTest {
             passthroughModeEnabled = false,
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,
-            initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
             elementsSessionId = "session_1234",
             linkMode = LinkMode.LinkPaymentMethod,
             allowDefaultOptIn = false,

@@ -18,6 +18,7 @@ class FakeStripeRepository : AbsFakeStripeRepository() {
         return when {
             amount > 0 -> Result.success(if (paymentMethods.size == 1) singlePartner else multiPartner)
             amount == 0 -> Result.success(PaymentMethodMessage.NoContent(listOf()))
+            amount == -100 -> Result.success(unexpectedError)
             else -> Result.failure(Exception("Price must be non negative"))
         }
     }
@@ -48,6 +49,9 @@ class FakeStripeRepository : AbsFakeStripeRepository() {
             flatImages = listOf(image),
             learnMore = learnMore,
             paymentMethods = listOf()
+        )
+        val unexpectedError = PaymentMethodMessage.UnexpectedError(
+            message = "whoops"
         )
     }
 }

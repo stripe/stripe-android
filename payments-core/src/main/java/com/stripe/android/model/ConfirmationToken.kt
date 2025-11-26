@@ -96,6 +96,11 @@ class ConfirmationToken internal constructor(
         @JvmField val billingDetails: PaymentMethod.BillingDetails? = null,
 
         /**
+         *  If this is a `card` PaymentMethod, this hash contains details about the card.
+         */
+        @JvmField val card: PaymentMethod.Card? = null,
+
+        /**
          *  The ID of the Customer to which this PaymentMethod is saved.
          *  This will only be set when the PaymentMethod has been saved to a Customer.
          */

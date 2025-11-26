@@ -2,8 +2,8 @@ package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
-import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
@@ -21,8 +21,10 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode.AlongsideSaveForFutureUse
 import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUse
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.Address
@@ -43,6 +45,8 @@ import com.stripe.android.model.StripeIntent.Status.Succeeded
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.ConfigFixtures
@@ -53,7 +57,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.MERCHANT_DISPLAY_NAM
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.FakeLoadingEventReporter
 import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
@@ -70,12 +73,11 @@ import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_ELEMENTS_SESSION_CONFIG_ID
 import com.stripe.attestation.IntegrityRequestManager
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.mockito.ArgumentCaptor
-import org.mockito.Captor
-import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.doReturn
@@ -84,51 +86,19 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
 @OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class DefaultPaymentElementLoaderTest {
 
-    private val testDispatcher = UnconfinedTestDispatcher()
-    private val eventReporter = FakeLoadingEventReporter()
-
-    private val customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
-    private val lpmRepository = LpmRepository()
-
-    private val prefsRepository = FakePrefsRepository()
-
-    @Captor
-    private lateinit var paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>
-
-    private val readyGooglePayRepository = mock<GooglePayRepository>()
-    private val unreadyGooglePayRepository = mock<GooglePayRepository>()
-
-    @BeforeTest
-    fun setup() {
-        MockitoAnnotations.openMocks(this)
-
-        whenever(readyGooglePayRepository.isReady()).thenReturn(
-            flow {
-                emit(true)
-            }
-        )
-
-        whenever(unreadyGooglePayRepository.isReady()).thenReturn(
-            flow {
-                emit(false)
-            }
-        )
-    }
-
     @AfterTest
     fun tearDown() {
-        eventReporter.validate()
+        PaymentElementCallbackReferences.clear()
     }
 
     @Test
-    fun `load with configuration should return expected result`() = runTest {
+    fun `load with configuration should return expected result`() = runScenario {
         prefsRepository.setSavedSelection(
             SavedSelection.PaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id)
         )
@@ -177,12 +147,12 @@ internal class DefaultPaymentElementLoaderTest {
                         canRemoveLastPaymentMethod = true,
                         canUpdateFullPaymentMethodDetails = false,
                     ),
-                    shopPayConfiguration = null,
                     clientAttributionMetadata = ClientAttributionMetadata(
                         elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
                         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
-                    )
+                    ),
+                    integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_1234"),
                 ),
             )
         )
@@ -192,10 +162,8 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `load with empty merchantDisplayName returns failure`() = runTest {
-        val loader = createPaymentElementLoader()
-
-        val result = loader.load(
+    fun `load with empty merchantDisplayName returns failure`() = runScenario {
+        val result = createPaymentElementLoader().load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
@@ -214,10 +182,8 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `load with empty client secret returns failure`() = runTest {
-        val loader = createPaymentElementLoader()
-
-        val result = loader.load(
+    fun `load with empty client secret returns failure`() = runScenario {
+        val result = createPaymentElementLoader().load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = " ",
             ),
@@ -236,10 +202,8 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `load with empty customer id returns failure`() = runTest {
-        val loader = createPaymentElementLoader()
-
-        val result = loader.load(
+    fun `load with empty customer id returns failure`() = runScenario {
+        val result = createPaymentElementLoader().load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
@@ -264,10 +228,8 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `load with conflicting ephemeral key returns failure`() = runTest {
-        val loader = createPaymentElementLoader()
-
-        val result = loader.load(
+    fun `load with conflicting ephemeral key returns failure`() = runScenario {
+        val result = createPaymentElementLoader().load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
@@ -293,7 +255,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `load without customer should return expected result`() = runTest {
+    fun `load without customer should return expected result`() = runScenario {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
         )
@@ -314,7 +276,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `load with google pay kill switch enabled should return expected result`() = runTest {
+    fun `load with google pay kill switch enabled should return expected result`() = runScenario {
         prefsRepository.setSavedSelection(
             SavedSelection.PaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id)
         )
@@ -342,13 +304,12 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Should default to first payment method if customer has payment methods`() = runTest {
+    fun `Should default to first payment method if customer has payment methods`() = runScenario {
         prefsRepository.setSavedSelection(null)
 
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
             isGooglePayReady = true,
-            customerRepo = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS),
         )
 
         val state = loader.load(
@@ -370,13 +331,12 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Should default to last used payment method if available even if customer has payment methods`() = runTest {
+    fun `Should default to last used payment method if available even if customer has payment methods`() = runScenario {
         prefsRepository.setSavedSelection(SavedSelection.GooglePay)
 
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
             isGooglePayReady = true,
-            customerRepo = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS),
         )
 
         val result = loader.load(
@@ -397,7 +357,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Should default to google if customer has no payment methods and no last used payment method`() =
-        runTest {
+        runScenario {
             prefsRepository.setSavedSelection(null)
 
             val loader = createPaymentElementLoader(
@@ -424,7 +384,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Should default to no payment method when google pay is not ready`() =
-        runTest {
+        runScenario {
             prefsRepository.setSavedSelection(null)
 
             val loader = createPaymentElementLoader(
@@ -451,7 +411,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Should default to no payment method when saved selection is Google Pay & its not ready`() =
-        runTest {
+        runScenario {
             prefsRepository.setSavedSelection(SavedSelection.GooglePay)
 
             val loader = createPaymentElementLoader(
@@ -479,7 +439,7 @@ internal class DefaultPaymentElementLoaderTest {
     @OptIn(WalletButtonsPreview::class)
     @Test
     fun `Should default to no payment method when using wallet buttons`() =
-        runTest {
+        runScenario {
             prefsRepository.setSavedSelection(null)
 
             val loader = createPaymentElementLoader(
@@ -513,7 +473,7 @@ internal class DefaultPaymentElementLoaderTest {
     @OptIn(WalletButtonsPreview::class)
     @Test
     fun `Should default to no payment method when using wallet buttons & google is saved selection`() =
-        runTest {
+        runScenario {
             prefsRepository.setSavedSelection(SavedSelection.GooglePay)
 
             val loader = createPaymentElementLoader(
@@ -547,7 +507,7 @@ internal class DefaultPaymentElementLoaderTest {
     @OptIn(WalletButtonsPreview::class)
     @Test
     fun `Should default to no payment method when using wallet buttons & link is saved selection`() =
-        runTest {
+        runScenario {
             prefsRepository.setSavedSelection(SavedSelection.Link)
 
             val loader = createPaymentElementLoader(
@@ -580,7 +540,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Should default to no payment method when google pay is not configured`() =
-        runTest {
+        runScenario {
             prefsRepository.setSavedSelection(null)
 
             val userFacingLogger = FakeUserFacingLogger()
@@ -611,7 +571,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Should default to no payment method if customer has no payment methods and no last used payment method`() =
-        runTest {
+        runScenario {
             prefsRepository.setSavedSelection(null)
 
             val loader = createPaymentElementLoader(
@@ -639,7 +599,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `load() with customer should fetch only supported payment method types`() =
-        runTest {
+        runScenario {
             val customerRepository = mock<CustomerRepository> {
                 whenever(it.getPaymentMethods(any(), any(), any())).thenReturn(Result.success(emptyList()))
             }
@@ -681,7 +641,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `when allowsDelayedPaymentMethods is false then delayed payment methods are filtered out`() =
-        runTest {
+        runScenario {
             val customerRepository = mock<CustomerRepository> {
                 whenever(it.getPaymentMethods(any(), any(), any())).thenReturn(Result.success(emptyList()))
             }
@@ -721,7 +681,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `when getPaymentMethods fails in test mode, load() fails`() =
-        runTest {
+        runScenario {
             val expectedException = IllegalArgumentException("invalid API key provided")
             val customerRepository =
                 FakeCustomerRepository(PAYMENT_METHODS, onGetPaymentMethods = { Result.failure(expectedException) })
@@ -751,7 +711,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `load() with customer should filter out invalid payment method types`() =
-        runTest {
+        runScenario {
             val result = createPaymentElementLoader(
                 customerRepo = FakeCustomerRepository(
                     listOf(
@@ -778,7 +738,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `load() with customer should not filter out cards attached to a wallet`() =
-        runTest {
+        runScenario {
             val cardWithAmexWallet = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
                 card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
                     wallet = Wallet.AmexExpressCheckoutWallet("3000")
@@ -809,7 +769,7 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `load() with customer should allow sepa`() = runTest {
+    fun `load() with customer should allow sepa`() = runScenario {
         var requestPaymentMethodTypes: List<PaymentMethod.Type>? = null
         val result = createPaymentElementLoader(
             customerRepo = object : FakeCustomerRepository() {
@@ -855,7 +815,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `load() when PaymentIntent has invalid status should return null`() = runTest {
+    fun `load() when PaymentIntent has invalid status should return null`() = runScenario {
         val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
             paymentMethod = PaymentMethodFactory.card(),
         )
@@ -879,7 +839,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `load() when PaymentIntent has invalid confirmationMethod should return null`() = runTest {
+    fun `load() when PaymentIntent has invalid confirmationMethod should return null`() = runScenario {
         val result = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 confirmationMethod = Manual,
@@ -901,7 +861,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Defaults to first existing payment method for known customer`() = runTest {
+    fun `Defaults to first existing payment method for known customer`() = runScenario {
         val result = createPaymentElementLoader(
             customerRepo = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS)
         ).load(
@@ -927,7 +887,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Considers Link logged in if the account is verified`() = runTest {
+    fun `Considers Link logged in if the account is verified`() = runScenario {
         val loader = createPaymentElementLoader(linkAccountState = AccountStatus.Verified(true, null))
 
         val result = loader.load(
@@ -945,7 +905,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Considers Link as needing verification if the account needs verification`() = runTest {
+    fun `Considers Link as needing verification if the account needs verification`() = runScenario {
         val loader = createPaymentElementLoader(linkAccountState = AccountStatus.NeedsVerification())
 
         val result = loader.load(
@@ -963,7 +923,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Considers Link as needing verification if the account is being verified`() = runTest {
+    fun `Considers Link as needing verification if the account is being verified`() = runScenario {
         val loader = createPaymentElementLoader(linkAccountState = AccountStatus.VerificationStarted)
 
         val result = loader.load(
@@ -981,7 +941,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Considers Link as logged out correctly`() = runTest {
+    fun `Considers Link as logged out correctly`() = runScenario {
         val loader = createPaymentElementLoader(linkAccountState = AccountStatus.SignedOut)
 
         val result = loader.load(
@@ -999,16 +959,14 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Populates Link configuration correctly from billing details`() = runTest {
-        val loader = createPaymentElementLoader()
-
+    fun `Populates Link configuration correctly from billing details`() = runScenario {
         val billingDetails = PaymentSheet.BillingDetails(
             address = PaymentSheet.Address(country = "CA"),
             name = "Till",
         )
 
         val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret")
-        val result = loader.load(
+        val result = createPaymentElementLoader().load(
             initializationMode = initializationMode,
             paymentSheetConfiguration = mockConfiguration(
                 defaultBillingDetails = billingDetails,
@@ -1033,16 +991,14 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Populates Link configuration with shipping details if checkbox is selected`() = runTest {
-        val loader = createPaymentElementLoader()
-
+    fun `Populates Link configuration with shipping details if checkbox is selected`() = runScenario {
         val shippingDetails = AddressDetails(
             name = "Not Till",
             address = PaymentSheet.Address(country = "US"),
             isCheckboxSelected = true,
         )
 
-        val result = loader.load(
+        val result = createPaymentElementLoader().load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
                 shippingDetails = shippingDetails,
@@ -1059,7 +1015,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Populates Link configuration with passthrough mode`() = runTest {
+    fun `Populates Link configuration with passthrough mode`() = runScenario {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
             linkSettings = ElementsSession.LinkSettings(
@@ -1095,7 +1051,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Populates Link configuration with link flags`() = runTest {
+    fun `Populates Link configuration with link flags`() = runScenario {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             linkSettings = ElementsSession.LinkSettings(
@@ -1151,7 +1107,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Populates Link configuration correctly with eligible card brand choice information`() = runTest {
+    fun `Populates Link configuration correctly with eligible card brand choice information`() = runScenario {
         val loader = createPaymentElementLoader(
             cardBrandChoice = ElementsSession.CardBrandChoice(
                 eligible = true,
@@ -1177,7 +1133,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Populates Link configuration correctly with ineligible card brand choice information`() = runTest {
+    fun `Populates Link configuration correctly with ineligible card brand choice information`() = runScenario {
         val loader = createPaymentElementLoader(
             cardBrandChoice = ElementsSession.CardBrandChoice(
                 eligible = false,
@@ -1203,7 +1159,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Disables link sign up if used before`() = runTest {
+    fun `Disables link sign up if used before`() = runScenario {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             linkSettings = ElementsSession.LinkSettings(
@@ -1242,7 +1198,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Disables link sign up when settings have it disabled`() = runTest {
+    fun `Disables link sign up when settings have it disabled`() = runScenario {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             linkSettings = ElementsSession.LinkSettings(
@@ -1278,7 +1234,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Disables Link inline signup if no valid funding source`() = runTest {
+    fun `Disables Link inline signup if no valid funding source`() = runScenario {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 linkFundingSources = listOf("us_bank_account")
@@ -1301,7 +1257,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Disables Link inline signup if user already has an unverified account`() = runTest {
+    fun `Disables Link inline signup if user already has an unverified account`() = runScenario {
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.NeedsVerification(),
         )
@@ -1321,7 +1277,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Disables Link inline signup if user already has an verified account`() = runTest {
+    fun `Disables Link inline signup if user already has an verified account`() = runScenario {
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.Verified(true, null),
         )
@@ -1341,7 +1297,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Disables Link inline signup if there is an account error`() = runTest {
+    fun `Disables Link inline signup if there is an account error`() = runScenario {
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.Error(Exception()),
         )
@@ -1361,7 +1317,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Enables Link inline signup if valid card funding source`() = runTest {
+    fun `Enables Link inline signup if valid card funding source`() = runScenario {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 linkFundingSources = listOf("card"),
@@ -1384,7 +1340,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Enables Link inline signup if user has no account`() = runTest {
+    fun `Enables Link inline signup if user has no account`() = runScenario {
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
         )
@@ -1404,9 +1360,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Uses shipping address phone number if checkbox is selected`() = runTest {
-        val loader = createPaymentElementLoader()
-
+    fun `Uses shipping address phone number if checkbox is selected`() = runScenario {
         val billingDetails = PaymentSheet.BillingDetails(phone = "123-456-7890")
 
         val shippingDetails = AddressDetails(
@@ -1415,7 +1369,7 @@ internal class DefaultPaymentElementLoaderTest {
             isCheckboxSelected = true,
         )
 
-        val result = loader.load(
+        val result = createPaymentElementLoader().load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
                 shippingDetails = shippingDetails,
@@ -1434,7 +1388,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Falls back to customer email if billing address email not provided`() = runTest {
+    fun `Falls back to customer email if billing address email not provided`() = runScenario {
         val loader = createPaymentElementLoader(
             customerRepo = FakeCustomerRepository(
                 customer = mock {
@@ -1467,7 +1421,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Moves last-used customer payment method to the front of the list`() = runTest {
+    fun `Moves last-used customer payment method to the front of the list`() = runScenario {
         val paymentMethods = PaymentMethodFixtures.createCards(10)
         val lastUsed = paymentMethods[6]
         prefsRepository.setSavedSelection(SavedSelection.PaymentMethod(lastUsed.id))
@@ -1499,7 +1453,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Returns failure if StripeIntent does not contain any supported payment method type`() = runTest {
+    fun `Returns failure if StripeIntent does not contain any supported payment method type`() = runScenario {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("gold", "silver", "bronze"),
@@ -1525,7 +1479,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Returns failure if configuring deferred intent with negative amounts`() = runTest {
+    fun `Returns failure if configuring deferred intent with negative amounts`() = runScenario {
         assertFailsWith<IllegalArgumentException>("Payment IntentConfiguration requires a positive amount.") {
             PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -1539,7 +1493,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Returns failure if configuring deferred intent with zero amounts`() = runTest {
+    fun `Returns failure if configuring deferred intent with zero amounts`() = runScenario {
         assertFailsWith<IllegalArgumentException>("Payment IntentConfiguration requires a positive amount.") {
             PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -1553,7 +1507,117 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Emits correct events when loading succeeds for non-deferred intent`() = runTest {
+    fun `integrationMetadata returns intent first for payment intent`() = runScenario {
+        val paymentIntent = PaymentElementLoader.InitializationMode.PaymentIntent("secret")
+        assertThat(paymentIntent.integrationMetadata(null))
+            .isEqualTo(IntegrationMetadata.IntentFirst("secret"))
+        assertThat(paymentIntent.integrationMetadata(PaymentElementCallbacks.Builder().build()))
+            .isEqualTo(IntegrationMetadata.IntentFirst("secret"))
+    }
+
+    @Test
+    fun `integrationMetadata returns intent first for setup intent`() = runScenario {
+        val setupIntent = PaymentElementLoader.InitializationMode.SetupIntent("secret")
+        assertThat(setupIntent.integrationMetadata(null))
+            .isEqualTo(IntegrationMetadata.IntentFirst("secret"))
+        assertThat(setupIntent.integrationMetadata(PaymentElementCallbacks.Builder().build()))
+            .isEqualTo(IntegrationMetadata.IntentFirst("secret"))
+    }
+
+    @Test
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    fun `integrationMetadata returns spt`() = runScenario {
+        val intentConfiguration = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 1234,
+                currency = "cad",
+            ),
+        )
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            intentConfiguration = intentConfiguration
+        )
+        assertThat(
+            initializationMode.integrationMetadata(
+                PaymentElementCallbacks.Builder()
+                    .preparePaymentMethodHandler { _, _ ->
+                        error("Should not be called.")
+                    }.build()
+            )
+        ).isEqualTo(IntegrationMetadata.DeferredIntentWithSharedPaymentToken(intentConfiguration))
+    }
+
+    @Test
+    fun `integrationMetadata returns confirmation token`() = runScenario {
+        val intentConfiguration = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 1234,
+                currency = "cad",
+            ),
+        )
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            intentConfiguration = intentConfiguration
+        )
+        assertThat(
+            initializationMode.integrationMetadata(
+                PaymentElementCallbacks.Builder()
+                    .createIntentCallback { _ ->
+                        error("Should not be called.")
+                    }.build()
+            )
+        ).isEqualTo(IntegrationMetadata.DeferredIntentWithConfirmationToken(intentConfiguration))
+    }
+
+    @Test
+    fun `integrationMetadata returns payment method`() = runScenario {
+        val intentConfiguration = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 1234,
+                currency = "cad",
+            ),
+        )
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            intentConfiguration = intentConfiguration
+        )
+        assertThat(
+            initializationMode.integrationMetadata(
+                PaymentElementCallbacks.Builder()
+                    .createIntentCallback { _, _ ->
+                        error("Should not be called.")
+                    }.build()
+            )
+        ).isEqualTo(IntegrationMetadata.DeferredIntentWithPaymentMethod(intentConfiguration))
+    }
+
+    @Test
+    fun `integrationMetadata throws when no callbacks set`() = runScenario {
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 1234,
+                    currency = "cad",
+                ),
+            ),
+        )
+
+        assertFailsWith<IllegalStateException>("No callback for deferred intent.") {
+            initializationMode.integrationMetadata(null)
+        }
+        assertFailsWith<IllegalStateException>("No callback for deferred intent.") {
+            initializationMode.integrationMetadata(PaymentElementCallbacks.Builder().build())
+        }
+    }
+
+    @Test
+    fun `integrationMetadata returns cryptoOnramp`() = runScenario {
+        val initializationMode = PaymentElementLoader.InitializationMode.CryptoOnramp
+        assertThat(initializationMode.integrationMetadata(null))
+            .isEqualTo(IntegrationMetadata.CryptoOnramp)
+        assertThat(initializationMode.integrationMetadata(PaymentElementCallbacks.Builder().build()))
+            .isEqualTo(IntegrationMetadata.CryptoOnramp)
+    }
+
+    @Test
+    fun `Emits correct events when loading succeeds for non-deferred intent`() = runScenario {
         val loader = createPaymentElementLoader(
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
         )
@@ -1577,26 +1641,10 @@ internal class DefaultPaymentElementLoaderTest {
         val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
         assertThat(loadSucceededCall.paymentSelection)
             .isEqualTo(PaymentSelection.Saved(paymentMethod = PAYMENT_METHODS.first()))
-        assertThat(loadSucceededCall.linkEnabled).isTrue()
-        assertThat(loadSucceededCall.linkMode).isEqualTo(LinkMode.LinkPaymentMethod)
-        assertThat(loadSucceededCall.linkDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkSignupDisabledReasons).isNull()
-        assertThat(loadSucceededCall.googlePaySupported).isTrue()
-        assertThat(loadSucceededCall.currency).isEqualTo("usd")
-        assertThat(loadSucceededCall.initializationMode).isEqualTo(initializationMode)
-        assertThat(loadSucceededCall.orderedLpms).isEqualTo(listOf("card", "link"))
-        assertThat(loadSucceededCall.requireCvcRecollection).isFalse()
-        assertThat(loadSucceededCall.hasDefaultPaymentMethod).isNull()
-        assertThat(loadSucceededCall.setAsDefaultEnabled).isNull()
-        assertThat(loadSucceededCall.linkDisplay).isEqualTo(PaymentSheet.LinkConfiguration.Display.Automatic)
-        assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
-        assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isFalse()
-        assertThat(loadSucceededCall.setupFutureUsage).isNull()
-        assertThat(loadSucceededCall.openCardScanAutomatically).isFalse()
     }
 
     @Test
-    fun `Emits correct events when loading succeeds with saved LPM selection`() = runTest {
+    fun `Emits correct events when loading succeeds with saved LPM selection`() = runScenario {
         testSuccessfulLoadSendsEventsCorrectly(
             paymentSelection = PaymentSelection.Saved(
                 paymentMethod = PAYMENT_METHODS.last()
@@ -1605,21 +1653,26 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Emits correct events when loading succeeds with saved Google Pay selection`() = runTest {
+    fun `Emits correct events when loading succeeds with saved Google Pay selection`() = runScenario {
         testSuccessfulLoadSendsEventsCorrectly(
             paymentSelection = PaymentSelection.GooglePay
         )
     }
 
     @Test
-    fun `Emits correct events when loading succeeds with saved Link selection`() = runTest {
+    fun `Emits correct events when loading succeeds with saved Link selection`() = runScenario {
         testSuccessfulLoadSendsEventsCorrectly(
             paymentSelection = PaymentSelection.Link()
         )
     }
 
     @Test
-    fun `Emits correct events when loading succeeds for deferred intent`() = runTest {
+    fun `Emits correct events when loading succeeds for deferred intent`() = runScenario {
+        PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _ ->
+                error("Should not be called.")
+            }
+            .build()
         val loader = createPaymentElementLoader(
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
         )
@@ -1643,26 +1696,40 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadStartedTurbine.awaitItem().initializedViaCompose).isTrue()
         val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
         assertThat(loadSucceededCall.paymentSelection).isNull()
-        assertThat(loadSucceededCall.linkEnabled).isTrue()
-        assertThat(loadSucceededCall.linkMode).isEqualTo(LinkMode.LinkPaymentMethod)
-        assertThat(loadSucceededCall.linkDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkSignupDisabledReasons).isNull()
-        assertThat(loadSucceededCall.googlePaySupported).isTrue()
-        assertThat(loadSucceededCall.currency).isEqualTo("usd")
-        assertThat(loadSucceededCall.initializationMode).isEqualTo(initializationMode)
-        assertThat(loadSucceededCall.orderedLpms).isEqualTo(listOf("card", "link"))
-        assertThat(loadSucceededCall.requireCvcRecollection).isFalse()
-        assertThat(loadSucceededCall.hasDefaultPaymentMethod).isNull()
-        assertThat(loadSucceededCall.setAsDefaultEnabled).isNull()
-        assertThat(loadSucceededCall.linkDisplay).isEqualTo(PaymentSheet.LinkConfiguration.Display.Automatic)
-        assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
-        assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isFalse()
-        assertThat(loadSucceededCall.setupFutureUsage).isNull()
-        assertThat(loadSucceededCall.openCardScanAutomatically).isFalse()
     }
 
     @Test
-    fun `Emits correct events when loading fails for non-deferred intent`() = runTest {
+    fun `Fails to load when missing deferred intent callback`() = runScenario {
+        val loader = createPaymentElementLoader(
+            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+        )
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 1234,
+                    currency = "cad",
+                ),
+            ),
+        )
+
+        val result = loader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = true,
+            ),
+        ).exceptionOrNull()
+
+        assertThat(result).isInstanceOf<IllegalStateException>()
+        assertThat(result?.message).isEqualTo("No callback for deferred intent.")
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem().initializedViaCompose).isTrue()
+        val loadFailedCall = eventReporter.loadFailedTurbine.awaitItem()
+        assertThat(loadFailedCall.error.message).isEqualTo("No callback for deferred intent.")
+    }
+
+    @Test
+    fun `Emits correct events when loading fails for non-deferred intent`() = runScenario {
         val error = PaymentSheetLoadingException.MissingAmountOrCurrency
         val loader = createPaymentElementLoader(error = error)
 
@@ -1679,7 +1746,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Emits correct events when loading fails for deferred intent`() = runTest {
+    fun `Emits correct events when loading fails for deferred intent`() = runScenario {
         val error = PaymentIntentInTerminalState(Canceled)
         val loader = createPaymentElementLoader(error = error)
 
@@ -1703,7 +1770,12 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Emits correct events when loading fails with invalid confirmation method`() = runTest {
+    fun `Emits correct events when loading fails with invalid confirmation method`() = runScenario {
+        PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _ ->
+                error("Should not be called.")
+            }
+            .build()
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 confirmationMethod = Manual,
@@ -1731,7 +1803,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Emits correct events when we fallback to the core Stripe API`() = runTest {
+    fun `Emits correct events when we fallback to the core Stripe API`() = runScenario {
         val intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         val error = APIConnectionException()
 
@@ -1753,7 +1825,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Includes card brand choice state if feature is enabled`() = runTest {
+    fun `Includes card brand choice state if feature is enabled`() = runScenario {
         val loader = createPaymentElementLoader(
             cardBrandChoice = ElementsSession.CardBrandChoice(
                 eligible = true,
@@ -1779,7 +1851,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Returns correct Link signup mode if has used Link before`() = runTest {
+    fun `Returns correct Link signup mode if has used Link before`() = runScenario {
         val linkStore = mock<LinkStore> {
             on { hasUsedLink() } doReturn true
         }
@@ -1811,7 +1883,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Returns correct Link signup mode if signup is disabled`() = runTest {
+    fun `Returns correct Link signup mode if signup is disabled`() = runScenario {
         val linkStore = mock<LinkStore> {
             on { hasUsedLink() } doReturn false
         }
@@ -1854,7 +1926,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Returns correct Link signup mode if not saving for future use`() = runTest {
+    fun `Returns correct Link signup mode if not saving for future use`() = runScenario {
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
         )
@@ -1876,7 +1948,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Returns correct Link signup mode if saving for future use`() = runTest {
+    fun `Returns correct Link signup mode if saving for future use`() = runScenario {
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
         )
@@ -1904,7 +1976,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Returns correct Link signup mode when payment sheet save is disabled`() = runTest {
+    fun `Returns correct Link signup mode when payment sheet save is disabled`() = runScenario {
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
             customer = createElementsSessionCustomer(
@@ -1927,7 +1999,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Returns correct Link signup mode when payment sheet save is enabled`() = runTest {
+    fun `Returns correct Link signup mode when payment sheet save is enabled`() = runScenario {
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
             customer = createElementsSessionCustomer(
@@ -1950,7 +2022,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Returns InsteadOfSaveForFutureUse signup mode when linkSignUpOptInFeatureEnabled is true`() = runTest {
+    fun `Returns InsteadOfSaveForFutureUse signup mode when linkSignUpOptInFeatureEnabled is true`() = runScenario {
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
             linkSettings = createLinkSettings(
@@ -1980,7 +2052,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Returns InsteadOfSaveForFutureUse signup mode when linkSignUpOptInFeatureEnabled is true even with customer config`() =
-        runTest {
+        runScenario {
             val loader = createPaymentElementLoader(
                 linkAccountState = AccountStatus.SignedOut,
                 linkSettings = createLinkSettings(
@@ -2015,7 +2087,7 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `Returns null signup mode when linkSignUpOptInFeatureEnabled is true but user has used Link`() = runTest {
+    fun `Returns null signup mode when linkSignUpOptInFeatureEnabled is true but user has used Link`() = runScenario {
         val linkStore = mock<LinkStore>()
         whenever(linkStore.hasUsedLink()).thenReturn(true)
 
@@ -2049,7 +2121,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Returns null signup mode when linkSignUpOptInFeatureEnabled is true but signup is disabled`() = runTest {
+    fun `Returns null signup mode when linkSignUpOptInFeatureEnabled is true but signup is disabled`() = runScenario {
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
             linkSettings = createLinkSettings(
@@ -2074,7 +2146,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Returns correct Link enablement based on card brand filtering`() = runTest {
+    fun `Returns correct Link enablement based on card brand filtering`() = runScenario {
         testLinkEnablementWithCardBrandFiltering(
             passthroughModeEnabled = false,
             useNativeLink = true,
@@ -2098,7 +2170,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Retains all payment method when 'allowedCountries' is empty`() = runTest {
+    fun `Retains all payment method when 'allowedCountries' is empty`() = runScenario {
         val paymentMethods = createCardsWithDifferentBillingDetails()
 
         val loader = createPaymentElementLoader(
@@ -2111,14 +2183,20 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"
             ),
-            configuration = CommonConfigurationFactory.create(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    allowedCountries = emptySet(),
-                ),
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                    id = "cus_1",
-                    clientSecret = "cuss_123",
-                ),
+            integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(
+                PaymentSheet.Configuration.Builder("Example, Inc.")
+                    .billingDetailsCollectionConfiguration(
+                        PaymentSheet.BillingDetailsCollectionConfiguration(
+                            allowedCountries = emptySet(),
+                        )
+                    )
+                    .customer(
+                        PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "cus_1",
+                            clientSecret = "cuss_123",
+                        )
+                    )
+                    .build()
             ),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
@@ -2135,7 +2213,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Filters out countries not in 'allowedCountries' array`() = runTest {
+    fun `Filters out countries not in 'allowedCountries' array`() = runScenario {
         val paymentMethods = createCardsWithDifferentBillingDetails()
 
         val loader = createPaymentElementLoader(
@@ -2148,14 +2226,20 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"
             ),
-            configuration = CommonConfigurationFactory.create(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    allowedCountries = setOf("CA", "mx"),
-                ),
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                    id = "cus_1",
-                    clientSecret = "cuss_123",
-                ),
+            integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(
+                PaymentSheet.Configuration.Builder("Example, Inc.")
+                    .billingDetailsCollectionConfiguration(
+                        PaymentSheet.BillingDetailsCollectionConfiguration(
+                            allowedCountries = setOf("CA", "mx"),
+                        )
+                    )
+                    .customer(
+                        PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "cus_1",
+                            clientSecret = "cuss_123",
+                        )
+                    )
+                    .build()
             ),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
@@ -2174,7 +2258,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
-    private suspend fun testLinkEnablementWithCardBrandFiltering(
+    private suspend fun Scenario.testLinkEnablementWithCardBrandFiltering(
         passthroughModeEnabled: Boolean,
         useNativeLink: Boolean,
         expectedEnabled: Boolean,
@@ -2212,7 +2296,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When EPMs are requested but not returned by elements session, no EPMs are used`() = runTest {
+    fun `When EPMs are requested but not returned by elements session, no EPMs are used`() = runScenario {
         testExternalPaymentMethods(
             requestedExternalPaymentMethods = listOf("external_paypal"),
             externalPaymentMethodData = null,
@@ -2226,7 +2310,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When EPMs are requested and returned by elements session, EPMs are used`() = runTest {
+    fun `When EPMs are requested and returned by elements session, EPMs are used`() = runScenario {
         val requestedExternalPaymentMethods = listOf("external_venmo", "external_paypal")
 
         testExternalPaymentMethods(
@@ -2295,7 +2379,7 @@ internal class DefaultPaymentElementLoaderTest {
     )
 
     @Test
-    fun `When customer session configuration is provided, should pass it to 'ElementsSessionRepository'`() = runTest {
+    fun `When customer session configuration is provided, should pass it to 'ElementsSessionRepository'`() = runScenario {
         val repository = FakeElementsSessionRepository(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             error = null,
@@ -2335,7 +2419,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When 'CustomerSession' config is provided, should use payment methods from elements_session and not fetch`() =
-        runTest {
+        runScenario {
             var attemptedToRetrievePaymentMethods = false
 
             val repository = FakeCustomerRepository(
@@ -2391,7 +2475,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When 'elements_session' has remove permissions enabled, should enable remove permissions in customerMetadata`() =
-        runTest {
+        runScenario {
             val loader = createPaymentElementLoader(
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
@@ -2440,7 +2524,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When 'elements_session' has remove permissions disabled, should disable remove permissions in customerMetadata`() =
-        runTest {
+        runScenario {
             val loader = createPaymentElementLoader(
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
@@ -2489,7 +2573,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When 'elements_session' has Payment Sheet component disabled, should disable permissions in customerMetadata`() =
-        runTest {
+        runScenario {
             val loader = createPaymentElementLoader(
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
@@ -2538,7 +2622,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When 'elements_session' has partial remove permissions, should enable partial remove permissions in customerMetadata`() =
-        runTest {
+        runScenario {
             val loader = createPaymentElementLoader(
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
@@ -2587,7 +2671,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `customer session should have canUpdateFullPaymentMethodDetails permission enabled`() =
-        runTest {
+        runScenario {
             val loader = createPaymentElementLoader(
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
@@ -2636,10 +2720,8 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When 'LegacyEphemeralKey' config is provided, permissions should always be enabled and remove duplicates, payment method update should be disabled`() =
-        runTest {
-            val loader = createPaymentElementLoader()
-
-            val state = loader.load(
+        runScenario {
+            val state = createPaymentElementLoader().load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
@@ -2670,7 +2752,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When 'CustomerSession' config is provided but no customer object was returned in test mode, should report error and return error`() =
-        runTest {
+        runScenario {
             val errorReporter = FakeErrorReporter()
 
             val loader = createPaymentElementLoader(
@@ -2712,7 +2794,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When 'CustomerSession' config is provided but no customer object was returned in live mode, should report error and continue with loading without customer`() =
-        runTest {
+        runScenario {
             val errorReporter = FakeErrorReporter()
 
             val loader = createPaymentElementLoader(
@@ -2756,7 +2838,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When 'LegacyEphemeralKey' is provided, should fetch and use payment methods from 'CustomerRepository'`() =
-        runTest {
+        runScenario {
             var attemptedToRetrievePaymentMethods = false
 
             val cards = PaymentMethodFactory.cards(2)
@@ -2797,7 +2879,7 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `When using 'CustomerSession', move last-used customer payment method to the front of the list`() = runTest {
+    fun `When using 'CustomerSession', move last-used customer payment method to the front of the list`() = runScenario {
         val paymentMethods = PaymentMethodFixtures.createCards(10)
         val lastUsed = paymentMethods[6]
 
@@ -2845,7 +2927,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When using 'CustomerSession', payment methods should be filtered by supported saved payment methods`() =
-        runTest {
+        runScenario {
             val paymentMethods = PaymentMethodFixtures.createCards(2) +
                 listOf(
                     PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
@@ -2890,7 +2972,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When using 'CustomerSession' & no default billing details, customer email for Link config is fetched using 'elements_session' ephemeral key`() =
-        runTest {
+        runScenario {
             val customerRepository = spy(
                 FakeCustomerRepository(
                     onRetrieveCustomer = {
@@ -2948,7 +3030,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When using 'CustomerSession' & has a default saved Stripe payment method, should call 'ElementsSessionRepository' with default id`() =
-        runTest {
+        runScenario {
             prefsRepository.setSavedSelection(SavedSelection.PaymentMethod("pm_1234321"))
 
             val repository = FakeElementsSessionRepository(
@@ -2983,7 +3065,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @OptIn(LinkDisallowFundingSourceCreationPreview::class)
     @Test
-    fun `Passes Link disallowed funding source creation along to ElementsSessionRepository`() = runTest {
+    fun `Passes Link disallowed funding source creation along to ElementsSessionRepository`() = runScenario {
         val repository = FakeElementsSessionRepository(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             linkSettings = null,
@@ -3022,7 +3104,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When using 'CustomerSession' & has a default Google Pay payment method, should not call 'ElementsSessionRepository' with default id`() =
-        runTest {
+        runScenario {
             prefsRepository.setSavedSelection(SavedSelection.GooglePay)
 
             val repository = FakeElementsSessionRepository(
@@ -3055,7 +3137,7 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `When DefaultPaymentMethod not null, no saved selection, defaultPaymentMethod first`() = runTest {
+    fun `When DefaultPaymentMethod not null, no saved selection, defaultPaymentMethod first`() = runScenario {
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             lastUsedPaymentMethod = null,
             defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
@@ -3067,7 +3149,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod not null, no saved selection, defaultPaymentMethod selected`() = runTest {
+    fun `When DefaultPaymentMethod not null, no saved selection, defaultPaymentMethod selected`() = runScenario {
         val defaultPaymentMethod = paymentMethodsForTestingOrdering[2]
 
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
@@ -3081,7 +3163,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod not null, saved selection, defaultPaymentMethod first`() = runTest {
+    fun `When DefaultPaymentMethod not null, saved selection, defaultPaymentMethod first`() = runScenario {
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             lastUsedPaymentMethod = paymentMethodsForTestingOrdering[1],
             defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
@@ -3093,7 +3175,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod not null, saved selection, defaultPaymentMethod selected`() = runTest {
+    fun `When DefaultPaymentMethod not null, saved selection, defaultPaymentMethod selected`() = runScenario {
         val defaultPaymentMethod = paymentMethodsForTestingOrdering[2]
 
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
@@ -3108,7 +3190,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When DefaultPaymentMethod not null, saved selection is defaultPaymentMethod, defaultPaymentMethod first`() =
-        runTest {
+        runScenario {
             val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
                 lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
                 defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
@@ -3121,7 +3203,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When DefaultPaymentMethod not null, saved selection is same as defaultPaymentMethod, defaultPaymentMethod selected`() =
-        runTest {
+        runScenario {
             val defaultPaymentMethod = paymentMethodsForTestingOrdering[2]
 
             val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
@@ -3135,7 +3217,7 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `When DefaultPaymentMethod null, no saved selection, order unchanged`() = runTest {
+    fun `When DefaultPaymentMethod null, no saved selection, order unchanged`() = runScenario {
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             lastUsedPaymentMethod = null,
             defaultPaymentMethod = null,
@@ -3147,7 +3229,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod null, no saved selection, first payment method selected`() = runTest {
+    fun `When DefaultPaymentMethod null, no saved selection, first payment method selected`() = runScenario {
         val firstPaymentMethod = paymentMethodsForTestingOrdering[0]
 
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
@@ -3161,7 +3243,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod null, saved selection first, order unchanged`() = runTest {
+    fun `When DefaultPaymentMethod null, saved selection first, order unchanged`() = runScenario {
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             lastUsedPaymentMethod = paymentMethodsForTestingOrdering[0],
             defaultPaymentMethod = null,
@@ -3173,7 +3255,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod null, saved selection first, first payment method selected`() = runTest {
+    fun `When DefaultPaymentMethod null, saved selection first, first payment method selected`() = runScenario {
         val firstPaymentMethod = paymentMethodsForTestingOrdering[0]
 
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
@@ -3187,7 +3269,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod null, saved selection not first, order unchanged`() = runTest {
+    fun `When DefaultPaymentMethod null, saved selection not first, order unchanged`() = runScenario {
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
             lastUsedPaymentMethod = paymentMethodsForTestingOrdering[1],
             defaultPaymentMethod = null,
@@ -3199,7 +3281,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod null, saved selection not first, first payment method selected`() = runTest {
+    fun `When DefaultPaymentMethod null, saved selection not first, first payment method selected`() = runScenario {
         val firstPaymentMethod = paymentMethodsForTestingOrdering[0]
 
         val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
@@ -3214,7 +3296,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When using 'LegacyEphemeralKey' & has a default saved Stripe payment method, should not call 'ElementsSessionRepository' with default id`() =
-        runTest {
+        runScenario {
             prefsRepository.setSavedSelection(SavedSelection.PaymentMethod("pm_1234321"))
 
             val repository = FakeElementsSessionRepository(
@@ -3247,160 +3329,7 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `Emits correct loaded event when Link is unavailable`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card"),
-            )
-        )
-
-        loader.load(
-            initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = true,
-            ),
-        )
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.paymentSelection).isNull()
-        assertThat(loadSucceededCall.linkEnabled).isFalse()
-        assertThat(loadSucceededCall.linkMode).isNull()
-        assertThat(loadSucceededCall.linkDisabledReasons)
-            .containsExactly(LinkDisabledReason.NotSupportedInElementsSession)
-        assertThat(loadSucceededCall.linkSignupDisabledReasons).isNull()
-        assertThat(loadSucceededCall.googlePaySupported).isTrue()
-        assertThat(loadSucceededCall.currency).isEqualTo("usd")
-        assertThat(loadSucceededCall.initializationMode).isEqualTo(DEFAULT_INITIALIZATION_MODE)
-        assertThat(loadSucceededCall.orderedLpms).isEqualTo(listOf("card"))
-        assertThat(loadSucceededCall.requireCvcRecollection).isFalse()
-        assertThat(loadSucceededCall.hasDefaultPaymentMethod).isNull()
-        assertThat(loadSucceededCall.setAsDefaultEnabled).isNull()
-        assertThat(loadSucceededCall.linkDisplay).isEqualTo(PaymentSheet.LinkConfiguration.Display.Automatic)
-        assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
-        assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isFalse()
-        assertThat(loadSucceededCall.setupFutureUsage).isNull()
-        assertThat(loadSucceededCall.openCardScanAutomatically).isFalse()
-    }
-
-    @Test
-    fun `Emits correct event when Link is in payment method mode`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "link"),
-            ),
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
-        )
-
-        loader.load(
-            initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = true,
-            ),
-        )
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.paymentSelection).isNull()
-        assertThat(loadSucceededCall.linkEnabled).isTrue()
-        assertThat(loadSucceededCall.linkMode).isEqualTo(LinkMode.LinkPaymentMethod)
-        assertThat(loadSucceededCall.linkDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkSignupDisabledReasons).isNull()
-        assertThat(loadSucceededCall.googlePaySupported).isTrue()
-        assertThat(loadSucceededCall.currency).isEqualTo("usd")
-        assertThat(loadSucceededCall.initializationMode).isEqualTo(DEFAULT_INITIALIZATION_MODE)
-        assertThat(loadSucceededCall.orderedLpms).isEqualTo(listOf("card", "link"))
-        assertThat(loadSucceededCall.requireCvcRecollection).isFalse()
-        assertThat(loadSucceededCall.hasDefaultPaymentMethod).isNull()
-        assertThat(loadSucceededCall.setAsDefaultEnabled).isNull()
-        assertThat(loadSucceededCall.linkDisplay).isEqualTo(PaymentSheet.LinkConfiguration.Display.Automatic)
-        assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
-        assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isFalse()
-        assertThat(loadSucceededCall.setupFutureUsage).isNull()
-        assertThat(loadSucceededCall.openCardScanAutomatically).isFalse()
-    }
-
-    @Test
-    fun `Emits correct event when Link is in passthrough mode`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "link"),
-            ),
-            linkSettings = createLinkSettings(passthroughModeEnabled = true),
-        )
-
-        loader.load(
-            initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = true,
-            ),
-        )
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.linkEnabled).isTrue()
-        assertThat(loadSucceededCall.linkMode).isEqualTo(LinkMode.Passthrough)
-        assertThat(loadSucceededCall.linkDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkSignupDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkDisplay).isEqualTo(PaymentSheet.LinkConfiguration.Display.Automatic)
-        assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
-    }
-
-    @Test
-    fun `Emits correct event when CVC recollection is required`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
-        )
-
-        loader.load(
-            initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = true,
-            ),
-        )
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.requireCvcRecollection).isTrue()
-    }
-
-    @Test
-    fun `Emits correct event when CVC recollection is required for deferred`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
-            linkSettings = createLinkSettings(passthroughModeEnabled = false),
-        )
-
-        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                    amount = 100L,
-                    currency = "usd"
-                ),
-                requireCvcRecollection = true
-            )
-        )
-
-        loader.load(
-            initializationMode = initializationMode,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = true,
-            ),
-        )
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.requireCvcRecollection).isTrue()
-    }
-
-    @Test
-    fun `Should filter out saved cards with disallowed brands`() = runTest {
+    fun `Should filter out saved cards with disallowed brands`() = runScenario {
         prefsRepository.setSavedSelection(null)
 
         val paymentMethods = listOf(
@@ -3491,7 +3420,7 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `Sets client attribution metadata correctly in LinkState`() = runTest {
+    fun `Sets client attribution metadata correctly in LinkState`() = runScenario {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
@@ -3525,7 +3454,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Allows Link if Link display is set to 'automatic'`() = runTest {
+    fun `Allows Link if Link display is set to 'automatic'`() = runScenario {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
@@ -3556,40 +3485,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Emits correct load event if Link display is set to 'automatic'`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        )
-
-        val config = PaymentSheet.Configuration(
-            merchantDisplayName = MERCHANT_DISPLAY_NAME,
-            link = PaymentSheet.LinkConfiguration(
-                display = PaymentSheet.LinkConfiguration.Display.Automatic,
-            ),
-        )
-
-        loader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = config,
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.linkEnabled).isTrue()
-        assertThat(loadSucceededCall.linkMode).isNull()
-        assertThat(loadSucceededCall.linkDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkSignupDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkDisplay).isEqualTo(PaymentSheet.LinkConfiguration.Display.Automatic)
-        assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
-    }
-
-    @Test
-    fun `Hides Link if Link display is set to 'never'`() = runTest {
+    fun `Hides Link if Link display is set to 'never'`() = runScenario {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         )
@@ -3619,7 +3515,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Hides Link if using web flow and collecting extra billing details`() = runTest {
+    fun `Hides Link if using web flow and collecting extra billing details`() = runScenario {
         val linkGate = FakeLinkGate()
         linkGate.setUseNativeLink(false)
 
@@ -3656,63 +3552,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Emits correct load event if Link display is set to 'never'`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        )
-
-        val config = PaymentSheet.Configuration(
-            merchantDisplayName = MERCHANT_DISPLAY_NAME,
-            link = PaymentSheet.LinkConfiguration(
-                display = PaymentSheet.LinkConfiguration.Display.Never,
-            ),
-        )
-
-        loader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = config,
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.linkEnabled).isFalse()
-        assertThat(loadSucceededCall.linkMode).isNull()
-        assertThat(loadSucceededCall.linkDisabledReasons).isEqualTo(listOf(LinkDisabledReason.LinkConfiguration))
-        assertThat(loadSucceededCall.linkSignupDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkDisplay).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
-        assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
-    }
-
-    @Test
-    fun `Emits correct load event for PMO setup future usage`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
-            ),
-        )
-
-        loader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isTrue()
-    }
-
-    @Test
-    fun `Should call prepare on integrity manager when attestation endpoints are enabled`() = runTest {
+    fun `Should call prepare on integrity manager when attestation endpoints are enabled`() = runScenario {
         val integrityRequestManager = FakeIntegrityRequestManager()
 
         val loader = createPaymentElementLoader(
@@ -3744,7 +3584,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Should not call prepare on integrity manager when attestation endpoints are disabled`() = runTest {
+    fun `Should not call prepare on integrity manager when attestation endpoints are disabled`() = runScenario {
         val integrityRequestManager = FakeIntegrityRequestManager()
 
         val loader = createPaymentElementLoader(
@@ -3775,7 +3615,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Should call prepare on integrity manager in test mode when attestation endpoints are enabled`() = runTest {
+    fun `Should call prepare on integrity manager in test mode when attestation endpoints are enabled`() = runScenario {
         val integrityRequestManager = FakeIntegrityRequestManager()
 
         val loader = createPaymentElementLoader(
@@ -3807,53 +3647,6 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
-    @Test
-    fun `Emits correct load event for setup future usage'`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                setupFutureUsage = StripeIntent.Usage.OffSession
-            ),
-        )
-
-        loader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.setupFutureUsage).isEqualTo(StripeIntent.Usage.OffSession)
-    }
-
-    @Test
-    fun `Emits correct load event for openCardScanAutomatically'`() = runTest {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-        )
-
-        loader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Some Name",
-                opensCardScannerAutomatically = true,
-            ),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceededCall.openCardScanAutomatically).isTrue()
-    }
-
     private fun removeLastPaymentMethodTest(
         customer: PaymentSheet.CustomerConfiguration,
         shouldDisableMobilePaymentElement: Boolean = false,
@@ -3861,7 +3654,7 @@ internal class DefaultPaymentElementLoaderTest {
             ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
         canRemoveLastPaymentMethodFromConfig: Boolean = true,
         test: (CustomerMetadata.Permissions) -> Unit,
-    ) = runTest {
+    ) = runScenario {
         val loader = createPaymentElementLoader(
             customer = ElementsSession.Customer(
                 paymentMethods = PaymentMethodFactory.cards(4),
@@ -3902,7 +3695,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
-    private suspend fun testExternalPaymentMethods(
+    private suspend fun Scenario.testExternalPaymentMethods(
         requestedExternalPaymentMethods: List<String>,
         externalPaymentMethodData: String?,
         expectedExternalPaymentMethods: List<String>?,
@@ -3935,7 +3728,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `All Link holdback experiments are triggered when loading PaymentSheet when Link is unavailable`() = runTest {
+    fun `All Link holdback experiments are triggered when loading PaymentSheet when Link is unavailable`() = runScenario {
         val logLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment()
 
         val loader = createPaymentElementLoader(
@@ -3965,7 +3758,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `All Link holdback experiments are triggered when loading PaymentSheet when Link is available`() = runTest {
+    fun `All Link holdback experiments are triggered when loading PaymentSheet when Link is available`() = runScenario {
         val logLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment()
 
         val loader = createPaymentElementLoader(
@@ -3991,12 +3784,131 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
+    @Test
+    fun `Loads successfully for cryptoOnramp`() = runScenario {
+        val loader = createPaymentElementLoader(
+            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+        )
+        val initializationMode = PaymentElementLoader.InitializationMode.CryptoOnramp
+
+        val result = loader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = true,
+            ),
+        ).getOrThrow()
+
+        assertThat(result.paymentMethodMetadata.integrationMetadata).isEqualTo(IntegrationMetadata.CryptoOnramp)
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem().initializedViaCompose).isTrue()
+        eventReporter.loadSucceededTurbine.awaitItem()
+    }
+
+    @Test
+    fun `analyticsMetadataFactory is called with correct parameters`() = runScenario {
+        val analyticsMetadataFactory = FakeDefaultPaymentElementLoaderAnalyticsMetadataFactory {
+            AnalyticsMetadata(emptyMap())
+        }
+
+        val loader = createPaymentElementLoader(
+            isGooglePayReady = true,
+            analyticsMetadataFactory = analyticsMetadataFactory
+        )
+
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+        )
+
+        loader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = config,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        val createCall = analyticsMetadataFactory.createCall.awaitItem()
+        assertThat(createCall.initializationMode).isEqualTo(initializationMode)
+        assertThat(createCall.configuration).isEqualTo(
+            PaymentElementLoader.Configuration.PaymentSheet(config)
+        )
+        assertThat(createCall.isGooglePaySupported).isTrue()
+        assertThat(createCall.customerMetadata).isNotNull()
+        assertThat(createCall.integrationMetadata).isEqualTo(
+            IntegrationMetadata.IntentFirst(PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value)
+        )
+        assertThat(createCall.elementsSession).isNotNull()
+        assertThat(createCall.linkStateResult).isNotNull()
+        analyticsMetadataFactory.validate()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `analyticsMetadataFactory is called with correct parameters without customer`() = runScenario {
+        PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _ ->
+                error("Should not be called.")
+            }
+            .build()
+
+        val analyticsMetadataFactory = FakeDefaultPaymentElementLoaderAnalyticsMetadataFactory {
+            AnalyticsMetadata(emptyMap())
+        }
+
+        val loader = createPaymentElementLoader(
+            isGooglePayReady = false,
+            linkAccountState = AccountStatus.SignedOut,
+            analyticsMetadataFactory = analyticsMetadataFactory
+        )
+
+        val config = PaymentSheet.Configuration(
+            merchantDisplayName = "Merchant"
+        )
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 5000,
+                    currency = "USD"
+                ),
+            ),
+        )
+
+        loader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = config,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        val createCall = analyticsMetadataFactory.createCall.awaitItem()
+        assertThat(createCall.initializationMode).isEqualTo(initializationMode)
+        assertThat(createCall.configuration).isEqualTo(
+            PaymentElementLoader.Configuration.PaymentSheet(config)
+        )
+        assertThat(createCall.isGooglePaySupported).isFalse()
+        assertThat(createCall.customerMetadata).isNull()
+        assertThat(createCall.integrationMetadata).isEqualTo(
+            IntegrationMetadata.DeferredIntentWithConfirmationToken(initializationMode.intentConfiguration)
+        )
+        assertThat(createCall.elementsSession).isNotNull()
+        assertThat(createCall.linkStateResult).isNotNull()
+        analyticsMetadataFactory.validate()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
     private fun testCustomPaymentMethods(
         requestedCustomPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         returnedCustomPaymentMethods: List<ElementsSession.CustomPaymentMethod>,
         expectedCustomPaymentMethods: List<DisplayableCustomPaymentMethod>,
         expectedLogMessages: List<String>,
-    ) = runTest {
+    ) = runScenario {
         val userFacingLogger = FakeUserFacingLogger()
         val loader = createPaymentElementLoader(
             customPaymentMethods = returnedCustomPaymentMethods,
@@ -4024,7 +3936,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
-    private suspend fun testSuccessfulLoadSendsEventsCorrectly(paymentSelection: PaymentSelection?) {
+    private suspend fun Scenario.testSuccessfulLoadSendsEventsCorrectly(paymentSelection: PaymentSelection?) {
         prefsRepository.setSavedSelection(paymentSelection?.toSavedSelection())
 
         val loader = createPaymentElementLoader(
@@ -4054,22 +3966,6 @@ internal class DefaultPaymentElementLoaderTest {
 
         val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
         assertThat(loadSucceededCall.paymentSelection).isEqualTo(paymentSelection)
-        assertThat(loadSucceededCall.linkEnabled).isTrue()
-        assertThat(loadSucceededCall.linkMode).isEqualTo(LinkMode.LinkPaymentMethod)
-        assertThat(loadSucceededCall.linkDisabledReasons).isNull()
-        assertThat(loadSucceededCall.linkSignupDisabledReasons).isNull()
-        assertThat(loadSucceededCall.googlePaySupported).isTrue()
-        assertThat(loadSucceededCall.currency).isEqualTo("usd")
-        assertThat(loadSucceededCall.initializationMode).isEqualTo(initializationMode)
-        assertThat(loadSucceededCall.orderedLpms).isEqualTo(listOf("card", "link"))
-        assertThat(loadSucceededCall.requireCvcRecollection).isFalse()
-        assertThat(loadSucceededCall.hasDefaultPaymentMethod).isNull()
-        assertThat(loadSucceededCall.setAsDefaultEnabled).isNull()
-        assertThat(loadSucceededCall.linkDisplay).isEqualTo(PaymentSheet.LinkConfiguration.Display.Automatic)
-        assertThat(loadSucceededCall.financialConnectionsAvailability).isEqualTo(FinancialConnectionsAvailability.Full)
-        assertThat(loadSucceededCall.paymentMethodOptionsSetupFutureUsage).isFalse()
-        assertThat(loadSucceededCall.setupFutureUsage).isNull()
-        assertThat(loadSucceededCall.openCardScanAutomatically).isFalse()
     }
 
     private fun createLinkSettings(
@@ -4182,10 +4078,41 @@ internal class DefaultPaymentElementLoaderTest {
         ),
     )
 
-    private fun createPaymentElementLoader(
+    private fun runScenario(
+        block: suspend Scenario.() -> Unit
+    ) {
+        val testDispatcher = UnconfinedTestDispatcher()
+        val eventReporter = FakeLoadingEventReporter()
+        val prefsRepository = FakePrefsRepository()
+
+        @Suppress("UNCHECKED_CAST")
+        val paymentMethodTypeCaptor = ArgumentCaptor.forClass(List::class.java)
+            as ArgumentCaptor<List<PaymentMethod.Type>>
+
+        Scenario(
+            testDispatcher = testDispatcher,
+            eventReporter = eventReporter,
+            prefsRepository = prefsRepository,
+            paymentMethodTypeCaptor = paymentMethodTypeCaptor,
+        ).apply {
+            runTest {
+                block()
+            }
+            eventReporter.validate()
+        }
+    }
+
+    private data class Scenario(
+        val testDispatcher: TestDispatcher,
+        val eventReporter: FakeLoadingEventReporter,
+        val prefsRepository: FakePrefsRepository,
+        val paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>,
+    )
+
+    private fun Scenario.createPaymentElementLoader(
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        customerRepo: CustomerRepository = customerRepository,
+        customerRepo: CustomerRepository = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS),
         linkAccountState: AccountStatus = AccountStatus.Verified(true, null),
         error: Throwable? = null,
         linkSettings: ElementsSession.LinkSettings? = null,
@@ -4213,6 +4140,10 @@ internal class DefaultPaymentElementLoaderTest {
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
         isLiveMode: Boolean = false,
+        analyticsMetadataFactory: DefaultPaymentElementLoader.AnalyticsMetadataFactory =
+            FakeDefaultPaymentElementLoaderAnalyticsMetadataFactory {
+                AnalyticsMetadata(emptyMap())
+            },
     ): PaymentElementLoader {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(customerRepo)
         val createLinkState = DefaultCreateLinkState(
@@ -4225,11 +4156,11 @@ internal class DefaultPaymentElementLoaderTest {
         return DefaultPaymentElementLoader(
             prefsRepositoryFactory = { prefsRepository },
             googlePayRepositoryFactory = {
-                if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
+                GooglePayRepository { flowOf(isGooglePayReady) }
             },
             elementsSessionRepository = elementsSessionRepository,
             customerRepository = customerRepo,
-            lpmRepository = lpmRepository,
+            lpmRepository = LpmRepository(),
             logger = Logger.noop(),
             eventReporter = eventReporter,
             errorReporter = errorReporter,
@@ -4238,9 +4169,10 @@ internal class DefaultPaymentElementLoaderTest {
             logLinkHoldbackExperiment = logLinkHoldbackExperiment,
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
-            cvcRecollectionHandler = CvcRecollectionHandlerImpl(),
             integrityRequestManager = integrityRequestManager,
             isLiveModeProvider = { isLiveMode },
+            paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
+            analyticsMetadataFactory = analyticsMetadataFactory,
         )
     }
 
@@ -4265,6 +4197,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private companion object {
+        private const val PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER = "PaymentElementLoaderTest"
         private val PAYMENT_METHODS =
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
         private val DEFAULT_PAYMENT_SHEET_CONFIG = PaymentSheet.Configuration(
@@ -4285,7 +4218,7 @@ internal class DefaultPaymentElementLoaderTest {
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> = load(
         initializationMode = initializationMode,
-        configuration = paymentSheetConfiguration.asCommonConfiguration(),
+        integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(paymentSheetConfiguration),
         metadata = metadata,
     )
 
@@ -4303,7 +4236,7 @@ internal class DefaultPaymentElementLoaderTest {
         PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "d4", customerId = "dan")
     )
 
-    private suspend fun getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+    private suspend fun Scenario.getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
         lastUsedPaymentMethod: PaymentMethod?,
         defaultPaymentMethod: PaymentMethod?,
     ): PaymentElementLoader.State {

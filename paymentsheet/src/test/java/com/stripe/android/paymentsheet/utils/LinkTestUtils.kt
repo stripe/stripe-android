@@ -12,9 +12,9 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 
@@ -35,6 +35,16 @@ internal object LinkTestUtils {
             )
         ),
         paymentMethodCreateParams = mock(),
+        paymentMethod = PaymentMethod.Builder()
+            .setId("pm_123")
+            .setType(PaymentMethod.Type.Card)
+            .setCard(
+                PaymentMethod.Card(
+                    last4 = "4242",
+                    wallet = Wallet.LinkWallet("4242"),
+                )
+            )
+            .build(),
     )
 
     val LINK_NEW_PAYMENT_DETAILS = LinkPaymentDetails.New(
@@ -86,7 +96,6 @@ internal object LinkTestUtils {
             shippingDetails = null,
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,
-            initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
             elementsSessionId = "session_1234",
             linkMode = LinkMode.LinkPaymentMethod,
             allowDefaultOptIn = false,

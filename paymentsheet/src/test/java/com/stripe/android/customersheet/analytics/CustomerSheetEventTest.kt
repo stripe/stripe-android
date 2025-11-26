@@ -47,6 +47,7 @@ class CustomerSheetEventTest {
             ),
             "preferred_networks" to null,
             "card_brand_acceptance" to false,
+            "open_card_scan_automatically_enabled" to false,
         )
 
         assertThat(event.additionalParams)
@@ -93,6 +94,7 @@ class CustomerSheetEventTest {
             ),
             "preferred_networks" to null,
             "card_brand_acceptance" to false,
+            "open_card_scan_automatically_enabled" to false
         )
 
         assertThat(event.additionalParams)
@@ -138,6 +140,7 @@ class CustomerSheetEventTest {
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
             "preferred_networks" to "cartes_bancaires, visa",
             "card_brand_acceptance" to false,
+            "open_card_scan_automatically_enabled" to true,
         )
 
         val event = CustomerSheetEvent.Init(

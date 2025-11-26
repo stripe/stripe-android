@@ -193,7 +193,6 @@ internal class LinkConfirmationDefinitionTest {
             confirmationOption = LINK_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = LinkActivityResult.PaymentMethodObtained(paymentMethod),
         )
 
@@ -221,7 +220,6 @@ internal class LinkConfirmationDefinitionTest {
             confirmationOption = LINK_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = LinkActivityResult.Completed(
                 linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
             ),
@@ -231,7 +229,6 @@ internal class LinkConfirmationDefinitionTest {
             ConfirmationDefinition.Result.Succeeded(
                 intent = CONFIRMATION_PARAMETERS.intent,
                 deferredIntentConfirmationType = null,
-                isConfirmationToken = false,
             )
         )
         assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
@@ -252,7 +249,6 @@ internal class LinkConfirmationDefinitionTest {
             confirmationOption = LINK_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = LinkActivityResult.Failed(
                 error = exception,
                 linkAccountUpdate = LinkAccountUpdate.Value(null)
@@ -285,7 +281,6 @@ internal class LinkConfirmationDefinitionTest {
             confirmationOption = LINK_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.LoggedOut,
                 linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
@@ -315,7 +310,6 @@ internal class LinkConfirmationDefinitionTest {
             confirmationOption = LINK_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            isConfirmationToken = false,
             result = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.BackPressed,
                 linkAccountUpdate = LinkAccountUpdate.None

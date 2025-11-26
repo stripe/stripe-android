@@ -142,9 +142,10 @@ internal class DefaultCustomerSheetLoader(
             serverLpmSpecs = elementsSession.paymentMethodSpecs,
         ).sharedDataSpecs
 
-        val isGooglePayReadyAndEnabled = configuration.googlePayEnabled && googlePayRepositoryFactory(
+        val isGooglePaySupportedOnDevice = googlePayRepositoryFactory(
             if (isLiveModeProvider()) GooglePayEnvironment.Production else GooglePayEnvironment.Test
         ).isReady().first()
+        val isGooglePayReadyAndEnabled = configuration.googlePayEnabled && isGooglePaySupportedOnDevice
 
         val customerMetadata = CustomerMetadata(
             id = customerSheetSession.customerId,

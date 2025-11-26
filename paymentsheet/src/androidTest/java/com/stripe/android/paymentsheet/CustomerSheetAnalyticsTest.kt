@@ -4,11 +4,11 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.customersheet.CustomerSheetResult
+import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.utils.AdvancedFraudSignalsTestRule
 import com.stripe.android.paymentsheet.utils.CustomerSheetTestType
 import com.stripe.android.paymentsheet.utils.CustomerSheetUtils
 import com.stripe.android.paymentsheet.utils.IntegrationType
@@ -21,7 +21,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class CustomerSheetAnalyticsTest {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
-        validationTimeout = 1.seconds, // Analytics requests happen async.
+        validationTimeout = 5.seconds, // Analytics requests happen async.
     )
 
     @get:Rule

@@ -33,6 +33,7 @@ import com.stripe.android.cards.DefaultCardAccountRangeStore
 import com.stripe.android.model.Address
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardParams
 import com.stripe.android.model.Networks
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -106,6 +107,20 @@ internal class CardInputWidgetTest {
             expiryDateEditText.append("50")
             cvcEditText.append(CVC_VALUE_COMMON)
 
+            assertThat(cardParams)
+                .isEqualTo(
+                    CardParams(
+                        brand = CardBrand.Visa,
+                        loggingTokens = ATTRIBUTION,
+                        number = VISA_NO_SPACES,
+                        expMonth = 12,
+                        expYear = 2050,
+                        cvc = CVC_VALUE_COMMON,
+                        address = Address.Builder()
+                            .build()
+                    )
+                )
+
             assertThat(paymentMethodCreateParams)
                 .isEqualTo(
                     PaymentMethodCreateParams.create(
@@ -131,6 +146,9 @@ internal class CardInputWidgetTest {
             cvcEditText.append(CVC_VALUE_COMMON)
             setPreferredNetworks(listOf(CardBrand.CartesBancaires))
 
+            assertThat(cardParams?.networks)
+                .isEqualTo(Networks(CardBrand.CartesBancaires.code))
+
             assertThat(paymentMethodCreateParams?.card?.networks?.preferred)
                 .isEqualTo(CardBrand.CartesBancaires.code)
         }
@@ -145,6 +163,21 @@ internal class CardInputWidgetTest {
             expiryDateEditText.append("50")
             cvcEditText.append(CVC_VALUE_COMMON)
             postalCodeEditText.setText(POSTAL_CODE_VALUE)
+
+            assertThat(cardParams)
+                .isEqualTo(
+                    CardParams(
+                        brand = CardBrand.Visa,
+                        loggingTokens = ATTRIBUTION,
+                        number = VISA_NO_SPACES,
+                        expMonth = 12,
+                        expYear = 2050,
+                        cvc = CVC_VALUE_COMMON,
+                        address = Address.Builder()
+                            .setPostalCode(POSTAL_CODE_VALUE)
+                            .build()
+                    )
+                )
 
             assertThat(paymentMethodCreateParams)
                 .isEqualTo(
@@ -174,6 +207,20 @@ internal class CardInputWidgetTest {
         expiryDateEditText.append("50")
         cvcEditText.append(CVC_VALUE_AMEX)
 
+        assertThat(cardParams)
+            .isEqualTo(
+                CardParams(
+                    brand = CardBrand.AmericanExpress,
+                    loggingTokens = ATTRIBUTION,
+                    number = AMEX_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_AMEX,
+                    address = Address.Builder()
+                        .build()
+                )
+            )
+
         assertThat(paymentMethodCreateParams)
             .isEqualTo(
                 PaymentMethodCreateParams.create(
@@ -197,6 +244,21 @@ internal class CardInputWidgetTest {
         expiryDateEditText.append("50")
         cvcEditText.append(CVC_VALUE_AMEX)
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
+
+        assertThat(cardParams)
+            .isEqualTo(
+                CardParams(
+                    brand = CardBrand.AmericanExpress,
+                    loggingTokens = ATTRIBUTION,
+                    number = AMEX_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_AMEX,
+                    address = Address.Builder()
+                        .setPostalCode(POSTAL_CODE_VALUE)
+                        .build()
+                )
+            )
 
         assertThat(paymentMethodCreateParams)
             .isEqualTo(
@@ -229,6 +291,20 @@ internal class CardInputWidgetTest {
             expiryDateEditText.append("50")
             cvcEditText.append(CVC_VALUE_COMMON)
 
+            assertThat(cardParams)
+                .isEqualTo(
+                    CardParams(
+                        brand = CardBrand.DinersClub,
+                        loggingTokens = ATTRIBUTION,
+                        number = DINERS_CLUB_14_NO_SPACES,
+                        expMonth = 12,
+                        expYear = 2050,
+                        cvc = CVC_VALUE_COMMON,
+                        address = Address.Builder()
+                            .build()
+                    )
+                )
+
             assertThat(paymentMethodCard)
                 .isEqualTo(
                     PaymentMethodCreateParams.Card(
@@ -251,6 +327,21 @@ internal class CardInputWidgetTest {
             expiryDateEditText.append("50")
             cvcEditText.append(CVC_VALUE_COMMON)
             postalCodeEditText.setText(POSTAL_CODE_VALUE)
+
+            assertThat(cardParams)
+                .isEqualTo(
+                    CardParams(
+                        brand = CardBrand.DinersClub,
+                        loggingTokens = ATTRIBUTION,
+                        number = DINERS_CLUB_14_NO_SPACES,
+                        expMonth = 12,
+                        expYear = 2050,
+                        cvc = CVC_VALUE_COMMON,
+                        address = Address.Builder()
+                            .setPostalCode(POSTAL_CODE_VALUE)
+                            .build()
+                    )
+                )
 
             assertThat(paymentMethodCard)
                 .isEqualTo(
@@ -275,6 +366,9 @@ internal class CardInputWidgetTest {
         cvcEditText.append(CVC_VALUE_COMMON)
         postalCodeEditText.append("")
 
+        assertThat(cardParams)
+            .isNull()
+
         assertThat(paymentMethodCard)
             .isNull()
     }
@@ -286,6 +380,9 @@ internal class CardInputWidgetTest {
         expiryDateEditText.append("12")
         expiryDateEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
+
+        assertThat(cardParams)
+            .isNull()
 
         assertThat(paymentMethodCard)
             .isNull()
@@ -310,6 +407,9 @@ internal class CardInputWidgetTest {
         expiryDateEditText.append("50")
         cvcEditText.append("12")
 
+        assertThat(cardParams)
+            .isNull()
+
         assertThat(paymentMethodCard)
             .isNull()
     }
@@ -324,6 +424,21 @@ internal class CardInputWidgetTest {
         cvcEditText.append(CVC_VALUE_COMMON)
         postalCodeEditText.setText("")
 
+        assertThat(cardParams)
+            .isEqualTo(
+                CardParams(
+                    brand = CardBrand.Visa,
+                    loggingTokens = ATTRIBUTION,
+                    number = VISA_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address()
+                )
+            )
+        assertThat(paymentMethodCard)
+            .isNotNull()
+
         assertThat(paymentMethodCreateParams?.billingDetails?.address?.postalCode)
             .isEqualTo("")
     }
@@ -336,6 +451,21 @@ internal class CardInputWidgetTest {
         expiryDateEditText.append("12")
         expiryDateEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
+
+        assertThat(cardParams)
+            .isEqualTo(
+                CardParams(
+                    brand = CardBrand.AmericanExpress,
+                    loggingTokens = ATTRIBUTION,
+                    number = AMEX_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address()
+                )
+            )
+        assertThat(paymentMethodCard)
+            .isNotNull()
 
         assertThat(paymentMethodCreateParams?.billingDetails)
             .isNull()
@@ -351,6 +481,23 @@ internal class CardInputWidgetTest {
         cvcEditText.append(CVC_VALUE_COMMON)
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
 
+        assertThat(cardParams)
+            .isEqualTo(
+                CardParams(
+                    brand = CardBrand.AmericanExpress,
+                    loggingTokens = ATTRIBUTION,
+                    number = AMEX_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address.Builder()
+                        .setPostalCode(POSTAL_CODE_VALUE)
+                        .build()
+                )
+            )
+        assertThat(paymentMethodCard)
+            .isNotNull()
+
         assertThat(paymentMethodCreateParams?.billingDetails?.address?.postalCode)
             .isEqualTo(POSTAL_CODE_VALUE)
     }
@@ -362,6 +509,8 @@ internal class CardInputWidgetTest {
         expiryDateEditText.append("50")
         cvcEditText.append("12")
 
+        assertThat(cardParams)
+            .isNull()
         assertThat(paymentMethodCard)
             .isNull()
     }
@@ -401,6 +550,8 @@ internal class CardInputWidgetTest {
         expiryDateEditText.append("50")
         cvcEditText.append("12")
 
+        assertThat(cardParams)
+            .isNull()
         assertThat(paymentMethodCard)
             .isNull()
     }
@@ -973,6 +1124,20 @@ internal class CardInputWidgetTest {
             setExpiryDate(12, 2079)
             setCvcCode(CVC_VALUE_AMEX)
 
+            assertThat(cardParams)
+                .isEqualTo(
+                    CardParams(
+                        brand = CardBrand.AmericanExpress,
+                        loggingTokens = ATTRIBUTION,
+                        number = AMEX_NO_SPACES,
+                        expMonth = 12,
+                        expYear = 2079,
+                        cvc = CVC_VALUE_AMEX,
+                        address = Address.Builder()
+                            .build()
+                    )
+                )
+
             assertThat(paymentMethodCard)
                 .isEqualTo(
                     PaymentMethodCreateParams.Card(
@@ -994,6 +1159,21 @@ internal class CardInputWidgetTest {
             setExpiryDate(12, 2079)
             setCvcCode(CVC_VALUE_AMEX)
             setPostalCode(POSTAL_CODE_VALUE)
+
+            assertThat(cardParams)
+                .isEqualTo(
+                    CardParams(
+                        brand = CardBrand.AmericanExpress,
+                        loggingTokens = ATTRIBUTION,
+                        number = AMEX_NO_SPACES,
+                        expMonth = 12,
+                        expYear = 2079,
+                        cvc = CVC_VALUE_AMEX,
+                        address = Address.Builder()
+                            .setPostalCode(POSTAL_CODE_VALUE)
+                            .build()
+                    )
+                )
 
             assertThat(paymentMethodCard)
                 .isEqualTo(
@@ -1333,6 +1513,7 @@ internal class CardInputWidgetTest {
 
         // invalid zipcode
         postalCodeEditText.setText(CVC_VALUE_AMEX)
+        assertThat(cardParams)
         assertThat(paymentMethodCreateParams)
             .isNull()
     }
@@ -1351,6 +1532,20 @@ internal class CardInputWidgetTest {
         // valid zipcode
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
 
+        assertThat(cardParams)
+            .isEqualTo(
+                CardParams(
+                    brand = CardBrand.Visa,
+                    loggingTokens = ATTRIBUTION,
+                    number = VISA_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address.Builder()
+                        .setPostalCode(POSTAL_CODE_VALUE)
+                        .build()
+                )
+            )
         assertThat(paymentMethodCreateParams?.billingDetails?.address?.postalCode)
             .isEqualTo(POSTAL_CODE_VALUE)
     }

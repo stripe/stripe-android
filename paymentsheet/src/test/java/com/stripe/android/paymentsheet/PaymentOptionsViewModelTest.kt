@@ -801,7 +801,7 @@ internal class PaymentOptionsViewModelTest {
         val cards = PaymentMethodFactory.cards(3)
         val paymentMethodToRemove = cards.first()
 
-        whenever(customerRepository.detachPaymentMethod(any(), eq(paymentMethodToRemove.id!!), eq(false))).thenReturn(
+        whenever(customerRepository.detachPaymentMethod(any(), eq(paymentMethodToRemove.id), eq(false))).thenReturn(
             Result.success(paymentMethodToRemove)
         )
 
@@ -1255,11 +1255,11 @@ internal class PaymentOptionsViewModelTest {
 
             val selection = awaitItem()
 
-            assertThat(selection).isInstanceOf<PaymentSelection.New.LinkInline>()
+            assertThat(selection).isInstanceOf<PaymentSelection.New.Card>()
 
-            val inlineSelection = selection as PaymentSelection.New.LinkInline
+            val inlineSelection = selection as PaymentSelection.New.Card
 
-            assertThat(inlineSelection.input).isEqualTo(input)
+            assertThat(inlineSelection.linkInput).isEqualTo(input)
             assertThat(inlineSelection.brand).isEqualTo(CardBrand.Visa)
             assertThat(inlineSelection.customerRequestedSave).isEqualTo(expectedCustomerRequestedSave)
         }

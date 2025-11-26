@@ -42,12 +42,22 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_card_type_unknown">%1$s Card</string>
   <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
   <string name="stripe_link_confirm_payment_title">Kumpirmahin ang mga detalye ng pagbabayad</string>
-  <!-- Email suggestion prompt shown when we detect a typo. The %1$s is a placeholder for the suggested email address. -->
-  <string name="stripe_link_email_suggestion">Ang ibig mong sabihin ay %1$s?</string>
   <!-- CTA text for accepting the suggested email correction -->
   <string name="stripe_link_email_suggestion_update">Oo, update</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Mag-log in o mag-sign up</string>
+  <!-- Title for the address field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_address_field_title">Address</string>
+  <!-- Text displayed in a confirmation button when gathering kyc information -->
+  <string name="stripe_link_onramp_kyc_verification_confirm_button_text">Kumpirmahin</string>
+  <!-- Title for the date of birth field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_dob_field_title">Petsa ng kapanganakan</string>
+  <!-- Title for the name field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_name_field_title">Pangalan</string>
+  <!-- Title of the screen responsible for confirming kyc information -->
+  <string name="stripe_link_onramp_kyc_verification_screen_title">Kumpirmahin ang iyong impormasyon</string>
+  <!-- Title for the SSN field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_ssn_field_title">Huling 4 na digit ng SSN</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Sumang-ayon at magpatuloy</string>
   <!-- Title for the Link signup screen -->

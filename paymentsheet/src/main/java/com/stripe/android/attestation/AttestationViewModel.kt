@@ -51,12 +51,12 @@ internal class AttestationViewModel @Inject constructor(
                 val args: AttestationArgs = getArgs(createSavedStateHandle())
                     ?: throw NoArgsException()
                 val app = this[APPLICATION_KEY] as Application
-                DaggerAttestationComponent
-                    .builder()
-                    .application(app)
-                    .publishableKeyProvider { args.publishableKey }
-                    .productUsage(args.productUsage.toSet())
-                    .build()
+                DaggerAttestationComponent.factory()
+                    .build(
+                        application = app,
+                        publishableKeyProvider = { args.publishableKey },
+                        productUsage = args.productUsage.toSet()
+                    )
                     .attestationViewModel
             }
         }

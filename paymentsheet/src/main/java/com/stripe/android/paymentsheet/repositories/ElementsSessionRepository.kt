@@ -203,6 +203,25 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 link = linkParams,
             )
         }
+
+        is PaymentElementLoader.InitializationMode.CryptoOnramp -> {
+            val intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
+            )
+            ElementsSessionParams.DeferredIntentType(
+                deferredIntentParams = intentConfiguration.toDeferredIntentParams(),
+                customPaymentMethods = customPaymentMethodIds,
+                externalPaymentMethods = externalPaymentMethods,
+                customerSessionClientSecret = customerSessionClientSecret,
+                legacyCustomerEphemeralKey = legacyCustomerEphemeralKey,
+                savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
+                mobileSessionId = mobileSessionId,
+                sellerDetails = intentConfiguration.toSellerDetails(),
+                appId = appId,
+                countryOverride = countryOverride,
+                link = linkParams,
+            )
+        }
     }
 }
 

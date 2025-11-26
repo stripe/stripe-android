@@ -242,7 +242,6 @@ internal class DefaultCreateLinkState @Inject constructor(
             linkSignUpOptInFeatureEnabled = elementsSession.linkSignUpOptInFeatureEnabled,
             linkSignUpOptInInitialValue = elementsSession.linkSignUpOptInInitialValue,
             elementsSessionId = elementsSession.elementsSessionId,
-            initializationMode = initializationMode,
             linkMode = elementsSession.linkSettings?.linkMode,
             billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
             defaultBillingDetails = configuration.defaultBillingDetails,

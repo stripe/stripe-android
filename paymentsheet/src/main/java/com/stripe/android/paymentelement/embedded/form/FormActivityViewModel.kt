@@ -29,7 +29,6 @@ internal class FormActivityViewModel @Inject constructor(
                 selectedPaymentMethodCode = args.selectedPaymentMethodCode,
                 hasSavedPaymentMethods = args.hasSavedPaymentMethods,
                 configuration = args.configuration,
-                initializationMode = args.initializationMode,
                 statusBarColor = args.statusBarColor,
                 application = extras.requireApplication(),
                 paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,

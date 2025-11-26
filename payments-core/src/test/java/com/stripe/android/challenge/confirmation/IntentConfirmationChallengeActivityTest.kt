@@ -164,7 +164,8 @@ internal class IntentConfirmationChallengeActivityTest {
     private fun createTestArgs(): IntentConfirmationChallengeArgs {
         return IntentConfirmationChallengeArgs(
             publishableKey = "pk_test_123",
-            intent = PaymentIntentFixtures.PI_SUCCEEDED
+            intent = PaymentIntentFixtures.PI_SUCCEEDED,
+            productUsage = listOf("PaymentSheet")
         )
     }
 

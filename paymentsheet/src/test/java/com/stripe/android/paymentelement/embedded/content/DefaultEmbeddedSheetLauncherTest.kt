@@ -43,7 +43,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
             paymentMethodMetadata = paymentMethodMetadata,
             hasSavedPaymentMethods = false,
             configuration = state.configuration,
-            initializationMode = state.initializationMode,
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
             paymentSelection = null,

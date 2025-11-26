@@ -42,12 +42,22 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_card_type_unknown">Karta %1$s</string>
   <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
   <string name="stripe_link_confirm_payment_title">Potvrdit platební údaje</string>
-  <!-- Email suggestion prompt shown when we detect a typo. The %1$s is a placeholder for the suggested email address. -->
-  <string name="stripe_link_email_suggestion">Mysleli jste %1$s?</string>
   <!-- CTA text for accepting the suggested email correction -->
   <string name="stripe_link_email_suggestion_update">Ano, aktualizovat</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Registrovat nebo přihlásit</string>
+  <!-- Title for the address field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_address_field_title">Adresa</string>
+  <!-- Text displayed in a confirmation button when gathering kyc information -->
+  <string name="stripe_link_onramp_kyc_verification_confirm_button_text">Potvrdit</string>
+  <!-- Title for the date of birth field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_dob_field_title">Datum narození</string>
+  <!-- Title for the name field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_name_field_title">Jméno</string>
+  <!-- Title of the screen responsible for confirming kyc information -->
+  <string name="stripe_link_onramp_kyc_verification_screen_title">Potvrďte své údaje</string>
+  <!-- Title for the SSN field on the KYC verification screen -->
+  <string name="stripe_link_onramp_kyc_verification_ssn_field_title">Poslední 4 číslice SSN</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Souhlasit a pokračovat</string>
   <!-- Title for the Link signup screen -->
@@ -216,11 +226,11 @@ to be saved and used in future checkout sessions. -->
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Značka karty nebyla aktualizována. Zkuste to prosím znovu.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
-  <string name="stripe_paynow_confirm_payment">Pro dokončení nákupu potvrďte platbu ve své bance nebo platební aplikaci do %.</string>
+  <string name="stripe_paynow_confirm_payment">Pro dokončení nákupu potvrďte platbu ve své bance nebo platební aplikaci do %s.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Nastavit jako výchozí způsob platby</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->
-  <string name="stripe_qrcode_lpm_confirm_payment">Pro dokončení nákupu potvrďte platbu ve své bance nebo platební aplikaci do %.</string>
+  <string name="stripe_qrcode_lpm_confirm_payment">Pro dokončení nákupu potvrďte platbu ve své bance nebo platební aplikaci do %s.</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Odebrat bankovní účet končící na %s</string>
   <!-- Accessibility description for a button that launches Shop Pay. -->

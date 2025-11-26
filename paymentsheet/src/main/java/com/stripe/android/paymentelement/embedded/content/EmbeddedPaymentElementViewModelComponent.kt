@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.state.CreateLinkState
+import com.stripe.android.paymentsheet.state.DefaultAnalyticsMetadataFactory
 import com.stripe.android.paymentsheet.state.DefaultCreateLinkState
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
@@ -129,6 +130,11 @@ internal interface EmbeddedPaymentElementViewModelModule {
     fun bindPaymentElementLoader(loader: DefaultPaymentElementLoader): PaymentElementLoader
 
     @Binds
+    fun bindAnalyticsMetadataFactory(
+        implementation: DefaultAnalyticsMetadataFactory
+    ): DefaultPaymentElementLoader.AnalyticsMetadataFactory
+
+    @Binds
     fun bindsCreateLinkState(
         impl: DefaultCreateLinkState,
     ): CreateLinkState
@@ -170,10 +176,10 @@ internal interface EmbeddedPaymentElementViewModelModule {
         }
 
         @Provides
-        fun providesInitializationMode(
-            stateHolder: EmbeddedConfirmationStateHolder
-        ): PaymentElementLoader.InitializationMode? {
-            return stateHolder.state?.initializationMode
+        fun providePaymentMethodMetadataValue(
+            confirmationStateHolder: EmbeddedConfirmationStateHolder,
+        ): PaymentMethodMetadata? {
+            return confirmationStateHolder.state?.paymentMethodMetadata
         }
 
         @Provides

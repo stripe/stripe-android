@@ -34,11 +34,8 @@ import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
-import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
-import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.isLink
@@ -72,8 +69,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
+@Singleton
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     internal val args: PaymentSheetContract.Args,
@@ -219,15 +218,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
-        val isDeferred = args.initializationMode is PaymentElementLoader.InitializationMode.DeferredIntent
-
-        eventReporter.onInit(
-            commonConfiguration = config.asCommonConfiguration(),
-            primaryButtonColor = config.primaryButtonColorUsage(),
-            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
-            isDeferred = isDeferred,
-            appearance = config.appearance
-        )
+        eventReporter.onInit()
 
         viewModelScope.launch(workContext) {
             loadPaymentSheetState()
@@ -238,7 +229,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         val result = withContext(workContext) {
             paymentElementLoader.load(
                 initializationMode = args.initializationMode,
-                configuration = args.config.asCommonConfiguration(),
+                integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(args.config),
                 metadata = PaymentElementLoader.Metadata(
                     isReloadingAfterProcessDeath = confirmationHandler.hasReloadedFromProcessDeath,
                     initializedViaCompose = args.initializedViaCompose,
@@ -265,8 +256,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             // PaymentSheet and return a `Completed` result to the caller.
             handlePaymentCompleted(
                 deferredIntentConfirmationType = pendingResult.deferredIntentConfirmationType,
-                isConfirmationToken = pendingResult.isConfirmationToken,
                 finishImmediately = true,
+                intentId = pendingResult.intent.id,
             )
         } else if (state.validationError != null) {
             handlePaymentSheetStateLoadFailure(state.validationError)
@@ -513,7 +504,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 confirmationHandler.start(
                     arguments = ConfirmationHandler.Args(
                         confirmationOption = option,
-                        initializationMode = args.initializationMode,
                         paymentMethodMetadata = paymentMethodMetadata,
                     ),
                 )
@@ -564,14 +554,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun handlePaymentCompleted(
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         finishImmediately: Boolean,
-        isConfirmationToken: Boolean
+        intentId: String?,
     ) {
         val currentSelection = inProgressSelection
         currentSelection?.let { paymentSelection ->
             eventReporter.onPaymentSuccess(
                 paymentSelection = paymentSelection,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
-                isConfirmationToken = isConfirmationToken,
+                intentId = intentId,
             )
         }
 
@@ -595,8 +585,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> handlePaymentCompleted(
                 deferredIntentConfirmationType = result.deferredIntentConfirmationType,
-                isConfirmationToken = result.isConfirmationToken,
                 finishImmediately = false,
+                intentId = result.intent.id,
             )
             is ConfirmationHandler.Result.Failed -> processConfirmationFailure(result)
             is ConfirmationHandler.Result.Canceled,
@@ -702,15 +692,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             val savedStateHandle = extras.createSavedStateHandle()
             val arguments = starterArgsSupplier()
 
-            val component = DaggerPaymentSheetLauncherComponent
-                .builder()
-                .application(application)
-                .savedStateHandle(savedStateHandle)
-                .paymentElementCallbackIdentifier(arguments.paymentElementCallbackIdentifier)
-                .build()
-                .paymentSheetViewModelSubcomponentBuilder
-                .paymentSheetViewModelModule(PaymentSheetViewModelModule(arguments))
-                .build()
+            val component = DaggerPaymentSheetLauncherComponent.factory()
+                .build(
+                    application = application,
+                    handle = savedStateHandle,
+                    starterArgs = arguments,
+                )
 
             return component.viewModel as T
         }

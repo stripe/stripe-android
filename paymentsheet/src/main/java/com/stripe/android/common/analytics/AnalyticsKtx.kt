@@ -1,9 +1,7 @@
 package com.stripe.android.common.analytics
 
-import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.uicore.StripeThemeDefaults
 
 internal const val FIELD_APPEARANCE_USAGE = "usage"
@@ -91,26 +89,6 @@ internal fun List<CardBrand>.toAnalyticsValue(): String? {
     }
 }
 
-internal fun CommonConfiguration.getExternalPaymentMethodsAnalyticsValue(): List<String>? {
-    return this.externalPaymentMethods.takeIf { it.isNotEmpty() }?.take(PaymentSheetEvent.MAX_EXTERNAL_PAYMENT_METHODS)
-}
-
-internal fun CommonConfiguration.getCustomPaymentMethodsAnalyticsValue(): String? {
-    return this.customPaymentMethods.takeIf { customPaymentMethods ->
-        customPaymentMethods.isNotEmpty()
-    }?.joinToString(",") { customPaymentMethod ->
-        customPaymentMethod.id
-    }
-}
-
 internal fun PaymentSheet.CardBrandAcceptance.toAnalyticsValue(): Boolean {
     return this !is PaymentSheet.CardBrandAcceptance.All
-}
-
-internal fun PaymentSheet.PaymentMethodLayout.toAnalyticsValue(): String {
-    return when (this) {
-        PaymentSheet.PaymentMethodLayout.Horizontal -> "horizontal"
-        PaymentSheet.PaymentMethodLayout.Vertical -> "vertical"
-        PaymentSheet.PaymentMethodLayout.Automatic -> "automatic"
-    }
 }

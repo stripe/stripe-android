@@ -579,7 +579,7 @@ internal class EndToEndTest {
         )
 
         val attachResult = stripe.attachPaymentMethod(
-            paymentMethodId = paymentMethod.id!!,
+            paymentMethodId = paymentMethod.id,
             customerId = createEphemeralKeyResponse.customerId,
             ephemeralKeySecret = createEphemeralKeyResponse.ephemeralKeySecret,
         )
@@ -593,7 +593,7 @@ internal class EndToEndTest {
         )
 
         val updatedPaymentMethod = stripe.updatePaymentMethod(
-            paymentMethodId = paymentMethod.id!!,
+            paymentMethodId = paymentMethod.id,
             paymentMethodUpdateParams = updateParams,
             ephemeralKeySecret = createEphemeralKeyResponse.ephemeralKeySecret,
         )

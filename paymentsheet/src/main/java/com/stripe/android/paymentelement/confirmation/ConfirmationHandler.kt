@@ -8,7 +8,6 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.IgnoredOnParcel
@@ -71,11 +70,6 @@ internal interface ConfirmationHandler {
          * The confirmation option used to in order to potentially confirm the intent
          */
         val confirmationOption: Option,
-
-        /**
-         * The mode that a Payment Element product was initialized with
-         */
-        val initializationMode: PaymentElementLoader.InitializationMode,
 
         /**
          * The immutable data created during configuration.
@@ -160,7 +154,6 @@ internal interface ConfirmationHandler {
         data class Succeeded(
             val intent: StripeIntent,
             val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
-            val isConfirmationToken: Boolean,
             val completedFullPaymentFlow: Boolean = true,
         ) : Result {
             override fun log(logger: Logger) {

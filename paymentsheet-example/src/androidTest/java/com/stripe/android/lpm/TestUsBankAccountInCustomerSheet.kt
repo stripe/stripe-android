@@ -3,8 +3,8 @@ package com.stripe.android.lpm
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
@@ -23,7 +23,7 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
         paymentMethodCode = "us_bank_account",
         authorizationAction = null
     ) { settings ->
-        settings[CountrySettingsDefinition] = Country.US
+        settings[MerchantSettingsDefinition] = Merchant.US
         settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
     }
 

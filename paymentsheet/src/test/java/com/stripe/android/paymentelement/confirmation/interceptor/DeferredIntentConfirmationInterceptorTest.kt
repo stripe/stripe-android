@@ -8,6 +8,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -30,7 +31,6 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.RadarOptionsFactory
@@ -48,6 +48,15 @@ import javax.inject.Provider
 @RunWith(RobolectricTestRunner::class)
 @OptIn(SharedPaymentTokenSessionPreview::class)
 class DeferredIntentConfirmationInterceptorTest {
+    private val defaultIntegrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
+        intentConfiguration = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 1099L,
+                currency = "usd",
+            ),
+        ),
+    )
+
     @Test
     fun `Fails if creating payment method did not succeed`() = runTest {
         val invalidRequestException = InvalidRequestException(
@@ -61,7 +70,7 @@ class DeferredIntentConfirmationInterceptorTest {
         )
 
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createPaymentMethod(
                     paymentMethodCreateParams: PaymentMethodCreateParams,
@@ -99,7 +108,7 @@ class DeferredIntentConfirmationInterceptorTest {
         )
 
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
@@ -127,7 +136,7 @@ class DeferredIntentConfirmationInterceptorTest {
 
     @Test
     fun `Fails if callback returns failure with custom error message`() = runInterceptorScenario(
-        initializationMode = DEFAULT_DEFERRED_INTENT,
+        integrationMetadata = defaultIntegrationMetadata,
         scenario = InterceptorTestScenario(
             stripeRepository = mock(),
             intentCreationCallbackProvider = {
@@ -152,7 +161,7 @@ class DeferredIntentConfirmationInterceptorTest {
     @Test
     fun `Fails if callback returns failure without custom error message`() = runTest {
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = mock(),
             intentCreationCallbackProvider = {
                 failingCreateIntentCallback()
@@ -172,7 +181,7 @@ class DeferredIntentConfirmationInterceptorTest {
 
     @Test
     fun `Returns confirm as next step after creating an unconfirmed intent`() = runInterceptorScenario(
-        initializationMode = DEFAULT_DEFERRED_INTENT,
+        integrationMetadata = defaultIntegrationMetadata,
         scenario = InterceptorTestScenario(
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
@@ -200,7 +209,7 @@ class DeferredIntentConfirmationInterceptorTest {
 
     @Test
     fun `Returns complete as next step after creating and confirming a succeeded intent`() = runInterceptorScenario(
-        initializationMode = DEFAULT_DEFERRED_INTENT,
+        integrationMetadata = defaultIntegrationMetadata,
         scenario = InterceptorTestScenario(
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
@@ -224,7 +233,6 @@ class DeferredIntentConfirmationInterceptorTest {
             ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                isConfirmationToken = false,
                 completedFullPaymentFlow = true,
             )
         )
@@ -233,7 +241,7 @@ class DeferredIntentConfirmationInterceptorTest {
     @Test
     fun `Returns handleNextAction as next step after creating and confirming a non-succeeded intent`() =
         runInterceptorScenario(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             scenario = InterceptorTestScenario(
                 stripeRepository = object : AbsFakeStripeRepository() {
                     override suspend fun retrieveStripeIntent(
@@ -261,14 +269,12 @@ class DeferredIntentConfirmationInterceptorTest {
             assertThat(nextStep).isEqualTo(
                 ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>(
                     launcherArguments = IntentConfirmationDefinition.Args.NextAction(
-                        clientSecret = "pi_123_secret_456",
                         intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.copy(
                             paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
                             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                         )
                     ),
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                    isConfirmationToken = false,
                     receivesResultInProcess = false,
                 )
             )
@@ -280,7 +286,7 @@ class DeferredIntentConfirmationInterceptorTest {
         val observedValues = mutableListOf<Boolean>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
@@ -322,7 +328,7 @@ class DeferredIntentConfirmationInterceptorTest {
         val stripeRepository = mock<StripeRepository>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = stripeRepository,
             intentCreationCallbackProvider = {
                 CreateIntentCallback { _, _ ->
@@ -340,7 +346,6 @@ class DeferredIntentConfirmationInterceptorTest {
             ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                 intent = intent,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
-                isConfirmationToken = false,
                 completedFullPaymentFlow = true,
             )
         )
@@ -350,7 +355,7 @@ class DeferredIntentConfirmationInterceptorTest {
     fun `If requires next action with an attached payment method different then the created one, throw error`() =
         runTest {
             val interceptor = createIntentConfirmationInterceptor(
-                initializationMode = DEFAULT_DEFERRED_INTENT,
+                integrationMetadata = defaultIntegrationMetadata,
                 stripeRepository = stripeRepositoryReturning(
                     onCreatePaymentMethodId = "pm_1234",
                     onRetrievePaymentMethodId = "pm_5678"
@@ -379,7 +384,7 @@ class DeferredIntentConfirmationInterceptorTest {
         val hCaptchaToken = "test_hcaptcha_token"
 
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
@@ -428,7 +433,7 @@ class DeferredIntentConfirmationInterceptorTest {
         val hCaptchaToken = "test_hcaptcha_token"
 
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
@@ -474,7 +479,7 @@ class DeferredIntentConfirmationInterceptorTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
@@ -521,7 +526,7 @@ class DeferredIntentConfirmationInterceptorTest {
         val attestationToken = "attestation_token_123"
 
         val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
+            integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
@@ -565,17 +570,6 @@ class DeferredIntentConfirmationInterceptorTest {
                     )
                 )
             )
-    }
-
-    companion object {
-        internal val DEFAULT_DEFERRED_INTENT = InitializationMode.DeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                    amount = 1099L,
-                    currency = "usd",
-                ),
-            ),
-        )
     }
 }
 

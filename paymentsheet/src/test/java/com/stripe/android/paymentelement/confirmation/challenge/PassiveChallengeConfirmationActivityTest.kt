@@ -29,7 +29,6 @@ import com.stripe.android.paymentelement.confirmation.paymentElementConfirmation
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.RadarOptionsFactory
@@ -136,53 +135,6 @@ internal class PassiveChallengeConfirmationActivityTest {
         }
     }
 
-    @Test
-    fun `On PassiveChallenge params provided with Saved option, should launch challenge flow then intent flow`() =
-        test {
-            intendingPassiveChallengeToBeLaunched(
-                PassiveChallengeActivityResult.Success("test_token")
-            )
-            intendingPaymentConfirmationToBeLaunched(
-                InternalPaymentResult.Completed(PAYMENT_INTENT.copy(paymentMethod = PAYMENT_METHOD))
-            )
-
-            val savedConfirmationArgs = CONFIRMATION_ARGUMENTS.copy(
-                confirmationOption = SAVED_CONFIRMATION_OPTION
-            )
-
-            confirmationHandler.state.test {
-                awaitItem().assertIdle()
-
-                confirmationHandler.start(savedConfirmationArgs)
-
-                val confirmingWithChallengeOption = awaitItem().assertConfirming()
-
-                assertThat(confirmingWithChallengeOption.option).isEqualTo(SAVED_CONFIRMATION_OPTION)
-
-                intendedPassiveChallengeToBeLaunched()
-
-                val confirmingWithNewOption = awaitItem().assertConfirming()
-
-                assertThat(confirmingWithNewOption.option)
-                    .isEqualTo(
-                        PaymentMethodConfirmationOption.Saved(
-                            paymentMethod = SAVED_CONFIRMATION_OPTION.paymentMethod,
-                            optionsParams = SAVED_CONFIRMATION_OPTION.optionsParams,
-                            originatedFromWallet = false,
-                            hCaptchaToken = "test_token",
-                            passiveChallengeComplete = true,
-                        )
-                    )
-
-                intendedPaymentConfirmationToBeLaunched()
-
-                val successResult = awaitItem().assertComplete().result.assertSucceeded()
-
-                assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = PAYMENT_METHOD))
-                assertThat(successResult.deferredIntentConfirmationType).isNull()
-            }
-        }
-
     private fun test(
         test: suspend ConfirmationTestScenario.() -> Unit
     ) {
@@ -216,7 +168,7 @@ internal class PassiveChallengeConfirmationActivityTest {
     }
 
     private companion object {
-        val PAYMENT_INTENT = PaymentIntentFactory.create()
+        val PAYMENT_INTENT = PaymentIntentFactory.create(clientSecret = "pi_123_secret_123")
 
         val PAYMENT_METHOD = PaymentMethodFactory.card()
 
@@ -227,18 +179,8 @@ internal class PassiveChallengeConfirmationActivityTest {
             shouldSave = false,
         )
 
-        val SAVED_CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
-            paymentMethod = PAYMENT_METHOD,
-            optionsParams = null,
-            originatedFromWallet = false,
-            hCaptchaToken = null
-        )
-
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
             confirmationOption = CONFIRMATION_OPTION,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123"
-            ),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PAYMENT_INTENT,
                 shippingDetails = AddressDetails(),
