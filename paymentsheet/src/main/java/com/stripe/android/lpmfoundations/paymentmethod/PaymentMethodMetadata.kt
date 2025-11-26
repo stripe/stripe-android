@@ -383,6 +383,7 @@ internal data class PaymentMethodMetadata(
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
             customerMetadata: CustomerMetadata,
+            integrationMetadata: IntegrationMetadata.CustomerSheet,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
@@ -433,7 +434,7 @@ internal data class PaymentMethodMetadata(
                 attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation,
                 appearance = configuration.appearance,
                 onBehalfOf = elementsSession.onBehalfOf,
-                integrationMetadata = IntegrationMetadata.CustomerSheet,
+                integrationMetadata = integrationMetadata,
                 analyticsMetadata = AnalyticsMetadata(emptyMap()), // This is unused in customer sheet.
             )
         }

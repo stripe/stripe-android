@@ -291,6 +291,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         PAYMENT_METHOD_MESSAGING_ELEMENT_UNABLE_TO_PARSE_RESPONSE(
             partialEventName = "paymentmethodmessaging.element.unable_to_parse_response"
         ),
+        CUSTOMER_SHEET_METADATA_NULL_ON_CONFIRM(
+            partialEventName = "customersheet.confirmation.no_payment_method_metadata"
+        ),
         TAP_TO_ADD_LOCATION_PERMISSIONS_FAILURE(
             partialEventName = "elements.tap_to_add.location_permission_required_unexpectedly"
         ),

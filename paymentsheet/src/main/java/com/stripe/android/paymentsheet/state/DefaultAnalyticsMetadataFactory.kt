@@ -248,7 +248,7 @@ private val PaymentElementLoader.InitializationMode.defaultAnalyticsValue: Strin
 private fun IntegrationMetadata.isDeferred(): Boolean = when (this) {
     is IntegrationMetadata.IntentFirst -> false
     IntegrationMetadata.CryptoOnramp -> true
-    IntegrationMetadata.CustomerSheet -> true
+    is IntegrationMetadata.CustomerSheet -> true
     is IntegrationMetadata.DeferredIntentWithConfirmationToken -> true
     is IntegrationMetadata.DeferredIntentWithPaymentMethod -> true
     is IntegrationMetadata.DeferredIntentWithSharedPaymentToken -> true

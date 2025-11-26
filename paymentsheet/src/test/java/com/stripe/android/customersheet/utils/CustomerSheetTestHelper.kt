@@ -17,10 +17,8 @@ import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
-import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
-import com.stripe.android.customersheet.data.FakeCustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetSavedSelectionDataSource
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -102,7 +100,8 @@ internal object CustomerSheetTestHelper {
         paymentMethodDataSource: CustomerSheetPaymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
             paymentMethods = CustomerSheetDataResult.success(customerPaymentMethods)
         ),
-        intentDataSource: CustomerSheetIntentDataSource = FakeCustomerSheetIntentDataSource(),
+        attachmentStyle: IntegrationMetadata.CustomerSheet.AttachmentStyle =
+            IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
         savedSelectionDataSource: CustomerSheetSavedSelectionDataSource = FakeCustomerSheetSavedSelectionDataSource(),
         customerSheetLoader: CustomerSheetLoader = FakeCustomerSheetLoader(
             customerPaymentMethods = customerPaymentMethods,
@@ -111,6 +110,7 @@ internal object CustomerSheetTestHelper {
             isGooglePayAvailable = isGooglePayAvailable,
             cbcEligibility = cbcEligibility,
             permissions = customerPermissions,
+            attachmentStyle = attachmentStyle,
         ),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         confirmationHandler: ConfirmationHandler? = null,
@@ -122,7 +122,6 @@ internal object CustomerSheetTestHelper {
             originalPaymentSelection = savedPaymentSelection,
             paymentConfigurationProvider = { paymentConfiguration },
             paymentMethodDataSourceProvider = CompletableSingle(paymentMethodDataSource),
-            intentDataSourceProvider = CompletableSingle(intentDataSource),
             savedSelectionDataSourceProvider = CompletableSingle(savedSelectionDataSource),
             stripeRepository = stripeRepository,
             configuration = configuration,
