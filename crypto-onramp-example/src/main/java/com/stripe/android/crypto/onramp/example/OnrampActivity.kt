@@ -79,6 +79,10 @@ import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.launch
+import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.Snackbar
+import androidx.compose.material.SnackbarDuration
 
 internal class OnrampActivity : ComponentActivity() {
 
@@ -132,6 +136,21 @@ internal class OnrampActivity : ComponentActivity() {
 
         setContent {
             val showAddressModal by viewModel.updateAddressEvent.collectAsStateWithLifecycle()
+            val message by viewModel.message.collectAsStateWithLifecycle()
+            val snackbarHostState = remember { SnackbarHostState() }
+
+            // Show toast messages
+            LaunchedEffect(message) {
+                message?.let {
+                    snackbarHostState.showSnackbar(
+                        message = it,
+                        duration = SnackbarDuration.Short
+                    )
+
+                    Log.d("OnrampExample", it)
+                    viewModel.clearMessage()
+                }
+            }
 
             OnrampExampleTheme {
                 Scaffold(
@@ -141,6 +160,17 @@ internal class OnrampActivity : ComponentActivity() {
                             title = { Text("Onramp Coordinator") },
                         )
                     },
+                    snackbarHost = {
+                        SnackbarHost(
+                            hostState = snackbarHostState,
+                            modifier = Modifier.testTag("OnrampSnackbarHost"),
+                            snackbar = { data ->
+                                Snackbar(modifier = Modifier.testTag(SNACKBAR_TAG)) {
+                                    Text(data.message)
+                                }
+                            }
+                        )
+                    }
                 ) { innerPadding ->
                     ModalBottomSheetLayout(
                         sheetContent = {
@@ -406,20 +436,10 @@ internal fun OnrampScreen(
     onVerifyKyc: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val message by viewModel.message.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     BackHandler(enabled = uiState.screen != Screen.LoginSignup) {
         viewModel.onBackToLoginSignup()
-    }
-
-    // Show toast messages
-    LaunchedEffect(message) {
-        message?.let {
-            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-            Log.d("OnrampExample", it)
-            viewModel.clearMessage()
-        }
     }
 
     Column(
@@ -1122,3 +1142,4 @@ internal const val COLLECT_CARD_BUTTON_TAG = "CollectCardButtonTag"
 internal const val CREATE_CRYPTO_TOKEN_BUTTON_TAG = "CreateCryptoTokenButtonTag"
 internal const val CREATE_SESSION_BUTTON_TAG = "CreateSessionButtonTag"
 internal const val CHECKOUT_BUTTON_TAG = "CheckoutButtonTag"
+internal const val SNACKBAR_TAG = "SnackbarTag"

@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp.example
 
 import android.content.Context
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTextInput
@@ -38,10 +39,7 @@ class OnrampFlowTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testCheckoutFlow() {
-        composeRule.waitUntilExactlyOneExists(
-            hasTestTag(LOGIN_EMAIL_TAG),
-            timeoutMillis = defaultTimeout.inWholeMilliseconds
-        )
+        waitForTag(LOGIN_EMAIL_TAG)
 
         composeRule.onNodeWithTag(LOGIN_EMAIL_TAG)
             .performTextInput("twig@lickability.net")
@@ -49,21 +47,10 @@ class OnrampFlowTest {
         composeRule.onNodeWithTag(LOGIN_PASSWORD_TAG)
             .performTextInput("test1234")
 
-        composeRule.onNodeWithTag(LOGIN_LOGIN_BUTTON_TAG)
-            .performClick()
+        performClickOnNode(LOGIN_LOGIN_BUTTON_TAG)
+        performClickOnNode(AUTHENTICATE_BUTTON_TAG)
 
-        composeRule.waitUntilExactlyOneExists(
-            hasTestTag(AUTHENTICATE_BUTTON_TAG),
-            timeoutMillis = defaultTimeout.inWholeMilliseconds
-        )
-
-        composeRule.onNodeWithTag(AUTHENTICATE_BUTTON_TAG)
-            .performClick()
-
-        composeRule.waitUntilExactlyOneExists(
-            matcher = hasTestTag("OTP-0"),
-            timeoutMillis = defaultTimeout.inWholeMilliseconds,
-        )
+        waitForTag("OTP-0")
 
         for (i in 0..5) {
             composeRule
@@ -71,60 +58,15 @@ class OnrampFlowTest {
                 .slowType("0")
         }
 
-        composeRule.waitUntilExactlyOneExists(
-            hasTestTag(REGISTER_WALLET_BUTTON_TAG),
-            timeoutMillis = defaultTimeout.inWholeMilliseconds
-        )
-
-        composeRule.onNodeWithTag(REGISTER_WALLET_BUTTON_TAG)
-            .performClick()
-
-        composeRule.waitUntilExactlyOneExists(
-            hasTestTag(COLLECT_CARD_BUTTON_TAG),
-            timeoutMillis = defaultTimeout.inWholeMilliseconds
-        )
-
-        composeRule.onNodeWithTag(COLLECT_CARD_BUTTON_TAG)
-            .performScrollTo()
-            .performClick()
+        performClickOnNode(REGISTER_WALLET_BUTTON_TAG)
+        performClickOnNode(COLLECT_CARD_BUTTON_TAG)
+        performClickOnNode("PrimaryButtonTag")
+        performClickOnNode(CREATE_CRYPTO_TOKEN_BUTTON_TAG)
+        performClickOnNode(CREATE_SESSION_BUTTON_TAG)
+        performClickOnNode(CHECKOUT_BUTTON_TAG, timeoutMs = 30.seconds.inWholeMilliseconds)
 
         composeRule.waitUntilExactlyOneExists(
-            hasTestTag("PrimaryButtonTag"),
-            timeoutMillis = defaultTimeout.inWholeMilliseconds
-        )
-
-        composeRule.onNodeWithTag("PrimaryButtonTag")
-            .performClick()
-
-        composeRule.waitUntilExactlyOneExists(
-            hasTestTag(CREATE_CRYPTO_TOKEN_BUTTON_TAG),
-            timeoutMillis = defaultTimeout.inWholeMilliseconds
-        )
-
-        composeRule.onNodeWithTag(CREATE_CRYPTO_TOKEN_BUTTON_TAG)
-            .performScrollTo()
-            .performClick()
-
-        composeRule.waitUntilExactlyOneExists(
-            hasTestTag(CREATE_SESSION_BUTTON_TAG),
-            timeoutMillis = defaultTimeout.inWholeMilliseconds
-        )
-
-        composeRule.onNodeWithTag(CREATE_SESSION_BUTTON_TAG)
-            .performScrollTo()
-            .performClick()
-
-        composeRule.waitUntilExactlyOneExists(
-            hasTestTag(CHECKOUT_BUTTON_TAG),
-            timeoutMillis = 30.seconds.inWholeMilliseconds
-        )
-
-        composeRule.onNodeWithTag(CHECKOUT_BUTTON_TAG)
-            .performScrollTo()
-            .performClick()
-
-        composeRule.waitUntilExactlyOneExists(
-            hasTestTag(AUTHENTICATE_BUTTON_TAG),
+            hasText("Checkout completed successfully!"),
             timeoutMillis = 30.seconds.inWholeMilliseconds
         )
     }
@@ -137,5 +79,28 @@ class OnrampFlowTest {
             this.performTextInput(char.toString())
             Thread.sleep(delayMs)
         }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    private fun waitForSnackbarToHide(timeoutMs: Long = defaultTimeout.inWholeMilliseconds) {
+        composeRule.waitUntilDoesNotExist(hasTestTag(SNACKBAR_TAG), timeoutMillis = timeoutMs)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    private fun waitForTag(tag: String, timeoutMs: Long = defaultTimeout.inWholeMilliseconds) {
+        composeRule.waitUntilExactlyOneExists(
+            hasTestTag(tag),
+            timeoutMillis = timeoutMs
+        )
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    private fun performClickOnNode(tag: String, timeoutMs: Long = defaultTimeout.inWholeMilliseconds) {
+        waitForTag(tag = tag, timeoutMs = timeoutMs)
+        waitForSnackbarToHide()
+
+        val node = composeRule.onNodeWithTag(tag)
+        runCatching { node.performScrollTo() }
+        node.performClick()
     }
 }
