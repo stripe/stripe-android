@@ -6,6 +6,8 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.common.taptoadd.FakeTapToAddConnectionManager
+import com.stripe.android.common.taptoadd.TapToAddConnectionManager
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
@@ -468,6 +470,39 @@ internal class DefaultPaymentElementLoaderTest {
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+        }
+
+    @Test
+    fun `Should attempt Tap to Add connection on load`() =
+        runScenario {
+            FakeTapToAddConnectionManager.test(
+                isSupported = false,
+                isConnected = false,
+            ) {
+                val loader = createPaymentElementLoader(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                    isGooglePayReady = true,
+                    customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+                    tapToAddConnectionManager = tapToAddConnectionManager,
+                )
+
+                val result = loader.load(
+                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                        clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                    ),
+                    paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                    metadata = PaymentElementLoader.Metadata(
+                        initializedViaCompose = false,
+                    ),
+                ).getOrThrow()
+
+                assertThat(connectCalls.awaitItem()).isNotNull()
+
+                assertThat(result.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+
+                assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+                assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+            }
         }
 
     @OptIn(WalletButtonsPreview::class)
@@ -4139,6 +4174,10 @@ internal class DefaultPaymentElementLoaderTest {
         ),
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
+        tapToAddConnectionManager: TapToAddConnectionManager = FakeTapToAddConnectionManager.noOp(
+            isSupported = false,
+            isConnected = false,
+        ),
         isLiveMode: Boolean = false,
         analyticsMetadataFactory: DefaultPaymentElementLoader.AnalyticsMetadataFactory =
             FakeDefaultPaymentElementLoaderAnalyticsMetadataFactory {
@@ -4173,6 +4212,7 @@ internal class DefaultPaymentElementLoaderTest {
             isLiveModeProvider = { isLiveMode },
             paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
             analyticsMetadataFactory = analyticsMetadataFactory,
+            tapToAddConnectionManager = tapToAddConnectionManager,
         )
     }
 

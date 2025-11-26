@@ -9,7 +9,6 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentelement.confirmation.runLaunchTest
 import com.stripe.android.paymentelement.confirmation.runResultTest
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.RadarOptionsFactory
 import com.stripe.android.utils.FakePassiveChallengeWarmer
 import org.junit.Test
@@ -18,13 +17,6 @@ internal class PassiveChallengeConfirmationFlowTest {
     @Test
     fun `on launch with New option, should persist parameters & launch using launcher as expected`() = runLaunchTest(
         confirmationOption = NEW_CONFIRMATION_OPTION,
-        parameters = CONFIRMATION_PARAMETERS,
-        definition = confirmationDefinition(),
-    )
-
-    @Test
-    fun `on launch with Saved option, should persist parameters & launch using launcher as expected`() = runLaunchTest(
-        confirmationOption = SAVED_CONFIRMATION_OPTION,
         parameters = CONFIRMATION_PARAMETERS,
         definition = confirmationDefinition(),
     )
@@ -52,24 +44,6 @@ internal class PassiveChallengeConfirmationFlowTest {
     )
 
     @Test
-    fun `on result with Success, should return NextStep result with token attached for Saved option`() = runResultTest(
-        confirmationOption = SAVED_CONFIRMATION_OPTION,
-        definition = confirmationDefinition(),
-        launcherResult = PassiveChallengeActivityResult.Success("test_token"),
-        parameters = CONFIRMATION_PARAMETERS,
-        definitionResult = ConfirmationDefinition.Result.NextStep(
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = SAVED_CONFIRMATION_OPTION.paymentMethod,
-                optionsParams = SAVED_CONFIRMATION_OPTION.optionsParams,
-                originatedFromWallet = false,
-                passiveChallengeComplete = true,
-                hCaptchaToken = "test_token"
-            ),
-            arguments = CONFIRMATION_PARAMETERS,
-        ),
-    )
-
-    @Test
     fun `on result with Failed, should return NextStep result with no token for New option`() = runResultTest(
         confirmationOption = NEW_CONFIRMATION_OPTION,
         definition = confirmationDefinition(),
@@ -87,39 +61,12 @@ internal class PassiveChallengeConfirmationFlowTest {
         ),
     )
 
-    @Test
-    fun `on result with Failed, should return NextStep result with no token for Saved option`() = runResultTest(
-        confirmationOption = SAVED_CONFIRMATION_OPTION,
-        definition = confirmationDefinition(),
-        launcherResult = PassiveChallengeActivityResult.Failed(RuntimeException("Challenge failed")),
-        parameters = CONFIRMATION_PARAMETERS,
-        definitionResult = ConfirmationDefinition.Result.NextStep(
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = SAVED_CONFIRMATION_OPTION.paymentMethod,
-                optionsParams = SAVED_CONFIRMATION_OPTION.optionsParams,
-                originatedFromWallet = false,
-                passiveChallengeComplete = true,
-                hCaptchaToken = null
-            ),
-            arguments = CONFIRMATION_PARAMETERS,
-        ),
-    )
-
     private companion object {
-        private val PAYMENT_METHOD = PaymentMethodFactory.card()
-
         private val NEW_CONFIRMATION_OPTION = PaymentMethodConfirmationOption.New(
             createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             optionsParams = null,
             extraParams = null,
             shouldSave = false,
-        )
-
-        private val SAVED_CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
-            paymentMethod = PAYMENT_METHOD,
-            optionsParams = null,
-            originatedFromWallet = false,
-            hCaptchaToken = null,
         )
     }
 

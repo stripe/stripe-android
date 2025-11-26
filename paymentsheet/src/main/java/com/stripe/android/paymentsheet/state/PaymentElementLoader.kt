@@ -6,6 +6,7 @@ import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.common.taptoadd.TapToAddConnectionManager
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
@@ -213,6 +214,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
     private val integrityRequestManager: IntegrityRequestManager,
+    private val tapToAddConnectionManager: TapToAddConnectionManager,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
@@ -242,6 +244,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration.validate(isLiveModeProvider(), paymentElementCallbackIdentifier)
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
+        tapToAddConnectionManager.connect()
 
         val isGooglePaySupportedOnDevice = async {
             isGooglePaySupportedOnDevice()

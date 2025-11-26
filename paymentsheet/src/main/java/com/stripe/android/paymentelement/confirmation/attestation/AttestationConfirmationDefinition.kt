@@ -34,15 +34,15 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : ConfirmationDefinition<
-    PaymentMethodConfirmationOption,
+    PaymentMethodConfirmationOption.New,
     ActivityResultLauncher<AttestationActivityContract.Args>,
     AttestationActivityContract.Args,
     AttestationActivityResult
     > {
     override val key = "Attestation"
 
-    override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption? {
-        return confirmationOption as? PaymentMethodConfirmationOption
+    override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption.New? {
+        return confirmationOption as? PaymentMethodConfirmationOption.New
     }
 
     override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
@@ -63,16 +63,17 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     }
 
     override fun canConfirm(
-        confirmationOption: PaymentMethodConfirmationOption,
+        confirmationOption: PaymentMethodConfirmationOption.New,
         confirmationArgs: ConfirmationHandler.Args
     ): Boolean {
-        return confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation &&
+        return confirmationOption.createParams.typeCode == "card" &&
+            confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation &&
             confirmationOption.attestationComplete.not() &&
             confirmationOption.hasToken().not()
     }
 
     override fun toResult(
-        confirmationOption: PaymentMethodConfirmationOption,
+        confirmationOption: PaymentMethodConfirmationOption.New,
         confirmationArgs: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: AttestationActivityResult
@@ -103,14 +104,14 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     override fun launch(
         launcher: ActivityResultLauncher<AttestationActivityContract.Args>,
         arguments: AttestationActivityContract.Args,
-        confirmationOption: PaymentMethodConfirmationOption,
+        confirmationOption: PaymentMethodConfirmationOption.New,
         confirmationArgs: ConfirmationHandler.Args
     ) {
         launcher.launch(arguments)
     }
 
     override suspend fun action(
-        confirmationOption: PaymentMethodConfirmationOption,
+        confirmationOption: PaymentMethodConfirmationOption.New,
         confirmationArgs: ConfirmationHandler.Args
     ): ConfirmationDefinition.Action<AttestationActivityContract.Args> {
         if (confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation) {
@@ -137,30 +138,20 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         )
     }
 
-    private fun PaymentMethodConfirmationOption.attachToken(token: String?): PaymentMethodConfirmationOption {
-        return when (this) {
-            is PaymentMethodConfirmationOption.New -> {
-                copy(
-                    createParams = createParams.copy(
-                        radarOptions = token?.let {
-                            RadarOptions(
-                                hCaptchaToken = null,
-                                androidVerificationObject = AndroidVerificationObject(
-                                    androidVerificationToken = it
-                                )
-                            )
-                        }
-                    ),
-                    attestationComplete = true
-                )
-            }
-            is PaymentMethodConfirmationOption.Saved -> {
-                copy(
-                    attestationToken = token,
-                    attestationComplete = true
-                )
-            }
-        }
+    private fun PaymentMethodConfirmationOption.New.attachToken(token: String?): PaymentMethodConfirmationOption {
+        return copy(
+            createParams = createParams.copy(
+                radarOptions = token?.let {
+                    RadarOptions(
+                        hCaptchaToken = null,
+                        androidVerificationObject = AndroidVerificationObject(
+                            androidVerificationToken = it
+                        )
+                    )
+                }
+            ),
+            attestationComplete = true
+        )
     }
 
     private fun PaymentMethodConfirmationOption.hasToken(): Boolean {

@@ -961,22 +961,18 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `When setup intent provider error, error message is visible`() = runTest(testDispatcher) {
+        val confirmationHandler = FakeConfirmationHandler()
         val viewModel = createViewModel(
             workContext = testDispatcher,
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
             intentDataSource = FakeCustomerSheetIntentDataSource(
                 canCreateSetupIntents = true,
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.failure(
-                        displayMessage = "Merchant provided error message",
-                        cause = Exception("Some error"),
-                    )
-                },
             ),
             stripeRepository = FakeStripeRepository(
                 createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
             ),
+            confirmationHandler = confirmationHandler,
         )
 
         viewModel.handleViewAction(
@@ -992,6 +988,14 @@ class CustomerSheetViewModelTest {
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
+
+            confirmationHandler.awaitResultTurbine.add(
+                ConfirmationHandler.Result.Failed(
+                    cause = Exception("Some error"),
+                    message = "Merchant provided error message".resolvableString,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                )
+            )
 
             viewState = awaitViewState()
             assertThat(viewState.errorMessage).isEqualTo("Merchant provided error message".resolvableString)
@@ -1783,6 +1787,7 @@ class CustomerSheetViewModelTest {
     @Test
     fun `When attach with setup intent fails, event is reported`() = runTest(testDispatcher) {
         val eventReporter: CustomerSheetEventReporter = mock()
+        val confirmationHandler = FakeConfirmationHandler()
 
         val viewModel = createViewModel(
             workContext = testDispatcher,
@@ -1793,14 +1798,9 @@ class CustomerSheetViewModelTest {
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
             intentDataSource = FakeCustomerSheetIntentDataSource(
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.failure(
-                        cause = Exception("Unable to retrieve setup intent"),
-                        displayMessage = "Something went wrong"
-                    )
-                },
                 canCreateSetupIntents = true,
             ),
+            confirmationHandler = confirmationHandler,
             eventReporter = eventReporter,
         )
 
@@ -1810,6 +1810,13 @@ class CustomerSheetViewModelTest {
 
         viewModel.viewState.test {
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            confirmationHandler.awaitResultTurbine.add(
+                ConfirmationHandler.Result.Failed(
+                    cause = IllegalStateException("Failed!"),
+                    message = "Failed!".resolvableString,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                )
+            )
             verify(eventReporter).onAttachPaymentMethodFailed(
                 style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
             )
@@ -3717,12 +3724,11 @@ class CustomerSheetViewModelTest {
     fun `confirmation handler is bootstrapped after customer sheet is loaded`() =
         runTest(testDispatcher) {
             val fakeConfirmationHandler = FakeConfirmationHandler()
-            val confirmationHandlerFactory = ConfirmationHandler.Factory { fakeConfirmationHandler }
             val customerSheetLoader = FakeCustomerSheetLoader()
 
             createViewModel(
                 workContext = testDispatcher,
-                confirmationHandlerFactory = confirmationHandlerFactory,
+                confirmationHandler = fakeConfirmationHandler,
                 customerSheetLoader = customerSheetLoader,
             )
 

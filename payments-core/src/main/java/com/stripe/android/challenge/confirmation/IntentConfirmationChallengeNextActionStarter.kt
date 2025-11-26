@@ -33,6 +33,7 @@ internal interface IntentConfirmationChallengeNextActionStarter {
                     args = IntentConfirmationChallengeArgs(
                         publishableKey = args.publishableKey,
                         intent = args.intent,
+                        productUsage = args.productUsage.toList(),
                     )
                 ),
                 requestCode = StripePaymentController.getRequestCode(args.intent)
