@@ -10,6 +10,8 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Before
@@ -60,6 +62,19 @@ class OnrampFlowTest {
 
         performClickOnNode(REGISTER_WALLET_BUTTON_TAG)
         performClickOnNode(COLLECT_CARD_BUTTON_TAG)
+
+        // Optionally wait for a CVV field and input if present
+        val cvvMatcher = hasSetTextAction()
+        if (waitForOptionalNode(cvvMatcher, timeoutMs = 5.seconds.inWholeMilliseconds)) {
+            val cvvNode = try {
+                composeRule.onNode(cvvMatcher)
+            } catch (_: Throwable) {
+                composeRule.onNode(cvvMatcher, useUnmergedTree = true)
+            }
+            cvvNode.performScrollTo()
+            cvvNode.performTextInput("555")
+        }
+
         performClickOnNode("PrimaryButtonTag")
         performClickOnNode(CREATE_CRYPTO_TOKEN_BUTTON_TAG)
         performClickOnNode(CREATE_SESSION_BUTTON_TAG)
@@ -92,6 +107,19 @@ class OnrampFlowTest {
             hasTestTag(tag),
             timeoutMillis = timeoutMs
         )
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    private fun waitForOptionalNode(
+        matcher: SemanticsMatcher,
+        timeoutMs: Long = defaultTimeout.inWholeMilliseconds
+    ): Boolean {
+        return runCatching {
+            composeRule.waitUntil(timeoutMs) {
+                composeRule.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty()
+            }
+            true
+        }.getOrElse { false }
     }
 
     @OptIn(ExperimentalTestApi::class)
