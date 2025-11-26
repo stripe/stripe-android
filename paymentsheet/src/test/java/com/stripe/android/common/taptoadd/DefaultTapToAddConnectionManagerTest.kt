@@ -22,7 +22,6 @@ import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KStubbing
@@ -45,12 +44,6 @@ class DefaultTapToAddConnectionManagerTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val testDispatcher = UnconfinedTestDispatcher()
     private val lifecycleOwner = TestLifecycleOwner()
-
-    @After
-    fun teardown() {
-        TerminalLocationHolder.locationId = null
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    }
 
     @Test
     fun `init initializes terminal when not already initialized`() = test(
@@ -536,6 +529,9 @@ class DefaultTapToAddConnectionManagerTest {
         }
 
         errorReporter.ensureAllEventsConsumed()
+
+        TerminalLocationHolder.locationId = null
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     }
 
     private class Scenario(

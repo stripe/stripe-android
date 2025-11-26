@@ -125,7 +125,6 @@ internal class DefaultTapToAddConnectionManager(
         }
     }
 
-    @SuppressLint("MissingPermission")
     override fun connect() {
         workScope.launch {
             val canContinue = connectionStartLock.withLock {
@@ -142,75 +141,7 @@ internal class DefaultTapToAddConnectionManager(
             }
 
             try {
-                terminal().discoverReaders(
-                    config = discoveryConfiguration,
-                    discoveryListener = object : DiscoveryListener {
-                        override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
-                            val reader = readers.firstOrNull() ?: run {
-                                /*
-                                 * The Tap to Pay variant should never not return a reader through this callback.
-                                 * If no readers are found, something has changed in the internal implementation
-                                 * of Terminal that we should know about
-                                 */
-                                errorReporter.report(
-                                    ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_NO_READER_FOUND,
-                                )
-
-                                connectionTask?.completeExceptionally(IllegalStateException("No reader found!"))
-                                return
-                            }
-
-                            val locationId = TerminalLocationHolder.locationId ?: run {
-                                connectionTask?.completeExceptionally(IllegalStateException("No location specified!"))
-                                return
-                            }
-
-                            terminal().connectReader(
-                                reader = reader,
-                                config = ConnectionConfiguration.TapToPayConnectionConfiguration(
-                                    locationId = locationId,
-                                    autoReconnectOnUnexpectedDisconnect = true,
-                                    tapToPayReaderListener = this@DefaultTapToAddConnectionManager,
-                                ),
-                                connectionCallback = object : ReaderCallback {
-                                    override fun onFailure(e: TerminalException) {
-                                        errorReporter.report(
-                                            ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_CONNECT_READER_CALL_FAILURE,
-                                            StripeException.create(e),
-                                        )
-
-                                        connectionTask?.completeExceptionally(e)
-                                        connectionTask = null
-                                    }
-
-                                    override fun onSuccess(reader: Reader) {
-                                        errorReporter.report(
-                                            ErrorReporter.SuccessEvent.TAP_TO_ADD_CONNECT_READER_CALL_SUCCESS
-                                        )
-
-                                        connectionTask?.complete(true)
-                                        connectionTask = null
-                                    }
-                                }
-                            )
-                        }
-                    },
-                    callback = object : Callback {
-                        override fun onFailure(e: TerminalException) {
-                            errorReporter.report(
-                                ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE,
-                                StripeException.create(e),
-                            )
-
-                            connectionTask?.completeExceptionally(e)
-                            connectionTask = null
-                        }
-
-                        override fun onSuccess() {
-                            errorReporter.report(ErrorReporter.SuccessEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_SUCCESS)
-                        }
-                    }
-                )
+                discoverReaders()
             } catch (exception: SecurityException) {
                 errorReporter.report(
                     ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_LOCATION_PERMISSIONS_FAILURE,
@@ -220,6 +151,83 @@ internal class DefaultTapToAddConnectionManager(
                 connectionTask?.completeExceptionally(exception)
             }
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun discoverReaders() {
+        terminal().discoverReaders(
+            config = discoveryConfiguration,
+            discoveryListener = object : DiscoveryListener {
+                override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
+                    onUpdatedReaders(readers)
+                }
+            },
+            callback = object : Callback {
+                override fun onFailure(e: TerminalException) {
+                    errorReporter.report(
+                        ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE,
+                        StripeException.create(e),
+                    )
+
+                    connectionTask?.completeExceptionally(e)
+                    connectionTask = null
+                }
+
+                override fun onSuccess() {
+                    errorReporter.report(ErrorReporter.SuccessEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_SUCCESS)
+                }
+            }
+        )
+    }
+
+    private fun onUpdatedReaders(readers: List<Reader>) {
+        val reader = readers.firstOrNull() ?: run {
+            /*
+             * The Tap to Pay variant should never not return a reader through this callback.
+             * If no readers are found, something has changed in the internal implementation
+             * of Terminal that we should know about
+             */
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_NO_READER_FOUND,
+            )
+
+            connectionTask?.completeExceptionally(IllegalStateException("No reader found!"))
+            return
+        }
+
+        val locationId = TerminalLocationHolder.locationId ?: run {
+            connectionTask?.completeExceptionally(IllegalStateException("No location specified!"))
+            return
+        }
+
+        terminal().connectReader(
+            reader = reader,
+            config = ConnectionConfiguration.TapToPayConnectionConfiguration(
+                locationId = locationId,
+                autoReconnectOnUnexpectedDisconnect = true,
+                tapToPayReaderListener = this@DefaultTapToAddConnectionManager,
+            ),
+            connectionCallback = object : ReaderCallback {
+                override fun onFailure(e: TerminalException) {
+                    errorReporter.report(
+                        ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_CONNECT_READER_CALL_FAILURE,
+                        StripeException.create(e),
+                    )
+
+                    connectionTask?.completeExceptionally(e)
+                    connectionTask = null
+                }
+
+                override fun onSuccess(reader: Reader) {
+                    errorReporter.report(
+                        ErrorReporter.SuccessEvent.TAP_TO_ADD_CONNECT_READER_CALL_SUCCESS
+                    )
+
+                    connectionTask?.complete(true)
+                    connectionTask = null
+                }
+            }
+        )
     }
 
     private fun terminal() = terminalWrapper.getInstance()
