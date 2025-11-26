@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -696,11 +697,14 @@ class DefaultAnalyticsMetadataFactoryTest {
         val mode: EventReporter.Mode,
     )
 
-    private fun Scenario.createFactory(): DefaultAnalyticsMetadataFactory {
+    private fun Scenario.createFactory(
+        linkGateFactory: FakeLinkGate.Factory = FakeLinkGate.Factory()
+    ): DefaultAnalyticsMetadataFactory {
         return DefaultAnalyticsMetadataFactory(
             cvcRecollectionHandler = cvcRecollectionHandler,
             mode = mode,
             analyticEventCallbackProvider = analyticEventCallbackProvider,
+            linkGateFactory = linkGateFactory,
         )
     }
 
