@@ -10,9 +10,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.testing.FakeLogger
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -21,49 +19,6 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class CustomerSheetAttachPaymentMethodInterceptorTest {
-    @Test
-    fun `Rejects new payment method confirmation`() = runTest {
-        val interceptor = createInterceptor()
-
-        val result = interceptor.intercept(
-            intent = SetupIntentFactory.create(),
-            confirmationOption = PaymentMethodConfirmationOption.New(
-                createParams = com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                optionsParams = null,
-                extraParams = null,
-                shouldSave = false,
-            ),
-            shippingValues = null,
-        )
-
-        val failAction = result as ConfirmationDefinition.Action.Fail
-        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
-        assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
-        assertThat(failAction.cause.message)
-            .isEqualTo("Cannot use CustomerSheetAttachPaymentMethodInterceptor with new payment methods!")
-    }
-
-    @Test
-    fun `Rejects non-SetupIntent`() = runTest {
-        val interceptor = createInterceptor()
-
-        val result = interceptor.intercept(
-            intent = PaymentIntentFactory.create(),
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                optionsParams = null,
-            ),
-            shippingValues = null,
-        )
-
-        val failAction = result as ConfirmationDefinition.Action.Fail
-        assertThat(failAction.errorType).isEqualTo(
-            ConfirmationHandler.Result.Failed.ErrorType.Internal
-        )
-        assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
-        assertThat(failAction.cause.message).isEqualTo("Cannot confirm non setup intents with Customer Sheet!")
-    }
-
     @Test
     fun `Successfully attaches payment method`() = runTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -80,11 +35,7 @@ class CustomerSheetAttachPaymentMethodInterceptorTest {
 
         val result = interceptor.intercept(
             intent = setupIntent,
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = paymentMethod,
-                optionsParams = null,
-            ),
-            shippingValues = null,
+            paymentMethod = paymentMethod,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
@@ -115,11 +66,7 @@ class CustomerSheetAttachPaymentMethodInterceptorTest {
 
         val result = interceptor.intercept(
             intent = SetupIntentFactory.create(),
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = paymentMethod,
-                optionsParams = null,
-            ),
-            shippingValues = null,
+            paymentMethod = paymentMethod,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
@@ -150,11 +97,7 @@ class CustomerSheetAttachPaymentMethodInterceptorTest {
 
         interceptor.intercept(
             intent = SetupIntentFactory.create(),
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = paymentMethod,
-                optionsParams = null,
-            ),
-            shippingValues = null,
+            paymentMethod = paymentMethod,
         )
 
         assertThat(logger.errorLogs).hasSize(1)
@@ -166,7 +109,7 @@ class CustomerSheetAttachPaymentMethodInterceptorTest {
         paymentMethodDataSource: CustomerSheetPaymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(),
         logger: Logger = FakeLogger(),
     ): CustomerSheetAttachPaymentMethodInterceptor {
-        return CustomerSheetAttachPaymentMethodInterceptor(
+        return DefaultCustomerSheetAttachPaymentMethodInterceptor(
             paymentMethodDataSourceProvider = { paymentMethodDataSource },
             logger = logger,
         )

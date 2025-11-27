@@ -4,6 +4,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -40,6 +41,16 @@ internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> {
+        if (intent !is SetupIntent) {
+            val cause = IllegalStateException("Cannot use payment intents in Customer Sheet!")
+
+            return ConfirmationDefinition.Action.Fail(
+                cause = cause,
+                message = cause.stripeErrorMessage(),
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+            )
+        }
+
         return when (integrationMetadata.attachmentStyle) {
             IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent -> {
                 val setupIntentInterceptor = setupIntentInterceptorFactory.create(clientAttributionMetadata)
@@ -55,8 +66,7 @@ internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
 
                 attachPaymentMethodInterceptor.intercept(
                     intent = intent,
-                    confirmationOption = confirmationOption,
-                    shippingValues = null,
+                    paymentMethod = confirmationOption.paymentMethod,
                 )
             }
         }
