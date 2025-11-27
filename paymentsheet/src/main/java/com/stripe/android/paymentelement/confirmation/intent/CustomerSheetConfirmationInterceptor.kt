@@ -4,6 +4,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -15,7 +16,9 @@ import javax.inject.Inject
 
 internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
+    @Assisted private val integrationMetadata: IntegrationMetadata.CustomerSheet,
     private val setupIntentInterceptorFactory: CustomerSheetSetupIntentInterceptor.Factory,
+    private val attachPaymentMethodInterceptorFactory: CustomerSheetAttachPaymentMethodInterceptor.Factory,
 ) : IntentConfirmationInterceptor {
     override suspend fun intercept(
         intent: StripeIntent,
@@ -38,19 +41,42 @@ internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> {
-        val setupIntentInterceptor = setupIntentInterceptorFactory.create(clientAttributionMetadata)
+        if (intent !is SetupIntent) {
+            val cause = IllegalStateException("Cannot use payment intents in Customer Sheet!")
 
-        return setupIntentInterceptor.intercept(
-            intent = intent,
-            confirmationOption = confirmationOption,
-            shippingValues = null,
-        )
+            return ConfirmationDefinition.Action.Fail(
+                cause = cause,
+                message = cause.stripeErrorMessage(),
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+            )
+        }
+
+        return when (integrationMetadata.attachmentStyle) {
+            IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent -> {
+                val setupIntentInterceptor = setupIntentInterceptorFactory.create(clientAttributionMetadata)
+
+                setupIntentInterceptor.intercept(
+                    intent = intent,
+                    confirmationOption = confirmationOption,
+                    shippingValues = null,
+                )
+            }
+            IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach -> {
+                val attachPaymentMethodInterceptor = attachPaymentMethodInterceptorFactory.create()
+
+                attachPaymentMethodInterceptor.intercept(
+                    intent = intent,
+                    paymentMethod = confirmationOption.paymentMethod,
+                )
+            }
+        }
     }
 
     @AssistedFactory
     interface Factory {
         fun create(
-            clientAttributionMetadata: ClientAttributionMetadata
+            clientAttributionMetadata: ClientAttributionMetadata,
+            integrationMetadata: IntegrationMetadata.CustomerSheet,
         ): CustomerSheetConfirmationInterceptor
     }
 }
@@ -66,7 +92,7 @@ internal class CustomerSheetIntentConfirmationInterceptorFactory @Inject constru
     ): IntentConfirmationInterceptor {
         return when (integrationMetadata) {
             is IntegrationMetadata.CustomerSheet -> {
-                customerSheetConfirmationInterceptor.create(clientAttributionMetadata)
+                customerSheetConfirmationInterceptor.create(clientAttributionMetadata, integrationMetadata)
             }
             else -> {
                 throw IllegalStateException(
