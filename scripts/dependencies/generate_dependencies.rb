@@ -2,8 +2,8 @@
 
 require 'open3'
 
-def generate_dependencies(module_name)
-    output, _, _ = Open3.capture3("./gradlew #{module_name}:dependencies --configuration releaseRuntimeClasspath")
+def generate_dependencies(module_name, configuration)
+    output, _, _ = Open3.capture3("./gradlew #{module_name}:dependencies --configuration #{configuration}")
     lines = output.lines.map(&:chomp)
 
     result = []
