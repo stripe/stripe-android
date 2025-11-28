@@ -61,11 +61,7 @@ internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
 
                     setupIntentInterceptor.intercept(
                         intent = intent,
-                        confirmationOption = PaymentMethodConfirmationOption.Saved(
-                            paymentMethod = paymentMethod,
-                            optionsParams = null,
-                        ),
-                        shippingValues = null,
+                        paymentMethod = paymentMethod,
                     )
                 }
                 IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach -> {
