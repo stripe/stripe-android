@@ -3,7 +3,7 @@
 You can run BrowserStack tests with the following command:
 
 ```bash
-./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug && \
+./gradlew :paymentsheet-example:assembleBaseDebugAndroidTest :paymentsheet-example:assembleBaseDebug && \
   BROWSERSTACK_USERNAME=YOUR_BROWSERSTACK_USERNAME \
   BROWSERSTACK_ACCESS_KEY=YOUR_BROWSERSTACK_ACCESS_KEY \
   python scripts/browserstack.py \

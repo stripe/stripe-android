@@ -116,7 +116,7 @@ end
 private def build_example_release_apk
     gnupg_env do |env|
         Subprocess.check_call(
-            ['./gradlew', ':paymentsheet-example:assembleRelease'],
+            ['./gradlew', ':paymentsheet-example:assembleBaseRelease'],
             env: env
         )
     end
