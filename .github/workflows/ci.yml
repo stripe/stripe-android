@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
       - name: Build example projects
-        run: ./gradlew :paymentsheet-example:assembleAndroidTest
+        run: ./gradlew :paymentsheet-example:assembleBaseAndroidTest
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
       - name: Upload release bundle to Emerge
-        run: ./gradlew :paymentsheet-example:emergeUploadReleaseAab
+        run: ./gradlew :paymentsheet-example:emergeUploadBaseReleaseAab
         env:
           EMERGE_API_TOKEN: ${{ secrets.EMERGE_API_KEY }}
           EMERGE_TAG: pull_request
