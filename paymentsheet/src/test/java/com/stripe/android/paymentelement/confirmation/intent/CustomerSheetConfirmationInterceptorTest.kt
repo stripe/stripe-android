@@ -11,14 +11,12 @@ import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ClientAttributionMetadata
-import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -178,7 +176,7 @@ class CustomerSheetConfirmationInterceptorTest {
 
         val interceptCall = createSetupIntentInterceptCalls.awaitItem()
         assertThat(interceptCall.intent).isEqualTo(setupIntent)
-        assertThat(interceptCall.confirmationOption.paymentMethod).isEqualTo(paymentMethod)
+        assertThat(interceptCall.paymentMethod).isEqualTo(paymentMethod)
     }
 
     @Test
@@ -351,7 +349,7 @@ class CustomerSheetConfirmationInterceptorTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val stripeRepository = FakeStripeRepository(paymentMethodCreationResult)
-        val setupIntentInterceptor = FakeIntentConfirmationInterceptor(setupInterceptAction)
+        val setupIntentInterceptor = FakeCustomerSheetSetupIntentConfirmationInterceptor(setupInterceptAction)
         val attachPaymentMethodInterceptor = FakeCustomerSheetAttachPaymentMethodInterceptor(attachInterceptAction)
         val setupIntentInterceptorFactory = FakeSetupIntentInterceptorFactory(setupIntentInterceptor)
         val attachPaymentMethodInterceptorFactory =
@@ -387,7 +385,8 @@ class CustomerSheetConfirmationInterceptorTest {
         val interceptor: CustomerSheetConfirmationInterceptor,
         val createSetupIntentInterceptorFactoryCalls: Turbine<FakeSetupIntentInterceptorFactory.CreateCall>,
         val createAttachPaymentMethodInterceptorFactoryCalls: Turbine<Unit>,
-        val createSetupIntentInterceptCalls: Turbine<FakeIntentConfirmationInterceptor.InterceptCall>,
+        val createSetupIntentInterceptCalls:
+        Turbine<FakeCustomerSheetSetupIntentConfirmationInterceptor.InterceptCall>,
         val createAttachPaymentMethodInterceptCalls:
         Turbine<FakeCustomerSheetAttachPaymentMethodInterceptor.InterceptCall>,
     )
@@ -412,33 +411,24 @@ class CustomerSheetConfirmationInterceptorTest {
         }
 
         class InterceptCall(
-            val intent: StripeIntent,
+            val intent: SetupIntent,
             val paymentMethod: PaymentMethod,
         )
     }
 
-    private class FakeIntentConfirmationInterceptor(
+    private class FakeCustomerSheetSetupIntentConfirmationInterceptor(
         private val interceptAction: ConfirmationDefinition.Action<IntentConfirmationDefinition.Args>,
-    ) : IntentConfirmationInterceptor {
+    ) : CustomerSheetSetupIntentInterceptor {
         val interceptCalls = Turbine<InterceptCall>()
 
         override suspend fun intercept(
-            intent: StripeIntent,
-            confirmationOption: PaymentMethodConfirmationOption.New,
-            shippingValues: ConfirmPaymentIntentParams.Shipping?
-        ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> {
-            throw IllegalStateException("Should call new payment method path in interceptor tests")
-        }
-
-        override suspend fun intercept(
-            intent: StripeIntent,
-            confirmationOption: PaymentMethodConfirmationOption.Saved,
-            shippingValues: ConfirmPaymentIntentParams.Shipping?
+            intent: SetupIntent,
+            paymentMethod: PaymentMethod,
         ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> {
             interceptCalls.add(
                 InterceptCall(
                     intent = intent,
-                    confirmationOption = confirmationOption,
+                    paymentMethod = paymentMethod,
                 )
             )
 
@@ -446,19 +436,19 @@ class CustomerSheetConfirmationInterceptorTest {
         }
 
         class InterceptCall(
-            val intent: StripeIntent,
-            val confirmationOption: PaymentMethodConfirmationOption.Saved,
+            val intent: SetupIntent,
+            val paymentMethod: PaymentMethod,
         )
     }
 
     private class FakeSetupIntentInterceptorFactory(
-        private val interceptor: IntentConfirmationInterceptor
+        private val interceptor: CustomerSheetSetupIntentInterceptor
     ) : CustomerSheetSetupIntentInterceptor.Factory {
         val createCalls = Turbine<CreateCall>()
 
         override fun create(
             clientAttributionMetadata: ClientAttributionMetadata
-        ): IntentConfirmationInterceptor {
+        ): CustomerSheetSetupIntentInterceptor {
             createCalls.add(CreateCall(clientAttributionMetadata))
 
             return interceptor
