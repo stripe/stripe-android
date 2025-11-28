@@ -8,6 +8,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.HTTP_INTERNAL_SERVER_ERROR
+import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
@@ -67,6 +68,8 @@ internal class RealElementsSessionRepository @Inject constructor(
         linkDisallowedFundingSourceCreation: Set<String>,
     ): Result<ElementsSession> {
         val params = initializationMode.toElementsSessionParams(
+            stripeRepository = stripeRepository,
+            requestOptions = requestOptions,
             customer = customer,
             customPaymentMethods = customPaymentMethods,
             externalPaymentMethods = externalPaymentMethods,
@@ -139,7 +142,9 @@ private fun StripeIntent.withoutWeChatPay(): StripeIntent {
     }
 }
 
-internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
+internal suspend fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
+    stripeRepository: StripeRepository,
+    requestOptions: ApiRequest.Options,
     customer: PaymentSheet.CustomerConfiguration?,
     customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     externalPaymentMethods: List<String>,
@@ -222,6 +227,50 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 link = linkParams,
             )
         }
+        is PaymentElementLoader.InitializationMode.CheckoutSession -> {
+            val checkoutSessionResponse = stripeRepository.fetchPaymentPage(
+                checkoutSessionId = id,
+                options = requestOptions,
+            ).getOrThrow()
+
+            ElementsSessionParams.DeferredIntentType(
+                deferredIntentParams = DeferredIntentParams(
+                    mode = checkoutSessionResponse.asMode(),
+                    paymentMethodTypes = checkoutSessionResponse.paymentMethodTypes,
+                    paymentMethodConfigurationId = null,
+                    onBehalfOf = checkoutSessionResponse.onBehalfOf,
+                ),
+                checkoutSessionId = id,
+                customPaymentMethods = customPaymentMethodIds,
+                externalPaymentMethods = externalPaymentMethods,
+                customerSessionClientSecret = customerSessionClientSecret,
+                legacyCustomerEphemeralKey = legacyCustomerEphemeralKey,
+                savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
+                mobileSessionId = mobileSessionId,
+                sellerDetails = null,
+                appId = appId,
+                countryOverride = countryOverride,
+                link = linkParams,
+            )
+        }
+    }
+}
+
+private fun CheckoutSessionResponse.asMode(): DeferredIntentParams.Mode = when (mode) {
+    CheckoutSessionResponse.Mode.Payment -> {
+        DeferredIntentParams.Mode.Payment(
+            amount = amount,
+            currency = currency,
+            setupFutureUsage = setupFutureUsage,
+            captureMethod = captureMethod,
+            paymentMethodOptionsJsonString = paymentMethodOptionsJsonString,
+        )
+    }
+    CheckoutSessionResponse.Mode.Subscription -> {
+        DeferredIntentParams.Mode.Setup(
+            currency = currency,
+            setupFutureUsage = setupFutureUsage ?: StripeIntent.Usage.OffSession,
+        )
     }
 }
 

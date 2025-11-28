@@ -16,6 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.google.android.material.snackbar.Snackbar
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CompletedPaymentAlertDialog
@@ -90,8 +91,12 @@ internal class CompleteFlowActivity : AppCompatActivity() {
             return
         }
 
-        paymentSheet.presentWithPaymentIntent(
-            paymentIntentClientSecret = paymentInfo.clientSecret,
+        PaymentConfiguration.init(
+            context = application,
+            publishableKey = "pk_test_51M5XCTE8QcndKTcNxIe9EDvsTcqKboIq3NgptdIc2u429ml2hfGyeJtE9x3qZG6tio1vFlJHXz81EfsQdqHuIzZE008MHWQPkO",
+        )
+        paymentSheet.presentWithCheckoutSession(
+            checkoutSessionId = "cs_test_a1fOHLv82fV9RsggFiwTpFja9n7DRbLfD7ME0rAd7cTuJCtK9art1aEMfE",
             configuration = paymentInfo.paymentSheetConfig,
         )
 
