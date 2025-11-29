@@ -54,7 +54,7 @@ internal class PaymentSheetScreenAddFirstPaymentMethodTest {
     }
 
     @Test
-    fun `title returns choose payment method with non card one supported payment method`() = runTest {
+    fun `title returns null with non card one supported payment method`() = runTest {
         val state = createState(
             metadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -66,7 +66,7 @@ internal class PaymentSheetScreenAddFirstPaymentMethodTest {
         val interactor = FakeAddPaymentMethodInteractor(state)
         PaymentSheetScreen.AddFirstPaymentMethod(interactor)
             .title(isCompleteFlow = false, isWalletEnabled = false).test {
-                assertThat(awaitItem()).isEqualTo(R.string.stripe_paymentsheet_choose_payment_method.resolvableString)
+                assertThat(awaitItem()).isEqualTo(null)
             }
     }
 
