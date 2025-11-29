@@ -5,7 +5,7 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 internal object ConfirmationTokenSettingsDefinition : BooleanSettingsDefinition(
     key = "confirmationToken",
     displayName = "Use Confirmation Token",
-    defaultValue = false,
+    defaultValue = true,
 ) {
     override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
         return configurationData.integrationType.isPaymentFlow()
@@ -13,5 +13,11 @@ internal object ConfirmationTokenSettingsDefinition : BooleanSettingsDefinition(
 
     override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {
         checkoutRequestBuilder.isConfirmationToken(value)
+    }
+
+    override fun valueUpdated(value: Boolean, playgroundSettings: PlaygroundSettings) {
+        if (value) {
+            playgroundSettings[CustomerSessionSettingsDefinition] = true
+        }
     }
 }
