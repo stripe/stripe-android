@@ -23,11 +23,12 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
@@ -42,6 +43,8 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentType
+import androidx.compose.ui.semantics.onAutofillText
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextRange
@@ -59,7 +62,6 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBorderStrokeWidth
 import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -175,10 +177,14 @@ fun OTPElementUI(
                 if (index == 0) {
                     textFieldModifier = textFieldModifier
                         .focusRequester(focusRequester)
-                        .autofill(
-                            types = listOf(AutofillType.SmsOtpCode),
-                            onFill = element.controller::onAutofillDigit,
-                        )
+                        .semantics {
+                            contentType = ContentType.SmsOtpCode
+
+                            onAutofillText {
+                                element.controller.onAutofillDigit(it.text)
+                                true
+                            }
+                        }
                 }
 
                 OTPInputBox(
@@ -211,28 +217,38 @@ private fun OTPInputBox(
     colors: OTPElementColors,
     placeholder: String
 ) {
+    var lastTextValue by remember(value) { mutableStateOf(value) }
+
+    val textFieldValue = TextFieldValue(
+        text = value,
+        selection = if (isSelected) {
+            TextRange(value.length)
+        } else {
+            TextRange.Zero
+        }
+    )
+
     // Need to use BasicTextField instead of TextField to be able to customize the
     // internal contentPadding
     BasicTextField(
-        value = TextFieldValue(
-            text = value,
-            selection = if (isSelected) {
-                TextRange(value.length)
-            } else {
-                TextRange.Zero
+        value = textFieldValue,
+        onValueChange = { newTextFieldValueState ->
+            val stringChangedSinceLastInvocation = lastTextValue != newTextFieldValueState.text
+            val newText = newTextFieldValueState.text
+            lastTextValue = newText
+
+            if (stringChangedSinceLastInvocation || newTextFieldValueState.text.length == 1) {
+                // If the OTPInputBox already has a value, it would be the first character of it.text
+                // remove it before passing it to the controller.
+                val newValue =
+                    if (value.isNotBlank() && newText.isNotBlank()) {
+                        newText.substring(1)
+                    } else {
+                        newText
+                    }
+                val inputLength = element.controller.onValueChanged(index, newValue)
+                (0 until inputLength).forEach { _ -> focusManager.moveFocusSafely(FocusDirection.Next) }
             }
-        ),
-        onValueChange = {
-            // If the OTPInputBox already has a value, it would be the first character of it.text
-            // remove it before passing it to the controller.
-            val newValue =
-                if (value.isNotBlank() && it.text.isNotBlank()) {
-                    it.text.substring(1)
-                } else {
-                    it.text
-                }
-            val inputLength = element.controller.onValueChanged(index, newValue)
-            (0 until inputLength).forEach { _ -> focusManager.moveFocusSafely(FocusDirection.Next) }
         },
         modifier = modifier,
         enabled = enabled,

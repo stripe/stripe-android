@@ -1,8 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
@@ -49,8 +48,7 @@ class CvcController constructor(
 
     override val showOptionalLabel: Boolean = false
 
-    @OptIn(ExperimentalComposeUiApi::class)
-    override val autofillType: AutofillType = AutofillType.CreditCardSecurityCode
+    override val autofillType: ContentType = ContentType.CreditCardSecurityCode
 
     private val _fieldValue = MutableStateFlow("")
     override val fieldValue: StateFlow<String> = _fieldValue.asStateFlow()
