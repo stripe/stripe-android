@@ -139,16 +139,24 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     }
 
     private fun PaymentMethodConfirmationOption.New.attachToken(token: String?): PaymentMethodConfirmationOption {
+        val radarOptions = if (token != null) {
+            createParams.radarOptions?.copy(
+                androidVerificationObject = AndroidVerificationObject(
+                    androidVerificationToken = token
+                )
+            ) ?: RadarOptions(
+                hCaptchaToken = null,
+                androidVerificationObject = AndroidVerificationObject(
+                    androidVerificationToken = token
+                )
+            )
+        } else {
+            createParams.radarOptions
+        }
+
         return copy(
             createParams = createParams.copy(
-                radarOptions = token?.let {
-                    RadarOptions(
-                        hCaptchaToken = null,
-                        androidVerificationObject = AndroidVerificationObject(
-                            androidVerificationToken = it
-                        )
-                    )
-                }
+                radarOptions = radarOptions
             ),
             attestationComplete = true
         )

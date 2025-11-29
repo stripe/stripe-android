@@ -268,6 +268,38 @@ internal class AttestationConfirmationDefinitionTest {
     }
 
     @Test
+    fun `'toResult' should leave hCaptchaToken as is in RadarOptions for New option`() {
+        val definition = createAttestationConfirmationDefinition()
+        val testToken = "attestation_token"
+        val hCaptchaToken = "hcaptcha_token"
+
+        val result = definition.toResult(
+            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
+                createParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
+                    radarOptions = RadarOptions(
+                        hCaptchaToken = hCaptchaToken,
+                        androidVerificationObject = null
+                    )
+                )
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            deferredIntentConfirmationType = null,
+            result = AttestationActivityResult.Success(testToken),
+        )
+
+        val nextStepResult = result.asNextStep()
+        val option = nextStepResult.confirmationOption as PaymentMethodConfirmationOption.New
+
+        val expectedCreateParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
+            radarOptions = RadarOptions(
+                hCaptchaToken = hCaptchaToken,
+                androidVerificationObject = AndroidVerificationObject(testToken)
+            )
+        )
+        assertThat(option.createParams).isEqualTo(expectedCreateParams)
+    }
+
+    @Test
     fun `'canConfirm' should return false when New option already has a token`() {
         val definition = createAttestationConfirmationDefinition()
 

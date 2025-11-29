@@ -420,7 +420,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val expectedCreateParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
             radarOptions = RadarOptions(
                 hCaptchaToken = testToken,
-                androidVerificationObject = null
+                androidVerificationObject = AndroidVerificationObject(attestationToken)
             )
         )
         assertThat(option.createParams).isEqualTo(expectedCreateParams)
