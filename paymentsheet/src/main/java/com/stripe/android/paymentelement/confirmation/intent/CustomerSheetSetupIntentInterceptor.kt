@@ -8,23 +8,35 @@ import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.fold
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.ClientAttributionMetadata
-import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import javax.inject.Inject
 
-internal class CustomerSheetSetupIntentInterceptor(
+internal interface CustomerSheetSetupIntentInterceptor {
+    suspend fun intercept(
+        intent: SetupIntent,
+        paymentMethod: PaymentMethod
+    ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args>
+
+    interface Factory {
+        fun create(
+            clientAttributionMetadata: ClientAttributionMetadata
+        ): CustomerSheetSetupIntentInterceptor
+    }
+}
+
+internal class DefaultCustomerSheetSetupIntentInterceptor(
     private val intentDataSourceProvider: Single<CustomerSheetIntentDataSource>,
     private val intentFirstConfirmationInterceptorFactory: IntentFirstConfirmationInterceptor.Factory,
     private val logger: Logger,
     private val clientAttributionMetadata: ClientAttributionMetadata,
-) : IntentConfirmationInterceptor {
+) : CustomerSheetSetupIntentInterceptor {
     override suspend fun intercept(
-        intent: StripeIntent,
-        confirmationOption: PaymentMethodConfirmationOption.Saved,
-        shippingValues: ConfirmPaymentIntentParams.Shipping?
+        intent: SetupIntent,
+        paymentMethod: PaymentMethod
     ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> {
         return intentDataSourceProvider.await()
             .retrieveSetupIntentClientSecret()
@@ -35,7 +47,7 @@ internal class CustomerSheetSetupIntentInterceptor(
                         .intercept(
                             intent = intent,
                             confirmationOption = PaymentMethodConfirmationOption.Saved(
-                                paymentMethod = confirmationOption.paymentMethod,
+                                paymentMethod = paymentMethod,
                                 optionsParams = null,
                             ),
                             shippingValues = null,
@@ -43,7 +55,7 @@ internal class CustomerSheetSetupIntentInterceptor(
                 },
                 onFailure = { cause, displayMessage ->
                     logger.error(
-                        msg = "Failed to attach payment method to SetupIntent: ${confirmationOption.paymentMethod}",
+                        msg = "Failed to attach payment method to SetupIntent: $paymentMethod",
                         t = cause,
                     )
 
@@ -55,28 +67,6 @@ internal class CustomerSheetSetupIntentInterceptor(
                 }
             )
     }
-
-    override suspend fun intercept(
-        intent: StripeIntent,
-        confirmationOption: PaymentMethodConfirmationOption.New,
-        shippingValues: ConfirmPaymentIntentParams.Shipping?
-    ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> {
-        val error = IllegalStateException(
-            "Cannot use CustomerSheetSetupIntentInterceptor with new payment methods!"
-        )
-
-        return ConfirmationDefinition.Action.Fail(
-            errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
-            cause = error,
-            message = error.stripeErrorMessage()
-        )
-    }
-
-    interface Factory {
-        fun create(
-            clientAttributionMetadata: ClientAttributionMetadata
-        ): IntentConfirmationInterceptor
-    }
 }
 
 internal class DefaultCustomerSheetSetupIntentInterceptorFactory @Inject constructor(
@@ -86,7 +76,7 @@ internal class DefaultCustomerSheetSetupIntentInterceptorFactory @Inject constru
     override fun create(
         clientAttributionMetadata: ClientAttributionMetadata
     ): CustomerSheetSetupIntentInterceptor {
-        return CustomerSheetSetupIntentInterceptor(
+        return DefaultCustomerSheetSetupIntentInterceptor(
             intentDataSourceProvider = CustomerSheetHacks.intentDataSource,
             intentFirstConfirmationInterceptorFactory = intentFirstConfirmationInterceptorFactory,
             logger = logger,
