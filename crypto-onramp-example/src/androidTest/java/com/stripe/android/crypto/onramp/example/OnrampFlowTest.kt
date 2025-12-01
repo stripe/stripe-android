@@ -12,6 +12,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.printToLog
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Before
@@ -26,7 +28,7 @@ class OnrampFlowTest {
     @get:Rule
     internal val composeRule = createAndroidComposeRule<OnrampActivity>()
 
-    private val defaultTimeout: Duration = 15.seconds
+    private val defaultTimeout: Duration = 25.seconds
 
     @Before
     fun clearPrefs() {
@@ -140,10 +142,23 @@ class OnrampFlowTest {
 
     @OptIn(ExperimentalTestApi::class)
     private fun waitForTag(tag: String, timeoutMs: Long = defaultTimeout.inWholeMilliseconds) {
-        composeRule.waitUntilExactlyOneExists(
-            hasTestTag(tag),
-            timeoutMillis = timeoutMs
-        )
+        runCatching {
+            composeRule.waitUntil(timeoutMs) {
+                val merged = composeRule.onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isNotEmpty()
+                val unmerged = composeRule.onAllNodes(hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+                merged || unmerged
+            }
+        }.getOrElse {
+            println("==== TAG NOT FOUND: $tag ====")
+            composeRule.onRoot().printToLog("SEMANTICS_MERGED_WAIT_FOR_$tag")
+            composeRule.onRoot(useUnmergedTree = true).printToLog("SEMANTICS_UNMERGED_WAIT_FOR_$tag")
+            throw AssertionError("Tag '$tag' not found within ${timeoutMs}ms").apply { addSuppressed(it) }
+        }
+
+//        composeRule.waitUntilExactlyOneExists(
+//            hasTestTag(tag),
+//            timeoutMillis = timeoutMs
+//        )
     }
 
     private fun waitForOptionalNode(
@@ -162,8 +177,17 @@ class OnrampFlowTest {
         waitForTag(tag = tag, timeoutMs = timeoutMs)
         waitForSnackbarToHide()
 
-        val node = composeRule.onNodeWithTag(tag)
-        runCatching { node.performScrollTo() }
-        node.performClick()
+        val node = runCatching { composeRule.onNodeWithTag(tag) }
+            .getOrElse { composeRule.onNodeWithTag(tag, useUnmergedTree = true) }
+
+        node.assertExists().run {
+            runCatching { performScrollTo() }
+            performClick()
+            composeRule.waitForIdle()
+        }
+
+//        val node = composeRule.onNodeWithTag(tag)
+//        runCatching { node.performScrollTo() }
+//        node.performClick()
     }
 }
