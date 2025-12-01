@@ -4,6 +4,7 @@ apply plugin: 'com.android.lint'
 
 apply from: rootProject.file('build-configuration/detekt.gradle')
 apply from: rootProject.file('build-configuration/ktlint.gradle')
+apply from: rootProject.file('build-configuration/configurations.gradle')
 
 check.dependsOn('ktlint')
 
