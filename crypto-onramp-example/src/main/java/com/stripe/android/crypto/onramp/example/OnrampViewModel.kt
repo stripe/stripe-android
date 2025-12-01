@@ -26,7 +26,6 @@ import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
-import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
@@ -122,16 +121,7 @@ internal class OnrampViewModel(
                 )
             )
 
-            when(val result = onrampCoordinator.configure(configuration = configuration)) {
-                is OnrampConfigurationResult.Completed -> {
-                    _message.value = "Configuration completed successfully"
-                }
-                is OnrampConfigurationResult.Failed -> {
-                    _message.value = "Onramp configuration failed: ${result.error}"
-                    _uiState.update { it.copy(screen = Screen.LoginSignup) }
-                    return@launch
-                }
-            }
+            onrampCoordinator.configure(configuration = configuration)
 
             loadUserData()?.let { data ->
                 _uiState.update { it.copy(email = data.email, authToken = data.token, screen = Screen.SeamlessSignIn) }
@@ -265,7 +255,7 @@ internal class OnrampViewModel(
                 }
             }
             is OnrampHasLinkAccountResult.Failed -> {
-                _message.value = "Lookup failed: ${result.error}"
+                _message.value = "Lookup failed: ${result.error.message}"
                 _uiState.update { it.copy(screen = Screen.LoginSignup) }
             }
         }
