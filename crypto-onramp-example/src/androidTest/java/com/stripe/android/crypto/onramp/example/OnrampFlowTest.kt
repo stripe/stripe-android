@@ -43,6 +43,7 @@ class OnrampFlowTest {
     fun testCheckoutFlow() {
         waitForTag(LOGIN_EMAIL_TAG)
 
+        // Enter test login credentials previously registered with the demo backend.
         composeRule.onNodeWithTag(LOGIN_EMAIL_TAG)
             .performTextInput("onramptest@stripe.com")
 
@@ -109,7 +110,6 @@ class OnrampFlowTest {
         )
     }
 
-    @OptIn(ExperimentalTestApi::class)
     private fun waitForOptionalNode(
         matcher: SemanticsMatcher,
         timeoutMs: Long = defaultTimeout.inWholeMilliseconds
@@ -122,7 +122,6 @@ class OnrampFlowTest {
         }.getOrElse { false }
     }
 
-    @OptIn(ExperimentalTestApi::class)
     private fun performClickOnNode(tag: String, timeoutMs: Long = defaultTimeout.inWholeMilliseconds) {
         waitForTag(tag = tag, timeoutMs = timeoutMs)
         waitForSnackbarToHide()
