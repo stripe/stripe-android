@@ -349,7 +349,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew :crypto-onramp-example:connectedAndroidTest
+            - content: ./gradlew :crypto-onramp-example:connectedDebugAndroidTest
   check-dependencies:
     envs:
       - INCLUDE_DEPENDENCIES_ON_FAILURE: true
