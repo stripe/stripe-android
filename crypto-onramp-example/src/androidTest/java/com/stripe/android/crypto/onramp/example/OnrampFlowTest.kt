@@ -144,30 +144,16 @@ class OnrampFlowTest {
 
     @OptIn(ExperimentalTestApi::class)
     private fun getSnackbarText(timeoutMs: Long = defaultTimeout.inWholeMilliseconds): String? {
-        runCatching {
-            composeRule.waitUntil(timeoutMs) {
-                val merged = composeRule.onAllNodes(hasTestTag(SNACKBAR_TAG))
-                    .fetchSemanticsNodes().isNotEmpty()
-                val unmerged = composeRule.onAllNodes(hasTestTag(SNACKBAR_TAG), useUnmergedTree = true)
-                    .fetchSemanticsNodes().isNotEmpty()
-                merged || unmerged
-            }
-        }
+        // Wait for the text node itself (optional)
+        val exists = waitForOptionalNode(hasTestTag(SNACKBAR_TEXT_TAG), timeoutMs)
+        if (!exists) return null
 
-        runCatching {
-            val nodes = composeRule.onAllNodes(hasTestTag(SNACKBAR_TAG))
-                .fetchSemanticsNodes()
-            nodes.firstOrNull()?.let { node ->
-                node.config.getOrNull(SemanticsProperties.Text)?.joinToString("") { it.text }
-            }?.let { return it }
-        }
-
+        // Read text from the tagged Text node (merged tree)
         return runCatching {
-            val nodes = composeRule.onAllNodes(hasTestTag(SNACKBAR_TAG), useUnmergedTree = true)
-                .fetchSemanticsNodes()
-            nodes.firstOrNull()?.let { node ->
-                node.config.getOrNull(SemanticsProperties.Text)?.joinToString("") { it.text }
-            }
+            val node = composeRule.onNodeWithTag(SNACKBAR_TEXT_TAG)
+                .fetchSemanticsNode()
+            node.config.getOrNull(SemanticsProperties.Text)
+                ?.joinToString("") { it.text }
         }.getOrNull()
     }
 }

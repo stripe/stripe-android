@@ -164,7 +164,11 @@ internal class OnrampActivity : ComponentActivity() {
                             modifier = Modifier.testTag("OnrampSnackbarHost"),
                             snackbar = { data ->
                                 Snackbar(modifier = Modifier.testTag(SNACKBAR_TAG)) {
-                                    Text(data.message)
+                                    Text(
+                                        data.message,
+                                        modifier = Modifier.testTag(SNACKBAR_TEXT_TAG)
+                                    )
+
                                 }
                             }
                         )
@@ -1140,3 +1144,4 @@ internal const val CREATE_CRYPTO_TOKEN_BUTTON_TAG = "CreateCryptoTokenButtonTag"
 internal const val CREATE_SESSION_BUTTON_TAG = "CreateSessionButtonTag"
 internal const val CHECKOUT_BUTTON_TAG = "CheckoutButtonTag"
 internal const val SNACKBAR_TAG = "SnackbarTag"
+internal const val SNACKBAR_TEXT_TAG = "SnackbarTextTag"
