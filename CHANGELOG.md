@@ -18,6 +18,7 @@
 ### PaymentSheet
 * [Added][12011](https://github.com/stripe/stripe-android/pull/12011) Builder APIs for PaymentSheet appearance customization (Colors, Shapes, Typography, PrimaryButtonColors, and embedded row styles)
 * [Added] opensCardScannerAutomatically configuration is now available.
+* [Added] Added support for [PromptPay](https://docs.stripe.com/payments/promptpay) to PaymentSheet.
 
 ### Payments
 * [Added][12014](https://github.com/stripe/stripe-android/pull/12014) `ConfirmationToken.PaymentMethodPreview` now includes structured `Card` field with detailed card information (brand, country, expiry, funding, last4, etc.)
