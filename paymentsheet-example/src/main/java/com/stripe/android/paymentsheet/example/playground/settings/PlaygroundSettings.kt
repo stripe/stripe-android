@@ -553,7 +553,6 @@ internal class PlaygroundSettings private constructor(
             TermsDisplaySettingsDefinition,
             PassiveCaptchaDefinition,
             AttestationOnIntentConfirmationDefinition,
-            EnablePromptPaySettingsDefinition,
             EnableTapToAddSettingsDefinition,
         )
 
