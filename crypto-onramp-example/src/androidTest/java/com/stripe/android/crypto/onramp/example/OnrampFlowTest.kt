@@ -52,24 +52,38 @@ class OnrampFlowTest {
 
         performClickOnNode(LOGIN_LOGIN_BUTTON_TAG)
 
-        if (waitForOptionalNode(hasText(
-                "User exists in Link. Please authenticate",
-                )
-        , timeoutMs = 5.seconds.inWholeMilliseconds)) {
+        if (waitForOptionalNode(
+                hasText("Please enter an email address"),
+                timeoutMs = 5.seconds.inWholeMilliseconds
+            )) {
+            throw AssertionError("No email entered")
+        }
+
+        if (waitForOptionalNode(
+                hasText("Please enter an valid password (at least 8 characters)"),
+                timeoutMs = 5.seconds.inWholeMilliseconds
+            )) {
+            throw AssertionError("No password entered")
+        }
+
+        if (waitForOptionalNode(
+                hasText("User exists in Link. Please authenticate"),
+                timeoutMs = 5.seconds.inWholeMilliseconds
+        )) {
             throw AssertionError("User does exist in Link")
         }
 
-        if (waitForOptionalNode(hasText(
-                "Log in failed: HTTP Exception 401 Unauthorized",
-                )
-        , timeoutMs = 5.seconds.inWholeMilliseconds)) {
+        if (waitForOptionalNode(
+                hasText("Log in failed: HTTP Exception 401 Unauthorized"),
+                timeoutMs = 5.seconds.inWholeMilliseconds
+        )) {
             throw AssertionError("Login failed with 401 Unauthorized")
         }
 
-        if (waitForOptionalNode(hasText(
-                "Log in failed",
-                )
-        , timeoutMs = 5.seconds.inWholeMilliseconds)) {
+        if (waitForOptionalNode(
+                hasText("Log in failed"),
+                timeoutMs = 5.seconds.inWholeMilliseconds
+        )) {
             throw AssertionError("Different log in failure")
         }
 
