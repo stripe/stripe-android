@@ -45,6 +45,14 @@ class OnrampFlowTest {
     fun testCheckoutFlow() {
         waitForTag(LOGIN_EMAIL_TAG)
 
+        val snackbarText = getSnackbarText()
+        if (snackbarText != null) {
+            println("Snackbar text: $snackbarText")
+            throw AssertionError("Snackbar shown: $snackbarText")
+        } else {
+            throw AssertionError("Snackbar never shown")
+        }
+
         // Enter test login credentials previously registered with the demo backend.
         composeRule.onNodeWithTag(LOGIN_EMAIL_TAG)
             .performTextInput("onramptest@stripe.com")
@@ -53,14 +61,6 @@ class OnrampFlowTest {
             .performTextInput("testing1234")
 
         performClickOnNode(LOGIN_LOGIN_BUTTON_TAG)
-
-        val snackbarText = getSnackbarText()
-        if (snackbarText != null) {
-            println("Snackbar text: $snackbarText")
-            throw AssertionError("Snackbar shown: $snackbarText")
-        } else {
-            throw AssertionError("Snackbar never shown")
-        }
 
         performClickOnNode(AUTHENTICATE_BUTTON_TAG)
 
