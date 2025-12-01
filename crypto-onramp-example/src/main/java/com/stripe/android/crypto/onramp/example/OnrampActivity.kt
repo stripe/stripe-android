@@ -168,7 +168,6 @@ internal class OnrampActivity : ComponentActivity() {
                                         data.message,
                                         modifier = Modifier.testTag(SNACKBAR_TEXT_TAG)
                                     )
-
                                 }
                             }
                         )
