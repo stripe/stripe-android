@@ -197,8 +197,6 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Jälgige, et nägu oleks raami keskel.</string>
   <!-- Instructional text when the document is too blurry -->
-  <string name="stripe_reduce_blur">ID ei ole fookuses</string>
-  <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Üksikasjad pole nähtavad</string>
   <string name="stripe_reduce_glare_2">Proovige vähendada läiget ja veenduge, et ID oleks nähtav</string>
   <!-- Button text displayed to the user to retake photo -->
