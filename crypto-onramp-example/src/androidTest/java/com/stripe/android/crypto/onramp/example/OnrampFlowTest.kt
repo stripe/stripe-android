@@ -50,15 +50,15 @@ class OnrampFlowTest {
         composeRule.onNodeWithTag(LOGIN_PASSWORD_TAG)
             .performTextInput("testing1234")
 
-        if (waitForOptionalNode("User exists in Link. Please authenticate")) {
+        if (waitForOptionalNode(hasText("User exists in Link. Please authenticate"))) {
             throw AssertionError("User does exist in Link")
         }
 
-        if (waitForOptionalNode("Log in failed: HTTP Exception 401 Unauthorized")) {
+        if (waitForOptionalNode(hasText("Log in failed: HTTP Exception 401 Unauthorized"))) {
             throw AssertionError("Login failed with 401 Unauthorized")
         }
 
-        if (waitForOptionalNode("Log in failed")) {
+        if (waitForOptionalNode(hasText("Log in failed"))) {
             throw AssertionError("Different log in failure")
         }
 
