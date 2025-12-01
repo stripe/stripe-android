@@ -127,7 +127,7 @@ internal class OnrampViewModel(
                     _message.value = "Configuration completed successfully"
                 }
                 is OnrampConfigurationResult.Failed -> {
-                    _message.value = "Onramp configuration failed: ${result.error.message}"
+                    _message.value = "Onramp configuration failed: ${result.error}"
                     _uiState.update { it.copy(screen = Screen.LoginSignup) }
                     return@launch
                 }
