@@ -50,19 +50,29 @@ class OnrampFlowTest {
         composeRule.onNodeWithTag(LOGIN_PASSWORD_TAG)
             .performTextInput("testing1234")
 
-        if (waitForOptionalNode(hasText("User exists in Link. Please authenticate"))) {
+        performClickOnNode(LOGIN_LOGIN_BUTTON_TAG)
+
+        if (waitForOptionalNode(hasText(
+                "User exists in Link. Please authenticate",
+                timeoutMs = 5.seconds.inWholeMilliseconds)
+        )) {
             throw AssertionError("User does exist in Link")
         }
 
-        if (waitForOptionalNode(hasText("Log in failed: HTTP Exception 401 Unauthorized"))) {
+        if (waitForOptionalNode(hasText(
+                "Log in failed: HTTP Exception 401 Unauthorized",
+                timeoutMs = 5.seconds.inWholeMilliseconds)
+        )) {
             throw AssertionError("Login failed with 401 Unauthorized")
         }
 
-        if (waitForOptionalNode(hasText("Log in failed"))) {
+        if (waitForOptionalNode(hasText(
+                "Log in failed",
+                timeoutMs = 5.seconds.inWholeMilliseconds)
+        )) {
             throw AssertionError("Different log in failure")
         }
 
-        performClickOnNode(LOGIN_LOGIN_BUTTON_TAG)
         performClickOnNode(AUTHENTICATE_BUTTON_TAG)
 
         waitForTag("OTP-0")
