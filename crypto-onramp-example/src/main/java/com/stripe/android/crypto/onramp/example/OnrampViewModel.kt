@@ -255,7 +255,7 @@ internal class OnrampViewModel(
                 }
             }
             is OnrampHasLinkAccountResult.Failed -> {
-                _message.value = "Lookup failed: ${result.error.message}"
+                _message.value = "Lookup failed: ${result.error}"
                 _uiState.update { it.copy(screen = Screen.LoginSignup) }
             }
         }
