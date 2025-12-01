@@ -333,6 +333,8 @@ workflows:
           inputs:
             - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk --num-retries 2
   run-crypto-onramp-example-e2e-tests:
+    envs:
+      - BUILD_VARIANT: debug
     before_run:
       - start_emulator
       - prepare_all
@@ -342,7 +344,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew :crypto-onramp-example:assembleDebugAndroidTest
+            - content: ./gradlew :crypto-onramp-example:assembleDebug :crypto-onramp-example:assembleDebugAndroidTest
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
