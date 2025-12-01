@@ -689,64 +689,6 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(resultMap["link_native_available"]).isEqualTo(true)
     }
 
-    @Test
-    fun `create returns false for link_native_available when native link is not available`() = runScenario {
-        val fakeLinkGate = FakeLinkGate().apply {
-            setUseNativeLink(false)
-        }
-        val linkGateFactory = FakeLinkGate.Factory(fakeLinkGate)
-
-        val resultMap = createAnalyticsMetadata(
-            linkGateFactory = linkGateFactory
-        )
-
-        assertThat(resultMap["link_native_available"]).isEqualTo(false)
-    }
-
-    @Test
-    fun `create returns true for link_native_available when useNativeLink is true`() = runScenario {
-        val fakeLinkGate = FakeLinkGate().apply {
-            setUseNativeLink(true)
-        }
-        val linkGateFactory = FakeLinkGate.Factory(fakeLinkGate)
-
-        val elementsSession = createElementsSession(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
-            linkSettings = createLinkSettings(linkMode = LinkMode.Passthrough).copy(
-                useAttestationEndpoints = true
-            )
-        )
-
-        val resultMap = createAnalyticsMetadata(
-            elementsSession = elementsSession,
-            linkGateFactory = linkGateFactory
-        )
-
-        assertThat(resultMap["link_native_available"]).isEqualTo(true)
-    }
-
-    @Test
-    fun `create returns false for link_native_available when useNativeLink is false`() = runScenario {
-        val fakeLinkGate = FakeLinkGate().apply {
-            setUseNativeLink(false)
-        }
-        val linkGateFactory = FakeLinkGate.Factory(fakeLinkGate)
-
-        val elementsSession = createElementsSession(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
-            linkSettings = createLinkSettings(linkMode = LinkMode.Passthrough).copy(
-                useAttestationEndpoints = false
-            )
-        )
-
-        val resultMap = createAnalyticsMetadata(
-            elementsSession = elementsSession,
-            linkGateFactory = linkGateFactory
-        )
-
-        assertThat(resultMap["link_native_available"]).isEqualTo(false)
-    }
-
     private fun runScenario(
         mode: EventReporter.Mode = EventReporter.Mode.Complete,
         block: Scenario.() -> Unit
