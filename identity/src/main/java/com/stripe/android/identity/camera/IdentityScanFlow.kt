@@ -3,6 +3,7 @@ package com.stripe.android.identity.camera
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.framework.AggregateResultListener
@@ -118,7 +119,8 @@ internal class IdentityScanFlow(
                             )
                         }
                     )
-            } catch (e: IllegalStateException) {
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed analyzer pool creation", e)
                 withContext(Dispatchers.Main) {
                     errorHandler(e)
                 }
@@ -170,5 +172,9 @@ internal class IdentityScanFlow(
             }
         }
         loopJob = null
+    }
+
+    companion object {
+        private const val TAG = "IdentityScanFlow"
     }
 }
