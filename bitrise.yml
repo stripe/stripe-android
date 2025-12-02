@@ -433,9 +433,9 @@ workflows:
       - git-clone@8: { }
       - restore-gradle-configuration-cache@1: { }
       - restore-gradle-cache@2: { }
-      #- set-java-version@1:
-          #inputs:
-            #- set_java_version: 21
+      - set-java-version@1:
+          inputs:
+            - set_java_version: 21
       - script@1:
           inputs:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
