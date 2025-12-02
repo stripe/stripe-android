@@ -1,11 +1,3 @@
-public final class com/stripe/android/paymentmethodmessaging/element/LearnMoreActivityArgs$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentmethodmessaging/element/LearnMoreActivityArgs;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentmethodmessaging/element/LearnMoreActivityArgs;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Companion;
