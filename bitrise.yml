@@ -334,7 +334,7 @@ workflows:
             - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/base/debug/paymentsheet-example-base-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/base/debug/paymentsheet-example-base-debug-androidTest.apk --num-retries 2
   run-crypto-onramp-example-e2e-tests:
     before_run:
-      - start_emulator
+      #- start_emulator
       - prepare_all
     after_run:
       - conclude_all
@@ -342,14 +342,28 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew :crypto-onramp-example:assembleDebug :crypto-onramp-example:assembleDebugAndroidTest
-      - wait-for-android-emulator@1:
-          inputs:
-            - boot_timeout: 600
+            - content: ./gradlew :crypto-onramp-example:assembleDebug :crypto-onramp-example:assembleDebugAndroidTest -PIS_BROWSERSTACK_BUILD=true
       - script@1:
-          timeout: 1200
+          title: Install Python deps
+          timeout: 120
           inputs:
-            - content: ./gradlew :crypto-onramp-example:connectedDebugAndroidTest
+            - content: pip3 install requests_toolbelt requests
+            #- wait-for-android-emulator@1:
+          #inputs:
+            #- boot_timeout: 600
+      - script@1:
+          title: Upload & run on BrowserStack
+          timeout: 2400
+          inputs:
+            - content: |
+                python3 scripts/browserstack.py --test \
+                  --apk crypto-onramp-example/build/outputs/apk/debug/crypto-onramp-example-debug.apk \
+                  --espresso crypto-onramp-example/build/outputs/apk/androidTest/debug/crypto-onramp-example-debug-androidTest.apk \
+                  --num-retries 2
+      #- script@1:
+      #    timeout: 1200
+      #    inputs:
+      #      - content: ./gradlew :crypto-onramp-example:connectedDebugAndroidTest
   check-dependencies:
     envs:
       - INCLUDE_DEPENDENCIES_ON_FAILURE: true
@@ -427,9 +441,9 @@ workflows:
       - git-clone@8: { }
       - restore-gradle-configuration-cache@1: { }
       - restore-gradle-cache@2: { }
-      - set-java-version@1:
-          inputs:
-            - set_java_version: 21
+      #- set-java-version@1:
+          #inputs:
+            #- set_java_version: 21
       - script@1:
           inputs:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
