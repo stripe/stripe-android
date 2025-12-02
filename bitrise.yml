@@ -334,7 +334,6 @@ workflows:
             - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/base/debug/paymentsheet-example-base-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/base/debug/paymentsheet-example-base-debug-androidTest.apk --num-retries 2
   run-crypto-onramp-example-e2e-tests:
     before_run:
-      #- start_emulator
       - prepare_all
     after_run:
       - conclude_all
@@ -348,9 +347,6 @@ workflows:
           timeout: 120
           inputs:
             - content: pip3 install requests_toolbelt requests
-            #- wait-for-android-emulator@1:
-          #inputs:
-            #- boot_timeout: 600
       - script@1:
           title: Upload & run on BrowserStack
           timeout: 2400
@@ -360,10 +356,6 @@ workflows:
                   --apk crypto-onramp-example/build/outputs/apk/debug/crypto-onramp-example-debug.apk \
                   --espresso crypto-onramp-example/build/outputs/apk/androidTest/debug/crypto-onramp-example-debug-androidTest.apk \
                   --num-retries 2
-      #- script@1:
-      #    timeout: 1200
-      #    inputs:
-      #      - content: ./gradlew :crypto-onramp-example:connectedDebugAndroidTest
   check-dependencies:
     envs:
       - INCLUDE_DEPENDENCIES_ON_FAILURE: true
