@@ -528,6 +528,14 @@ constructor(
             hasDelayedSettlement = false,
             requiresMandateForPaymentIntent = false,
         ),
+        PayPay(
+            "paypay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
+        ),
         PromptPay(
             "promptpay",
             isReusable = false,

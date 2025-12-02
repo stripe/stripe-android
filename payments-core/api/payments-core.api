@@ -2140,6 +2140,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field P24 Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field PayNow Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field PayPal Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field PayPay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field PromptPay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field RevolutPay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Satispay Lcom/stripe/android/model/PaymentMethod$Type;
