@@ -120,7 +120,7 @@ internal class IdentityScanFlow(
                         }
                     )
             } catch (e: Exception) {
-                Log.e(TAG, "Failed analyzer pool creation", e)
+                Log.e(TAG, "Analyzer creation failed", e)
                 withContext(Dispatchers.Main) {
                     errorHandler(e)
                 }
