@@ -258,7 +258,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33DebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :crypto-onramp-example:pixel2api33DebugAndroidTest
+            - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest  -x :crypto-onramp-example:pixel2api33DebugAndroidTest
   run-paymentsheet-instrumentation-tests:
     before_run:
       - prepare_all
@@ -323,7 +323,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug -PIS_BROWSERSTACK_BUILD=true -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN
+            - content: ./gradlew :paymentsheet-example:assembleBaseDebugAndroidTest :paymentsheet-example:assembleBaseDebug -PIS_BROWSERSTACK_BUILD=true -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN
       - script@1:
           timeout: 120
           inputs:
@@ -331,7 +331,7 @@ workflows:
       - script@1:
           timeout: 2400
           inputs:
-            - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk --num-retries 2
+            - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/base/debug/paymentsheet-example-base-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/base/debug/paymentsheet-example-base-debug-androidTest.apk --num-retries 2
   run-crypto-onramp-example-e2e-tests:
     before_run:
       - start_emulator

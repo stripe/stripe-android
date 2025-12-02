@@ -14,7 +14,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.SetupIntentFactory
 import kotlinx.coroutines.test.runTest
@@ -36,31 +35,6 @@ class CustomerSheetSetupIntentInterceptorTest {
     )
 
     @Test
-    fun `Rejects new payment method confirmation`() = runTest {
-        val interceptor = createInterceptor()
-
-        val result = interceptor.intercept(
-            intent = SetupIntentFactory.create(),
-            confirmationOption = PaymentMethodConfirmationOption.New(
-                createParams = com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                optionsParams = null,
-                extraParams = null,
-                shouldSave = false,
-            ),
-            shippingValues = null,
-        )
-
-        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
-
-        val failAction = result as ConfirmationDefinition.Action.Fail
-
-        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
-        assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
-        assertThat(failAction.cause.message)
-            .isEqualTo("Cannot use CustomerSheetSetupIntentInterceptor with new payment methods!")
-    }
-
-    @Test
     fun `Successfully creates and confirms setup intent`() = runTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val setupIntentClientSecret = "seti_1234_secret_5678"
@@ -77,11 +51,7 @@ class CustomerSheetSetupIntentInterceptorTest {
 
         val result = interceptor.intercept(
             intent = setupIntent,
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = paymentMethod,
-                optionsParams = null,
-            ),
-            shippingValues = null,
+            paymentMethod = paymentMethod,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Launch<*>>()
@@ -107,11 +77,7 @@ class CustomerSheetSetupIntentInterceptorTest {
 
         val result = interceptor.intercept(
             intent = SetupIntentFactory.create(),
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = paymentMethod,
-                optionsParams = null,
-            ),
-            shippingValues = null,
+            paymentMethod = paymentMethod,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
@@ -144,11 +110,7 @@ class CustomerSheetSetupIntentInterceptorTest {
 
         interceptor.intercept(
             intent = SetupIntentFactory.create(),
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = paymentMethod,
-                optionsParams = null,
-            ),
-            shippingValues = null,
+            paymentMethod = paymentMethod,
         )
 
         assertThat(logger.errorLogs).hasSize(1)
@@ -159,7 +121,7 @@ class CustomerSheetSetupIntentInterceptorTest {
         intentDataSource: CustomerSheetIntentDataSource = FakeCustomerSheetIntentDataSource(),
         logger: Logger = FakeLogger(),
     ): CustomerSheetSetupIntentInterceptor {
-        return CustomerSheetSetupIntentInterceptor(
+        return DefaultCustomerSheetSetupIntentInterceptor(
             intentDataSourceProvider = { intentDataSource },
             intentFirstConfirmationInterceptorFactory = FakeIntentFirstConfirmationInterceptorFactory(requestOptions),
             logger = logger,

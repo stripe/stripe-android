@@ -30,6 +30,8 @@ module:identity
 com.stripe.android.identity
 com.stripe.android.identity.navigation
 com.stripe.android.identity.utils
+module:payment-method-messaging
+com.stripe.android.paymentmethodmessaging.element
 module:payments-core
 com.stripe.android
 com.stripe.android.exception

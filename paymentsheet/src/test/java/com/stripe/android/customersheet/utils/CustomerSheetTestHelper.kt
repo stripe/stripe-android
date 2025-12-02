@@ -14,13 +14,10 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.CustomerSheetViewModel
-import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
-import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
-import com.stripe.android.customersheet.data.FakeCustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetSavedSelectionDataSource
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -32,7 +29,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -76,7 +72,6 @@ internal object CustomerSheetTestHelper {
             LpmRepositoryTestHelpers.usBankAccount,
         ),
         savedPaymentSelection: PaymentSelection? = null,
-        stripeRepository: StripeRepository = FakeStripeRepository(),
         paymentConfiguration: PaymentConfiguration = PaymentConfiguration(
             publishableKey = "pk_test_123",
             stripeAccountId = null,
@@ -102,7 +97,8 @@ internal object CustomerSheetTestHelper {
         paymentMethodDataSource: CustomerSheetPaymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
             paymentMethods = CustomerSheetDataResult.success(customerPaymentMethods)
         ),
-        intentDataSource: CustomerSheetIntentDataSource = FakeCustomerSheetIntentDataSource(),
+        attachmentStyle: IntegrationMetadata.CustomerSheet.AttachmentStyle =
+            IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
         savedSelectionDataSource: CustomerSheetSavedSelectionDataSource = FakeCustomerSheetSavedSelectionDataSource(),
         customerSheetLoader: CustomerSheetLoader = FakeCustomerSheetLoader(
             customerPaymentMethods = customerPaymentMethods,
@@ -111,6 +107,7 @@ internal object CustomerSheetTestHelper {
             isGooglePayAvailable = isGooglePayAvailable,
             cbcEligibility = cbcEligibility,
             permissions = customerPermissions,
+            attachmentStyle = attachmentStyle,
         ),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         confirmationHandler: ConfirmationHandler? = null,
@@ -120,11 +117,8 @@ internal object CustomerSheetTestHelper {
             application = application,
             workContext = workContext,
             originalPaymentSelection = savedPaymentSelection,
-            paymentConfigurationProvider = { paymentConfiguration },
             paymentMethodDataSourceProvider = CompletableSingle(paymentMethodDataSource),
-            intentDataSourceProvider = CompletableSingle(intentDataSource),
             savedSelectionDataSourceProvider = CompletableSingle(savedSelectionDataSource),
-            stripeRepository = stripeRepository,
             configuration = configuration,
             integrationType = integrationType,
             isLiveModeProvider = { isLiveMode },

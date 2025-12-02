@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -674,6 +675,20 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(appearance?.get("usage")).isEqualTo(true)
     }
 
+    @Test
+    fun `create returns true for link_native_available when native link is available`() = runScenario {
+        val fakeLinkGate = FakeLinkGate().apply {
+            setUseNativeLink(true)
+        }
+        val linkGateFactory = FakeLinkGate.Factory(fakeLinkGate)
+
+        val resultMap = createAnalyticsMetadata(
+            linkGateFactory = linkGateFactory
+        )
+
+        assertThat(resultMap["link_native_available"]).isEqualTo(true)
+    }
+
     private fun runScenario(
         mode: EventReporter.Mode = EventReporter.Mode.Complete,
         block: Scenario.() -> Unit
@@ -696,11 +711,14 @@ class DefaultAnalyticsMetadataFactoryTest {
         val mode: EventReporter.Mode,
     )
 
-    private fun Scenario.createFactory(): DefaultAnalyticsMetadataFactory {
+    private fun Scenario.createFactory(
+        linkGateFactory: FakeLinkGate.Factory = FakeLinkGate.Factory()
+    ): DefaultAnalyticsMetadataFactory {
         return DefaultAnalyticsMetadataFactory(
             cvcRecollectionHandler = cvcRecollectionHandler,
             mode = mode,
             analyticEventCallbackProvider = analyticEventCallbackProvider,
+            linkGateFactory = linkGateFactory,
         )
     }
 
@@ -718,8 +736,9 @@ class DefaultAnalyticsMetadataFactoryTest {
         ),
         customerMetadata: CustomerMetadata? = null,
         linkStateResult: LinkStateResult? = null,
+        linkGateFactory: FakeLinkGate.Factory = FakeLinkGate.Factory(),
     ): Map<String, Any?> {
-        val factory = createFactory()
+        val factory = createFactory(linkGateFactory = linkGateFactory)
         return factory.create(
             initializationMode = initializationMode,
             integrationMetadata = integrationMetadata,
