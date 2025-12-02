@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Identity
+* [FIXED] Improved exception handling for TFLite selfie models to prevent rare crashes in the Identity verification flow.
+
 ## 22.3.0 - 2025-12-01
 
 ### Payment Method Messaging
