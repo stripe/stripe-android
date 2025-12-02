@@ -2,12 +2,13 @@ package com.stripe.android.ui.core.elements.autocomplete
 
 import android.content.Context
 import android.graphics.Typeface
+import android.os.Build
 import android.text.style.StyleSpan
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
-import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.api.model.PlaceTypes
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
@@ -50,7 +51,7 @@ interface PlacesClientProxy {
             initializer: () -> Unit = { Places.initialize(context, googlePlacesApiKey) },
             errorReporter: ErrorReporter
         ): PlacesClientProxy {
-            return if (isPlacesAvailable()) {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isPlacesAvailable()) {
                 override ?: run {
                     initializer()
                     DefaultPlacesClientProxy(
@@ -102,8 +103,8 @@ internal class DefaultPlacesClientProxy(
                     .builder()
                     .setSessionToken(token)
                     .setQuery(query)
-                    .setCountry(country)
-                    .setTypeFilter(TypeFilter.ADDRESS)
+                    .setCountries(listOf(country))
+                    .setTypesFilter(listOf(PlaceTypes.ADDRESS))
                     .build()
             ).await()
             errorReporter.report(ErrorReporter.SuccessEvent.PLACES_FIND_AUTOCOMPLETE_SUCCESS)
