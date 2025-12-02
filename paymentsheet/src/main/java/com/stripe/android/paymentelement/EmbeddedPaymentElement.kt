@@ -32,6 +32,7 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementViewModel
 import com.stripe.android.paymentelement.embedded.content.EmbeddedStateHelper
 import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDataHolder
+import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -258,6 +259,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val paymentMethodOrder: List<String>,
         internal val externalPaymentMethods: List<String>,
         internal val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+        internal val cardFundingAcceptance: PaymentSheet.CardFundingAcceptance,
         internal val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         internal val embeddedViewDisplaysMandateText: Boolean,
         internal val link: PaymentSheet.LinkConfiguration,
@@ -291,6 +293,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
+            private var cardFundingAcceptance: PaymentSheet.CardFundingAcceptance =
+                ConfigurationDefaults.cardFundingAcceptance
             private var embeddedViewDisplaysMandateText: Boolean = ConfigurationDefaults.embeddedViewDisplaysMandateText
             private var customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -457,6 +461,24 @@ class EmbeddedPaymentElement @Inject internal constructor(
             }
 
             /**
+             * By default, the embedded payment element will accept cards of all funding types
+             * (credit, debit, prepaid, unknown).
+             * You can specify which card funding types to allow.
+             *
+             * **Note**: This is only a client-side solution.
+             * **Note**: Card funding filtering is not currently supported in Link.
+             *
+             * @param allowedCardFundingTypes The card funding acceptance configuration.
+             * Defaults to [PaymentSheet.CardFundingAcceptance.all].
+             */
+            @CardFundingFilteringPrivatePreview
+            fun allowedCardFundingTypes(
+                allowedCardFundingTypes: PaymentSheet.CardFundingAcceptance
+            ): Builder = apply {
+                this.cardFundingAcceptance = allowedCardFundingTypes
+            }
+
+            /**
              * Configuration related to custom payment methods.
              *
              * If set, Embedded Payment Element will display the defined list of custom payment methods in the UI.
@@ -536,6 +558,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 paymentMethodOrder = paymentMethodOrder,
                 externalPaymentMethods = externalPaymentMethods,
                 cardBrandAcceptance = cardBrandAcceptance,
+                cardFundingAcceptance = cardFundingAcceptance,
                 customPaymentMethods = customPaymentMethods,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
                 link = link,

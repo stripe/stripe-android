@@ -808,6 +808,8 @@ class PaymentSheet internal constructor(
 
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
 
+        internal val cardFundingAcceptance: CardFundingAcceptance = ConfigurationDefaults.cardFundingAcceptance,
+
         internal val customPaymentMethods: List<CustomPaymentMethod> =
             ConfigurationDefaults.customPaymentMethods,
 
@@ -966,6 +968,7 @@ class PaymentSheet internal constructor(
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
+            private var cardFundingAcceptance: CardFundingAcceptance = ConfigurationDefaults.cardFundingAcceptance
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
             private var walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons
             private var shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration
@@ -1078,6 +1081,24 @@ class PaymentSheet internal constructor(
             }
 
             /**
+             * By default, PaymentSheet will accept cards of all funding types (credit, debit,
+             * prepaid, unknown).
+             * You can specify which card funding types to allow.
+             *
+             * **Note**: This is only a client-side solution.
+             * **Note**: Card funding filtering is not currently supported in Link.
+             *
+             * @param allowedCardFundingTypes The card funding acceptance configuration.
+             * Defaults to [CardFundingAcceptance.all].
+             */
+            @CardFundingFilteringPrivatePreview
+            fun allowedCardFundingTypes(
+                allowedCardFundingTypes: CardFundingAcceptance
+            ): Builder = apply {
+                this.cardFundingAcceptance = allowedCardFundingTypes
+            }
+
+            /**
              * Configuration related to custom payment methods.
              *
              * If set, Payment Sheet will display the defined list of custom payment methods in the UI.
@@ -1159,6 +1180,7 @@ class PaymentSheet internal constructor(
                 externalPaymentMethods = externalPaymentMethods,
                 paymentMethodLayout = paymentMethodLayout,
                 cardBrandAcceptance = cardBrandAcceptance,
+                cardFundingAcceptance = cardFundingAcceptance,
                 customPaymentMethods = customPaymentMethods,
                 link = link,
                 walletButtons = walletButtons,
@@ -1181,7 +1203,8 @@ class PaymentSheet internal constructor(
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
             ExperimentalCustomPaymentMethodsApi::class,
             WalletButtonsPreview::class,
-            ShopPayPreview::class
+            ShopPayPreview::class,
+            CardFundingFilteringPrivatePreview::class
         )
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
@@ -1198,6 +1221,7 @@ class PaymentSheet internal constructor(
             .externalPaymentMethods(externalPaymentMethods)
             .paymentMethodLayout(paymentMethodLayout)
             .cardBrandAcceptance(cardBrandAcceptance)
+            .allowedCardFundingTypes(cardFundingAcceptance)
             .customPaymentMethods(customPaymentMethods)
             .link(link)
             .walletButtons(walletButtons)
@@ -3427,6 +3451,65 @@ class PaymentSheet internal constructor(
         internal data class Disallowed(
             val brands: List<BrandCategory>
         ) : CardBrandAcceptance()
+    }
+
+    /**
+     * Card funding categories that can be filtered.
+     */
+    sealed class CardFundingAcceptance : Parcelable {
+        /**
+         * Card funding categories that can be filtered.
+         */
+        @Parcelize
+        enum class CardFundingType : Parcelable {
+            /**
+             * Debit cards
+             */
+            Debit,
+
+            /**
+             * Credit cards
+             */
+            Credit,
+
+            /**
+             * Prepaid cards
+             */
+            Prepaid,
+
+            /**
+             * Unknown funding type
+             */
+            Unknown
+        }
+
+        companion object {
+            /**
+             * Accept all card funding types.
+             *
+             * This is the default behavior.
+             */
+            @JvmStatic
+            fun all(): CardFundingAcceptance = All
+
+            /**
+             * Accept only the card funding types specified.
+             *
+             * @param fundingTypes The list of [CardFundingType] to accept.
+             * **Note**: Any card funding types not in the list will be blocked.
+             */
+            @JvmStatic
+            fun allowed(fundingTypes: List<CardFundingType>): CardFundingAcceptance =
+                Allowed(fundingTypes)
+        }
+
+        @Parcelize
+        internal data object All : CardFundingAcceptance()
+
+        @Parcelize
+        internal data class Allowed(
+            val fundingTypes: List<CardFundingType>
+        ) : CardFundingAcceptance()
     }
 
     /**
