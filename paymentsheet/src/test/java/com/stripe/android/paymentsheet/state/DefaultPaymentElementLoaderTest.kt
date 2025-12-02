@@ -67,6 +67,7 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -473,7 +474,7 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `Should attempt Tap to Add connection on load`() =
+    fun `isTapToAddSupported should be false when tap to add is not supported`() =
         runScenario {
             FakeTapToAddConnectionManager.test(
                 isSupported = false,
@@ -498,7 +499,40 @@ internal class DefaultPaymentElementLoaderTest {
 
                 assertThat(connectCalls.awaitItem()).isNotNull()
 
-                assertThat(result.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+                assertThat(result.paymentMethodMetadata.isTapToAddSupported).isFalse()
+
+                assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+                assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+            }
+        }
+
+    @Test
+    fun `isTapToAddSupported should be true when tap to add is supported`() =
+        runScenario {
+            FakeTapToAddConnectionManager.test(
+                isSupported = true,
+                isConnected = true,
+            ) {
+                val loader = createPaymentElementLoader(
+                    stripeIntent = PaymentIntentFactory.create(),
+                    isGooglePayReady = true,
+                    customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+                    tapToAddConnectionManager = tapToAddConnectionManager,
+                )
+
+                val result = loader.load(
+                    initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
+                        clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
+                    ),
+                    paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                    metadata = PaymentElementLoader.Metadata(
+                        initializedViaCompose = false,
+                    ),
+                ).getOrThrow()
+
+                assertThat(connectCalls.awaitItem()).isNotNull()
+
+                assertThat(result.paymentMethodMetadata.isTapToAddSupported).isTrue()
 
                 assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
                 assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()

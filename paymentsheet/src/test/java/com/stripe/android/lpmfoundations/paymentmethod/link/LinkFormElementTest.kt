@@ -64,7 +64,11 @@ class LinkFormElementTest {
 
         composeTestRule.setContent {
             DefaultLinkTheme {
-                element.ComposeUI(enabled = true)
+                element.ComposeUI(
+                    enabled = true,
+                    hiddenIdentifiers = emptySet(),
+                    lastTextFieldIdentifier = null,
+                )
             }
         }
 
@@ -90,7 +94,11 @@ class LinkFormElementTest {
 
         composeTestRule.setContent {
             DefaultLinkTheme {
-                element.ComposeUI(enabled = true)
+                element.ComposeUI(
+                    enabled = true,
+                    hiddenIdentifiers = emptySet(),
+                    lastTextFieldIdentifier = null,
+                )
             }
         }
 
