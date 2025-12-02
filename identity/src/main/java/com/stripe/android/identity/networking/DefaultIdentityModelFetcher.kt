@@ -25,9 +25,9 @@ internal class DefaultIdentityModelFetcher @Inject constructor(
         }
     }
 
+    @Suppress("SwallowedException", "TooGenericExceptionCaught")
     private fun validateModel(modelFile: File): Boolean {
         // Try to load the model file
-        @Suppress("SwallowedException")
         return try {
             InterpreterWrapperImpl(
                 modelFile,

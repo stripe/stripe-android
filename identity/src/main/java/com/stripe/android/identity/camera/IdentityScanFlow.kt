@@ -77,6 +77,7 @@ internal class IdentityScanFlow(
      */
     private var loopJob: Job? = null
 
+    @Suppress("TooGenericExceptionCaught")
     override fun startFlow(
         context: Context,
         imageStream: Flow<CameraPreviewImage<Bitmap>>,
