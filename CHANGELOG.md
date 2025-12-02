@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 22.3.0 - 2025-12-01
+
 ### Payment Method Messaging
 * [Added] Payment Method Messaging Element is now available in public preview.
 
