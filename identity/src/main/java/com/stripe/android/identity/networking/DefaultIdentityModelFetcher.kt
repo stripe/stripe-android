@@ -34,7 +34,7 @@ internal class DefaultIdentityModelFetcher @Inject constructor(
                 InterpreterOptionsWrapper.Builder().build()
             )
             true
-        } catch (e: IllegalStateException) {
+        } catch (e: Exception) {
             false
         }
     }
