@@ -3295,11 +3295,9 @@ internal class StripeApiRepositoryTest {
     fun `elements session accepts PMO SFU params`() = runTest {
         val pmMap = mutableMapOf<String, Map<String, String>>()
         PaymentMethod.Type.entries.forEach {
-            if (it.supportsSetupFutureUsage) {
-                pmMap[it.code] = mapOf(
-                    "setup_future_usage" to "off_session"
-                )
-            }
+            pmMap[it.code] = mapOf(
+                "setup_future_usage" to "off_session"
+            )
         }
 
         val session = stripeApiRepository.retrieveElementsSession(
