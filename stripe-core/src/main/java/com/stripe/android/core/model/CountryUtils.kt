@@ -29,6 +29,13 @@ object CountryUtils {
         "VG", "VN", "VU", "WF", "WS", "XK", "YE", "YT", "ZA", "ZM", "ZW"
     )
 
+    // This comes from: pay-server/-/blob/lib/klarna/core/constants.rb SUPPORTED_KLARNA_CONSUMER_FX_COUNTRIES
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val klarnaSupportedBuyerCountries = setOf(
+        "AT", "BE", "DE", "DK", "ES", "FI", "GB", "IE", "IT", "NL", "NO", "SE", "US", "FR",
+        "CZ", "RO", "GR", "AU", "NZ", "CA", "PL", "PT", "CH", "PR"
+    )
+
     private val CARD_POSTAL_CODE_COUNTRIES = setOf(
         "US",
         "GB",

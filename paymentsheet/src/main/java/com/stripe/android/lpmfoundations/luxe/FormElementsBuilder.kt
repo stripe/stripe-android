@@ -15,6 +15,8 @@ internal class FormElementsBuilder(
     private val requiredContactInformationCollectionModes: MutableSet<ContactInformationCollectionMode> = mutableSetOf()
 
     private var requireBillingAddressCollection: Boolean = false
+
+    private var hideCountryElement: Boolean = false
     private var availableCountries: Set<String> =
         arguments.billingDetailsCollectionConfiguration.allowedBillingCountries
 
@@ -52,6 +54,16 @@ internal class FormElementsBuilder(
         uiFormElements += formElement
     }
 
+    fun hideCountryElement() = apply {
+        hideCountryElement = true
+    }
+
+    fun availableCountries(
+        availableCountries: Set<String>
+    ) = apply {
+        this.availableCountries = availableCountries
+    }
+
     fun ignoreBillingAddressRequirements() = apply {
         requireBillingAddressCollection = false
     }
@@ -83,7 +95,10 @@ internal class FormElementsBuilder(
             addAll(uiFormElements)
 
             if (requireBillingAddressCollection) {
-                val elements = AddressSpec(allowedCountryCodes = availableCountries).transform(
+                val elements = AddressSpec(
+                    allowedCountryCodes = availableCountries,
+                    hideCountry = hideCountryElement,
+                ).transform(
                     initialValues = arguments.initialValues,
                     shippingValues = arguments.shippingValues,
                     autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
