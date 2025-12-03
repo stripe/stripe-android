@@ -808,7 +808,7 @@ class PaymentSheet internal constructor(
 
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
 
-        internal val cardFundingAcceptance: CardFundingAcceptance = ConfigurationDefaults.cardFundingAcceptance,
+        internal val allowedCardFundingTypes: List<CardFundingType> = ConfigurationDefaults.allowedCardFundingTypes,
 
         internal val customPaymentMethods: List<CustomPaymentMethod> =
             ConfigurationDefaults.customPaymentMethods,
@@ -968,7 +968,7 @@ class PaymentSheet internal constructor(
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
-            private var cardFundingAcceptance: CardFundingAcceptance = ConfigurationDefaults.cardFundingAcceptance
+            private var allowedCardFundingTypes: List<CardFundingType> = ConfigurationDefaults.allowedCardFundingTypes
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
             private var walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons
             private var shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration
@@ -1088,14 +1088,13 @@ class PaymentSheet internal constructor(
              * **Note**: This is only a client-side solution.
              * **Note**: Card funding filtering is not currently supported in Link.
              *
-             * @param allowedCardFundingTypes The card funding acceptance configuration.
-             * Defaults to [CardFundingAcceptance.all].
+             * @param cardFundingTypes The list of allowed card funding types.
              */
             @CardFundingFilteringPrivatePreview
             fun allowedCardFundingTypes(
-                allowedCardFundingTypes: CardFundingAcceptance
+                cardFundingTypes: List<CardFundingType>
             ): Builder = apply {
-                this.cardFundingAcceptance = allowedCardFundingTypes
+                this.allowedCardFundingTypes = cardFundingTypes
             }
 
             /**
@@ -1180,7 +1179,7 @@ class PaymentSheet internal constructor(
                 externalPaymentMethods = externalPaymentMethods,
                 paymentMethodLayout = paymentMethodLayout,
                 cardBrandAcceptance = cardBrandAcceptance,
-                cardFundingAcceptance = cardFundingAcceptance,
+                allowedCardFundingTypes = allowedCardFundingTypes,
                 customPaymentMethods = customPaymentMethods,
                 link = link,
                 walletButtons = walletButtons,
@@ -1221,7 +1220,7 @@ class PaymentSheet internal constructor(
             .externalPaymentMethods(externalPaymentMethods)
             .paymentMethodLayout(paymentMethodLayout)
             .cardBrandAcceptance(cardBrandAcceptance)
-            .allowedCardFundingTypes(cardFundingAcceptance)
+            .allowedCardFundingTypes(CardFundingType.entries)
             .customPaymentMethods(customPaymentMethods)
             .link(link)
             .walletButtons(walletButtons)
@@ -3456,60 +3455,27 @@ class PaymentSheet internal constructor(
     /**
      * Card funding categories that can be filtered.
      */
-    sealed class CardFundingAcceptance : Parcelable {
+    @Parcelize
+    enum class CardFundingType : Parcelable {
         /**
-         * Card funding categories that can be filtered.
+         * Debit cards
          */
-        @Parcelize
-        enum class CardFundingType : Parcelable {
-            /**
-             * Debit cards
-             */
-            Debit,
+        Debit,
 
-            /**
-             * Credit cards
-             */
-            Credit,
+        /**
+         * Credit cards
+         */
+        Credit,
 
-            /**
-             * Prepaid cards
-             */
-            Prepaid,
+        /**
+         * Prepaid cards
+         */
+        Prepaid,
 
-            /**
-             * Unknown funding type
-             */
-            Unknown
-        }
-
-        companion object {
-            /**
-             * Accept all card funding types.
-             *
-             * This is the default behavior.
-             */
-            @JvmStatic
-            fun all(): CardFundingAcceptance = All
-
-            /**
-             * Accept only the card funding types specified.
-             *
-             * @param fundingTypes The list of [CardFundingType] to accept.
-             * **Note**: Any card funding types not in the list will be blocked.
-             */
-            @JvmStatic
-            fun allowed(fundingTypes: List<CardFundingType>): CardFundingAcceptance =
-                Allowed(fundingTypes)
-        }
-
-        @Parcelize
-        internal data object All : CardFundingAcceptance()
-
-        @Parcelize
-        internal data class Allowed(
-            val fundingTypes: List<CardFundingType>
-        ) : CardFundingAcceptance()
+        /**
+         * Unknown funding type
+         */
+        Unknown
     }
 
     /**

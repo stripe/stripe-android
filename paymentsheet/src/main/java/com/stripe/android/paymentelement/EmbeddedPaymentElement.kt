@@ -259,7 +259,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val paymentMethodOrder: List<String>,
         internal val externalPaymentMethods: List<String>,
         internal val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
-        internal val cardFundingAcceptance: PaymentSheet.CardFundingAcceptance,
+        internal val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
         internal val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         internal val embeddedViewDisplaysMandateText: Boolean,
         internal val link: PaymentSheet.LinkConfiguration,
@@ -293,8 +293,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
-            private var cardFundingAcceptance: PaymentSheet.CardFundingAcceptance =
-                ConfigurationDefaults.cardFundingAcceptance
+            private var allowedCardFundingTypes: List<PaymentSheet.CardFundingType> =
+                ConfigurationDefaults.allowedCardFundingTypes
             private var embeddedViewDisplaysMandateText: Boolean = ConfigurationDefaults.embeddedViewDisplaysMandateText
             private var customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -468,14 +468,13 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * **Note**: This is only a client-side solution.
              * **Note**: Card funding filtering is not currently supported in Link.
              *
-             * @param allowedCardFundingTypes The card funding acceptance configuration.
-             * Defaults to [PaymentSheet.CardFundingAcceptance.all].
+             * @param cardFundingTypes The list of allowed card funding types.
              */
             @CardFundingFilteringPrivatePreview
             fun allowedCardFundingTypes(
-                allowedCardFundingTypes: PaymentSheet.CardFundingAcceptance
+                cardFundingTypes: List<PaymentSheet.CardFundingType>
             ): Builder = apply {
-                this.cardFundingAcceptance = allowedCardFundingTypes
+                this.allowedCardFundingTypes = cardFundingTypes
             }
 
             /**
@@ -558,7 +557,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 paymentMethodOrder = paymentMethodOrder,
                 externalPaymentMethods = externalPaymentMethods,
                 cardBrandAcceptance = cardBrandAcceptance,
-                cardFundingAcceptance = cardFundingAcceptance,
+                allowedCardFundingTypes = allowedCardFundingTypes,
                 customPaymentMethods = customPaymentMethods,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
                 link = link,
