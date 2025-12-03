@@ -258,7 +258,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest  -x :crypto-onramp-example:pixel2api33DebugAndroidTest
+            - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest
   run-paymentsheet-instrumentation-tests:
     before_run:
       - prepare_all
@@ -335,27 +335,22 @@ workflows:
   run-crypto-onramp-example-e2e-tests:
     before_run:
       - prepare_all
+      - start_emulator
     after_run:
       - conclude_all
     steps:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew :crypto-onramp-example:assembleDebug :crypto-onramp-example:assembleDebugAndroidTest -PIS_BROWSERSTACK_BUILD=true
-      - script@1:
-          title: Install Python deps
-          timeout: 120
+            - content: ./gradlew :crypto-onramp-example:assembleDebug :crypto-onramp-example:assembleDebugAndroidTest
+      - wait-for-android-emulator@1:
           inputs:
-            - content: pip3 install requests_toolbelt requests
+            - boot_timeout: 600
       - script@1:
-          title: Upload & run on BrowserStack
-          timeout: 2400
+          title: Run Crypto Onramp Example E2E Tests
+          timeout: 1200
           inputs:
-            - content: |
-                python3 scripts/browserstack.py --test \
-                  --apk crypto-onramp-example/build/outputs/apk/debug/crypto-onramp-example-debug.apk \
-                  --espresso crypto-onramp-example/build/outputs/apk/androidTest/debug/crypto-onramp-example-debug-androidTest.apk \
-                  --num-retries 2
+            - content: ./gradlew :crypto-onramp-example:connectedDebugAndroidTest
   check-dependencies:
     envs:
       - INCLUDE_DEPENDENCIES_ON_FAILURE: true

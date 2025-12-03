@@ -14,6 +14,8 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -25,6 +27,12 @@ import kotlin.time.Duration.Companion.seconds
 class OnrampFlowTest {
     @get:Rule
     internal val composeRule = createAndroidComposeRule<OnrampActivity>()
+
+    @get:Rule
+    internal val attestationFeatureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.nativeLinkAttestationEnabled,
+        isEnabled = false
+    )
 
     private val defaultTimeout: Duration = 15.seconds
 
