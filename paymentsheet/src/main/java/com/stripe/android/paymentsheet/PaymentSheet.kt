@@ -3479,15 +3479,6 @@ class PaymentSheet internal constructor(
     }
 
     /**
-     * Card funding categories that can be filtered.
-     */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @Parcelize
-    data class CardFundingAcceptance(
-        val cardFundingTypes: List<CardFundingType> = CardFundingType.entries
-    ) : Parcelable
-
-    /**
      * Defines a custom payment method type that can be displayed in Payment Element.
      */
     @Poko
