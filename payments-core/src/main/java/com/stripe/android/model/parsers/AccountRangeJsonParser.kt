@@ -27,9 +27,9 @@ internal class AccountRangeJsonParser : ModelJsonParser<AccountRange> {
                 panLength = panLength,
                 brandInfo = brandInfo,
                 country = StripeJsonUtils.optString(json, FIELD_COUNTRY),
-                funding = StripeJsonUtils.optString(json, FIELD_FUNDING)?.let { fundingString ->
+                funding = StripeJsonUtils.optString(json, FIELD_FUNDING).let { fundingString ->
                     CardFunding.fromCode(fundingString)
-                }
+                } ?: CardFunding.Unknown
             )
         } else {
             null
@@ -43,7 +43,7 @@ internal class AccountRangeJsonParser : ModelJsonParser<AccountRange> {
             .put(FIELD_PAN_LENGTH, accountRange.panLength)
             .put(FIELD_BRAND, accountRange.brandInfo.brandName)
             .put(FIELD_COUNTRY, accountRange.country)
-            .put(FIELD_FUNDING, accountRange.funding?.code)
+            .put(FIELD_FUNDING, accountRange.funding.code)
     }
 
     private companion object {

@@ -40,6 +40,7 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -940,6 +941,7 @@ internal class CardNumberEditTextTest {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.CartesBancaires,
+                funding = CardFunding.Unknown,
             ),
             AccountRange(
                 binRange = BinRange(
@@ -948,6 +950,7 @@ internal class CardNumberEditTextTest {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Visa,
+                funding = CardFunding.Unknown,
             ),
         )
 
@@ -971,6 +974,7 @@ internal class CardNumberEditTextTest {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Visa,
+                funding = CardFunding.Unknown,
             ),
         )
 
@@ -994,6 +998,7 @@ internal class CardNumberEditTextTest {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.CartesBancaires,
+                funding = CardFunding.Unknown,
             ),
             AccountRange(
                 binRange = BinRange(
@@ -1002,6 +1007,7 @@ internal class CardNumberEditTextTest {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Visa,
+                funding = CardFunding.Unknown,
             ),
         )
 
@@ -1025,6 +1031,7 @@ internal class CardNumberEditTextTest {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Visa,
+                funding = CardFunding.Unknown,
             ),
         )
 

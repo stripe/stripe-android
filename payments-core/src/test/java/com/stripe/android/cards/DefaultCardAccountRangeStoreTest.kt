@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
+import com.stripe.android.model.CardFunding
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -50,7 +51,8 @@ internal class DefaultCardAccountRangeStoreTest {
                     high = "9999999999999999"
                 ),
                 panLength = 16,
-                brandInfo = AccountRange.BrandInfo.JCB
+                brandInfo = AccountRange.BrandInfo.JCB,
+                funding = CardFunding.Unknown
             )
         )
     }
