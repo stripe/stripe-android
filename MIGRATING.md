@@ -110,6 +110,44 @@ val type = paymentMethod.type
 val card = paymentMethod.card
 ```
 
+**Overriding a Subset of Colors**
+
+If you previously used `.copy()` to override a subset of colors while keeping other default values, use the new builder pattern with `.light()` or `.dark()` factory methods:
+
+```kotlin
+// before - using copy() to override specific colors
+return PaymentSheet.Appearance(
+    colorsLight = PaymentSheet.Colors.defaultLight.copy(
+        primary = yourBrandColor,
+        surface = yourBackgroundColor,
+        onSurface = yourTextColor,
+        error = yourErrorColor,
+    ),
+    ...
+)
+
+// after - using Builder.light() to start with defaults
+return PaymentSheet.Appearance.Builder()
+    .colorsLight(
+        PaymentSheet.Colors.Builder.light()
+            .primary(yourBrandColor)
+            .surface(yourBackgroundColor)
+            .onSurface(yourTextColor)
+            .error(yourErrorColor)
+            .build()
+    )
+    .build()
+```
+
+The same pattern applies to these classes:
+- `PaymentSheet.Colors`
+- `PaymentSheet.PrimaryButtonColors`
+- `PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Colors`
+- `PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors`
+- `PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure.Colors`
+
+> Note: While `defaultLight` and `defaultDark` in the classes above still exist, we recommend using the builder pattern with `.light()` or `.dark()` for better forward compatibility.
+
 **PaymentMethod.id Non-Nullable**
 `PaymentMethod.id` is now non-nullable:
 ```kotlin
