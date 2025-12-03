@@ -19,8 +19,7 @@ internal object PayPayDefinition : PaymentMethodDefinition {
 
     override fun requirementsToBeUsedAsNewPaymentMethod(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement> {
         return if (FeatureFlags.enablePayPay.isEnabled) {
-            // We haven't implemented support for PromptPay for Setup, because PromptPay is not currently eligible for
-            // setup.
+            // We haven't implemented support for PayPay for Setup, because PayPay is not currently eligible for setup.
             setOf(AddPaymentMethodRequirement.UnsupportedForSetup)
         } else {
             setOf(AddPaymentMethodRequirement.Unsupported)
