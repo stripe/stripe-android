@@ -30,6 +30,7 @@ internal object CommonConfigurationFactory {
         opensCardScannerAutomatically: Boolean = false,
         userOverrideCountry: String? = null,
         appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+        allowedCardFundingTypes: List<PaymentSheet.CardFundingType> = PaymentSheet.CardFundingType.entries
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = merchantDisplayName,
         customer = customer,
@@ -53,5 +54,6 @@ internal object CommonConfigurationFactory {
         opensCardScannerAutomatically = opensCardScannerAutomatically,
         userOverrideCountry = userOverrideCountry,
         appearance = appearance,
+        allowedCardFundingTypes = allowedCardFundingTypes,
     )
 }

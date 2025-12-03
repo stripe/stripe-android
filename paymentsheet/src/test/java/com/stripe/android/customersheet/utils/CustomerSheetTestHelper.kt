@@ -6,6 +6,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.Logger
@@ -111,6 +114,8 @@ internal object CustomerSheetTestHelper {
         ),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         confirmationHandler: ConfirmationHandler? = null,
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     ): CustomerSheetViewModel {
         val savedStateHandle = SavedStateHandle()
         return CustomerSheetViewModel(
@@ -166,6 +171,8 @@ internal object CustomerSheetTestHelper {
             errorReporter = errorReporter,
             savedStateHandle = savedStateHandle,
             userFacingLogger = FakeUserFacingLogger(),
+            cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = cardFundingFilter
         ).apply {
             registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
         }

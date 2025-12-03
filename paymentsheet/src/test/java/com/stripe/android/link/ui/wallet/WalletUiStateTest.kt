@@ -2,6 +2,8 @@ package com.stripe.android.link.ui.wallet
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -14,6 +16,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.testing.FakeCardFundingFilter
 import com.stripe.android.uicore.forms.FormFieldEntry
 import org.junit.Test
 
@@ -285,6 +288,7 @@ class WalletUiStateTest {
         paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails> =
             TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
         cardBrandFilter: CardBrandFilter = RejectCardBrands(),
+        cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
         selectedItem: ConsumerPaymentDetails.PaymentDetails? = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
         hasCompleted: Boolean = false,
         isProcessing: Boolean = false,
@@ -308,6 +312,7 @@ class WalletUiStateTest {
             allowLogOut = true,
             selectedItemId = selectedItem?.id,
             cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = cardFundingFilter,
             hasCompleted = hasCompleted,
             isProcessing = isProcessing,
             primaryButtonLabel = primaryButtonLabel,
@@ -380,4 +385,52 @@ class WalletUiStateTest {
         countryCode = countryCode,
         postalCode = null,
     )
+
+    @Test
+    fun testCardFundingFilterAcceptsCard() {
+        val creditCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(funding = "CREDIT")
+        val state = walletUiState(
+            paymentDetailsList = listOf(creditCard),
+            selectedItem = creditCard,
+            cardFundingFilter = FakeCardFundingFilter { true }
+        )
+
+        assertThat(state.isItemAvailable(creditCard)).isTrue()
+    }
+
+    @Test
+    fun testCardFundingFilterRejectsCard() {
+        val creditCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(funding = "CREDIT")
+        val state = walletUiState(
+            paymentDetailsList = listOf(creditCard),
+            selectedItem = creditCard,
+            cardFundingFilter = FakeCardFundingFilter { false }
+        )
+
+        assertThat(state.isItemAvailable(creditCard)).isFalse()
+    }
+
+    @Test
+    fun testCardFundingFilterDoesNotAffectBankAccounts() {
+        val bankAccount = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
+        val state = walletUiState(
+            paymentDetailsList = listOf(bankAccount),
+            selectedItem = bankAccount,
+            cardFundingFilter = FakeCardFundingFilter { false }
+        )
+
+        assertThat(state.isItemAvailable(bankAccount)).isTrue()
+    }
+
+    @Test
+    fun testCardFundingFilterDoesNotAffectPassthrough() {
+        val passthrough = TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
+        val state = walletUiState(
+            paymentDetailsList = listOf(passthrough),
+            selectedItem = passthrough,
+            cardFundingFilter = FakeCardFundingFilter { false }
+        )
+
+        assertThat(state.isItemAvailable(passthrough)).isTrue()
+    }
 }

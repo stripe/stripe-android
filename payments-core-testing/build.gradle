@@ -1,5 +1,7 @@
 apply from: configs.androidLibrary
 
+apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
+
 android {
     defaultConfig {
         buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"

@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
@@ -1180,6 +1181,7 @@ internal class PaymentMethodMetadataTest {
             onBehalfOf = null,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            cardFundingFilter = DefaultCardFundingFilter,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1269,6 +1271,7 @@ internal class PaymentMethodMetadataTest {
                 attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
             ),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            cardFundingFilter = DefaultCardFundingFilter,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -2199,6 +2202,7 @@ internal class PaymentMethodMetadataTest {
             forceSetupFutureUseBehaviorAndNewMandate = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            cardFundingFilter = DefaultCardFundingFilter,
         )
     }
 

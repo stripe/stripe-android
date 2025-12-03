@@ -9,6 +9,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
@@ -40,6 +42,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
@@ -106,6 +109,8 @@ internal class CustomerSheetViewModel(
     private val errorReporter: ErrorReporter,
     private val savedStateHandle: SavedStateHandle,
     internal val userFacingLogger: UserFacingLogger,
+    private val cardBrandFilter: CardBrandFilter,
+    private val cardFundingFilter: CardFundingFilter
 ) : ViewModel() {
 
     @Inject
@@ -124,6 +129,8 @@ internal class CustomerSheetViewModel(
         errorReporter: ErrorReporter,
         savedStateHandle: SavedStateHandle,
         userFacingLogger: UserFacingLogger,
+        cardBrandFilter: CardBrandFilter,
+        cardFundingFilter: CardFundingFilter,
     ) : this(
         application = application,
         originalPaymentSelection = originalPaymentSelection,
@@ -141,6 +148,8 @@ internal class CustomerSheetViewModel(
         errorReporter = errorReporter,
         savedStateHandle = savedStateHandle,
         userFacingLogger = userFacingLogger,
+        cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter
     )
 
     private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
@@ -1078,7 +1087,8 @@ internal class CustomerSheetViewModel(
                     } ?: state.currentSelection
                     val filteredPaymentMethods = paymentMethods.filter { paymentMethod ->
                         paymentMethod.card?.let { card ->
-                            PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(card.brand)
+                            cardBrandFilter.isAccepted(card.brand) &&
+                                cardFundingFilter.isAccepted(CardFunding.fromCode(card.funding))
                         } ?: true
                     }
                     state.copy(

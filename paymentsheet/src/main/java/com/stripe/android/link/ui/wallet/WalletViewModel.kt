@@ -82,6 +82,7 @@ internal class WalletViewModel(
             sellerBusinessName = configuration.sellerBusinessName,
             selectedItemId = null,
             cardBrandFilter = configuration.cardBrandFilter,
+            cardFundingFilter = configuration.cardFundingFilter,
             collectMissingBillingDetailsForExistingPaymentMethods = configuration
                 .collectMissingBillingDetailsForExistingPaymentMethods,
             isProcessing = false,

@@ -572,7 +572,7 @@ class DefaultWalletButtonsInteractorTest {
                         customAmount = 5050L,
                         customLabel = "This is a purchase!",
                         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-                        cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance)
+                        cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
                     ),
                 )
             )

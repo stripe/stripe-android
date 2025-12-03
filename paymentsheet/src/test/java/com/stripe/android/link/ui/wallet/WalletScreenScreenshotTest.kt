@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.wallet
 
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
@@ -272,6 +273,7 @@ internal class WalletScreenScreenshotTest {
             signupToggleEnabled = signupToggleEnabled,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             isValidating = isValidating,
+            cardFundingFilter = DefaultCardFundingFilter,
         )
     }
 

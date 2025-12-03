@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.wallet
 
 import androidx.compose.runtime.Immutable
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -18,6 +19,7 @@ internal data class WalletUiState(
     val email: String,
     val allowLogOut: Boolean,
     val cardBrandFilter: CardBrandFilter,
+    val cardFundingFilter: CardFundingFilter,
     val selectedItemId: String?,
     val isProcessing: Boolean,
     val isSettingUp: Boolean,
@@ -104,9 +106,22 @@ internal data class WalletUiState(
         get() = addPaymentMethodOptions.isNotEmpty()
 
     fun isItemAvailable(item: ConsumerPaymentDetails.PaymentDetails): Boolean {
-        return (
-            item !is ConsumerPaymentDetails.Card || cardBrandFilter.isAccepted(item.brand)
-            ) && item.isSupportedWithBillingConfig(billingDetailsCollectionConfiguration)
+        if (item.isSupportedWithBillingConfig(billingDetailsCollectionConfiguration).not()) {
+            return false
+        }
+
+        return item !is ConsumerPaymentDetails.Card ||
+            (cardBrandFilter.isAccepted(item.brand) && cardFundingAccepted(item))
+    }
+
+    private fun cardFundingAccepted(item: ConsumerPaymentDetails.PaymentDetails): Boolean {
+        return when (item) {
+            is ConsumerPaymentDetails.BankAccount -> true
+            is ConsumerPaymentDetails.Card -> {
+                cardFundingFilter.isAccepted(item.funding.cardFunding)
+            }
+            is ConsumerPaymentDetails.Passthrough -> true
+        }
     }
 
     fun updateWithResponse(
