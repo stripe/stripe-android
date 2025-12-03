@@ -28,6 +28,7 @@ data class CustomFlowViewState(
         val paymentSheetConfig: PaymentSheet.Configuration
             get() = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
                 .customer(customerConfiguration)
+                .appearance(PaymentSheet.Appearance.Builder().colorsDark(PaymentSheet.Colors.Builder.light().build()).build())
                 .googlePay(
                     PaymentSheet.GooglePayConfiguration(
                         environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
