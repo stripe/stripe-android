@@ -2,7 +2,6 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
 import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -46,7 +45,6 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple {
         val allowedCountryCodes: Set<String> = CountryUtils.klarnaSupportedBuyerCountries
 
         val formElementsBuilder = FormElementsBuilder(arguments)
-            .hideCountryElement()
             .availableCountries(allowedCountryCodes)
 
         if (KlarnaDefinition.requiresMandate(metadata)) {
@@ -57,10 +55,11 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple {
             )
         }
 
-        if (metadata.stripeIntent is SetupIntent ||
-            arguments.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full
+        if (metadata.stripeIntent is SetupIntent &&
+            arguments.billingDetailsCollectionConfiguration.address != AddressCollectionMode.Full
         ) {
-            formElementsBuilder.element(
+            formElementsBuilder
+                .element(
                 getKlarnaCountryElement(
                     allowedCountryCodes = allowedCountryCodes,
                     initialValue = metadata.stripeIntent.countryCode
