@@ -519,6 +519,7 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Conf
 public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder {
 	public static final field $stable I
 	public fun <init> (Ljava/lang/String;)V
+	public final fun allowedCardFundingTypes (Lcom/stripe/android/paymentsheet/PaymentSheet$CardFundingAcceptance;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun allowsDelayedPaymentMethods (Z)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun allowsPaymentMethodsRequiringShippingAddress (Z)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun allowsRemovalOfLastSavedPaymentMethod (Z)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
@@ -1136,6 +1137,31 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$CardBrandAccepta
 	public final fun disallowed (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;
 }
 
+public abstract class com/stripe/android/paymentsheet/PaymentSheet$CardFundingAcceptance : android/os/Parcelable {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$CardFundingAcceptance$Companion;
+	public static final fun all ()Lcom/stripe/android/paymentsheet/PaymentSheet$CardFundingAcceptance;
+	public static final fun allowed (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$CardFundingAcceptance;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$CardFundingAcceptance$CardFundingType : java/lang/Enum, android/os/Parcelable {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Credit Lcom/stripe/android/paymentsheet/PaymentSheet$CardFundingAcceptance$CardFundingType;
+	public static final field Debit Lcom/stripe/android/paymentsheet/PaymentSheet$CardFundingAcceptance$CardFundingType;
+	public static final field Prepaid Lcom/stripe/android/paymentsheet/PaymentSheet$CardFundingAcceptance$CardFundingType;
+	public static final field Unknown Lcom/stripe/android/paymentsheet/PaymentSheet$CardFundingAcceptance$CardFundingType;
+	public final fun describeContents ()I
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$CardFundingAcceptance$CardFundingType;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$CardFundingAcceptance$CardFundingType;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$CardFundingAcceptance$Companion {
+	public final fun all ()Lcom/stripe/android/paymentsheet/PaymentSheet$CardFundingAcceptance;
+	public final fun allowed (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$CardFundingAcceptance;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$Colors : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -1217,6 +1243,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration : 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder {
 	public static final field $stable I
 	public fun <init> (Ljava/lang/String;)V
+	public final fun allowedCardFundingTypes (Lcom/stripe/android/paymentsheet/PaymentSheet$CardFundingAcceptance;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun allowsDelayedPaymentMethods (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun allowsPaymentMethodsRequiringShippingAddress (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun allowsRemovalOfLastSavedPaymentMethod (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;

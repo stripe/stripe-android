@@ -25,6 +25,7 @@ internal object ConfigurationDefaults {
     val externalPaymentMethods: List<String> = emptyList()
     val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.Automatic
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
+    val cardFundingAcceptance: PaymentSheet.CardFundingAcceptance = PaymentSheet.CardFundingAcceptance.all()
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> = emptyList()
     val walletButtons: PaymentSheet.WalletButtonsConfiguration = PaymentSheet.WalletButtonsConfiguration()
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
