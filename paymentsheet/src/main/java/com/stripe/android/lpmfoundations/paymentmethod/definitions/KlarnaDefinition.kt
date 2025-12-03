@@ -37,6 +37,16 @@ internal object KlarnaDefinition : PaymentMethodDefinition {
 }
 
 private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple {
+    override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
+        return SupportedPaymentMethod(
+            paymentMethodDefinition = KlarnaDefinition,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_klarna,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_klarna,
+            iconResourceNight = null,
+            subtitle = R.string.stripe_klarna_pay_later.resolvableString
+        )
+    }
+
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments
@@ -68,16 +78,6 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple {
         }
 
         return formElementsBuilder.build()
-    }
-
-    override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
-        return SupportedPaymentMethod(
-            paymentMethodDefinition = KlarnaDefinition,
-            displayNameResource = R.string.stripe_paymentsheet_payment_method_klarna,
-            iconResource = R.drawable.stripe_ic_paymentsheet_pm_klarna,
-            iconResourceNight = null,
-            subtitle = R.string.stripe_klarna_pay_later.resolvableString
-        )
     }
 
     private fun getKlarnaMandateElement(merchantName: String): MandateTextElement {
