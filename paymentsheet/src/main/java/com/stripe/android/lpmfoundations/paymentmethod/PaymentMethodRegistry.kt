@@ -27,6 +27,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.OxxoDefinitio
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.P24Definition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayNowDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPalDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PromptPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.RevolutPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SatispayDefinition
@@ -69,6 +70,7 @@ internal object PaymentMethodRegistry {
         P24Definition,
         PayNowDefinition,
         PayPalDefinition,
+        PayPayDefinition,
         PromptPayDefinition,
         RevolutPayDefinition,
         SatispayDefinition,
