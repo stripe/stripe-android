@@ -808,7 +808,7 @@ class PaymentSheet internal constructor(
 
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
 
-        internal val cardFundingAcceptance: CardFundingAcceptance = ConfigurationDefaults.cardFundingAcceptance,
+        internal val allowedCardFundingTypes: List<CardFundingType> = ConfigurationDefaults.allowedCardFundingTypes,
 
         internal val customPaymentMethods: List<CustomPaymentMethod> =
             ConfigurationDefaults.customPaymentMethods,
@@ -968,7 +968,7 @@ class PaymentSheet internal constructor(
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
-            private var cardFundingAcceptance: CardFundingAcceptance = ConfigurationDefaults.cardFundingAcceptance
+            private var allowedCardFundingTypes: List<CardFundingType> = ConfigurationDefaults.allowedCardFundingTypes
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
             private var walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons
             private var shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration
@@ -1094,7 +1094,7 @@ class PaymentSheet internal constructor(
             fun allowedCardFundingTypes(
                 cardFundingTypes: List<CardFundingType>
             ): Builder = apply {
-                this.cardFundingAcceptance = CardFundingAcceptance(cardFundingTypes)
+                this.allowedCardFundingTypes = cardFundingTypes
             }
 
             /**
@@ -1179,7 +1179,7 @@ class PaymentSheet internal constructor(
                 externalPaymentMethods = externalPaymentMethods,
                 paymentMethodLayout = paymentMethodLayout,
                 cardBrandAcceptance = cardBrandAcceptance,
-                cardFundingAcceptance = cardFundingAcceptance,
+                allowedCardFundingTypes = allowedCardFundingTypes,
                 customPaymentMethods = customPaymentMethods,
                 link = link,
                 walletButtons = walletButtons,
