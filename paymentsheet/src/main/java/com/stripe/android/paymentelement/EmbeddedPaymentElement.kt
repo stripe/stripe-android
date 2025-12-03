@@ -468,14 +468,13 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * **Note**: This is only a client-side solution.
              * **Note**: Card funding filtering is not currently supported in Link.
              *
-             * @param allowedCardFundingTypes The card funding acceptance configuration.
-             * Defaults to [PaymentSheet.CardFundingAcceptance.all].
+             * @param cardFundingTypes The list of allowed card funding types.
              */
             @CardFundingFilteringPrivatePreview
             fun allowedCardFundingTypes(
-                allowedCardFundingTypes: PaymentSheet.CardFundingAcceptance
+                cardFundingTypes: List<PaymentSheet.CardFundingType>
             ): Builder = apply {
-                this.cardFundingAcceptance = allowedCardFundingTypes
+                this.cardFundingAcceptance = PaymentSheet.CardFundingAcceptance(cardFundingTypes)
             }
 
             /**

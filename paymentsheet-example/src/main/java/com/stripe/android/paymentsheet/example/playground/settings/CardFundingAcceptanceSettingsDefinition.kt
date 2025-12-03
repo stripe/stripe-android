@@ -41,7 +41,7 @@ internal object CardFundingAcceptanceSettingsDefinition :
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
-        configurationBuilder.allowedCardFundingTypes(value.cardFundingAcceptance)
+        configurationBuilder.allowedCardFundingTypes(value.cardFundingAcceptance.cardFundingTypes)
     }
 
     override fun configure(
@@ -50,7 +50,7 @@ internal object CardFundingAcceptanceSettingsDefinition :
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData
     ) {
-        configurationBuilder.allowedCardFundingTypes(value.cardFundingAcceptance)
+        configurationBuilder.allowedCardFundingTypes(value.cardFundingAcceptance.cardFundingTypes)
     }
 }
 
@@ -58,19 +58,22 @@ sealed class CardFundingAcceptanceType(
     val value: String,
     val cardFundingAcceptance: PaymentSheet.CardFundingAcceptance
 ) {
-    object All : CardFundingAcceptanceType("all", PaymentSheet.CardFundingAcceptance.all())
+    object All : CardFundingAcceptanceType(
+        value = "all",
+        cardFundingAcceptance = PaymentSheet.CardFundingAcceptance(PaymentSheet.CardFundingType.entries)
+    )
 
     object CreditOnly : CardFundingAcceptanceType(
         value = "creditOnly",
-        cardFundingAcceptance = PaymentSheet.CardFundingAcceptance.allowed(
-            fundingTypes = listOf(PaymentSheet.CardFundingAcceptance.CardFundingType.Credit)
+        cardFundingAcceptance = PaymentSheet.CardFundingAcceptance(
+            cardFundingTypes = listOf(PaymentSheet.CardFundingType.Credit)
         )
     )
 
     object DebitOnly : CardFundingAcceptanceType(
         value = "debitOnly",
-        cardFundingAcceptance = PaymentSheet.CardFundingAcceptance.allowed(
-            fundingTypes = listOf(PaymentSheet.CardFundingAcceptance.CardFundingType.Debit)
+        cardFundingAcceptance = PaymentSheet.CardFundingAcceptance(
+            cardFundingTypes = listOf(PaymentSheet.CardFundingType.Debit)
         )
     )
 }
