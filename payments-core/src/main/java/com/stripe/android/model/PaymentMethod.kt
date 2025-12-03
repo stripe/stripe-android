@@ -186,6 +186,7 @@ constructor(
         internal val requiresMandateForPaymentIntent: Boolean,
         private val hasDelayedSettlement: Boolean,
         internal val afterRedirectAction: AfterRedirectAction = AfterRedirectAction.None,
+        internal val supportsSetupFutureUsage: Boolean = true,
     ) : Parcelable {
         Link(
             "link",
@@ -535,6 +536,7 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false,
             requiresMandateForPaymentIntent = false,
+            supportsSetupFutureUsage = false,
         ),
         PromptPay(
             "promptpay",
