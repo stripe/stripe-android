@@ -10,7 +10,8 @@ data class AccountRange internal constructor(
     val binRange: BinRange,
     val panLength: Int,
     val brandInfo: BrandInfo,
-    val country: String? = null
+    val country: String? = null,
+    val funding: CardFunding? = null
 ) : StripeModel {
     val brand: CardBrand
         get() = brandInfo.brand

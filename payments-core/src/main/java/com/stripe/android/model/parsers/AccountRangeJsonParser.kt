@@ -4,6 +4,7 @@ import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
+import com.stripe.android.model.CardFunding
 import org.json.JSONObject
 
 internal class AccountRangeJsonParser : ModelJsonParser<AccountRange> {
@@ -25,7 +26,10 @@ internal class AccountRangeJsonParser : ModelJsonParser<AccountRange> {
                 binRange = BinRange(accountRangeLow, accountRangeHigh),
                 panLength = panLength,
                 brandInfo = brandInfo,
-                country = StripeJsonUtils.optString(json, FIELD_COUNTRY)
+                country = StripeJsonUtils.optString(json, FIELD_COUNTRY),
+                funding = StripeJsonUtils.optString(json, FIELD_FUNDING)?.let { fundingString ->
+                    CardFunding.fromCode(fundingString)
+                }
             )
         } else {
             null
@@ -39,6 +43,7 @@ internal class AccountRangeJsonParser : ModelJsonParser<AccountRange> {
             .put(FIELD_PAN_LENGTH, accountRange.panLength)
             .put(FIELD_BRAND, accountRange.brandInfo.brandName)
             .put(FIELD_COUNTRY, accountRange.country)
+            .put(FIELD_FUNDING, accountRange.funding?.code)
     }
 
     private companion object {
@@ -47,5 +52,6 @@ internal class AccountRangeJsonParser : ModelJsonParser<AccountRange> {
         const val FIELD_PAN_LENGTH = "pan_length"
         const val FIELD_BRAND = "brand"
         const val FIELD_COUNTRY = "country"
+        const val FIELD_FUNDING = "funding"
     }
 }
