@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -18,12 +17,7 @@ internal object PayPayDefinition : PaymentMethodDefinition {
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
     override fun requirementsToBeUsedAsNewPaymentMethod(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement> {
-        return if (FeatureFlags.enablePayPay.isEnabled) {
-            // We haven't implemented support for PayPay for Setup, because PayPay is not currently eligible for setup.
-            setOf(AddPaymentMethodRequirement.UnsupportedForSetup)
-        } else {
-            setOf(AddPaymentMethodRequirement.Unsupported)
-        }
+        return  setOf(AddPaymentMethodRequirement.UnsupportedForSetup)
     }
 
     override fun uiDefinitionFactory(): UiDefinitionFactory = PayPayUiDefinitionFactory
