@@ -51,6 +51,14 @@ class OnrampFlowTest {
     fun testCheckoutFlow() {
         waitForTag(LOGIN_EMAIL_TAG)
 
+        val snackbarText = getSnackbarText()
+        if (snackbarText != null) {
+            println("Snackbar text: $snackbarText")
+            throw AssertionError("Snackbar shown: $snackbarText")
+        } else {
+            throw AssertionError("Snackbar never shown")
+        }
+
         // Enter test login credentials previously registered with the demo backend.
         composeRule.onNodeWithTag(LOGIN_EMAIL_TAG)
             .performTextInput("onramptest@stripe.com")
@@ -137,5 +145,20 @@ class OnrampFlowTest {
         val node = composeRule.onNodeWithTag(tag)
         runCatching { node.performScrollTo() }
         node.performClick()
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    private fun getSnackbarText(timeoutMs: Long = defaultTimeout.inWholeMilliseconds): String? {
+        // Wait for the text node itself (optional)
+        val exists = waitForOptionalNode(hasTestTag(SNACKBAR_TEXT_TAG), timeoutMs)
+        if (!exists) return null
+
+        // Read text from the tagged Text node (merged tree)
+        return runCatching {
+            val node = composeRule.onNodeWithTag(SNACKBAR_TEXT_TAG)
+                .fetchSemanticsNode()
+            node.config.getOrNull(SemanticsProperties.Text)
+                ?.joinToString("") { it.text }
+        }.getOrNull()
     }
 }
