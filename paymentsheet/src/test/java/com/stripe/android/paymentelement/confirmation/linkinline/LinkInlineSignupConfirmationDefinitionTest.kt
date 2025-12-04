@@ -452,7 +452,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                             brand = CardBrand.Visa,
                             cvcCheck = CvcCheck.Pass,
                             networks = emptyList(),
-                            funding = "CREDIT",
+                            funding = ConsumerPaymentDetails.Card.Funding.Credit,
                             nickname = null,
                             billingAddress = null,
                         ),
@@ -627,7 +627,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                     cvcCheck = CvcCheck.Fail,
                     isDefault = false,
                     networks = emptyList(),
-                    funding = "CREDIT",
+                    funding = ConsumerPaymentDetails.Card.Funding.Credit,
                     nickname = null,
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
                         name = null,

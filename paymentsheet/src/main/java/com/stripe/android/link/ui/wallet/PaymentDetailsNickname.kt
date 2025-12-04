@@ -31,7 +31,7 @@ internal val LinkPaymentDetails.sublabel: ResolvableString?
 
 internal val ConsumerPaymentDetails.PaymentDetails.displayName: ResolvableString
     get() = when (this) {
-        is ConsumerPaymentDetails.Card -> makeCardDisplayName(nickname, funding, brand)
+        is ConsumerPaymentDetails.Card -> makeCardDisplayName(nickname, funding.code, brand)
         is ConsumerPaymentDetails.BankAccount -> makeBankAccountDisplayName(nickname, bankAccountName)
         is ConsumerPaymentDetails.Passthrough -> {
             "•••• $last4".resolvableString
@@ -42,7 +42,7 @@ internal val ConsumerPaymentDetails.PaymentDetails.paymentOptionLabel: Resolvabl
     get() {
         val components = when (this) {
             is ConsumerPaymentDetails.Card -> {
-                listOf(makeCardDisplayName(nickname, funding, brand), "•••• $last4".resolvableString)
+                listOf(makeCardDisplayName(nickname, funding.code, brand), "•••• $last4".resolvableString)
             }
             is ConsumerPaymentDetails.BankAccount -> {
                 listOf(makeBankAccountDisplayName(nickname, bankAccountName), "•••• $last4".resolvableString)

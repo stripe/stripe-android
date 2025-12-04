@@ -27,7 +27,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         last4 = "4444",
                         cvcCheck = CvcCheck.Pass,
                         networks = emptyList(),
-                        funding = "CREDIT",
+                        funding = ConsumerPaymentDetails.Card.Funding.Credit,
                         nickname = null,
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
                             name = null,
@@ -60,7 +60,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         last4 = "4444",
                         cvcCheck = CvcCheck.Unknown,
                         networks = emptyList(),
-                        funding = "CREDIT",
+                        funding = ConsumerPaymentDetails.Card.Funding.Credit,
                         nickname = null,
                         billingAddress = null
                     )
@@ -144,7 +144,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         brand = CardBrand.MasterCard,
                         cvcCheck = CvcCheck.Pass,
                         networks = emptyList(),
-                        funding = "CREDIT",
+                        funding = ConsumerPaymentDetails.Card.Funding.Credit,
                         nickname = null,
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
                             name = null,
@@ -165,7 +165,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         cvcCheck = CvcCheck.Fail,
                         isDefault = false,
                         networks = emptyList(),
-                        funding = "CREDIT",
+                        funding = ConsumerPaymentDetails.Card.Funding.Credit,
                         nickname = null,
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
                             name = null,
@@ -200,6 +200,101 @@ class ConsumerPaymentDetailsJsonParserTest {
             ConsumerPaymentDetailsJsonParser.parse(ConsumerFixtures.CONSUMER_PAYMENT_DETAILS_JSON),
         )
     }
+
+    @Test
+    fun `parse card with DEBIT funding`() {
+        val json = createCardJsonWithFunding("DEBIT")
+        val expected = createExpectedCardWithFunding(ConsumerPaymentDetails.Card.Funding.Debit)
+        assertEquals(expected, ConsumerPaymentDetailsJsonParser.parse(json))
+    }
+
+    @Test
+    fun `parse card with PREPAID funding`() {
+        val json = createCardJsonWithFunding("PREPAID")
+        val expected = createExpectedCardWithFunding(ConsumerPaymentDetails.Card.Funding.Prepaid)
+        assertEquals(expected, ConsumerPaymentDetailsJsonParser.parse(json))
+    }
+
+    @Test
+    fun `parse card with UNKNOWN funding`() {
+        val json = createCardJsonWithFunding("UNKNOWN")
+        val expected = createExpectedCardWithFunding(ConsumerPaymentDetails.Card.Funding.Unknown)
+        assertEquals(expected, ConsumerPaymentDetailsJsonParser.parse(json))
+    }
+
+    @Test
+    fun `parse card with unrecognized funding defaults to Unknown`() {
+        val json = createCardJsonWithFunding("INVALID")
+        val expected = createExpectedCardWithFunding(ConsumerPaymentDetails.Card.Funding.Unknown)
+        assertEquals(expected, ConsumerPaymentDetailsJsonParser.parse(json))
+    }
+
+    private fun createCardJsonWithFunding(funding: String) = JSONObject(
+        """
+        {
+          "redacted_payment_details": [
+            {
+              "id": "QAAAKJ6",
+              "bank_account_details": null,
+              "billing_address": {
+                "administrative_area": null,
+                "country_code": "US",
+                "dependent_locality": null,
+                "line_1": null,
+                "line_2": null,
+                "locality": null,
+                "name": null,
+                "postal_code": "12312",
+                "sorting_code": null
+              },
+              "billing_email_address": "",
+              "card_details": {
+                "brand": "VISA",
+                "checks": {
+                  "address_line1_check": "STATE_INVALID",
+                  "address_postal_code_check": "PASS",
+                  "cvc_check": "PASS"
+                },
+                "funding": "$funding",
+                "exp_month": 12,
+                "exp_year": 2023,
+                "last4": "4444"
+              },
+              "is_default": true,
+              "type": "CARD"
+            }
+          ]
+        }
+        """.trimIndent()
+    )
+
+    private fun createExpectedCardWithFunding(
+        funding: ConsumerPaymentDetails.Card.Funding
+    ) = ConsumerPaymentDetails(
+        listOf(
+            ConsumerPaymentDetails.Card(
+                id = "QAAAKJ6",
+                last4 = "4444",
+                expiryYear = 2023,
+                expiryMonth = 12,
+                brand = CardBrand.Visa,
+                cvcCheck = CvcCheck.Pass,
+                isDefault = true,
+                networks = emptyList(),
+                funding = funding,
+                nickname = null,
+                billingAddress = ConsumerPaymentDetails.BillingAddress(
+                    name = null,
+                    line1 = null,
+                    line2 = null,
+                    locality = null,
+                    administrativeArea = null,
+                    countryCode = CountryCode.US,
+                    postalCode = "12312"
+                )
+            )
+        )
+    )
 
     @Suppress("LongMethod")
     @Test
@@ -287,7 +382,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         cvcCheck = CvcCheck.Pass,
                         isDefault = true,
                         networks = emptyList(),
-                        funding = "CREDIT",
+                        funding = ConsumerPaymentDetails.Card.Funding.Credit,
                         nickname = null,
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
                             name = null,
@@ -308,7 +403,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         cvcCheck = CvcCheck.Fail,
                         isDefault = false,
                         networks = emptyList(),
-                        funding = "CREDIT",
+                        funding = ConsumerPaymentDetails.Card.Funding.Credit,
                         nickname = null,
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
                             name = null,

@@ -34,7 +34,7 @@ internal class FakeLinkConfigurationCoordinator(
                 cvcCheck = CvcCheck.Fail,
                 isDefault = false,
                 networks = emptyList(),
-                funding = "CREDIT",
+                funding = ConsumerPaymentDetails.Card.Funding.Credit,
                 nickname = null,
                 billingAddress = ConsumerPaymentDetails.BillingAddress(
                     name = null,

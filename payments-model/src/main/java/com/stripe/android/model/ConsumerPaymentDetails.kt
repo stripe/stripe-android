@@ -40,7 +40,7 @@ data class ConsumerPaymentDetails(
         val brand: CardBrand,
         val networks: List<String>,
         val cvcCheck: CvcCheck,
-        val funding: String
+        val funding: Funding
     ) : PaymentDetails(
         id = id,
         isDefault = isDefault,
@@ -49,6 +49,32 @@ data class ConsumerPaymentDetails(
         billingAddress = billingAddress,
         billingEmailAddress = billingEmailAddress
     ) {
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class Funding(val code: String) {
+            Credit("CREDIT"),
+            Debit("DEBIT"),
+            Prepaid("PREPAID"),
+            Unknown("UNKNOWN");
+
+            val cardFunding: CardFunding
+                get() {
+                    return when (this) {
+                        Credit -> CardFunding.Credit
+                        Debit -> CardFunding.Debit
+                        Prepaid -> CardFunding.Prepaid
+                        Unknown -> CardFunding.Unknown
+                    }
+                }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            companion object {
+                fun fromCode(code: String?): Funding {
+                    return Funding.entries.firstOrNull { it.code == code }
+                        ?: Unknown
+                }
+            }
+        }
 
         val requiresCardDetailsRecollection: Boolean
             get() = isExpired || cvcCheck.requiresRecollection

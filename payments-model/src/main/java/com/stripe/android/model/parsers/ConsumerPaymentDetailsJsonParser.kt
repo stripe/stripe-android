@@ -78,7 +78,9 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
                         networks = networks,
                         last4 = cardDetails.getString(FIELD_CARD_LAST_4),
                         cvcCheck = CvcCheck.fromCode(checks?.getString(FIELD_CARD_CVC_CHECK)),
-                        funding = cardDetails.getString(FIELD_FUNDING),
+                        funding = ConsumerPaymentDetails.Card.Funding.fromCode(
+                            code = cardDetails.getString(FIELD_FUNDING)
+                        ),
                         billingAddress = parseBillingAddress(json),
                         billingEmailAddress = optString(json, FIELD_BILLING_EMAIL_ADDRESS),
                         isDefault = isDefault,
