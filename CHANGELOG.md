@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [Added] Added support for [PayPay](https://docs.stripe.com/payments/paypay) payments.
+
 ### PaymentSheet
 * [Added][12073](https://github.com/stripe/stripe-android/pull/12073) Added support for [PromptPay](https://docs.stripe.com/payments/promptpay) to PaymentSheet.
 
