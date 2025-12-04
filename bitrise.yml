@@ -42,6 +42,7 @@ stages:
       - run-connections-e2e-token-tests-on-push: { }
       - run-connections-e2e-data-tests-on-push: { }
       - run-paymentsheet-end-to-end-tests: { }
+      - run-crypto-onramp-example-e2e-tests: { }
       - check-dependencies: { }
   stage-run-connect-e2e-tests:
     workflows:
@@ -331,6 +332,25 @@ workflows:
           timeout: 2400
           inputs:
             - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/base/debug/paymentsheet-example-base-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/base/debug/paymentsheet-example-base-debug-androidTest.apk --num-retries 2
+  run-crypto-onramp-example-e2e-tests:
+    before_run:
+      - prepare_all
+      - start_emulator
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          timeout: 1200
+          inputs:
+            - content: ./gradlew :crypto-onramp-example:assembleDebug :crypto-onramp-example:assembleDebugAndroidTest
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - script@1:
+          title: Run Crypto Onramp Example E2E Tests
+          timeout: 1200
+          inputs:
+            - content: ./gradlew :crypto-onramp-example:connectedDebugAndroidTest
   check-dependencies:
     envs:
       - INCLUDE_DEPENDENCIES_ON_FAILURE: true

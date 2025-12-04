@@ -705,7 +705,6 @@ internal class OnrampViewModel(
         }
     }
 
-    private val prefsName = "onramp_prefs"
     private val userDataKey = "onramp_user_data"
 
     private fun saveUserData(userData: OnrampUserData) {
@@ -723,7 +722,7 @@ internal class OnrampViewModel(
     }
 
     private fun getPrefs(): SharedPreferences {
-        return application.applicationContext.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+        return application.applicationContext.getSharedPreferences(ONRAMP_PREFS_NAME, Context.MODE_PRIVATE)
     }
 
     class Factory : ViewModelProvider.Factory {
@@ -776,3 +775,5 @@ data class OnrampUserData(
     val email: String,
     val token: String
 )
+
+internal const val ONRAMP_PREFS_NAME = "onramp_prefs"
