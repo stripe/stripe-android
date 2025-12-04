@@ -13,10 +13,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -79,8 +82,10 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         activity: ComponentActivity,
         config: Config,
         readyCallback: ReadyCallback,
-        resultCallback: ResultCallback
+        resultCallback: ResultCallback,
+        updateHandler: GooglePayDynamicUpdateHandler? = null,
     ) : this(
+        activity,
         activity,
         activity.lifecycleScope,
         activity.registerForActivityResult(
@@ -90,7 +95,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         },
         config,
         readyCallback,
-        DefaultCardBrandFilter
+        DefaultCardBrandFilter,
+        updateHandler,
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -100,8 +106,10 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         signal: UnregisterSignal,
         config: Config,
         readyCallback: ReadyCallback,
-        resultCallback: ResultCallback
+        resultCallback: ResultCallback,
+        updateHandler: GooglePayDynamicUpdateHandler? = null,
     ) : this(
+        activity,
         activity,
         activity.lifecycleScope,
         registerForReactNativeActivityResult(
@@ -113,7 +121,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         },
         config,
         readyCallback,
-        DefaultCardBrandFilter
+        DefaultCardBrandFilter,
+        updateHandler,
     )
 
     /**
@@ -131,8 +140,10 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         fragment: Fragment,
         config: Config,
         readyCallback: ReadyCallback,
-        resultCallback: ResultCallback
+        resultCallback: ResultCallback,
+        updateHandler: GooglePayDynamicUpdateHandler? = null,
     ) : this(
+        fragment,
         fragment.requireContext(),
         fragment.viewLifecycleOwner.lifecycleScope,
         fragment.registerForActivityResult(
@@ -142,16 +153,19 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         },
         config,
         readyCallback,
-        DefaultCardBrandFilter
+        DefaultCardBrandFilter,
+        updateHandler,
     )
 
     internal constructor(
+        lifecycleOwner: LifecycleOwner,
         context: Context,
         lifecycleScope: CoroutineScope,
         activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         config: Config,
         readyCallback: ReadyCallback,
-        cardBrandFilter: CardBrandFilter
+        cardBrandFilter: CardBrandFilter,
+        updateHandler: GooglePayDynamicUpdateHandler?,
     ) : this(
         lifecycleScope,
         config,
@@ -173,7 +187,17 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
             )
         },
         cardBrandFilter = cardBrandFilter
-    )
+    ) {
+        GooglePayDynamicUpdateCallbacks.registeredListener = updateHandler
+
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    GooglePayDynamicUpdateCallbacks.registeredListener = null
+                }
+            }
+        )
+    }
 
     init {
         if (!HAS_SENT_INIT_ANALYTIC_EVENT) {
@@ -292,7 +316,9 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         /**
          * Set this property to enable other card networks in additional to the default list, such as "INTERAC"
          */
-        internal val additionalEnabledNetworks: List<String> = emptyList()
+        internal val additionalEnabledNetworks: List<String> = emptyList(),
+        internal val shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters? = null,
+        internal val shippingOptionParameters: GooglePayJsonFactory.ShippingOptionParameters? = null,
     ) : Parcelable {
 
         internal val isJcbEnabled: Boolean
@@ -407,12 +433,13 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
 fun rememberGooglePayPaymentMethodLauncher(
     config: GooglePayPaymentMethodLauncher.Config,
     readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
-    resultCallback: GooglePayPaymentMethodLauncher.ResultCallback
+    resultCallback: GooglePayPaymentMethodLauncher.ResultCallback,
+    updateHandler: GooglePayDynamicUpdateHandler? = null,
 ): GooglePayPaymentMethodLauncher {
     val currentReadyCallback by rememberUpdatedState(readyCallback)
 
     val context = LocalContext.current
-    val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
+    val lifecycleOwner = LocalLifecycleOwner.current
     val activityResultLauncher = rememberLauncherForActivityResult(
         GooglePayPaymentMethodLauncherContractV2(),
         resultCallback::onResult
@@ -420,14 +447,16 @@ fun rememberGooglePayPaymentMethodLauncher(
 
     return remember(config) {
         GooglePayPaymentMethodLauncher(
+            lifecycleOwner = lifecycleOwner,
             context = context,
-            lifecycleScope = lifecycleScope,
+            lifecycleScope = lifecycleOwner.lifecycleScope,
             activityResultLauncher = activityResultLauncher,
             config = config,
             readyCallback = {
                 currentReadyCallback.onReady(it)
             },
-            cardBrandFilter = DefaultCardBrandFilter
+            cardBrandFilter = DefaultCardBrandFilter,
+            updateHandler = updateHandler,
         )
     }
 }

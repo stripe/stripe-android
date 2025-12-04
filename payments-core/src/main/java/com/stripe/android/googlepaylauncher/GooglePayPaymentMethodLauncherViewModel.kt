@@ -71,9 +71,11 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                     }
                 )
             ),
+            shippingAddressParameters = args.config.shippingAddressParameters,
             billingAddressParameters = args.config.billingAddressConfig.convert(),
             isEmailRequired = args.config.isEmailRequired,
-            allowCreditCards = args.config.allowCreditCards
+            allowCreditCards = args.config.allowCreditCards,
+            shippingOptionParameters = args.config.shippingOptionParameters,
         )
     }
 
