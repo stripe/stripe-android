@@ -12,6 +12,7 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
@@ -66,7 +67,8 @@ internal class DefaultCardAccountRangeRepositoryTest {
                     high = "4999999999999999"
                 ),
                 panLength = 16,
-                brandInfo = AccountRange.BrandInfo.Visa
+                brandInfo = AccountRange.BrandInfo.Visa,
+                funding = CardFunding.Unknown
             )
         )
         assertThat(realStore.get(BinFixtures.VISA))
@@ -113,6 +115,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                 binRange = BinRange(low = "5555550070000000", high = "5555550089999999"),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Mastercard,
+                funding = CardFunding.Unknown,
                 country = "BR"
             )
         )
@@ -135,6 +138,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                 binRange = BinRange(low = "6011000000000000", high = "6011011999999999"),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Discover,
+                funding = CardFunding.Unknown,
                 country = "US"
             )
         )
@@ -153,6 +157,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                 binRange = BinRange(low = "3568400000000000", high = "3568409999999999"),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.UnionPay,
+                funding = CardFunding.Unknown,
                 country = "CN"
             )
         )
@@ -337,6 +342,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Visa,
+                funding = CardFunding.Unknown,
             )
         )
 
@@ -348,6 +354,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Visa,
+                funding = CardFunding.Unknown,
             ),
             AccountRange(
                 binRange = BinRange(
@@ -356,6 +363,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Mastercard,
+                funding = CardFunding.Unknown,
             ),
             AccountRange(
                 BinRange(
@@ -364,6 +372,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Mastercard,
+                funding = CardFunding.Unknown,
             ),
         )
     }

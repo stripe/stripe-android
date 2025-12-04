@@ -16,6 +16,7 @@ import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeApiRepository
@@ -124,6 +125,7 @@ class CardAccountRangeServiceTest {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Mastercard,
+                funding = CardFunding.Unknown,
             )
 
             val (accountRanges, _) = testBehavior(
@@ -154,6 +156,7 @@ class CardAccountRangeServiceTest {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Visa,
+                funding = CardFunding.Unknown,
             ),
             AccountRange(
                 binRange = BinRange(
@@ -162,6 +165,7 @@ class CardAccountRangeServiceTest {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.CartesBancaires,
+                funding = CardFunding.Unknown,
             )
         )
 
