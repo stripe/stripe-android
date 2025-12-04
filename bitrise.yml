@@ -334,8 +334,8 @@ workflows:
             - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/base/debug/paymentsheet-example-base-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/base/debug/paymentsheet-example-base-debug-androidTest.apk --num-retries 2
   run-crypto-onramp-example-e2e-tests:
     before_run:
-      - prepare_all
       - start_emulator
+      - prepare_all
     after_run:
       - conclude_all
     steps:
