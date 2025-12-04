@@ -108,6 +108,7 @@ internal object PaymentMethodMetadataFactory {
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
             isTapToAddSupported = isTapToAddSupported,
+            experimentsData = null,
         )
     }
 

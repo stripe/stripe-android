@@ -1182,6 +1182,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
+            experimentsData = null,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1272,6 +1273,7 @@ internal class PaymentMethodMetadataTest {
             ),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
+            experimentsData = null,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
