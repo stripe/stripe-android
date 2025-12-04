@@ -47,7 +47,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "LargeClass")
 internal class OnrampViewModel(
     private val application: Application,
     savedStateHandle: SavedStateHandle
@@ -122,7 +122,7 @@ internal class OnrampViewModel(
                 )
             )
 
-            when(val result = onrampCoordinator.configure(configuration = configuration)) {
+            when (val result = onrampCoordinator.configure(configuration = configuration)) {
                 is OnrampConfigurationResult.Completed -> {
                     _message.value = "Configuration completed successfully"
                 }
@@ -777,8 +777,6 @@ data class CheckoutEvent(
 )
 
 data class AuthorizeEvent(val linkAuthIntentId: String)
-
-data object UpdateAddressEvent
 
 @Serializable
 data class OnrampUserData(
