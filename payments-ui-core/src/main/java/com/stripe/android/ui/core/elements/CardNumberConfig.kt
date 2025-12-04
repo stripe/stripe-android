@@ -7,6 +7,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.CardUtils
+import com.stripe.android.cards.CardNumber
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
@@ -19,7 +20,7 @@ import com.stripe.android.R as StripeR
 internal class CardNumberConfig(
     private val isCardBrandChoiceEligible: Boolean,
     private val cardBrandFilter: CardBrandFilter,
-    private val cardFundingFilter: CardFundingFilter
+    private val cardFundingValidator: CardFundingValidator
 ) : CardDetailsTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "Card number"
@@ -43,6 +44,7 @@ internal class CardNumberConfig(
         numberAllowedDigits: Int,
         funding: CardFunding?
     ): TextFieldState {
+        val bin = CardNumber.Unvalidated(number).bin
         val luhnValid = CardUtils.isValidLuhnNumber(number)
         val isDigitLimit = brand.getMaxLengthForCardNumber(number) != -1
 
@@ -65,7 +67,7 @@ internal class CardNumberConfig(
                 errorMessageResId = StripeR.string.stripe_invalid_card_number,
                 preventMoreInput = true,
             )
-        } else if (cardFundingFilter.isAccepted(funding).not()) {
+        } else if (cardFundingValidator.isValid(number, funding).not()) {
             Log.d("TOLUWANI", "[$funding] not accepted => $number")
             TextFieldStateConstants.Error.Invalid(
                 errorMessageResId = StripeR.string.stripe_invalid_card_funding_type,

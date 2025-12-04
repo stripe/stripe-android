@@ -268,6 +268,7 @@ internal class DefaultCardNumberController(
         flow2 = _fieldValue,
         flow3 = accountRangeService.accountRangeFlow
     ) { brand, fieldValue, accountRange ->
+        accountRange?.binRange
         Log.d("TOLUWANI", "range => ${accountRange?.funding}")
         cardTextFieldConfig.determineState(
             brand,
