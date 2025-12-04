@@ -345,14 +345,15 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     }
 
     class ExperimentExposure(
-        experiment: LoggableExperiment
+        experiment: LoggableExperiment,
+        mode: EventReporter.Mode
     ) : PaymentSheetEvent() {
         override val eventName: String = "elements.experiment_exposure"
         override val params: Map<String, Any?> = mapOf(
             "experiment_retrieved" to experiment.experiment.experimentValue,
             "arb_id" to experiment.arbId,
             "assignment_group" to experiment.group
-        ) + experiment.dimensions.mapKeys { "dimensions-${it.key}" }
+        ) + experiment.dimensions.mapKeys { "dimensions-${it.key}" } + ("dimensions-integration_shape" to mode.code)
     }
 
     class ShopPayWebviewLoadAttempt : PaymentSheetEvent() {

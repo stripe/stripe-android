@@ -81,6 +81,7 @@ internal data class PaymentMethodMetadata(
     val onBehalfOf: String?,
     val integrationMetadata: IntegrationMetadata,
     val analyticsMetadata: AnalyticsMetadata,
+    val experimentsData: ElementsSession.ExperimentsData?,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -373,6 +374,7 @@ internal data class PaymentMethodMetadata(
                 onBehalfOf = elementsSession.onBehalfOf,
                 integrationMetadata = integrationMetadata,
                 analyticsMetadata = analyticsMetadata,
+                experimentsData = elementsSession.experimentsData,
             )
         }
 
@@ -436,6 +438,7 @@ internal data class PaymentMethodMetadata(
                 onBehalfOf = elementsSession.onBehalfOf,
                 integrationMetadata = integrationMetadata,
                 analyticsMetadata = AnalyticsMetadata(emptyMap()), // This is unused in customer sheet.
+                experimentsData = null,
             )
         }
     }

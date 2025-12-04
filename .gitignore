@@ -33,6 +33,7 @@ proguard/
 *.ipr
 *.iws
 .idea
+.idea/
 
 # Cursor IDE
 .cursor/

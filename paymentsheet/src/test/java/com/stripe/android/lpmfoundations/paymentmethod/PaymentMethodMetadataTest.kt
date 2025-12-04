@@ -1158,18 +1158,18 @@ internal class PaymentMethodMetadataTest {
             customerMetadata = getDefaultCustomerMetadata(
                 isPaymentMethodSetAsDefaultEnabled = false
             ),
-            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             isGooglePayReady = false,
             linkConfiguration = PaymentSheet.LinkConfiguration(),
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             linkMode = null,
             linkStateResult = LinkState(
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
                 configuration = createLinkConfiguration(),
                 loginState = LinkState.LoginState.LoggedOut,
             ),
-            cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             termsDisplay = emptyMap(),
             forceSetupFutureUseBehaviorAndNewMandate = false,
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
@@ -1180,6 +1180,7 @@ internal class PaymentMethodMetadataTest {
             onBehalfOf = null,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            experimentsData = null,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1246,13 +1247,13 @@ internal class PaymentMethodMetadataTest {
                 isPaymentMethodSetAsDefaultEnabled = false
             ),
             isGooglePayReady = true,
-            paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             linkConfiguration = PaymentSheet.LinkConfiguration(),
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             linkMode = null,
             linkStateResult = null,
-            cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             termsDisplay = emptyMap(),
             forceSetupFutureUseBehaviorAndNewMandate = false,
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
@@ -1269,6 +1270,7 @@ internal class PaymentMethodMetadataTest {
                 attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
             ),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            experimentsData = null,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }

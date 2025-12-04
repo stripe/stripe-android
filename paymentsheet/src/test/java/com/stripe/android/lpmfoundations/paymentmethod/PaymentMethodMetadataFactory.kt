@@ -75,6 +75,9 @@ internal object PaymentMethodMetadataFactory {
             sellerBusinessName = sellerBusinessName,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
+            sharedDataSpecs = sharedDataSpecs,
+            displayableCustomPaymentMethods = displayableCustomPaymentMethods,
+            externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             customerMetadata = if (hasCustomerConfiguration) {
                 PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
                     isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
@@ -84,17 +87,14 @@ internal object PaymentMethodMetadataFactory {
             } else {
                 null
             },
-            sharedDataSpecs = sharedDataSpecs,
-            paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
-            externalPaymentMethodSpecs = externalPaymentMethodSpecs,
-            displayableCustomPaymentMethods = displayableCustomPaymentMethods,
             isGooglePayReady = isGooglePayReady,
             linkConfiguration = linkConfiguration,
+            paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             linkMode = linkMode,
             linkStateResult = linkState,
-            cardBrandFilter = cardBrandFilter,
             paymentMethodIncentive = paymentMethodIncentive,
             financialConnectionsAvailability = financialConnectionsAvailability,
+            cardBrandFilter = cardBrandFilter,
             termsDisplay = termsDisplay,
             forceSetupFutureUseBehaviorAndNewMandate = forceSetupFutureUseBehaviorAndNewMandate,
             passiveCaptchaParams = passiveCaptchaParams,
@@ -106,6 +106,7 @@ internal object PaymentMethodMetadataFactory {
             onBehalfOf = onBehalfOf,
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
+            experimentsData = null,
         )
     }
 
