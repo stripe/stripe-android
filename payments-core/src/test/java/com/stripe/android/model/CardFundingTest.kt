@@ -8,6 +8,8 @@ class CardFundingTest {
     fun fromCode_shouldReturnExpectedValue() {
         CardFunding.entries.forEach {
             assertEquals(it, CardFunding.fromCode(it.code))
+            assertEquals(it, CardFunding.fromCode(it.code.lowercase()))
+            assertEquals(it, CardFunding.fromCode(it.code.uppercase()))
         }
     }
 }

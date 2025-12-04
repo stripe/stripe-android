@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
+import com.stripe.android.model.CardFunding
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
@@ -26,7 +27,8 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                 AccountRange(
                     binRange = it,
                     panLength = 16,
-                    brandInfo = AccountRange.BrandInfo.Visa
+                    brandInfo = AccountRange.BrandInfo.Visa,
+                    funding = CardFunding.Unknown
                 )
             }
 
@@ -44,7 +46,8 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                 AccountRange(
                     binRange = it,
                     panLength = 16,
-                    brandInfo = AccountRange.BrandInfo.Mastercard
+                    brandInfo = AccountRange.BrandInfo.Mastercard,
+                    funding = CardFunding.Unknown
                 )
             }
 
@@ -62,7 +65,8 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             AccountRange(
                 binRange = it,
                 panLength = 15,
-                brandInfo = AccountRange.BrandInfo.AmericanExpress
+                brandInfo = AccountRange.BrandInfo.AmericanExpress,
+                funding = CardFunding.Unknown
             )
         }
 
@@ -85,7 +89,8 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             AccountRange(
                 binRange = it,
                 panLength = 16,
-                brandInfo = AccountRange.BrandInfo.Discover
+                brandInfo = AccountRange.BrandInfo.Discover,
+                funding = CardFunding.Unknown
             )
         }
 
@@ -98,7 +103,8 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             AccountRange(
                 binRange = it,
                 panLength = 16,
-                brandInfo = AccountRange.BrandInfo.JCB
+                brandInfo = AccountRange.BrandInfo.JCB,
+                funding = CardFunding.Unknown
             )
         }
 
@@ -122,7 +128,8 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             AccountRange(
                 binRange = it,
                 panLength = 16,
-                brandInfo = AccountRange.BrandInfo.UnionPay
+                brandInfo = AccountRange.BrandInfo.UnionPay,
+                funding = CardFunding.Unknown
             )
         }
 
@@ -136,7 +143,8 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             AccountRange(
                 binRange = it,
                 panLength = 19,
-                brandInfo = AccountRange.BrandInfo.UnionPay
+                brandInfo = AccountRange.BrandInfo.UnionPay,
+                funding = CardFunding.Unknown
             )
         }
 
@@ -159,7 +167,8 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             AccountRange(
                 binRange = it,
                 panLength = 16,
-                brandInfo = AccountRange.BrandInfo.DinersClub
+                brandInfo = AccountRange.BrandInfo.DinersClub,
+                funding = CardFunding.Unknown
             )
         }
 
@@ -172,7 +181,8 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             AccountRange(
                 binRange = it,
                 panLength = 14,
-                brandInfo = AccountRange.BrandInfo.DinersClub
+                brandInfo = AccountRange.BrandInfo.DinersClub,
+                funding = CardFunding.Unknown
             )
         }
 
@@ -192,7 +202,8 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             AccountRange(
                 binRange = it,
                 panLength = 16,
-                brandInfo = AccountRange.BrandInfo.CartesBancaires
+                brandInfo = AccountRange.BrandInfo.CartesBancaires,
+                funding = CardFunding.Unknown
             )
         }
 
