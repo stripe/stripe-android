@@ -6,7 +6,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.CardBrandFilter
-import com.stripe.android.CardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.Logger
@@ -27,8 +26,6 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLaun
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -114,8 +111,6 @@ internal object CustomerSheetTestHelper {
         ),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         confirmationHandler: ConfirmationHandler? = null,
-        cardBrandFilter: CardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
-        cardFundingFilter: CardFundingFilter = PaymentSheetCardFundingFilter(configuration.allowedCardFundingTypes),
     ): CustomerSheetViewModel {
         val savedStateHandle = SavedStateHandle()
         return CustomerSheetViewModel(
@@ -171,8 +166,6 @@ internal object CustomerSheetTestHelper {
             errorReporter = errorReporter,
             savedStateHandle = savedStateHandle,
             userFacingLogger = FakeUserFacingLogger(),
-            cardBrandFilter = cardBrandFilter,
-            cardFundingFilter = cardFundingFilter,
         ).apply {
             registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
         }

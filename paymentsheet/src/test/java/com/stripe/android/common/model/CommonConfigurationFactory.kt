@@ -3,7 +3,6 @@ package com.stripe.android.common.model
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.CardFundingType
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 
 internal object CommonConfigurationFactory {
@@ -23,7 +22,6 @@ internal object CommonConfigurationFactory {
         externalPaymentMethods: List<String> = emptyList(),
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> = emptyList(),
         cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
-        allowedCardFundingTypes: List<CardFundingType> = CardFundingType.entries,
         link: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
         shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null,
         googlePlacesApiKey: String? = null,
@@ -47,7 +45,6 @@ internal object CommonConfigurationFactory {
         externalPaymentMethods = externalPaymentMethods,
         customPaymentMethods = customPaymentMethods,
         cardBrandAcceptance = cardBrandAcceptance,
-        allowedCardFundingTypes = allowedCardFundingTypes,
         link = link,
         shopPayConfiguration = shopPayConfiguration,
         googlePlacesApiKey = googlePlacesApiKey,
