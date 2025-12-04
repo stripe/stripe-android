@@ -2,7 +2,6 @@ package com.stripe.android.ui.core.elements.autocomplete
 
 import android.content.Context
 import android.graphics.Typeface
-import android.os.Build
 import android.text.style.StyleSpan
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
@@ -51,7 +50,7 @@ interface PlacesClientProxy {
             initializer: () -> Unit = { Places.initialize(context, googlePlacesApiKey) },
             errorReporter: ErrorReporter
         ): PlacesClientProxy {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isPlacesAvailable()) {
+            return if (isPlacesAvailable()) {
                 override ?: run {
                     initializer()
                     DefaultPlacesClientProxy(

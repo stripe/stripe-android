@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+* [CHANGED][12036](https://github.com/stripe/stripe-android/pull/12095) Upgrade minimum SDK version from 21 to 24
+
 ### PaymentSheet
 * [CHANGED][12036](https://github.com/stripe/stripe-android/pull/12036) Updates the google places SDK from 3.5.0 to 5.0.0.
 
