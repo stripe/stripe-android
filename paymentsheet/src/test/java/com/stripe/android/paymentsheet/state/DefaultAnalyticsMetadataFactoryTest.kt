@@ -11,6 +11,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Flag
@@ -896,6 +897,7 @@ class DefaultAnalyticsMetadataFactoryTest {
                 forceSetupFutureUseBehaviorAndNewMandate = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = emptyList(),
                 clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+                cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             ),
             loginState = LinkState.LoginState.LoggedOut,
             signupModeResult = signupModeResult,

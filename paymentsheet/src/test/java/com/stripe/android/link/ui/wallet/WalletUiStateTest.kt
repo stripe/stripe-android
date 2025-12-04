@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.wallet
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -9,6 +10,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.LINK_WALLET_PRIMARY_BUTTON_LABEL
 import com.stripe.android.link.TestFactory.LINK_WALLET_SECONDARY_BUTTON_LABEL
 import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
@@ -281,10 +283,41 @@ class WalletUiStateTest {
         assertThat(state.copy(userSetIsExpanded = false, cardBrandFilter = noVisa).isExpanded).isFalse()
     }
 
+    @Test
+    fun testPaymentMethodsRespectCardFundingFilter() {
+        val creditCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            funding = ConsumerPaymentDetails.Card.Funding.Credit
+        )
+        val debitCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            funding = ConsumerPaymentDetails.Card.Funding.Debit
+        )
+        val prepaidCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            funding = ConsumerPaymentDetails.Card.Funding.Prepaid
+        )
+        val unknownCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            funding = ConsumerPaymentDetails.Card.Funding.Unknown
+        )
+        val bankAccount = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
+        val passthrough = TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
+        val state = walletUiState(
+            paymentDetailsList = listOf(creditCard, debitCard, prepaidCard, unknownCard, bankAccount, passthrough),
+            selectedItem = creditCard,
+            cardFundingFilter = PaymentSheetCardFundingFilter(listOf(PaymentSheet.CardFundingType.Credit))
+        )
+
+        assertThat(state.isItemAvailable(creditCard)).isTrue()
+        assertThat(state.isItemAvailable(debitCard)).isFalse()
+        assertThat(state.isItemAvailable(prepaidCard)).isFalse()
+        assertThat(state.isItemAvailable(unknownCard)).isFalse()
+        assertThat(state.isItemAvailable(bankAccount)).isTrue()
+        assertThat(state.isItemAvailable(passthrough)).isTrue()
+    }
+
     private fun walletUiState(
         paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails> =
             TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
         cardBrandFilter: CardBrandFilter = RejectCardBrands(),
+        cardFundingFilter: CardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
         selectedItem: ConsumerPaymentDetails.PaymentDetails? = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
         hasCompleted: Boolean = false,
         isProcessing: Boolean = false,
@@ -308,6 +341,7 @@ class WalletUiStateTest {
             allowLogOut = true,
             selectedItemId = selectedItem?.id,
             cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = cardFundingFilter,
             hasCompleted = hasCompleted,
             isProcessing = isProcessing,
             primaryButtonLabel = primaryButtonLabel,

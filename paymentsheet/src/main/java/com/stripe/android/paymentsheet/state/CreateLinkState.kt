@@ -12,6 +12,7 @@ import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
@@ -233,6 +234,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
             cardBrandChoice = cardBrandChoice,
             cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = PaymentSheetCardFundingFilter(configuration.allowedCardFundingTypes),
             financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = elementsSession),
             flags = elementsSession.linkFlags,
             useAttestationEndpointsForLink = elementsSession.useAttestationEndpointsForLink,
