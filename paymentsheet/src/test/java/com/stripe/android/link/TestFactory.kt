@@ -127,7 +127,7 @@ internal object TestFactory {
         cvcCheck = CvcCheck.Pass,
         isDefault = true,
         networks = emptyList(),
-        funding = "CREDIT",
+        funding = ConsumerPaymentDetails.Card.Funding.Credit,
         nickname = null,
         billingAddress = ConsumerPaymentDetails.BillingAddress(
             name = null,

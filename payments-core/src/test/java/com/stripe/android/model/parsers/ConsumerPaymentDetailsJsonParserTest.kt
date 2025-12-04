@@ -27,7 +27,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         last4 = "4444",
                         cvcCheck = CvcCheck.Pass,
                         networks = emptyList(),
-                        funding = "CREDIT",
+                        funding = ConsumerPaymentDetails.Card.Funding.Credit,
                         nickname = null,
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
                             name = null,
@@ -60,7 +60,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         last4 = "4444",
                         cvcCheck = CvcCheck.Unknown,
                         networks = emptyList(),
-                        funding = "CREDIT",
+                        funding = ConsumerPaymentDetails.Card.Funding.Credit,
                         nickname = null,
                         billingAddress = null
                     )
@@ -144,7 +144,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         brand = CardBrand.MasterCard,
                         cvcCheck = CvcCheck.Pass,
                         networks = emptyList(),
-                        funding = "CREDIT",
+                        funding = ConsumerPaymentDetails.Card.Funding.Credit,
                         nickname = null,
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
                             name = null,
@@ -165,7 +165,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         cvcCheck = CvcCheck.Fail,
                         isDefault = false,
                         networks = emptyList(),
-                        funding = "CREDIT",
+                        funding = ConsumerPaymentDetails.Card.Funding.Credit,
                         nickname = null,
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
                             name = null,
@@ -198,6 +198,290 @@ class ConsumerPaymentDetailsJsonParserTest {
                 )
             ),
             ConsumerPaymentDetailsJsonParser.parse(ConsumerFixtures.CONSUMER_PAYMENT_DETAILS_JSON),
+        )
+    }
+
+    @Test
+    fun `parse card with DEBIT funding`() {
+        val json = JSONObject(
+            """
+            {
+              "redacted_payment_details": [
+                {
+                  "id": "QAAAKJ6",
+                  "bank_account_details": null,
+                  "billing_address": {
+                    "administrative_area": null,
+                    "country_code": "US",
+                    "dependent_locality": null,
+                    "line_1": null,
+                    "line_2": null,
+                    "locality": null,
+                    "name": null,
+                    "postal_code": "12312",
+                    "sorting_code": null
+                  },
+                  "billing_email_address": "",
+                  "card_details": {
+                    "brand": "VISA",
+                    "checks": {
+                      "address_line1_check": "STATE_INVALID",
+                      "address_postal_code_check": "PASS",
+                      "cvc_check": "PASS"
+                    },
+                    "funding": "DEBIT",
+                    "exp_month": 12,
+                    "exp_year": 2023,
+                    "last4": "4444"
+                  },
+                  "is_default": true,
+                  "type": "CARD"
+                }
+              ]
+            }
+            """.trimIndent()
+        )
+
+        assertEquals(
+            ConsumerPaymentDetailsJsonParser.parse(json),
+            ConsumerPaymentDetails(
+                listOf(
+                    ConsumerPaymentDetails.Card(
+                        id = "QAAAKJ6",
+                        last4 = "4444",
+                        expiryYear = 2023,
+                        expiryMonth = 12,
+                        brand = CardBrand.Visa,
+                        cvcCheck = CvcCheck.Pass,
+                        isDefault = true,
+                        networks = emptyList(),
+                        funding = ConsumerPaymentDetails.Card.Funding.Debit,
+                        nickname = null,
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            name = null,
+                            line1 = null,
+                            line2 = null,
+                            locality = null,
+                            administrativeArea = null,
+                            countryCode = CountryCode.US,
+                            postalCode = "12312"
+                        )
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `parse card with PREPAID funding`() {
+        val json = JSONObject(
+            """
+            {
+              "redacted_payment_details": [
+                {
+                  "id": "QAAAKJ6",
+                  "bank_account_details": null,
+                  "billing_address": {
+                    "administrative_area": null,
+                    "country_code": "US",
+                    "dependent_locality": null,
+                    "line_1": null,
+                    "line_2": null,
+                    "locality": null,
+                    "name": null,
+                    "postal_code": "12312",
+                    "sorting_code": null
+                  },
+                  "billing_email_address": "",
+                  "card_details": {
+                    "brand": "VISA",
+                    "checks": {
+                      "address_line1_check": "STATE_INVALID",
+                      "address_postal_code_check": "PASS",
+                      "cvc_check": "PASS"
+                    },
+                    "funding": "PREPAID",
+                    "exp_month": 12,
+                    "exp_year": 2023,
+                    "last4": "4444"
+                  },
+                  "is_default": true,
+                  "type": "CARD"
+                }
+              ]
+            }
+            """.trimIndent()
+        )
+
+        assertEquals(
+            ConsumerPaymentDetailsJsonParser.parse(json),
+            ConsumerPaymentDetails(
+                listOf(
+                    ConsumerPaymentDetails.Card(
+                        id = "QAAAKJ6",
+                        last4 = "4444",
+                        expiryYear = 2023,
+                        expiryMonth = 12,
+                        brand = CardBrand.Visa,
+                        cvcCheck = CvcCheck.Pass,
+                        isDefault = true,
+                        networks = emptyList(),
+                        funding = ConsumerPaymentDetails.Card.Funding.Prepaid,
+                        nickname = null,
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            name = null,
+                            line1 = null,
+                            line2 = null,
+                            locality = null,
+                            administrativeArea = null,
+                            countryCode = CountryCode.US,
+                            postalCode = "12312"
+                        )
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `parse card with UNKNOWN funding`() {
+        val json = JSONObject(
+            """
+            {
+              "redacted_payment_details": [
+                {
+                  "id": "QAAAKJ6",
+                  "bank_account_details": null,
+                  "billing_address": {
+                    "administrative_area": null,
+                    "country_code": "US",
+                    "dependent_locality": null,
+                    "line_1": null,
+                    "line_2": null,
+                    "locality": null,
+                    "name": null,
+                    "postal_code": "12312",
+                    "sorting_code": null
+                  },
+                  "billing_email_address": "",
+                  "card_details": {
+                    "brand": "VISA",
+                    "checks": {
+                      "address_line1_check": "STATE_INVALID",
+                      "address_postal_code_check": "PASS",
+                      "cvc_check": "PASS"
+                    },
+                    "funding": "UNKNOWN",
+                    "exp_month": 12,
+                    "exp_year": 2023,
+                    "last4": "4444"
+                  },
+                  "is_default": true,
+                  "type": "CARD"
+                }
+              ]
+            }
+            """.trimIndent()
+        )
+
+        assertEquals(
+            ConsumerPaymentDetailsJsonParser.parse(json),
+            ConsumerPaymentDetails(
+                listOf(
+                    ConsumerPaymentDetails.Card(
+                        id = "QAAAKJ6",
+                        last4 = "4444",
+                        expiryYear = 2023,
+                        expiryMonth = 12,
+                        brand = CardBrand.Visa,
+                        cvcCheck = CvcCheck.Pass,
+                        isDefault = true,
+                        networks = emptyList(),
+                        funding = ConsumerPaymentDetails.Card.Funding.Unknown,
+                        nickname = null,
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            name = null,
+                            line1 = null,
+                            line2 = null,
+                            locality = null,
+                            administrativeArea = null,
+                            countryCode = CountryCode.US,
+                            postalCode = "12312"
+                        )
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `parse card with unrecognized funding defaults to Unknown`() {
+        val json = JSONObject(
+            """
+            {
+              "redacted_payment_details": [
+                {
+                  "id": "QAAAKJ6",
+                  "bank_account_details": null,
+                  "billing_address": {
+                    "administrative_area": null,
+                    "country_code": "US",
+                    "dependent_locality": null,
+                    "line_1": null,
+                    "line_2": null,
+                    "locality": null,
+                    "name": null,
+                    "postal_code": "12312",
+                    "sorting_code": null
+                  },
+                  "billing_email_address": "",
+                  "card_details": {
+                    "brand": "VISA",
+                    "checks": {
+                      "address_line1_check": "STATE_INVALID",
+                      "address_postal_code_check": "PASS",
+                      "cvc_check": "PASS"
+                    },
+                    "funding": "INVALID",
+                    "exp_month": 12,
+                    "exp_year": 2023,
+                    "last4": "4444"
+                  },
+                  "is_default": true,
+                  "type": "CARD"
+                }
+              ]
+            }
+            """.trimIndent()
+        )
+
+        assertEquals(
+            ConsumerPaymentDetailsJsonParser.parse(json),
+            ConsumerPaymentDetails(
+                listOf(
+                    ConsumerPaymentDetails.Card(
+                        id = "QAAAKJ6",
+                        last4 = "4444",
+                        expiryYear = 2023,
+                        expiryMonth = 12,
+                        brand = CardBrand.Visa,
+                        cvcCheck = CvcCheck.Pass,
+                        isDefault = true,
+                        networks = emptyList(),
+                        funding = ConsumerPaymentDetails.Card.Funding.Unknown,
+                        nickname = null,
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            name = null,
+                            line1 = null,
+                            line2 = null,
+                            locality = null,
+                            administrativeArea = null,
+                            countryCode = CountryCode.US,
+                            postalCode = "12312"
+                        )
+                    )
+                )
+            )
         )
     }
 
@@ -287,7 +571,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         cvcCheck = CvcCheck.Pass,
                         isDefault = true,
                         networks = emptyList(),
-                        funding = "CREDIT",
+                        funding = ConsumerPaymentDetails.Card.Funding.Credit,
                         nickname = null,
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
                             name = null,
@@ -308,7 +592,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         cvcCheck = CvcCheck.Fail,
                         isDefault = false,
                         networks = emptyList(),
-                        funding = "CREDIT",
+                        funding = ConsumerPaymentDetails.Card.Funding.Credit,
                         nickname = null,
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
                             name = null,
