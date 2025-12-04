@@ -190,7 +190,7 @@ private fun PaymentDetailsListItemPreview() {
         brand = CardBrand.Visa,
         cvcCheck = CvcCheck.Pass,
         networks = emptyList(),
-        funding = "CREDIT",
+        funding = Card.Funding.Credit,
         nickname = null,
         billingAddress = null
     )

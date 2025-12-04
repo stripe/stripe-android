@@ -32,7 +32,7 @@ internal object PaymentMethodWithLinkDetailsJsonParser : ModelJsonParser<Payment
                     expYear = consumerPaymentDetails.expiryYear,
                     last4 = consumerPaymentDetails.last4,
                     brand = consumerPaymentDetails.brand,
-                    funding = consumerPaymentDetails.funding,
+                    funding = consumerPaymentDetails.funding.code,
                 )
             }
             is ConsumerPaymentDetails.BankAccount -> {

@@ -66,7 +66,7 @@ class PaymentSelectionTest {
             brand = CardBrand.Visa,
             networks = listOf("visa"),
             cvcCheck = CvcCheck.Pass,
-            funding = "credit"
+            funding = ConsumerPaymentDetails.Card.Funding.Credit
         )
 
         val selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
