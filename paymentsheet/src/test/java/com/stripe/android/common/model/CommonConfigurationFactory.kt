@@ -3,6 +3,7 @@ package com.stripe.android.common.model
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.CardFundingType
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 
 internal object CommonConfigurationFactory {
@@ -30,6 +31,7 @@ internal object CommonConfigurationFactory {
         opensCardScannerAutomatically: Boolean = false,
         userOverrideCountry: String? = null,
         appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+        allowedCardFundingTypes: List<CardFundingType> = CardFundingType.entries
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = merchantDisplayName,
         customer = customer,
@@ -53,5 +55,6 @@ internal object CommonConfigurationFactory {
         opensCardScannerAutomatically = opensCardScannerAutomatically,
         userOverrideCountry = userOverrideCountry,
         appearance = appearance,
+        allowedCardFundingTypes = allowedCardFundingTypes,
     )
 }
