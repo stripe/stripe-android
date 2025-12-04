@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -19,10 +21,13 @@ import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
@@ -176,6 +181,16 @@ internal interface CustomerSheetViewModelModule {
         @Provides
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
+        }
+
+        @Provides
+        fun provideCardFundingFilter(configuration: CustomerSheet.Configuration): CardFundingFilter {
+            return PaymentSheetCardFundingFilter(configuration.allowedCardFundingTypes)
+        }
+
+        @Provides
+        fun provideCardBrandFilter(configuration: CustomerSheet.Configuration): CardBrandFilter {
+            return PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
         }
 
         private val savedPaymentSelection: PaymentSelection? = null

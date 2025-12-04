@@ -21,6 +21,7 @@ import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -2983,15 +2984,12 @@ class CustomerSheetViewModelTest {
             ),
         )
 
-        // Call refreshAndUpdatePaymentMethods indirectly through the attachment flow
         viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
         viewModel.handleViewAction(CustomerSheetViewAction.OnFormFieldValuesCompleted(TEST_FORM_VALUES))
 
         viewModel.viewState.test {
-            // Initial state is AddPaymentMethod
             assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
 
-            // Trigger refresh by saving the payment method
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
             assertThat(startTurbine.awaitItem()).isNotNull()
@@ -3007,12 +3005,7 @@ class CustomerSheetViewModelTest {
                 )
             )
 
-            var currentState: CustomerSheetViewState? = null
-            while (currentState !is SelectPaymentMethod) {
-                currentState = awaitItem()
-            }
-
-            val selectPaymentMethodState = currentState as SelectPaymentMethod
+            val selectPaymentMethodState = awaitSelectPaymentMethodState()
 
             // Should only include the accepted card payment method
             assertThat(selectPaymentMethodState.savedPaymentMethods).hasSize(1)
@@ -3023,6 +3016,133 @@ class CustomerSheetViewModelTest {
             assertThat(selectPaymentMethodState.savedPaymentMethods).doesNotContain(rejectedCardPaymentMethod)
         }
     }
+
+    @Test
+    fun `When refreshing payment methods, payment methods should be filtered based on card funding type`() =
+        confirmationTest {
+            val acceptedCreditCardPaymentMethod = CARD_PAYMENT_METHOD.update(
+                last4 = "4242",
+                addCbcNetworks = false,
+                brand = CardBrand.Visa,
+                funding = "credit"
+            )
+
+            val rejectedDebitCardPaymentMethod = CARD_PAYMENT_METHOD.update(
+                last4 = "5555",
+                addCbcNetworks = false,
+                brand = CardBrand.Visa,
+                funding = "debit"
+            )
+
+            val usBankAccountPaymentMethod = PaymentMethodFactory.usBankAccount()
+
+            val allPaymentMethods = listOf(
+                acceptedCreditCardPaymentMethod,
+                rejectedDebitCardPaymentMethod,
+                usBankAccountPaymentMethod
+            )
+
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                configuration = CustomerSheet.Configuration(
+                    merchantDisplayName = "Merchant",
+                    // Only accept credit cards
+                    allowedCardFundingTypes = listOf(PaymentSheet.CardFundingType.Credit)
+                ),
+                confirmationHandler = handler,
+                customerSheetLoader = FakeCustomerSheetLoader(
+                    customerPaymentMethods = listOf(),
+                    isGooglePayAvailable = false
+                ),
+                paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                    paymentMethods = CustomerSheetDataResult.success(allPaymentMethods),
+                ),
+            )
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+            viewModel.handleViewAction(CustomerSheetViewAction.OnFormFieldValuesCompleted(TEST_FORM_VALUES))
+
+            viewModel.viewState.test {
+                assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
+
+                viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+                assertThat(startTurbine.awaitItem()).isNotNull()
+
+                val processingState = awaitItem()
+                assertThat(processingState).isInstanceOf<AddPaymentMethod>()
+                assertThat((processingState as AddPaymentMethod).isProcessing).isTrue()
+
+                awaitResultTurbine.add(
+                    ConfirmationHandler.Result.Succeeded(
+                        intent = SetupIntentFactory.create(acceptedCreditCardPaymentMethod),
+                        deferredIntentConfirmationType = null,
+                    )
+                )
+
+                val selectPaymentMethodState = awaitSelectPaymentMethodState()
+
+                assertPaymentMethodsFiltered(
+                    selectPaymentMethodState,
+                    acceptedPaymentMethods = listOf(acceptedCreditCardPaymentMethod, usBankAccountPaymentMethod),
+                    rejectedPaymentMethods = listOf(rejectedDebitCardPaymentMethod)
+                )
+            }
+        }
+
+    @Test
+    fun `When loading customer sheet, payment methods should be filtered based on card funding type`() =
+        confirmationTest {
+            val acceptedCreditCardPaymentMethod = CARD_PAYMENT_METHOD.update(
+                last4 = "4242",
+                addCbcNetworks = false,
+                brand = CardBrand.Visa,
+                funding = "credit"
+            )
+
+            val rejectedDebitCardPaymentMethod = CARD_PAYMENT_METHOD.update(
+                last4 = "5555",
+                addCbcNetworks = false,
+                brand = CardBrand.Visa,
+                funding = "debit"
+            )
+
+            val usBankAccountPaymentMethod = PaymentMethodFactory.usBankAccount()
+
+            val allPaymentMethods = listOf(
+                acceptedCreditCardPaymentMethod,
+                rejectedDebitCardPaymentMethod,
+                usBankAccountPaymentMethod
+            )
+
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                configuration = CustomerSheet.Configuration(
+                    merchantDisplayName = "Merchant",
+                    // Only accept credit cards
+                    allowedCardFundingTypes = listOf(PaymentSheet.CardFundingType.Credit)
+                ),
+                confirmationHandler = handler,
+                customerSheetLoader = FakeCustomerSheetLoader(
+                    customerPaymentMethods = allPaymentMethods,
+                    isGooglePayAvailable = false
+                ),
+                paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                    paymentMethods = CustomerSheetDataResult.success(allPaymentMethods),
+                ),
+                cardFundingFilter = PaymentSheetCardFundingFilter(listOf(PaymentSheet.CardFundingType.Credit))
+            )
+
+            viewModel.viewState.test {
+                val selectPaymentMethodState = awaitItem() as SelectPaymentMethod
+
+                assertPaymentMethodsFiltered(
+                    selectPaymentMethodState,
+                    acceptedPaymentMethods = listOf(acceptedCreditCardPaymentMethod, usBankAccountPaymentMethod),
+                    rejectedPaymentMethods = listOf(rejectedDebitCardPaymentMethod)
+                )
+            }
+        }
 
     @Test
     fun `When card number input is completed, should report event`() = runTest(testDispatcher) {
@@ -3756,6 +3876,30 @@ class CustomerSheetViewModelTest {
     @Suppress("UNCHECKED_CAST")
     private suspend inline fun <R> ReceiveTurbine<*>.awaitViewState(): R {
         return awaitItem() as R
+    }
+
+    private suspend fun ReceiveTurbine<CustomerSheetViewState>.awaitSelectPaymentMethodState(): SelectPaymentMethod {
+        var currentState: CustomerSheetViewState? = null
+        while (currentState !is SelectPaymentMethod) {
+            currentState = awaitItem()
+        }
+        return currentState
+    }
+
+    private fun assertPaymentMethodsFiltered(
+        selectPaymentMethodState: SelectPaymentMethod,
+        acceptedPaymentMethods: List<PaymentMethod>,
+        rejectedPaymentMethods: List<PaymentMethod>,
+    ) {
+        acceptedPaymentMethods.forEach { acceptedMethod ->
+            assertThat(selectPaymentMethodState.savedPaymentMethods)
+                .contains(acceptedMethod)
+        }
+
+        rejectedPaymentMethods.forEach { rejectedMethod ->
+            assertThat(selectPaymentMethodState.savedPaymentMethods)
+                .doesNotContain(rejectedMethod)
+        }
     }
 
     private companion object {

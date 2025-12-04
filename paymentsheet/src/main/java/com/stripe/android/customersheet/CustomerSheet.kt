@@ -230,6 +230,9 @@ class CustomerSheet internal constructor(
 
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
 
+        internal val allowedCardFundingTypes: List<PaymentSheet.CardFundingType> =
+            ConfigurationDefaults.allowedCardFundingTypes,
+
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
     ) : Parcelable {
 
