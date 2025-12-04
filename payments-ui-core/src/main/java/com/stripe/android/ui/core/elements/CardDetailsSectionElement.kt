@@ -2,7 +2,9 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -19,6 +21,7 @@ class CardDetailsSectionElement(
     private val collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     override val identifier: IdentifierSpec,
     override val controller: CardDetailsSectionController = CardDetailsSectionController(
         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
@@ -26,6 +29,7 @@ class CardDetailsSectionElement(
         collectName = collectName,
         cbcEligibility = cbcEligibility,
         cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter,
         automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
     )
 ) : FormElement {

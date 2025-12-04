@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -40,6 +41,7 @@ internal sealed interface UiDefinitionFactory {
         val requiresMandate: Boolean,
         val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
         val cardBrandFilter: CardBrandFilter,
+        val cardFundingFilter: CardFundingFilter,
         val setAsDefaultMatchesSaveForFutureUse: Boolean,
         val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
         val linkInlineHandler: LinkInlineHandler?,
@@ -90,6 +92,7 @@ internal sealed interface UiDefinitionFactory {
                         requiresMandate = requiresMandate,
                         onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
                         cardBrandFilter = metadata.cardBrandFilter,
+                        cardFundingFilter = metadata.cardBrandFilter,
                         initialLinkUserInput = initialLinkUserInput,
                         setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
                         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,

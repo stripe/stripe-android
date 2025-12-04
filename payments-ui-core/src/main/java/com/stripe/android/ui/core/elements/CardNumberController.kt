@@ -14,7 +14,9 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.CardNumber
@@ -72,6 +74,7 @@ internal class DefaultCardNumberController(
     override val initialValue: String?,
     private val cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
 ) : CardNumberController() {
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
@@ -181,7 +184,8 @@ internal class DefaultCardNumberController(
             }
         },
         isCbcEligible = { isEligibleForCardBrandChoice },
-        cardBrandFilter = cardBrandFilter
+        cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter
     )
 
     override val trailingIcon: StateFlow<TextFieldIcon?> = combineAsStateFlow(
