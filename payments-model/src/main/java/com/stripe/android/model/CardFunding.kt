@@ -13,7 +13,7 @@ enum class CardFunding(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun fromCode(code: String?): CardFunding? {
-            return entries.firstOrNull { it.code == code }
+            return entries.firstOrNull { it.code == code?.lowercase() }
         }
     }
 }

@@ -3,6 +3,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.lpmfoundations.FormHeaderInformation
@@ -363,7 +364,7 @@ internal data class PaymentMethodMetadata(
                 isGooglePayReady = isGooglePayReady,
                 displayableCustomPaymentMethods = elementsSession.toDisplayableCustomPaymentMethods(configuration),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
-                cardFundingFilter = PaymentSheetCardFundingFilter(configuration.allowsDelayedPaymentMethods),
+                cardFundingFilter = PaymentSheetCardFundingFilter(configuration.allowedCardFundingTypes),
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 termsDisplay = configuration.termsDisplay,
                 forceSetupFutureUseBehaviorAndNewMandate = elementsSession
@@ -420,6 +421,7 @@ internal data class PaymentMethodMetadata(
                 externalPaymentMethodSpecs = emptyList(),
                 displayableCustomPaymentMethods = emptyList(),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
+                cardFundingFilter = PaymentSheetCardFundingFilter(ConfigurationDefaults.allowedCardFundingTypes),
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 termsDisplay = emptyMap(),
                 forceSetupFutureUseBehaviorAndNewMandate = elementsSession

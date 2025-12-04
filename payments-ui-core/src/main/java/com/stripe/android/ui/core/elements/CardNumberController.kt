@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -262,13 +263,19 @@ internal class DefaultCardNumberController(
         }
     }
 
-    private val _fieldState = combineAsStateFlow(impliedCardBrand, _fieldValue) { brand, fieldValue ->
+    private val _fieldState = combineAsStateFlow(
+        flow1 = impliedCardBrand,
+        flow2 = _fieldValue,
+        flow3 = accountRangeService.accountRangeFlow
+    ) { brand, fieldValue, accountRange ->
+        Log.d("TOLUWANI", "range => ${accountRange?.funding}")
         cardTextFieldConfig.determineState(
             brand,
-            fieldValue,
-            accountRangeService.accountRange?.panLength ?: brand.getMaxLengthForCardNumber(
+            number = fieldValue,
+            numberAllowedDigits = accountRangeService.accountRange?.panLength ?: brand.getMaxLengthForCardNumber(
                 fieldValue
-            )
+            ),
+            funding = accountRange?.funding
         )
     }
     override val fieldState: StateFlow<TextFieldState> = _fieldState

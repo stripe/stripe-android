@@ -92,7 +92,7 @@ internal sealed interface UiDefinitionFactory {
                         requiresMandate = requiresMandate,
                         onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
                         cardBrandFilter = metadata.cardBrandFilter,
-                        cardFundingFilter = metadata.cardBrandFilter,
+                        cardFundingFilter = metadata.cardFundingFilter,
                         initialLinkUserInput = initialLinkUserInput,
                         setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
                         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,

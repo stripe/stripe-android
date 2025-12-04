@@ -1,20 +1,25 @@
 package com.stripe.android.ui.core.elements
 
+import android.util.Log
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.CardUtils
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.R as StripeR
 
 internal class CardNumberConfig(
     private val isCardBrandChoiceEligible: Boolean,
-    private val cardBrandFilter: CardBrandFilter
+    private val cardBrandFilter: CardBrandFilter,
+    private val cardFundingFilter: CardFundingFilter
 ) : CardDetailsTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "Card number"
@@ -32,7 +37,12 @@ internal class CardNumberConfig(
         }
     }
 
-    override fun determineState(brand: CardBrand, number: String, numberAllowedDigits: Int): TextFieldState {
+    override fun determineState(
+        brand: CardBrand,
+        number: String,
+        numberAllowedDigits: Int,
+        funding: CardFunding?
+    ): TextFieldState {
         val luhnValid = CardUtils.isValidLuhnNumber(number)
         val isDigitLimit = brand.getMaxLengthForCardNumber(number) != -1
 
@@ -54,6 +64,12 @@ internal class CardNumberConfig(
             TextFieldStateConstants.Error.Invalid(
                 errorMessageResId = StripeR.string.stripe_invalid_card_number,
                 preventMoreInput = true,
+            )
+        } else if (cardFundingFilter.isAccepted(funding).not()) {
+            Log.d("TOLUWANI", "[$funding] not accepted => $number")
+            TextFieldStateConstants.Error.Invalid(
+                errorMessageResId = StripeR.string.stripe_invalid_card_funding_type,
+                preventMoreInput = false,
             )
         } else if (isDigitLimit && number.length < numberAllowedDigits) {
             TextFieldStateConstants.Error.Incomplete(StripeR.string.stripe_invalid_card_number)

@@ -7,13 +7,13 @@ import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface CardFundingFilter: Parcelable {
-    fun isAccepted(cardFunding: CardFunding): Boolean
+    fun isAccepted(cardFunding: CardFunding?): Boolean
 }
 
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object DefaultCardFundingFilter : CardFundingFilter {
-    override fun isAccepted(cardFunding: CardFunding): Boolean {
+    override fun isAccepted(cardFunding: CardFunding?): Boolean {
         return true
     }
 }

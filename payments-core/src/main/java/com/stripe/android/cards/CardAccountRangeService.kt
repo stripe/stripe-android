@@ -10,7 +10,11 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
@@ -32,11 +36,17 @@ class CardAccountRangeService(
     val isLoading: StateFlow<Boolean> = cardAccountRangeRepository.loading
     private var lastBin: Bin? = null
 
-    var accountRanges: List<AccountRange> = emptyList()
-        private set
+    private val _accountRanges = MutableStateFlow(emptyList<AccountRange>())
+    val accountRanges: StateFlow<List<AccountRange>> = _accountRanges
 
+    val accountRangeFlow: StateFlow<AccountRange?> = _accountRanges.map { it.firstOrNull() }
+        .stateIn(
+            scope = CoroutineScope(workContext),
+            started = SharingStarted.Lazily,
+            initialValue = null
+        )
     val accountRange: AccountRange?
-        get() = accountRanges.firstOrNull()
+        get() = accountRangeFlow.value
 
     @VisibleForTesting
     var accountRangeRepositoryJob: Job? = null
@@ -61,19 +71,7 @@ class CardAccountRangeService(
             return
         }
 
-        val staticAccountRanges = staticCardAccountRanges.filter(cardNumber)
-
-        if (isCbcEligible) {
-            queryAccountRangeRepository(cardNumber)
-        } else {
-            if (staticAccountRanges.isEmpty() || shouldQueryRepository(staticAccountRanges)) {
-                // query for AccountRange data
-                queryAccountRangeRepository(cardNumber)
-            } else {
-                // use static AccountRange data
-                updateAccountRangesResult(staticAccountRanges)
-            }
-        }
+        queryAccountRangeRepository(cardNumber)
     }
 
     @JvmSynthetic
@@ -83,7 +81,7 @@ class CardAccountRangeService(
             cancelAccountRangeRepositoryJob()
 
             // invalidate accountRange before fetching
-            accountRanges = emptyList()
+            _accountRanges.tryEmit(emptyList())
 
             accountRangeRepositoryJob = CoroutineScope(workContext).launch {
                 val bin = cardNumber.bin
@@ -107,12 +105,10 @@ class CardAccountRangeService(
     }
 
     fun updateAccountRangesResult(accountRanges: List<AccountRange>) {
-        this.accountRanges = accountRanges.filter {
-            cardBrandFilter.isAccepted(it.brand)
-        }.filter {
-            cardFundingFilter.isAccepted(it.funding)
-        }
-        accountRangeResultListener.onAccountRangesResult(this.accountRanges, accountRanges)
+        this._accountRanges.tryEmit(
+            value = accountRanges.filter { cardBrandFilter.isAccepted(it.brand) }
+        )
+        accountRangeResultListener.onAccountRangesResult(this._accountRanges.value, accountRanges)
     }
 
     private fun shouldQueryRepository(

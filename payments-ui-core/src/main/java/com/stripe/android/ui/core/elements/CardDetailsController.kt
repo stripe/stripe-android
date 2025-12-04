@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
@@ -46,7 +47,7 @@ internal class CardDetailsController(
                 textFieldConfig = SimpleTextFieldConfig(
                     label = resolvableString(R.string.stripe_name_on_card),
                     capitalization = KeyboardCapitalization.Words,
-                    keyboard = androidx.compose.ui.text.input.KeyboardType.Text
+                    keyboard = KeyboardType.Text
                 ),
                 initialValue = initialValues[IdentifierSpec.Name],
             ),
@@ -62,7 +63,8 @@ internal class CardDetailsController(
         DefaultCardNumberController(
             cardTextFieldConfig = CardNumberConfig(
                 isCardBrandChoiceEligible = cbcEligibility != CardBrandChoiceEligibility.Ineligible,
-                cardBrandFilter = cardBrandFilter
+                cardBrandFilter = cardBrandFilter,
+                cardFundingFilter = cardFundingFilter
             ),
             cardAccountRangeRepository = cardAccountRangeRepositoryFactory.create(),
             uiContext = uiContext,
@@ -80,7 +82,7 @@ internal class CardDetailsController(
                 is CardBrandChoiceEligibility.Ineligible -> CardBrandChoiceConfig.Ineligible
             },
             cardBrandFilter = cardBrandFilter,
-            cardFundingFilter =
+            cardFundingFilter = cardFundingFilter
         )
     )
 

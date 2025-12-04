@@ -147,6 +147,7 @@
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="stripe_invalid_bank_account_iban">The IBAN you entered is invalid.</string>
   <string name="stripe_invalid_card_number">Your card\'s number is invalid.</string>
+  <string name="stripe_invalid_card_funding_type">invalid funding type.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="stripe_invalid_cvc">Your card\'s security code is invalid.</string>
   <!-- Error when customer's name is invalid -->

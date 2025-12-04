@@ -16,7 +16,8 @@ internal data class CvcState(
     val isValid: Boolean = cvcTextFieldConfig.determineState(
         brand = cardBrand,
         number = cvc,
-        numberAllowedDigits = cardBrand.maxCvcLength
+        numberAllowedDigits = cardBrand.maxCvcLength,
+        funding = null
     ).isValid()
 
     val label: Int = if (cardBrand == CardBrand.AmericanExpress) {
