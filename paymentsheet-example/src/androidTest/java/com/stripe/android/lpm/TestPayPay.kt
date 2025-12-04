@@ -9,7 +9,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.EnablePayPaySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.test.core.TestParameters
@@ -26,7 +25,6 @@ internal class TestPayPay : BasePlaygroundTest() {
         settings[CustomerSettingsDefinition] = CustomerType.GUEST
         settings[DelayedPaymentMethodsSettingsDefinition] = true
         settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
-        settings[EnablePayPaySettingsDefinition] = true
     }
 
     @Test
