@@ -26,6 +26,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -3475,7 +3476,17 @@ class PaymentSheet internal constructor(
         /**
          * Unknown funding type
          */
-        Unknown
+        Unknown;
+
+        internal val cardFunding: CardFunding
+            get() {
+                return when (this) {
+                    Debit -> CardFunding.Debit
+                    Credit -> CardFunding.Credit
+                    Prepaid -> CardFunding.Prepaid
+                    Unknown -> CardFunding.Unknown
+                }
+            }
     }
 
     /**

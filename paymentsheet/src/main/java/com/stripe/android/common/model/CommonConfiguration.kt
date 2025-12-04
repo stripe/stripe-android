@@ -31,6 +31,7 @@ internal data class CommonConfiguration(
     val paymentMethodOrder: List<String>,
     val externalPaymentMethods: List<String>,
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+    val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val googlePlacesApiKey: String?,
@@ -192,6 +193,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     opensCardScannerAutomatically = opensCardScannerAutomatically,
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
+    allowedCardFundingTypes = allowedCardFundingTypes,
 )
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -217,6 +219,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     opensCardScannerAutomatically = opensCardScannerAutomatically,
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
+    allowedCardFundingTypes = allowedCardFundingTypes,
 )
 
 internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -249,6 +252,7 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
     opensCardScannerAutomatically = false,
     userOverrideCountry = null,
     appearance = PaymentSheet.Appearance(),
+    allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
 )
 
 private fun String.isEKClientSecretValid(): Boolean {
