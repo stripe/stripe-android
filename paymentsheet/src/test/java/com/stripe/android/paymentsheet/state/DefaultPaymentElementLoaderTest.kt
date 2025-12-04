@@ -51,6 +51,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentsheet.ConfigFixtures
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -3409,6 +3410,67 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(state.customer?.paymentMethods?.first()?.card?.brand).isEqualTo(
             CardBrand.AmericanExpress
         )
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @OptIn(CardFundingFilteringPrivatePreview::class)
+    @Test
+    fun `Should filter saved cards by allowed funding types`() = runScenario {
+        prefsRepository.setSavedSelection(null)
+        val credit = PaymentMethodFactory.card(id = "pm_credit").update(
+            last4 = "1000",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa,
+            funding = "credit",
+        )
+        val bank = PaymentMethodFactory.usBankAccount().copy(
+            id = "pm_bank"
+        )
+
+        val paymentMethods = listOf(
+            credit,
+            bank,
+            PaymentMethodFactory.card(id = "pm_debit").update(
+                last4 = "1001",
+                addCbcNetworks = false,
+                brand = CardBrand.Visa,
+                funding = "debit",
+            ),
+            PaymentMethodFactory.card(id = "pm_prepaid").update(
+                last4 = "1002",
+                addCbcNetworks = false,
+                brand = CardBrand.Visa,
+                funding = "prepaid",
+            ),
+            PaymentMethodFactory.card(id = "pm_no_funding").update(
+                last4 = "1003",
+                addCbcNetworks = false,
+                brand = CardBrand.Visa,
+                funding = null,
+            )
+        )
+
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            isGooglePayReady = true,
+            customerRepo = FakeCustomerRepository(paymentMethods = paymentMethods),
+        )
+
+        val creditOnlyConfig = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+            .allowedCardFundingTypes(listOf(PaymentSheet.CardFundingType.Credit))
+            .build()
+
+        val state = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = creditOnlyConfig,
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        assertThat(state.customer?.paymentMethods).containsExactly(credit, bank)
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
