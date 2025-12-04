@@ -46,7 +46,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-@Suppress("TooManyFunctions", "LargeClass")
+@Suppress("TooManyFunctions")
 internal class OnrampViewModel(
     private val application: Application,
     savedStateHandle: SavedStateHandle
