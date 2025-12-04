@@ -12,7 +12,7 @@ internal class CardFundingTest {
     }
 
     @Test
-    fun `given different case codes, fromCode should be case insensitive`() {
+    fun `fromCode should be case insensitive`() {
         assertThat(CardFunding.fromCode("credit")).isEqualTo(CardFunding.Credit)
         assertThat(CardFunding.fromCode("CREDIT")).isEqualTo(CardFunding.Credit)
         assertThat(CardFunding.fromCode("Credit")).isEqualTo(CardFunding.Credit)

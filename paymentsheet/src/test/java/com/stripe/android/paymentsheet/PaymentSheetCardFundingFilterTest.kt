@@ -72,7 +72,7 @@ internal class PaymentSheetCardFundingFilterTest {
     }
 
     @Test
-    fun `filter with empty list should reject all funding types`() {
+    fun `filter with no accepted types should reject all funding types`() {
         val filter = PaymentSheetCardFundingFilter(emptyList())
 
         for (funding in CardFunding.entries) {
