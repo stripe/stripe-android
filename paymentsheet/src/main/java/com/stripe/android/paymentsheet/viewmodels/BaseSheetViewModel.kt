@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodLayoutProvider
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -217,6 +218,18 @@ internal abstract class BaseSheetViewModel(
         } else {
             onUserCancel()
         }
+    }
+
+    fun getPaymentMethodLayout(): PaymentSheet.PaymentMethodLayout {
+        val paymentMethodMetadata = this.paymentMethodMetadata.value ?: return config.paymentMethodLayout
+        val customerState = customerStateHolder.customer.value
+
+        return PaymentMethodLayoutProvider(
+            layout = config.paymentMethodLayout,
+            customerState = customerState,
+            paymentMethodMetadata = paymentMethodMetadata,
+            eventReporter = eventReporter,
+        ).getAndLogExposure()
     }
 
     abstract fun onUserCancel()

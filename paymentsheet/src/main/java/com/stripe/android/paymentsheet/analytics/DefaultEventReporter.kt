@@ -358,6 +358,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireV2Event(
             PaymentSheetEvent.ExperimentExposure(
                 experiment = experiment,
+                mode = mode,
             )
         )
     }
