@@ -51,21 +51,11 @@ data class ConsumerPaymentDetails(
     ) {
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        enum class Funding(val code: String) {
-            Credit("CREDIT"),
-            Debit("DEBIT"),
-            Prepaid("PREPAID"),
-            Unknown("UNKNOWN");
-
-            val cardFunding: CardFunding
-                get() {
-                    return when (this) {
-                        Credit -> CardFunding.Credit
-                        Debit -> CardFunding.Debit
-                        Prepaid -> CardFunding.Prepaid
-                        Unknown -> CardFunding.Unknown
-                    }
-                }
+        enum class Funding(val code: String, val cardFunding: CardFunding) {
+            Credit("CREDIT", CardFunding.Credit),
+            Debit("DEBIT", CardFunding.Debit),
+            Prepaid("PREPAID", CardFunding.Prepaid),
+            Unknown("UNKNOWN", CardFunding.Unknown);
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             companion object {
