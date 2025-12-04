@@ -106,6 +106,7 @@ internal object PaymentMethodMetadataFactory {
             onBehalfOf = onBehalfOf,
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
+            experimentsData = null,
         )
     }
 

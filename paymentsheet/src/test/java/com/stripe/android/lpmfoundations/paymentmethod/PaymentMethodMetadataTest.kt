@@ -1180,6 +1180,7 @@ internal class PaymentMethodMetadataTest {
             onBehalfOf = null,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            experimentsData = null,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1269,6 +1270,7 @@ internal class PaymentMethodMetadataTest {
                 attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
             ),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            experimentsData = null,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
