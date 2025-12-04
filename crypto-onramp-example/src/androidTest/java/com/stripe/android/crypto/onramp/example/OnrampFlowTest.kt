@@ -1,8 +1,6 @@
 package com.stripe.android.crypto.onramp.example
 
 import android.content.Context
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -139,20 +137,5 @@ class OnrampFlowTest {
         val node = composeRule.onNodeWithTag(tag)
         runCatching { node.performScrollTo() }
         node.performClick()
-    }
-
-    @OptIn(ExperimentalTestApi::class)
-    private fun getSnackbarText(timeoutMs: Long = defaultTimeout.inWholeMilliseconds): String? {
-        // Wait for the text node itself (optional)
-        val exists = waitForOptionalNode(hasTestTag(SNACKBAR_TEXT_TAG), timeoutMs)
-        if (!exists) return null
-
-        // Read text from the tagged Text node (merged tree)
-        return runCatching {
-            val node = composeRule.onNodeWithTag(SNACKBAR_TEXT_TAG)
-                .fetchSemanticsNode()
-            node.config.getOrNull(SemanticsProperties.Text)
-                ?.joinToString("") { it.text }
-        }.getOrNull()
     }
 }
