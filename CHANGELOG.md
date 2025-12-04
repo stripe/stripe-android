@@ -5,6 +5,9 @@
 ### PaymentSheet
 * [CHANGED][12036](https://github.com/stripe/stripe-android/pull/12036) Updates the google places SDK from 3.5.0 to 5.0.0.
 
+### Identity
+* [FIXED] [12083](https://github.com/stripe/stripe-android/pull/12083) Improved exception handling for TFLite selfie models to prevent rare crashes in the Identity verification flow.
+
 ## 22.3.0 - 2025-12-01
 
 ### Payment Method Messaging

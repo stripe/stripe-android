@@ -76,6 +76,7 @@ internal class IdentityScanFlow(
      */
     private var loopJob: Job? = null
 
+    @Suppress("TooGenericExceptionCaught")
     override fun startFlow(
         context: Context,
         imageStream: Flow<CameraPreviewImage<Bitmap>>,
@@ -118,7 +119,12 @@ internal class IdentityScanFlow(
                             )
                         }
                     )
-            } catch (e: IllegalStateException) {
+            } catch (e: Exception) {
+                identityAnalyticsRequestFactory.genericError(
+                    "Analyzer creation failed, likely due to model file issue: ${e.message}",
+                    e.stackTraceToString()
+                )
+
                 withContext(Dispatchers.Main) {
                     errorHandler(e)
                 }
