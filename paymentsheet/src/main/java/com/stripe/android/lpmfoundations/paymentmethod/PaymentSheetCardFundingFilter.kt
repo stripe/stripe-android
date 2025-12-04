@@ -9,8 +9,8 @@ import kotlinx.parcelize.Parcelize
 internal data class PaymentSheetCardFundingFilter(
     private val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>
 ) : CardFundingFilter {
-    override fun isAccepted(cardFunding: CardFunding?): Boolean {
-        return allowedCardFundingTypes.any { it.matches(cardFunding ?: CardFunding.Unknown) }
+    override fun isAccepted(cardFunding: CardFunding): Boolean {
+        return allowedCardFundingTypes.any { it.matches(cardFunding) }
     }
 
     private fun PaymentSheet.CardFundingType.matches(cardFunding: CardFunding): Boolean {

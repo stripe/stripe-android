@@ -79,17 +79,4 @@ internal class PaymentSheetCardFundingFilterTest {
             assertThat(filter.isAccepted(funding)).isFalse()
         }
     }
-
-    @Test
-    fun `filter should treat null funding as unknown`() {
-        val filterAcceptingUnknown = PaymentSheetCardFundingFilter(
-            listOf(PaymentSheet.CardFundingType.Unknown)
-        )
-        assertThat(filterAcceptingUnknown.isAccepted(null)).isTrue()
-
-        val filterNotAcceptingUnknown = PaymentSheetCardFundingFilter(
-            listOf(PaymentSheet.CardFundingType.Credit)
-        )
-        assertThat(filterNotAcceptingUnknown.isAccepted(null)).isFalse()
-    }
 }
