@@ -388,7 +388,9 @@ class WalletUiStateTest {
 
     @Test
     fun testCardFundingFilterAcceptsCard() {
-        val creditCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(funding = ConsumerPaymentDetails.Card.Funding.Credit)
+        val creditCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            funding = ConsumerPaymentDetails.Card.Funding.Credit
+        )
         val state = walletUiState(
             paymentDetailsList = listOf(creditCard),
             selectedItem = creditCard,
@@ -400,7 +402,9 @@ class WalletUiStateTest {
 
     @Test
     fun testCardFundingFilterRejectsCard() {
-        val creditCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(funding = ConsumerPaymentDetails.Card.Funding.Credit)
+        val creditCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            funding = ConsumerPaymentDetails.Card.Funding.Credit
+        )
         val state = walletUiState(
             paymentDetailsList = listOf(creditCard),
             selectedItem = creditCard,

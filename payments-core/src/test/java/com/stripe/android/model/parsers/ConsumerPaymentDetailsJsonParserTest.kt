@@ -201,6 +201,7 @@ class ConsumerPaymentDetailsJsonParserTest {
         )
     }
 
+    @SuppressWarnings("LongMethod")
     @Test
     fun `parse card with DEBIT funding`() {
         val json = JSONObject(
@@ -272,6 +273,7 @@ class ConsumerPaymentDetailsJsonParserTest {
         )
     }
 
+    @SuppressWarnings("LongMethod")
     @Test
     fun `parse card with PREPAID funding`() {
         val json = JSONObject(
@@ -343,6 +345,7 @@ class ConsumerPaymentDetailsJsonParserTest {
         )
     }
 
+    @SuppressWarnings("LongMethod")
     @Test
     fun `parse card with UNKNOWN funding`() {
         val json = JSONObject(
@@ -414,6 +417,7 @@ class ConsumerPaymentDetailsJsonParserTest {
         )
     }
 
+    @SuppressWarnings("LongMethod")
     @Test
     fun `parse card with unrecognized funding defaults to Unknown`() {
         val json = JSONObject(
