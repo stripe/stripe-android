@@ -486,4 +486,109 @@ class CardUiDefinitionFactoryTest {
             DefaultAppearance.appearance.parseAppearance()
         }
     }
+
+    @Test
+    fun testCardWithTapToAdd() {
+        paparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                metadata = metadata.copy(
+                    isTapToAddSupported = true,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun testCardWithTapToAddAndValidation() {
+        paparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                metadata = metadata.copy(
+                    isTapToAddSupported = true,
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    )
+                ),
+                isValidating = true,
+            )
+        }
+    }
+
+    @Test
+    fun testCardWithTapToAddAndBillingDetails() {
+        paparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                metadata = metadata.copy(
+                    isTapToAddSupported = true,
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    )
+                )
+            )
+        }
+    }
+
+    @Test
+    fun testCardWithTapToAddAndSaveForLater() {
+        paparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                metadata = metadata.copy(
+                    isTapToAddSupported = true,
+                    customerMetadata = getDefaultCustomerMetadata(
+                        isPaymentMethodSetAsDefaultEnabled = false
+                    ),
+                )
+            )
+        }
+    }
+
+    @Test
+    fun testCardWithTapToAddAndMandate() {
+        paparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                metadata = metadata.copy(
+                    isTapToAddSupported = true,
+                    stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                        paymentMethodTypes = listOf("card"),
+                    ),
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun testCardWithTapToAddAndDefaultValues() {
+        paparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                metadata = metadata.copy(
+                    isTapToAddSupported = true,
+                ),
+                paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
+                    code = "card",
+                    billingDetails = null,
+                    requiresMandate = false,
+                    overrideParamMap = mapOf(
+                        "type" to "card",
+                        "card" to mapOf(
+                            "number" to "4242424242424242",
+                            "exp_month" to "07",
+                            "exp_year" to "2050",
+                            "cvc" to "123",
+                        ),
+                        "billing_details" to mapOf(
+                            "country" to "US",
+                            "postal_code" to "94080",
+                        ),
+                    ),
+                    productUsage = emptySet(),
+                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+                )
+            )
+        }
+    }
 }

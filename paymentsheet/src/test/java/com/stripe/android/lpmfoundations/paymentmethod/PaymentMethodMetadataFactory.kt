@@ -63,6 +63,7 @@ internal object PaymentMethodMetadataFactory {
         sellerBusinessName: String? = null,
         analyticsMetadata: AnalyticsMetadata = AnalyticsMetadata(emptyMap()),
         experimentsData: ElementsSession.ExperimentsData? = null,
+        isTapToAddSupported: Boolean = false,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -109,6 +110,7 @@ internal object PaymentMethodMetadataFactory {
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
             experimentsData = experimentsData,
+            isTapToAddSupported = isTapToAddSupported,
         )
     }
 

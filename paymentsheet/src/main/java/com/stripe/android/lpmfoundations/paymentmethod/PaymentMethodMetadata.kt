@@ -82,6 +82,7 @@ internal data class PaymentMethodMetadata(
     val integrationMetadata: IntegrationMetadata,
     val analyticsMetadata: AnalyticsMetadata,
     val experimentsData: ElementsSession.ExperimentsData?,
+    val isTapToAddSupported: Boolean,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -327,6 +328,7 @@ internal data class PaymentMethodMetadata(
             clientAttributionMetadata: ClientAttributionMetadata,
             integrationMetadata: IntegrationMetadata,
             analyticsMetadata: AnalyticsMetadata,
+            isTapToAddSupported: Boolean,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
@@ -375,6 +377,7 @@ internal data class PaymentMethodMetadata(
                 integrationMetadata = integrationMetadata,
                 analyticsMetadata = analyticsMetadata,
                 experimentsData = elementsSession.experimentsData,
+                isTapToAddSupported = isTapToAddSupported,
             )
         }
 
@@ -439,6 +442,7 @@ internal data class PaymentMethodMetadata(
                 integrationMetadata = integrationMetadata,
                 analyticsMetadata = AnalyticsMetadata(emptyMap()), // This is unused in customer sheet.
                 experimentsData = elementsSession.experimentsData,
+                isTapToAddSupported = false, // This is unused in customer sheet.
             )
         }
     }

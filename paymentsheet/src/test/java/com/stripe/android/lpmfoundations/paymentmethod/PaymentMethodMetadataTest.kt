@@ -1117,6 +1117,7 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddSupported = false,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1181,6 +1182,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             experimentsData = null,
+            isTapToAddSupported = false,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1271,6 +1273,7 @@ internal class PaymentMethodMetadataTest {
             ),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             experimentsData = null,
+            isTapToAddSupported = false,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -1347,6 +1350,7 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddSupported = false,
         )
     }
 
@@ -2068,6 +2072,7 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddSupported = false,
         )
 
         assertThat(metadata.availableWallets)
@@ -2149,6 +2154,7 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddSupported = false,
         )
     }
 
@@ -2266,4 +2272,28 @@ internal class PaymentMethodMetadataTest {
         cardBrandAcceptance = cardBrandAcceptance,
         shopPayConfiguration = shopPayConfiguration
     )
+
+    @Test
+    fun `createForPaymentElement sets isTapToAddSupported from parameter`() {
+        val elementsSession = createElementsSession(
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        )
+
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+            sharedDataSpecs = emptyList(),
+            externalPaymentMethodSpecs = emptyList(),
+            isGooglePayReady = false,
+            linkStateResult = null,
+            customerMetadata = null,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddSupported = true,
+        )
+
+        assertThat(metadata.isTapToAddSupported).isTrue()
+    }
 }

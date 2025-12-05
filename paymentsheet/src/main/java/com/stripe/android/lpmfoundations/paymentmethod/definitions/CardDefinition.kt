@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.stripe.android.common.taptoadd.TapToAddFormWrapperElement
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -86,7 +87,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         arguments: UiDefinitionFactory.Arguments,
     ): List<FormElement> {
         val billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration
-        return buildList {
+        val elements = buildList {
             add(
                 CardDetailsSectionElement(
                     cardAccountRangeRepositoryFactory = arguments.cardAccountRangeRepositoryFactory,
@@ -162,6 +163,12 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                     )
                 )
             }
+        }
+
+        return if (metadata.isTapToAddSupported) {
+            listOf(TapToAddFormWrapperElement(elements))
+        } else {
+            elements
         }
     }
 
@@ -272,7 +279,11 @@ internal class CombinedLinkMandateElement(
     }
 
     @Composable
-    override fun ComposeUI(enabled: Boolean) {
+    override fun ComposeUI(
+        enabled: Boolean,
+        hiddenIdentifiers: Set<IdentifierSpec>,
+        lastTextFieldIdentifier: IdentifierSpec?
+    ) {
         val linkState by linkSignupStateFlow.collectAsState()
         Mandate(
             // when displaying the mandate from Link UI (add card to Link) we always want the

@@ -19,4 +19,6 @@
 
     <string name="stripe_paymentsheet_iban">IBAN</string>
     <string name="stripe_paymentsheet_invalid_deferred_intent_usage">The payment method on the intent doesn\'t match the one provided in the createIntentCallback. When using deferred intent creation, ensure you\'re either creating a new intent with the correct payment method or updating an existing intent with the new payment method ID.</string>
+
+    <string name="stripe_paymentsheet_tap_to_add">Tap to Add Card</string>
 </resources>
