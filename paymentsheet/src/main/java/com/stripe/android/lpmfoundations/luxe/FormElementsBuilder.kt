@@ -7,6 +7,7 @@ import com.stripe.android.uicore.elements.FormElement
 
 internal class FormElementsBuilder(
     private val arguments: UiDefinitionFactory.Arguments,
+    allowedCountriesOverride: Set<String>? = null
 ) {
     private val headerFormElements: MutableList<FormElement> = mutableListOf()
     private val uiFormElements: MutableList<FormElement> = mutableListOf()
@@ -15,8 +16,8 @@ internal class FormElementsBuilder(
     private val requiredContactInformationCollectionModes: MutableSet<ContactInformationCollectionMode> = mutableSetOf()
 
     private var requireBillingAddressCollection: Boolean = false
-    private var availableCountries: Set<String> =
-        arguments.billingDetailsCollectionConfiguration.allowedBillingCountries
+    private var availableCountries: Set<String> = allowedCountriesOverride
+        ?: arguments.billingDetailsCollectionConfiguration.allowedBillingCountries
 
     init {
         // Setup the required contact information fields based on the merchant billingDetailsCollectionConfiguration.
@@ -51,13 +52,6 @@ internal class FormElementsBuilder(
     fun element(formElement: FormElement): FormElementsBuilder = apply {
         uiFormElements += formElement
     }
-
-    fun availableCountries(
-        availableCountries: Set<String>
-    ) = apply {
-        this.availableCountries = availableCountries
-    }
-
     fun ignoreBillingAddressRequirements() = apply {
         requireBillingAddressCollection = false
     }
@@ -89,9 +83,7 @@ internal class FormElementsBuilder(
             addAll(uiFormElements)
 
             if (requireBillingAddressCollection) {
-                val elements = AddressSpec(
-                    allowedCountryCodes = availableCountries,
-                ).transform(
+                val elements = AddressSpec(allowedCountryCodes = availableCountries,).transform(
                     initialValues = arguments.initialValues,
                     shippingValues = arguments.shippingValues,
                     autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,

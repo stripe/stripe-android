@@ -54,8 +54,10 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple {
         // These are the countries/regions where Klarna allows buyers
         val allowedCountryCodes: Set<String> = CountryUtils.klarnaSupportedBuyerCountries
 
-        val formElementsBuilder = FormElementsBuilder(arguments)
-            .availableCountries(allowedCountryCodes)
+        val formElementsBuilder = FormElementsBuilder(
+            arguments = arguments,
+            allowedCountriesOverride = allowedCountryCodes,
+        )
 
         if (KlarnaDefinition.requiresMandate(metadata)) {
             formElementsBuilder.footer(
@@ -70,11 +72,11 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple {
         ) {
             formElementsBuilder
                 .element(
-                getKlarnaCountryElement(
-                    allowedCountryCodes = allowedCountryCodes,
-                    initialValue = metadata.stripeIntent.countryCode
+                    getKlarnaCountryElement(
+                        allowedCountryCodes = allowedCountryCodes,
+                        initialValue = metadata.stripeIntent.countryCode
+                    )
                 )
-            )
         }
 
         return formElementsBuilder.build()
