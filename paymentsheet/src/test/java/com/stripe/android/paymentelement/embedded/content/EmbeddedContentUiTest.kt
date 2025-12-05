@@ -5,6 +5,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
@@ -140,6 +141,7 @@ internal class EmbeddedContentUiTest {
             embeddedSelectionHolder = selectionHolder,
             savedStateHandle = savedStateHandle,
             selectedPaymentMethodCode = "",
+            tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
         )
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()

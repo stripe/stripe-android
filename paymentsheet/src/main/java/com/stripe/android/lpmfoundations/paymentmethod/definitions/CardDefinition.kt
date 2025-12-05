@@ -86,8 +86,24 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
     ): List<FormElement> {
+        val elements = buildElements(metadata, arguments)
+
+        val tapToAddHelper = arguments.tapToAddHelper
+
+        return if (metadata.isTapToAddSupported && tapToAddHelper != null) {
+            listOf(TapToAddFormWrapperElement(tapToAddHelper, elements))
+        } else {
+            elements
+        }
+    }
+
+    private fun buildElements(
+        metadata: PaymentMethodMetadata,
+        arguments: UiDefinitionFactory.Arguments,
+    ): List<FormElement> {
         val billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration
-        val elements = buildList {
+
+        return buildList {
             add(
                 CardDetailsSectionElement(
                     cardAccountRangeRepositoryFactory = arguments.cardAccountRangeRepositoryFactory,
@@ -163,12 +179,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                     )
                 )
             }
-        }
-
-        return if (metadata.isTapToAddSupported) {
-            listOf(TapToAddFormWrapperElement(elements))
-        } else {
-            elements
         }
     }
 

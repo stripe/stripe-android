@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -20,6 +21,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -44,6 +46,7 @@ internal class DefaultFormHelper(
     private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     private val isLinkUI: Boolean = false,
     private val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
+    private val tapToAddHelper: TapToAddHelper?,
 ) : FormHelper {
     companion object {
         internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
@@ -53,6 +56,18 @@ internal class DefaultFormHelper(
             linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
             shouldCreateAutomaticallyLaunchedCardScanFormDataHelper: Boolean = false,
         ): FormHelper {
+            val tapToAddHelper = TapToAddHelper.create(
+                coroutineScope = viewModel.viewModelScope,
+                tapToAddCollectionHandler = viewModel.tapToAddCollectionHandler,
+                paymentMethodMetadata = paymentMethodMetadata,
+                updateProcessing = { processing ->
+                    viewModel.savedStateHandle[SAVE_PROCESSING] = processing
+                },
+                updateError = { error ->
+                    viewModel.onError(error)
+                },
+            )
+
             return DefaultFormHelper(
                 coroutineScope = viewModel.viewModelScope,
                 linkInlineHandler = linkInlineHandler,
@@ -83,6 +98,7 @@ internal class DefaultFormHelper(
                 } else {
                     null
                 },
+                tapToAddHelper = tapToAddHelper,
             )
         }
 
@@ -108,7 +124,8 @@ internal class DefaultFormHelper(
                 savedStateHandle = savedStateHandle,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
                 isLinkUI = isLinkUI,
-                automaticallyLaunchedCardScanFormDataHelper = null
+                automaticallyLaunchedCardScanFormDataHelper = null,
+                tapToAddHelper = null,
             )
         }
     }
@@ -167,6 +184,7 @@ internal class DefaultFormHelper(
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
                 isLinkUI = isLinkUI,
                 automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+                tapToAddHelper = tapToAddHelper,
             ),
         ) ?: emptyList()
     }

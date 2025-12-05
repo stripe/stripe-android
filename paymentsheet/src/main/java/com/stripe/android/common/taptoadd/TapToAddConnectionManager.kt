@@ -34,6 +34,8 @@ internal interface TapToAddConnectionManager {
 
     fun connect()
 
+    suspend fun await(): Result<Boolean>
+
     companion object {
         fun create(
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
@@ -153,6 +155,12 @@ internal class DefaultTapToAddConnectionManager(
         }
     }
 
+    override suspend fun await(): Result<Boolean> {
+        return runCatching {
+            isConnected || connectionTask?.await() ?: false
+        }
+    }
+
     @SuppressLint("MissingPermission")
     private fun discoverReaders() {
         terminal().discoverReaders(
@@ -170,7 +178,6 @@ internal class DefaultTapToAddConnectionManager(
                     )
 
                     connectionTask?.completeExceptionally(e)
-                    connectionTask = null
                 }
 
                 override fun onSuccess() {
@@ -215,7 +222,6 @@ internal class DefaultTapToAddConnectionManager(
                     )
 
                     connectionTask?.completeExceptionally(e)
-                    connectionTask = null
                 }
 
                 override fun onSuccess(reader: Reader) {
@@ -224,7 +230,6 @@ internal class DefaultTapToAddConnectionManager(
                     )
 
                     connectionTask?.complete(true)
-                    connectionTask = null
                 }
             }
         )
@@ -239,6 +244,10 @@ internal class UnsupportedTapToAddConnectionManager : TapToAddConnectionManager 
 
     override fun connect() {
         // No-op
+    }
+
+    override suspend fun await(): Result<Boolean> {
+        return Result.success(false)
     }
 }
 

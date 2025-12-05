@@ -2,6 +2,9 @@ package com.stripe.android.paymentelement.embedded
 
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
+import com.stripe.android.common.taptoadd.TapToAddHelper
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
@@ -21,12 +24,15 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val savedStateHandle: SavedStateHandle,
     private val selectedPaymentMethodCode: String,
+    private val tapToAddCollectionHandler: TapToAddCollectionHandler,
 ) {
     fun create(
         coroutineScope: CoroutineScope,
         setAsDefaultMatchesSaveForFutureUse: Boolean,
         paymentMethodMetadata: PaymentMethodMetadata,
         eventReporter: EventReporter,
+        errorUpdater: (ResolvableString?) -> Unit = {},
+        enabledUpdater: (Boolean) -> Unit = {},
         selectionUpdater: (PaymentSelection?) -> Unit,
     ): FormHelper {
         val automaticallyLaunchedCardScanFormDataHelper = if (selectedPaymentMethodCode.isNotBlank()) {
@@ -42,6 +48,17 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
         } else {
             null
         }
+        val tapToAddHelper = TapToAddHelper.create(
+            coroutineScope = coroutineScope,
+            tapToAddCollectionHandler = tapToAddCollectionHandler,
+            paymentMethodMetadata = paymentMethodMetadata,
+            updateProcessing = { processing ->
+                enabledUpdater(processing)
+            },
+            updateError = { error ->
+                errorUpdater(error)
+            },
+        )
         return DefaultFormHelper(
             coroutineScope = coroutineScope,
             linkInlineHandler = LinkInlineHandler.create(),
@@ -68,6 +85,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             savedStateHandle = savedStateHandle,
             autocompleteAddressInteractorFactory = null,
             automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+            tapToAddHelper = tapToAddHelper,
         )
     }
 }
