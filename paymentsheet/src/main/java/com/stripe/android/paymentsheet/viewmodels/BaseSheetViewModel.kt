@@ -227,9 +227,9 @@ internal abstract class BaseSheetViewModel(
         val experimentsData = paymentMethodMetadata?.experimentsData
 
         if (
-            paymentMethodMetadata == null
-            || experimentsData == null
-            || paymentMethodLayout != PaymentSheet.PaymentMethodLayout.Automatic
+            paymentMethodMetadata == null ||
+            experimentsData == null ||
+            paymentMethodLayout != PaymentSheet.PaymentMethodLayout.Automatic
         ) {
             return paymentMethodLayout
         }
