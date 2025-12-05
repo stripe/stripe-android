@@ -15,6 +15,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
+import androidx.core.view.updatePaddingRelative
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
@@ -55,8 +56,8 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(0, 0, 0, systemBars.bottom)
-            insets
+            view.updatePaddingRelative(systemBars.bottom)
+            WindowInsetsCompat.CONSUMED
         }
 
         val args = _args
