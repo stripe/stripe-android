@@ -124,16 +124,21 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     }
 
     private fun PaymentMethodConfirmationOption.New.attachToken(token: String?): PaymentMethodConfirmationOption {
+        val radarOptions = if (token != null) {
+            createParams.radarOptions?.copy(
+                hCaptchaToken = token
+            ) ?: RadarOptions(
+                hCaptchaToken = token,
+                androidVerificationObject = null
+            )
+        } else {
+            createParams.radarOptions
+        }
         return copy(
             createParams = createParams.copy(
-                radarOptions = token?.let {
-                    RadarOptions(
-                        hCaptchaToken = it,
-                        androidVerificationObject = null
-                    )
-                }
+                radarOptions = radarOptions
             ),
-            passiveChallengeComplete = true,
+            passiveChallengeComplete = true
         )
     }
 
