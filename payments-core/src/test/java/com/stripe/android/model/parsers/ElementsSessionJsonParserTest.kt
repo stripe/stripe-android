@@ -212,7 +212,7 @@ class ElementsSessionJsonParserTest {
             ),
             isLiveMode = false
         ).parse(
-            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_EXPERIMENTS_DATA_JSON
         )!!
 
         assertThat(elementsSession.experimentsData).isNotNull()
