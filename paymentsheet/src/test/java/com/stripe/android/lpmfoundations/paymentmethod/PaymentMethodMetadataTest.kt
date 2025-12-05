@@ -1181,6 +1181,7 @@ internal class PaymentMethodMetadataTest {
             onBehalfOf = null,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            experimentsData = null,
             isTapToAddSupported = false,
         )
 
@@ -1271,6 +1272,7 @@ internal class PaymentMethodMetadataTest {
                 attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
             ),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            experimentsData = null,
             isTapToAddSupported = false,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1361,7 +1363,8 @@ internal class PaymentMethodMetadataTest {
         orderedPaymentMethodTypesAndWallets: List<String> = intent.paymentMethodTypes,
         customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
         mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement? = null,
-        passiveCaptchaParams: PassiveCaptchaParams? = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+        passiveCaptchaParams: PassiveCaptchaParams? = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+        experimentsData: ElementsSession.ExperimentsData? = null,
     ): ElementsSession {
         return ElementsSession(
             stripeIntent = intent,
@@ -1394,7 +1397,7 @@ internal class PaymentMethodMetadataTest {
                 ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true
             ),
             orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
-            experimentsData = null,
+            experimentsData = experimentsData,
             merchantLogoUrl = null,
             passiveCaptcha = passiveCaptchaParams,
             elementsSessionConfigId = null,
@@ -2107,10 +2110,29 @@ internal class PaymentMethodMetadataTest {
         assertThat(metadata.attestOnIntentConfirmation).isFalse()
     }
 
-    private fun createPaymentElementMetadata(attestOnIntentConfirmationFlag: Boolean?): PaymentMethodMetadata {
+    @Test
+    fun `Experiments data is initialized from elements session experiments data`() {
         val elementsSession = createElementsSession(
-            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        ).copy(
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "232dd033-0b45-4456-b834-ecdcb02ab1fb",
+                experimentAssignments = emptyMap(),
+            )
+        )
+        val metadata = createPaymentElementMetadata(elementsSession = elementsSession)
+
+        assertThat(metadata.experimentsData).isEqualTo(elementsSession.experimentsData)
+    }
+
+    private fun createPaymentElementMetadata(
+        attestOnIntentConfirmationFlag: Boolean? = null,
+        elementsSession: ElementsSession? = null,
+    ): PaymentMethodMetadata {
+        val elementsSession = (
+            elementsSession
+                ?: createElementsSession(
+                    intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                )
+            ).copy(
             flags = if (attestOnIntentConfirmationFlag != null) {
                 mapOf(
                     ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION to attestOnIntentConfirmationFlag
