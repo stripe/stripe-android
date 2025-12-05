@@ -53,7 +53,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root){ view, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.setPadding(0, 0, 0, systemBars.bottom)
             insets
