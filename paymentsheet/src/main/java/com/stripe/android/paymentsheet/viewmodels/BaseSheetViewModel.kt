@@ -223,23 +223,26 @@ internal abstract class BaseSheetViewModel(
 
     fun getPaymentMethodLayout(): PaymentSheet.PaymentMethodLayout {
         val paymentMethodLayout = config.paymentMethodLayout
-        val paymentMethodMetadata = paymentMethodMetadata.value ?: return paymentMethodLayout
+        val paymentMethodMetadata = paymentMethodMetadata.value
+        val experimentsData = paymentMethodMetadata?.experimentsData
 
-        if (paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Automatic) {
-            paymentMethodMetadata.experimentsData?.let { experimentsData ->
-                experimentsData.experimentAssignments[
-                    ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA
-                ]?.let { variant ->
-                    if (variant == "control" || variant == "treatment") {
-                        eventReporter.onExperimentExposure(
-                            LoggableExperiment.OcsMobileHorizontalModeAndroidAA(
-                                experimentsData = experimentsData,
-                                group = variant,
-                            )
-                        )
-                    }
-                }
-            }
+        if (
+            paymentMethodMetadata == null
+            || experimentsData == null
+            || paymentMethodLayout != PaymentSheet.PaymentMethodLayout.Automatic
+        ) {
+            return paymentMethodLayout
+        }
+
+        experimentsData.experimentAssignments[
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA
+        ]?.let { variant ->
+            eventReporter.onExperimentExposure(
+                LoggableExperiment.OcsMobileHorizontalModeAndroidAA(
+                    experimentsData = experimentsData,
+                    group = variant,
+                )
+            )
         }
 
         return paymentMethodLayout
