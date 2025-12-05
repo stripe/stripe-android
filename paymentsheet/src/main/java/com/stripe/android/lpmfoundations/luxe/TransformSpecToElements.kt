@@ -21,8 +21,6 @@ import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.EmptyFormSpec
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IbanSpec
-import com.stripe.android.ui.core.elements.KlarnaHeaderStaticTextSpec
-import com.stripe.android.ui.core.elements.KlarnaMandateTextSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
@@ -74,7 +72,6 @@ internal class TransformSpecToElements(
                 is SimpleTextSpec -> listOf(spec.transform(arguments.initialValues))
                 is AuBankAccountNumberSpec -> listOf(spec.transform(arguments.initialValues))
                 is IbanSpec -> listOf(spec.transform(arguments.initialValues))
-                is KlarnaHeaderStaticTextSpec -> listOf(spec.transform())
                 is DropdownSpec -> listOf(spec.transform(arguments.initialValues))
                 is CountrySpec -> listOf(spec.transform(arguments.initialValues))
                 is AddressSpec -> spec.transform(
@@ -85,7 +82,6 @@ internal class TransformSpecToElements(
                 is SepaMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
                 is PlaceholderSpec -> listOf() // Placeholders should be processed before calling transform.
                 is CashAppPayMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
-                is KlarnaMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
             }
         }
     }

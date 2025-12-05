@@ -48,8 +48,6 @@ object FormItemSpecSerializer :
             "selector" -> DropdownSpec.serializer()
             "email" -> EmailSpec.serializer()
             "iban" -> IbanSpec.serializer()
-            "klarna_country" -> CountrySpec.serializer()
-            "klarna_header" -> KlarnaHeaderStaticTextSpec.serializer()
             "static_text" -> StaticTextSpec.serializer()
             "name" -> NameSpec.serializer()
             "mandate" -> MandateTextSpec.serializer()
