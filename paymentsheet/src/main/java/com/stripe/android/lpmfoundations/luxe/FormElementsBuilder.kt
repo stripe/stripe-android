@@ -52,6 +52,7 @@ internal class FormElementsBuilder(
     fun element(formElement: FormElement): FormElementsBuilder = apply {
         uiFormElements += formElement
     }
+
     fun ignoreBillingAddressRequirements() = apply {
         requireBillingAddressCollection = false
     }
@@ -83,7 +84,7 @@ internal class FormElementsBuilder(
             addAll(uiFormElements)
 
             if (requireBillingAddressCollection) {
-                val elements = AddressSpec(allowedCountryCodes = availableCountries,).transform(
+                val elements = AddressSpec(allowedCountryCodes = availableCountries).transform(
                     initialValues = arguments.initialValues,
                     shippingValues = arguments.shippingValues,
                     autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,

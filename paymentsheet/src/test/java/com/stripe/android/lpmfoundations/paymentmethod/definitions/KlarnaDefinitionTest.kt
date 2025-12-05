@@ -86,7 +86,7 @@ class KlarnaDefinitionTest {
     }
 
     @Test
-    fun `createFormElements requested billing details fields for setup intent `() {
+    fun `createFormElements requested billing details fields for setup intent`() {
         val formElements = KlarnaDefinition.formElements(
             PaymentMethodMetadataFactory.create(
                 stripeIntent = getSetupIntent(),
