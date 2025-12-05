@@ -61,6 +61,7 @@ internal object PaymentMethodMetadataFactory {
         integrationMetadata: IntegrationMetadata = stripeIntent.integrationMetadata(),
         sellerBusinessName: String? = null,
         analyticsMetadata: AnalyticsMetadata = AnalyticsMetadata(emptyMap()),
+        isTapToAddSupported: Boolean = false,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -106,6 +107,7 @@ internal object PaymentMethodMetadataFactory {
             onBehalfOf = onBehalfOf,
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
+            isTapToAddSupported = isTapToAddSupported,
         )
     }
 

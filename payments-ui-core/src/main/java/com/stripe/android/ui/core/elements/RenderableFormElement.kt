@@ -16,5 +16,9 @@ abstract class RenderableFormElement(
     override val mandateText: ResolvableString? = null
 
     @Composable
-    abstract fun ComposeUI(enabled: Boolean)
+    abstract fun ComposeUI(
+        enabled: Boolean,
+        hiddenIdentifiers: Set<IdentifierSpec>,
+        lastTextFieldIdentifier: IdentifierSpec?,
+    )
 }

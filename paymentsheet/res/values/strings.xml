@@ -330,4 +330,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_update_card">Update card</string>
   <!-- A text notice shown when the user selects an expired card. -->
   <string name="stripe_wallet_update_expired_card_error">This card has expired. Update your card info or choose a different payment method.</string>
+    <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
+    <string name="stripe_or_enter_manually">or enter manually</string>
 </resources>

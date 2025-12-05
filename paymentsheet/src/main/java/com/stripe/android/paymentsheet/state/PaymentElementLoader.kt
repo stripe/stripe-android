@@ -481,6 +481,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             clientAttributionMetadata = clientAttributionMetadata,
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
+            isTapToAddSupported = tapToAddConnectionManager.isSupported,
         )
     }
 
