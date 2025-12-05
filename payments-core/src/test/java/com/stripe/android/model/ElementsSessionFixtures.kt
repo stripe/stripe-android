@@ -12,6 +12,12 @@ internal object ElementsSessionFixtures {
             "link_bank_enabled": false,
             "link_bank_onboarding_enabled": false
           },
+          "experiments_data": {
+            "arb_id": "232dd033-0b45-4456-b834-ecdcb02ab1fb",
+            "experiment_assignments": {
+              "ocs_mobile_horizontal_mode_android_aa": "control",
+            }
+          },
           "merchant_country": "US",
           "payment_method_preference": {
             "object": "payment_method_preference",
@@ -1350,7 +1356,7 @@ internal object ElementsSessionFixtures {
                 "elements_link_in_payment_element_only": "treatment",
                 "elements_link_in_payment_element_only_holdback": "control",
                 "elements_link_longterm_holdback": "control",
-                "lpm_discoverability_upe_experiment_1": "downward_arrow_treatment"
+                "lpm_discoverability_upe_experiment_1": "downward_arrow_treatment",
               },
               "experiments_data": {
                 "arb_id": "232dd033-0b45-4456-b834-ecdcb02ab1fb",
