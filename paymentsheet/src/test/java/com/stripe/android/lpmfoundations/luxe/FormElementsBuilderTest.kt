@@ -214,6 +214,39 @@ class FormElementsBuilderTest {
         )
     }
 
+    @Test
+    fun `build contains only countries provided through allowed Countries override`() {
+        val arguments = arguments(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                allowedCountries = setOf("US", "CA")
+            )
+        )
+        val formElements = FormElementsBuilder(
+            arguments = arguments,
+            allowedCountriesOverride = setOf("FR", "DE")
+        ).build()
+
+        assertThat(formElements).hasSize(1)
+        assertThat(formElements.firstOrNull()).isInstanceOf<SectionElement>()
+
+        val sectionElement = formElements.first() as SectionElement
+        val sectionFields = sectionElement.fields
+
+        assertThat(sectionFields.size).isEqualTo(1)
+        assertThat(sectionFields.firstOrNull()).isInstanceOf<AddressElement>()
+
+        val addressElement = sectionFields.first() as AddressElement
+
+        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
+            "\uD83C\uDDEB\uD83C\uDDF7 France",
+            "\uD83C\uDDE9\uD83C\uDDEA Germany"
+        )
+    }
+
     private fun arguments(
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
