@@ -33,6 +33,8 @@ import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -148,6 +150,11 @@ internal interface ExtendedPaymentElementConfirmationTestComponent {
 internal interface ExtendedPaymentElementConfirmationTestModule {
     @Binds
     fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
+
+    @Binds
+    fun bindCardFundingFilter(
+        cardFundingFilterFactory: PaymentSheetCardFundingFilter.Factory
+    ): PaymentSheetCardFundingFilterFactory
 
     @Binds
     fun bindsAnalyticsRequestFactory(factory: PaymentAnalyticsRequestFactory): AnalyticsRequestFactory

@@ -162,6 +162,42 @@ class ElementsSessionTest {
         assertThat(session.onBehalfOf).isEqualTo("acct_1SGP1sPvdtoA7EjP")
     }
 
+    @Test
+    fun `ELEMENTS_MOBILE_CARD_FUND_FILTERING flag has correct value`() {
+        assertThat(ElementsSession.Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING.flagValue)
+            .isEqualTo("elements_mobile_card_funding_filtering")
+    }
+
+    @Test
+    fun `enableCardFundFiltering returns true when flag is enabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING to true)
+        )
+
+        assertThat(session.enableCardFundFiltering).isTrue()
+    }
+
+    @Test
+    fun `enableCardFundFiltering returns false when flag is disabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING to false)
+        )
+
+        assertThat(session.enableCardFundFiltering).isFalse()
+    }
+
+    @Test
+    fun `enableCardFundFiltering returns false when flag is missing`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = emptyMap()
+        )
+
+        assertThat(session.enableCardFundFiltering).isFalse()
+    }
+
     private fun createElementsSession(
         passiveCaptcha: PassiveCaptchaParams? = null,
         flags: Map<ElementsSession.Flag, Boolean> = emptyMap(),

@@ -23,6 +23,8 @@ import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkCommonModule
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.PaymentsIntegrityModule
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -135,6 +137,11 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
+
+    @Binds
+    abstract fun bindCardFundingFilter(
+        cardFundingFilterFactory: PaymentSheetCardFundingFilter.Factory
+    ): PaymentSheetCardFundingFilterFactory
 
     @Binds
     abstract fun bindsCardAccountRangeRepositoryFactory(

@@ -42,4 +42,26 @@ internal class CommonConfigurationTest {
 
         assertThat(configuration.containsVolatileDifferences(configWithBillingConfigChanges)).isTrue()
     }
+
+    @Test
+    fun `allowedCardFundingTypes returns configured list when enabled is true`() {
+        val customFundingTypes = listOf(PaymentSheet.CardFundingType.Credit)
+        val config = configuration.copy(
+            allowedCardFundingTypes = customFundingTypes
+        )
+
+        assertThat(config.allowedCardFundingTypes(enabled = true))
+            .isEqualTo(customFundingTypes)
+    }
+
+    @Test
+    fun `allowedCardFundingTypes returns default list when enabled is false`() {
+        val customFundingTypes = listOf(PaymentSheet.CardFundingType.Credit)
+        val config = configuration.copy(
+            allowedCardFundingTypes = customFundingTypes
+        )
+
+        assertThat(config.allowedCardFundingTypes(enabled = false))
+            .isEqualTo(PaymentSheet.CardFundingType.entries)
+    }
 }

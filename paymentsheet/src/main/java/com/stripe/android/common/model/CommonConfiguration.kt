@@ -31,7 +31,7 @@ internal data class CommonConfiguration(
     val paymentMethodOrder: List<String>,
     val externalPaymentMethods: List<String>,
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
-    val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
+    private val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val googlePlacesApiKey: String?,
@@ -42,6 +42,11 @@ internal data class CommonConfiguration(
     val userOverrideCountry: String?,
     val appearance: PaymentSheet.Appearance,
 ) : Parcelable {
+
+    fun allowedCardFundingTypes(enabled: Boolean): List<PaymentSheet.CardFundingType> {
+        if (enabled) return allowedCardFundingTypes
+        return ConfigurationDefaults.allowedCardFundingTypes
+    }
 
     fun validate(isLiveMode: Boolean, @PaymentElementCallbackIdentifier callbackIdentifier: String) {
         customerAndMerchantValidate()
