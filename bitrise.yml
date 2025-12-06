@@ -253,7 +253,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest
+            - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :crypto-onramp-example:pixel2api33DebugAndroidTest
   run-paymentsheet-instrumentation-tests:
     before_run:
       - prepare_all
@@ -329,8 +329,8 @@ workflows:
             - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/base/debug/paymentsheet-example-base-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/base/debug/paymentsheet-example-base-debug-androidTest.apk --num-retries 2
   run-crypto-onramp-example-e2e-tests:
     before_run:
-      - prepare_all
       - start_emulator
+      - prepare_all
     after_run:
       - conclude_all
     steps:
