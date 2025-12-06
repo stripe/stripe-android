@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.FormHeaderInformation
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ui.FormElement
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
@@ -45,7 +46,7 @@ internal fun VerticalModeFormUI(
     Column(modifier) {
         val headerInformation = state.headerInformation
         val enabled = !state.isProcessing
-        if (headerInformation != null && !showsWalletHeader) {
+        if (headerInformation != null && shouldShowHeader(state.selectedPaymentMethodCode, showsWalletHeader)) {
             VerticalModeFormHeaderUI(isEnabled = enabled, formHeaderInformation = headerInformation)
         }
 
@@ -69,6 +70,10 @@ internal fun VerticalModeFormUI(
             },
         )
     }
+}
+
+private fun shouldShowHeader(selectedCode: String, showsWalletHeader: Boolean): Boolean {
+    return if (selectedCode == PaymentMethod.Type.Card.code) !showsWalletHeader else true
 }
 
 @Composable
