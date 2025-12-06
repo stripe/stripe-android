@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
@@ -493,7 +494,8 @@ class CardUiDefinitionFactoryTest {
             CardDefinition.CreateFormUi(
                 metadata = metadata.copy(
                     isTapToAddSupported = true,
-                )
+                ),
+                tapToAddHelper = FakeTapToAddHelper.noOp(),
             )
         }
     }
@@ -512,6 +514,7 @@ class CardUiDefinitionFactoryTest {
                     )
                 ),
                 isValidating = true,
+                tapToAddHelper = FakeTapToAddHelper.noOp(),
             )
         }
     }
@@ -528,7 +531,8 @@ class CardUiDefinitionFactoryTest {
                         email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
                         address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                     )
-                )
+                ),
+                tapToAddHelper = FakeTapToAddHelper.noOp(),
             )
         }
     }
@@ -542,7 +546,8 @@ class CardUiDefinitionFactoryTest {
                     customerMetadata = getDefaultCustomerMetadata(
                         isPaymentMethodSetAsDefaultEnabled = false
                     ),
-                )
+                ),
+                tapToAddHelper = FakeTapToAddHelper.noOp(),
             )
         }
     }
@@ -557,6 +562,7 @@ class CardUiDefinitionFactoryTest {
                         paymentMethodTypes = listOf("card"),
                     ),
                 ),
+                tapToAddHelper = FakeTapToAddHelper.noOp(),
             )
         }
     }
@@ -568,6 +574,7 @@ class CardUiDefinitionFactoryTest {
                 metadata = metadata.copy(
                     isTapToAddSupported = true,
                 ),
+                tapToAddHelper = FakeTapToAddHelper.noOp(),
                 paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
                     code = "card",
                     billingDetails = null,

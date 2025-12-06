@@ -17,6 +17,7 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal class TapToAddFormWrapperElement(
+    private val tapToAddHelper: TapToAddHelper,
     private val elements: List<FormElement>
 ) : RenderableFormElement(
     identifier = TapToAddFormIdentifier,
@@ -28,7 +29,9 @@ internal class TapToAddFormWrapperElement(
         hiddenIdentifiers: Set<IdentifierSpec>,
         lastTextFieldIdentifier: IdentifierSpec?,
     ) {
-        TapToAddButton(enabled) {}
+        TapToAddButton(enabled) {
+            tapToAddHelper.startPaymentMethodCollection()
+        }
 
         Spacer(modifier = Modifier.requiredHeight(24.dp))
 

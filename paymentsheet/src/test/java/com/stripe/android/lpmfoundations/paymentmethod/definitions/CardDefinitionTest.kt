@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddFormWrapperElement
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.isInstanceOf
@@ -691,11 +692,12 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `createFormElements wraps in TapToAddFormWrapperElement when isTapToAddSupported is true`() {
+    fun `createFormElements wraps in TapToAddFormWrapperElement when isTapToAddSupported is true & helper not null`() {
         val formElements = CardDefinition.formElements(
-            PaymentMethodMetadataFactory.create(
+            metadata = PaymentMethodMetadataFactory.create(
                 isTapToAddSupported = true,
-            )
+            ),
+            tapToAddHelper = FakeTapToAddHelper.noOp(),
         )
 
         assertThat(formElements).hasSize(1)

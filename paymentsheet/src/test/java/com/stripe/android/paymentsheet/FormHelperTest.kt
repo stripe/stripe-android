@@ -638,6 +638,7 @@ internal class FormHelperTest {
             savedStateHandle = SavedStateHandle(),
             autocompleteAddressInteractorFactory = null,
             automaticallyLaunchedCardScanFormDataHelper = null,
+            tapToAddHelper = null,
         )
     }
 

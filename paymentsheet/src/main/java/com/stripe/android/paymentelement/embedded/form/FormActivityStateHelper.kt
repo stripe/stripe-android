@@ -28,6 +28,7 @@ import javax.inject.Singleton
 
 internal interface FormActivityStateHelper {
     val state: StateFlow<State>
+    fun updateEnabled(enabled: Boolean)
     fun updateConfirmationState(confirmationState: ConfirmationHandler.State)
     fun updateMandate(mandateText: ResolvableString?)
     fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?)
@@ -82,6 +83,14 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     override fun updateConfirmationState(confirmationState: ConfirmationHandler.State) {
         _state.update {
             it.updateWithConfirmationState(confirmationState)
+        }
+    }
+
+    override fun updateEnabled(enabled: Boolean) {
+        _state.update {
+            it.copy(
+                isEnabled = enabled,
+            )
         }
     }
 

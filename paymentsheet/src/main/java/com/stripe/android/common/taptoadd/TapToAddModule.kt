@@ -2,6 +2,8 @@ package com.stripe.android.common.taptoadd
 
 import android.content.Context
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.paymentelement.TapToAddPreview
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
 import dagger.Binds
@@ -37,6 +39,19 @@ internal interface TapToAddModule {
                 errorReporter = errorReporter,
                 isSimulated = BuildConfig.DEBUG,
                 workContext = workContext,
+            )
+        }
+
+        @OptIn(TapToAddPreview::class)
+        @Provides
+        fun providesTapToAddCollectionHandler(
+            isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
+            connectionManager: TapToAddConnectionManager,
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        ): TapToAddCollectionHandler {
+            return TapToAddCollectionHandler.create(
+                isStripeTerminalSdkAvailable = isStripeTerminalSdkAvailable,
+                connectionManager = connectionManager,
             )
         }
     }

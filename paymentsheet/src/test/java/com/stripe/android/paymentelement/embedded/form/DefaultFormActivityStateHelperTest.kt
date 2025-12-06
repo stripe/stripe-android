@@ -218,6 +218,19 @@ class DefaultFormActivityStateHelperTest {
     }
 
     @Test
+    fun `updateEnabled updates isEnabled state`() = testScenario {
+        stateHolder.state.test {
+            awaitAndVerifyInitialState()
+
+            stateHolder.updateEnabled(true)
+            assertThat(awaitItem().isEnabled).isTrue()
+
+            stateHolder.updateEnabled(false)
+            assertThat(awaitItem().isEnabled).isFalse()
+        }
+    }
+
+    @Test
     fun `updatePrimaryButton updates primary button state`() = testScenario {
         stateHolder.state.test {
             awaitAndVerifyInitialState()

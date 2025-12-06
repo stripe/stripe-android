@@ -9,6 +9,7 @@ import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -1304,7 +1305,8 @@ internal class PaymentOptionsViewModelTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             linkGateFactory = FakeLinkGate.Factory(linkGate),
             linkPaymentLauncher = linkPaymentLauncher,
-            linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+            tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
         )
     }
 

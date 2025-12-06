@@ -10,6 +10,7 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 
 internal class FakeFormActivityStateHelper : FormActivityStateHelper {
+    val updateEnabledTurbine = Turbine<Boolean>()
     val updateTurbine = Turbine<ConfirmationHandler.State>()
 
     override val state: StateFlow<FormActivityStateHelper.State>
@@ -22,6 +23,10 @@ internal class FakeFormActivityStateHelper : FormActivityStateHelper {
                 shouldDisplayLockIcon = true,
             )
         )
+
+    override fun updateEnabled(enabled: Boolean) {
+        updateEnabledTurbine.add(enabled)
+    }
 
     override fun updateConfirmationState(confirmationState: ConfirmationHandler.State) {
         updateTurbine.add(confirmationState)
@@ -40,6 +45,7 @@ internal class FakeFormActivityStateHelper : FormActivityStateHelper {
     }
 
     fun validate() {
+        updateEnabledTurbine.ensureAllEventsConsumed()
         updateTurbine.ensureAllEventsConsumed()
     }
 }

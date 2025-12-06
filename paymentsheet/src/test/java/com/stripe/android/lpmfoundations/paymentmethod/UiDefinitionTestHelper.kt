@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -18,7 +19,8 @@ internal fun PaymentMethodDefinition.formElements(
     linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
     setAsDefaultMatchesSaveForFutureUse: Boolean = false,
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
-    automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null
+    automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
+    tapToAddHelper: TapToAddHelper? = null,
 ): List<FormElement> {
     return requireNotNull(
         metadata.formElementsForCode(
@@ -32,6 +34,7 @@ internal fun PaymentMethodDefinition.formElements(
                 initialLinkUserInput = initialLinkUserInput,
                 setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
                 automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+                tapToAddHelper = tapToAddHelper,
             )
         )
     )

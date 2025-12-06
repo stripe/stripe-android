@@ -29,10 +29,25 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.CoroutineContext
 
 internal interface TapToAddConnectionManager {
+    /**
+     * Indicates if the device has the support required to use the on-device NFC reader
+     */
     val isSupported: Boolean
+
+    /**
+     * Indicates if the NFC reader has been connected to.
+     */
     val isConnected: Boolean
 
+    /**
+     * Starts connecting to the NFC reader. If already connected or unsupported, will do nothing.
+     */
     fun connect()
+
+    /**
+     * Waits for connection to NFC reader to be completed or returns current connection status of the NFC reader.
+     */
+    suspend fun awaitConnection(): Result<Boolean>
 
     companion object {
         fun create(
@@ -153,6 +168,12 @@ internal class DefaultTapToAddConnectionManager(
         }
     }
 
+    override suspend fun awaitConnection(): Result<Boolean> {
+        return runCatching {
+            isConnected || connectionTask?.await() ?: false
+        }
+    }
+
     @SuppressLint("MissingPermission")
     private fun discoverReaders() {
         terminal().discoverReaders(
@@ -170,7 +191,6 @@ internal class DefaultTapToAddConnectionManager(
                     )
 
                     connectionTask?.completeExceptionally(e)
-                    connectionTask = null
                 }
 
                 override fun onSuccess() {
@@ -215,7 +235,6 @@ internal class DefaultTapToAddConnectionManager(
                     )
 
                     connectionTask?.completeExceptionally(e)
-                    connectionTask = null
                 }
 
                 override fun onSuccess(reader: Reader) {
@@ -224,7 +243,6 @@ internal class DefaultTapToAddConnectionManager(
                     )
 
                     connectionTask?.complete(true)
-                    connectionTask = null
                 }
             }
         )
@@ -239,6 +257,10 @@ internal class UnsupportedTapToAddConnectionManager : TapToAddConnectionManager 
 
     override fun connect() {
         // No-op
+    }
+
+    override suspend fun awaitConnection(): Result<Boolean> {
+        return Result.success(false)
     }
 }
 
