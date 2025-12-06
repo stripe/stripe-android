@@ -52,6 +52,12 @@ internal class FormElementsBuilder(
         uiFormElements += formElement
     }
 
+    fun availableCountries(
+        availableCountries: Set<String>
+    ) = apply {
+        this.availableCountries = availableCountries
+    }
+
     fun ignoreBillingAddressRequirements() = apply {
         requireBillingAddressCollection = false
     }
@@ -83,7 +89,9 @@ internal class FormElementsBuilder(
             addAll(uiFormElements)
 
             if (requireBillingAddressCollection) {
-                val elements = AddressSpec(allowedCountryCodes = availableCountries).transform(
+                val elements = AddressSpec(
+                    allowedCountryCodes = availableCountries,
+                ).transform(
                     initialValues = arguments.initialValues,
                     shippingValues = arguments.shippingValues,
                     autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
