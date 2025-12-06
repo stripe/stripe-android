@@ -375,27 +375,10 @@ class DefaultTapToAddConnectionManagerTest {
         ) {
             manager.connect()
 
-            val listenerCaptor = argumentCaptor<DiscoveryListener>()
-
-            verify(terminalInstance).discoverReaders(
-                any<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>(),
-                listenerCaptor.capture(),
-                any<Callback>(),
-            )
-
             val reader = Reader()
 
-            listenerCaptor.firstValue.onUpdateDiscoveredReaders(listOf(reader))
-
-            val readerCaptor = argumentCaptor<ReaderCallback>()
-
-            verify(terminalInstance).connectReader(
-                any<Reader>(),
-                any<ConnectionConfiguration.TapToPayConnectionConfiguration>(),
-                readerCaptor.capture(),
-            )
-
-            readerCaptor.firstValue.onSuccess(reader)
+            captureDiscoveryListener().onUpdateDiscoveredReaders(listOf(reader))
+            captureReaderCallback().onSuccess(reader)
 
             val successReportCall = errorReporter.awaitCall()
 
@@ -421,38 +404,20 @@ class DefaultTapToAddConnectionManagerTest {
         ) {
             manager.connect()
 
-            val listenerCaptor = argumentCaptor<DiscoveryListener>()
-
-            verify(terminalInstance).discoverReaders(
-                any<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>(),
-                listenerCaptor.capture(),
-                any<Callback>(),
-            )
-
             val reader = Reader()
-
-            listenerCaptor.firstValue.onUpdateDiscoveredReaders(listOf(reader))
-
-            val readerCaptor = argumentCaptor<ReaderCallback>()
-
-            verify(terminalInstance).connectReader(
-                any<Reader>(),
-                any<ConnectionConfiguration.TapToPayConnectionConfiguration>(),
-                readerCaptor.capture(),
-            )
-
             val exception = TerminalException(
                 errorCode = TerminalErrorCode.CANCEL_FAILED,
                 errorMessage = "Something went wrong!"
             )
 
-            readerCaptor.firstValue.onFailure(exception)
+            captureDiscoveryListener().onUpdateDiscoveredReaders(listOf(reader))
+            captureReaderCallback().onFailure(exception)
 
-            val successReportCall = errorReporter.awaitCall()
+            val errorCall = errorReporter.awaitCall()
 
-            assertThat(successReportCall.errorEvent)
+            assertThat(errorCall.errorEvent)
                 .isEqualTo(ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_CONNECT_READER_CALL_FAILURE)
-            assertThat(successReportCall.stripeException?.cause).isEqualTo(exception)
+            assertThat(errorCall.stripeException?.cause).isEqualTo(exception)
         }
     }
 
@@ -462,7 +427,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockReaderCall(Reader())
         }
     ) {
-        val result = manager.await()
+        val result = manager.awaitConnection()
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isTrue()
@@ -474,7 +439,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockReaderCall(null)
         }
     ) {
-        val result = manager.await()
+        val result = manager.awaitConnection()
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isFalse()
@@ -498,30 +463,13 @@ class DefaultTapToAddConnectionManagerTest {
             manager.connect()
 
             val awaitResult = testScope.backgroundScope.async {
-                manager.await()
+                manager.awaitConnection()
             }
-
-            val listenerCaptor = argumentCaptor<DiscoveryListener>()
-
-            verify(terminalInstance).discoverReaders(
-                any<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>(),
-                listenerCaptor.capture(),
-                any<Callback>(),
-            )
 
             val reader = Reader()
 
-            listenerCaptor.firstValue.onUpdateDiscoveredReaders(listOf(reader))
-
-            val readerCaptor = argumentCaptor<ReaderCallback>()
-
-            verify(terminalInstance).connectReader(
-                any<Reader>(),
-                any<ConnectionConfiguration.TapToPayConnectionConfiguration>(),
-                readerCaptor.capture(),
-            )
-
-            readerCaptor.firstValue.onSuccess(reader)
+            captureDiscoveryListener().onUpdateDiscoveredReaders(listOf(reader))
+            captureReaderCallback().onSuccess(reader)
 
             assertThat(errorReporter.awaitCall()).isNotNull()
 
@@ -550,35 +498,17 @@ class DefaultTapToAddConnectionManagerTest {
             manager.connect()
 
             val awaitResult = testScope.backgroundScope.async {
-                manager.await()
+                manager.awaitConnection()
             }
 
-            val listenerCaptor = argumentCaptor<DiscoveryListener>()
-
-            verify(terminalInstance).discoverReaders(
-                any<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>(),
-                listenerCaptor.capture(),
-                any<Callback>(),
-            )
-
             val reader = Reader()
-
-            listenerCaptor.firstValue.onUpdateDiscoveredReaders(listOf(reader))
-
-            val readerCaptor = argumentCaptor<ReaderCallback>()
-
-            verify(terminalInstance).connectReader(
-                any<Reader>(),
-                any<ConnectionConfiguration.TapToPayConnectionConfiguration>(),
-                readerCaptor.capture(),
-            )
-
             val exception = TerminalException(
                 errorCode = TerminalErrorCode.CANCEL_FAILED,
                 errorMessage = "Something went wrong!"
             )
 
-            readerCaptor.firstValue.onFailure(exception)
+            captureDiscoveryListener().onUpdateDiscoveredReaders(listOf(reader))
+            captureReaderCallback().onFailure(exception)
 
             assertThat(errorReporter.awaitCall()).isNotNull()
 
@@ -628,6 +558,30 @@ class DefaultTapToAddConnectionManagerTest {
         reader: Reader? = null
     ) {
         on { connectedReader } doReturn reader
+    }
+
+    private fun Scenario.captureDiscoveryListener(): DiscoveryListener {
+        val listenerCaptor = argumentCaptor<DiscoveryListener>()
+
+        verify(terminalInstance).discoverReaders(
+            any<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>(),
+            listenerCaptor.capture(),
+            any<Callback>(),
+        )
+
+        return listenerCaptor.firstValue
+    }
+
+    private fun Scenario.captureReaderCallback(): ReaderCallback {
+        val readerCaptor = argumentCaptor<ReaderCallback>()
+
+        verify(terminalInstance).connectReader(
+            any<Reader>(),
+            any<ConnectionConfiguration.TapToPayConnectionConfiguration>(),
+            readerCaptor.capture(),
+        )
+
+        return readerCaptor.firstValue
     }
 
     private fun test(

@@ -29,12 +29,25 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.CoroutineContext
 
 internal interface TapToAddConnectionManager {
+    /**
+     * Indicates if the device has the support required to use the on-device NFC reader
+     */
     val isSupported: Boolean
+
+    /**
+     * Indicates if the NFC reader has been connected to.
+     */
     val isConnected: Boolean
 
+    /**
+     * Starts connecting to the NFC reader. If already connected or unsupported, will do nothing.
+     */
     fun connect()
 
-    suspend fun await(): Result<Boolean>
+    /**
+     * Waits for connection to NFC reader to be completed or returns current connection status of the NFC reader.
+     */
+    suspend fun awaitConnection(): Result<Boolean>
 
     companion object {
         fun create(
@@ -155,7 +168,7 @@ internal class DefaultTapToAddConnectionManager(
         }
     }
 
-    override suspend fun await(): Result<Boolean> {
+    override suspend fun awaitConnection(): Result<Boolean> {
         return runCatching {
             isConnected || connectionTask?.await() ?: false
         }
@@ -246,7 +259,7 @@ internal class UnsupportedTapToAddConnectionManager : TapToAddConnectionManager 
         // No-op
     }
 
-    override suspend fun await(): Result<Boolean> {
+    override suspend fun awaitConnection(): Result<Boolean> {
         return Result.success(false)
     }
 }

@@ -6,7 +6,7 @@ import app.cash.turbine.Turbine
 internal class FakeTapToAddHelper private constructor() : TapToAddHelper {
     private val collectCalls = Turbine<Unit>()
 
-    override fun collect() {
+    override fun startPaymentMethodCollection() {
         collectCalls.add(Unit)
     }
 

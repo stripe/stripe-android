@@ -60,10 +60,10 @@ internal class DefaultFormHelper(
                 coroutineScope = viewModel.viewModelScope,
                 tapToAddCollectionHandler = viewModel.tapToAddCollectionHandler,
                 paymentMethodMetadata = paymentMethodMetadata,
-                updateProcessing = { processing ->
-                    viewModel.savedStateHandle[SAVE_PROCESSING] = processing
+                onCollectingUpdated = { collecting ->
+                    viewModel.savedStateHandle[SAVE_PROCESSING] = collecting
                 },
-                updateError = { error ->
+                onError = { error ->
                     viewModel.onError(error)
                 },
             )

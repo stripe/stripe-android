@@ -31,8 +31,8 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
         setAsDefaultMatchesSaveForFutureUse: Boolean,
         paymentMethodMetadata: PaymentMethodMetadata,
         eventReporter: EventReporter,
-        errorUpdater: (ResolvableString?) -> Unit = {},
-        enabledUpdater: (Boolean) -> Unit = {},
+        onError: (ResolvableString?) -> Unit = {},
+        updateEnabled: (Boolean) -> Unit = {},
         selectionUpdater: (PaymentSelection?) -> Unit,
     ): FormHelper {
         val automaticallyLaunchedCardScanFormDataHelper = if (selectedPaymentMethodCode.isNotBlank()) {
@@ -52,11 +52,11 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             coroutineScope = coroutineScope,
             tapToAddCollectionHandler = tapToAddCollectionHandler,
             paymentMethodMetadata = paymentMethodMetadata,
-            updateProcessing = { processing ->
-                enabledUpdater(processing)
+            onCollectingUpdated = { processing ->
+                updateEnabled(processing)
             },
-            updateError = { error ->
-                errorUpdater(error)
+            onError = { error ->
+                onError(error)
             },
         )
         return DefaultFormHelper(

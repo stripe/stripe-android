@@ -43,7 +43,7 @@ internal class DefaultTapToAddCollectionHandler(
             connectionManager.connect()
 
             connectionManager
-                .await()
+                .awaitConnection()
                 .onFailure { exception ->
                     throw exception
                 }

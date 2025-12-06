@@ -30,7 +30,7 @@ internal class TapToAddFormWrapperElement(
         lastTextFieldIdentifier: IdentifierSpec?,
     ) {
         TapToAddButton(enabled) {
-            tapToAddHelper.collect()
+            tapToAddHelper.startPaymentMethodCollection()
         }
 
         Spacer(modifier = Modifier.requiredHeight(24.dp))

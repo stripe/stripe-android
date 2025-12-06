@@ -15,7 +15,7 @@ internal class FakeTapToAddConnectionManager private constructor(
         connectCalls.add(Unit)
     }
 
-    override suspend fun await(): Result<Boolean> {
+    override suspend fun awaitConnection(): Result<Boolean> {
         awaitCalls.add(Unit)
 
         return awaitResult

@@ -24,8 +24,8 @@ class TapToAddHelperTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 isTapToAddSupported = false,
             ),
-            updateProcessing = {},
-            updateError = {},
+            onCollectingUpdated = {},
+            onError = {},
         )
 
         assertThat(helper).isNull()
@@ -37,8 +37,8 @@ class TapToAddHelperTest {
             coroutineScope = CoroutineScope(coroutineContext),
             tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
             paymentMethodMetadata = DEFAULT_METADATA,
-            updateProcessing = {},
-            updateError = {},
+            onCollectingUpdated = {},
+            onError = {},
         )
 
         assertThat(helper).isNotNull()
@@ -49,7 +49,7 @@ class TapToAddHelperTest {
         metadata = DEFAULT_METADATA,
         collectResult = TapToAddCollectionHandler.CollectionState.Collected,
     ) {
-        helper.collect()
+        helper.startPaymentMethodCollection()
 
         assertThat(updateProcessingCalls.awaitItem()).isTrue()
         assertThat(handlerScenario.collectCalls.awaitItem()).isEqualTo(DEFAULT_METADATA)
@@ -68,7 +68,7 @@ class TapToAddHelperTest {
                 displayMessage = message,
             ),
         ) {
-            helper.collect()
+            helper.startPaymentMethodCollection()
 
             assertThat(updateProcessingCalls.awaitItem()).isTrue()
             assertThat(handlerScenario.collectCalls.awaitItem()).isEqualTo(DEFAULT_METADATA)
@@ -120,8 +120,8 @@ class TapToAddHelperTest {
             coroutineScope = CoroutineScope(currentCoroutineContext()),
             tapToAddCollectionHandler = collectionHandler,
             paymentMethodMetadata = metadata,
-            updateProcessing = updateProcessing,
-            updateError = updateError,
+            onCollectingUpdated = updateProcessing,
+            onError = updateError,
         )
     }
 
