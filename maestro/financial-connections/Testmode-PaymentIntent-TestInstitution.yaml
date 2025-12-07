@@ -20,7 +20,7 @@ tags:
 - tapOn:
     id: "consent_cta"
 # SELECT LEGACY INSTITUTION
-- tapOn: "Test Institution"
+- tapOn: "Test"
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
