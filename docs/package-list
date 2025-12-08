@@ -54,6 +54,7 @@ module:paymentsheet
 com.stripe.android
 com.stripe.android.customersheet
 com.stripe.android.link.ui.verification
+com.stripe.android.lpmfoundations.paymentmethod
 com.stripe.android.paymentelement
 com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.addresselement
