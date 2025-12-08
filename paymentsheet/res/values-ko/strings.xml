@@ -86,6 +86,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Link 로그아웃</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">오류가 발생했습니다. 연결을 확인하고 다시 시도하십시오.</string>
+  <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
+  <string name="stripe_or_enter_manually">또는 수동으로 입력</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
   <string name="stripe_pay_with_link">Link로 결제</string>
   <!-- Text providing link to terms for ACH payments -->
