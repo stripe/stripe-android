@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 22.4.0 - 2025-12-08
+
 ### PaymentSheet
 * [CHANGED][12036](https://github.com/stripe/stripe-android/pull/12036) Updates the google places SDK from 3.5.0 to 5.0.0.
 
