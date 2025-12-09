@@ -17,6 +17,7 @@ internal fun confirmationStateConfirming(
         paymentSelection = selection,
         configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration.asCommonConfiguration(),
         linkConfiguration = null,
+        enableCardFundFiltering = false,
     )
     return ConfirmationHandler.State.Confirming(requireNotNull(confirmationOption))
 }

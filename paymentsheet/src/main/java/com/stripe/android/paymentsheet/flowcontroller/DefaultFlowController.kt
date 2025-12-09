@@ -533,7 +533,8 @@ internal class DefaultFlowController @Inject internal constructor(
                 createConfirmationOption(
                     paymentSelection,
                     configuration = state.config,
-                    linkConfiguration = state.linkConfiguration
+                    linkConfiguration = state.linkConfiguration,
+                    enableCardFundFiltering = state.paymentMethodMetadata.enableCardFundFiltering,
                 )
             }
 

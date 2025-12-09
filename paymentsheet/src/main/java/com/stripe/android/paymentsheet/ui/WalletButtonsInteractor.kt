@@ -315,6 +315,7 @@ internal class DefaultWalletButtonsInteractor constructor(
             selection,
             configuration = arguments.configuration,
             linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration,
+            enableCardFundFiltering = arguments.paymentMethodMetadata.enableCardFundFiltering,
         ) ?: return null
 
         return ConfirmationHandler.Args(

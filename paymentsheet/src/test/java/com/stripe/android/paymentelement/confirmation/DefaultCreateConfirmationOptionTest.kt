@@ -57,6 +57,7 @@ internal class DefaultCreateConfirmationOptionTest {
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                enableCardFundFiltering = false,
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -79,6 +80,7 @@ internal class DefaultCreateConfirmationOptionTest {
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                enableCardFundFiltering = false,
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -101,6 +103,7 @@ internal class DefaultCreateConfirmationOptionTest {
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                enableCardFundFiltering = false,
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -134,6 +137,7 @@ internal class DefaultCreateConfirmationOptionTest {
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                enableCardFundFiltering = false,
             )
         ).isEqualTo(
             BacsConfirmationOption(
@@ -154,6 +158,7 @@ internal class DefaultCreateConfirmationOptionTest {
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                enableCardFundFiltering = false,
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -179,6 +184,7 @@ internal class DefaultCreateConfirmationOptionTest {
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                enableCardFundFiltering = false,
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
@@ -211,6 +217,7 @@ internal class DefaultCreateConfirmationOptionTest {
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                enableCardFundFiltering = false,
             )
         ).isEqualTo(
             ExternalPaymentMethodConfirmationOption(
@@ -232,6 +239,7 @@ internal class DefaultCreateConfirmationOptionTest {
                 paymentSelection = PaymentSelection.GooglePay,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                enableCardFundFiltering = false,
             )
         ).isNull()
     }
@@ -254,6 +262,7 @@ internal class DefaultCreateConfirmationOptionTest {
                     .build()
                     .asCommonConfiguration(),
                 linkConfiguration = null,
+                enableCardFundFiltering = false,
             )
         ).isEqualTo(
             GooglePayConfirmationOption(
@@ -283,6 +292,7 @@ internal class DefaultCreateConfirmationOptionTest {
                 paymentSelection = PaymentSelection.Link(),
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                enableCardFundFiltering = false,
             )
         ).isNull()
     }
@@ -294,6 +304,7 @@ internal class DefaultCreateConfirmationOptionTest {
                 paymentSelection = PaymentSelection.Link(),
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = createLinkConfiguration(),
+                enableCardFundFiltering = false,
             )
         ).isEqualTo(
             LinkConfirmationOption(
@@ -312,6 +323,7 @@ internal class DefaultCreateConfirmationOptionTest {
                 ),
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = createLinkConfiguration(),
+                enableCardFundFiltering = false,
             )
         ).isEqualTo(
             LinkConfirmationOption(
@@ -330,6 +342,7 @@ internal class DefaultCreateConfirmationOptionTest {
                 paymentSelection = linkInlineSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                enableCardFundFiltering = false,
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -373,6 +386,7 @@ internal class DefaultCreateConfirmationOptionTest {
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                enableCardFundFiltering = false,
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
@@ -393,6 +407,7 @@ internal class DefaultCreateConfirmationOptionTest {
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                enableCardFundFiltering = false,
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
@@ -413,6 +428,7 @@ internal class DefaultCreateConfirmationOptionTest {
             paymentSelection = linkInlinePaymentSelection,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             linkConfiguration = createLinkConfiguration(),
+            enableCardFundFiltering = false,
         )
 
         assertThat(confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption>()
@@ -438,6 +454,7 @@ internal class DefaultCreateConfirmationOptionTest {
                 .build()
                 .asCommonConfiguration(),
             linkConfiguration = null,
+            enableCardFundFiltering = false,
         )
 
         assertThat(confirmationOption).isNull()
@@ -468,6 +485,7 @@ internal class DefaultCreateConfirmationOptionTest {
                 .build()
                 .asCommonConfiguration(),
             linkConfiguration = null,
+            enableCardFundFiltering = false,
         )
 
         assertThat(confirmationOption).isInstanceOf<CustomPaymentMethodConfirmationOption>()
@@ -484,6 +502,7 @@ internal class DefaultCreateConfirmationOptionTest {
                 paymentSelection = PaymentSelection.ShopPay,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                enableCardFundFiltering = false,
             )
         ).isNull()
     }
@@ -498,6 +517,7 @@ internal class DefaultCreateConfirmationOptionTest {
                     customer = null
                 ),
                 linkConfiguration = null,
+                enableCardFundFiltering = false,
             )
         ).isNull()
     }
@@ -517,6 +537,7 @@ internal class DefaultCreateConfirmationOptionTest {
                         shopPayConfiguration = SHOP_PAY_CONFIGURATION
                     ),
                 linkConfiguration = null,
+                enableCardFundFiltering = false,
             )
         ).isEqualTo(
             ShopPayConfirmationOption(
@@ -547,6 +568,7 @@ internal class DefaultCreateConfirmationOptionTest {
                         paymentSelection = it,
                         configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                         linkConfiguration = createLinkConfiguration(),
+                        enableCardFundFiltering = false,
                     )
                 }
         ).isEqualTo(

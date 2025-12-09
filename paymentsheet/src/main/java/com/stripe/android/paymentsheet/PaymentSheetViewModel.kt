@@ -503,6 +503,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                             paymentSelection = it,
                             configuration = config.asCommonConfiguration(),
                             linkConfiguration = linkHandler.linkConfiguration.value,
+                            enableCardFundFiltering = paymentMethodMetadata.enableCardFundFiltering,
                         )
                     }
             }
