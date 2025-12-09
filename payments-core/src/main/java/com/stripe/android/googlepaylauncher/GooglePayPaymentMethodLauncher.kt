@@ -16,13 +16,16 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
+import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -53,8 +56,9 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
     @Assisted private val skipReadyCheck: Boolean,
     context: Context,
-    private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
+    private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
     @Assisted private val cardBrandFilter: CardBrandFilter,
+    @Assisted private val cardFundingFilter: CardFundingFilter,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context,
         PaymentConfiguration.getInstance(context).publishableKey,
@@ -90,7 +94,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         },
         config,
         readyCallback,
-        DefaultCardBrandFilter
+        DefaultCardBrandFilter,
+        DefaultCardFundingFilter
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -113,7 +118,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         },
         config,
         readyCallback,
-        DefaultCardBrandFilter
+        DefaultCardBrandFilter,
+        DefaultCardFundingFilter
     )
 
     /**
@@ -142,7 +148,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         },
         config,
         readyCallback,
-        DefaultCardBrandFilter
+        DefaultCardBrandFilter,
+        DefaultCardFundingFilter
     )
 
     internal constructor(
@@ -151,7 +158,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         config: Config,
         readyCallback: ReadyCallback,
-        cardBrandFilter: CardBrandFilter
+        cardBrandFilter: CardBrandFilter,
+        cardFundingFilter: CardFundingFilter
     ) : this(
         lifecycleScope,
         config,
@@ -159,20 +167,29 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         activityResultLauncher,
         false,
         context,
-        googlePayRepositoryFactory = {
-            DefaultGooglePayRepository(
-                context = context,
-                environment = config.environment,
-                billingAddressParameters = config.billingAddressConfig.convert(),
-                existingPaymentMethodRequired = config.existingPaymentMethodRequired,
-                allowCreditCards = config.allowCreditCards,
-                errorReporter = ErrorReporter.createFallbackInstance(
+        googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
+            override fun invoke(
+                environment: GooglePayEnvironment,
+                cardFundingFilter: CardFundingFilter,
+                cardBrandFilter: CardBrandFilter
+            ): GooglePayRepository {
+                return DefaultGooglePayRepository(
                     context = context,
-                    productUsage = setOf(PRODUCT_USAGE_TOKEN),
+                    environment = config.environment,
+                    billingAddressParameters = config.billingAddressConfig.convert(),
+                    existingPaymentMethodRequired = config.existingPaymentMethodRequired,
+                    allowCreditCards = config.allowCreditCards,
+                    errorReporter = ErrorReporter.createFallbackInstance(
+                        context = context,
+                        productUsage = setOf(PRODUCT_USAGE_TOKEN),
+                    ),
+                    cardFundingFilter = cardFundingFilter,
+                    cardBrandFilter = cardBrandFilter
                 )
-            )
+            }
         },
-        cardBrandFilter = cardBrandFilter
+        cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter
     )
 
     init {
@@ -185,7 +202,11 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
 
         if (!skipReadyCheck) {
             lifecycleScope.launch {
-                val repository = googlePayRepositoryFactory(config.environment)
+                val repository = googlePayRepositoryFactory(
+                    environment = config.environment,
+                    cardFundingFilter = cardFundingFilter,
+                    cardBrandFilter = cardBrandFilter
+                )
                 readyCallback.onReady(
                     repository.isReady().first().also {
                         isReady = it
@@ -249,6 +270,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 label = label,
                 transactionId = transactionId,
                 cardBrandFilter = cardBrandFilter,
+                cardFundingFilter = cardFundingFilter,
                 clientAttributionMetadata = clientAttributionMetadata,
                 isElements = isElements,
             )
@@ -287,7 +309,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
          *
          * Default: The credit card class is supported for the card networks specified.
          */
-        var allowCreditCards: Boolean = true,
+        var allowCreditCards: Boolean? = null,
 
         /**
          * Set this property to enable other card networks in additional to the default list, such as "INTERAC"
@@ -428,7 +450,8 @@ fun rememberGooglePayPaymentMethodLauncher(
             readyCallback = {
                 currentReadyCallback.onReady(it)
             },
-            cardBrandFilter = DefaultCardBrandFilter
+            cardBrandFilter = DefaultCardBrandFilter,
+            cardFundingFilter = DefaultCardFundingFilter
         )
     }
 }

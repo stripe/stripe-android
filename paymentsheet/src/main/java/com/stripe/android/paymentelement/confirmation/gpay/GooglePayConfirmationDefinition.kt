@@ -166,7 +166,8 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             },
             activityResultLauncher = activityLauncher,
             skipReadyCheck = true,
-            cardBrandFilter = config.cardBrandFilter
+            cardBrandFilter = config.cardBrandFilter,
+            cardFundingFilter = config.cardFundingFilter,
         )
     }
 

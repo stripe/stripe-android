@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
@@ -282,7 +283,7 @@ class GooglePayConfirmationDefinitionTest {
             assertThat(createGooglePayLauncherCall.config.environment).isEqualTo(GooglePayEnvironment.Test)
             assertThat(createGooglePayLauncherCall.config.merchantName).isEqualTo("Test merchant Inc.")
             assertThat(createGooglePayLauncherCall.config.merchantCountryCode).isEqualTo("US")
-            assertThat(createGooglePayLauncherCall.config.allowCreditCards).isTrue()
+            assertThat(createGooglePayLauncherCall.config.allowCreditCards).isNull()
             assertThat(createGooglePayLauncherCall.config.existingPaymentMethodRequired).isTrue()
             assertThat(createGooglePayLauncherCall.config.isEmailRequired).isFalse()
             assertThat(createGooglePayLauncherCall.config.billingAddressConfig.isRequired).isTrue()
@@ -542,7 +543,7 @@ class GooglePayConfirmationDefinitionTest {
             // Should always be the same value
             assertThat(createGooglePayLauncherCall.activityResultLauncher).isEqualTo(launcher)
             assertThat(createGooglePayLauncherCall.skipReadyCheck).isTrue()
-            assertThat(createGooglePayLauncherCall.config.allowCreditCards).isTrue()
+            assertThat(createGooglePayLauncherCall.config.allowCreditCards).isNull()
             assertThat(createGooglePayLauncherCall.config.existingPaymentMethodRequired).isTrue()
 
             // Can vary on merchant's config
@@ -630,6 +631,7 @@ class GooglePayConfirmationDefinitionTest {
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 ),
                 cardBrandFilter = DefaultCardBrandFilter,
+                cardFundingFilter = DefaultCardFundingFilter,
             ),
         )
 

@@ -2,6 +2,8 @@ package com.stripe.android.customersheet.state
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.networking.AnalyticsEvent
@@ -20,7 +22,9 @@ import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.customersheet.data.FakeCustomerSheetInitializationDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetIntentDataSource
 import com.stripe.android.customersheet.util.CustomerSheetHacks
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -776,8 +780,18 @@ internal class DefaultCustomerSheetLoaderTest {
         workContext: CoroutineContext = UnconfinedTestDispatcher()
     ): CustomerSheetLoader {
         return DefaultCustomerSheetLoader(
-            googlePayRepositoryFactory = {
-                if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
+            googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
+                override fun invoke(
+                    environment: GooglePayEnvironment,
+                    cardFundingFilter: CardFundingFilter,
+                    cardBrandFilter: CardBrandFilter
+                ): GooglePayRepository {
+                    return if (isGooglePayReady) {
+                        readyGooglePayRepository
+                    } else {
+                        unreadyGooglePayRepository
+                    }
+                }
             },
             initializationDataSourceProvider = initializationDataSourceProvider,
             intentDataSourceProvider = intentDataSourceProvider,
@@ -785,7 +799,7 @@ internal class DefaultCustomerSheetLoaderTest {
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             eventReporter = eventReporter,
             errorReporter = errorReporter,
-            workContext = workContext,
+            workContext = workContext
         )
     }
 

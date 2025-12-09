@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultLauncher
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
@@ -24,7 +25,8 @@ internal class RecordingGooglePayPaymentMethodLauncherFactory private constructo
         readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
         activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         skipReadyCheck: Boolean,
-        cardBrandFilter: CardBrandFilter
+        cardBrandFilter: CardBrandFilter,
+        cardFundingFilter: CardFundingFilter
     ): GooglePayPaymentMethodLauncher {
         calls.add(
             Call(

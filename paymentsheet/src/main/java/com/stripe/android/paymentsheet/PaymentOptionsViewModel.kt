@@ -153,14 +153,16 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 onUserSelection()
             },
             onLinkPressed = {
-                updateSelection(PaymentSelection.Link())
+                updateSelection(Link())
                 onUserSelection()
             },
             isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent,
             walletsAllowedInHeader = walletsAllowedInHeader(paymentMethodMetadata),
             paymentDetails = linkAccountInfo.account?.displayablePaymentDetails,
             enableDefaultValues = linkConfiguration?.enableDisplayableDefaultValuesInEce == true &&
-                hasLinkWithSelectedPayment.not()
+                hasLinkWithSelectedPayment.not(),
+            cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
+            cardBrandFilter = paymentMethodMetadata.cardBrandFilter
         )
     }
 

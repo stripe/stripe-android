@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet
 
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.coroutines.awaitWithTimeout
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
@@ -15,7 +16,7 @@ import com.stripe.android.customersheet.util.getDefaultPaymentMethodAsPaymentSel
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
 import com.stripe.android.customersheet.util.sortPaymentMethods
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
-import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -38,23 +39,24 @@ internal interface CustomerSheetLoader {
 }
 
 internal class DefaultCustomerSheetLoader(
-    private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
+    private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
     private val lpmRepository: LpmRepository,
     private val initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>,
     private val intentDataSourceProvider: Single<CustomerSheetIntentDataSource>,
     private val eventReporter: CustomerSheetEventReporter,
     private val errorReporter: ErrorReporter,
-    private val workContext: CoroutineContext
+    private val workContext: CoroutineContext,
 ) : CustomerSheetLoader {
 
-    @Inject constructor(
-        googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
+    @Inject
+    constructor(
+        googlePayRepositoryFactory: GooglePayRepositoryFactory,
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
         lpmRepository: LpmRepository,
         eventReporter: CustomerSheetEventReporter,
         errorReporter: ErrorReporter,
-        @IOContext workContext: CoroutineContext
+        @IOContext workContext: CoroutineContext,
     ) : this(
         googlePayRepositoryFactory = googlePayRepositoryFactory,
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
@@ -140,9 +142,17 @@ internal class DefaultCustomerSheetLoader(
             stripeIntent = elementsSession.stripeIntent,
             serverLpmSpecs = elementsSession.paymentMethodSpecs,
         ).sharedDataSpecs
+        val cardFundingFilter = DefaultCardFundingFilter
+        val cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
 
         val isGooglePaySupportedOnDevice = googlePayRepositoryFactory(
-            if (elementsSession.stripeIntent.isLiveMode) GooglePayEnvironment.Production else GooglePayEnvironment.Test
+            environment = if (elementsSession.stripeIntent.isLiveMode) {
+                GooglePayEnvironment.Production
+            } else {
+                GooglePayEnvironment.Test
+            },
+            cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = cardFundingFilter
         ).isReady().first()
         val isGooglePayReadyAndEnabled = configuration.googlePayEnabled && isGooglePaySupportedOnDevice
 

@@ -1,6 +1,9 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.CardFundingFilter
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
@@ -15,7 +18,7 @@ import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
-import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.link.LinkController
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
@@ -25,7 +28,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata.Permissi
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.lpmfoundations.paymentmethod.create
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
@@ -200,7 +203,7 @@ internal interface PaymentElementLoader {
 @SuppressWarnings("LargeClass")
 internal class DefaultPaymentElementLoader @Inject constructor(
     private val prefsRepositoryFactory: PrefsRepository.Factory,
-    private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
+    private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
     private val elementsSessionRepository: ElementsSessionRepository,
     private val customerRepository: CustomerRepository,
     private val lpmRepository: LpmRepository,
@@ -218,6 +221,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
     private val paymentMethodFilter: PaymentMethodFilter,
+    private val cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -291,6 +295,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             automaticPaymentMethodsEnabled = elementsSession.stripeIntent.automaticPaymentMethodsEnabled,
         )
 
+        val cardFundingFilter = cardFundingFilterFactory(
+            params = configuration.allowedCardFundingTypes(elementsSession.enableCardFundFiltering)
+        )
+
         val linkState = async {
             createLinkState(
                 elementsSession = elementsSession,
@@ -325,11 +333,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 metadata = paymentMethodMetadata.await(),
                 savedSelection = savedSelection,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
-                cardFundingFilter = PaymentSheetCardFundingFilter(
-                    allowedCardFundingTypes = configuration.allowedCardFundingTypes(
-                        enabled = elementsSession.enableCardFundFiltering
-                    )
-                )
+                cardFundingFilter = cardFundingFilter
             )
         }
 
@@ -581,7 +585,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         metadata: PaymentMethodMetadata,
         savedSelection: Deferred<SavedSelection>,
         cardBrandFilter: PaymentSheetCardBrandFilter,
-        cardFundingFilter: PaymentSheetCardFundingFilter
+        cardFundingFilter: CardFundingFilter
     ): CustomerState? {
         val customerState = when (customerInfo) {
             is CustomerInfo.CustomerSession -> {
@@ -673,18 +677,24 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private suspend fun CommonConfiguration.isGooglePayReady(): Boolean {
         return googlePay?.environment?.let { environment ->
             googlePayRepositoryFactory(
-                when (environment) {
+                environment = when (environment) {
                     PaymentSheet.GooglePayConfiguration.Environment.Production ->
                         GooglePayEnvironment.Production
                     PaymentSheet.GooglePayConfiguration.Environment.Test ->
                         GooglePayEnvironment.Test
-                }
+                },
+                cardFundingFilter = DefaultCardFundingFilter,
+                cardBrandFilter = DefaultCardBrandFilter
             )
         }?.isReady()?.first() ?: false
     }
 
     private suspend fun isGooglePaySupportedOnDevice(): Boolean {
-        return googlePayRepositoryFactory(GooglePayEnvironment.Production).isReady().first()
+        return googlePayRepositoryFactory(
+            environment = GooglePayEnvironment.Production,
+            cardBrandFilter = DefaultCardBrandFilter,
+            cardFundingFilter = DefaultCardFundingFilter
+        ).isReady().first()
     }
 
     private suspend fun retrieveInitialPaymentSelection(
