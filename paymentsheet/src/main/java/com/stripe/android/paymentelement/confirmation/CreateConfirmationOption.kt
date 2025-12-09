@@ -35,7 +35,12 @@ internal class DefaultCreateConfirmationOption @Inject constructor(
         linkConfiguration: LinkConfiguration?,
         enableCardFundFiltering: Boolean,
     ): ConfirmationHandler.Option? {
-        return paymentSelection.toConfirmationOption(configuration, linkConfiguration, cardFundingFilterFactory, enableCardFundFiltering)
+        return paymentSelection.toConfirmationOption(
+            configuration,
+            linkConfiguration,
+            cardFundingFilterFactory,
+            enableCardFundFiltering
+        )
     }
 
     private fun PaymentSelection.toConfirmationOption(

@@ -42,6 +42,7 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.BankFormScreenStateFactory
 import org.junit.Test
 
+@SuppressWarnings("LargeClass")
 internal class DefaultCreateConfirmationOptionTest {
 
     @Test
