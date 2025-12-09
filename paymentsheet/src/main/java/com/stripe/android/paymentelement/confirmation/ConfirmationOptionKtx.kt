@@ -1,9 +1,12 @@
 package com.stripe.android.paymentelement.confirmation
 
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationOption
@@ -14,10 +17,32 @@ import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignu
 import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import javax.inject.Inject
+
+internal interface CreateConfirmationOption {
+    operator fun invoke(
+        paymentSelection: PaymentSelection,
+        configuration: CommonConfiguration,
+        linkConfiguration: LinkConfiguration?,
+    ): ConfirmationHandler.Option?
+}
+
+internal class DefaultCreateConfirmationOption @Inject constructor(
+    private val cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory
+) : CreateConfirmationOption {
+    override fun invoke(
+        paymentSelection: PaymentSelection,
+        configuration: CommonConfiguration,
+        linkConfiguration: LinkConfiguration?
+    ): ConfirmationHandler.Option? {
+        return paymentSelection.toConfirmationOption(configuration, linkConfiguration, cardFundingFilterFactory)
+    }
+}
 
 internal fun PaymentSelection.toConfirmationOption(
     configuration: CommonConfiguration,
     linkConfiguration: LinkConfiguration?,
+    cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory
 ): ConfirmationHandler.Option? {
     return when (this) {
         is PaymentSelection.Saved -> toConfirmationOption()
@@ -28,6 +53,7 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.New -> toConfirmationOption()
         is PaymentSelection.GooglePay -> toConfirmationOption(
             configuration,
+            cardFundingFilterFactory
         )
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.ShopPay -> toConfirmationOption(configuration)
@@ -108,6 +134,7 @@ private fun PaymentSelection.New.toConfirmationOption(): ConfirmationHandler.Opt
 
 private fun PaymentSelection.GooglePay.toConfirmationOption(
     configuration: CommonConfiguration,
+    cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory
 ): GooglePayConfirmationOption? {
     return configuration.googlePay?.let { googlePay ->
         GooglePayConfirmationOption(
@@ -119,7 +146,8 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 customAmount = googlePay.amount,
                 customLabel = googlePay.label,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
-                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
+                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
+                cardFundingFilter = cardFundingFilterFactory.invoke(ConfigurationDefaults.allowedCardFundingTypes)
             ),
         )
     }

@@ -28,10 +28,10 @@ import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.CreateConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
-import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
@@ -90,7 +90,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
     @Named(IS_LIVE_MODE) val isLiveModeProvider: () -> Boolean,
-    tapToAddCollectionHandler: TapToAddCollectionHandler,
+    tapToAddCollectionHandler: TapToAddCollectionHandler
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -497,10 +497,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 inProgressSelection = paymentSelection
 
                 paymentSelectionWithCvcIfEnabled(paymentSelection)
-                    ?.toConfirmationOption(
-                        configuration = config.asCommonConfiguration(),
-                        linkConfiguration = linkHandler.linkConfiguration.value,
-                    )
+                    ?.let {
+                        createConfirmationOption(
+                            paymentSelection = it,
+                            configuration = config.asCommonConfiguration(),
+                            linkConfiguration = linkHandler.linkConfiguration.value,
+                        )
+                    }
             }
 
             confirmationOption?.let { option ->

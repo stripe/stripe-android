@@ -2,6 +2,7 @@ package com.stripe.android.googlepaylauncher.injection
 
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.googlepaylauncher.DefaultGooglePayRepository
@@ -30,7 +31,8 @@ class GooglePayLauncherModule {
             existingPaymentMethodRequired = true,
             allowCreditCards = true,
             errorReporter = errorReporter,
-            logger = logger
+            logger = logger,
+            cardFundingFilter = DefaultCardFundingFilter
         )
     }
 }

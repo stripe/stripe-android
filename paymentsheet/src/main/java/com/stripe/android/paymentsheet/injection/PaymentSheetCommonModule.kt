@@ -30,6 +30,8 @@ import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.confirmation.CreateConfirmationOption
+import com.stripe.android.paymentelement.confirmation.DefaultCreateConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
@@ -152,6 +154,11 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsPrefsRepositoryFactory(
         factory: DefaultPrefsRepository.Factory
     ): PrefsRepository.Factory
+
+    @Binds
+    abstract fun bindsCreateConfirmationOption(
+        createConfirmationOption: DefaultCreateConfirmationOption
+    ): CreateConfirmationOption
 
     @Suppress("TooManyFunctions")
     companion object {

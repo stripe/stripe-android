@@ -25,7 +25,7 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+import com.stripe.android.paymentelement.confirmation.CreateConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedLinkHelper
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -144,6 +144,7 @@ internal class DefaultWalletButtonsInteractor constructor(
     private val linkInlineInteractor: LinkInlineInteractor,
     private val linkPaymentLauncher: LinkPaymentLauncher,
     private val linkAccountHolder: LinkAccountHolder,
+    private val createConfirmationOption: CreateConfirmationOption,
     private val analyticsCallbackProvider: Provider<AnalyticEventCallback?>,
     private val onWalletButtonsRenderStateChanged: (isRendered: Boolean) -> Unit
 ) : WalletButtonsInteractor {
@@ -310,7 +311,8 @@ internal class DefaultWalletButtonsInteractor constructor(
         selection: PaymentSelection,
         arguments: Arguments,
     ): ConfirmationHandler.Args? {
-        val confirmationOption = selection.toConfirmationOption(
+        val confirmationOption = createConfirmationOption(
+            selection,
             configuration = arguments.configuration,
             linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration,
         ) ?: return null
@@ -335,9 +337,9 @@ internal class DefaultWalletButtonsInteractor constructor(
             walletsButtonLinkLauncher: LinkPaymentLauncher
         ): WalletButtonsInteractor {
             val linkHandler = flowControllerViewModel.flowControllerStateComponent.linkHandler
-
+            val flowControllerStateComponent = flowControllerViewModel.flowControllerStateComponent
             return DefaultWalletButtonsInteractor(
-                errorReporter = flowControllerViewModel.flowControllerStateComponent.errorReporter,
+                errorReporter = flowControllerStateComponent.errorReporter,
                 arguments = combineAsStateFlow(
                     linkHandler.linkConfigurationCoordinator.emailFlow,
                     flowControllerViewModel.stateFlow,
@@ -355,13 +357,13 @@ internal class DefaultWalletButtonsInteractor constructor(
                         null
                     }
                 },
-                confirmationHandler = flowControllerViewModel.flowControllerStateComponent.confirmationHandler,
+                confirmationHandler = flowControllerStateComponent.confirmationHandler,
                 coroutineScope = flowControllerViewModel.viewModelScope,
-                linkInlineInteractor = flowControllerViewModel.flowControllerStateComponent.linkInlineInteractor,
+                linkInlineInteractor = flowControllerStateComponent.linkInlineInteractor,
                 linkPaymentLauncher = walletsButtonLinkLauncher,
-                linkAccountHolder = flowControllerViewModel.flowControllerStateComponent.linkAccountHolder,
-                analyticsCallbackProvider =
-                flowControllerViewModel.flowControllerStateComponent.analyticEventCallbackProvider,
+                linkAccountHolder = flowControllerStateComponent.linkAccountHolder,
+                createConfirmationOption = flowControllerStateComponent.createConfirmationOption,
+                analyticsCallbackProvider = flowControllerStateComponent.analyticEventCallbackProvider,
                 onWalletButtonsRenderStateChanged = { isRendered ->
                     flowControllerViewModel.walletButtonsRendered = isRendered
                 }
@@ -377,6 +379,7 @@ internal class DefaultWalletButtonsInteractor constructor(
             errorReporter: ErrorReporter,
             linkPaymentLauncher: LinkPaymentLauncher,
             linkAccountHolder: LinkAccountHolder,
+            createConfirmationOption: CreateConfirmationOption,
             analyticsCallbackProvider: Provider<AnalyticEventCallback?>,
         ): WalletButtonsInteractor {
             return DefaultWalletButtonsInteractor(
@@ -400,6 +403,7 @@ internal class DefaultWalletButtonsInteractor constructor(
                 linkInlineInteractor = linkInlineInteractor,
                 linkPaymentLauncher = linkPaymentLauncher,
                 linkAccountHolder = linkAccountHolder,
+                createConfirmationOption = createConfirmationOption,
                 analyticsCallbackProvider = analyticsCallbackProvider,
                 onWalletButtonsRenderStateChanged = {
                     // No-op, not supported for Embedded
