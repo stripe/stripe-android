@@ -1,0 +1,7 @@
+appId: ${APP_ID}
+---
+# Press "Wait" if "System UI isn't responding" dialog is showing
+- tapOn:
+    text: "Wait"
+    below: "System UI isn't responding"
+    optional: true

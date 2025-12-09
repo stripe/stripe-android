@@ -5,6 +5,10 @@ tags:
 ---
 - startRecording: ${'/tmp/test_results/testmode-data-testoauthinstitution-connected-' + new Date().getTime()}
 - clearState
+- runFlow:
+    file: ../common/subflow-clear-system-ui.yaml
+    env:
+      APP_ID: com.stripe.android.financialconnections.example
 - openLink: "stripeconnectionsexample://playground\
     ?integration_type=Standalone\
     &experience=FinancialConnections\

@@ -6,6 +6,10 @@ tags:
 ---
 - startRecording: ${'/tmp/test_results/testmode-data-testoauthinstitution-' + new Date().getTime()}
 - clearState
+- runFlow:
+    file: ../common/subflow-clear-system-ui.yaml
+    env:
+      APP_ID: com.stripe.android.financialconnections.example
 - openLink: stripeconnectionsexample://playground?integration_type=Standalone&experience=FinancialConnections&flow=Data&financial_connections_override_native=native&merchant=testmode&financial_connections_test_mode=true
 - scrollUntilVisible:
     element:
