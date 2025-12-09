@@ -188,7 +188,8 @@ internal class DefaultEmbeddedContentHelperTest {
             internalRowSelectionCallback = { null },
             linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
             analyticsCallbackProvider = { AnalyticEventCallbackRule() },
-            linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+            createConfirmationOption = TODO()
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,

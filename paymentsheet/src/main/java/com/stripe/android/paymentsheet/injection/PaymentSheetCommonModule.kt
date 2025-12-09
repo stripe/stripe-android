@@ -155,13 +155,16 @@ internal abstract class PaymentSheetCommonModule {
         factory: DefaultPrefsRepository.Factory
     ): PrefsRepository.Factory
 
-    @Binds
-    abstract fun bindsCreateConfirmationOption(
-        createConfirmationOption: DefaultCreateConfirmationOption
-    ): CreateConfirmationOption
-
     @Suppress("TooManyFunctions")
     companion object {
+        @JvmStatic
+        @Provides
+        fun provideCreateConfirmationOption(
+            cardFundingFilterFactory: PaymentSheetCardFundingFilter.Factory
+        ): CreateConfirmationOption {
+            return DefaultCreateConfirmationOption(cardFundingFilterFactory)
+        }
+
         @Provides
         @Singleton
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {

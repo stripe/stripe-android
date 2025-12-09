@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -187,7 +188,7 @@ class ConfirmationSaverTest {
     @Test
     fun `save with saved GooglePay wallet should save GooglePay selection`() = runScenario {
         val googlePayCard = PaymentMethod.Card(
-            brand = com.stripe.android.model.CardBrand.Visa,
+            brand = CardBrand.Visa,
             last4 = "4242",
             wallet = Wallet.GooglePayWallet("4242")
         )
@@ -216,7 +217,7 @@ class ConfirmationSaverTest {
     @Test
     fun `save with saved Link wallet should save Link selection`() = runScenario {
         val linkCard = PaymentMethod.Card(
-            brand = com.stripe.android.model.CardBrand.Visa,
+            brand = CardBrand.Visa,
             last4 = "4242",
             wallet = Wallet.LinkWallet("4242")
         )
@@ -258,6 +259,7 @@ class ConfirmationSaverTest {
                 customLabel = null,
                 billingDetailsCollectionConfiguration = mock(),
                 cardBrandFilter = mock(),
+                cardFundingFilter = mock(),
             )
         )
 
@@ -326,6 +328,7 @@ class ConfirmationSaverTest {
                 customLabel = null,
                 billingDetailsCollectionConfiguration = mock(),
                 cardBrandFilter = mock(),
+                cardFundingFilter = mock(),
             )
         )
 

@@ -1,7 +1,9 @@
 package com.stripe.android.paymentelement.confirmation
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
@@ -41,7 +43,8 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.BankFormScreenStateFactory
 import org.junit.Test
 
-class ConfirmationHandlerOptionKtxTest {
+internal class DefaultCreateConfirmationOptionTest {
+
     @Test
     fun `On new selection, should convert to new confirmation option properly`() {
         val paymentSelection = createNewPaymentSelection(
@@ -51,7 +54,8 @@ class ConfirmationHandlerOptionKtxTest {
         )
 
         assertThat(
-            paymentSelection.toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
             )
@@ -72,7 +76,8 @@ class ConfirmationHandlerOptionKtxTest {
         )
 
         assertThat(
-            paymentSelection.toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
             )
@@ -93,7 +98,8 @@ class ConfirmationHandlerOptionKtxTest {
         )
 
         assertThat(
-            paymentSelection.toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
             )
@@ -125,7 +131,8 @@ class ConfirmationHandlerOptionKtxTest {
         )
 
         assertThat(
-            paymentSelection.toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
             )
@@ -144,7 +151,8 @@ class ConfirmationHandlerOptionKtxTest {
         )
 
         assertThat(
-            paymentSelection.toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
             )
@@ -168,7 +176,8 @@ class ConfirmationHandlerOptionKtxTest {
         )
 
         assertThat(
-            paymentSelection.toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
             )
@@ -199,7 +208,8 @@ class ConfirmationHandlerOptionKtxTest {
         )
 
         assertThat(
-            paymentSelection.toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
             )
@@ -219,7 +229,8 @@ class ConfirmationHandlerOptionKtxTest {
     @Test
     fun `On Google Pay selection with config with null google pay config, should return null`() {
         assertThat(
-            PaymentSelection.GooglePay.toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = PaymentSelection.GooglePay,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
             )
@@ -229,7 +240,8 @@ class ConfirmationHandlerOptionKtxTest {
     @Test
     fun `On Google Pay selection with config with google pay config, should return expected option`() {
         assertThat(
-            PaymentSelection.GooglePay.toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = PaymentSelection.GooglePay,
                 configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
                     .googlePay(
                         PaymentSheet.GooglePayConfiguration(
@@ -256,6 +268,9 @@ class ConfirmationHandlerOptionKtxTest {
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
                     cardBrandFilter = PaymentSheetCardBrandFilter(
                         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
+                    ),
+                    cardFundingFilter = PaymentSheetCardFundingFilter(
+                        allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes
                     )
                 ),
             )
@@ -265,7 +280,8 @@ class ConfirmationHandlerOptionKtxTest {
     @Test
     fun `On Link selection but with no configuration, should return null`() {
         assertThat(
-            PaymentSelection.Link().toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = PaymentSelection.Link(),
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
             )
@@ -275,13 +291,14 @@ class ConfirmationHandlerOptionKtxTest {
     @Test
     fun `On Link selection with configuration, should return Link confirmation option`() {
         assertThat(
-            PaymentSelection.Link().toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = PaymentSelection.Link(),
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-                linkConfiguration = LINK_CONFIGURATION,
+                linkConfiguration = createLinkConfiguration(),
             )
         ).isEqualTo(
             LinkConfirmationOption(
-                configuration = LINK_CONFIGURATION,
+                configuration = createLinkConfiguration(),
                 linkExpressMode = LinkExpressMode.DISABLED,
             )
         )
@@ -290,15 +307,16 @@ class ConfirmationHandlerOptionKtxTest {
     @Test
     fun `On Link selection with express configuration, should return Link confirmation option with express enabled`() {
         assertThat(
-            PaymentSelection.Link(
-                linkExpressMode = LinkExpressMode.ENABLED
-            ).toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = PaymentSelection.Link(
+                    linkExpressMode = LinkExpressMode.ENABLED
+                ),
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-                linkConfiguration = LINK_CONFIGURATION,
+                linkConfiguration = createLinkConfiguration(),
             )
         ).isEqualTo(
             LinkConfirmationOption(
-                configuration = LINK_CONFIGURATION,
+                configuration = createLinkConfiguration(),
                 linkExpressMode = LinkExpressMode.ENABLED,
             )
         )
@@ -309,7 +327,8 @@ class ConfirmationHandlerOptionKtxTest {
         val linkInlineSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION_WITH_LINK
 
         assertThat(
-            linkInlineSelection.toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = linkInlineSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
             )
@@ -351,7 +370,8 @@ class ConfirmationHandlerOptionKtxTest {
         val expectedPaymentMethod = PaymentMethodFactory.instantDebits()
 
         assertThat(
-            paymentSelection.toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
             )
@@ -370,7 +390,8 @@ class ConfirmationHandlerOptionKtxTest {
         val expectedPaymentMethod = PaymentMethodFactory.instantDebits()
 
         assertThat(
-            paymentSelection.toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
             )
@@ -389,9 +410,10 @@ class ConfirmationHandlerOptionKtxTest {
         val linkInlinePaymentSelection = createCardPaymentSelectionWithLink(
             paymentMethodExtraParams = paymentMethodExtraParams
         )
-        val confirmationOption = linkInlinePaymentSelection.toConfirmationOption(
+        val confirmationOption = createConfirmationOption()(
+            paymentSelection = linkInlinePaymentSelection,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-            linkConfiguration = LINK_CONFIGURATION,
+            linkConfiguration = createLinkConfiguration(),
         )
 
         assertThat(confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption>()
@@ -410,7 +432,8 @@ class ConfirmationHandlerOptionKtxTest {
             darkThemeIconUrl = null,
         )
 
-        val confirmationOption = customPaymentMethodSelection.toConfirmationOption(
+        val confirmationOption = createConfirmationOption()(
+            paymentSelection = customPaymentMethodSelection,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
                 .customPaymentMethods(customPaymentMethods = listOf())
                 .build()
@@ -439,7 +462,8 @@ class ConfirmationHandlerOptionKtxTest {
             disableBillingDetailCollection = false,
         )
 
-        val confirmationOption = customPaymentMethodSelection.toConfirmationOption(
+        val confirmationOption = createConfirmationOption()(
+            paymentSelection = customPaymentMethodSelection,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
                 .customPaymentMethods(customPaymentMethods = listOf(customPaymentMethod))
                 .build()
@@ -457,7 +481,8 @@ class ConfirmationHandlerOptionKtxTest {
     @Test
     fun `On ShopPay selection with config with null shopPay config, should return null`() {
         assertThat(
-            PaymentSelection.ShopPay.toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = PaymentSelection.ShopPay,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
             )
@@ -467,7 +492,8 @@ class ConfirmationHandlerOptionKtxTest {
     @Test
     fun `On ShopPay selection with config with shopPay config but no customer session, should return null`() {
         assertThat(
-            PaymentSelection.ShopPay.toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = PaymentSelection.ShopPay,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration().copy(
                     shopPayConfiguration = SHOP_PAY_CONFIGURATION,
                     customer = null
@@ -480,7 +506,8 @@ class ConfirmationHandlerOptionKtxTest {
     @Test
     fun `On ShopPay selection with config with shopPay config, should return expected option`() {
         assertThat(
-            PaymentSelection.ShopPay.toConfirmationOption(
+            createConfirmationOption()(
+                paymentSelection = PaymentSelection.ShopPay,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER
                     .asCommonConfiguration()
                     .copy(
@@ -516,19 +543,28 @@ class ConfirmationHandlerOptionKtxTest {
 
         assertThat(
             createCardPaymentSelectionWithLink(customerRequestedSave)
-                .toConfirmationOption(
-                    configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-                    linkConfiguration = LINK_CONFIGURATION,
-                )
+                .let {
+                    createConfirmationOption()(
+                        paymentSelection = it,
+                        configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                        linkConfiguration = createLinkConfiguration(),
+                    )
+                }
         ).isEqualTo(
             LinkInlineSignupConfirmationOption(
                 createParams = paymentMethodCreateParams,
                 optionsParams = null,
                 extraParams = null,
                 saveOption = expectedSaveOption,
-                linkConfiguration = LINK_CONFIGURATION,
+                linkConfiguration = createLinkConfiguration(),
                 userInput = userInput,
             )
+        )
+    }
+
+    private fun createConfirmationOption(): CreateConfirmationOption {
+        return DefaultCreateConfirmationOption(
+            cardFundingFilterFactory = FakeCardFundingFilterFactory()
         )
     }
 
@@ -596,8 +632,8 @@ class ConfirmationHandlerOptionKtxTest {
         )
     }
 
-    private companion object {
-        val LINK_CONFIGURATION = LinkConfiguration(
+    private fun createLinkConfiguration(): LinkConfiguration {
+        return LinkConfiguration(
             stripeIntent = PaymentIntentFactory.create(),
             merchantName = "Merchant, Inc.",
             sellerBusinessName = null,
@@ -638,5 +674,11 @@ class ConfirmationHandlerOptionKtxTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
         )
+    }
+
+    private class FakeCardFundingFilterFactory : CardFundingFilter.Factory<List<PaymentSheet.CardFundingType>> {
+        override fun invoke(params: List<PaymentSheet.CardFundingType>): CardFundingFilter {
+            return PaymentSheetCardFundingFilter(params)
+        }
     }
 }

@@ -90,7 +90,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
     @Named(IS_LIVE_MODE) val isLiveModeProvider: () -> Boolean,
-    tapToAddCollectionHandler: TapToAddCollectionHandler
+    tapToAddCollectionHandler: TapToAddCollectionHandler,
+    private val createConfirmationOption: CreateConfirmationOption
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,

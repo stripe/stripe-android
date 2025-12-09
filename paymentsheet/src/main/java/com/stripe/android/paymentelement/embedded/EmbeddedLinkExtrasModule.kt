@@ -9,8 +9,11 @@ import com.stripe.android.link.injection.LinkCommonModule
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
+import com.stripe.android.paymentelement.confirmation.CreateConfirmationOption
+import com.stripe.android.paymentelement.confirmation.DefaultCreateConfirmationOption
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 
 @Module(
     subcomponents = [
@@ -32,4 +35,14 @@ internal interface EmbeddedLinkExtrasModule {
 
     @Binds
     fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
+
+    companion object {
+        @JvmStatic
+        @Provides
+        fun provideCreateConfirmationOption(
+            cardFundingFilterFactory: PaymentSheetCardFundingFilter.Factory
+        ): CreateConfirmationOption {
+            return DefaultCreateConfirmationOption(cardFundingFilterFactory)
+        }
+    }
 }

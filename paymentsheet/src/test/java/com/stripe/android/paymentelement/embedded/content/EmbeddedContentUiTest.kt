@@ -10,7 +10,9 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.FakeCardFundingFilterFactory
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.confirmation.DefaultCreateConfirmationOption
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -185,6 +187,7 @@ internal class EmbeddedContentUiTest {
                 linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
                 analyticsCallbackProvider = { AnalyticEventCallbackRule() },
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+                createConfirmationOption = DefaultCreateConfirmationOption(FakeCardFundingFilterFactory),
             )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
