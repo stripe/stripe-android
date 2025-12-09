@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.UserInput
@@ -46,6 +47,7 @@ internal sealed interface UiDefinitionFactory {
         val isLinkUI: Boolean = false,
         val previousLinkSignupCheckboxSelection: Boolean? = null,
         val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
+        val tapToAddHelper: TapToAddHelper? = null,
     ) {
         interface Factory {
             fun create(
@@ -69,6 +71,7 @@ internal sealed interface UiDefinitionFactory {
                 private val previousLinkSignupCheckboxSelection: Boolean? = null,
                 private val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? =
                     null,
+                private val tapToAddHelper: TapToAddHelper? = null,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
@@ -97,6 +100,7 @@ internal sealed interface UiDefinitionFactory {
                         isLinkUI = isLinkUI,
                         previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection,
                         automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+                        tapToAddHelper = tapToAddHelper,
                     )
                 }
 
