@@ -34,7 +34,9 @@ internal class DefaultEmbeddedWalletsHelper @Inject constructor(
                 onGooglePayPressed = { throw IllegalStateException("Not possible.") },
                 onLinkPressed = { throw IllegalStateException("Not possible.") },
                 isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent,
-                walletsAllowedInHeader = emptyList() // Embedded: all wallets inline, none in header
+                walletsAllowedInHeader = emptyList(), // Embedded: all wallets inline, none in header
+                cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
+                cardFundingFilter = paymentMethodMetadata.cardFundingFilter
             )
         }
     }

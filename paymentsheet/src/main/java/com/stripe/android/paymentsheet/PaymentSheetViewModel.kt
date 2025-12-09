@@ -9,6 +9,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
@@ -193,7 +195,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             onGooglePayPressed = this::checkoutWithGooglePay,
             onLinkPressed = this::checkoutWithLink,
             isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent,
-            walletsAllowedInHeader = WalletType.entries // PaymentSheet: all wallets in header
+            walletsAllowedInHeader = WalletType.entries, // PaymentSheet: all wallets in header
+            cardFundingFilter = paymentMethodMetadata?.cardFundingFilter ?: DefaultCardFundingFilter,
+            cardBrandFilter = paymentMethodMetadata?.cardBrandFilter ?: DefaultCardBrandFilter
         )
     }
 
@@ -503,7 +507,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                             paymentSelection = it,
                             configuration = config.asCommonConfiguration(),
                             linkConfiguration = linkHandler.linkConfiguration.value,
-                            enableCardFundFiltering = paymentMethodMetadata.enableCardFundFiltering,
+                            cardFundingFilter = paymentMethodMetadata.cardFundingFilter ,
                         )
                     }
             }

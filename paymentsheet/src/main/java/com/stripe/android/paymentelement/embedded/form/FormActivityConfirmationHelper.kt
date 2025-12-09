@@ -81,7 +81,7 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
                 paymentSelection,
                 configuration = configuration.asCommonConfiguration(),
                 linkConfiguration = paymentMethodMetadata.linkState?.configuration,
-                enableCardFundFiltering = paymentMethodMetadata.enableCardFundFiltering,
+                cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
             )
         } ?: return null
         return ConfirmationHandler.Args(

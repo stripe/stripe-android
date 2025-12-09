@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
@@ -18,6 +19,7 @@ import com.stripe.android.link.verification.VerificationState
 import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
@@ -94,6 +96,7 @@ internal interface WalletButtonsInteractor {
             val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
             val allowCreditCards: Boolean,
             val cardBrandFilter: CardBrandFilter,
+            val cardFundingFilter: CardFundingFilter
         ) : WalletButton {
             override val walletType = WalletType.GooglePay
 
@@ -102,11 +105,13 @@ internal interface WalletButtonsInteractor {
                 billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
                 allowCreditCards: Boolean,
                 cardBrandFilter: CardBrandFilter,
+                cardFundingFilter: CardFundingFilter
             ) : this(
                 googlePayButtonType = buttonType.asGooglePayButtonType,
                 billingAddressParameters = billingDetailsCollectionConfiguration.toBillingAddressParameters(),
                 allowCreditCards = allowCreditCards,
                 cardBrandFilter = cardBrandFilter,
+                cardFundingFilter = cardFundingFilter
             )
 
             override fun createSelection(): PaymentSelection {
@@ -145,6 +150,7 @@ internal class DefaultWalletButtonsInteractor constructor(
     private val linkPaymentLauncher: LinkPaymentLauncher,
     private val linkAccountHolder: LinkAccountHolder,
     private val createConfirmationOption: CreateConfirmationOption,
+    private val cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory,
     private val analyticsCallbackProvider: Provider<AnalyticEventCallback?>,
     private val onWalletButtonsRenderStateChanged: (isRendered: Boolean) -> Unit
 ) : WalletButtonsInteractor {
@@ -172,6 +178,7 @@ internal class DefaultWalletButtonsInteractor constructor(
                         cardBrandFilter = PaymentSheetCardBrandFilter(
                             cardBrandAcceptance = configuration.cardBrandAcceptance,
                         ),
+                        cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
                         billingDetailsCollectionConfiguration = configuration
                             .billingDetailsCollectionConfiguration,
                     ).takeIf {
@@ -315,7 +322,7 @@ internal class DefaultWalletButtonsInteractor constructor(
             selection,
             configuration = arguments.configuration,
             linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration,
-            enableCardFundFiltering = arguments.paymentMethodMetadata.enableCardFundFiltering,
+            cardFundingFilter = arguments.paymentMethodMetadata.cardFundingFilter,
         ) ?: return null
 
         return ConfirmationHandler.Args(
@@ -364,6 +371,7 @@ internal class DefaultWalletButtonsInteractor constructor(
                 linkPaymentLauncher = walletsButtonLinkLauncher,
                 linkAccountHolder = flowControllerStateComponent.linkAccountHolder,
                 createConfirmationOption = flowControllerStateComponent.createConfirmationOption,
+                cardFundingFilterFactory = flowControllerStateComponent.cardFundingFilterFactory,
                 analyticsCallbackProvider = flowControllerStateComponent.analyticEventCallbackProvider,
                 onWalletButtonsRenderStateChanged = { isRendered ->
                     flowControllerViewModel.walletButtonsRendered = isRendered
@@ -381,6 +389,7 @@ internal class DefaultWalletButtonsInteractor constructor(
             linkPaymentLauncher: LinkPaymentLauncher,
             linkAccountHolder: LinkAccountHolder,
             createConfirmationOption: CreateConfirmationOption,
+            cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory,
             analyticsCallbackProvider: Provider<AnalyticEventCallback?>,
         ): WalletButtonsInteractor {
             return DefaultWalletButtonsInteractor(
@@ -405,6 +414,7 @@ internal class DefaultWalletButtonsInteractor constructor(
                 linkPaymentLauncher = linkPaymentLauncher,
                 linkAccountHolder = linkAccountHolder,
                 createConfirmationOption = createConfirmationOption,
+                cardFundingFilterFactory = cardFundingFilterFactory,
                 analyticsCallbackProvider = analyticsCallbackProvider,
                 onWalletButtonsRenderStateChanged = {
                     // No-op, not supported for Embedded

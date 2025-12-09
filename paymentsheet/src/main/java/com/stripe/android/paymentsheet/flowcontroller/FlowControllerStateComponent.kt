@@ -8,6 +8,7 @@ import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.verification.DefaultLinkInlineInteractor
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -60,6 +61,7 @@ internal interface FlowControllerStateComponent {
     val linkAccountHolder: LinkAccountHolder
     val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>
     val createConfirmationOption: CreateConfirmationOption
+    val cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory
 
     fun inject(paymentOptionsViewModel: PaymentOptionsViewModel.Factory)
 

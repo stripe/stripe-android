@@ -58,7 +58,7 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
                 paymentSelection = it,
                 configuration = confirmationState.configuration.asCommonConfiguration(),
                 linkConfiguration = confirmationState.paymentMethodMetadata.linkState?.configuration,
-                enableCardFundFiltering = confirmationState.paymentMethodMetadata.enableCardFundFiltering,
+                cardFundingFilter = confirmationState.paymentMethodMetadata.cardFundingFilter,
             )
         } ?: return null
 

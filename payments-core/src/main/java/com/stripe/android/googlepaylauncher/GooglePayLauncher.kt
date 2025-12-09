@@ -13,6 +13,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -88,7 +90,8 @@ class GooglePayLauncher internal constructor(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
-                additionalEnabledNetworks = config.additionalEnabledNetworks
+                additionalEnabledNetworks = config.additionalEnabledNetworks,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         },
         PaymentAnalyticsRequestFactory(
@@ -131,6 +134,7 @@ class GooglePayLauncher internal constructor(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
+                cardFundingFilter = DefaultCardFundingFilter
             )
         },
         PaymentAnalyticsRequestFactory(
@@ -178,7 +182,8 @@ class GooglePayLauncher internal constructor(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE)
                 ),
-                additionalEnabledNetworks = config.additionalEnabledNetworks
+                additionalEnabledNetworks = config.additionalEnabledNetworks,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         },
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -423,7 +428,9 @@ fun rememberGooglePayLauncher(
                         context = context,
                         productUsage = setOf(GooglePayLauncher.PRODUCT_USAGE)
                     ),
-                    additionalEnabledNetworks = config.additionalEnabledNetworks
+                    additionalEnabledNetworks = config.additionalEnabledNetworks,
+                    cardBrandFilter = DefaultCardBrandFilter,
+                    cardFundingFilter = DefaultCardFundingFilter
                 )
             },
             PaymentAnalyticsRequestFactory(

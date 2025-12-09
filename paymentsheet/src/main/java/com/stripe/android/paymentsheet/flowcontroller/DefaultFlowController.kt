@@ -534,7 +534,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     paymentSelection,
                     configuration = state.config,
                     linkConfiguration = state.linkConfiguration,
-                    enableCardFundFiltering = state.paymentMethodMetadata.enableCardFundFiltering,
+                    cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
                 )
             }
 
