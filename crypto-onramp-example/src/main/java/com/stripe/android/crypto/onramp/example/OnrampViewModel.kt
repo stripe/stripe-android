@@ -48,7 +48,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "LargeClass")
 internal class OnrampViewModel(
     private val application: Application,
     savedStateHandle: SavedStateHandle
@@ -561,9 +561,9 @@ internal class OnrampViewModel(
         val walletAddress = currentState.walletAddress
         val network = currentState.network
         val authToken = currentState.authToken
-        val settlementSpeed = if (currentState.selectedPaymentType == PaymentMethodType.BankAccount)
+        val settlementSpeed = if (currentState.selectedPaymentType == PaymentMethodType.BankAccount) {
             currentState.settlementSpeed
-        else {
+        } else {
             SettlementSpeed.INSTANT
         }
 
