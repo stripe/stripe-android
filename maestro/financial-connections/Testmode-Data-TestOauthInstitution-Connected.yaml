@@ -7,8 +7,6 @@ tags:
 - clearState
 - runFlow:
     file: ../common/subflow-clear-system-ui.yaml
-    env:
-      APP_ID: com.stripe.android.financialconnections.example
 - openLink: "stripeconnectionsexample://playground\
     ?integration_type=Standalone\
     &experience=FinancialConnections\
