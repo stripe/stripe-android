@@ -196,5 +196,4 @@ internal class DefaultCreateConfirmationOption @Inject constructor(
             )
         }
     }
-
 }

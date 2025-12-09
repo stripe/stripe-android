@@ -133,7 +133,6 @@ class GooglePayLauncher internal constructor(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
-                cardFundingFilter = DefaultCardFundingFilter
             )
         },
         PaymentAnalyticsRequestFactory(
@@ -427,8 +426,7 @@ fun rememberGooglePayLauncher(
                         context = context,
                         productUsage = setOf(GooglePayLauncher.PRODUCT_USAGE)
                     ),
-                    additionalEnabledNetworks = config.additionalEnabledNetworks,
-                    cardFundingFilter = DefaultCardFundingFilter
+                    additionalEnabledNetworks = config.additionalEnabledNetworks
                 )
             },
             PaymentAnalyticsRequestFactory(

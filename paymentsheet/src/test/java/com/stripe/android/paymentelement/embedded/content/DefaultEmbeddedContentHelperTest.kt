@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.createConfirmationOption
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -189,7 +190,7 @@ internal class DefaultEmbeddedContentHelperTest {
             linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
             analyticsCallbackProvider = { AnalyticEventCallbackRule() },
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
-            createConfirmationOption = TODO()
+            createConfirmationOption = createConfirmationOption()
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,

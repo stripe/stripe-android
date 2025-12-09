@@ -3,7 +3,6 @@ package com.stripe.android.paymentelement.confirmation
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
@@ -54,7 +53,7 @@ internal class DefaultCreateConfirmationOptionTest {
         )
 
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
@@ -76,7 +75,7 @@ internal class DefaultCreateConfirmationOptionTest {
         )
 
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
@@ -98,7 +97,7 @@ internal class DefaultCreateConfirmationOptionTest {
         )
 
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
@@ -131,7 +130,7 @@ internal class DefaultCreateConfirmationOptionTest {
         )
 
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
@@ -151,7 +150,7 @@ internal class DefaultCreateConfirmationOptionTest {
         )
 
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
@@ -176,7 +175,7 @@ internal class DefaultCreateConfirmationOptionTest {
         )
 
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
@@ -208,7 +207,7 @@ internal class DefaultCreateConfirmationOptionTest {
         )
 
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
@@ -229,7 +228,7 @@ internal class DefaultCreateConfirmationOptionTest {
     @Test
     fun `On Google Pay selection with config with null google pay config, should return null`() {
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = PaymentSelection.GooglePay,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
@@ -240,7 +239,7 @@ internal class DefaultCreateConfirmationOptionTest {
     @Test
     fun `On Google Pay selection with config with google pay config, should return expected option`() {
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = PaymentSelection.GooglePay,
                 configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
                     .googlePay(
@@ -270,7 +269,7 @@ internal class DefaultCreateConfirmationOptionTest {
                         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
                     ),
                     cardFundingFilter = PaymentSheetCardFundingFilter(
-                        allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes
+                        allowedCardFundingTypes = PaymentSheet.CardFundingType.entries
                     )
                 ),
             )
@@ -280,7 +279,7 @@ internal class DefaultCreateConfirmationOptionTest {
     @Test
     fun `On Link selection but with no configuration, should return null`() {
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = PaymentSelection.Link(),
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
@@ -291,7 +290,7 @@ internal class DefaultCreateConfirmationOptionTest {
     @Test
     fun `On Link selection with configuration, should return Link confirmation option`() {
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = PaymentSelection.Link(),
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = createLinkConfiguration(),
@@ -307,7 +306,7 @@ internal class DefaultCreateConfirmationOptionTest {
     @Test
     fun `On Link selection with express configuration, should return Link confirmation option with express enabled`() {
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = PaymentSelection.Link(
                     linkExpressMode = LinkExpressMode.ENABLED
                 ),
@@ -327,7 +326,7 @@ internal class DefaultCreateConfirmationOptionTest {
         val linkInlineSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION_WITH_LINK
 
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = linkInlineSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
@@ -370,7 +369,7 @@ internal class DefaultCreateConfirmationOptionTest {
         val expectedPaymentMethod = PaymentMethodFactory.instantDebits()
 
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
@@ -390,7 +389,7 @@ internal class DefaultCreateConfirmationOptionTest {
         val expectedPaymentMethod = PaymentMethodFactory.instantDebits()
 
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = paymentSelection,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
@@ -410,7 +409,7 @@ internal class DefaultCreateConfirmationOptionTest {
         val linkInlinePaymentSelection = createCardPaymentSelectionWithLink(
             paymentMethodExtraParams = paymentMethodExtraParams
         )
-        val confirmationOption = createConfirmationOption()(
+        val confirmationOption = createConfirmationOption().invoke(
             paymentSelection = linkInlinePaymentSelection,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             linkConfiguration = createLinkConfiguration(),
@@ -432,7 +431,7 @@ internal class DefaultCreateConfirmationOptionTest {
             darkThemeIconUrl = null,
         )
 
-        val confirmationOption = createConfirmationOption()(
+        val confirmationOption = createConfirmationOption().invoke(
             paymentSelection = customPaymentMethodSelection,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
                 .customPaymentMethods(customPaymentMethods = listOf())
@@ -462,7 +461,7 @@ internal class DefaultCreateConfirmationOptionTest {
             disableBillingDetailCollection = false,
         )
 
-        val confirmationOption = createConfirmationOption()(
+        val confirmationOption = createConfirmationOption().invoke(
             paymentSelection = customPaymentMethodSelection,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
                 .customPaymentMethods(customPaymentMethods = listOf(customPaymentMethod))
@@ -481,7 +480,7 @@ internal class DefaultCreateConfirmationOptionTest {
     @Test
     fun `On ShopPay selection with config with null shopPay config, should return null`() {
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = PaymentSelection.ShopPay,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
@@ -492,7 +491,7 @@ internal class DefaultCreateConfirmationOptionTest {
     @Test
     fun `On ShopPay selection with config with shopPay config but no customer session, should return null`() {
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = PaymentSelection.ShopPay,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration().copy(
                     shopPayConfiguration = SHOP_PAY_CONFIGURATION,
@@ -506,7 +505,7 @@ internal class DefaultCreateConfirmationOptionTest {
     @Test
     fun `On ShopPay selection with config with shopPay config, should return expected option`() {
         assertThat(
-            createConfirmationOption()(
+            createConfirmationOption().invoke(
                 paymentSelection = PaymentSelection.ShopPay,
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER
                     .asCommonConfiguration()
@@ -544,7 +543,7 @@ internal class DefaultCreateConfirmationOptionTest {
         assertThat(
             createCardPaymentSelectionWithLink(customerRequestedSave)
                 .let {
-                    createConfirmationOption()(
+                    createConfirmationOption().invoke(
                         paymentSelection = it,
                         configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                         linkConfiguration = createLinkConfiguration(),

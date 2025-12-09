@@ -16,9 +16,8 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-import com.stripe.android.paymentelement.FakeCardFundingFilterFactory
-import com.stripe.android.paymentelement.confirmation.DefaultCreateConfirmationOption
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.createConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -205,7 +204,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 },
                 isLiveModeProvider = { false },
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
-                createConfirmationOption = DefaultCreateConfirmationOption(FakeCardFundingFilterFactory)
+                createConfirmationOption = createConfirmationOption()
             )
         }
     }

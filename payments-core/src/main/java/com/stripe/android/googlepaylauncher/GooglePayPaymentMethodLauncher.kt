@@ -176,8 +176,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE_TOKEN),
-                ),
-                cardFundingFilter = DefaultCardFundingFilter
+                )
             )
         },
         cardBrandFilter = cardBrandFilter,

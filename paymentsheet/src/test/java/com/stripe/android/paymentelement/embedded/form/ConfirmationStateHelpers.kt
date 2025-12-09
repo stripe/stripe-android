@@ -3,16 +3,15 @@ package com.stripe.android.paymentelement.embedded.form
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.paymentelement.FakeCardFundingFilterFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.CreateConfirmationOption
-import com.stripe.android.paymentelement.confirmation.DefaultCreateConfirmationOption
+import com.stripe.android.paymentelement.createConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal fun confirmationStateConfirming(
     selection: PaymentSelection,
-    createConfirmationOption: CreateConfirmationOption = DefaultCreateConfirmationOption(FakeCardFundingFilterFactory)
+    createConfirmationOption: CreateConfirmationOption = createConfirmationOption()
 ): ConfirmationHandler.State.Confirming {
     val confirmationOption = createConfirmationOption(
         paymentSelection = selection,

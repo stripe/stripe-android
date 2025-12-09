@@ -5,7 +5,7 @@ import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 
-internal object FakeCardFundingFilterFactory : PaymentSheetCardFundingFilterFactory {
+internal class FakeCardFundingFilterFactory : PaymentSheetCardFundingFilterFactory {
     override fun invoke(params: List<PaymentSheet.CardFundingType>): CardFundingFilter {
         return DefaultCardFundingFilter
     }

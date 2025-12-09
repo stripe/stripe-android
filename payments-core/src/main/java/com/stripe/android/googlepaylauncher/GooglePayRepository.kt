@@ -7,6 +7,7 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.Logger
@@ -55,7 +56,7 @@ internal class DefaultGooglePayRepository(
     private val errorReporter: ErrorReporter,
     private val logger: Logger = Logger.noop(),
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
-    private val cardFundingFilter: CardFundingFilter,
+    private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     private val additionalEnabledNetworks: List<String> = emptyList()
 ) : GooglePayRepository {
 
