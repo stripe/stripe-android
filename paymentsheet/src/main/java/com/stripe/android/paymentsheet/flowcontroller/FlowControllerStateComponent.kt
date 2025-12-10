@@ -8,13 +8,11 @@ import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.verification.DefaultLinkInlineInteractor
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.CreateConfirmationOption
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -60,8 +58,6 @@ internal interface FlowControllerStateComponent {
     val linkInlineInteractor: DefaultLinkInlineInteractor
     val linkAccountHolder: LinkAccountHolder
     val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>
-    val createConfirmationOption: CreateConfirmationOption
-    val cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory
 
     fun inject(paymentOptionsViewModel: PaymentOptionsViewModel.Factory)
 

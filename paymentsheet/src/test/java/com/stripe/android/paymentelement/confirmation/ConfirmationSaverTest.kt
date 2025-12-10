@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -259,7 +260,7 @@ class ConfirmationSaverTest {
                 customLabel = null,
                 billingDetailsCollectionConfiguration = mock(),
                 cardBrandFilter = mock(),
-                cardFundingFilter = mock(),
+                cardFundingFilter = DefaultCardFundingFilter,
             )
         )
 
@@ -328,7 +329,7 @@ class ConfirmationSaverTest {
                 customLabel = null,
                 billingDetailsCollectionConfiguration = mock(),
                 cardBrandFilter = mock(),
-                cardFundingFilter = mock(),
+                cardFundingFilter = DefaultCardFundingFilter,
             )
         )
 

@@ -6,6 +6,7 @@ import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.isInstanceOf
@@ -21,7 +22,6 @@ import com.stripe.android.link.verification.NoOpLinkInlineInteractor
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentelement.AnalyticEvent
@@ -32,7 +32,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
-import com.stripe.android.paymentelement.createConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
@@ -575,9 +574,7 @@ class DefaultWalletButtonsInteractorTest {
                         customLabel = "This is a purchase!",
                         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                         cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
-                        cardFundingFilter = PaymentSheetCardFundingFilter(
-                            allowedCardFundingTypes = PaymentSheet.CardFundingType.entries
-                        ),
+                        cardFundingFilter = DefaultCardFundingFilter,
                     ),
                 )
             )
@@ -1101,7 +1098,6 @@ class DefaultWalletButtonsInteractorTest {
             linkAccountHolder = linkAccountHolder,
             analyticsCallbackProvider = { analyticsEventCallbackRule },
             onWalletButtonsRenderStateChanged = onWalletButtonsRenderStateChanged,
-            createConfirmationOption = createConfirmationOption()
         )
     }
 

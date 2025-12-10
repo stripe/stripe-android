@@ -30,8 +30,6 @@ import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
-import com.stripe.android.paymentelement.confirmation.CreateConfirmationOption
-import com.stripe.android.paymentelement.confirmation.DefaultCreateConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
@@ -157,14 +155,6 @@ internal abstract class PaymentSheetCommonModule {
 
     @Suppress("TooManyFunctions")
     companion object {
-        @JvmStatic
-        @Provides
-        fun provideCreateConfirmationOption(
-            cardFundingFilterFactory: PaymentSheetCardFundingFilter.Factory
-        ): CreateConfirmationOption {
-            return DefaultCreateConfirmationOption(cardFundingFilterFactory)
-        }
-
         @Provides
         @Singleton
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {

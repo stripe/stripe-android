@@ -62,7 +62,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
-import com.stripe.android.paymentelement.createConfirmationOption
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
@@ -1295,7 +1294,6 @@ internal class PaymentSheetActivityTest {
                 },
                 isLiveModeProvider = { false },
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
-                createConfirmationOption = createConfirmationOption()
             )
         }
     }

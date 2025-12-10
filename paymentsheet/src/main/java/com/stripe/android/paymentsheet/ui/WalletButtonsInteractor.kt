@@ -19,7 +19,6 @@ import com.stripe.android.link.verification.VerificationState
 import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
@@ -27,7 +26,7 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.CreateConfirmationOption
+import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedLinkHelper
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -149,8 +148,6 @@ internal class DefaultWalletButtonsInteractor constructor(
     private val linkInlineInteractor: LinkInlineInteractor,
     private val linkPaymentLauncher: LinkPaymentLauncher,
     private val linkAccountHolder: LinkAccountHolder,
-    private val createConfirmationOption: CreateConfirmationOption,
-    private val cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory,
     private val analyticsCallbackProvider: Provider<AnalyticEventCallback?>,
     private val onWalletButtonsRenderStateChanged: (isRendered: Boolean) -> Unit
 ) : WalletButtonsInteractor {
@@ -318,8 +315,7 @@ internal class DefaultWalletButtonsInteractor constructor(
         selection: PaymentSelection,
         arguments: Arguments,
     ): ConfirmationHandler.Args? {
-        val confirmationOption = createConfirmationOption(
-            selection,
+        val confirmationOption = selection.toConfirmationOption(
             configuration = arguments.configuration,
             linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = arguments.paymentMethodMetadata.cardFundingFilter,
@@ -345,9 +341,9 @@ internal class DefaultWalletButtonsInteractor constructor(
             walletsButtonLinkLauncher: LinkPaymentLauncher
         ): WalletButtonsInteractor {
             val linkHandler = flowControllerViewModel.flowControllerStateComponent.linkHandler
-            val flowControllerStateComponent = flowControllerViewModel.flowControllerStateComponent
+
             return DefaultWalletButtonsInteractor(
-                errorReporter = flowControllerStateComponent.errorReporter,
+                errorReporter = flowControllerViewModel.flowControllerStateComponent.errorReporter,
                 arguments = combineAsStateFlow(
                     linkHandler.linkConfigurationCoordinator.emailFlow,
                     flowControllerViewModel.stateFlow,
@@ -365,14 +361,13 @@ internal class DefaultWalletButtonsInteractor constructor(
                         null
                     }
                 },
-                confirmationHandler = flowControllerStateComponent.confirmationHandler,
+                confirmationHandler = flowControllerViewModel.flowControllerStateComponent.confirmationHandler,
                 coroutineScope = flowControllerViewModel.viewModelScope,
-                linkInlineInteractor = flowControllerStateComponent.linkInlineInteractor,
+                linkInlineInteractor = flowControllerViewModel.flowControllerStateComponent.linkInlineInteractor,
                 linkPaymentLauncher = walletsButtonLinkLauncher,
-                linkAccountHolder = flowControllerStateComponent.linkAccountHolder,
-                createConfirmationOption = flowControllerStateComponent.createConfirmationOption,
-                cardFundingFilterFactory = flowControllerStateComponent.cardFundingFilterFactory,
-                analyticsCallbackProvider = flowControllerStateComponent.analyticEventCallbackProvider,
+                linkAccountHolder = flowControllerViewModel.flowControllerStateComponent.linkAccountHolder,
+                analyticsCallbackProvider =
+                flowControllerViewModel.flowControllerStateComponent.analyticEventCallbackProvider,
                 onWalletButtonsRenderStateChanged = { isRendered ->
                     flowControllerViewModel.walletButtonsRendered = isRendered
                 }
@@ -388,8 +383,6 @@ internal class DefaultWalletButtonsInteractor constructor(
             errorReporter: ErrorReporter,
             linkPaymentLauncher: LinkPaymentLauncher,
             linkAccountHolder: LinkAccountHolder,
-            createConfirmationOption: CreateConfirmationOption,
-            cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory,
             analyticsCallbackProvider: Provider<AnalyticEventCallback?>,
         ): WalletButtonsInteractor {
             return DefaultWalletButtonsInteractor(
@@ -413,8 +406,6 @@ internal class DefaultWalletButtonsInteractor constructor(
                 linkInlineInteractor = linkInlineInteractor,
                 linkPaymentLauncher = linkPaymentLauncher,
                 linkAccountHolder = linkAccountHolder,
-                createConfirmationOption = createConfirmationOption,
-                cardFundingFilterFactory = cardFundingFilterFactory,
                 analyticsCallbackProvider = analyticsCallbackProvider,
                 onWalletButtonsRenderStateChanged = {
                     // No-op, not supported for Embedded

@@ -1,23 +1,19 @@
 package com.stripe.android.paymentelement.embedded.form
 
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.CreateConfirmationOption
-import com.stripe.android.paymentelement.createConfirmationOption
+import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
-internal fun confirmationStateConfirming(
-    selection: PaymentSelection,
-    createConfirmationOption: CreateConfirmationOption = createConfirmationOption()
-): ConfirmationHandler.State.Confirming {
-    val confirmationOption = createConfirmationOption(
-        paymentSelection = selection,
+internal fun confirmationStateConfirming(selection: PaymentSelection): ConfirmationHandler.State.Confirming {
+    val confirmationOption = selection.toConfirmationOption(
         configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration.asCommonConfiguration(),
         linkConfiguration = null,
-        enableCardFundFiltering = false,
+        cardFundingFilter = DefaultCardFundingFilter
     )
     return ConfirmationHandler.State.Confirming(requireNotNull(confirmationOption))
 }

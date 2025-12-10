@@ -30,10 +30,10 @@ import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.CreateConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
+import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
@@ -93,7 +93,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
     @Named(IS_LIVE_MODE) val isLiveModeProvider: () -> Boolean,
     tapToAddCollectionHandler: TapToAddCollectionHandler,
-    private val createConfirmationOption: CreateConfirmationOption
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -502,14 +501,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 inProgressSelection = paymentSelection
 
                 paymentSelectionWithCvcIfEnabled(paymentSelection)
-                    ?.let {
-                        createConfirmationOption(
-                            paymentSelection = it,
-                            configuration = config.asCommonConfiguration(),
-                            linkConfiguration = linkHandler.linkConfiguration.value,
-                            cardFundingFilter = paymentMethodMetadata.cardFundingFilter ,
-                        )
-                    }
+                    ?.toConfirmationOption(
+                        configuration = config.asCommonConfiguration(),
+                        linkConfiguration = linkHandler.linkConfiguration.value,
+                        cardFundingFilter = paymentMethodMetadata.cardFundingFilter
+                    )
             }
 
             confirmationOption?.let { option ->

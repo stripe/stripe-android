@@ -9,12 +9,10 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.verification.NoOpLinkInlineInteractor
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.CreateConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -87,9 +85,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     private val linkPaymentLauncher: LinkPaymentLauncher,
-    private val linkAccountHolder: LinkAccountHolder,
-    private val createConfirmationOption: CreateConfirmationOption,
-    private val cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory
+    private val linkAccountHolder: LinkAccountHolder
 ) : EmbeddedContentHelper {
 
     private val state: StateFlow<State?> = savedStateHandle.getStateFlow(
@@ -181,8 +177,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             linkAccountHolder = linkAccountHolder,
             linkInlineInteractor = NoOpLinkInlineInteractor(),
             analyticsCallbackProvider = analyticsCallbackProvider,
-            createConfirmationOption = createConfirmationOption,
-            cardFundingFilterFactory = cardFundingFilterFactory
         )
     }
 

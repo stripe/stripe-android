@@ -2,7 +2,6 @@ package com.stripe.android
 
 import android.content.Context
 import android.os.Parcelable
-import android.util.Log
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -330,11 +329,10 @@ class GooglePayJsonFactory internal constructor(
                             .put("format", billingAddressParameters.format.code)
                     )
                 }
-                val allowCreditCards = cardFundingFilter.isAccepted(CardFunding.Credit)
+                val allowCreditCards = allowCreditCards ?: cardFundingFilter.isAccepted(CardFunding.Credit)
                 put("allowCreditCards", allowCreditCards)
                 put("allowPrepaidCards", cardFundingFilter.isAccepted(CardFunding.Prepaid))
             }
-        Log.d("TOLUWANI", cardPaymentMethodParams.toString(4))
 
         return JSONObject()
             .put("type", CARD_PAYMENT_METHOD)

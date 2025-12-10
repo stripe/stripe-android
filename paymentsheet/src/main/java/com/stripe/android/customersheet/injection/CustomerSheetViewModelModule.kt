@@ -23,8 +23,6 @@ import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
@@ -75,11 +73,6 @@ internal interface CustomerSheetViewModelModule {
     fun bindsPrefsRepositoryFactory(
         factory: DefaultPrefsRepository.Factory
     ): PrefsRepository.Factory
-
-    @Binds
-    fun bindCardFundingFilter(
-        cardFundingFilterFactory: PaymentSheetCardFundingFilter.Factory
-    ): PaymentSheetCardFundingFilterFactory
 
     @Suppress("TooManyFunctions")
     companion object {

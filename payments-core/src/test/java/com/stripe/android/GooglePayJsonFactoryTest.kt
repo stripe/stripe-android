@@ -338,56 +338,46 @@ class GooglePayJsonFactoryTest {
 
     @Test
     fun allowCreditCards_whenNull_shouldBeTrueWhenAcceptedByCardFundingFilter() {
-        val cardFundingFilter = FakeCardFundingFilter(acceptCredit = true)
-        val allowCreditCards = GooglePayJsonFactory(
-            googlePayConfig,
-            cardFundingFilter = cardFundingFilter
+        assertCardFundingParameter(
+            parameterName = "allowCreditCards",
+            cardFundingFilter = FakeCardFundingFilter(acceptCredit = true),
+            expectedValue = true
         )
-            .createIsReadyToPayRequest()
-            .getJSONArray("allowedPaymentMethods")
-            .getJSONObject(0)
-            .getJSONObject("parameters")
-            .getBoolean("allowCreditCards")
-
-        assertThat(allowCreditCards).isTrue()
     }
 
     @Test
     fun allowCreditCards_whenNull_shouldBeFalseWhenRejectedByCardFundingFilter() {
-        val cardFundingFilter = FakeCardFundingFilter(acceptCredit = false)
-        val allowCreditCards = GooglePayJsonFactory(
-            googlePayConfig,
-            cardFundingFilter = cardFundingFilter
+        assertCardFundingParameter(
+            parameterName = "allowCreditCards",
+            cardFundingFilter = FakeCardFundingFilter(acceptCredit = false),
+            expectedValue = false
         )
-            .createIsReadyToPayRequest()
-            .getJSONArray("allowedPaymentMethods")
-            .getJSONObject(0)
-            .getJSONObject("parameters")
-            .getBoolean("allowCreditCards")
-
-        assertThat(allowCreditCards).isFalse()
     }
 
     @Test
     fun allowPrepaidCards_shouldBeTrueWhenAcceptedByCardFundingFilter() {
-        val cardFundingFilter = FakeCardFundingFilter(acceptPrepaid = true)
-        val allowPrepaidCards = GooglePayJsonFactory(
-            googlePayConfig,
-            cardFundingFilter = cardFundingFilter
+        assertCardFundingParameter(
+            parameterName = "allowPrepaidCards",
+            cardFundingFilter = FakeCardFundingFilter(acceptPrepaid = true),
+            expectedValue = true
         )
-            .createIsReadyToPayRequest()
-            .getJSONArray("allowedPaymentMethods")
-            .getJSONObject(0)
-            .getJSONObject("parameters")
-            .getBoolean("allowPrepaidCards")
-
-        assertThat(allowPrepaidCards).isTrue()
     }
 
     @Test
     fun allowPrepaidCards_shouldBeFalseWhenRejectedByCardFundingFilter() {
-        val cardFundingFilter = FakeCardFundingFilter(acceptPrepaid = false)
-        val allowPrepaidCards = GooglePayJsonFactory(
+        assertCardFundingParameter(
+            parameterName = "allowPrepaidCards",
+            cardFundingFilter = FakeCardFundingFilter(acceptPrepaid = false),
+            expectedValue = false
+        )
+    }
+
+    private fun assertCardFundingParameter(
+        parameterName: String,
+        cardFundingFilter: CardFundingFilter,
+        expectedValue: Boolean
+    ) {
+        val actualValue = GooglePayJsonFactory(
             googlePayConfig,
             cardFundingFilter = cardFundingFilter
         )
@@ -395,9 +385,9 @@ class GooglePayJsonFactoryTest {
             .getJSONArray("allowedPaymentMethods")
             .getJSONObject(0)
             .getJSONObject("parameters")
-            .getBoolean("allowPrepaidCards")
+            .getBoolean(parameterName)
 
-        assertThat(allowPrepaidCards).isFalse()
+        assertThat(actualValue).isEqualTo(expectedValue)
     }
 
     @Test

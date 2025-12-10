@@ -13,7 +13,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
-import com.stripe.android.paymentelement.createConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -163,8 +162,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
             lifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined),
             confirmationStateHolder = confirmationStateHolder,
             eventReporter = FakeEventReporter(),
-            embeddedResultCallbackHelper = callbackHelper,
-            createConfirmationOption = createConfirmationOption()
+            embeddedResultCallbackHelper = callbackHelper
         )
         assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
         Scenario(

@@ -1,6 +1,6 @@
 package com.stripe.android.customersheet
 
-import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.coroutines.awaitWithTimeout
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
@@ -17,7 +17,6 @@ import com.stripe.android.customersheet.util.getDefaultPaymentMethodAsPaymentSel
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
 import com.stripe.android.customersheet.util.sortPaymentMethods
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
-import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -25,7 +24,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
@@ -52,18 +50,16 @@ internal class DefaultCustomerSheetLoader(
     private val eventReporter: CustomerSheetEventReporter,
     private val errorReporter: ErrorReporter,
     private val workContext: CoroutineContext,
-    private val cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory
 ) : CustomerSheetLoader {
 
     @Inject constructor(
         @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean,
-        googlePayRepositoryFactory: @JvmSuppressWildcards GooglePayRepositoryFactory,
+        googlePayRepositoryFactory: GooglePayRepositoryFactory,
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
         lpmRepository: LpmRepository,
         eventReporter: CustomerSheetEventReporter,
         errorReporter: ErrorReporter,
         @IOContext workContext: CoroutineContext,
-        cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory
     ) : this(
         isLiveModeProvider = isLiveModeProvider,
         googlePayRepositoryFactory = googlePayRepositoryFactory,
@@ -74,7 +70,6 @@ internal class DefaultCustomerSheetLoader(
         eventReporter = eventReporter,
         errorReporter = errorReporter,
         workContext = workContext,
-        cardFundingFilterFactory = cardFundingFilterFactory
     )
 
     override suspend fun load(
@@ -151,7 +146,7 @@ internal class DefaultCustomerSheetLoader(
             stripeIntent = elementsSession.stripeIntent,
             serverLpmSpecs = elementsSession.paymentMethodSpecs,
         ).sharedDataSpecs
-        val cardFundingFilter = cardFundingFilterFactory(ConfigurationDefaults.allowedCardFundingTypes)
+        val cardFundingFilter = DefaultCardFundingFilter
         val cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
 
         val isGooglePaySupportedOnDevice = googlePayRepositoryFactory(

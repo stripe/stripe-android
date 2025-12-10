@@ -11,7 +11,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentelement.createConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -95,7 +94,6 @@ internal class FormActivityConfirmationHandlerTest {
             eventReporter = FakeEventReporter(),
             coroutineScope = this,
             formActivityConfirmationHandlerRegistrar = formActivityConfirmationHandlerRegistrar,
-            createConfirmationOption = createConfirmationOption()
         )
 
         assertThat(formActivityConfirmationHandlerRegistrar.registerAndBootstrapTurbine.awaitItem()).isNotNull()

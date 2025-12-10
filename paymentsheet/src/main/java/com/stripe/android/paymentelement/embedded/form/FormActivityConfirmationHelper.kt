@@ -8,7 +8,7 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.CreateConfirmationOption
+import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.coroutines.CoroutineScope
@@ -32,8 +32,7 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     lifecycleOwner: LifecycleOwner,
     activityResultCaller: ActivityResultCaller,
     @ViewModelScope private val coroutineScope: CoroutineScope,
-    formActivityConfirmationHandlerRegistrar: FormActivityConfirmationHandlerRegistrar,
-    private val createConfirmationOption: CreateConfirmationOption
+    formActivityConfirmationHandlerRegistrar: FormActivityConfirmationHandlerRegistrar
 ) : FormActivityConfirmationHelper {
 
     init {
@@ -76,14 +75,11 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     }
 
     private fun confirmationArgs(): ConfirmationHandler.Args? {
-        val confirmationOption = selectionHolder.selection.value?.let { paymentSelection ->
-            createConfirmationOption(
-                paymentSelection,
-                configuration = configuration.asCommonConfiguration(),
-                linkConfiguration = paymentMethodMetadata.linkState?.configuration,
-                cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
-            )
-        } ?: return null
+        val confirmationOption = selectionHolder.selection.value?.toConfirmationOption(
+            configuration = configuration.asCommonConfiguration(),
+            linkConfiguration = paymentMethodMetadata.linkState?.configuration,
+            cardFundingFilter = paymentMethodMetadata.cardFundingFilter
+        ) ?: return null
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
             paymentMethodMetadata = paymentMethodMetadata,

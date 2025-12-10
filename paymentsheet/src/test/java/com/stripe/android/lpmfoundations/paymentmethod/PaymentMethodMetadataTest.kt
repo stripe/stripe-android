@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
@@ -1118,6 +1119,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
+            cardFundingFilter = DefaultCardFundingFilter,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1183,7 +1185,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
             experimentsData = null,
-            enableCardFundFiltering = false,
+            cardFundingFilter = DefaultCardFundingFilter,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1226,6 +1228,7 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = true,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,
+            cardFundingFilter = DefaultCardFundingFilter,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1275,7 +1278,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
             experimentsData = null,
-            enableCardFundFiltering = false,
+            cardFundingFilter = DefaultCardFundingFilter,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -1353,6 +1356,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
+            cardFundingFilter = DefaultCardFundingFilter,
         )
     }
 
@@ -2075,6 +2079,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
+            cardFundingFilter = DefaultCardFundingFilter,
         )
 
         assertThat(metadata.availableWallets)
@@ -2157,6 +2162,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
+            cardFundingFilter = DefaultCardFundingFilter,
         )
     }
 
@@ -2183,6 +2189,7 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = false,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,
+            cardFundingFilter = DefaultCardFundingFilter,
         )
     }
 
@@ -2295,6 +2302,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = true,
+            cardFundingFilter = DefaultCardFundingFilter,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()

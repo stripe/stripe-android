@@ -44,9 +44,8 @@ internal data class CommonConfiguration(
 ) : Parcelable {
 
     fun allowedCardFundingTypes(enabled: Boolean): List<PaymentSheet.CardFundingType> {
-//        if (enabled) return allowedCardFundingTypes
-//        return ConfigurationDefaults.allowedCardFundingTypes
-        return allowedCardFundingTypes
+        if (enabled) return allowedCardFundingTypes
+        return ConfigurationDefaults.allowedCardFundingTypes
     }
 
     fun validate(isLiveMode: Boolean, @PaymentElementCallbackIdentifier callbackIdentifier: String) {

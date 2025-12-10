@@ -6,7 +6,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.CreateConfirmationOption
+import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.utils.reportPaymentResult
@@ -24,8 +24,7 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
     private val lifecycleOwner: LifecycleOwner,
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     private val eventReporter: EventReporter,
-    private val embeddedResultCallbackHelper: EmbeddedResultCallbackHelper,
-    private val createConfirmationOption: CreateConfirmationOption
+    private val embeddedResultCallbackHelper: EmbeddedResultCallbackHelper
 ) : EmbeddedConfirmationHelper {
     init {
         confirmationStarter.register(
@@ -53,14 +52,11 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
 
     private fun confirmationArgs(): ConfirmationHandler.Args? {
         val confirmationState = confirmationStateHolder.state ?: return null
-        val confirmationOption = confirmationState.selection?.let {
-            createConfirmationOption(
-                paymentSelection = it,
-                configuration = confirmationState.configuration.asCommonConfiguration(),
-                linkConfiguration = confirmationState.paymentMethodMetadata.linkState?.configuration,
-                cardFundingFilter = confirmationState.paymentMethodMetadata.cardFundingFilter,
-            )
-        } ?: return null
+        val confirmationOption = confirmationState.selection?.toConfirmationOption(
+            configuration = confirmationState.configuration.asCommonConfiguration(),
+            linkConfiguration = confirmationState.paymentMethodMetadata.linkState?.configuration,
+            cardFundingFilter = confirmationState.paymentMethodMetadata.cardFundingFilter
+        ) ?: return null
 
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,

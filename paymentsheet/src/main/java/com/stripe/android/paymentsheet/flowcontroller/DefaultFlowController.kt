@@ -39,8 +39,8 @@ import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.CreateConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -103,7 +103,6 @@ internal class DefaultFlowController @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
-    private val createConfirmationOption: CreateConfirmationOption
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
@@ -529,14 +528,11 @@ internal class DefaultFlowController @Inject internal constructor(
         state: PaymentSheetState.Full,
     ) {
         viewModelScope.launch {
-            val confirmationOption = paymentSelection?.let {
-                createConfirmationOption(
-                    paymentSelection,
-                    configuration = state.config,
-                    linkConfiguration = state.linkConfiguration,
-                    cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
-                )
-            }
+            val confirmationOption = paymentSelection?.toConfirmationOption(
+                configuration = state.config,
+                linkConfiguration = state.linkConfiguration,
+                cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter
+            )
 
             confirmationOption?.let { option ->
                 confirmationHandler.start(

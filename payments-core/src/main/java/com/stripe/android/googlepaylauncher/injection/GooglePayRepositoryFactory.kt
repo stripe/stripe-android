@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
-import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.googlepaylauncher.DefaultGooglePayRepository
@@ -26,7 +25,7 @@ internal class DefaultGooglePayRepositoryFactory @Inject constructor(
     private val appContext: Context,
     private val logger: Logger,
     private val errorReporter: ErrorReporter,
-): GooglePayRepositoryFactory {
+) : GooglePayRepositoryFactory {
     override fun invoke(
         environment: GooglePayEnvironment,
         cardFundingFilter: CardFundingFilter,
@@ -44,5 +43,4 @@ internal class DefaultGooglePayRepositoryFactory @Inject constructor(
             cardBrandFilter = cardBrandFilter
         )
     }
-
 }
