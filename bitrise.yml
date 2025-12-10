@@ -365,7 +365,7 @@ workflows:
             - content: ruby scripts/dependencies/check_transitive_dependencies.rb
   start_connections_emulator:
     steps:
-      - avd-manager@1:
+      - avd-manager@2:
           inputs:
             - profile: "pixel_6"
             - abi: "x86_64"
@@ -382,7 +382,7 @@ workflows:
                 -no-window
   start_emulator:
     steps:
-      - avd-manager@1:
+      - avd-manager@2:
           inputs:
             - profile: "pixel_6"
             - abi: "x86_64"
@@ -399,7 +399,7 @@ workflows:
                -no-window
   start_screenshot_emulator:
     steps:
-      - avd-manager@1:
+      - avd-manager@2:
           inputs:
             - profile: "Nexus 6"
             - abi: "x86_64"
