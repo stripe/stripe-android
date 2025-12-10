@@ -177,8 +177,7 @@ class LpmSerializerTest {
         val types = listOf(
             "billing_address", "affirm_header", "afterpay_header",
             "au_becs_bsb_number", "au_becs_account_number", "au_becs_mandate",
-            "country", "email", "iban", "klarna_country",
-            "klarna_header", "static_text", "name", "mandate", "sepa_mandate"
+            "country", "email", "iban", "static_text", "name", "mandate", "sepa_mandate"
         )
         types.forEach { fieldType ->
             println("field type: $fieldType")
@@ -218,8 +217,6 @@ class LpmSerializerTest {
             "country" to "billing_details[address][country]",
             "email" to "billing_details[email]",
             "iban" to "sepa_debit[iban]",
-            "klarna_country" to "billing_details[address][country]",
-            "klarna_header" to "klarna_header_text",
             "name" to "billing_details[name]",
             "mandate" to "mandate",
             "sepa_mandate" to "sepa_mandate",

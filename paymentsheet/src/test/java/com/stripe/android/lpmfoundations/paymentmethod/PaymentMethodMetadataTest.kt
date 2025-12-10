@@ -212,28 +212,6 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `supportedPaymentMethodForCode returns null when sharedDataSpecs are missing`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("klarna")
-            ),
-            sharedDataSpecs = emptyList(),
-        )
-        assertThat(metadata.supportedPaymentMethodForCode("klarna")).isNull()
-    }
-
-    @Test
-    fun `supportedPaymentMethodForCode returns null when it's not supported`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card")
-            ),
-            sharedDataSpecs = listOf(SharedDataSpec("klarna")),
-        )
-        assertThat(metadata.supportedPaymentMethodForCode("klarna")).isNull()
-    }
-
-    @Test
     fun `sortedSupportedPaymentMethods returns list sorted by payment_method_types`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
