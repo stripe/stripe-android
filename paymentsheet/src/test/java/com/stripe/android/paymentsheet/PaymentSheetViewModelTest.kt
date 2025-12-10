@@ -11,6 +11,7 @@ import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
+import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
@@ -3501,7 +3502,8 @@ internal class PaymentSheetViewModelTest {
                         return cvcRecollectionInteractor
                     }
                 },
-                isLiveModeProvider = { false }
+                isLiveModeProvider = { false },
+                tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
             )
         }
     }
