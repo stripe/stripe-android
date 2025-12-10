@@ -6,10 +6,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -219,6 +221,33 @@ internal abstract class BaseSheetViewModel(
         } else {
             onUserCancel()
         }
+    }
+
+    fun getPaymentMethodLayout(): PaymentSheet.PaymentMethodLayout {
+        val paymentMethodLayout = config.paymentMethodLayout
+        val paymentMethodMetadata = paymentMethodMetadata.value
+        val experimentsData = paymentMethodMetadata?.experimentsData
+
+        if (
+            paymentMethodMetadata == null ||
+            experimentsData == null ||
+            paymentMethodLayout != PaymentSheet.PaymentMethodLayout.Automatic
+        ) {
+            return paymentMethodLayout
+        }
+
+        experimentsData.experimentAssignments[
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA
+        ]?.let { variant ->
+            eventReporter.onExperimentExposure(
+                LoggableExperiment.OcsMobileHorizontalModeAndroidAA(
+                    experimentsData = experimentsData,
+                    group = variant,
+                )
+            )
+        }
+
+        return paymentMethodLayout
     }
 
     abstract fun onUserCancel()

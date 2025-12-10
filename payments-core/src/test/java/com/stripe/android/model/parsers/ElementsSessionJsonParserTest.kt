@@ -202,6 +202,27 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun parseIntentWithOcsMobileExperiment_setsExperimentDataCorrectly() {
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false
+        ).parse(
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_EXPERIMENTS_DATA_JSON
+        )!!
+
+        assertThat(elementsSession.experimentsData).isNotNull()
+        assertThat(elementsSession.experimentsData?.experimentAssignments).containsEntry(
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA,
+            "control"
+        )
+    }
+
+    @Test
     fun `Test ordered payment methods returned in PI payment_method_type variable`() {
         val parsedData = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
