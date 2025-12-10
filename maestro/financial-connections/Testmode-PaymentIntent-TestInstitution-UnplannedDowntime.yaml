@@ -6,8 +6,6 @@ tags:
 ---
 - startRecording: ${'/tmp/test_results/testmode-paymentintent-testinstitution-networking-' + new Date().getTime()}
 - clearState
-- runFlow:
-    file: ../common/subflow-clear-system-ui.yaml
 - openLink: stripeconnectionsexample://playground?integration_type=Standalone&experience=FinancialConnections&flow=PaymentIntent&financial_connections_override_native=native&financial_connections_test_mode=true&merchant=testmode&permissions=payment_method
 - scrollUntilVisible:
     element:

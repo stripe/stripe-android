@@ -5,8 +5,6 @@ tags:
 ---
 - startRecording: ${'/tmp/test_results/testmode-data-testoauthinstitution-connected-' + new Date().getTime()}
 - clearState
-- runFlow:
-    file: ../common/subflow-clear-system-ui.yaml
 - openLink: "stripeconnectionsexample://playground\
     ?integration_type=Standalone\
     &experience=FinancialConnections\
