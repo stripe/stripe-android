@@ -174,6 +174,26 @@ internal class IntentConfirmationWebViewClientTest {
         assertThat(errors[0].webViewErrorType).isEqualTo("render_process_gone")
     }
 
+    @Test
+    fun `shouldOverrideUrlLoading calls openUri with correct URI`() {
+        val capturedUris = mutableListOf<Uri>()
+        val openUri: (Uri) -> Unit = { uri -> capturedUris.add(uri) }
+        val client = IntentConfirmationWebViewClient(
+            hostUrl = HOST_URL,
+            errorHandler = { },
+            openUri = openUri
+        )
+        val testUrl = "https://example.com/terms"
+        val request = createRequest(testUrl)
+        val webView = WebView(ApplicationProvider.getApplicationContext())
+
+        val result = client.shouldOverrideUrlLoading(webView, request)
+
+        assertThat(result).isTrue()
+        assertThat(capturedUris).hasSize(1)
+        assertThat(capturedUris[0].toString()).isEqualTo(testUrl)
+    }
+
     // Helper methods
     private fun testWithSetup(
         hostUrl: String = HOST_URL,
@@ -181,7 +201,13 @@ internal class IntentConfirmationWebViewClientTest {
     ) {
         val capturedErrors = mutableListOf<WebViewError>()
         val errorHandler = WebViewErrorHandler { error -> capturedErrors.add(error) }
-        val client = IntentConfirmationWebViewClient(hostUrl, errorHandler = errorHandler)
+        val capturedUris = mutableListOf<Uri>()
+        val openUri: (Uri) -> Unit = { uri -> capturedUris.add(uri) }
+        val client = IntentConfirmationWebViewClient(
+            hostUrl = hostUrl,
+            errorHandler = errorHandler,
+            openUri = openUri
+        )
         val webView = WebView(ApplicationProvider.getApplicationContext())
 
         block(client, capturedErrors, webView)
