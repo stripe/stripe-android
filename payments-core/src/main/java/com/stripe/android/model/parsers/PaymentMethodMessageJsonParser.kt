@@ -137,7 +137,9 @@ internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMes
             PaymentMethodMessageLegalDisclosure(
                 message = message
             )
-        } else null
+        } else {
+            null
+        }
     }
 
     /**
