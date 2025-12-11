@@ -243,6 +243,8 @@ internal abstract class BaseSheetViewModel(
                 LoggableExperiment.OcsMobileHorizontalModeAndroidAA(
                     experimentsData = experimentsData,
                     group = variant,
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    hasSavedPaymentMethod = customerStateHolder.paymentMethods.value.isNotEmpty(),
                 )
             )
         }

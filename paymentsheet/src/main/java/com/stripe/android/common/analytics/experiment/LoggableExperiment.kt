@@ -1,5 +1,6 @@
 package com.stripe.android.common.analytics.experiment
 
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.utils.filterNotNullValues
@@ -14,14 +15,17 @@ internal sealed class LoggableExperiment(
     open val dimensions: Map<String, String>
 ) {
 
-    data class OcsMobileHorizontalModeAndroidAA(
+    class OcsMobileHorizontalModeAndroidAA(
         val experimentsData: ElementsSession.ExperimentsData,
         override val group: String,
+        paymentMethodMetadata: PaymentMethodMetadata,
+        hasSavedPaymentMethod: Boolean,
     ) : LoggableExperiment(
         arbId = experimentsData.arbId,
         experiment = ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA,
         group = group,
-        dimensions = emptyMap(),
+        dimensions = CommonElementsDimensions.getDimensions(paymentMethodMetadata) +
+            mapOf("has_saved_payment_method" to hasSavedPaymentMethod.toString()),
     )
 
     data class LinkHoldback(
