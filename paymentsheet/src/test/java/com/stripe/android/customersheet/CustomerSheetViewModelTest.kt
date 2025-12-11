@@ -7,21 +7,19 @@ import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
-import com.stripe.android.core.StripeError
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
 import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMethod
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
-import com.stripe.android.customersheet.data.FakeCustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetSavedSelectionDataSource
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
 import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -33,7 +31,6 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.interceptor.FakeIntentConfirmationInterceptorFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -49,6 +46,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
+import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
@@ -58,7 +56,6 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.BankFormScreenStateFactory
-import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -766,22 +763,11 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When primary button is pressed in the add payment flow, view should be loading`() = runTest(testDispatcher) {
+    fun `When primary button is pressed in the add payment flow, view should be loading`() = confirmationTest {
         val viewModel = createViewModel(
-            workContext = testDispatcher,
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = false,
-            ),
-            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
-                onAttachPaymentMethod = {
-                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
-                }
-            ),
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-            )
+            confirmationHandler = handler,
         )
 
         viewModel.handleViewAction(CustomerSheetViewAction.OnFormFieldValuesCompleted(TEST_FORM_VALUES))
@@ -789,50 +775,29 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            assertThat(startTurbine.awaitItem()).isNotNull()
             val viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.isProcessing).isTrue()
             assertThat(viewState.enabled).isFalse()
+            awaitResultTurbine.add(
+                ConfirmationHandler.Result.Succeeded(
+                    intent = SetupIntentFactory.create(
+                        paymentMethod = CARD_PAYMENT_METHOD
+                    ),
+                    deferredIntentConfirmationType = null,
+                )
+            )
             assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
         }
     }
 
     @Test
-    fun `When payment method could not be created, error message is visible`() = runTest(testDispatcher) {
-        val viewModel = createViewModel(
-            workContext = testDispatcher,
-            isGooglePayAvailable = false,
-            customerPaymentMethods = listOf(),
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.failure(
-                    APIException(stripeError = StripeError(message = "Could not create payment method."))
-                ),
-            )
-        )
-
-        viewModel.handleViewAction(
-            CustomerSheetViewAction.OnFormFieldValuesCompleted(
-                formFieldValues = TEST_FORM_VALUES,
-            )
-        )
-
-        viewModel.viewState.test {
-            var viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.errorMessage).isNull()
-            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.isProcessing).isTrue()
-            viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.errorMessage).isEqualTo("Could not create payment method.".resolvableString)
-            assertThat(viewState.isProcessing).isFalse()
-        }
-    }
-
-    @Test
-    fun `After attaching payment method with setup intent, methods are refreshed`() = runTest(testDispatcher) {
+    fun `After attaching payment method, methods are refreshed`() = confirmationTest {
         val errorReporter = FakeErrorReporter()
         val viewModel = retrieveViewModelForAttaching(
-            attachWithSetupIntent = true,
             shouldFailRefresh = false,
+            confirmationHandler = handler,
+            refreshedPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             errorReporter = errorReporter,
         )
 
@@ -841,7 +806,16 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
+            assertThat(startTurbine.awaitItem()).isNotNull()
+
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
+
+            awaitResultTurbine.add(
+                ConfirmationHandler.Result.Succeeded(
+                    intent = SetupIntentFactory.create(CARD_PAYMENT_METHOD),
+                    deferredIntentConfirmationType = null,
+                )
+            )
 
             val newViewState = awaitViewState<SelectPaymentMethod>()
             assertThat(newViewState.errorMessage).isNull()
@@ -854,12 +828,12 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `if methods fail to refresh after attaching with setup intent, should dismiss and report event`() =
-        runTest(testDispatcher) {
+    fun `if methods fail to refresh after saving, should dismiss and report event`() =
+        confirmationTest {
             val errorReporter = FakeErrorReporter()
             val viewModel = retrieveViewModelForAttaching(
-                attachWithSetupIntent = true,
                 errorReporter = errorReporter,
+                confirmationHandler = handler,
                 shouldFailRefresh = true,
             )
 
@@ -868,8 +842,19 @@ class CustomerSheetViewModelTest {
 
                 viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
+                assertThat(startTurbine.awaitItem()).isNotNull()
+
                 assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
             }
+
+            awaitResultTurbine.add(
+                ConfirmationHandler.Result.Succeeded(
+                    intent = SetupIntentFactory.create(
+                        paymentMethod = CARD_PAYMENT_METHOD,
+                    ),
+                    deferredIntentConfirmationType = null,
+                )
+            )
 
             viewModel.result.test {
                 assertThat(awaitItem()).isInstanceOf<InternalCustomerSheetResult.Canceled>()
@@ -880,121 +865,12 @@ class CustomerSheetViewModelTest {
         }
 
     @Test
-    fun `After attaching payment method without setup intent, methods are refreshed`() = runTest(testDispatcher) {
-        val errorReporter = FakeErrorReporter()
-        val viewModel = retrieveViewModelForAttaching(
-            attachWithSetupIntent = false,
-            shouldFailRefresh = false,
-            errorReporter = errorReporter,
-        )
-
-        viewModel.viewState.test {
-            assertThat(awaitViewState<AddPaymentMethod>().errorMessage).isNull()
-
-            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-
-            assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
-
-            val newViewState = awaitViewState<SelectPaymentMethod>()
-            assertThat(newViewState.errorMessage).isNull()
-            assertThat(newViewState.isProcessing).isFalse()
-            assertThat(newViewState.savedPaymentMethods).contains(CARD_PAYMENT_METHOD)
-        }
-
-        assertThat(errorReporter.getLoggedErrors())
-            .contains(ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_SUCCESS.eventName)
-    }
-
-    @Test
-    fun `if methods fail to refresh after attaching without setup intent, should dismiss and report event`() =
-        runTest(testDispatcher) {
-            val errorReporter = FakeErrorReporter()
-            val viewModel = retrieveViewModelForAttaching(
-                attachWithSetupIntent = false,
-                errorReporter = errorReporter,
-                shouldFailRefresh = true,
-            )
-
-            viewModel.viewState.test {
-                assertThat(awaitViewState<AddPaymentMethod>().errorMessage).isNull()
-
-                viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-
-                assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
-            }
-
-            viewModel.result.test {
-                assertThat(awaitItem()).isInstanceOf<InternalCustomerSheetResult.Canceled>()
-            }
-
-            assertThat(errorReporter.getLoggedErrors())
-                .contains(ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_FAILURE.eventName)
-        }
-
-    @Test
-    fun `When setup intent provider error, error message is visible`() = runTest(testDispatcher) {
+    fun `When confirmation error, error message is visible`() = confirmationTest {
         val viewModel = createViewModel(
             workContext = testDispatcher,
             isGooglePayAvailable = false,
+            confirmationHandler = handler,
             customerPaymentMethods = listOf(),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = true,
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.failure(
-                        displayMessage = "Merchant provided error message",
-                        cause = Exception("Some error"),
-                    )
-                },
-            ),
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-            ),
-        )
-
-        viewModel.handleViewAction(
-            CustomerSheetViewAction.OnFormFieldValuesCompleted(
-                formFieldValues = TEST_FORM_VALUES,
-            )
-        )
-
-        viewModel.viewState.test {
-            var viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.errorMessage).isNull()
-
-            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-
-            assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
-
-            viewState = awaitViewState()
-            assertThat(viewState.errorMessage).isEqualTo("Merchant provided error message".resolvableString)
-            assertThat(viewState.isProcessing).isFalse()
-        }
-    }
-
-    @Test
-    fun `When payment method cannot be attached, error message is visible`() = runTest(testDispatcher) {
-        val viewModel = createViewModel(
-            workContext = testDispatcher,
-            isGooglePayAvailable = false,
-            customerPaymentMethods = listOf(),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = false,
-            ),
-            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
-                onAttachPaymentMethod = {
-                    CustomerSheetDataResult.failure(
-                        cause = APIException(
-                            stripeError = StripeError(
-                                message = "Cannot attach payment method."
-                            )
-                        ),
-                        displayMessage = "We couldn't save this payment method. Please try again."
-                    )
-                },
-            ),
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-            ),
         )
 
         viewModel.handleViewAction(
@@ -1007,10 +883,22 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
+            assertThat(startTurbine.awaitItem()).isNotNull()
+
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
+
+            val message = "We couldn't save this payment method. Please try again."
+
+            awaitResultTurbine.add(
+                ConfirmationHandler.Result.Failed(
+                    cause = IllegalStateException(message),
+                    message = message.resolvableString,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                )
+            )
+
             viewState = awaitViewState()
-            assertThat(viewState.errorMessage)
-                .isEqualTo("We couldn't save this payment method. Please try again.".resolvableString)
+            assertThat(viewState.errorMessage).isEqualTo(message.resolvableString)
             assertThat(viewState.isProcessing).isFalse()
         }
     }
@@ -1085,23 +973,15 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When a new payment method is added, the primary button is visible`() = runTest(testDispatcher) {
+    fun `When a new payment method is added, the primary button is visible`() = confirmationTest {
         val viewModel = createViewModel(
             workContext = testDispatcher,
             customerPaymentMethods = listOf(),
+            confirmationHandler = handler,
             isGooglePayAvailable = false,
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
-            ),
             paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 paymentMethods = CustomerSheetDataResult.success(listOf(CARD_PAYMENT_METHOD)),
             ),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.success("seti_123")
-                }
-            )
         )
 
         viewModel.handleViewAction(
@@ -1115,8 +995,17 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
+            assertThat(startTurbine.awaitItem()).isNotNull()
+
             assertThat(awaitViewState<AddPaymentMethod>().isProcessing)
                 .isTrue()
+
+            awaitResultTurbine.add(
+                ConfirmationHandler.Result.Succeeded(
+                    intent = SetupIntentFactory.create(CARD_PAYMENT_METHOD),
+                    deferredIntentConfirmationType = null,
+                )
+            )
 
             assertThat(awaitViewState<SelectPaymentMethod>().primaryButtonVisible)
                 .isTrue()
@@ -1638,23 +1527,13 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When attach without setup intent succeeds, event is reported`() = runTest(testDispatcher) {
+    fun `When attach without setup intent succeeds, event is reported`() = confirmationTest {
         val eventReporter: CustomerSheetEventReporter = mock()
 
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
-            ),
-            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
-                onAttachPaymentMethod = {
-                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
-                },
-            ),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = false,
-            ),
+            confirmationHandler = handler,
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach,
             customerPaymentMethods = listOf(),
             isGooglePayAvailable = false,
             eventReporter = eventReporter,
@@ -1666,36 +1545,32 @@ class CustomerSheetViewModelTest {
             )
         )
 
-        viewModel.viewState.test {
-            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onAttachPaymentMethodSucceeded(
-                style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
+        awaitResultTurbine.add(
+            ConfirmationHandler.Result.Succeeded(
+                intent = SetupIntentFactory.create(
+                    paymentMethod = PaymentMethodFactory.card(),
+                ),
+                deferredIntentConfirmationType = null,
             )
-            cancelAndIgnoreRemainingEvents()
-        }
+        )
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+        assertThat(startTurbine.awaitItem()).isNotNull()
+
+        verify(eventReporter).onAttachPaymentMethodSucceeded(
+            style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
+        )
     }
 
     @Test
-    fun `When attach without setup intent fails, event is reported`() = runTest(testDispatcher) {
+    fun `When attach without setup intent fails, event is reported`() = confirmationTest {
         val eventReporter: CustomerSheetEventReporter = mock()
 
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
-            ),
-            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
-                onAttachPaymentMethod = {
-                    CustomerSheetDataResult.failure(
-                        cause = Exception("Unable to attach payment option"),
-                        displayMessage = "Something went wrong"
-                    )
-                },
-            ),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = false,
-            ),
+            confirmationHandler = handler,
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach,
             customerPaymentMethods = listOf(),
             isGooglePayAvailable = false,
             eventReporter = eventReporter,
@@ -1707,31 +1582,31 @@ class CustomerSheetViewModelTest {
             )
         )
 
-        viewModel.viewState.test {
-            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onAttachPaymentMethodFailed(
-                style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
+        awaitResultTurbine.add(
+            ConfirmationHandler.Result.Failed(
+                cause = IllegalStateException("Failed!"),
+                message = "Failed!".resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
             )
-            cancelAndIgnoreRemainingEvents()
-        }
+        )
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+        assertThat(startTurbine.awaitItem()).isNotNull()
+
+        verify(eventReporter).onAttachPaymentMethodFailed(
+            style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
+        )
     }
 
     @Test
-    fun `When attach with setup intent succeeds, event is reported`() = runTest(testDispatcher) {
+    fun `When attach with setup intent succeeds, event is reported`() = confirmationTest {
         val eventReporter: CustomerSheetEventReporter = mock()
 
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
-            ),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.success("seti_123")
-                },
-                canCreateSetupIntents = true,
-            ),
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
+            confirmationHandler = handler,
             customerPaymentMethods = listOf(),
             isGooglePayAvailable = false,
             eventReporter = eventReporter,
@@ -1743,36 +1618,34 @@ class CustomerSheetViewModelTest {
             )
         )
 
-        viewModel.viewState.test {
-            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onAttachPaymentMethodSucceeded(
-                style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
+        awaitResultTurbine.add(
+            ConfirmationHandler.Result.Succeeded(
+                intent = SetupIntentFactory.create(
+                    paymentMethod = PaymentMethodFactory.card(),
+                ),
+                deferredIntentConfirmationType = null,
             )
-            cancelAndIgnoreRemainingEvents()
-        }
+        )
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+        assertThat(startTurbine.awaitItem()).isNotNull()
+
+        verify(eventReporter).onAttachPaymentMethodSucceeded(
+            style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
+        )
     }
 
     @Test
-    fun `When attach with setup intent fails, event is reported`() = runTest(testDispatcher) {
+    fun `When attach with setup intent fails, event is reported`() = confirmationTest {
         val eventReporter: CustomerSheetEventReporter = mock()
 
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
-            ),
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.failure(
-                        cause = Exception("Unable to retrieve setup intent"),
-                        displayMessage = "Something went wrong"
-                    )
-                },
-                canCreateSetupIntents = true,
-            ),
+            confirmationHandler = handler,
+            attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
             eventReporter = eventReporter,
         )
 
@@ -1780,51 +1653,21 @@ class CustomerSheetViewModelTest {
             CustomerSheetViewAction.OnFormFieldValuesCompleted(formFieldValues = TEST_FORM_VALUES)
         )
 
-        viewModel.viewState.test {
-            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onAttachPaymentMethodFailed(
-                style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
+        awaitResultTurbine.add(
+            ConfirmationHandler.Result.Failed(
+                cause = IllegalStateException("Failed!"),
+                message = "Failed!".resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
             )
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun `When attach with setup intent handle next action fails, event is reported`() = runTest(testDispatcher) {
-        val eventReporter: CustomerSheetEventReporter = mock()
-
-        val viewModel = createViewModel(
-            workContext = testDispatcher,
-            customerPaymentMethods = listOf(),
-            isGooglePayAvailable = false,
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
-            ),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.success("seti_123")
-                },
-                canCreateSetupIntents = true,
-            ),
-            intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
-                enqueueFailureStep(
-                    cause = Exception("Unable to confirm setup intent"),
-                    message = "Something went wrong"
-                )
-            },
-            eventReporter = eventReporter,
         )
 
-        viewModel.handleViewAction(CustomerSheetViewAction.OnFormFieldValuesCompleted(TEST_FORM_VALUES))
+        viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
-        viewModel.viewState.test {
-            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onAttachPaymentMethodFailed(
-                style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
-            )
-            cancelAndIgnoreRemainingEvents()
-        }
+        assertThat(startTurbine.awaitItem()).isNotNull()
+
+        verify(eventReporter).onAttachPaymentMethodFailed(
+            style = CustomerSheetEventReporter.AddPaymentMethodStyle.SetupIntent
+        )
     }
 
     @Test
@@ -2105,24 +1948,15 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `US Bank Account can be created and attached`() = runTest(testDispatcher) {
+    fun `US Bank Account can be created and attached`() = confirmationTest {
         val usBankAccount = mockUSBankAccountPaymentSelection()
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(US_BANK_ACCOUNT_VERIFIED),
-                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
-            ),
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
+            confirmationHandler = handler,
             paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 paymentMethods = CustomerSheetDataResult.success(listOf(US_BANK_ACCOUNT_VERIFIED)),
-            ),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.success("seti_123")
-                },
-                canCreateSetupIntents = true,
             ),
         )
 
@@ -2143,7 +1977,17 @@ class CustomerSheetViewModelTest {
             assertThat(viewStateAfterAdding.bankAccountSelection).isEqualTo(usBankAccount)
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            assertThat(startTurbine.awaitItem()).isNotNull()
             assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
+
+            awaitResultTurbine.add(
+                ConfirmationHandler.Result.Succeeded(
+                    intent = SetupIntentFactory.create(
+                        paymentMethod = US_BANK_ACCOUNT_VERIFIED,
+                    ),
+                    deferredIntentConfirmationType = null,
+                )
+            )
 
             val viewStateAfterConfirming = awaitViewState<SelectPaymentMethod>()
 
@@ -2559,20 +2403,10 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When confirming a card, the card form should be reset when trying to add another card`() = runTest(testDispatcher) {
+    fun `When confirming a card, the card form should be reset when trying to add another card`() = confirmationTest {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = false,
-            ),
-            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
-                onAttachPaymentMethod = {
-                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
-                }
-            ),
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-            )
+            confirmationHandler = handler,
         )
 
         viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
@@ -2593,7 +2427,20 @@ class CustomerSheetViewModelTest {
             assertThat(awaitViewState<AddPaymentMethod>().formFieldValues).isNotNull()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+            assertThat(startTurbine.awaitItem()).isNotNull()
+
             assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
+
+            awaitResultTurbine.add(
+                ConfirmationHandler.Result.Succeeded(
+                    intent = SetupIntentFactory.create(
+                        paymentMethod = CARD_PAYMENT_METHOD,
+                    ),
+                    deferredIntentConfirmationType = null,
+                )
+            )
+
             assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
@@ -2604,21 +2451,12 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When attaching a non-verified bank account, the sheet closes and returns the account`() = runTest(testDispatcher) {
+    fun `When attaching a non-verified bank account, the sheet closes and returns the account`() = confirmationTest {
         val viewModel = createViewModel(
             workContext = testDispatcher,
             isGooglePayAvailable = false,
+            confirmationHandler = handler,
             customerPaymentMethods = listOf(),
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(US_BANK_ACCOUNT),
-                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
-            ),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.success("seti_123")
-                },
-                canCreateSetupIntents = true,
-            ),
         )
 
         viewModel.handleViewAction(CustomerSheetViewAction.OnFormFieldValuesCompleted(TEST_FORM_VALUES))
@@ -2632,6 +2470,17 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnPrimaryButtonPressed
+            )
+
+            assertThat(startTurbine.awaitItem()).isNotNull()
+
+            awaitResultTurbine.add(
+                ConfirmationHandler.Result.Succeeded(
+                    intent = SetupIntentFactory.create(
+                        paymentMethod = US_BANK_ACCOUNT,
+                    ),
+                    deferredIntentConfirmationType = null,
+                )
             )
 
             assertThat(awaitItem())
@@ -2764,12 +2613,10 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `Card Brand Choice should be enabled in 'SelectPaymentMethod' after attaching first payment method`() =
-        runTest(testDispatcher) {
+        confirmationTest {
             val viewModel = createViewModel(
                 workContext = testDispatcher,
-                stripeRepository = FakeStripeRepository(
-                    createPaymentMethodResult = Result.success(CARD_WITH_NETWORKS_PAYMENT_METHOD)
-                ),
+                confirmationHandler = handler,
                 customerSheetLoader = FakeCustomerSheetLoader(
                     customerPaymentMethods = listOf(),
                     paymentSelection = null,
@@ -2778,14 +2625,6 @@ class CustomerSheetViewModelTest {
                         preferredNetworks = listOf(CardBrand.CartesBancaires)
                     ),
                 ),
-                intentDataSource = FakeCustomerSheetIntentDataSource(
-                    canCreateSetupIntents = false,
-                ),
-                paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
-                    onAttachPaymentMethod = {
-                        CustomerSheetDataResult.success(CARD_WITH_NETWORKS_PAYMENT_METHOD)
-                    }
-                )
             )
 
             viewModel.viewState.test {
@@ -2808,8 +2647,19 @@ class CustomerSheetViewModelTest {
 
                 viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
+                assertThat(startTurbine.awaitItem()).isNotNull()
+
                 // Skip updated add state
                 awaitViewState<AddPaymentMethod>()
+
+                awaitResultTurbine.add(
+                    ConfirmationHandler.Result.Succeeded(
+                        intent = SetupIntentFactory.create(
+                            paymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD,
+                        ),
+                        deferredIntentConfirmationType = null,
+                    )
+                )
 
                 val selectPaymentMethodState = awaitViewState<SelectPaymentMethod>()
 
@@ -3069,7 +2919,7 @@ class CustomerSheetViewModelTest {
         }
 
     @Test
-    fun `When refreshing payment methods, payment methods should be filtered based on card brand acceptance`() = runTest(testDispatcher) {
+    fun `When refreshing payment methods, payment methods should be filtered based on card brand acceptance`() = confirmationTest {
         val acceptedCardPaymentMethod = CARD_PAYMENT_METHOD.update(
             last4 = "4242",
             addCbcNetworks = false,
@@ -3095,22 +2945,14 @@ class CustomerSheetViewModelTest {
                     )
                 )
             ),
+            confirmationHandler = handler,
             customerSheetLoader = FakeCustomerSheetLoader(
                 customerPaymentMethods = listOf(),
                 isGooglePayAvailable = false
             ),
             paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 paymentMethods = CustomerSheetDataResult.success(allPaymentMethods),
-                onAttachPaymentMethod = {
-                    CustomerSheetDataResult.success(acceptedCardPaymentMethod)
-                }
             ),
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(acceptedCardPaymentMethod),
-            ),
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = false
-            )
         )
 
         // Call refreshAndUpdatePaymentMethods indirectly through the attachment flow
@@ -3124,9 +2966,18 @@ class CustomerSheetViewModelTest {
             // Trigger refresh by saving the payment method
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
+            assertThat(startTurbine.awaitItem()).isNotNull()
+
             val processingState = awaitItem()
             assertThat(processingState).isInstanceOf<AddPaymentMethod>()
             assertThat((processingState as AddPaymentMethod).isProcessing).isTrue()
+
+            awaitResultTurbine.add(
+                ConfirmationHandler.Result.Succeeded(
+                    intent = SetupIntentFactory.create(acceptedCardPaymentMethod),
+                    deferredIntentConfirmationType = null,
+                )
+            )
 
             var currentState: CustomerSheetViewState? = null
             while (currentState !is SelectPaymentMethod) {
@@ -3172,51 +3023,6 @@ class CustomerSheetViewModelTest {
 
         verify(eventReporter).onDisallowedCardBrandEntered(CardBrand.AmericanExpress)
     }
-
-    @Test
-    fun `When setting up with intent, should call 'IntentConfirmationInterceptor' with expected params`() =
-        runTest(testDispatcher) {
-            val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory()
-
-            val viewModel = createViewModel(
-                workContext = testDispatcher,
-                customerPaymentMethods = listOf(),
-                isGooglePayAvailable = false,
-                stripeRepository = FakeStripeRepository(
-                    createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-                    retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
-                ),
-                intentDataSource = FakeCustomerSheetIntentDataSource(
-                    onRetrieveSetupIntentClientSecret = {
-                        CustomerSheetDataResult.success("seti_123")
-                    },
-                    canCreateSetupIntents = true,
-                ),
-                intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
-            )
-
-            viewModel.handleViewAction(
-                CustomerSheetViewAction.OnFormFieldValuesCompleted(
-                    formFieldValues = TEST_FORM_VALUES,
-                )
-            )
-
-            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-
-            val intentConfirmationInterceptor = intentConfirmationInterceptorFactory.interceptor
-            val call = intentConfirmationInterceptor.calls.awaitItem()
-
-            assertThat(call).isEqualTo(
-                FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
-                    paymentMethod = CARD_PAYMENT_METHOD,
-                    shippingValues = null,
-                    paymentMethodOptionsParams = null,
-                    hCaptchaToken = null,
-                )
-            )
-
-            intentConfirmationInterceptor.calls.ensureAllEventsConsumed()
-        }
 
     @Test
     fun `If has remove permissions, can remove should be true in state`() = runTest(testDispatcher) {
@@ -3343,24 +3149,34 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `If refreshed payment methods does not contain newly added payment method, keep original selection`() =
-        runTest(testDispatcher) {
+        confirmationTest {
             val attachedPaymentMethod = PaymentMethodFactory.card(random = true)
             val paymentMethods = PaymentMethodFactory.cards(size = 4)
             val originalSelection = PaymentSelection.Saved(paymentMethods[0])
 
             val viewModel = retrieveViewModelForAttaching(
-                attachWithSetupIntent = true,
                 shouldFailRefresh = false,
                 originalSelection = originalSelection,
                 originalPaymentMethods = paymentMethods,
-                attachedPaymentMethod = attachedPaymentMethod,
                 refreshedPaymentMethods = paymentMethods,
+                confirmationHandler = handler,
             )
 
             viewModel.viewState.test {
                 assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isFalse()
 
                 viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+                assertThat(startTurbine.awaitItem()).isNotNull()
+
+                awaitResultTurbine.add(
+                    ConfirmationHandler.Result.Succeeded(
+                        intent = SetupIntentFactory.create(
+                            paymentMethod = attachedPaymentMethod,
+                        ),
+                        deferredIntentConfirmationType = null,
+                    )
+                )
 
                 assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
 
@@ -3373,18 +3189,17 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `If refreshed payment methods does contain newly added payment method, use new selection & sort PMs`() =
-        runTest(testDispatcher) {
+        confirmationTest {
             val attachedPaymentMethod = PaymentMethodFactory.card(random = true)
             val paymentMethods = PaymentMethodFactory.cards(size = 4)
             val originalSelection = PaymentSelection.Saved(paymentMethods[0])
             val newSelection = PaymentSelection.Saved(attachedPaymentMethod)
 
             val viewModel = retrieveViewModelForAttaching(
-                attachWithSetupIntent = true,
                 shouldFailRefresh = false,
+                confirmationHandler = handler,
                 originalSelection = originalSelection,
                 originalPaymentMethods = paymentMethods,
-                attachedPaymentMethod = attachedPaymentMethod,
                 refreshedPaymentMethods = paymentMethods + listOf(attachedPaymentMethod),
             )
 
@@ -3392,6 +3207,17 @@ class CustomerSheetViewModelTest {
                 assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isFalse()
 
                 viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+                assertThat(startTurbine.awaitItem()).isNotNull()
+
+                awaitResultTurbine.add(
+                    ConfirmationHandler.Result.Succeeded(
+                        intent = SetupIntentFactory.create(
+                            paymentMethod = attachedPaymentMethod,
+                        ),
+                        deferredIntentConfirmationType = null,
+                    )
+                )
 
                 assertThat(awaitViewState<AddPaymentMethod>().isProcessing).isTrue()
 
@@ -3580,20 +3406,10 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `After confirming a card, the card scan should be shown when trying to add another card`() = runTest(testDispatcher) {
+    fun `After confirming a card, the card scan should be shown when trying to add another card`() = confirmationTest {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = false,
-            ),
-            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
-                onAttachPaymentMethod = {
-                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
-                }
-            ),
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-            ),
+            confirmationHandler = handler,
             configuration = CustomerSheet.Configuration(
                 merchantDisplayName = "Example",
                 opensCardScannerAutomatically = true,
@@ -3624,7 +3440,20 @@ class CustomerSheetViewModelTest {
             assertThat(awaitViewState<AddPaymentMethod>().formFieldValues).isNotNull()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+            assertThat(startTurbine.awaitItem()).isNotNull()
+
             assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
+
+            awaitResultTurbine.add(
+                ConfirmationHandler.Result.Succeeded(
+                    intent = SetupIntentFactory.create(
+                        paymentMethod = CARD_PAYMENT_METHOD,
+                    ),
+                    deferredIntentConfirmationType = null,
+                )
+            )
+
             assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
@@ -3642,17 +3471,6 @@ class CustomerSheetViewModelTest {
     fun `After leaving card form, the card scan should be shown when trying to add another card`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = false,
-            ),
-            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
-                onAttachPaymentMethod = {
-                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
-                }
-            ),
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
-            ),
             configuration = CustomerSheet.Configuration(
                 merchantDisplayName = "Example",
                 opensCardScannerAutomatically = true,
@@ -3689,12 +3507,11 @@ class CustomerSheetViewModelTest {
     fun `confirmation handler is bootstrapped after customer sheet is loaded`() =
         runTest(testDispatcher) {
             val fakeConfirmationHandler = FakeConfirmationHandler()
-            val confirmationHandlerFactory = ConfirmationHandler.Factory { fakeConfirmationHandler }
             val customerSheetLoader = FakeCustomerSheetLoader()
 
             createViewModel(
                 workContext = testDispatcher,
-                confirmationHandlerFactory = confirmationHandlerFactory,
+                confirmationHandler = fakeConfirmationHandler,
                 customerSheetLoader = customerSheetLoader,
             )
 
@@ -3730,27 +3547,37 @@ class CustomerSheetViewModelTest {
         )
     }
 
+    private fun confirmationTest(
+        initialState: ConfirmationHandler.State = ConfirmationHandler.State.Idle,
+        block: suspend FakeConfirmationHandler.Scenario.() -> Unit
+    ) = runTest(testDispatcher) {
+        FakeConfirmationHandler.test(
+            hasReloadedFromProcessDeath = false,
+            initialState = initialState,
+            block = {
+                block()
+
+                assertThat(bootstrapTurbine.awaitItem()).isNotNull()
+                assertThat(registerTurbine.awaitItem()).isNotNull()
+            },
+        )
+    }
+
     private fun retrieveViewModelForAttaching(
-        attachWithSetupIntent: Boolean,
         shouldFailRefresh: Boolean,
         originalPaymentMethods: List<PaymentMethod> = listOf(),
         originalSelection: PaymentSelection.Saved? = null,
-        attachedPaymentMethod: PaymentMethod = CARD_PAYMENT_METHOD,
         refreshedPaymentMethods: List<PaymentMethod> = listOf(CARD_PAYMENT_METHOD),
-        errorReporter: ErrorReporter = FakeErrorReporter()
+        errorReporter: ErrorReporter = FakeErrorReporter(),
+        confirmationHandler: ConfirmationHandler? = null,
     ): CustomerSheetViewModel {
         return createViewModel(
             workContext = testDispatcher,
             customerPaymentMethods = originalPaymentMethods,
+            confirmationHandler = confirmationHandler,
             isGooglePayAvailable = false,
             errorReporter = errorReporter,
             savedPaymentSelection = originalSelection,
-            intentDataSource = FakeCustomerSheetIntentDataSource(
-                canCreateSetupIntents = attachWithSetupIntent,
-                onRetrieveSetupIntentClientSecret = {
-                    CustomerSheetDataResult.success("seti_123")
-                }
-            ),
             paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
                 paymentMethods = if (shouldFailRefresh) {
                     CustomerSheetDataResult.failure(
@@ -3760,13 +3587,6 @@ class CustomerSheetViewModelTest {
                 } else {
                     CustomerSheetDataResult.success(refreshedPaymentMethods)
                 },
-                onAttachPaymentMethod = {
-                    CustomerSheetDataResult.success(attachedPaymentMethod)
-                },
-            ),
-            stripeRepository = FakeStripeRepository(
-                createPaymentMethodResult = Result.success(attachedPaymentMethod),
-                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
             ),
         ).apply {
             if (originalPaymentMethods.isNotEmpty()) {

@@ -31,6 +31,7 @@ internal data class CommonConfiguration(
     val paymentMethodOrder: List<String>,
     val externalPaymentMethods: List<String>,
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+    private val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val googlePlacesApiKey: String?,
@@ -42,10 +43,15 @@ internal data class CommonConfiguration(
     val appearance: PaymentSheet.Appearance,
 ) : Parcelable {
 
-    fun validate(@PaymentElementCallbackIdentifier callbackIdentifier: String) {
+    fun allowedCardFundingTypes(enabled: Boolean): List<PaymentSheet.CardFundingType> {
+        if (enabled) return allowedCardFundingTypes
+        return ConfigurationDefaults.allowedCardFundingTypes
+    }
+
+    fun validate(isLiveMode: Boolean, @PaymentElementCallbackIdentifier callbackIdentifier: String) {
         customerAndMerchantValidate()
-        externalPaymentMethodsValidate()
-        confirmationTokenValidate(callbackIdentifier)
+        externalPaymentMethodsValidate(isLiveMode)
+        confirmationTokenValidate(isLiveMode, callbackIdentifier)
 
         customer?.accessType?.let { customerAccessType ->
             customerAccessTypeValidate(customerAccessType)
@@ -73,9 +79,9 @@ internal data class CommonConfiguration(
 
     // These exception messages are not localized as they are not intended to be displayed to a user.
     @Suppress("ThrowsCount")
-    private fun externalPaymentMethodsValidate() {
+    private fun externalPaymentMethodsValidate(isLiveMode: Boolean) {
         externalPaymentMethods.forEach { externalPaymentMethod ->
-            if (!externalPaymentMethod.startsWith("external_")) {
+            if (!externalPaymentMethod.startsWith("external_") && isLiveMode.not()) {
                 throw IllegalArgumentException(
                     "External payment method '$externalPaymentMethod' does not start with 'external_'. " +
                         "All external payment methods must use the 'external_' prefix. " +
@@ -89,11 +95,13 @@ internal data class CommonConfiguration(
     // These exception messages are not localized as they are not intended to be displayed to a user.
     @Suppress("ThrowsCount")
     private fun confirmationTokenValidate(
+        isLiveMode: Boolean,
         @PaymentElementCallbackIdentifier callbackIdentifier: String
     ) {
         if (
             PaymentElementCallbackReferences[callbackIdentifier]?.createIntentWithConfirmationTokenCallback != null &&
-            customer?.accessType is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
+            customer?.accessType is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey &&
+            isLiveMode.not()
         ) {
             throw IllegalArgumentException(
                 "createIntentWithConfirmationTokenCallback must be used with CustomerSession."
@@ -190,6 +198,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     opensCardScannerAutomatically = opensCardScannerAutomatically,
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
+    allowedCardFundingTypes = allowedCardFundingTypes,
 )
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -215,6 +224,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     opensCardScannerAutomatically = opensCardScannerAutomatically,
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
+    allowedCardFundingTypes = allowedCardFundingTypes,
 )
 
 internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -247,6 +257,7 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
     opensCardScannerAutomatically = false,
     userOverrideCountry = null,
     appearance = PaymentSheet.Appearance(),
+    allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
 )
 
 private fun String.isEKClientSecretValid(): Boolean {

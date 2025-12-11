@@ -13,6 +13,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
@@ -635,6 +636,7 @@ class ConfirmationHandlerOptionKtxTest {
             forceSetupFutureUseBehaviorAndNewMandate = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
         )
     }
 }

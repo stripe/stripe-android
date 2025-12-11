@@ -136,12 +136,14 @@ internal class FakeEventReporter : EventReporter {
 
     override fun onPaymentSuccess(
         paymentSelection: PaymentSelection,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?
+        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        intentId: String?,
     ) {
         _paymentSuccessCalls.add(
             PaymentSuccessCall(
                 paymentSelection = paymentSelection,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
+                intentId = intentId,
             )
         )
     }
@@ -268,6 +270,7 @@ internal class FakeEventReporter : EventReporter {
     data class PaymentSuccessCall(
         val paymentSelection: PaymentSelection,
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        val intentId: String?,
     )
 
     data class UpdatePaymentMethodSucceededCall(

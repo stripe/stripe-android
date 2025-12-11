@@ -26,6 +26,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -808,6 +809,8 @@ class PaymentSheet internal constructor(
 
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
 
+        internal val allowedCardFundingTypes: List<CardFundingType> = ConfigurationDefaults.allowedCardFundingTypes,
+
         internal val customPaymentMethods: List<CustomPaymentMethod> =
             ConfigurationDefaults.customPaymentMethods,
 
@@ -966,6 +969,7 @@ class PaymentSheet internal constructor(
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
+            private var allowedCardFundingTypes: List<CardFundingType> = ConfigurationDefaults.allowedCardFundingTypes
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
             private var walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons
             private var shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration
@@ -1078,6 +1082,23 @@ class PaymentSheet internal constructor(
             }
 
             /**
+             * By default, PaymentSheet will accept cards of all funding types (credit, debit,
+             * prepaid, unknown).
+             * You can specify which card funding types to allow.
+             *
+             * **Note**: This is only a client-side solution.
+             * **Note**: Card funding filtering is not currently supported in Link.
+             *
+             * @param cardFundingTypes The list of allowed card funding types.
+             */
+            @CardFundingFilteringPrivatePreview
+            fun allowedCardFundingTypes(
+                cardFundingTypes: List<CardFundingType>
+            ): Builder = apply {
+                this.allowedCardFundingTypes = cardFundingTypes
+            }
+
+            /**
              * Configuration related to custom payment methods.
              *
              * If set, Payment Sheet will display the defined list of custom payment methods in the UI.
@@ -1132,9 +1153,7 @@ class PaymentSheet internal constructor(
              * By default, the payment sheet offers a card scan button within the new card entry form.
              * When opensCardScannerAutomatically is set to true, the card entry form will
              * initialize with the card scanner already open.
-             * **Note**: The stripecardscan dependency must be added to set `opensCardScannerAutomatically` to true
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun opensCardScannerAutomatically(opensCardScannerAutomatically: Boolean) = apply {
                 this.opensCardScannerAutomatically = opensCardScannerAutomatically
             }
@@ -1161,6 +1180,7 @@ class PaymentSheet internal constructor(
                 externalPaymentMethods = externalPaymentMethods,
                 paymentMethodLayout = paymentMethodLayout,
                 cardBrandAcceptance = cardBrandAcceptance,
+                allowedCardFundingTypes = allowedCardFundingTypes,
                 customPaymentMethods = customPaymentMethods,
                 link = link,
                 walletButtons = walletButtons,
@@ -1183,7 +1203,8 @@ class PaymentSheet internal constructor(
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
             ExperimentalCustomPaymentMethodsApi::class,
             WalletButtonsPreview::class,
-            ShopPayPreview::class
+            ShopPayPreview::class,
+            CardFundingFilteringPrivatePreview::class
         )
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
@@ -1200,6 +1221,7 @@ class PaymentSheet internal constructor(
             .externalPaymentMethods(externalPaymentMethods)
             .paymentMethodLayout(paymentMethodLayout)
             .cardBrandAcceptance(cardBrandAcceptance)
+            .allowedCardFundingTypes(CardFundingType.entries)
             .customPaymentMethods(customPaymentMethods)
             .link(link)
             .walletButtons(walletButtons)
@@ -3429,6 +3451,42 @@ class PaymentSheet internal constructor(
         internal data class Disallowed(
             val brands: List<BrandCategory>
         ) : CardBrandAcceptance()
+    }
+
+    /**
+     * Card funding categories that can be filtered.
+     */
+    @Parcelize
+    enum class CardFundingType : Parcelable {
+        /**
+         * Debit cards
+         */
+        Debit,
+
+        /**
+         * Credit cards
+         */
+        Credit,
+
+        /**
+         * Prepaid cards
+         */
+        Prepaid,
+
+        /**
+         * Unknown funding type
+         */
+        Unknown;
+
+        internal val cardFunding: CardFunding
+            get() {
+                return when (this) {
+                    Debit -> CardFunding.Debit
+                    Credit -> CardFunding.Credit
+                    Prepaid -> CardFunding.Prepaid
+                    Unknown -> CardFunding.Unknown
+                }
+            }
     }
 
     /**

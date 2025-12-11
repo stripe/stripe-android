@@ -13,8 +13,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.CollectAddres
 import com.stripe.android.paymentsheet.example.playground.settings.CollectEmailSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionOnBehalfOfSettingsDefinition
@@ -313,7 +313,7 @@ internal class TestCard : BasePlaygroundTest() {
     fun testCardWithCardBrandChoiceComplete() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
-                settings[CountrySettingsDefinition] = Country.FR
+                settings[MerchantSettingsDefinition] = Merchant.FR
             },
             values = FieldPopulator.Values(
                 cardNumber = "4000002500001001"
@@ -329,7 +329,7 @@ internal class TestCard : BasePlaygroundTest() {
     fun testCardWithCardBrandChoiceCustom() {
         testDriver.confirmCustom(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
-                settings[CountrySettingsDefinition] = Country.FR
+                settings[MerchantSettingsDefinition] = Merchant.FR
             },
             values = FieldPopulator.Values(
                 cardNumber = "4000002500001001"
@@ -422,7 +422,7 @@ internal class TestCard : BasePlaygroundTest() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[GooglePaySettingsDefinition] = false
-                settings[CountrySettingsDefinition] = Country.US
+                settings[MerchantSettingsDefinition] = Merchant.US
                 settings[CustomerSessionOnBehalfOfSettingsDefinition] =
                     CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT
                 settings[CustomerSessionSettingsDefinition] = true

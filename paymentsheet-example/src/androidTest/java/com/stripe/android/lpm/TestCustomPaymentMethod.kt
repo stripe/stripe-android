@@ -3,8 +3,8 @@ package com.stripe.android.lpm
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomPaymentMethodPlaygroundType
@@ -24,7 +24,7 @@ internal class TestCustomPaymentMethod : BasePlaygroundTest() {
         paymentMethodCode = DEFAULT_CUSTOM_PAYMENT_METHOD_ID,
     ) { settings ->
         settings[CustomerSettingsDefinition] = CustomerType.GUEST
-        settings[CountrySettingsDefinition] = Country.US
+        settings[MerchantSettingsDefinition] = Merchant.US
         settings[CurrencySettingsDefinition] = Currency.USD
         settings[CustomPaymentMethodsSettingDefinition] = CustomPaymentMethodPlaygroundType.On
         settings[PaymentMethodOrderSettingsDefinition] = DEFAULT_CUSTOM_PAYMENT_METHOD_ID

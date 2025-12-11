@@ -38,7 +38,14 @@ dependencies {
 
     testImplementation testLibs.junit
 
+    androidTestImplementation project(':payments-core-testing')
     androidTestImplementation testLibs.androidx.junit
     androidTestImplementation testLibs.androidx.testRunner
     androidTestImplementation testLibs.androidx.uiAutomator
+    androidTestImplementation testLibs.androidx.archCore
+    androidTestImplementation testLibs.androidx.composeUi
+    androidTestImplementation testLibs.androidx.core
+    androidTestImplementation testLibs.androidx.coreKtx
+    androidTestImplementation testLibs.androidx.testRules
+    androidTestImplementation testLibs.androidx.truth
 }

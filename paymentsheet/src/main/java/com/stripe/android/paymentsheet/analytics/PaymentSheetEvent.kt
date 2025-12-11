@@ -186,6 +186,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         duration: Duration?,
         paymentSelection: PaymentSelection,
         private val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        private val intentId: String?,
     ) : PaymentSheetEvent() {
 
         override val eventName: String =
@@ -199,6 +200,9 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             put(FIELD_DURATION, duration?.asSeconds)
             deferredIntentConfirmationType?.let { type ->
                 put(FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE, type.value)
+            }
+            intentId?.let { id ->
+                put(INTENT_ID, id)
             }
             if (result is Result.Failure) {
                 put(FIELD_ERROR_MESSAGE, result.error.analyticsValue)

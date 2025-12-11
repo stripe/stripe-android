@@ -36,11 +36,8 @@ class StripeBrowserLauncherViewModelTest {
         val viewModel = createViewModel()
         val launchIntent = viewModel.createLaunchIntent(ARGS)
 
-        val browserIntent = requireNotNull(launchIntent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT))
-
-        assertThat(browserIntent.action).isEqualTo(Intent.ACTION_VIEW)
-        assertThat(browserIntent.data).isEqualTo(Uri.parse("https://bank.com"))
-        assertThat(launchIntent.getStringExtra(Intent.EXTRA_TITLE)).isEqualTo("Verify your payment")
+        assertThat(launchIntent.action).isEqualTo(Intent.ACTION_VIEW)
+        assertThat(launchIntent.data).isEqualTo(Uri.parse("https://bank.com"))
     }
 
     @Test
@@ -103,7 +100,6 @@ class StripeBrowserLauncherViewModelTest {
             analyticsRequestExecutor = analyticsRequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             browserCapabilities = browserCapabilities,
-            intentChooserTitle = "Verify your payment",
             resolveErrorMessage = "Unable to resolve things",
             savedStateHandle = savedStateHandle,
         )

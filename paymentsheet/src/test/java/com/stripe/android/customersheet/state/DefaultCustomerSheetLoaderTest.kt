@@ -15,12 +15,15 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerAdapterDataSource
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
 import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
+import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.customersheet.data.FakeCustomerSheetInitializationDataSource
+import com.stripe.android.customersheet.data.FakeCustomerSheetIntentDataSource
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -419,13 +422,9 @@ internal class DefaultCustomerSheetLoaderTest {
         val initDataSource = CompletableSingle<CustomerSheetInitializationDataSource>()
 
         val configuration = CustomerSheet.Configuration(merchantDisplayName = "Merchant, Inc.")
-        val loader = DefaultCustomerSheetLoader(
-            googlePayRepositoryFactory = { readyGooglePayRepository },
+        val loader = createCustomerSheetLoader(
             initializationDataSourceProvider = initDataSource,
-            lpmRepository = lpmRepository,
-            isFinancialConnectionsAvailable = { false },
-            eventReporter = FakeCustomerSheetEventReporter(),
-            errorReporter = FakeErrorReporter(),
+            intentDataSourceProvider = CompletableSingle(FakeCustomerSheetIntentDataSource()),
             workContext = coroutineContext,
         )
 
@@ -459,13 +458,10 @@ internal class DefaultCustomerSheetLoaderTest {
     @Test
     fun `Fails if awaiting InitializationDataSource times out`() = runTest {
         val configuration = CustomerSheet.Configuration(merchantDisplayName = "Merchant, Inc.")
-        val loader = DefaultCustomerSheetLoader(
-            googlePayRepositoryFactory = { readyGooglePayRepository },
-            lpmRepository = lpmRepository,
-            isFinancialConnectionsAvailable = { false },
-            eventReporter = FakeCustomerSheetEventReporter(),
-            errorReporter = FakeErrorReporter(),
-            workContext = coroutineContext,
+        val loader = createCustomerSheetLoader(
+            initializationDataSourceProvider = CompletableSingle(),
+            intentDataSourceProvider = CompletableSingle(),
+            workContext = coroutineContext
         )
 
         val result = loader.load(configuration)
@@ -479,6 +475,7 @@ internal class DefaultCustomerSheetLoaderTest {
 
         val loader = createCustomerSheetLoader(
             initializationDataSourceProvider = CompletableSingle(),
+            intentDataSourceProvider = CompletableSingle(),
             errorReporter = errorReporter,
         )
 
@@ -627,6 +624,48 @@ internal class DefaultCustomerSheetLoaderTest {
         )
     }
 
+    @Test
+    fun `load creates integrationMetadata with SetupIntent attachment style when canCreateSetupIntents is true`() = runTest {
+        val intentDataSource = FakeCustomerSheetIntentDataSource(canCreateSetupIntents = true)
+
+        val loader = createCustomerSheetLoader(
+            intentDataSource = intentDataSource,
+        )
+
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
+        val state = loader.load(config).getOrThrow()
+
+        val integrationMetadata = state.paymentMethodMetadata.integrationMetadata
+
+        assertThat(integrationMetadata).isInstanceOf<IntegrationMetadata.CustomerSheet>()
+
+        val customerSheetMetadata = integrationMetadata as IntegrationMetadata.CustomerSheet
+
+        assertThat(customerSheetMetadata.attachmentStyle)
+            .isEqualTo(IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent)
+    }
+
+    @Test
+    fun `load creates integrationMetadata with CreateAttach attachment style when canCreateSetupIntents is false`() = runTest {
+        val intentDataSource = FakeCustomerSheetIntentDataSource(canCreateSetupIntents = false)
+
+        val loader = createCustomerSheetLoader(
+            intentDataSource = intentDataSource,
+        )
+
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
+        val state = loader.load(config).getOrThrow()
+
+        val integrationMetadata = state.paymentMethodMetadata.integrationMetadata
+
+        assertThat(integrationMetadata).isInstanceOf<IntegrationMetadata.CustomerSheet>()
+
+        val customerSheetMetadata = integrationMetadata as IntegrationMetadata.CustomerSheet
+
+        assertThat(customerSheetMetadata.attachmentStyle)
+            .isEqualTo(IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach)
+    }
+
     private fun createCustomerSheetLoader(
         isGooglePayReady: Boolean = true,
         isCbcEligible: Boolean? = null,
@@ -662,12 +701,14 @@ internal class DefaultCustomerSheetLoaderTest {
                 )
             }
         ),
+        intentDataSource: CustomerSheetIntentDataSource = FakeCustomerSheetIntentDataSource(),
         lpmRepository: LpmRepository = this.lpmRepository,
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: CustomerSheetEventReporter = FakeCustomerSheetEventReporter(),
     ): CustomerSheetLoader {
         return createCustomerSheetLoader(
             initializationDataSourceProvider = CompletableSingle(initializationDataSource),
+            intentDataSourceProvider = CompletableSingle(intentDataSource),
             isGooglePayReady = isGooglePayReady,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             lpmRepository = lpmRepository,
@@ -725,6 +766,7 @@ internal class DefaultCustomerSheetLoaderTest {
 
     private fun createCustomerSheetLoader(
         initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>,
+        intentDataSourceProvider: Single<CustomerSheetIntentDataSource>,
         isGooglePayReady: Boolean = true,
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable =
             IsFinancialConnectionsSdkAvailable { false },
@@ -738,6 +780,7 @@ internal class DefaultCustomerSheetLoaderTest {
                 if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
             },
             initializationDataSourceProvider = initializationDataSourceProvider,
+            intentDataSourceProvider = intentDataSourceProvider,
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             eventReporter = eventReporter,

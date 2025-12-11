@@ -1,19 +1,3 @@
-public final class com/stripe/android/ui/core/Amount$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/Amount;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/Amount;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/ui/core/BillingDetailsCollectionConfiguration$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/ui/core/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
@@ -24,22 +8,6 @@ public final class com/stripe/android/ui/core/BuildConfig {
 public final class com/stripe/android/ui/core/FieldValuesToParamsMapConverter$Companion {
 	public final fun transformToPaymentMethodCreateParams (Ljava/util/Map;Ljava/lang/String;ZLcom/stripe/android/model/PaymentMethod$AllowRedisplay;Lcom/stripe/android/model/ClientAttributionMetadata;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static synthetic fun transformToPaymentMethodCreateParams$default (Lcom/stripe/android/ui/core/FieldValuesToParamsMapConverter$Companion;Ljava/util/Map;Ljava/lang/String;ZLcom/stripe/android/model/PaymentMethod$AllowRedisplay;Lcom/stripe/android/model/ClientAttributionMetadata;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
-}
-
-public final class com/stripe/android/ui/core/cbc/CardBrandChoiceEligibility$Eligible$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/cbc/CardBrandChoiceEligibility$Eligible;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/cbc/CardBrandChoiceEligibility$Eligible;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/ui/core/cbc/CardBrandChoiceEligibility$Ineligible$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/cbc/CardBrandChoiceEligibility$Ineligible;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/cbc/CardBrandChoiceEligibility$Ineligible;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/ui/core/databinding/StripeActivityCardScanBinding : androidx/viewbinding/ViewBinding {
@@ -66,14 +34,6 @@ public final class com/stripe/android/ui/core/elements/AddressSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/AddressSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/AddressSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/AddressSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public synthetic class com/stripe/android/ui/core/elements/AffirmTextSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/AffirmTextSpec$$serializer;
@@ -87,14 +47,6 @@ public synthetic class com/stripe/android/ui/core/elements/AffirmTextSpec$$seria
 
 public final class com/stripe/android/ui/core/elements/AffirmTextSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/AffirmTextSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/AffirmTextSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/AffirmTextSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/ui/core/elements/AfterpayClearpayHeaderElement$Companion {
@@ -115,14 +67,6 @@ public final class com/stripe/android/ui/core/elements/AfterpayClearpayTextSpec$
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/AfterpayClearpayTextSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/AfterpayClearpayTextSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/AfterpayClearpayTextSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public synthetic class com/stripe/android/ui/core/elements/AuBankAccountNumberSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/AuBankAccountNumberSpec$$serializer;
@@ -136,14 +80,6 @@ public synthetic class com/stripe/android/ui/core/elements/AuBankAccountNumberSp
 
 public final class com/stripe/android/ui/core/elements/AuBankAccountNumberSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/AuBankAccountNumberSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/AuBankAccountNumberSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/AuBankAccountNumberSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public synthetic class com/stripe/android/ui/core/elements/AuBecsDebitMandateTextSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -161,14 +97,6 @@ public final class com/stripe/android/ui/core/elements/AuBecsDebitMandateTextSpe
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/AuBecsDebitMandateTextSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/AuBecsDebitMandateTextSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/AuBecsDebitMandateTextSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public synthetic class com/stripe/android/ui/core/elements/BacsDebitBankAccountSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/BacsDebitBankAccountSpec$$serializer;
@@ -178,14 +106,6 @@ public synthetic class com/stripe/android/ui/core/elements/BacsDebitBankAccountS
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/BacsDebitBankAccountSpec;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-}
-
-public final class com/stripe/android/ui/core/elements/BacsDebitBankAccountSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/BacsDebitBankAccountSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/BacsDebitBankAccountSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public synthetic class com/stripe/android/ui/core/elements/BacsDebitConfirmSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -203,14 +123,6 @@ public final class com/stripe/android/ui/core/elements/BacsDebitConfirmSpec$Comp
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/BacsDebitConfirmSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/BacsDebitConfirmSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/BacsDebitConfirmSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public synthetic class com/stripe/android/ui/core/elements/BsbSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/BsbSpec$$serializer;
@@ -224,14 +136,6 @@ public synthetic class com/stripe/android/ui/core/elements/BsbSpec$$serializer :
 
 public final class com/stripe/android/ui/core/elements/BsbSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/BsbSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/BsbSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/BsbSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/ui/core/elements/Capitalization : java/lang/Enum {
@@ -264,14 +168,6 @@ public final class com/stripe/android/ui/core/elements/CashAppPayMandateTextSpec
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/CashAppPayMandateTextSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/CashAppPayMandateTextSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/CashAppPayMandateTextSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public synthetic class com/stripe/android/ui/core/elements/CountrySpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/CountrySpec$$serializer;
@@ -285,14 +181,6 @@ public synthetic class com/stripe/android/ui/core/elements/CountrySpec$$serializ
 
 public final class com/stripe/android/ui/core/elements/CountrySpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/CountrySpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/CountrySpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/CountrySpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/ui/core/elements/DisplayField : java/lang/Enum {
@@ -322,14 +210,6 @@ public final class com/stripe/android/ui/core/elements/DropdownItemSpec$Companio
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/DropdownItemSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/DropdownItemSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/DropdownItemSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public synthetic class com/stripe/android/ui/core/elements/DropdownSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/DropdownSpec$$serializer;
@@ -343,14 +223,6 @@ public synthetic class com/stripe/android/ui/core/elements/DropdownSpec$$seriali
 
 public final class com/stripe/android/ui/core/elements/DropdownSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/DropdownSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/DropdownSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/DropdownSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public synthetic class com/stripe/android/ui/core/elements/EmailSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -368,22 +240,6 @@ public final class com/stripe/android/ui/core/elements/EmailSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/EmailSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/EmailSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/EmailSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/ui/core/elements/EmptyFormSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/EmptyFormSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/EmptyFormSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public synthetic class com/stripe/android/ui/core/elements/ExternalPaymentMethodSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ExternalPaymentMethodSpec$$serializer;
@@ -397,14 +253,6 @@ public synthetic class com/stripe/android/ui/core/elements/ExternalPaymentMethod
 
 public final class com/stripe/android/ui/core/elements/ExternalPaymentMethodSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/ExternalPaymentMethodSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/ExternalPaymentMethodSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/ExternalPaymentMethodSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/ui/core/elements/FormItemSpec$Companion {
@@ -429,14 +277,6 @@ public synthetic class com/stripe/android/ui/core/elements/IbanSpec$$serializer 
 
 public final class com/stripe/android/ui/core/elements/IbanSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/IbanSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/IbanSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/IbanSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/ui/core/elements/KeyboardType : java/lang/Enum {
@@ -473,14 +313,6 @@ public final class com/stripe/android/ui/core/elements/KlarnaHeaderStaticTextSpe
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/KlarnaHeaderStaticTextSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/KlarnaHeaderStaticTextSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/KlarnaHeaderStaticTextSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public synthetic class com/stripe/android/ui/core/elements/KlarnaMandateTextSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/KlarnaMandateTextSpec$$serializer;
@@ -494,14 +326,6 @@ public synthetic class com/stripe/android/ui/core/elements/KlarnaMandateTextSpec
 
 public final class com/stripe/android/ui/core/elements/KlarnaMandateTextSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/KlarnaMandateTextSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/KlarnaMandateTextSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/KlarnaMandateTextSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/ui/core/elements/LayoutSpec$Companion {
@@ -524,14 +348,6 @@ public final class com/stripe/android/ui/core/elements/MandateTextSpec$Companion
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/MandateTextSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/MandateTextSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/MandateTextSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public synthetic class com/stripe/android/ui/core/elements/NameSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/NameSpec$$serializer;
@@ -545,22 +361,6 @@ public synthetic class com/stripe/android/ui/core/elements/NameSpec$$serializer 
 
 public final class com/stripe/android/ui/core/elements/NameSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/NameSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/NameSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/NameSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/ui/core/elements/OTPSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/OTPSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/OTPSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public synthetic class com/stripe/android/ui/core/elements/PhoneSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -578,14 +378,6 @@ public final class com/stripe/android/ui/core/elements/PhoneSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/PhoneSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/PhoneSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/PhoneSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public synthetic class com/stripe/android/ui/core/elements/PlaceholderSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/PlaceholderSpec$$serializer;
@@ -599,14 +391,6 @@ public synthetic class com/stripe/android/ui/core/elements/PlaceholderSpec$$seri
 
 public final class com/stripe/android/ui/core/elements/PlaceholderSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/PlaceholderSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/PlaceholderSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/PlaceholderSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/ui/core/elements/PlaceholderSpec$PlaceholderField$Companion {
@@ -632,14 +416,6 @@ public final class com/stripe/android/ui/core/elements/SelectorIcon$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/SelectorIcon$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/SelectorIcon;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/SelectorIcon;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public synthetic class com/stripe/android/ui/core/elements/SepaMandateTextSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/SepaMandateTextSpec$$serializer;
@@ -653,14 +429,6 @@ public synthetic class com/stripe/android/ui/core/elements/SepaMandateTextSpec$$
 
 public final class com/stripe/android/ui/core/elements/SepaMandateTextSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/SepaMandateTextSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/SepaMandateTextSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/SepaMandateTextSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public synthetic class com/stripe/android/ui/core/elements/SharedDataSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -678,14 +446,6 @@ public final class com/stripe/android/ui/core/elements/SharedDataSpec$Companion 
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/SharedDataSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/SharedDataSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/SharedDataSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public synthetic class com/stripe/android/ui/core/elements/SimpleTextSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/SimpleTextSpec$$serializer;
@@ -701,14 +461,6 @@ public final class com/stripe/android/ui/core/elements/SimpleTextSpec$Companion 
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/SimpleTextSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/SimpleTextSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/SimpleTextSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public synthetic class com/stripe/android/ui/core/elements/StaticTextSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/StaticTextSpec$$serializer;
@@ -722,14 +474,6 @@ public synthetic class com/stripe/android/ui/core/elements/StaticTextSpec$$seria
 
 public final class com/stripe/android/ui/core/elements/StaticTextSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/StaticTextSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/StaticTextSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/StaticTextSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/ui/core/elements/TranslationId$Companion {

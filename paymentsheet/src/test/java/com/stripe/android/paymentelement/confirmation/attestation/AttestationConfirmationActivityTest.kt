@@ -56,11 +56,6 @@ internal class AttestationConfirmationActivityTest {
             InternalPaymentResult.Completed(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
         )
 
-        // Bootstrap the confirmation handler with attestation enabled
-        confirmationHandler.bootstrap(
-            PaymentMethodMetadataFactory.create(attestOnIntentConfirmation = true)
-        )
-
         confirmationHandler.state.test {
             awaitItem().assertIdle()
 
@@ -74,7 +69,7 @@ internal class AttestationConfirmationActivityTest {
 
             val confirmingWithAttestationToken = awaitItem().assertConfirming()
 
-            // Verify the token was attached to the payment method
+            // Verify the token was attached to the payment method and attestation is marked complete
             val optionWithToken = confirmingWithAttestationToken.option as PaymentMethodConfirmationOption.New
             assertThat(optionWithToken.createParams.radarOptions)
                 .isEqualTo(
@@ -85,47 +80,7 @@ internal class AttestationConfirmationActivityTest {
                         )
                     )
                 )
-
-            intendedPaymentConfirmationToBeLaunched()
-
-            val successResult = awaitItem().assertComplete().result.assertSucceeded()
-
-            assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
-            assertThat(successResult.deferredIntentConfirmationType).isNull()
-        }
-    }
-
-    @Test
-    fun `on attestation success with Saved option, should attach token and proceed to payment confirmation`() = test {
-        val testToken = "test_attestation_token"
-        val paymentMethod = PaymentMethodFactory.card()
-
-        intendingAttestationToBeLaunched(AttestationActivityResult.Success(testToken))
-        intendingPaymentConfirmationToBeLaunched(
-            InternalPaymentResult.Completed(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
-        )
-
-        // Bootstrap the confirmation handler with attestation enabled
-        confirmationHandler.bootstrap(
-            PaymentMethodMetadataFactory.create(attestOnIntentConfirmation = true)
-        )
-
-        confirmationHandler.state.test {
-            awaitItem().assertIdle()
-
-            confirmationHandler.start(CONFIRMATION_ARGUMENTS_SAVED)
-
-            val confirmingWithSavedOption = awaitItem().assertConfirming()
-
-            assertThat(confirmingWithSavedOption.option).isEqualTo(SAVED_CONFIRMATION_OPTION)
-
-            intendedAttestationToBeLaunched()
-
-            val confirmingWithAttestationToken = awaitItem().assertConfirming()
-
-            // Verify the token was attached to the saved payment method option
-            val optionWithToken = confirmingWithAttestationToken.option as PaymentMethodConfirmationOption.Saved
-            assertThat(optionWithToken.attestationToken).isEqualTo(testToken)
+            assertThat(optionWithToken.attestationComplete).isTrue()
 
             intendedPaymentConfirmationToBeLaunched()
 
@@ -146,11 +101,6 @@ internal class AttestationConfirmationActivityTest {
             InternalPaymentResult.Completed(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
         )
 
-        // Bootstrap the confirmation handler with attestation enabled
-        confirmationHandler.bootstrap(
-            PaymentMethodMetadataFactory.create(attestOnIntentConfirmation = true)
-        )
-
         confirmationHandler.state.test {
             awaitItem().assertIdle()
 
@@ -162,43 +112,15 @@ internal class AttestationConfirmationActivityTest {
 
             intendedAttestationToBeLaunched()
 
-            val successResult = awaitItem().assertComplete().result.assertSucceeded()
+            // Even on failure, attestation marks the option as complete
+            val confirmingAfterAttestation = awaitItem().assertConfirming()
+            val optionAfterAttestation = confirmingAfterAttestation.option as PaymentMethodConfirmationOption.New
+            assertThat(optionAfterAttestation.attestationComplete).isTrue()
 
             intendedPaymentConfirmationToBeLaunched()
-            assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
-            assertThat(successResult.deferredIntentConfirmationType).isNull()
-        }
-    }
-
-    @Test
-    fun `on attestation failure with Saved option, should proceed without token`() = test {
-        val testError = Exception("Attestation failed")
-        val paymentMethod = PaymentMethodFactory.card()
-
-        intendingAttestationToBeLaunched(AttestationActivityResult.Failed(testError))
-        intendingPaymentConfirmationToBeLaunched(
-            InternalPaymentResult.Completed(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
-        )
-
-        // Bootstrap the confirmation handler with attestation enabled
-        confirmationHandler.bootstrap(
-            PaymentMethodMetadataFactory.create(attestOnIntentConfirmation = true)
-        )
-
-        confirmationHandler.state.test {
-            awaitItem().assertIdle()
-
-            confirmationHandler.start(CONFIRMATION_ARGUMENTS_SAVED)
-
-            val confirmingWithSavedOption = awaitItem().assertConfirming()
-
-            assertThat(confirmingWithSavedOption.option).isEqualTo(SAVED_CONFIRMATION_OPTION)
-
-            intendedAttestationToBeLaunched()
 
             val successResult = awaitItem().assertComplete().result.assertSucceeded()
 
-            intendedPaymentConfirmationToBeLaunched()
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
             assertThat(successResult.deferredIntentConfirmationType).isNull()
         }
@@ -249,26 +171,12 @@ internal class AttestationConfirmationActivityTest {
             shouldSave = false,
         )
 
-        private val SAVED_CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
-            paymentMethod = PaymentMethodFactory.card(),
-            optionsParams = null,
-            originatedFromWallet = false,
-            hCaptchaToken = null,
-        )
-
         private val CONFIRMATION_ARGUMENTS_NEW = ConfirmationHandler.Args(
             confirmationOption = NEW_CONFIRMATION_OPTION,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 shippingDetails = AddressDetails(),
                 stripeIntent = PAYMENT_INTENT,
-            ),
-        )
-
-        private val CONFIRMATION_ARGUMENTS_SAVED = ConfirmationHandler.Args(
-            confirmationOption = SAVED_CONFIRMATION_OPTION,
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                shippingDetails = AddressDetails(),
-                stripeIntent = PAYMENT_INTENT,
+                attestOnIntentConfirmation = true,
             ),
         )
 

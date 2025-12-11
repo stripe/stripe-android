@@ -83,8 +83,8 @@ internal class PlaygroundSettings private constructor(
              * Keeps the existing customer ID if the country value can be shared between integration types
              */
             if (definition == CustomerSettingsDefinition && value is CustomerType.Existing) {
-                val countryOptions = CountrySettingsDefinition.createOptions(configurationData)
-                val country = settings[CountrySettingsDefinition]?.value
+                val countryOptions = MerchantSettingsDefinition.createOptions(configurationData)
+                val country = settings[MerchantSettingsDefinition]?.value
 
                 if (countryOptions.any { it.value == country }) {
                     return@forEach
@@ -496,7 +496,7 @@ internal class PlaygroundSettings private constructor(
             UserCountryOverrideSettingsDefinition,
             LinkSettingsDefinition,
             LinkTypeSettingsDefinition,
-            CountrySettingsDefinition,
+            MerchantSettingsDefinition,
             CurrencySettingsDefinition,
             GooglePaySettingsDefinition,
             DefaultBillingAddressSettingsDefinition,
@@ -522,6 +522,7 @@ internal class PlaygroundSettings private constructor(
             CustomPaymentMethodsSettingDefinition,
             LayoutSettingsDefinition,
             CardBrandAcceptanceSettingsDefinition,
+            CardFundingAcceptanceSettingsDefinition,
             FeatureFlagSettingsDefinition(
                 FeatureFlags.instantDebitsIncentives,
                 PlaygroundConfigurationData.IntegrationType.paymentFlows().toList(),
@@ -554,6 +555,7 @@ internal class PlaygroundSettings private constructor(
             PassiveCaptchaDefinition,
             AttestationOnIntentConfirmationDefinition,
             EnablePromptPaySettingsDefinition,
+            EnablePayPaySettingsDefinition,
             EnableTapToAddSettingsDefinition,
         )
 

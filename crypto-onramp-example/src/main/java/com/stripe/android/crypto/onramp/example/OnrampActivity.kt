@@ -3,7 +3,6 @@ package com.stripe.android.crypto.onramp.example
 import android.R
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -35,6 +34,10 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Snackbar
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
@@ -53,8 +56,8 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -131,6 +134,21 @@ internal class OnrampActivity : ComponentActivity() {
 
         setContent {
             val showAddressModal by viewModel.updateAddressEvent.collectAsStateWithLifecycle()
+            val message by viewModel.message.collectAsStateWithLifecycle()
+            val snackbarHostState = remember { SnackbarHostState() }
+
+            // Show toast messages
+            LaunchedEffect(message) {
+                message?.let {
+                    snackbarHostState.showSnackbar(
+                        message = it,
+                        duration = SnackbarDuration.Short
+                    )
+
+                    Log.d("OnrampExample", it)
+                    viewModel.clearMessage()
+                }
+            }
 
             OnrampExampleTheme {
                 Scaffold(
@@ -140,6 +158,20 @@ internal class OnrampActivity : ComponentActivity() {
                             title = { Text("Onramp Coordinator") },
                         )
                     },
+                    snackbarHost = {
+                        SnackbarHost(
+                            hostState = snackbarHostState,
+                            modifier = Modifier.testTag("OnrampSnackbarHost"),
+                            snackbar = { data ->
+                                Snackbar(modifier = Modifier.testTag(SNACKBAR_TAG)) {
+                                    Text(
+                                        data.message,
+                                        modifier = Modifier.testTag(SNACKBAR_TEXT_TAG)
+                                    )
+                                }
+                            }
+                        )
+                    }
                 ) { innerPadding ->
                     ModalBottomSheetLayout(
                         sheetContent = {
@@ -345,6 +377,7 @@ internal fun LoginSignupScreen(
                 imeAction = ImeAction.Next
             ),
             modifier = Modifier
+                .testTag(LOGIN_EMAIL_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
                 .onPreviewKeyEvent {
@@ -367,6 +400,7 @@ internal fun LoginSignupScreen(
                 imeAction = ImeAction.Done
             ),
             modifier = Modifier
+                .testTag(LOGIN_PASSWORD_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
         )
@@ -374,6 +408,7 @@ internal fun LoginSignupScreen(
         Button(
             onClick = { onLogin(email, password) },
             modifier = Modifier.fillMaxWidth()
+                .testTag(LOGIN_LOGIN_BUTTON_TAG)
                 .padding(bottom = 16.dp)
         ) {
             Text("Login")
@@ -382,6 +417,7 @@ internal fun LoginSignupScreen(
         Button(
             onClick = { onRegister(email, password) },
             modifier = Modifier.fillMaxWidth()
+                .testTag(LOGIN_REGISTER_BUTTON_TAG)
         ) {
             Text("Register")
         }
@@ -401,20 +437,9 @@ internal fun OnrampScreen(
     onVerifyKyc: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val message by viewModel.message.collectAsStateWithLifecycle()
-    val context = LocalContext.current
 
     BackHandler(enabled = uiState.screen != Screen.LoginSignup) {
         viewModel.onBackToLoginSignup()
-    }
-
-    // Show toast messages
-    LaunchedEffect(message) {
-        message?.let {
-            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-            Log.d("OnrampExample", it)
-            viewModel.clearMessage()
-        }
     }
 
     Column(
@@ -679,6 +704,7 @@ fun AuthenticateSection(
     Button(
         onClick = { onAuthenticate(oauthScopes) },
         modifier = Modifier
+            .testTag(AUTHENTICATE_BUTTON_TAG)
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     ) {
@@ -856,6 +882,7 @@ private fun AuthenticatedOperationsScreen(
         Button(
             onClick = { onRegisterWalletAddress(walletAddressInput, selectedNetwork) },
             modifier = Modifier
+                .testTag(REGISTER_WALLET_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 24.dp)
         ) {
@@ -898,6 +925,7 @@ private fun AuthenticatedOperationsScreen(
         Button(
             onClick = { onCollectPayment(PaymentMethodType.Card) },
             modifier = Modifier
+                .testTag(COLLECT_CARD_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
@@ -916,6 +944,7 @@ private fun AuthenticatedOperationsScreen(
         Button(
             onClick = onCreatePaymentToken,
             modifier = Modifier
+                .testTag(CREATE_CRYPTO_TOKEN_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
@@ -925,6 +954,7 @@ private fun AuthenticatedOperationsScreen(
         Button(
             onClick = onCreateSession,
             modifier = Modifier
+                .testTag(CREATE_SESSION_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
@@ -935,6 +965,7 @@ private fun AuthenticatedOperationsScreen(
             onClick = onPerformCheckout,
             enabled = onrampSessionResponse != null,
             modifier = Modifier
+                .testTag(CHECKOUT_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
@@ -1100,3 +1131,16 @@ fun OnrampExampleTheme(
         content = content,
     )
 }
+
+internal const val LOGIN_EMAIL_TAG = "LoginEmailTag"
+internal const val LOGIN_PASSWORD_TAG = "LoginPasswordTag"
+internal const val LOGIN_LOGIN_BUTTON_TAG = "LoginLoginButtonTag"
+internal const val LOGIN_REGISTER_BUTTON_TAG = "LoginRegisterButtonTag"
+internal const val AUTHENTICATE_BUTTON_TAG = "AuthenticateButtonTag"
+internal const val REGISTER_WALLET_BUTTON_TAG = "RegisterWalletButtonTag"
+internal const val COLLECT_CARD_BUTTON_TAG = "CollectCardButtonTag"
+internal const val CREATE_CRYPTO_TOKEN_BUTTON_TAG = "CreateCryptoTokenButtonTag"
+internal const val CREATE_SESSION_BUTTON_TAG = "CreateSessionButtonTag"
+internal const val CHECKOUT_BUTTON_TAG = "CheckoutButtonTag"
+internal const val SNACKBAR_TAG = "SnackbarTag"
+internal const val SNACKBAR_TEXT_TAG = "SnackbarTextTag"

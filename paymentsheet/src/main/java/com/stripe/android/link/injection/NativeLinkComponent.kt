@@ -26,6 +26,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
+import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -47,6 +48,7 @@ internal annotation class NativeLinkScope
         NativeLinkModule::class,
         ApplicationIdModule::class,
         DefaultConfirmationModule::class,
+        DefaultIntentConfirmationModule::class,
         LinkPassthroughConfirmationModule::class,
     ]
 )

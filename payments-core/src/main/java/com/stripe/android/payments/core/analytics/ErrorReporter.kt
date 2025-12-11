@@ -182,6 +182,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         HCAPTCHA_FAILURE(
             eventName = "elements.captcha.passive.expected_failure"
         ),
+        TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE(
+            eventName = "elements.tap_to_add.discover_readers_call.failure"
+        ),
+        TAP_TO_ADD_CONNECT_READER_CALL_FAILURE(
+            eventName = "elements.tap_to_add.connect_reader_call.failure"
+        )
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -273,13 +279,27 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE(
             partialEventName = "intent_confirmation_handler.attestation.failed_to_prepare"
         ),
+        INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_SUCCESS_CALLBACK_PARAMS(
+            partialEventName = "intent_confirmation_challenge.failed_to_parse_success_callback_params"
+        ),
+        INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_ERROR_CALLBACK_PARAMS(
+            partialEventName = "intent_confirmation_challenge.failed_to_parse_error_callback_params"
+        ),
         HCAPTCHA_UNEXPECTED_FAILURE(
             partialEventName = "elements.captcha.passive.unexpected_failure"
         ),
         PAYMENT_METHOD_MESSAGING_ELEMENT_UNABLE_TO_PARSE_RESPONSE(
             partialEventName = "paymentmethodmessaging.element.unable_to_parse_response"
-        )
-        ;
+        ),
+        CUSTOMER_SHEET_METADATA_NULL_ON_CONFIRM(
+            partialEventName = "customersheet.confirmation.no_payment_method_metadata"
+        ),
+        TAP_TO_ADD_LOCATION_PERMISSIONS_FAILURE(
+            partialEventName = "elements.tap_to_add.location_permission_required_unexpectedly"
+        ),
+        TAP_TO_ADD_NO_READER_FOUND(
+            partialEventName = "elements.tap_to_add.no_reader_found"
+        );
 
         override val eventName: String
             get() = "unexpected_error.$partialEventName"
@@ -334,6 +354,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         FOUND_PREPARE_PAYMENT_METHOD_HANDLER_WHILE_POLLING(
             eventName = "paymentsheet.polling_for_prepare_payment_method_handler.found"
         ),
+        TAP_TO_ADD_DISCOVER_READERS_CALL_SUCCESS(
+            eventName = "elements.tap_to_add.discover_readers_call.success"
+        ),
+        TAP_TO_ADD_CONNECT_READER_CALL_SUCCESS(
+            eventName = "elements.tap_to_add.connect_reader_call.success"
+        )
     }
 }
 

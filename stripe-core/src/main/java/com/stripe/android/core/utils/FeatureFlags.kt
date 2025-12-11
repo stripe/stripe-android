@@ -16,6 +16,7 @@ object FeatureFlags {
     val enablePassiveCaptcha = FeatureFlag("Enable Passive Captcha")
     val forceLinkWebAuth = FeatureFlag("Link: Force web auth")
     val enablePromptPay = FeatureFlag("Enable PromptPay")
+    val enablePayPay = FeatureFlag("Enable PayPay")
     val enableAttestationOnIntentConfirmation = FeatureFlag("Enable Attestation on Intent Confirmation")
     val enableTapToAdd = FeatureFlag("Enable Tap to Add")
 }

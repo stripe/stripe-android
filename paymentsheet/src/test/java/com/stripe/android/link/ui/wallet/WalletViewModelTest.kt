@@ -31,6 +31,7 @@ import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.TestNavigationManager
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -99,6 +100,7 @@ class WalletViewModelTest {
                 collectMissingBillingDetailsForExistingPaymentMethods = true,
                 signupToggleEnabled = false,
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             )
         )
         assertThat(state.selectedItem).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull())

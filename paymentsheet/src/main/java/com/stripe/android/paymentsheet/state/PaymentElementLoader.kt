@@ -6,6 +6,7 @@ import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.common.taptoadd.TapToAddConnectionManager
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
@@ -25,7 +26,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.lpmfoundations.paymentmethod.create
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
@@ -55,6 +58,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -211,6 +215,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
     private val integrityRequestManager: IntegrityRequestManager,
+    private val tapToAddConnectionManager: TapToAddConnectionManager,
+    @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
 ) : PaymentElementLoader {
@@ -236,9 +242,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val configuration = integrationConfiguration.commonConfiguration
         // Validate configuration before loading
         initializationMode.validate()
-        configuration.validate(paymentElementCallbackIdentifier)
+        configuration.validate(isLiveModeProvider(), paymentElementCallbackIdentifier)
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
+        tapToAddConnectionManager.connect()
 
         val isGooglePaySupportedOnDevice = async {
             isGooglePaySupportedOnDevice()
@@ -319,7 +326,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customerInfo = customerInfo,
                 metadata = paymentMethodMetadata.await(),
                 savedSelection = savedSelection,
-                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
+                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
+                cardFundingFilter = PaymentSheetCardFundingFilter(
+                    allowedCardFundingTypes = configuration.allowedCardFundingTypes(
+                        enabled = elementsSession.enableCardFundFiltering
+                    )
+                )
             )
         }
 
@@ -472,6 +484,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             clientAttributionMetadata = clientAttributionMetadata,
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
+            isTapToAddSupported = tapToAddConnectionManager.isSupported,
         )
     }
 
@@ -570,7 +583,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customerInfo: CustomerInfo?,
         metadata: PaymentMethodMetadata,
         savedSelection: Deferred<SavedSelection>,
-        cardBrandFilter: PaymentSheetCardBrandFilter
+        cardBrandFilter: PaymentSheetCardBrandFilter,
+        cardFundingFilter: PaymentSheetCardFundingFilter
     ): CustomerState? {
         val customerState = when (customerInfo) {
             is CustomerInfo.CustomerSession -> {
@@ -600,7 +614,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                             ?.isPaymentMethodSetAsDefaultEnabled
                             ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
                     ).filter { paymentMethod ->
+                        val fundingAccepted = paymentMethod.card?.let {
+                            cardFundingFilter.isAccepted(CardFunding.fromCode(it.funding))
+                        } ?: true
                         cardBrandFilter.isAccepted(paymentMethod) &&
+                            fundingAccepted &&
                             paymentMethod.isSupportedWithBillingConfig(
                                 configuration.billingDetailsCollectionConfiguration
                             )

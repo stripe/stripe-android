@@ -6,6 +6,8 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.common.taptoadd.FakeTapToAddConnectionManager
+import com.stripe.android.common.taptoadd.TapToAddConnectionManager
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
@@ -27,6 +29,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentM
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ClientAttributionMetadata
@@ -49,6 +52,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentsheet.ConfigFixtures
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -65,6 +69,7 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -468,6 +473,72 @@ internal class DefaultPaymentElementLoaderTest {
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+        }
+
+    @Test
+    fun `isTapToAddSupported should be false when tap to add is not supported`() =
+        runScenario {
+            FakeTapToAddConnectionManager.test(
+                isSupported = false,
+                isConnected = false,
+            ) {
+                val loader = createPaymentElementLoader(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                    isGooglePayReady = true,
+                    customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+                    tapToAddConnectionManager = tapToAddConnectionManager,
+                )
+
+                val result = loader.load(
+                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                        clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                    ),
+                    paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                    metadata = PaymentElementLoader.Metadata(
+                        initializedViaCompose = false,
+                    ),
+                ).getOrThrow()
+
+                assertThat(connectCalls.awaitItem()).isNotNull()
+
+                assertThat(result.paymentMethodMetadata.isTapToAddSupported).isFalse()
+
+                assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+                assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+            }
+        }
+
+    @Test
+    fun `isTapToAddSupported should be true when tap to add is supported`() =
+        runScenario {
+            FakeTapToAddConnectionManager.test(
+                isSupported = true,
+                isConnected = true,
+            ) {
+                val loader = createPaymentElementLoader(
+                    stripeIntent = PaymentIntentFactory.create(),
+                    isGooglePayReady = true,
+                    customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+                    tapToAddConnectionManager = tapToAddConnectionManager,
+                )
+
+                val result = loader.load(
+                    initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
+                        clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
+                    ),
+                    paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                    metadata = PaymentElementLoader.Metadata(
+                        initializedViaCompose = false,
+                    ),
+                ).getOrThrow()
+
+                assertThat(connectCalls.awaitItem()).isNotNull()
+
+                assertThat(result.paymentMethodMetadata.isTapToAddSupported).isTrue()
+
+                assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+                assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+            }
         }
 
     @OptIn(WalletButtonsPreview::class)
@@ -3376,6 +3447,113 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
+    @OptIn(CardFundingFilteringPrivatePreview::class)
+    @Test
+    fun `Should filter saved cards by allowed funding types when flag is enabled`() = runScenario {
+        testCardFundingFiltering(
+            cardFundFilteringFlagEnabled = true,
+            expectedPaymentMethods = { listOf(it.credit, it.bank) }
+        )
+    }
+
+    @OptIn(CardFundingFilteringPrivatePreview::class)
+    @Test
+    fun `Should not filter saved cards when flag is disabled`() = runScenario {
+        testCardFundingFiltering(
+            cardFundFilteringFlagEnabled = false,
+            expectedPaymentMethods = { it.all }
+        )
+    }
+
+    private fun createFundingPaymentMethods(): FundingPaymentMethods {
+        val credit = PaymentMethodFactory.card(id = "pm_credit").update(
+            last4 = "1000",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa,
+            funding = "credit",
+        )
+        val debit = PaymentMethodFactory.card(id = "pm_debit").update(
+            last4 = "1001",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa,
+            funding = "debit",
+        )
+        val prepaid = PaymentMethodFactory.card(id = "pm_prepaid").update(
+            last4 = "1002",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa,
+            funding = "prepaid",
+        )
+        val noFunding = PaymentMethodFactory.card(id = "pm_no_funding").update(
+            last4 = "1003",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa,
+            funding = null,
+        )
+        val bank = PaymentMethodFactory.usBankAccount().copy(
+            id = "pm_bank"
+        )
+
+        return FundingPaymentMethods(
+            credit = credit,
+            debit = debit,
+            prepaid = prepaid,
+            noFunding = noFunding,
+            bank = bank
+        )
+    }
+
+    @OptIn(CardFundingFilteringPrivatePreview::class)
+    private suspend fun Scenario.testCardFundingFiltering(
+        cardFundFilteringFlagEnabled: Boolean?,
+        expectedPaymentMethods: (FundingPaymentMethods) -> List<PaymentMethod>
+    ) {
+        prefsRepository.setSavedSelection(null)
+
+        val paymentMethodsData = createFundingPaymentMethods()
+        val paymentMethods = paymentMethodsData.all
+
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            isGooglePayReady = true,
+            customerRepo = FakeCustomerRepository(paymentMethods = paymentMethods),
+            elementsSessionRepository = if (cardFundFilteringFlagEnabled != null) {
+                FakeElementsSessionRepository(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+                    error = null,
+                    linkSettings = null,
+                    flags = mapOf(
+                        ElementsSession.Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING to cardFundFilteringFlagEnabled
+                    )
+                )
+            } else {
+                FakeElementsSessionRepository(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+                    error = null,
+                    linkSettings = null,
+                )
+            }
+        )
+
+        val creditOnlyConfig = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+            .allowedCardFundingTypes(listOf(PaymentSheet.CardFundingType.Credit))
+            .build()
+
+        val state = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = creditOnlyConfig,
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        assertThat(state.customer?.paymentMethods)
+            .containsExactlyElementsIn(expectedPaymentMethods(paymentMethodsData))
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
     @Test
     fun `When using 'LegacyEphemeralKey',last PM permission should be true if config value is true`() =
         removeLastPaymentMethodTest(
@@ -4136,6 +4314,10 @@ internal class DefaultPaymentElementLoaderTest {
         ),
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
+        tapToAddConnectionManager: TapToAddConnectionManager = FakeTapToAddConnectionManager.noOp(
+            isSupported = false,
+            isConnected = false,
+        ),
         analyticsMetadataFactory: DefaultPaymentElementLoader.AnalyticsMetadataFactory =
             FakeDefaultPaymentElementLoaderAnalyticsMetadataFactory {
                 AnalyticsMetadata(emptyMap())
@@ -4146,7 +4328,8 @@ internal class DefaultPaymentElementLoaderTest {
             accountStatusProvider = { linkAccountState },
             retrieveCustomerEmail = retrieveCustomerEmailImpl,
             linkStore = linkStore,
-            linkGateFactory = FakeLinkGate.Factory(linkGate)
+            linkGateFactory = FakeLinkGate.Factory(linkGate),
+            cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory()
         )
 
         return DefaultPaymentElementLoader(
@@ -4168,6 +4351,7 @@ internal class DefaultPaymentElementLoaderTest {
             integrityRequestManager = integrityRequestManager,
             paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
             analyticsMetadataFactory = analyticsMetadataFactory,
+            tapToAddConnectionManager = tapToAddConnectionManager,
         )
     }
 
@@ -4293,5 +4477,15 @@ internal class DefaultPaymentElementLoaderTest {
             allowRedisplayOverride = allowRedisplayOverride,
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
         )
+    }
+
+    private data class FundingPaymentMethods(
+        val credit: PaymentMethod,
+        val debit: PaymentMethod,
+        val prepaid: PaymentMethod,
+        val noFunding: PaymentMethod,
+        val bank: PaymentMethod,
+    ) {
+        val all: List<PaymentMethod> = listOf(credit, debit, prepaid, noFunding, bank)
     }
 }

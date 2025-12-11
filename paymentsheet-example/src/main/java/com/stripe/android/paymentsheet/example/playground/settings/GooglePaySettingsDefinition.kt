@@ -20,7 +20,7 @@ internal object GooglePaySettingsDefinition : BooleanSettingsDefinition(
             configurationBuilder.googlePay(
                 PaymentSheet.GooglePayConfiguration(
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = playgroundState.countryCode.value,
+                    countryCode = playgroundState.merchantCode.countryCode,
                     currencyCode = playgroundState.currencyCode.value,
                 )
             )
@@ -37,7 +37,7 @@ internal object GooglePaySettingsDefinition : BooleanSettingsDefinition(
             configurationBuilder.googlePay(
                 PaymentSheet.GooglePayConfiguration(
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = playgroundState.countryCode.value,
+                    countryCode = playgroundState.merchantCode.countryCode,
                     currencyCode = playgroundState.currencyCode.value,
                 )
             )
@@ -54,7 +54,7 @@ internal object GooglePaySettingsDefinition : BooleanSettingsDefinition(
             configurationBuilder.googlePay(
                 PaymentSheet.GooglePayConfiguration(
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = playgroundState.countryCode.value,
+                    countryCode = playgroundState.merchantCode.countryCode,
                     currencyCode = playgroundState.currencyCode.value,
                 )
             )

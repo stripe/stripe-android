@@ -116,7 +116,7 @@ end
 private def build_example_release_apk
     gnupg_env do |env|
         Subprocess.check_call(
-            ['./gradlew', ':paymentsheet-example:assembleRelease'],
+            ['./gradlew', ':paymentsheet-example:assembleBaseRelease'],
             env: env
         )
     end
@@ -125,7 +125,7 @@ end
 private def upload_example_apk_to_release(release_url)
     octokit_client.upload_asset(
         release_url,
-        "../stripe-android/paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release.apk",
+        "../stripe-android/paymentsheet-example/build/outputs/apk/base/release/paymentsheet-example-base-release.apk",
         name: "paymentsheet-example-release-#{@version}.apk",
         content_type: "application/vnd.android.package-archive"
     )

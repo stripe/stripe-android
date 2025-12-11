@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
+import com.stripe.android.model.CardFunding
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
@@ -23,6 +24,7 @@ internal class InMemoryCardAccountRangeSourceTest {
                 ),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Visa,
+                funding = CardFunding.Unknown,
                 country = "GB"
             )
         )

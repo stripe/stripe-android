@@ -135,53 +135,6 @@ internal class PassiveChallengeConfirmationActivityTest {
         }
     }
 
-    @Test
-    fun `On PassiveChallenge params provided with Saved option, should launch challenge flow then intent flow`() =
-        test {
-            intendingPassiveChallengeToBeLaunched(
-                PassiveChallengeActivityResult.Success("test_token")
-            )
-            intendingPaymentConfirmationToBeLaunched(
-                InternalPaymentResult.Completed(PAYMENT_INTENT.copy(paymentMethod = PAYMENT_METHOD))
-            )
-
-            val savedConfirmationArgs = CONFIRMATION_ARGUMENTS.copy(
-                confirmationOption = SAVED_CONFIRMATION_OPTION
-            )
-
-            confirmationHandler.state.test {
-                awaitItem().assertIdle()
-
-                confirmationHandler.start(savedConfirmationArgs)
-
-                val confirmingWithChallengeOption = awaitItem().assertConfirming()
-
-                assertThat(confirmingWithChallengeOption.option).isEqualTo(SAVED_CONFIRMATION_OPTION)
-
-                intendedPassiveChallengeToBeLaunched()
-
-                val confirmingWithNewOption = awaitItem().assertConfirming()
-
-                assertThat(confirmingWithNewOption.option)
-                    .isEqualTo(
-                        PaymentMethodConfirmationOption.Saved(
-                            paymentMethod = SAVED_CONFIRMATION_OPTION.paymentMethod,
-                            optionsParams = SAVED_CONFIRMATION_OPTION.optionsParams,
-                            originatedFromWallet = false,
-                            hCaptchaToken = "test_token",
-                            passiveChallengeComplete = true,
-                        )
-                    )
-
-                intendedPaymentConfirmationToBeLaunched()
-
-                val successResult = awaitItem().assertComplete().result.assertSucceeded()
-
-                assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = PAYMENT_METHOD))
-                assertThat(successResult.deferredIntentConfirmationType).isNull()
-            }
-        }
-
     private fun test(
         test: suspend ConfirmationTestScenario.() -> Unit
     ) {
@@ -224,13 +177,6 @@ internal class PassiveChallengeConfirmationActivityTest {
             optionsParams = null,
             extraParams = null,
             shouldSave = false,
-        )
-
-        val SAVED_CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
-            paymentMethod = PAYMENT_METHOD,
-            optionsParams = null,
-            originatedFromWallet = false,
-            hCaptchaToken = null
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(

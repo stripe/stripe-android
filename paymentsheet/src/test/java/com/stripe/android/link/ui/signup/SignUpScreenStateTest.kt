@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.LinkMode
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -114,6 +115,7 @@ class SignUpScreenStateTest {
             forceSetupFutureUseBehaviorAndNewMandate = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
         )
     }
 

@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `./gradlew connectedAndroidTest` - Run instrumentation tests (requires device)
 - `./gradlew :payments:test` - Run tests for a specific module
 - `./gradlew :example:assembleDebug` - Build example app
-- `./gradlew :paymentsheet-example:assembleDebug` - Build PaymentSheet example app
+- `./gradlew :paymentsheet-example:assembleBaseDebug` - Build PaymentSheet example app
 
 **Code Quality**
 - `./gradlew detekt` - Run static analysis with Detekt

@@ -3,6 +3,7 @@ package com.stripe.android.utils
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -30,6 +31,7 @@ internal class FakePaymentElementLoader(
     private val passiveCaptchaParams: PassiveCaptchaParams? = null,
     private val clientAttributionMetadata: ClientAttributionMetadata? = null,
     private val shippingDetails: AddressDetails? = null,
+    private val experimentsData: ElementsSession.ExperimentsData? = null,
 ) : PaymentElementLoader {
 
     fun updatePaymentMethods(paymentMethods: List<PaymentMethod>) {
@@ -72,6 +74,7 @@ internal class FakePaymentElementLoader(
                         clientAttributionMetadata =
                         clientAttributionMetadata ?: PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                         shippingDetails = shippingDetails,
+                        experimentsData = experimentsData,
                     ),
                 )
             )

@@ -41,6 +41,7 @@ import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.PrimaryButtonTag
 import com.stripe.android.link.utils.TestNavigationManager
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
@@ -769,6 +770,7 @@ internal class WalletScreenTest {
                 collectMissingBillingDetailsForExistingPaymentMethods = true,
                 signupToggleEnabled = false,
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             ),
             onItemSelected = {},
             onExpandedChanged = {},

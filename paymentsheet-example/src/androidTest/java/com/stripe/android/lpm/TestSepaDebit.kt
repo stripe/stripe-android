@@ -11,8 +11,8 @@ import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
@@ -36,7 +36,7 @@ internal class TestSepaDebit : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "sepa_debit",
     ) { settings ->
-        settings[CountrySettingsDefinition] = Country.FR
+        settings[MerchantSettingsDefinition] = Merchant.FR
         settings[DelayedPaymentMethodsSettingsDefinition] = true
         settings[GooglePaySettingsDefinition] = false
         settings[InitializationTypeSettingsDefinition] = InitializationType.DeferredClientSideConfirmation

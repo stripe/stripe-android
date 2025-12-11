@@ -20,14 +20,6 @@ public final class com/stripe/android/core/AppInfo$Companion {
 	public static synthetic fun create$default (Lcom/stripe/android/core/AppInfo$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/core/AppInfo;
 }
 
-public final class com/stripe/android/core/AppInfo$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/AppInfo;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/core/AppInfo;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/core/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
@@ -64,14 +56,6 @@ public final class com/stripe/android/core/StripeError : com/stripe/android/core
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/core/StripeError$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/StripeError;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/core/StripeError;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/core/exception/APIConnectionException : com/stripe/android/core/exception/StripeException {
@@ -122,14 +106,6 @@ public abstract class com/stripe/android/core/exception/StripeException : java/l
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/core/frauddetection/FraudDetectionData$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/frauddetection/FraudDetectionData;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/core/frauddetection/FraudDetectionData;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public synthetic class com/stripe/android/core/model/Country$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/core/model/Country$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
@@ -144,14 +120,6 @@ public final class com/stripe/android/core/model/Country$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/core/model/Country$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/model/Country;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/core/model/Country;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public synthetic class com/stripe/android/core/model/CountryCode$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/core/model/CountryCode$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
@@ -160,14 +128,6 @@ public synthetic class com/stripe/android/core/model/CountryCode$$serializer : k
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/core/model/CountryCode;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-}
-
-public final class com/stripe/android/core/model/CountryCode$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/model/CountryCode;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/core/model/CountryCode;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/core/model/StripeFile : com/stripe/android/core/model/StripeModel {
@@ -197,14 +157,6 @@ public final class com/stripe/android/core/model/StripeFile : com/stripe/android
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/core/model/StripeFile$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/model/StripeFile;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/core/model/StripeFile;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/core/model/StripeFileParams {
 	public fun <init> (Ljava/io/File;Lcom/stripe/android/core/model/StripeFilePurpose;)V
 	public final fun copy (Ljava/io/File;Lcom/stripe/android/core/model/StripeFilePurpose;)Lcom/stripe/android/core/model/StripeFileParams;
@@ -228,14 +180,6 @@ public final class com/stripe/android/core/model/StripeFileParams$FileLink : and
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/core/model/StripeFileParams$FileLink$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/model/StripeFileParams$FileLink;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/core/model/StripeFileParams$FileLink;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/core/model/StripeFilePurpose : java/lang/Enum {
@@ -263,14 +207,6 @@ public synthetic class com/stripe/android/core/networking/AnalyticsRequestV2$$se
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/core/networking/AnalyticsRequestV2;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-}
-
-public final class com/stripe/android/core/networking/ApiRequest$Options$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/networking/ApiRequest$Options;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/core/networking/ApiRequest$Options;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/core/networking/StripeConnection$Default : com/stripe/android/core/networking/StripeConnection$AbstractConnection {
@@ -302,38 +238,6 @@ public final class com/stripe/android/core/networking/StripeRequest$MimeType : j
 	public fun toString ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/core/networking/StripeRequest$MimeType;
 	public static fun values ()[Lcom/stripe/android/core/networking/StripeRequest$MimeType;
-}
-
-public final class com/stripe/android/core/strings/ConcatenatedResolvableString$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/strings/ConcatenatedResolvableString;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/core/strings/ConcatenatedResolvableString;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/core/strings/IdentifierResolvableString$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/strings/IdentifierResolvableString;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/core/strings/IdentifierResolvableString;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/core/strings/StaticResolvableString$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/strings/StaticResolvableString;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/core/strings/StaticResolvableString;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/core/strings/transformations/Replace$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/strings/transformations/Replace;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/core/strings/transformations/Replace;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/core/utils/FeatureFlag$Flag$Disabled : com/stripe/android/core/utils/FeatureFlag$Flag {

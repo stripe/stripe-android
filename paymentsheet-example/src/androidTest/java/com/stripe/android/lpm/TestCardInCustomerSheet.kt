@@ -7,8 +7,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.CollectAddres
 import com.stripe.android.paymentsheet.example.playground.settings.CollectEmailSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionOnBehalfOfSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
@@ -39,7 +39,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
     fun testCard() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters.copyPlaygroundSettings { settings ->
-                settings[CountrySettingsDefinition] = Country.US
+                settings[MerchantSettingsDefinition] = Merchant.US
             },
             populateCustomLpmFields = {
                 populateCardDetails()
@@ -51,7 +51,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
     fun testCardWithNonUsMerchant() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters.copyPlaygroundSettings { settings ->
-                settings[CountrySettingsDefinition] = Country.FR
+                settings[MerchantSettingsDefinition] = Merchant.FR
             },
             populateCustomLpmFields = {
                 populateCardDetails()
@@ -64,7 +64,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters.copyPlaygroundSettings { settings ->
                 settings[CustomerSettingsDefinition] = CustomerType.NEW
-                settings[CountrySettingsDefinition] = Country.US
+                settings[MerchantSettingsDefinition] = Merchant.US
                 settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
             },
             populateCustomLpmFields = {
@@ -78,7 +78,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[CustomerSettingsDefinition] = CustomerType.NEW
-                settings[CountrySettingsDefinition] = Country.US
+                settings[MerchantSettingsDefinition] = Merchant.US
                 settings[CustomerSessionSettingsDefinition] = true
                 settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
                 settings[CustomerSessionOnBehalfOfSettingsDefinition] =
@@ -97,7 +97,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[GooglePaySettingsDefinition] = false
-                settings[CountrySettingsDefinition] = Country.US
+                settings[MerchantSettingsDefinition] = Merchant.US
                 settings[CustomerSessionOnBehalfOfSettingsDefinition] =
                     CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT
                 settings[CustomerSessionSettingsDefinition] = true
@@ -115,7 +115,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[CustomerSettingsDefinition] = CustomerType.NEW
-                settings[CountrySettingsDefinition] = Country.US
+                settings[MerchantSettingsDefinition] = Merchant.US
                 settings[CustomerSessionSettingsDefinition] = true
                 settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
                 settings[CustomerSessionOnBehalfOfSettingsDefinition] =
@@ -133,7 +133,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
     fun testCardWith3ds2() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters.copyPlaygroundSettings { settings ->
-                settings[CountrySettingsDefinition] = Country.US
+                settings[MerchantSettingsDefinition] = Merchant.US
                 settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
             }.copy(
                 authorizationAction = AuthorizeAction.Authorize3ds2,
@@ -150,7 +150,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters.copyPlaygroundSettings { settings ->
                 settings[CustomerSettingsDefinition] = CustomerType.NEW
-                settings[CountrySettingsDefinition] = Country.FR
+                settings[MerchantSettingsDefinition] = Merchant.FR
                 settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
             },
             populateCustomLpmFields = {
@@ -164,7 +164,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters.copyPlaygroundSettings { settings ->
                 settings[CustomerSettingsDefinition] = CustomerType.NEW
-                settings[CountrySettingsDefinition] = Country.US
+                settings[MerchantSettingsDefinition] = Merchant.US
                 settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
                 settings[CollectNameSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
@@ -190,7 +190,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters.copyPlaygroundSettings { settings ->
                 settings[CustomerSettingsDefinition] = CustomerType.NEW
-                settings[CountrySettingsDefinition] = Country.US
+                settings[MerchantSettingsDefinition] = Merchant.US
                 settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
                 settings[CollectNameSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always

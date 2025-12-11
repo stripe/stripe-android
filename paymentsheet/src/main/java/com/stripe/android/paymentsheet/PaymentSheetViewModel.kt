@@ -13,6 +13,7 @@ import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -86,6 +87,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
+    @Named(IS_LIVE_MODE) val isLiveModeProvider: () -> Boolean,
+    tapToAddCollectionHandler: TapToAddCollectionHandler,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -95,6 +98,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler = linkHandler,
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
+    tapToAddCollectionHandler = tapToAddCollectionHandler,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
@@ -254,6 +258,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             handlePaymentCompleted(
                 deferredIntentConfirmationType = pendingResult.deferredIntentConfirmationType,
                 finishImmediately = true,
+                intentId = pendingResult.intent.id,
             )
         } else if (state.validationError != null) {
             handlePaymentSheetStateLoadFailure(state.validationError)
@@ -410,7 +415,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     lastFour = cvcRecollectionData.lastFour ?: "",
                     cardBrand = cvcRecollectionData.brand,
                     cvc = "",
-                    isTestMode = paymentMethodMetadata.value?.stripeIntent?.isLiveMode?.not() ?: false
+                    isTestMode = paymentMethodMetadata.value?.stripeIntent?.isLiveMode?.not() ?: false,
                 ),
                 processing = processing,
                 coroutineScope = viewModelScope,
@@ -550,12 +555,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun handlePaymentCompleted(
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         finishImmediately: Boolean,
+        intentId: String?,
     ) {
         val currentSelection = inProgressSelection
         currentSelection?.let { paymentSelection ->
             eventReporter.onPaymentSuccess(
                 paymentSelection = paymentSelection,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
+                intentId = intentId,
             )
         }
 
@@ -580,6 +587,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is ConfirmationHandler.Result.Succeeded -> handlePaymentCompleted(
                 deferredIntentConfirmationType = result.deferredIntentConfirmationType,
                 finishImmediately = false,
+                intentId = result.intent.id,
             )
             is ConfirmationHandler.Result.Failed -> processConfirmationFailure(result)
             is ConfirmationHandler.Result.Canceled,
@@ -623,7 +631,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         customerStateHolder: CustomerStateHolder,
     ): List<PaymentSheetScreen> {
-        if (config.paymentMethodLayout != PaymentSheet.PaymentMethodLayout.Horizontal) {
+        if (getPaymentMethodLayout() != PaymentSheet.PaymentMethodLayout.Horizontal) {
             return VerticalModeInitialScreenFactory.create(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
