@@ -71,6 +71,7 @@ internal class FormHelperTest {
         assertThat(formElements).hasSize(1)
         // Email field has an empty string for value
         assertThat(formElements[0].getFormFieldValueFlow().value[0].first.v1).isEqualTo("billing_details[email]")
+        assertThat(formElements[0].getFormFieldValueFlow().value[0].second.value).isEqualTo("")
     }
 
     @Test
