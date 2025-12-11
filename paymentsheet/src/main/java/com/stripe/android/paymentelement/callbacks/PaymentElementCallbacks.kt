@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.callbacks
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.RowSelectionBehavior.Companion.getInternalRowSelectionCallback
@@ -10,6 +11,7 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
+import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -22,6 +24,7 @@ import com.stripe.android.paymentsheet.ShopPayHandlers
     ShopPayPreview::class,
     SharedPaymentTokenSessionPreview::class,
     WalletButtonsPreview::class,
+    TapToAddPreview::class,
 )
 internal data class PaymentElementCallbacks private constructor(
     val createIntentCallback: CreateIntentCallback?,
@@ -32,6 +35,7 @@ internal data class PaymentElementCallbacks private constructor(
     val rowSelectionCallback: InternalRowSelectionCallback?,
     val shopPayHandlers: ShopPayHandlers?,
     val preparePaymentMethodHandler: PreparePaymentMethodHandler?,
+    val createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback?,
 ) {
     class Builder {
         private var createIntentCallback: CreateIntentCallback? = null
@@ -42,6 +46,7 @@ internal data class PaymentElementCallbacks private constructor(
         private var rowSelectionCallback: InternalRowSelectionCallback? = null
         private var shopPayHandlers: ShopPayHandlers? = null
         private var preparePaymentMethodHandler: PreparePaymentMethodHandler? = null
+        private var createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback? = null
 
         fun createIntentCallback(createIntentCallback: CreateIntentCallback?) = apply {
             this.createIntentCallback = createIntentCallback
@@ -71,6 +76,10 @@ internal data class PaymentElementCallbacks private constructor(
 
         fun preparePaymentMethodHandler(handler: PreparePaymentMethodHandler?) = apply {
             this.preparePaymentMethodHandler = handler
+        }
+
+        fun createCardPresentSetupIntentCallback(callback: CreateCardPresentSetupIntentCallback?) = apply {
+            this.createCardPresentSetupIntentCallback = callback
         }
 
         fun rowSelectionImmediateActionCallback(
@@ -116,6 +125,7 @@ internal data class PaymentElementCallbacks private constructor(
                 rowSelectionCallback = rowSelectionCallback,
                 shopPayHandlers = shopPayHandlers,
                 preparePaymentMethodHandler = preparePaymentMethodHandler,
+                createCardPresentSetupIntentCallback = createCardPresentSetupIntentCallback,
             )
         }
     }

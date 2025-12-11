@@ -47,6 +47,7 @@
     <ID>LongMethod:ElementsSessionRepositoryTest.kt$ElementsSessionRepositoryTest$@Test fun `Verify mobile session ID is passed to 'StripeRepository'`()</ID>
     <ID>LongMethod:EmbeddedConfigurationHandler.kt$DefaultEmbeddedConfigurationHandler$override suspend fun configure( intentConfiguration: PaymentSheet.IntentConfiguration, configuration: EmbeddedPaymentElement.Configuration, ): Result&lt;PaymentElementLoader.State></ID>
     <ID>LongMethod:EmbeddedContentHelper.kt$DefaultEmbeddedContentHelper$private fun createInteractor( coroutineScope: CoroutineScope, paymentMethodMetadata: PaymentMethodMetadata, walletsState: StateFlow&lt;WalletsState?>, isImmediateAction: Boolean, embeddedViewDisplaysMandateText: Boolean, ): PaymentMethodVerticalLayoutInteractor</ID>
+    <ID>LongMethod:EmbeddedPaymentElementKtx.kt$@Composable fun rememberEmbeddedPaymentElement( builder: EmbeddedPaymentElement.Builder ): EmbeddedPaymentElement</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`()</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when required address fields are complete`()</ID>
     <ID>LongMethod:FullScreenContent.kt$@Composable internal fun FullScreenContent( modifier: Modifier, bottomSheetState: StripeBottomSheetState, initialDestination: LinkScreen, appBarState: LinkAppBarState, eventReporter: EventReporter, onBackPressed: () -> Unit, moveToWeb: (Throwable) -> Unit, goBack: () -> Unit, onNavBackStackEntryChanged: (NavBackStackEntryUpdate) -> Unit, navigationChannel: SharedFlow&lt;NavigationIntent>, handleViewAction: (LinkAction) -> Unit, navigate: (route: LinkScreen, clearStack: Boolean) -> Unit, dismiss: () -> Unit, dismissWithResult: (LinkActivityResult) -> Unit, getLinkAccount: () -> LinkAccount?, changeEmail: () -> Unit )</ID>
@@ -113,9 +114,11 @@
     <ID>TooManyFunctions:NativeLinkModule.kt$NativeLinkModule</ID>
     <ID>TooManyFunctions:PaymentMethodMetadata.kt$PaymentMethodMetadata : Parcelable</ID>
     <ID>TooManyFunctions:PaymentMethodsUiExtension.kt$com.stripe.android.paymentsheet.ui.PaymentMethodsUiExtension.kt</ID>
+    <ID>TooManyFunctions:PaymentSheet.kt$PaymentSheet$Builder</ID>
     <ID>TooManyFunctions:PaymentSheet.kt$PaymentSheet.Appearance$Builder</ID>
     <ID>TooManyFunctions:PaymentSheet.kt$PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark$Builder</ID>
     <ID>TooManyFunctions:PaymentSheet.kt$PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure$Builder</ID>
+    <ID>TooManyFunctions:PaymentSheet.kt$PaymentSheet.FlowController$Builder</ID>
     <ID>TooManyFunctions:ShopPayModule.kt$ShopPayModule$Companion</ID>
     <ID>TooManyFunctions:WalletViewModel.kt$WalletViewModel : ViewModel</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>

@@ -7,7 +7,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentCallbackNotFoundException
+import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentCallbackRetriever
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -188,9 +188,9 @@ class DeferredIntentCallbackRetrieverTest {
         val dispatcher = StandardTestDispatcher()
 
         runTest(dispatcher) {
-            lateinit var exception: DeferredIntentCallbackNotFoundException
+            lateinit var exception: CallbackNotFoundException
             val retrieveJob = async {
-                exception = assertFailsWith<DeferredIntentCallbackNotFoundException> {
+                exception = assertFailsWith<CallbackNotFoundException> {
                     retrieveCall(errorReporter)
                 }
             }
