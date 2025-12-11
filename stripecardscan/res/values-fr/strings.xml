@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stripe_card_scan_title" description="Text displayed above the scan window for paymentsheet, instructing the user how to scan card">Placez votre carte dans le rectangle pour la numériser</string>
+    <string name="stripe_card_scan_instructions" description="Text displayed above the scan window, instructing the user how to scan card">Numérisez votre carte</string>
+    <string name="stripe_card_scan_privacy_link_text" description="Privacy link text in scan window. THIS STRING SHOULD NOT BE MODIFIED"><![CDATA[Nous utilisons Stripe pour vérifier les informations de votre carte. Stripe peut utiliser et stocker vos données conformément à sa politique de confidentialité. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>En savoir plus</u></a>]]></string>
+
+    <string name="stripe_camera_permission_settings_message" description="Message shown to the user when camera permission is denied in fragment">Veuillez autoriser l\'accès à la caméra dans les paramètres pour numériser votre carte</string>
+
+    <string name="stripe_close_button_description" description="Text used to close the scan window">Fermer</string>
+    <string name="stripe_torch_button_description" description="Text used to turn on the camera torch">Lampe</string>
+    <string name="stripe_swap_camera_button_description" description="Text used to swap the camera">Changer de caméra</string>
+</resources>
