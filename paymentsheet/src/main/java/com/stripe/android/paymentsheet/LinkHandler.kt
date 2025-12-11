@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.paymentsheet.state.LinkState
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -58,16 +57,7 @@ internal class LinkHandler @Inject constructor(
         val linkAttestationCheck = linkConfigurationCoordinator
             .linkAttestationCheck(configuration)
             .invoke()
-        return when (linkAttestationCheck) {
-            is LinkAttestationCheck.Result.AccountError,
-            is LinkAttestationCheck.Result.AttestationFailed,
-            is LinkAttestationCheck.Result.Error -> {
-                false
-            }
-            LinkAttestationCheck.Result.Successful -> {
-                true
-            }
-        }
+        return linkAttestationCheck.succeeded
     }
 
     @OptIn(DelicateCoroutinesApi::class)
