@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodLayoutInitialVisibilityTracker.Companion.EMBEDDED_PAYMENT_METHOD_LAYOUT_NAME
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
@@ -137,7 +138,12 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     // Cancel tracking and any pending dispatches, when the paymentMethods used change
     DisposableEffect(paymentMethodCodes) { onDispose { cancelPaymentMethodVisibilityTracking.invoke() } }
 
-    Column(modifier = modifier, verticalArrangement = arrangement) {
+    Column(
+        modifier = modifier.onGloballyPositioned {
+            updatePaymentMethodVisibility(EMBEDDED_PAYMENT_METHOD_LAYOUT_NAME, it)
+        },
+        verticalArrangement = arrangement
+    ) {
         if (appearance.style.topSeparatorEnabled()) OptionalEmbeddedDivider(appearance.style)
 
         EmbeddedSavedPaymentMethodRowButton(
@@ -149,7 +155,6 @@ internal fun PaymentMethodEmbeddedLayoutUI(
             onViewMorePaymentMethods = onViewMorePaymentMethods,
             onManageOneSavedPaymentMethod = onManageOneSavedPaymentMethod,
             onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
-            updatePaymentMethodVisibility = updatePaymentMethodVisibility,
             appearance = appearance
         )
 
@@ -159,7 +164,6 @@ internal fun PaymentMethodEmbeddedLayoutUI(
             isEnabled = isEnabled,
             imageLoader = imageLoader,
             appearance = appearance,
-            updatePaymentMethodVisibility = updatePaymentMethodVisibility
         )
 
         if (appearance.style.bottomSeparatorEnabled()) OptionalEmbeddedDivider(appearance.style)
@@ -262,7 +266,6 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
     appearance: Embedded,
 ) {
     if (displayedSavedPaymentMethod != null) {
@@ -277,9 +280,6 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
                     onViewMorePaymentMethods = onViewMorePaymentMethods,
                     onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
                 )
-            },
-            modifier = Modifier.onGloballyPositioned { coordinates ->
-                updatePaymentMethodVisibility("saved", coordinates)
             },
             onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
             appearance = appearance
@@ -296,7 +296,6 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
     isEnabled: Boolean,
     imageLoader: StripeImageLoader,
     appearance: Embedded,
-    updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
 ) {
     val selectedIndex = remember(selection, paymentMethods) {
         if (selection is PaymentMethodVerticalLayoutInteractor.Selection.New) {
@@ -327,9 +326,6 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
                         )
                     }
                 },
-                modifier = Modifier.onGloballyPositioned { coordinates ->
-                    updatePaymentMethodVisibility(item.code, coordinates)
-                },
             )
         } else {
             NewPaymentMethodRowButton(
@@ -338,9 +334,6 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
                 displayablePaymentMethod = item,
                 imageLoader = imageLoader,
                 appearance = appearance,
-                modifier = Modifier.onGloballyPositioned { coordinates ->
-                    updatePaymentMethodVisibility(item.code, coordinates)
-                },
             )
         }
 
