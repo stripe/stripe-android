@@ -55,6 +55,10 @@ class PaymentMethodMessagingElementPage(
         )
     }
 
+    fun verifyLegalDisclosure() {
+        composeTestRule.onNodeWithText("18+, T&C apply. Credit subject to status.").assertExists()
+    }
+
     fun openAndCloseLearnMoreActivity() {
         composeTestRule.onNodeWithContentDescription("Learn more").performClick()
         composeTestRule.waitForIdle()
