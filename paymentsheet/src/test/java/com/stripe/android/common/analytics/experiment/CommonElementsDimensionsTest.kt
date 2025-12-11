@@ -1,7 +1,6 @@
 package com.stripe.android.common.analytics.experiment
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.state.LinkState

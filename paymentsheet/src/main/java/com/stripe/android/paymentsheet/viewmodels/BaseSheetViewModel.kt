@@ -244,6 +244,7 @@ internal abstract class BaseSheetViewModel(
                     experimentsData = experimentsData,
                     group = variant,
                     paymentMethodMetadata = paymentMethodMetadata,
+                    hasSavedPaymentMethod = customerStateHolder.paymentMethods.value.isNotEmpty(),
                 )
             )
         }

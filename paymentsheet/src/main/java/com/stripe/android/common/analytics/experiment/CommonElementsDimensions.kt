@@ -1,8 +1,6 @@
 package com.stripe.android.common.analytics.experiment
 
-import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.utils.filterNotNullValues
 import kotlin.collections.joinToString
 import kotlin.collections.plus
 
