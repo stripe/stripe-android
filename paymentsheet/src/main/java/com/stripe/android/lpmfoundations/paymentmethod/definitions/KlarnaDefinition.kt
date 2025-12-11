@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -51,12 +50,8 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple {
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments
     ): List<FormElement> {
-        // These are the countries/regions where Klarna allows buyers
-        val allowedCountryCodes: Set<String> = CountryUtils.klarnaSupportedBuyerCountries
-
         val formElementsBuilder = FormElementsBuilder(
             arguments = arguments,
-            allowedCountriesOverride = allowedCountryCodes,
         )
 
         if (KlarnaDefinition.requiresMandate(metadata)) {
@@ -73,7 +68,7 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple {
             formElementsBuilder
                 .element(
                     getKlarnaCountryElement(
-                        allowedCountryCodes = allowedCountryCodes,
+                        allowedCountryCodes = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
                         initialValue = metadata.stripeIntent.countryCode
                     )
                 )

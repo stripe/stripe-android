@@ -7,7 +7,6 @@ import com.stripe.android.uicore.elements.FormElement
 
 internal class FormElementsBuilder(
     private val arguments: UiDefinitionFactory.Arguments,
-    allowedCountriesOverride: Set<String>? = null
 ) {
     private val headerFormElements: MutableList<FormElement> = mutableListOf()
     private val uiFormElements: MutableList<FormElement> = mutableListOf()
@@ -16,8 +15,8 @@ internal class FormElementsBuilder(
     private val requiredContactInformationCollectionModes: MutableSet<ContactInformationCollectionMode> = mutableSetOf()
 
     private var requireBillingAddressCollection: Boolean = false
-    private var availableCountries: Set<String> = allowedCountriesOverride
-        ?: arguments.billingDetailsCollectionConfiguration.allowedBillingCountries
+    private var availableCountries: Set<String> =
+        arguments.billingDetailsCollectionConfiguration.allowedBillingCountries
 
     init {
         // Setup the required contact information fields based on the merchant billingDetailsCollectionConfiguration.
