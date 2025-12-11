@@ -2,8 +2,10 @@ package com.stripe.android.common.taptoadd
 
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.TapToAddPreview
+import com.stripe.android.paymentsheet.CreateIntentResult
 
 internal interface TapToAddCollectionHandler {
     suspend fun collect(metadata: PaymentMethodMetadata): CollectionState
@@ -22,9 +24,10 @@ internal interface TapToAddCollectionHandler {
         fun create(
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             connectionManager: TapToAddConnectionManager,
+            createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
         ): TapToAddCollectionHandler {
             return if (isStripeTerminalSdkAvailable()) {
-                DefaultTapToAddCollectionHandler(connectionManager)
+                DefaultTapToAddCollectionHandler(connectionManager, createCardPresentSetupIntentCallbackRetriever)
             } else {
                 UnsupportedTapToAddCollectionHandler()
             }
@@ -35,6 +38,7 @@ internal interface TapToAddCollectionHandler {
 @OptIn(TapToAddPreview::class)
 internal class DefaultTapToAddCollectionHandler(
     private val connectionManager: TapToAddConnectionManager,
+    private val createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
 ) : TapToAddCollectionHandler {
     override suspend fun collect(
         metadata: PaymentMethodMetadata
@@ -48,8 +52,27 @@ internal class DefaultTapToAddCollectionHandler(
                     throw exception
                 }
         }
+
+        val callback = try {
+            createCardPresentSetupIntentCallbackRetriever.waitForCallback()
+        } catch (error: CreateCardPresentSetupIntentCallbackNotFoundException) {
+            return@runCatching TapToAddCollectionHandler.CollectionState.FailedCollection(
+                error = error,
+                displayMessage = error.resolvableError,
+            )
+        }
+
+        when (val result = callback.createCardPresentSetupIntent()) {
+            is CreateIntentResult.Success -> TapToAddCollectionHandler.CollectionState.Collected
+            is CreateIntentResult.Failure -> {
+                TapToAddCollectionHandler.CollectionState.FailedCollection(
+                    error = result.cause,
+                    displayMessage = result.displayMessage?.resolvableString ?: result.cause.stripeErrorMessage()
+                )
+            }
+        }
     }.fold(
-        onSuccess = { TapToAddCollectionHandler.CollectionState.Collected },
+        onSuccess = { it },
         onFailure = { error ->
             TapToAddCollectionHandler.CollectionState.FailedCollection(
                 error = error,

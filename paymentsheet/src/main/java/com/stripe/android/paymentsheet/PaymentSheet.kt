@@ -34,12 +34,14 @@ import com.stripe.android.paymentelement.AddressAutocompletePreview
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
+import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -355,6 +357,17 @@ class PaymentSheet internal constructor(
             handler: PreparePaymentMethodHandler
         ) = apply {
             callbacksBuilder.preparePaymentMethodHandler(handler)
+        }
+
+        /**
+         * @param callback called when the customer attempts to save their card by tapping it on their device.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @TapToAddPreview
+        fun createCardPresentSetupIntentCallback(
+            callback: CreateCardPresentSetupIntentCallback,
+        ) = apply {
+            callbacksBuilder.createCardPresentSetupIntentCallback(callback)
         }
 
         /**
@@ -4146,6 +4159,17 @@ class PaymentSheet internal constructor(
                 handler: PreparePaymentMethodHandler
             ) = apply {
                 callbacksBuilder.preparePaymentMethodHandler(handler)
+            }
+
+            /**
+             * @param callback called when the customer attempts to save their card by tapping it on their device.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @TapToAddPreview
+            fun createCardPresentSetupIntentCallback(
+                callback: CreateCardPresentSetupIntentCallback,
+            ) = apply {
+                callbacksBuilder.createCardPresentSetupIntentCallback(callback)
             }
 
             /**
