@@ -6,6 +6,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
+import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.testing.FakeErrorReporter
@@ -64,7 +65,7 @@ class DefaultCreateCardPresentSetupIntentCallbackRetrieverTest {
             assertFalse(retrieveJob.isActive)
             assertTrue(retrieveJob.isCompleted)
             assertThat(errorReporter.awaitCall().errorEvent)
-                .isEqualTo(ErrorReporter.SuccessEvent.TAP_TO_ADD_FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING)
+                .isEqualTo(ErrorReporter.SuccessEvent.FOUND_CREATE_CARD_PRESENT_SETUP_INTENT_CALLBACK_WHILE_POLLING)
             errorReporter.ensureAllEventsConsumed()
         }
     }
@@ -79,9 +80,9 @@ class DefaultCreateCardPresentSetupIntentCallbackRetrieverTest {
         )
 
         runTest(dispatcher) {
-            lateinit var exception: CreateCardPresentSetupIntentCallbackNotFoundException
+            lateinit var exception: CallbackNotFoundException
             val retrieveJob = async {
-                exception = assertFailsWith<CreateCardPresentSetupIntentCallbackNotFoundException> {
+                exception = assertFailsWith<CallbackNotFoundException> {
                     retriever.waitForCallback()
                 }
             }
@@ -110,7 +111,7 @@ class DefaultCreateCardPresentSetupIntentCallbackRetrieverTest {
                         .resolvableString
                 )
             assertThat(errorReporter.awaitCall().errorEvent)
-                .isEqualTo(ErrorReporter.ExpectedErrorEvent.CREATE_CARD_PRESENT_SETUP_INTENT_NULL)
+                .isEqualTo(ErrorReporter.ExpectedErrorEvent.CREATE_CARD_PRESENT_SETUP_INTENT_CALLBACK_NULL)
             errorReporter.ensureAllEventsConsumed()
         }
     }
@@ -125,7 +126,7 @@ class DefaultCreateCardPresentSetupIntentCallbackRetrieverTest {
         try {
             retriever.waitForCallback()
             error("Expected exception to be thrown")
-        } catch (e: CreateCardPresentSetupIntentCallbackNotFoundException) {
+        } catch (e: CallbackNotFoundException) {
             assertThat(e.resolvableError)
                 .isEqualTo(
                     "CreateCardPresentSetupIntentCallback must be implemented when using Tap to Add!"
@@ -144,7 +145,7 @@ class DefaultCreateCardPresentSetupIntentCallbackRetrieverTest {
         try {
             retriever.waitForCallback()
             error("Expected exception to be thrown")
-        } catch (e: CreateCardPresentSetupIntentCallbackNotFoundException) {
+        } catch (e: CallbackNotFoundException) {
             assertThat(e.resolvableError)
                 .isEqualTo(PaymentsCoreR.string.stripe_internal_error.resolvableString)
         }

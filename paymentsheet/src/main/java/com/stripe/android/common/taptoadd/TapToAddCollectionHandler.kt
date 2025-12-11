@@ -5,6 +5,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.TapToAddPreview
+import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
 import com.stripe.android.paymentsheet.CreateIntentResult
 
 internal interface TapToAddCollectionHandler {
@@ -55,7 +56,7 @@ internal class DefaultTapToAddCollectionHandler(
 
         val callback = try {
             createCardPresentSetupIntentCallbackRetriever.waitForCallback()
-        } catch (error: CreateCardPresentSetupIntentCallbackNotFoundException) {
+        } catch (error: CallbackNotFoundException) {
             return@runCatching TapToAddCollectionHandler.CollectionState.FailedCollection(
                 error = error,
                 displayMessage = error.resolvableError,

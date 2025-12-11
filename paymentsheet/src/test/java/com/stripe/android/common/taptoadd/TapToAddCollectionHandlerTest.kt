@@ -7,6 +7,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
+import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.test.runTest
@@ -92,8 +93,9 @@ class TapToAddCollectionHandlerTest {
 
     @Test
     fun `handler returns FailedCollection when callback retriever throws`() {
-        val error = CreateCardPresentSetupIntentCallbackNotFoundException(
+        val error = CallbackNotFoundException(
             message = "Callback not found",
+            analyticsValue = "notFound",
             resolvableError = "Callback not implemented".resolvableString
         )
 

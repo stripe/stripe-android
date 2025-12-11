@@ -179,8 +179,8 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         PREPARE_PAYMENT_METHOD_HANDLER_NULL(
             eventName = "paymentsheet.prepare_payment_method_handler.is_null"
         ),
-        CREATE_CARD_PRESENT_SETUP_INTENT_NULL(
-            eventName = "elements.tap_to_add.create_card_present_setup_intent.is_null"
+        CREATE_CARD_PRESENT_SETUP_INTENT_CALLBACK_NULL(
+            eventName = "elements.tap_to_add.create_card_present_setup_intent_callback.is_null"
         ),
         HCAPTCHA_FAILURE(
             eventName = "elements.captcha.passive.expected_failure"
@@ -363,7 +363,7 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         TAP_TO_ADD_CONNECT_READER_CALL_SUCCESS(
             eventName = "elements.tap_to_add.connect_reader_call.success"
         ),
-        TAP_TO_ADD_FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING(
+        FOUND_CREATE_CARD_PRESENT_SETUP_INTENT_CALLBACK_WHILE_POLLING(
             eventName = "elements.tap_to_add.polling_for_create_card_present_setup_intent_callback.success"
         )
     }
