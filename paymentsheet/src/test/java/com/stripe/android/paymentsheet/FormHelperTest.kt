@@ -590,7 +590,8 @@ internal class FormHelperTest {
             ),
             newPaymentSelectionProvider = { null },
         )
-        assertThat(formHelper.formTypeForCode("afterpay_clearpay")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+        assertThat(formHelper.formTypeForCode("afterpay_clearpay"))
+            .isEqualTo(FormHelper.FormType.UserInteractionRequired)
     }
 
     @Test

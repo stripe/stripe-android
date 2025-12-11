@@ -42,7 +42,6 @@ import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.elements.AddressElement
-import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberElement
