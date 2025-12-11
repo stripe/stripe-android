@@ -12,35 +12,14 @@ import org.junit.Test
 class CommonElementsDimensionsTest {
 
     @Test
-    fun `sdk_platform dimension has correct value`() {
-        val dimensions = CommonElementsDimensions.getDimensions(
-            PaymentMethodMetadataFactory.create()
-        )
-
-        assertThat(dimensions).containsEntry("sdk_platform", "android")
-    }
-
-    @Test
-    fun `amount dimensions have correct values`() {
-        val dimensions = CommonElementsDimensions.getDimensions(
-            PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            )
-        )
-
-        assertThat(dimensions).containsEntry("amount", "1099")
-        assertThat(dimensions).containsEntry("currency", "usd")
-    }
-
-    @Test
-    fun `payment_method_types dimension has correct value`() {
+    fun `displayed_payment_method_types dimension has correct value`() {
         val dimensions = CommonElementsDimensions.getDimensions(
             PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
             )
         )
 
-        assertThat(dimensions).containsEntry("payment_method_types", "card")
+        assertThat(dimensions).containsEntry("displayed_payment_method_types", "card")
     }
 
     @Test
@@ -52,8 +31,7 @@ class CommonElementsDimensionsTest {
             )
         )
 
-        assertThat(dimensions).containsEntry("is_google_pay_available", "false")
-        assertThat(dimensions).containsEntry("payment_method_types_including_wallets", "card")
+        assertThat(dimensions).containsEntry("displayed_payment_method_types_including_wallets", "card")
     }
 
     @Test
@@ -65,8 +43,7 @@ class CommonElementsDimensionsTest {
             )
         )
 
-        assertThat(dimensions).containsEntry("is_google_pay_available", "true")
-        assertThat(dimensions).containsEntry("payment_method_types_including_wallets", "card,google_pay")
+        assertThat(dimensions).containsEntry("displayed_payment_method_types_including_wallets", "card,google_pay")
     }
 
     @Test
@@ -83,8 +60,7 @@ class CommonElementsDimensionsTest {
             )
         )
 
-        assertThat(dimensions).containsEntry("link_displayed", "true")
-        assertThat(dimensions).containsEntry("payment_method_types_including_wallets", "card,link")
+        assertThat(dimensions).containsEntry("displayed_payment_method_types_including_wallets", "card,link")
     }
 
     @Test
@@ -96,27 +72,6 @@ class CommonElementsDimensionsTest {
             )
         )
 
-        assertThat(dimensions).containsEntry("link_displayed", "false")
-        assertThat(dimensions).containsEntry("payment_method_types_including_wallets", "card")
-    }
-
-    @Test
-    fun `sdk version dimension has correct value`() {
-        val dimensions = CommonElementsDimensions.getDimensions(
-            PaymentMethodMetadataFactory.create()
-        )
-
-        assertThat(dimensions).containsEntry("mobile_sdk_version", StripeSdkVersion.VERSION_NAME)
-    }
-
-    @Test
-    fun `live mode dimension has correct value`() {
-        val dimensions = CommonElementsDimensions.getDimensions(
-            PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            )
-        )
-
-        assertThat(dimensions).containsEntry("livemode", "false")
+        assertThat(dimensions).containsEntry("displayed_payment_method_types_including_wallets", "card")
     }
 }

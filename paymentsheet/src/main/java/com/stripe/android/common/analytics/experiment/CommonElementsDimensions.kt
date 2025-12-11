@@ -8,26 +8,18 @@ import kotlin.collections.plus
 
 internal object CommonElementsDimensions {
     fun getDimensions(paymentMethodMetadata: PaymentMethodMetadata): Map<String, String> {
-        val amount = paymentMethodMetadata.amount()
         val paymentMethodTypes = paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code }
         val isGooglePayAvailable = paymentMethodMetadata.isGooglePayReady
         val isLinkDisplayed = paymentMethodMetadata.linkState != null
 
         return mapOf(
-            "sdk_platform" to "android",
-            "amount" to amount?.value,
-            "currency" to amount?.currencyCode,
-            "payment_method_types" to paymentMethodTypes.joinToString(","),
-            "payment_method_types_including_wallets" to getPaymentMethodTypesPlusWallets(
+            "displayed_payment_method_types" to paymentMethodTypes.joinToString(","),
+            "displayed_payment_method_types_including_wallets" to getPaymentMethodTypesPlusWallets(
                 paymentMethodTypes,
                 isGooglePayAvailable = isGooglePayAvailable,
                 isLinkDisplayed = isLinkDisplayed,
             ).joinToString(","),
-            "mobile_sdk_version" to StripeSdkVersion.VERSION_NAME,
-            "is_google_pay_available" to isGooglePayAvailable,
-            "link_displayed" to isLinkDisplayed,
-            "livemode" to paymentMethodMetadata.stripeIntent.isLiveMode,
-        ).filterNotNullValues().mapValues { entry -> entry.value.toString() }
+        )
     }
 
     private fun getPaymentMethodTypesPlusWallets(
