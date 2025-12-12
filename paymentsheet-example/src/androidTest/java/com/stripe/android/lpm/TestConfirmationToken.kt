@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.utils.ForceNativeBankFlowTestRule
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -95,6 +96,8 @@ internal class TestConfirmationToken : BasePlaygroundTest() {
         )
     }
 
+    // TODO(alexzhu): Enable after institutions are renamed (ir-rider-prefix)
+    @Ignore("Disabling test while institution name changes modifications are complete")
     @Test
     fun testBankAccountWithConfirmationTokenInCustomFlow_withCSC() {
         val testParameters = createConfirmationTokenParams("us_bank_account") { settings ->
