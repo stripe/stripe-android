@@ -4,6 +4,7 @@ package com.stripe.android.paymentmethodmessaging.element
 
 import android.content.Context
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -112,7 +113,9 @@ private fun SinglePartner(
             launchLearnMore(context, message.learnMore.url, appearance.theme)
         }
     ) {
-        Column {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
             TextWithLogo(
                 label = message.inlinePartnerPromotion,
                 image = image,
@@ -120,7 +123,6 @@ private fun SinglePartner(
                 learnMoreMessage = message.learnMore.message
             )
             message.legalDisclosure?.let {
-                Spacer(Modifier.height(2.dp))
                 LegalDisclosure(
                     legalDisclosure = it,
                     theme = appearance.theme
@@ -148,7 +150,8 @@ private fun MultiPartner(
             scope.launch { keyboardController.dismiss() }
             analyticsOnClick()
             launchLearnMore(context, message.learnMore.url, appearance.theme)
-        }
+        },
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Images(getImages(message, appearance.theme), appearance)
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -173,7 +176,6 @@ private fun MultiPartner(
             )
         }
         message.legalDisclosure?.let {
-            Spacer(Modifier.height(2.dp))
             LegalDisclosure(
                 legalDisclosure = it,
                 theme = appearance.theme
