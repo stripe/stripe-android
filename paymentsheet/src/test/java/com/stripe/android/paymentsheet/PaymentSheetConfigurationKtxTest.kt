@@ -34,7 +34,7 @@ class PaymentSheetConfigurationKtxTest {
             message = "When a CustomerConfiguration is passed to PaymentSheet, " +
                 "the ephemeralKeySecret cannot be an empty string."
         ) {
-            configWithBlankEphemeralKeySecret.validate(callbackIdentifier = "")
+            configWithBlankEphemeralKeySecret.validate(isLiveMode = false, callbackIdentifier = "")
         }
     }
 
@@ -50,8 +50,8 @@ class PaymentSheetConfigurationKtxTest {
 
     @Test
     fun `'validate' should succeed when ephemeral key secret is of correct format`() {
-        getConfig("ek_askljdlkasfhgasdfjls").validate(callbackIdentifier = "")
-        getConfig("ek_test_iiuwfhdaiuhasdvkcjn32n").validate(callbackIdentifier = "")
+        getConfig("ek_askljdlkasfhgasdfjls").validate(isLiveMode = false, callbackIdentifier = "")
+        getConfig("ek_test_iiuwfhdaiuhasdvkcjn32n").validate(isLiveMode = false, callbackIdentifier = "")
     }
 
     @Test
@@ -61,7 +61,7 @@ class PaymentSheetConfigurationKtxTest {
                 IllegalArgumentException::class,
                 message = "`ephemeralKeySecret` format does not match expected client secret formatting"
             ) {
-                getConfig(ephemeralKeySecret).validate(callbackIdentifier = "")
+                getConfig(ephemeralKeySecret).validate(isLiveMode = false, callbackIdentifier = "")
             }
         }
 
@@ -88,7 +88,7 @@ class PaymentSheetConfigurationKtxTest {
             message = "When a CustomerConfiguration is passed to PaymentSheet, " +
                 "the customerSessionClientSecret cannot be an empty string."
         ) {
-            configWithBlankCustomerSessionClientSecret.validate(callbackIdentifier = "")
+            configWithBlankCustomerSessionClientSecret.validate(isLiveMode = false, callbackIdentifier = "")
         }
     }
 
@@ -108,6 +108,7 @@ class PaymentSheetConfigurationKtxTest {
                 "secret. See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
         ) {
             configWithEphemeralKeySecretAsCustomerSessionClientSecret.validate(
+                isLiveMode = false,
                 callbackIdentifier = ""
             )
         }
@@ -128,7 +129,7 @@ class PaymentSheetConfigurationKtxTest {
             message = "Argument does not look like a CustomerSession client secret. " +
                 "See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
         ) {
-            configWithInvalidCustomerSessionClientSecret.validate(callbackIdentifier = "")
+            configWithInvalidCustomerSessionClientSecret.validate(isLiveMode = false, callbackIdentifier = "")
         }
     }
 
@@ -140,7 +141,7 @@ class PaymentSheetConfigurationKtxTest {
             .asCommonConfiguration()
 
         // Should not throw
-        configWithValidExternalPaymentMethods.validate(callbackIdentifier = "")
+        configWithValidExternalPaymentMethods.validate(isLiveMode = false, callbackIdentifier = "")
     }
 
     @Test
@@ -157,7 +158,7 @@ class PaymentSheetConfigurationKtxTest {
                 "See https://docs.stripe.com/payments/external-payment-methods?platform=android#available-external-" +
                 "payment-methods"
         ) {
-            configWithInvalidExternalPaymentMethod.validate(callbackIdentifier = "")
+            configWithInvalidExternalPaymentMethod.validate(isLiveMode = false, callbackIdentifier = "")
         }
     }
 
@@ -169,7 +170,7 @@ class PaymentSheetConfigurationKtxTest {
             .asCommonConfiguration()
 
         // Should not throw
-        configWithEmptyExternalPaymentMethods.validate(callbackIdentifier = "")
+        configWithEmptyExternalPaymentMethods.validate(isLiveMode = false, callbackIdentifier = "")
     }
 
     @Test
@@ -186,8 +187,19 @@ class PaymentSheetConfigurationKtxTest {
                 "See https://docs.stripe.com/payments/external-payment-methods?platform=android#available-external" +
                 "-payment-methods"
         ) {
-            configWithMultipleInvalidExternalPaymentMethods.validate(callbackIdentifier = "")
+            configWithMultipleInvalidExternalPaymentMethods.validate(isLiveMode = false, callbackIdentifier = "")
         }
+    }
+
+    @Test
+    fun `'validate' should succeed when in live mode with invalid external payment methods`() {
+        val configWithInvalidExternalPaymentMethods = configuration.newBuilder()
+            .externalPaymentMethods(listOf("paypal", "venmo"))
+            .build()
+            .asCommonConfiguration()
+
+        // Should not throw when in live mode
+        configWithInvalidExternalPaymentMethods.validate(isLiveMode = true, callbackIdentifier = "")
     }
 
     @Test
@@ -213,9 +225,34 @@ class PaymentSheetConfigurationKtxTest {
             message = "createIntentWithConfirmationTokenCallback must be used with CustomerSession."
         ) {
             configWithLegacyKey.validate(
+                isLiveMode = false,
                 callbackIdentifier = callbackIdentifier
             )
         }
+    }
+
+    @Test
+    fun `'validate' should succeed when CT callback is set with LegacyCustomerEphemeralKey in live mode`() {
+        val callbackIdentifier = "test_identifier"
+
+        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _ -> error("Should not be called!") }
+            .build()
+
+        val configWithLegacyKey = configuration.newBuilder()
+            .customer(
+                PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "ek_live_123",
+                )
+            )
+            .build()
+            .asCommonConfiguration()
+
+        configWithLegacyKey.validate(
+            isLiveMode = true,
+            callbackIdentifier = callbackIdentifier
+        )
     }
 
     @Test
@@ -237,6 +274,7 @@ class PaymentSheetConfigurationKtxTest {
             .asCommonConfiguration()
 
         configWithCustomerSession.validate(
+            isLiveMode = false,
             callbackIdentifier = callbackIdentifier
         )
     }
@@ -255,6 +293,7 @@ class PaymentSheetConfigurationKtxTest {
             .asCommonConfiguration()
 
         configWithoutCustomer.validate(
+            isLiveMode = false,
             callbackIdentifier = callbackIdentifier
         )
     }

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.model.PaymentMethodRemovePermission
@@ -2828,7 +2829,9 @@ internal class DefaultPaymentElementLoaderTest {
 
             val loader = createPaymentElementLoader(
                 errorReporter = errorReporter,
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    isLiveMode = false
+                )
             )
 
             val exception = loader.load(
@@ -2871,6 +2874,7 @@ internal class DefaultPaymentElementLoaderTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     isLiveMode = true
                 ),
+                isLiveMode = true,
             )
 
             val state = loader.load(
@@ -4318,6 +4322,7 @@ internal class DefaultPaymentElementLoaderTest {
             isSupported = false,
             isConnected = false,
         ),
+        isLiveMode: Boolean = false,
         analyticsMetadataFactory: DefaultPaymentElementLoader.AnalyticsMetadataFactory =
             FakeDefaultPaymentElementLoaderAnalyticsMetadataFactory {
                 AnalyticsMetadata(emptyMap())
@@ -4352,6 +4357,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
             analyticsMetadataFactory = analyticsMetadataFactory,
             tapToAddConnectionManager = tapToAddConnectionManager,
+            paymentConfiguration = PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test")
         )
     }
 
