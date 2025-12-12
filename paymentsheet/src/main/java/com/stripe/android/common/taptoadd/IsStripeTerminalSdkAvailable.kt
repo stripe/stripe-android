@@ -3,7 +3,7 @@ package com.stripe.android.common.taptoadd
 import com.stripe.android.core.utils.FeatureFlags
 import javax.inject.Inject
 
-internal interface IsStripeTerminalSdkAvailable {
+internal fun interface IsStripeTerminalSdkAvailable {
     operator fun invoke(): Boolean
 }
 

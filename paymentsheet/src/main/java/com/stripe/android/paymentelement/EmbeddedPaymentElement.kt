@@ -191,6 +191,10 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal var analyticEventCallback: AnalyticEventCallback? = null
             private set
 
+        @OptIn(TapToAddPreview::class)
+        internal var createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback? = null
+            private set
+
         internal var rowSelectionBehavior: RowSelectionBehavior = RowSelectionBehavior.default()
 
         /**
@@ -214,6 +218,17 @@ class EmbeddedPaymentElement @Inject internal constructor(
         @ExperimentalAnalyticEventCallbackApi
         fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
             this.analyticEventCallback = callback
+        }
+
+        /**
+         * @param callback called when the customer attempts to save their card by tapping it on their device.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @TapToAddPreview
+        fun createCardPresentSetupIntentCallback(
+            callback: CreateCardPresentSetupIntentCallback,
+        ) = apply {
+            this.createCardPresentSetupIntentCallback = callback
         }
 
         /**

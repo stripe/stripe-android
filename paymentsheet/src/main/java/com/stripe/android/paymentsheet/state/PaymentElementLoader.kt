@@ -328,7 +328,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 metadata = paymentMethodMetadata.await(),
                 savedSelection = savedSelection,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
-                cardFundingFilter = PaymentSheetCardFundingFilter(configuration.allowedCardFundingTypes)
+                cardFundingFilter = PaymentSheetCardFundingFilter(
+                    allowedCardFundingTypes = configuration.allowedCardFundingTypes(
+                        enabled = elementsSession.enableCardFundFiltering
+                    )
+                )
             )
         }
 

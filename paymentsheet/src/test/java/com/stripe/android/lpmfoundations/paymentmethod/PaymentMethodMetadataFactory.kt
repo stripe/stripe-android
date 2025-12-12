@@ -3,6 +3,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
@@ -62,6 +63,7 @@ internal object PaymentMethodMetadataFactory {
         sellerBusinessName: String? = null,
         analyticsMetadata: AnalyticsMetadata = AnalyticsMetadata(emptyMap()),
         isTapToAddSupported: Boolean = false,
+        experimentsData: ElementsSession.ExperimentsData? = null,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -108,6 +110,7 @@ internal object PaymentMethodMetadataFactory {
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
             isTapToAddSupported = isTapToAddSupported,
+            experimentsData = experimentsData,
         )
     }
 

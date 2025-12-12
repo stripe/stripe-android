@@ -2,6 +2,14 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [Added] Added support for [PayPay](https://docs.stripe.com/payments/paypay) payments.
+
+### PaymentSheet
+* [Added][12073](https://github.com/stripe/stripe-android/pull/12073) Added support for [PromptPay](https://docs.stripe.com/payments/promptpay) to PaymentSheet.
+
+## 22.4.0 - 2025-12-08
+
 ### PaymentSheet
 * [CHANGED][12036](https://github.com/stripe/stripe-android/pull/12036) Updates the google places SDK from 3.5.0 to 5.0.0.
 

@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import androidx.compose.runtime.Composable
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -19,6 +20,7 @@ internal fun PaymentMethodDefinition.CreateFormUi(
     initialLinkUserInput: UserInput? = null,
     linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
+    tapToAddHelper: TapToAddHelper? = null,
     isValidating: Boolean = false,
 ) {
     val formElements = formElements(
@@ -28,6 +30,7 @@ internal fun PaymentMethodDefinition.CreateFormUi(
         initialLinkUserInput = initialLinkUserInput,
         linkConfigurationCoordinator = linkConfigurationCoordinator,
         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+        tapToAddHelper = tapToAddHelper,
     ).onEach { element ->
         element.onValidationStateChanged(isValidating)
     }

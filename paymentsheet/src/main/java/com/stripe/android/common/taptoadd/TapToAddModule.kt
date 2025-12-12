@@ -2,6 +2,10 @@ package com.stripe.android.common.taptoadd
 
 import android.content.Context
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
+import com.stripe.android.paymentelement.TapToAddPreview
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
 import dagger.Binds
@@ -9,6 +13,7 @@ import dagger.Module
 import dagger.Provides
 import kotlin.coroutines.CoroutineContext
 
+@OptIn(TapToAddPreview::class)
 @Module
 internal interface TapToAddModule {
     @Binds
@@ -21,7 +26,20 @@ internal interface TapToAddModule {
         terminalWrapper: DefaultTerminalWrapper
     ): TerminalWrapper
 
+    @Binds
+    fun bindsCreateCardPresentSetupIntentCallbackRetriever(
+        retriever: DefaultCreateCardPresentSetupIntentCallbackRetriever
+    ): CreateCardPresentSetupIntentCallbackRetriever
+
     companion object {
+        @Provides
+        fun providesCreateCardPresentSetupIntentCallback(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        ): CreateCardPresentSetupIntentCallback? {
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
+                ?.createCardPresentSetupIntentCallback
+        }
+
         @Provides
         fun providesTapToAddConnectionManager(
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
@@ -37,6 +55,19 @@ internal interface TapToAddModule {
                 errorReporter = errorReporter,
                 isSimulated = BuildConfig.DEBUG,
                 workContext = workContext,
+            )
+        }
+
+        @Provides
+        fun providesTapToAddCollectionHandler(
+            isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
+            connectionManager: TapToAddConnectionManager,
+            createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever
+        ): TapToAddCollectionHandler {
+            return TapToAddCollectionHandler.create(
+                isStripeTerminalSdkAvailable = isStripeTerminalSdkAvailable,
+                connectionManager = connectionManager,
+                createCardPresentSetupIntentCallbackRetriever = createCardPresentSetupIntentCallbackRetriever,
             )
         }
     }

@@ -10,6 +10,8 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.analytics.experiment.LoggableExperiment
+import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
@@ -34,6 +36,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinitio
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -3274,6 +3277,56 @@ internal class PaymentSheetViewModelTest {
             }
         }
 
+    @Test
+    fun `getPaymentMethodLayout() logs experiment exposure when in horizontal mode experiment`() {
+        createViewModel(
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "232dd033-0b45-4456-b834-ecdcb02ab1fb",
+                experimentAssignments = mapOf(
+                    ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA to "control"
+                )
+            ),
+            args = ARGS_WITH_AUTOMATIC_LAYOUT,
+        )
+
+        verify(eventReporter).onExperimentExposure(
+            any<LoggableExperiment.OcsMobileHorizontalModeAndroidAA>()
+        )
+    }
+
+    @Test
+    fun `getPaymentMethodLayout() does not log experiment exposure when not in horizontal mode experiment`() {
+        val viewModel = createViewModel(
+            experimentsData = null,
+            args = ARGS_WITH_AUTOMATIC_LAYOUT
+        )
+
+        viewModel.getPaymentMethodLayout()
+
+        verify(eventReporter, never()).onExperimentExposure(
+            any<LoggableExperiment.OcsMobileHorizontalModeAndroidAA>()
+        )
+    }
+
+    @Test
+    fun `getPaymentMethodLayout() does not log experiment exposure when payment method layout is not automatic`() {
+        val viewModel = createViewModel(
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "232dd033-0b45-4456-b834-ecdcb02ab1fb",
+                experimentAssignments = mapOf(
+                    ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA to "control"
+                )
+            ),
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        )
+
+        viewModel.getPaymentMethodLayout()
+
+        verify(eventReporter, never()).onExperimentExposure(
+            any<LoggableExperiment.OcsMobileHorizontalModeAndroidAA>()
+        )
+    }
+
     private fun testConfirmationStateRestorationAfterPaymentSuccess(
         loadStateBeforePaymentResult: Boolean
     ) = confirmationTest(
@@ -3400,6 +3453,7 @@ internal class PaymentSheetViewModelTest {
             customer?.paymentMethods?.firstOrNull()?.let { PaymentSelection.Saved(it) },
         validationError: PaymentSheetLoadingException? = null,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        experimentsData: ElementsSession.ExperimentsData? = null,
         paymentElementLoader: PaymentElementLoader = FakePaymentElementLoader(
             stripeIntent = stripeIntent,
             shouldFail = shouldFailLoad,
@@ -3409,6 +3463,7 @@ internal class PaymentSheetViewModelTest {
             isGooglePayAvailable = isGooglePayReady,
             paymentSelection = initialPaymentSelection,
             validationError = validationError,
+            experimentsData = experimentsData,
         ),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this.eventReporter,
@@ -3447,7 +3502,8 @@ internal class PaymentSheetViewModelTest {
                         return cvcRecollectionInteractor
                     }
                 },
-                isLiveModeProvider = { false }
+                isLiveModeProvider = { false },
+                tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
             )
         }
     }
@@ -3596,6 +3652,12 @@ internal class PaymentSheetViewModelTest {
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP =
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
+
+        private val ARGS_WITH_AUTOMATIC_LAYOUT = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
+                .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                .build()
+        )
 
         private val PAYMENT_METHODS = listOf(CARD_PAYMENT_METHOD)
 

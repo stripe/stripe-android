@@ -19,6 +19,7 @@ class TapToAddFormWrapperElementTest {
     fun `allowsUserInteraction is true`() {
         val element = TapToAddFormWrapperElement(
             elements = emptyList(),
+            tapToAddHelper = FakeTapToAddHelper.noOp(),
         )
 
         assertThat(element.allowsUserInteraction).isTrue()
@@ -45,6 +46,7 @@ class TapToAddFormWrapperElementTest {
                     ),
                 )
             ),
+            tapToAddHelper = FakeTapToAddHelper.noOp(),
         )
 
         element.getFormFieldValueFlow().test {

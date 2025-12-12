@@ -17,7 +17,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,7 +46,6 @@ class OnrampFlowTest {
             .commit()
     }
 
-    @Ignore("Disabled until fixed")
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testCheckoutFlow() {

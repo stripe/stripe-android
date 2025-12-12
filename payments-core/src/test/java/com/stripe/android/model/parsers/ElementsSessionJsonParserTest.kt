@@ -202,6 +202,27 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun parseIntentWithOcsMobileExperiment_setsExperimentDataCorrectly() {
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false
+        ).parse(
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_EXPERIMENTS_DATA_JSON
+        )!!
+
+        assertThat(elementsSession.experimentsData).isNotNull()
+        assertThat(elementsSession.experimentsData?.experimentAssignments).containsEntry(
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA,
+            "control"
+        )
+    }
+
+    @Test
     fun `Test ordered payment methods returned in PI payment_method_type variable`() {
         val parsedData = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
@@ -1640,6 +1661,73 @@ class ElementsSessionJsonParserTest {
 
         assertThat(session.accountId).isEqualTo("acct_1HvTI7Lu5o3P18Zp")
         assertThat(session.merchantId).isEqualTo("acct_1HvTI7Lu5o3P18Zp")
+    }
+
+    @Test
+    fun `Parses elements_mobile_card_funding_filtering flag when present and enabled`() {
+        testCardFundingFilteringFlag(enabled = true)
+    }
+
+    @Test
+    fun `Parses elements_mobile_card_funding_filtering flag as false when disabled`() {
+        testCardFundingFilteringFlag(enabled = false)
+    }
+
+    @Test
+    fun `Returns null for elements_mobile_card_funding_filtering flag when not present`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val session = parser.parse(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON)
+
+        assertThat(session?.flags?.get(ElementsSession.Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING))
+            .isNull()
+    }
+
+    private fun testCardFundingFilteringFlag(enabled: Boolean) {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val json = JSONObject(
+            """
+            {
+              "payment_method_preference": {
+                "object": "payment_method_preference",
+                "country_code": "US",
+                "payment_intent": {
+                  "id": "pi_123",
+                  "object": "payment_intent",
+                  "amount": 1099,
+                  "currency": "usd",
+                  "status": "requires_payment_method"
+                },
+                "ordered_payment_method_types": ["card"]
+              },
+              "flags": {
+                "elements_mobile_card_funding_filtering": $enabled
+              }
+            }
+            """.trimIndent()
+        )
+
+        val session = parser.parse(json)
+
+        assertThat(session?.flags?.get(ElementsSession.Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING))
+            .isEqualTo(enabled)
     }
 
     companion object {

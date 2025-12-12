@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -26,6 +27,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
         initialLinkUserInput: UserInput? = null,
         setAsDefaultMatchesSaveForFutureUse: Boolean = false,
         automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
+        tapToAddHelper: TapToAddHelper? = null,
     ): UiDefinitionFactory.Arguments.Factory {
         val context: Context? = try {
             ApplicationProvider.getApplicationContext<Application>()
@@ -44,6 +46,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
             linkInlineHandler = linkInlineHandler,
             automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+            tapToAddHelper = tapToAddHelper,
         )
     }
 

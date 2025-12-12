@@ -1608,7 +1608,7 @@ internal class PlaygroundTestDriver(
         clickButton("Agree and continue")
         clickButtonWithTag("existing_email-button")
         clickButton("Use test code")
-        clickButton("Success")
+        clickButton("Checking")
         clickButton("Connect account")
         clickButtonWithTag("done_button")
     }
