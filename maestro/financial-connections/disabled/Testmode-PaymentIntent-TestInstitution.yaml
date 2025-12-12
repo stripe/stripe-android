@@ -1,3 +1,4 @@
+# Disabling test while institution name changes modifications are complete
 appId: com.stripe.android.financialconnections.example
 tags:
   - all
