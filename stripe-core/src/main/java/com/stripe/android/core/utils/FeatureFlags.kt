@@ -18,6 +18,7 @@ object FeatureFlags {
     val enablePayPay = FeatureFlag("Enable PayPay")
     val enableAttestationOnIntentConfirmation = FeatureFlag("Enable Attestation on Intent Confirmation")
     val enableTapToAdd = FeatureFlag("Enable Tap to Add")
+    val enableKlarnaFormRemoval = FeatureFlag("Remove forms from Klarna")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
