@@ -15,6 +15,7 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.taptoadd.CreateConnectionTokenResult
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheet
@@ -25,6 +26,7 @@ import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
+import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -37,6 +39,8 @@ import com.stripe.android.paymentsheet.example.playground.model.CreateSetupInten
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyResponse
+import com.stripe.android.paymentsheet.example.playground.network.CreateCardPresentSetupIntentRequester
+import com.stripe.android.paymentsheet.example.playground.network.CreateConnectionTokenRequester
 import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.network.SharedPaymentTokenPlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
@@ -180,6 +184,60 @@ internal class PaymentSheetPlaygroundViewModel(
                 )
             )
         }
+    }
+
+    @OptIn(TapToAddPreview::class)
+    suspend fun createConnectionToken(): CreateConnectionTokenResult {
+        val snapshot = state.value?.snapshot
+            ?: return CreateConnectionTokenResult.Failure(
+                cause = IllegalStateException("No playground state!"),
+                message = "No playground state on token creation!"
+            )
+
+        return CreateConnectionTokenRequester(snapshot, getApplication())
+            .fetch()
+            .fold(
+                onSuccess = {
+                    CreateConnectionTokenResult.Success(it)
+                },
+                onFailure = {
+                    CreateConnectionTokenResult.Failure(
+                        cause = IllegalStateException("No playground state!"),
+                        message = "No playground state on token creation!"
+                    )
+                }
+            )
+    }
+
+    suspend fun createCardPresentSetupIntent(): CreateIntentResult {
+        val state = state.value
+            ?: return CreateIntentResult.Failure(
+                cause = IllegalStateException("No playground state!"),
+                displayMessage = "No playground state on token creation!"
+            )
+
+        val customerId = state.customerId()
+            ?: return CreateIntentResult.Failure(
+                cause = IllegalStateException("No customer found!"),
+                displayMessage = "No customer found!"
+            )
+
+        return CreateCardPresentSetupIntentRequester(
+            playgroundSettings = state.snapshot,
+            applicationContext = getApplication()
+        )
+            .fetch(customerId)
+            .fold(
+                onSuccess = {
+                    CreateIntentResult.Success(it)
+                },
+                onFailure = {
+                    CreateIntentResult.Failure(
+                        cause = Exception(it),
+                        displayMessage = it.message,
+                    )
+                }
+            )
     }
 
     fun createCustomerAdapter(

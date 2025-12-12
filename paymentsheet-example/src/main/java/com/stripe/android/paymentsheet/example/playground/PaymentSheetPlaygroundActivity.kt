@@ -30,6 +30,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +50,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.stripe.android.common.taptoadd.TerminalConnectionTokenCallbackHolder
+import com.stripe.android.common.taptoadd.TerminalLocationHolder
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
@@ -57,6 +61,7 @@ import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
+import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -145,6 +150,7 @@ internal class PaymentSheetPlaygroundActivity :
 
     @OptIn(
         ExperimentalAnalyticEventCallbackApi::class,
+        TapToAddPreview::class,
     )
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -162,11 +168,14 @@ internal class PaymentSheetPlaygroundActivity :
 
             val playgroundState by viewModel.state.collectAsState()
 
+            SetupTapToAddAlpha(playgroundState)
+
             val paymentSheet = remember(playgroundState) {
                 PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                     .externalPaymentMethodConfirmHandler(this)
                     .confirmCustomPaymentMethodCallback(this)
                     .analyticEventCallback(viewModel::analyticCallback)
+                    .createCardPresentSetupIntentCallback(viewModel::createCardPresentSetupIntent)
                     .also {
                         if (playgroundState?.snapshot[ConfirmationTokenSettingsDefinition] == true) {
                             it.createIntentCallback(viewModel::createIntentWithConfirmationTokenCallback)
@@ -183,6 +192,7 @@ internal class PaymentSheetPlaygroundActivity :
                 )
                     .externalPaymentMethodConfirmHandler(this)
                     .confirmCustomPaymentMethodCallback(this)
+                    .createCardPresentSetupIntentCallback(viewModel::createCardPresentSetupIntent)
                     .analyticEventCallback(viewModel::analyticCallback)
                     .also {
                         if (playgroundState?.snapshot[ConfirmationTokenSettingsDefinition] == true) {
@@ -323,6 +333,37 @@ internal class PaymentSheetPlaygroundActivity :
                     Toast.makeText(context, status?.message, Toast.LENGTH_LONG).show()
                 }
                 viewModel.status.value = status?.copy(hasBeenDisplayed = true)
+            }
+        }
+    }
+
+    @OptIn(TapToAddPreview::class)
+    @Composable
+    private fun SetupTapToAddAlpha(
+        playgroundState: PlaygroundState?,
+    ) {
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        DisposableEffect(playgroundState, lifecycleOwner) {
+            val paymentState = playgroundState?.asPaymentState()
+
+            if (
+                paymentState != null &&
+                (
+                    paymentState.integrationType == PlaygroundConfigurationData.IntegrationType.PaymentSheet ||
+                        paymentState.integrationType == PlaygroundConfigurationData.IntegrationType.FlowController
+                    )
+            ) {
+                TerminalConnectionTokenCallbackHolder.set(
+                    lifecycleOwner = lifecycleOwner,
+                    callback = viewModel::createConnectionToken,
+                )
+
+                TerminalLocationHolder.locationId = playgroundState.asPaymentState()?.terminalLocationId
+            }
+
+            onDispose {
+                TerminalLocationHolder.locationId = null
             }
         }
     }
