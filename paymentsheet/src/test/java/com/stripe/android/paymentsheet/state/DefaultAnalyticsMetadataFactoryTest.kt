@@ -267,7 +267,7 @@ class DefaultAnalyticsMetadataFactoryTest {
                 phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 attachDefaultsToPaymentMethod = true,
-                allowedCountries = setOf("US","CA","UK","JP")
+                allowedCountries = setOf("US", "CA", "UK", "JP")
             )
         )
 
