@@ -62,11 +62,13 @@ internal interface TapToAddModule {
         fun providesTapToAddCollectionHandler(
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             connectionManager: TapToAddConnectionManager,
+            terminalWrapper: TerminalWrapper,
             createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever
         ): TapToAddCollectionHandler {
             return TapToAddCollectionHandler.create(
                 isStripeTerminalSdkAvailable = isStripeTerminalSdkAvailable,
                 connectionManager = connectionManager,
+                terminalWrapper = terminalWrapper,
                 createCardPresentSetupIntentCallbackRetriever = createCardPresentSetupIntentCallbackRetriever,
             )
         }
