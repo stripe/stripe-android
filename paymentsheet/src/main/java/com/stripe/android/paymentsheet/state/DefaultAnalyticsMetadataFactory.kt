@@ -186,6 +186,9 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
             put("email", SimpleString(email.name))
             put("phone", SimpleString(phone.name))
             put("address", SimpleString(address.name))
+            if (allowedBillingCountries.isNotEmpty()) {
+                put("allowed_countries", SimpleString(allowedBillingCountries.joinToString(",")))
+            }
         }
 
     private fun PaymentSheet.Appearance.analyticsMap() = buildMap<String, AnalyticsMetadata.Value> {

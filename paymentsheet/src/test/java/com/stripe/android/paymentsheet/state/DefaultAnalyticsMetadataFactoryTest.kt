@@ -254,6 +254,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(billingConfig?.get("email")).isEqualTo("Automatic")
         assertThat(billingConfig?.get("phone")).isEqualTo("Automatic")
         assertThat(billingConfig?.get("address")).isEqualTo("Automatic")
+        assertThat(billingConfig?.get("allowed_countries")).isNull()
     }
 
     @Test
@@ -266,6 +267,7 @@ class DefaultAnalyticsMetadataFactoryTest {
                 phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 attachDefaultsToPaymentMethod = true,
+                allowedCountries = setOf("US","CA","UK","JP")
             )
         )
 
@@ -283,6 +285,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(billingConfig?.get("email")).isEqualTo("Never")
         assertThat(billingConfig?.get("phone")).isEqualTo("Always")
         assertThat(billingConfig?.get("address")).isEqualTo("Full")
+        assertThat(billingConfig?.get("allowed_countries")).isEqualTo("US,CA,UK,JP")
     }
 
     @Test
