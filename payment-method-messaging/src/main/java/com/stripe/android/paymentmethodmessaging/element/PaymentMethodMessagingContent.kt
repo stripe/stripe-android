@@ -205,17 +205,18 @@ private fun Images(
     val fontSize = appearance.font?.fontSizeSp ?: DEFAULT_TEXT_SIZE
     val scaleFactor = fontSize / DEFAULT_TEXT_SIZE
     val iconHeight = DEFAULT_ICON_SIZE * scaleFactor
-
-    Row {
-        imageList.forEachIndexed { index, messagingImage ->
-            StripeImage(
-                url = messagingImage.url,
-                imageLoader = imageLoader,
-                contentDescription = messagingImage.text,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.align(Alignment.CenterVertically).height(iconHeight.dp)
-            )
-            if (index != imageList.lastIndex) Spacer(Modifier.width(8.dp))
+    if (imageList.isNotEmpty()) {
+        Row {
+            imageList.forEachIndexed { index, messagingImage ->
+                StripeImage(
+                    url = messagingImage.url,
+                    imageLoader = imageLoader,
+                    contentDescription = messagingImage.text,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.align(Alignment.CenterVertically).height(iconHeight.dp)
+                )
+                if (index != imageList.lastIndex) Spacer(Modifier.width(8.dp))
+            }
         }
     }
 }
