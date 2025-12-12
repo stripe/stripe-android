@@ -10,6 +10,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
@@ -44,7 +45,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         } else {
             try {
                 starterArgs.initializationMode.validate()
-                starterArgs.config.asCommonConfiguration().validate(starterArgs.paymentElementCallbackIdentifier)
+                starterArgs.config.asCommonConfiguration().validate(
+                    PaymentConfiguration.getInstance(this).isLiveMode(),
+                    starterArgs.paymentElementCallbackIdentifier
+                )
             } catch (e: IllegalArgumentException) {
                 finishWithError(e)
                 return

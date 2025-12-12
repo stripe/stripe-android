@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
@@ -158,9 +159,9 @@ internal class CustomerSheetViewModel(
         )
     )
 
+    private val isConfiguredLiveMode = PaymentConfiguration.getInstance(application).isLiveMode()
     private val isLiveMode
-        get() = customerState.value.metadata?.stripeIntent?.isLiveMode
-            ?: paymentConfigurationProvider.get().isLiveMode()
+        get() = customerState.value.metadata?.stripeIntent?.isLiveMode ?: isConfiguredLiveMode
 
     private val backStack = MutableStateFlow<List<CustomerSheetViewState>>(
         listOf(

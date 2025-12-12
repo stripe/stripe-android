@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.coroutines.runCatching
@@ -58,7 +59,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -216,7 +216,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val userFacingLogger: UserFacingLogger,
     private val integrityRequestManager: IntegrityRequestManager,
     private val tapToAddConnectionManager: TapToAddConnectionManager,
-    @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
+    private val paymentConfiguration: PaymentConfiguration,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
 ) : PaymentElementLoader {
@@ -242,7 +242,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val configuration = integrationConfiguration.commonConfiguration
         // Validate configuration before loading
         initializationMode.validate()
-        configuration.validate(isLiveModeProvider(), paymentElementCallbackIdentifier)
+        configuration.validate(paymentConfiguration.isLiveMode(), paymentElementCallbackIdentifier)
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
         tapToAddConnectionManager.connect()
