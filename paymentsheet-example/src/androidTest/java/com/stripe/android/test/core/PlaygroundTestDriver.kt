@@ -1583,7 +1583,7 @@ internal class PlaygroundTestDriver(
         }
 
         clickButton("Agree and continue")
-        clickButton("Test Institution")
+        clickButton("Test (Non-OAuth)")
 
         // Verifies bank in web view so Compose hierarchy can detach. Button should be available
         // after web view verification.

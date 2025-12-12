@@ -1,4 +1,3 @@
-# TODO(alexzhu): Enable after institutions are renamed (ir-rider-prefix)
 appId: com.stripe.android.financialconnections.example
 tags:
   - all
@@ -21,7 +20,7 @@ tags:
 - tapOn:
     id: "consent_cta"
 # SELECT LEGACY INSTITUTION
-- tapOn: "Test Institution"
+- tapOn: "Test (Non-OAuth)"
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
