@@ -31,7 +31,6 @@ import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.PaymentSelection
 import com.stripe.android.utils.ForceNativeBankFlowTestRule
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,8 +50,6 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         context = ApplicationProvider.getApplicationContext()
     )
 
-    // TODO(alexzhu): Enable after institutions are renamed (ir-rider-prefix)
-    @Ignore("Disabling test while institution name changes modifications are complete")
     @Test
     fun testUSBankAccountSuccess() {
         testDriver.confirmUSBankAccount(
@@ -71,8 +68,6 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
      * Tests that save checkbox SFU (which is still present when customer session is enabled) does not override
      * PMO SFU.
      */
-    // TODO(alexzhu): Enable after institutions are renamed (ir-rider-prefix)
-    @Ignore("Disabling test while institution name changes modifications are complete")
     @Test
     fun testUSBankAccountSuccessWithPmoSfuAndCustomerSession() {
         testDriver.confirmUSBankAccount(
@@ -90,8 +85,6 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         )
     }
 
-    // TODO(alexzhu): Enable after institutions are renamed (ir-rider-prefix)
-    @Ignore("Disabling test while institution name changes modifications are complete")
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testUSBankAccountSuccessWithPmoSfu() {
@@ -124,8 +117,6 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         )
     }
 
-    // TODO(alexzhu): Enable after institutions are renamed (ir-rider-prefix)
-    @Ignore("Disabling test while institution name changes modifications are complete")
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testUSBankAccountSuccessWithPmoSfuDeferred() {
@@ -174,8 +165,6 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         )
     }
 
-    // TODO(alexzhu): Enable after institutions are renamed (ir-rider-prefix)
-    @Ignore("Disabling test while institution name changes modifications are complete")
     @Test
     fun testUSBankAccountSuccessWithIndecisiveUser() {
         // Select another LPM before coming back to the linked bank account
@@ -203,8 +192,6 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         )
     }
 
-    // TODO(alexzhu): Enable after institutions are renamed (ir-rider-prefix)
-    @Ignore("Disabling test while institution name changes modifications are complete")
     @Test
     fun testCardAfterConfirmingUSBankAccount() {
         // Link a bank account, but pay with a card instead
@@ -229,8 +216,6 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         )
     }
 
-    // TODO(alexzhu): Enable after institutions are renamed (ir-rider-prefix)
-    @Ignore("Disabling test while institution name changes modifications are complete")
     @Test
     fun testUSBankAccountCancelAllowsUserToContinue() {
         testDriver.confirmUSBankAccount(

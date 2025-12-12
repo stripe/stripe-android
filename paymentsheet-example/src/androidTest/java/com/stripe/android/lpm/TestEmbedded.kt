@@ -21,7 +21,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaym
 import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.utils.ForceNativeBankFlowTestRule
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -86,8 +85,6 @@ internal class TestEmbedded : BasePlaygroundTest() {
         )
     }
 
-    // TODO(alexzhu): Enable after institutions are renamed (ir-rider-prefix)
-    @Ignore("Disabling test while institution name changes modifications are complete")
     @Test
     fun testUsBankAccount() {
         testDriver.confirmEmbeddedUsBankAccount(

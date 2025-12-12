@@ -1,4 +1,3 @@
-# TODO(alexzhu): Enable after institutions are renamed (ir-rider-prefix)
 appId: com.stripe.android.financialconnections.example
 tags:
   - all
