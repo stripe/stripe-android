@@ -7,10 +7,8 @@ import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.utils.TestRules
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 
-@Ignore("Disabling test while institution name changes modifications are complete")
 internal open class BasePlaygroundTest(disableAnimations: Boolean = true) {
     @get:Rule
     val rules = TestRules.create(disableAnimations = disableAnimations)
