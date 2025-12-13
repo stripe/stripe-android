@@ -6,6 +6,7 @@ import app.cash.turbine.Turbine
 import com.stripe.stripeterminal.Terminal
 import com.stripe.stripeterminal.external.callable.ConnectionTokenProvider
 import com.stripe.stripeterminal.external.callable.TerminalListener
+import org.mockito.Mockito.mock
 
 internal class TestTerminalWrapper private constructor(
     private val isInitialized: Boolean,
@@ -65,5 +66,8 @@ internal class TestTerminalWrapper private constructor(
             wrapper.isInitializedCalls.ensureAllEventsConsumed()
             wrapper.initTerminalCalls.ensureAllEventsConsumed()
         }
+
+        fun noOp(terminalInstance: Terminal = mock()) =
+            TestTerminalWrapper(isInitialized = true, terminalInstance = terminalInstance)
     }
 }
