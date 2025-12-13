@@ -12,6 +12,8 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentDataRequest
 import com.google.android.gms.wallet.PaymentsClient
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
@@ -311,7 +313,9 @@ internal class GooglePayLauncherViewModel(
                 existingPaymentMethodRequired = args.config.existingPaymentMethodRequired,
                 allowCreditCards = args.config.allowCreditCards,
                 errorReporter = errorReporter,
-                logger = logger
+                logger = logger,
+                cardFundingFilter = DefaultCardFundingFilter,
+                cardBrandFilter = DefaultCardBrandFilter
             )
 
             return GooglePayLauncherViewModel(

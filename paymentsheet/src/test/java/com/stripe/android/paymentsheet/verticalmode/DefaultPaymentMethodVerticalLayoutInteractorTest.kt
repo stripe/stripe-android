@@ -4,6 +4,8 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
@@ -498,6 +500,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             onGooglePayPressed = {},
             onLinkPressed = {},
             walletsAllowedInHeader = WalletType.entries, // PaymentSheet: wallets in header
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter,
         )
         interactor.state.test {
             awaitItem().run {
@@ -529,6 +533,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             onGooglePayPressed = {},
             onLinkPressed = {},
             walletsAllowedInHeader = listOf(WalletType.Link), // FlowController: Link in header, Google Pay inline
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter,
         )
         interactor.state.test {
             awaitItem().run {
@@ -563,6 +569,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 onGooglePayPressed = {},
                 onLinkPressed = {},
                 walletsAllowedInHeader = emptyList(), // Test expects both wallets inline
+                cardFundingFilter = DefaultCardFundingFilter,
+                cardBrandFilter = DefaultCardBrandFilter,
             )
             assertThat(selection.value).isNull()
 
@@ -630,6 +638,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             onGooglePayPressed = {},
             onLinkPressed = {},
             walletsAllowedInHeader = WalletType.entries,
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter,
         )
         interactor.state.test {
             awaitItem().run {
@@ -663,6 +673,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             onGooglePayPressed = {},
             onLinkPressed = {},
             walletsAllowedInHeader = emptyList(),
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter,
         )
         interactor.state.test {
             awaitItem().run {
@@ -691,6 +703,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             onGooglePayPressed = {},
             onLinkPressed = {},
             walletsAllowedInHeader = emptyList(),
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter,
         )
         interactor.state.test {
             awaitItem().run {
@@ -1428,6 +1442,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             onGooglePayPressed = {},
             onLinkPressed = {},
             walletsAllowedInHeader = emptyList(), // Link inline to test row subtitle
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter,
         )
         runScenario(
             initialWalletsState = walletsState,
@@ -1454,6 +1470,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             onGooglePayPressed = {},
             onLinkPressed = {},
             walletsAllowedInHeader = emptyList(), // Link inline to test row subtitle
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter,
         )
         runScenario(
             initialWalletsState = walletsState,
@@ -1594,6 +1612,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         onGooglePayPressed = {},
         onLinkPressed = {},
         walletsAllowedInHeader = WalletType.entries,
+        cardFundingFilter = DefaultCardFundingFilter,
+        cardBrandFilter = DefaultCardBrandFilter,
     )
 
     private val metadataWithOnlyPaymentMethodTypes = PaymentMethodMetadataFactory.create(

@@ -1,7 +1,9 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
@@ -64,6 +66,7 @@ internal object PaymentMethodMetadataFactory {
         analyticsMetadata: AnalyticsMetadata = AnalyticsMetadata(emptyMap()),
         isTapToAddSupported: Boolean = false,
         experimentsData: ElementsSession.ExperimentsData? = null,
+        cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -111,6 +114,7 @@ internal object PaymentMethodMetadataFactory {
             analyticsMetadata = analyticsMetadata,
             isTapToAddSupported = isTapToAddSupported,
             experimentsData = experimentsData,
+            cardFundingFilter = cardFundingFilter,
         )
     }
 

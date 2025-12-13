@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.gpay
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
@@ -110,6 +111,7 @@ class GooglePayConfirmationFlowTest {
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 ),
                 cardBrandFilter = DefaultCardBrandFilter,
+                cardFundingFilter = DefaultCardFundingFilter,
             ),
         )
 

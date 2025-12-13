@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.gpay
 
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
@@ -20,6 +21,7 @@ internal data class GooglePayConfirmationOption(
         val customLabel: String?,
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         val cardBrandFilter: CardBrandFilter,
+        val cardFundingFilter: CardFundingFilter,
         val additionalEnabledNetworks: List<String> = emptyList()
     ) : Parcelable
 }

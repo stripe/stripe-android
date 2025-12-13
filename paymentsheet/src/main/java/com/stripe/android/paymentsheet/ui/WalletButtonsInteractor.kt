@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
@@ -94,6 +95,7 @@ internal interface WalletButtonsInteractor {
             val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
             val allowCreditCards: Boolean,
             val cardBrandFilter: CardBrandFilter,
+            val cardFundingFilter: CardFundingFilter
         ) : WalletButton {
             override val walletType = WalletType.GooglePay
 
@@ -102,11 +104,13 @@ internal interface WalletButtonsInteractor {
                 billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
                 allowCreditCards: Boolean,
                 cardBrandFilter: CardBrandFilter,
+                cardFundingFilter: CardFundingFilter
             ) : this(
                 googlePayButtonType = buttonType.asGooglePayButtonType,
                 billingAddressParameters = billingDetailsCollectionConfiguration.toBillingAddressParameters(),
                 allowCreditCards = allowCreditCards,
                 cardBrandFilter = cardBrandFilter,
+                cardFundingFilter = cardFundingFilter
             )
 
             override fun createSelection(): PaymentSelection {
@@ -171,6 +175,7 @@ internal class DefaultWalletButtonsInteractor constructor(
                         cardBrandFilter = PaymentSheetCardBrandFilter(
                             cardBrandAcceptance = configuration.cardBrandAcceptance,
                         ),
+                        cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
                         billingDetailsCollectionConfiguration = configuration
                             .billingDetailsCollectionConfiguration,
                     ).takeIf {
@@ -313,6 +318,7 @@ internal class DefaultWalletButtonsInteractor constructor(
         val confirmationOption = selection.toConfirmationOption(
             configuration = arguments.configuration,
             linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration,
+            cardFundingFilter = arguments.paymentMethodMetadata.cardFundingFilter,
         ) ?: return null
 
         return ConfirmationHandler.Args(
