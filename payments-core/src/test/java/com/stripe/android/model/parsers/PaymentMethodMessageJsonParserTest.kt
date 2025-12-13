@@ -166,5 +166,48 @@ class PaymentMethodMessageJsonParserTest {
         assertThat(message.paymentMethods).hasSize(1)
     }
 
+    @Test
+    fun `legal disclosure not null if present in response single partner`() {
+        val messageWithLegalDisclosure = PaymentMethodMessageFixtures.SINGLE_PARTNER_JSON.deepCopy()
+        messageWithLegalDisclosure.getJSONArray("payment_plan_groups")
+            .getJSONObject(0)
+            .getJSONObject("content")
+            .put(
+                "legal_disclosure",
+                JSONObject(
+                    mapOf(
+                        "message" to "legal stuff",
+                        "url" to null
+                    )
+                )
+            )
+
+        val message = PaymentMethodMessageJsonParser()
+            .parse(messageWithLegalDisclosure) as PaymentMethodMessage.SinglePartner
+        assertThat(message).isNotNull()
+        assertThat(message.legalDisclosure?.message).isEqualTo("legal stuff")
+    }
+
+    @Test
+    fun `legal disclosure not null if present in response multi partner`() {
+        val messageWithLegalDisclosure = PaymentMethodMessageFixtures.MULTI_PARTNER_JSON.deepCopy()
+        messageWithLegalDisclosure
+            .getJSONObject("content")
+            .put(
+                "legal_disclosure",
+                JSONObject(
+                    mapOf(
+                        "message" to "legal stuff",
+                        "url" to null
+                    )
+                )
+            )
+
+        val message = PaymentMethodMessageJsonParser()
+            .parse(messageWithLegalDisclosure) as PaymentMethodMessage.MultiPartner
+        assertThat(message).isNotNull()
+        assertThat(message.legalDisclosure?.message).isEqualTo("legal stuff")
+    }
+
     private fun JSONObject.deepCopy() = JSONObject(this.toString())
 }

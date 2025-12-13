@@ -10,6 +10,7 @@ import com.stripe.android.networktesting.RequestMatchers.composite
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.testing.RetryRule
 import org.junit.Rule
@@ -125,5 +126,50 @@ class PaymentMethodMessagingElementTest {
         assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.NoContent::class.java)
 
         page.verifyNoContentDisplayed()
+    }
+
+    @Test
+    fun testMultiPartnerLegalDisclosure() = runPaymentMethodMessagingElementTest { testContext ->
+        val replacement = ResponseReplacement(
+            original = """
+                "legal_disclosure": null
+            """.trimIndent(),
+            new = """
+                "legal_disclosure" : {
+                  "message" : "18+, T&C apply. Credit subject to status.",
+                  "url" : null
+                }
+            """.trimIndent()
+        )
+        networkRule.enqueue(getConfigRequestMatcher) { response ->
+            response.testBodyFromFile("multi-partner.json", listOf(replacement))
+        }
+
+        val result = testContext.configure()
+        assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
+
+        page.verifyLegalDisclosure()
+    }
+
+    @Test
+    fun testSinglePartnerLegalDisclosure() = runPaymentMethodMessagingElementTest { testContext ->
+        val replacement = ResponseReplacement(
+            original = """
+                "legal_disclosure": null
+            """.trimIndent(),
+            new = """
+                "legal_disclosure" : {
+                  "message" : "18+, T&C apply. Credit subject to status.",
+                  "url" : null
+                }
+            """.trimIndent()
+        )
+        networkRule.enqueue(getConfigRequestMatcher) { response ->
+            response.testBodyFromFile("single-partner.json", listOf(replacement))
+        }
+
+        val result = testContext.configure()
+        assertThat(result).isInstanceOf(PaymentMethodMessagingElement.ConfigureResult.Succeeded::class.java)
+        page.verifyLegalDisclosure()
     }
 }

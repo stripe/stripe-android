@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodMessageImage
 import com.stripe.android.model.PaymentMethodMessageLearnMore
+import com.stripe.android.model.PaymentMethodMessageLegalDisclosure
 import com.stripe.android.paymentmethodmessaging.R
 import com.stripe.android.screenshottesting.PaparazziRule
 import org.junit.Rule
@@ -83,6 +84,19 @@ class PaymentMethodMessagingContentScreenshotTest {
     }
 
     @Test
+    fun singlePartnerLegalDisclosure() {
+        paparazziRule.snapshot {
+            val content = PaymentMethodMessagingContent.get(
+                getSinglePartner(
+                    message = "Buy stuff in increments with {partner}",
+                    legalDisclosure = PaymentMethodMessageLegalDisclosure("legal stuff")
+                )
+            ) {}
+            content.Content(PaymentMethodMessagingElement.Appearance().build())
+        }
+    }
+
+    @Test
     fun multiPartnerLight() {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
@@ -134,7 +148,23 @@ class PaymentMethodMessagingContentScreenshotTest {
         }
     }
 
-    private fun getSinglePartner(message: String): PaymentMethodMessage {
+    @Test
+    fun multiPartnerLegalDisclosure() {
+        paparazziRule.snapshot {
+            val content = PaymentMethodMessagingContent.get(
+                getMultiPartner(
+                    message = "Buy stuff in increments of money",
+                    legalDisclosure = PaymentMethodMessageLegalDisclosure("legal stuff")
+                )
+            ) {}
+            content.Content(PaymentMethodMessagingElement.Appearance().build())
+        }
+    }
+
+    private fun getSinglePartner(
+        message: String,
+        legalDisclosure: PaymentMethodMessageLegalDisclosure? = null
+    ): PaymentMethodMessage {
         return PaymentMethodMessage.SinglePartner(
             inlinePartnerPromotion = message,
             lightImage = PaymentMethodMessageImage("", "", "", ""),
@@ -144,11 +174,15 @@ class PaymentMethodMessagingContentScreenshotTest {
                 url = "",
                 message = ""
             ),
-            paymentMethods = listOf()
+            paymentMethods = listOf(),
+            legalDisclosure = legalDisclosure
         )
     }
 
-    private fun getMultiPartner(message: String): PaymentMethodMessage {
+    private fun getMultiPartner(
+        message: String,
+        legalDisclosure: PaymentMethodMessageLegalDisclosure? = null
+    ): PaymentMethodMessage {
         return PaymentMethodMessage.MultiPartner(
             promotion = message,
             lightImages = listOf(),
@@ -158,7 +192,8 @@ class PaymentMethodMessagingContentScreenshotTest {
                 url = "",
                 message = ""
             ),
-            paymentMethods = listOf()
+            paymentMethods = listOf(),
+            legalDisclosure = legalDisclosure
         )
     }
 
