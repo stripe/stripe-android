@@ -30,6 +30,7 @@ internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         listenForActivityResult()
+        lifecycle.addObserver(viewModel)
 
         setContent {
             var showProgressIndicator by remember { mutableStateOf(true) }
