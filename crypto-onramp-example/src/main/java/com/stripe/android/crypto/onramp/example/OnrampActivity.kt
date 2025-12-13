@@ -9,6 +9,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,6 +55,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -72,6 +75,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
+import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -217,6 +221,7 @@ internal class OnrampActivity : ComponentActivity() {
                                 onrampPresenter.verifyIdentity()
                             },
                             onCollectPayment = { type ->
+                                viewModel.updateSelectedPaymentMethod(type)
                                 onrampPresenter.collectPaymentMethod(type)
                             },
                             onCreatePaymentToken = {
@@ -498,6 +503,8 @@ internal fun OnrampScreen(
                     email = uiState.email,
                     consentedLinkAuthIntentIds = uiState.consentedLinkAuthIntentIds,
                     onrampSessionResponse = uiState.onrampSession,
+                    selectedPaymentType = uiState.selectedPaymentType,
+                    selectedSettlementSpeed = uiState.settlementSpeed,
                     selectedPaymentData = uiState.selectedPaymentData,
                     onAuthenticate = onAuthenticateUser,
                     onRegisterWalletAddress = onRegisterWalletAddress,
@@ -511,6 +518,9 @@ internal fun OnrampScreen(
                     onLogOut = { viewModel.logOut() },
                     onBack = {
                         viewModel.onBackToLoginSignup()
+                    },
+                    onSelectSettlementSpeed = {
+                        viewModel.updateSettlementSpeed(it)
                     }
                 )
             }
@@ -719,6 +729,8 @@ private fun AuthenticatedOperationsScreen(
     consentedLinkAuthIntentIds: List<String>,
     onrampSessionResponse: OnrampSessionResponse?,
     selectedPaymentData: PaymentMethodDisplayData?,
+    selectedPaymentType: PaymentMethodType?,
+    selectedSettlementSpeed: SettlementSpeed?,
     onAuthenticate: (oauthScopes: String?) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
@@ -729,12 +741,14 @@ private fun AuthenticatedOperationsScreen(
     onCreateSession: () -> Unit,
     onPerformCheckout: () -> Unit,
     onLogOut: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onSelectSettlementSpeed: (SettlementSpeed) -> Unit,
 ) {
     // hardcoded sample ETH wallet
     var walletAddressInput by remember { mutableStateOf("0x742d35Cc6634C0532925a3b844Bc454e4438f44e") }
     var selectedNetwork by remember { mutableStateOf(CryptoNetwork.Ethereum) }
     var isDropdownExpanded by remember { mutableStateOf(false) }
+
     val scrollState = rememberScrollState()
 
     Column(
@@ -800,6 +814,34 @@ private fun AuthenticatedOperationsScreen(
         }
 
         selectedPaymentData?.let {
+            if (selectedPaymentType == PaymentMethodType.BankAccount) {
+                Text(
+                    text = "Settlement Speed",
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                ) {
+                    SettlementSpeed.entries.forEach { speed ->
+                        val isSelected = selectedSettlementSpeed == speed
+                        Box(
+                            modifier = Modifier
+                                .background(if (isSelected) MaterialTheme.colors.primary else Color.LightGray)
+                                .clickable { onSelectSettlementSpeed(speed) }
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = speed.name.lowercase().replaceFirstChar { it.uppercase() },
+                                color = if (isSelected) Color.White else Color.Black
+                            )
+                        }
+                    }
+                }
+            }
+
             Image(
                 painter = painterResource(selectedPaymentData.iconRes),
                 contentDescription = selectedPaymentData.label,
