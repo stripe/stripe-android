@@ -33,12 +33,6 @@ const val INITIAL_VALUES = "initialValues"
 const val SHIPPING_VALUES = "shippingValues"
 
 /**
- * Name for isLiveMode
- */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val IS_LIVE_MODE = "isLiveMode"
-
-/**
  * Name for linear delay supplier
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
