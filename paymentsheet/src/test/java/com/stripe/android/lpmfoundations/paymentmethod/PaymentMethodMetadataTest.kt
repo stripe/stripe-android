@@ -55,6 +55,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.assertFails
 import com.stripe.android.core.R as CoreR
 import com.stripe.android.uicore.R as UiCoreR
@@ -73,6 +75,22 @@ internal class PaymentMethodMetadataTest {
         featureFlag = FeatureFlags.enableAttestationOnIntentConfirmation,
         isEnabled = true
     )
+
+    @get:Rule
+    val enableKlarnaFormRemovalRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enableKlarnaFormRemoval,
+        isEnabled = true
+    )
+
+    @BeforeTest
+    fun enableKlarnaFormRemovalRule() {
+        enableKlarnaFormRemovalRule.setEnabled(true)
+    }
+
+    @AfterTest
+    fun disableKlarnaFormRemovalRule() {
+        enableKlarnaFormRemovalRule.setEnabled(false)
+    }
 
     @Test
     fun `hasIntentToSetup returns true for setup_intent`() {
@@ -146,7 +164,7 @@ internal class PaymentMethodMetadataTest {
     fun `filterSupportedPaymentMethods filters payment methods without shared data specs`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "klarna")
+                paymentMethodTypes = listOf("card", "affirm")
             ),
             sharedDataSpecs = listOf(SharedDataSpec("card")),
         )
@@ -188,31 +206,32 @@ internal class PaymentMethodMetadataTest {
     fun `filterSupportedPaymentMethods does not filter unactivated payment methods in test mode`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "klarna"),
-                unactivatedPaymentMethods = listOf("klarna"),
+                paymentMethodTypes = listOf("card", "affirm"),
+                unactivatedPaymentMethods = listOf("affirm"),
                 isLiveMode = false,
             ),
-            sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("klarna")),
+            sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("affirm")),
         )
         val supportedPaymentMethods = metadata.supportedPaymentMethodTypes()
         assertThat(supportedPaymentMethods).hasSize(2)
         assertThat(supportedPaymentMethods[0]).isEqualTo("card")
-        assertThat(supportedPaymentMethods[1]).isEqualTo("klarna")
+        assertThat(supportedPaymentMethods[1]).isEqualTo("affirm")
     }
 
     @Test
     fun `supportedPaymentMethodForCode returns expected result`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("klarna")
+                paymentMethodTypes = listOf("affirm")
             ),
-            sharedDataSpecs = listOf(SharedDataSpec("klarna")),
+            sharedDataSpecs = listOf(SharedDataSpec("affirm")),
         )
-        assertThat(metadata.supportedPaymentMethodForCode("klarna")?.code).isEqualTo("klarna")
+        assertThat(metadata.supportedPaymentMethodForCode("affirm")?.code).isEqualTo("affirm")
     }
 
     @Test
     fun `supportedPaymentMethodForCode returns null when sharedDataSpecs are missing`() {
+        enableKlarnaFormRemovalRule.setEnabled(false)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("klarna")
@@ -224,6 +243,7 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `supportedPaymentMethodForCode returns null when it's not supported`() {
+        enableKlarnaFormRemovalRule.setEnabled(false)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card")
@@ -277,7 +297,7 @@ internal class PaymentMethodMetadataTest {
     fun `sortedSupportedPaymentMethods filters payment methods without a sharedDataSpec`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("affirm", "klarna", "card"),
+                paymentMethodTypes = listOf("affirm", "cashapp", "card"),
             ),
             allowsPaymentMethodsRequiringShippingAddress = true,
             sharedDataSpecs = listOf(
@@ -605,6 +625,7 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `formElementsForCode replaces country placeholder fields correctly`() = runTest {
+        enableKlarnaFormRemovalRule.setEnabled(false)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")

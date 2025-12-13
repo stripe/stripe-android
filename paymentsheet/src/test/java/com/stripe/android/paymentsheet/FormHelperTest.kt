@@ -5,6 +5,7 @@ import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -27,6 +28,7 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
@@ -38,12 +40,31 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 internal class FormHelperTest {
+
+    @get:Rule
+    val enableKlarnaFormRemovalRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enableKlarnaFormRemoval,
+        isEnabled = true
+    )
+
+    @BeforeTest
+    fun enableKlarnaFormRemovalRule() {
+        enableKlarnaFormRemovalRule.setEnabled(true)
+    }
+
+    @AfterTest
+    fun disableKlarnaFormRemovalRule() {
+        enableKlarnaFormRemovalRule.setEnabled(false)
+    }
 
     @Test
     fun `formElementsForCode with unknown code returns empty list`() = runTest {
@@ -59,15 +80,18 @@ internal class FormHelperTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "klarna"),
-                )
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
             ),
             newPaymentSelectionProvider = { null },
         )
         val formElements = formHelper.formElementsForCode("klarna")
-        assertThat(formElements).hasSize(3)
+        assertThat(formElements).hasSize(1)
         // Email field has an empty string for value
-        assertThat(formElements[1].getFormFieldValueFlow().value[0].first.v1).isEqualTo("billing_details[email]")
-        assertThat(formElements[1].getFormFieldValueFlow().value[0].second.value).isEqualTo("")
+        assertThat(formElements[0].getFormFieldValueFlow().value[0].first.v1).isEqualTo("billing_details[email]")
+        assertThat(formElements[0].getFormFieldValueFlow().value[0].second.value).isEqualTo("")
     }
 
     @Test
@@ -76,7 +100,10 @@ internal class FormHelperTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "klarna"),
-                )
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
             ),
             newPaymentSelectionProvider = {
                 NewPaymentOptionSelection.New(
@@ -97,9 +124,9 @@ internal class FormHelperTest {
             },
         )
         val formElements = formHelper.formElementsForCode("klarna")
-        assertThat(formElements).hasSize(3)
-        assertThat(formElements[1].getFormFieldValueFlow().value[0].first.v1).isEqualTo("billing_details[email]")
-        assertThat(formElements[1].getFormFieldValueFlow().value[0].second.value).isEqualTo("")
+        assertThat(formElements).hasSize(1)
+        assertThat(formElements[0].getFormFieldValueFlow().value[0].first.v1).isEqualTo("billing_details[email]")
+        assertThat(formElements[0].getFormFieldValueFlow().value[0].second.value).isEqualTo("")
     }
 
     @Test
@@ -108,7 +135,10 @@ internal class FormHelperTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "klarna"),
-                )
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
             ),
             newPaymentSelectionProvider = {
                 NewPaymentOptionSelection.New(
@@ -129,9 +159,9 @@ internal class FormHelperTest {
             },
         )
         val formElements = formHelper.formElementsForCode("klarna")
-        assertThat(formElements).hasSize(3)
-        assertThat(formElements[1].getFormFieldValueFlow().value[0].first.v1).isEqualTo("billing_details[email]")
-        assertThat(formElements[1].getFormFieldValueFlow().value[0].second.value).isEqualTo("example@email.com")
+        assertThat(formElements).hasSize(1)
+        assertThat(formElements[0].getFormFieldValueFlow().value[0].first.v1).isEqualTo("billing_details[email]")
+        assertThat(formElements[0].getFormFieldValueFlow().value[0].second.value).isEqualTo("example@email.com")
     }
 
     @Test
@@ -188,7 +218,6 @@ internal class FormHelperTest {
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Country to FormFieldEntry("US", true),
                 IdentifierSpec.Email to FormFieldEntry("Joe@stripe.com", true),
             ),
             userRequestedReuse = customerRequestedSave,
@@ -197,7 +226,10 @@ internal class FormHelperTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "klarna"),
-                )
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
             ),
             eventReporter = eventReporter,
             newPaymentSelectionProvider = { null },
@@ -215,7 +247,10 @@ internal class FormHelperTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "klarna"),
-                )
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
             ),
             eventReporter = eventReporter,
             newPaymentSelectionProvider = { null },
@@ -224,7 +259,6 @@ internal class FormHelperTest {
 
         val firstFormFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Country to FormFieldEntry("US", true),
                 IdentifierSpec.Email to FormFieldEntry("Joe@stripe.com", true),
             ),
             userRequestedReuse = customerRequestedSave,
@@ -235,7 +269,6 @@ internal class FormHelperTest {
 
         val secondFormFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Country to FormFieldEntry("UK", true),
                 IdentifierSpec.Email to FormFieldEntry("Joey@stripe.com", true),
             ),
             userRequestedReuse = customerRequestedSave,
@@ -250,7 +283,10 @@ internal class FormHelperTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "klarna"),
-                )
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
             ),
             eventReporter = eventReporter,
             newPaymentSelectionProvider = { null },
@@ -259,7 +295,6 @@ internal class FormHelperTest {
 
         val klarnaFormFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Country to FormFieldEntry("US", true),
                 IdentifierSpec.Email to FormFieldEntry("Joe@stripe.com", true),
             ),
             userRequestedReuse = customerRequestedSave,
@@ -570,12 +605,13 @@ internal class FormHelperTest {
         val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    paymentMethodTypes = listOf("card", "klarna"),
+                    paymentMethodTypes = listOf("card", "afterpay_clearpay"),
                 ),
             ),
             newPaymentSelectionProvider = { null },
         )
-        assertThat(formHelper.formTypeForCode("klarna")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+        assertThat(formHelper.formTypeForCode("afterpay_clearpay"))
+            .isEqualTo(FormHelper.FormType.UserInteractionRequired)
     }
 
     @Test
