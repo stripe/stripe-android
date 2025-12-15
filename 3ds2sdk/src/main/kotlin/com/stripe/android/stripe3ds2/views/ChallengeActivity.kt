@@ -7,6 +7,7 @@ import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.commit
 import com.stripe.android.stripe3ds2.databinding.StripeChallengeActivityBinding
@@ -98,6 +99,13 @@ class ChallengeActivity : AppCompatActivity() {
     private val analyticsDelegate = AnalyticsProvider.instance.serviceImpl()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Check if required args are present, finish gracefully if not
+        if (!hasRequiredArgs()) {
+            super.onCreate(savedInstanceState)
+            finish()
+            return
+        }
+
         supportFragmentManager.fragmentFactory = ChallengeFragmentFactory(
             uiCustomization = viewArgs.uiCustomization,
             analyticsDelegate = analyticsDelegate,
@@ -267,6 +275,12 @@ class ChallengeActivity : AppCompatActivity() {
             }
         }
         progressDialog = null
+    }
+
+    private fun hasRequiredArgs(): Boolean {
+        return intent.extras?.let { extras ->
+            BundleCompat.getParcelable(extras, "extra_args", ChallengeViewArgs::class.java) != null
+        } ?: false
     }
 
     private companion object {
