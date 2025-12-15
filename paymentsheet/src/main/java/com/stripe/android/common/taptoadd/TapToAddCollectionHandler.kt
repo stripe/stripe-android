@@ -132,9 +132,7 @@ internal class DefaultTapToAddCollectionHandler(
         val cancellable = terminal().collectSetupIntentPaymentMethod(
             intent = intent,
             allowRedisplay = allowRedisplay.toTerminalAllowRedisplay(),
-            config = SetupIntentConfiguration.Builder()
-                .setEnableCustomerCancellation(true)
-                .build(),
+            config = SetupIntentConfiguration.Builder().build(),
             callback = continuation.createSetupIntentCallback(),
         )
 

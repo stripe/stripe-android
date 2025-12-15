@@ -164,7 +164,6 @@ class TapToAddCollectionHandlerTest {
         assertThat(collectPaymentMethodCall.config)
             .isEqualTo(
                 SetupIntentConfiguration.Builder()
-                    .setEnableCustomerCancellation(true)
                     .build()
             )
         collectPaymentMethodCall.callback.onSuccess(collectedIntent)
