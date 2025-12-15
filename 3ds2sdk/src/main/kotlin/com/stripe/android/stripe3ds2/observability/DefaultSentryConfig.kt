@@ -9,26 +9,28 @@ internal object DefaultSentryConfig : SentryConfig {
     /**
      * Default Sentry configuration for error reporting.
      *
-     * Note: These values are intentionally hardcoded and public. They are NOT sensitive credentials.
+     * ## What this is
+     * This is a write-only DSN (Data Source Name) key that allows the 3DS2 SDK to send error reports
+     * to Stripe's internal Sentry instance for monitoring and debugging.
      *
-     * These are write-only keys used exclusively to send error reports from the 3DS2 SDK to
-     * Stripe's internal Sentry project for bug monitoring and debugging purposes.
+     * It is equivalent to exposing a Stripe publishable key
      *
-     * Security considerations:
-     * - These keys can only be used to log errors to Stripe's Sentry instance (errors.stripe.com)
-     * - They cannot be used to access any payment data or user information
-     * - The worst-case scenario if compromised would be spam errors sent to Stripe's monitoring
-     * - This is no different from bundling a Stripe publishable key (pk_*) with an application
+     * ## Security
+     * The key can ONLY be used to send error events to errors.stripe.com. It cannot:
+     * - Access or read any data from Sentry
+     * - Access payment information or user data
+     * - Be used for authentication to any Stripe services
      *
      * This has been reviewed and confirmed as expected behavior multiple times:
      * - RUN_MOBILESDK-517 (2021)
      * - RUN_MOBILESDK-2468 (2023)
      * - RUN_MOBILESDK-4299 (2025)
+     * - RUN_MOBILESDK-4960 (2025)
      *
-     * For more information, see: https://forum.sentry.io/t/dsn-private-public/6297/2
+     * For more information, see:
+     * https://docs.sentry.io/concepts/key-terms/dsn-explainer/
      */
-    override val key: String = "dcb428fea25c40e7b99f81ae5981ee6a"
-    override val secret: String = "deca87e736574c5c83c07314051fd93a"
+    override val publicKey: String = "dcb428fea25c40e7b99f81ae5981ee6a"
     override val projectId: String = "426"
     override val version: String = "7"
 
