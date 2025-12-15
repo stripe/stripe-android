@@ -537,6 +537,7 @@ constructor(
             hasDelayedSettlement = false,
             requiresMandateForPaymentIntent = false,
             supportsSetupFutureUsage = false,
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION),
         ),
         PromptPay(
             "promptpay",
