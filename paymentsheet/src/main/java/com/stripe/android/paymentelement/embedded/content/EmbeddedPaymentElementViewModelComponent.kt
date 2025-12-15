@@ -4,12 +4,10 @@ import android.app.Application
 import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.di.MobileSessionIdModule
-import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
@@ -52,7 +50,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 
 @Singleton
@@ -181,12 +178,6 @@ internal interface EmbeddedPaymentElementViewModelModule {
         ): PaymentMethodMetadata? {
             return confirmationStateHolder.state?.paymentMethodMetadata
         }
-
-        @Provides
-        @Named(IS_LIVE_MODE)
-        fun providesIsLiveMode(
-            paymentConfiguration: Provider<PaymentConfiguration>
-        ): () -> Boolean = { paymentConfiguration.get().isLiveMode() }
 
         @Provides
         @Singleton

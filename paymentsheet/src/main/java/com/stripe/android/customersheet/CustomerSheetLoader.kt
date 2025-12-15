@@ -5,7 +5,6 @@ import com.stripe.android.common.coroutines.awaitWithTimeout
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
 import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
@@ -31,7 +30,6 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.validate
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
-import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.seconds
 
@@ -40,7 +38,6 @@ internal interface CustomerSheetLoader {
 }
 
 internal class DefaultCustomerSheetLoader(
-    @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
     private val lpmRepository: LpmRepository,
@@ -52,7 +49,6 @@ internal class DefaultCustomerSheetLoader(
 ) : CustomerSheetLoader {
 
     @Inject constructor(
-        @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean,
         googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
         lpmRepository: LpmRepository,
@@ -60,7 +56,6 @@ internal class DefaultCustomerSheetLoader(
         errorReporter: ErrorReporter,
         @IOContext workContext: CoroutineContext
     ) : this(
-        isLiveModeProvider = isLiveModeProvider,
         googlePayRepositoryFactory = googlePayRepositoryFactory,
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         lpmRepository = lpmRepository,
@@ -147,7 +142,7 @@ internal class DefaultCustomerSheetLoader(
         ).sharedDataSpecs
 
         val isGooglePaySupportedOnDevice = googlePayRepositoryFactory(
-            if (isLiveModeProvider()) GooglePayEnvironment.Production else GooglePayEnvironment.Test
+            if (elementsSession.stripeIntent.isLiveMode) GooglePayEnvironment.Production else GooglePayEnvironment.Test
         ).isReady().first()
         val isGooglePayReadyAndEnabled = configuration.googlePayEnabled && isGooglePaySupportedOnDevice
 

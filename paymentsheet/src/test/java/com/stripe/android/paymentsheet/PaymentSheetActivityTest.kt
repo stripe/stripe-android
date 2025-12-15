@@ -1291,7 +1291,6 @@ internal class PaymentSheetActivityTest {
                         return FakeCvcRecollectionInteractor()
                     }
                 },
-                isLiveModeProvider = { false },
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
             )
         }

@@ -668,7 +668,6 @@ internal class DefaultCustomerSheetLoaderTest {
 
     private fun createCustomerSheetLoader(
         isGooglePayReady: Boolean = true,
-        isLiveModeProvider: () -> Boolean = { false },
         isCbcEligible: Boolean? = null,
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable =
             IsFinancialConnectionsSdkAvailable { false },
@@ -711,7 +710,6 @@ internal class DefaultCustomerSheetLoaderTest {
             initializationDataSourceProvider = CompletableSingle(initializationDataSource),
             intentDataSourceProvider = CompletableSingle(intentDataSource),
             isGooglePayReady = isGooglePayReady,
-            isLiveModeProvider = isLiveModeProvider,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             lpmRepository = lpmRepository,
             errorReporter = errorReporter,
@@ -770,7 +768,6 @@ internal class DefaultCustomerSheetLoaderTest {
         initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>,
         intentDataSourceProvider: Single<CustomerSheetIntentDataSource>,
         isGooglePayReady: Boolean = true,
-        isLiveModeProvider: () -> Boolean = { false },
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable =
             IsFinancialConnectionsSdkAvailable { false },
         lpmRepository: LpmRepository = this.lpmRepository,
@@ -779,7 +776,6 @@ internal class DefaultCustomerSheetLoaderTest {
         workContext: CoroutineContext = UnconfinedTestDispatcher()
     ): CustomerSheetLoader {
         return DefaultCustomerSheetLoader(
-            isLiveModeProvider = isLiveModeProvider,
             googlePayRepositoryFactory = {
                 if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
             },

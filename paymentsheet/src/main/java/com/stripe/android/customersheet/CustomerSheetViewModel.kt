@@ -9,13 +9,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
@@ -99,7 +99,7 @@ internal class CustomerSheetViewModel(
     private val logger: Logger,
     private val eventReporter: CustomerSheetEventReporter,
     private val workContext: CoroutineContext = Dispatchers.IO,
-    private val isLiveModeProvider: () -> Boolean,
+    paymentConfiguration: PaymentConfiguration,
     private val productUsage: Set<String>,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val customerSheetLoader: CustomerSheetLoader,
@@ -117,7 +117,7 @@ internal class CustomerSheetViewModel(
         logger: Logger,
         eventReporter: CustomerSheetEventReporter,
         @IOContext workContext: CoroutineContext = Dispatchers.IO,
-        @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean,
+        paymentConfiguration: PaymentConfiguration,
         @Named(PRODUCT_USAGE) productUsage: Set<String>,
         confirmationHandlerFactory: ConfirmationHandler.Factory,
         customerSheetLoader: CustomerSheetLoader,
@@ -135,7 +135,7 @@ internal class CustomerSheetViewModel(
         eventReporter = eventReporter,
         workContext = workContext,
         productUsage = productUsage,
-        isLiveModeProvider = isLiveModeProvider,
+        paymentConfiguration = paymentConfiguration,
         confirmationHandlerFactory = confirmationHandlerFactory,
         customerSheetLoader = customerSheetLoader,
         errorReporter = errorReporter,
@@ -148,10 +148,28 @@ internal class CustomerSheetViewModel(
         productUsageTokens = productUsage,
     )
 
+    private val customerState = MutableStateFlow(
+        CustomerState(
+            paymentMethods = listOf(),
+            configuration = configuration,
+            currentSelection = originalPaymentSelection,
+            permissions = CustomerPermissions(
+                removePaymentMethod = PaymentMethodRemovePermission.None,
+                canRemoveLastPaymentMethod = false,
+                canUpdateFullPaymentMethodDetails = false,
+            ),
+            metadata = null,
+        )
+    )
+
+    private val isConfiguredLiveMode = paymentConfiguration.isLiveMode()
+    private val isLiveMode
+        get() = customerState.value.metadata?.stripeIntent?.isLiveMode ?: isConfiguredLiveMode
+
     private val backStack = MutableStateFlow<List<CustomerSheetViewState>>(
         listOf(
             CustomerSheetViewState.Loading(
-                isLiveMode = isLiveModeProvider()
+                isLiveMode = isLiveMode
             )
         )
     )
@@ -169,20 +187,6 @@ internal class CustomerSheetViewModel(
             error = null,
         )
     )
-    private val customerState = MutableStateFlow(
-        CustomerState(
-            paymentMethods = listOf(),
-            configuration = configuration,
-            currentSelection = originalPaymentSelection,
-            permissions = CustomerPermissions(
-                removePaymentMethod = PaymentMethodRemovePermission.None,
-                canRemoveLastPaymentMethod = false,
-                canUpdateFullPaymentMethodDetails = false,
-            ),
-            metadata = null,
-        )
-    )
-
     private val selectPaymentMethodState = combineAsStateFlow(
         customerState,
         selectionConfirmationState,
@@ -199,7 +203,7 @@ internal class CustomerSheetViewModel(
             title = configuration.headerTextForSelectionScreen,
             savedPaymentMethods = paymentMethods,
             paymentSelection = paymentSelection,
-            isLiveMode = isLiveModeProvider(),
+            isLiveMode = isLiveMode,
             canRemovePaymentMethods = customerState.canRemove,
             primaryButtonVisible = primaryButtonVisible,
             showGooglePay = shouldShowGooglePay(paymentMethodMetadata),
@@ -562,7 +566,7 @@ internal class CustomerSheetViewModel(
         transition(
             to = CustomerSheetViewState.UpdatePaymentMethod(
                 updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
-                    isLiveMode = isLiveModeProvider(),
+                    isLiveMode = isLiveMode,
                     canRemove = customerState.canRemove,
                     canUpdateFullPaymentMethodDetails = customerState.canUpdateFullPaymentMethodDetails,
                     displayableSavedPaymentMethod = paymentMethod,
@@ -595,7 +599,7 @@ internal class CustomerSheetViewModel(
                         )
                     },
                 ),
-                isLiveMode = isLiveModeProvider(),
+                isLiveMode = isLiveMode,
             )
         )
     }
@@ -833,7 +837,7 @@ internal class CustomerSheetViewModel(
                 ),
                 draftPaymentSelection = null,
                 enabled = true,
-                isLiveMode = isLiveModeProvider(),
+                isLiveMode = isLiveMode,
                 isProcessing = false,
                 isFirstPaymentMethod = isFirstPaymentMethod,
                 primaryButtonLabel = R.string.stripe_paymentsheet_save.resolvableString,

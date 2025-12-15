@@ -121,7 +121,7 @@ internal object CustomerSheetTestHelper {
             savedSelectionDataSourceProvider = CompletableSingle(savedSelectionDataSource),
             configuration = configuration,
             integrationType = integrationType,
-            isLiveModeProvider = { isLiveMode },
+            paymentConfiguration = PaymentConfiguration(if (isLiveMode) "pk_live" else "pk_test"),
             logger = Logger.noop(),
             productUsage = emptySet(),
             confirmationHandlerFactory = confirmationHandler?.let { ConfirmationHandler.Factory { _ -> it } }
