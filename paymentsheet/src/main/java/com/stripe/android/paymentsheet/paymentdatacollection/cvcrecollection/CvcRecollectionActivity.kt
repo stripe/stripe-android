@@ -31,6 +31,12 @@ internal class CvcRecollectionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Check if required args are present, finish gracefully if not
+        if (!hasRequiredArgs()) {
+            finish()
+            return
+        }
+
         args.appearance.parseAppearance()
         setContent {
             StripeTheme {
@@ -63,6 +69,10 @@ internal class CvcRecollectionActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun hasRequiredArgs(): Boolean {
+        return CvcRecollectionContract.Args.fromIntent(intent) != null
     }
 
     override fun finish() {
