@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.Logger
@@ -151,7 +152,8 @@ internal object CustomerSheetTestHelper {
                             activityResultLauncher:
                             ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
                             skipReadyCheck: Boolean,
-                            cardBrandFilter: CardBrandFilter
+                            cardBrandFilter: CardBrandFilter,
+                            cardFundingFilter: CardFundingFilter
                         ): GooglePayPaymentMethodLauncher = mock()
                     },
                     statusBarColor = null,

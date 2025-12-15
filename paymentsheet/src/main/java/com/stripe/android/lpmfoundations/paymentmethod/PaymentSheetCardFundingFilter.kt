@@ -16,7 +16,7 @@ internal data class PaymentSheetCardFundingFilter(
         return allowedCardFundingTypes.any { it.cardFunding == cardFunding }
     }
 
-    class Factory @Inject constructor() : PaymentSheetCardFundingFilterFactory {
+    class Factory @Inject constructor() : CardFundingFilter.Factory<List<PaymentSheet.CardFundingType>> {
         override fun invoke(params: List<PaymentSheet.CardFundingType>): CardFundingFilter {
             return PaymentSheetCardFundingFilter(params)
         }

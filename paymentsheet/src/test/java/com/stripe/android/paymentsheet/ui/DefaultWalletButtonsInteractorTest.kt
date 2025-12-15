@@ -6,6 +6,7 @@ import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.isInstanceOf
@@ -572,7 +573,8 @@ class DefaultWalletButtonsInteractorTest {
                         customAmount = 5050L,
                         customLabel = "This is a purchase!",
                         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-                        cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance)
+                        cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
+                        cardFundingFilter = DefaultCardFundingFilter,
                     ),
                 )
             )

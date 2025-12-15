@@ -13,6 +13,7 @@ import app.cash.turbine.plusAssign
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
@@ -348,6 +349,7 @@ internal class DefaultFlowControllerTest {
                     merchantName = config.merchantDisplayName,
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
+                    cardFundingFilter = DefaultCardFundingFilter,
                 ),
             )
         )
@@ -1324,6 +1326,7 @@ internal class DefaultFlowControllerTest {
                     merchantName = config.merchantDisplayName,
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
+                    cardFundingFilter = DefaultCardFundingFilter
                 ),
             )
         )
@@ -1981,6 +1984,7 @@ internal class DefaultFlowControllerTest {
                     merchantName = "My merchant",
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
+                    cardFundingFilter = DefaultCardFundingFilter,
                 ),
             )
         )
@@ -2414,7 +2418,7 @@ internal class DefaultFlowControllerTest {
             walletsButtonLinkLauncher = walletsButtonLinkPaymentLauncher,
             activityResultRegistryOwner = mock(),
             linkGateFactory = FakeLinkGate.Factory(linkGate),
-            confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
+            confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler()
         )
     }
 

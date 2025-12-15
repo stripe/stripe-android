@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -41,7 +42,8 @@ class GooglePayButtonTest {
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 isEnabled = true,
                 onPressed = {},
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         }
 
@@ -59,7 +61,8 @@ class GooglePayButtonTest {
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 isEnabled = true,
                 onPressed = {},
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         }
 
@@ -77,7 +80,8 @@ class GooglePayButtonTest {
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 isEnabled = true,
                 onPressed = {},
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         }
 
@@ -95,7 +99,8 @@ class GooglePayButtonTest {
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 isEnabled = true,
                 onPressed = {},
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         }
 

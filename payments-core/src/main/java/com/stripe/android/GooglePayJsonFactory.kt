@@ -8,6 +8,7 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import org.json.JSONArray
@@ -38,7 +39,8 @@ class GooglePayJsonFactory internal constructor(
      */
     private val additionalEnabledNetworks: List<String> = emptyList(),
 
-    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter
 ) {
     /**
      * [PaymentConfiguration] must be instantiated before calling this.
@@ -54,11 +56,13 @@ class GooglePayJsonFactory internal constructor(
          */
         isJcbEnabled: Boolean = false,
 
-        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter
     ) : this(
         googlePayConfig = GooglePayConfig(context),
         isJcbEnabled = isJcbEnabled,
-        cardBrandFilter = cardBrandFilter
+        cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter
     )
 
     constructor(
@@ -73,7 +77,8 @@ class GooglePayJsonFactory internal constructor(
     ) : this(
         googlePayConfig = GooglePayConfig(context),
         isJcbEnabled = isJcbEnabled,
-        cardBrandFilter = DefaultCardBrandFilter
+        cardBrandFilter = DefaultCardBrandFilter,
+        cardFundingFilter = DefaultCardFundingFilter
     )
 
     constructor(
@@ -94,7 +99,8 @@ class GooglePayJsonFactory internal constructor(
         googlePayConfig = googlePayConfig,
         isJcbEnabled = isJcbEnabled,
         additionalEnabledNetworks = additionalEnabledNetworks,
-        cardBrandFilter = DefaultCardBrandFilter
+        cardBrandFilter = DefaultCardBrandFilter,
+        cardFundingFilter = DefaultCardFundingFilter
     )
 
     @Inject
@@ -102,11 +108,13 @@ class GooglePayJsonFactory internal constructor(
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
         @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
         googlePayConfig: GooglePayPaymentMethodLauncher.Config,
-        cardBrandFilter: CardBrandFilter
+        cardBrandFilter: CardBrandFilter,
+        cardFundingFilter: CardFundingFilter
     ) : this(
         googlePayConfig = GooglePayConfig(publishableKeyProvider(), stripeAccountIdProvider()),
         isJcbEnabled = googlePayConfig.isJcbEnabled,
         cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter,
         additionalEnabledNetworks = googlePayConfig.additionalEnabledNetworks
     )
 
@@ -321,9 +329,9 @@ class GooglePayJsonFactory internal constructor(
                             .put("format", billingAddressParameters.format.code)
                     )
                 }
-                allowCreditCards?.let {
-                    put("allowCreditCards", it)
-                }
+                val allowCreditCards = allowCreditCards ?: cardFundingFilter.isAccepted(CardFunding.Credit)
+                put("allowCreditCards", allowCreditCards)
+                put("allowPrepaidCards", cardFundingFilter.isAccepted(CardFunding.Prepaid))
             }
 
         return JSONObject()

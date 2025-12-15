@@ -85,6 +85,7 @@ internal class WalletButtonsContent(
                     billingAddressParameters = button.billingAddressParameters,
                     isEnabled = state.buttonsEnabled,
                     cardBrandFilter = button.cardBrandFilter,
+                    cardFundingFilter = button.cardFundingFilter,
                     onPressed = {
                         interactor.handleViewAction(OnButtonPressed(button, walletButtonsViewClickHandler))
                     },

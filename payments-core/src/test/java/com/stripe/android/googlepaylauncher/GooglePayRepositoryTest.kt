@@ -8,6 +8,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wallet.PaymentsClient
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
@@ -129,6 +130,7 @@ class GooglePayRepositoryTest {
             paymentsClientFactory = { paymentsClient },
             errorReporter = errorReporter,
             logger = Logger.noop(),
+            cardFundingFilter = DefaultCardFundingFilter,
         )
     }
 }
