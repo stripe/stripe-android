@@ -56,6 +56,7 @@ internal object CustomerSheetTestHelper {
     internal val application = ApplicationProvider.getApplicationContext<Application>()
 
     internal fun createViewModel(
+        isLiveMode: Boolean = false,
         workContext: CoroutineContext = EmptyCoroutineContext,
         integrationType: CustomerSheetIntegration.Type = CustomerSheetIntegration.Type.CustomerAdapter,
         isGooglePayAvailable: Boolean = true,
@@ -120,6 +121,7 @@ internal object CustomerSheetTestHelper {
             savedSelectionDataSourceProvider = CompletableSingle(savedSelectionDataSource),
             configuration = configuration,
             integrationType = integrationType,
+            paymentConfiguration = PaymentConfiguration(if (isLiveMode) "pk_live" else "pk_test"),
             logger = Logger.noop(),
             productUsage = emptySet(),
             confirmationHandlerFactory = confirmationHandler?.let { ConfirmationHandler.Factory { _ -> it } }

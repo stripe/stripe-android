@@ -99,6 +99,7 @@ internal class CustomerSheetViewModel(
     private val logger: Logger,
     private val eventReporter: CustomerSheetEventReporter,
     private val workContext: CoroutineContext = Dispatchers.IO,
+    paymentConfiguration: PaymentConfiguration,
     private val productUsage: Set<String>,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val customerSheetLoader: CustomerSheetLoader,
@@ -116,6 +117,7 @@ internal class CustomerSheetViewModel(
         logger: Logger,
         eventReporter: CustomerSheetEventReporter,
         @IOContext workContext: CoroutineContext = Dispatchers.IO,
+        paymentConfiguration: PaymentConfiguration,
         @Named(PRODUCT_USAGE) productUsage: Set<String>,
         confirmationHandlerFactory: ConfirmationHandler.Factory,
         customerSheetLoader: CustomerSheetLoader,
@@ -133,6 +135,7 @@ internal class CustomerSheetViewModel(
         eventReporter = eventReporter,
         workContext = workContext,
         productUsage = productUsage,
+        paymentConfiguration = paymentConfiguration,
         confirmationHandlerFactory = confirmationHandlerFactory,
         customerSheetLoader = customerSheetLoader,
         errorReporter = errorReporter,
@@ -159,7 +162,7 @@ internal class CustomerSheetViewModel(
         )
     )
 
-    private val isConfiguredLiveMode = PaymentConfiguration.getInstance(application).isLiveMode()
+    private val isConfiguredLiveMode = paymentConfiguration.isLiveMode()
     private val isLiveMode
         get() = customerState.value.metadata?.stripeIntent?.isLiveMode ?: isConfiguredLiveMode
 
