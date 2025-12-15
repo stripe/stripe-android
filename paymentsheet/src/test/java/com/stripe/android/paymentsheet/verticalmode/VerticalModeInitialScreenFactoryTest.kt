@@ -6,10 +6,10 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -17,7 +17,6 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import kotlin.test.Test
 
@@ -26,18 +25,43 @@ class VerticalModeInitialScreenFactoryTest {
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun `returns form screen when only one payment method available and has interactable elements`() = runScenario(
+    fun `returns form screen when only one payment method available`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("cashapp"),
-            ),
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
             )
         )
     ) {
         assertThat(screens).hasSize(1)
         assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+    }
+
+    @Test
+    fun `showsWalletHeader is false for VerticalModeForm if no available wallets`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("cashapp"),
+            ),
+            availableWallets = listOf()
+        )
+    ) {
+        assertThat(screens).hasSize(1)
+        assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+        assertThat(screens[0].showsWalletsHeader(false).value).isFalse()
+    }
+
+    @Test
+    fun `showsWalletHeader is true for VerticalModeForm if available wallets exist`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("cashapp"),
+            ),
+            availableWallets = listOf(WalletType.Link)
+        )
+    ) {
+        assertThat(screens).hasSize(1)
+        assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+        assertThat(screens[0].showsWalletsHeader(false).value).isTrue()
     }
 
     @Test
@@ -62,19 +86,6 @@ class VerticalModeInitialScreenFactoryTest {
         assertThat(screens[1]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
     }
 
-    @Test
-    fun `returns list screen when only one payment method available with no interactable elements`() = runScenario(
-        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("alipay"),
-            )
-        ),
-        hasSavedPaymentMethods = false
-    ) {
-        assertThat(screens).hasSize(1)
-        assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalMode>()
-    }
-
     private fun runScenario(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             linkState = LinkState(
@@ -85,8 +96,8 @@ class VerticalModeInitialScreenFactoryTest {
         ),
         hasSavedPaymentMethods: Boolean = false,
         selection: PaymentSelection? = null,
-        block: suspend Scenario.() -> Unit,
-    ) = runTest {
+        block: Scenario.() -> Unit,
+    ) {
         val fakeViewModel = FakeBaseSheetViewModel.create(
             paymentMethodMetadata = paymentMethodMetadata,
             initialScreen = PaymentSheetScreen.Loading,
@@ -116,12 +127,9 @@ class VerticalModeInitialScreenFactoryTest {
             paymentMethodMetadata = paymentMethodMetadata,
             customerStateHolder = customerStateHolder,
         )
-
-        block(
-            Scenario(
-                screens = screens
-            )
-        )
+        Scenario(
+            screens = screens
+        ).apply(block)
     }
 
     private class Scenario(
