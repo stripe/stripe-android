@@ -48,6 +48,13 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Check if required args are present, finish gracefully if not
+        if (!hasRequiredArgs()) {
+            finish()
+            return
+        }
+
         setContentView(R.layout.stripe_activity_lite)
 
         webView = findViewById(R.id.webView)
@@ -168,6 +175,10 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
     private fun finishWithResult(result: FinancialConnectionsSheetActivityResult) {
         setResult(RESULT_OK, Intent().putExtras(result.toBundle()))
         finish()
+    }
+
+    private fun hasRequiredArgs(): Boolean {
+        return intent?.extras?.containsKey(EXTRA_ARGS) == true
     }
 
     companion object {
