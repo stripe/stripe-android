@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 22.5.0 - 2025-12-15
+
 ### Payments
 * [Added] Added support for [PayPay](https://docs.stripe.com/payments/paypay) payments.
 
