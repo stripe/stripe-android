@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.polling
 
+import android.content.Intent
 import android.os.Build
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -9,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onIdle
 import androidx.test.espresso.Espresso.onView
@@ -217,6 +219,19 @@ internal class PollingActivityTest {
             scenario.recreate()
 
             assertQrCodeWebViewIsNotDisplayed()
+        }
+    }
+
+    @Test
+    fun `activity finishes gracefully when required args are missing`() {
+        ActivityScenario.launchActivityForResult<PollingActivity>(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                PollingActivity::class.java
+            )
+        ).use { scenario ->
+            // Activity should finish gracefully without crashing
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
         }
     }
 
