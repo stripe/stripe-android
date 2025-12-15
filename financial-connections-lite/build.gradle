@@ -39,6 +39,7 @@ dependencies {
     testImplementation testLibs.mockito.core
     testImplementation testLibs.mockito.inline
     testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.robolectric
     testImplementation testLibs.turbine
     testImplementation testLibs.truth
 
