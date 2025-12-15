@@ -237,7 +237,8 @@ class DefaultPaymentMethodMessagingEventReporterTest {
                     learnMore = PaymentMethodMessageLearnMore(
                         message = "",
                         url = ""
-                    )
+                    ),
+                    legalDisclosure = null
                 )
             ) {},
         )

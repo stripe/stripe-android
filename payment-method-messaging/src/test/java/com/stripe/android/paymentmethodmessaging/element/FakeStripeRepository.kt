@@ -40,7 +40,8 @@ class FakeStripeRepository : AbsFakeStripeRepository() {
             darkImage = image,
             flatImage = image,
             learnMore = learnMore,
-            paymentMethods = listOf()
+            paymentMethods = listOf(),
+            legalDisclosure = null
         )
         val multiPartner = PaymentMethodMessage.MultiPartner(
             promotion = "buy stuff",
@@ -48,7 +49,8 @@ class FakeStripeRepository : AbsFakeStripeRepository() {
             darkImages = listOf(image),
             flatImages = listOf(image),
             learnMore = learnMore,
-            paymentMethods = listOf()
+            paymentMethods = listOf(),
+            legalDisclosure = null
         )
         val unexpectedError = PaymentMethodMessage.UnexpectedError(
             message = "whoops"

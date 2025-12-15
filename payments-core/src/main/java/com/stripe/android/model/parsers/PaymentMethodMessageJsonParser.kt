@@ -5,6 +5,7 @@ import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArray
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodMessageImage
 import com.stripe.android.model.PaymentMethodMessageLearnMore
+import com.stripe.android.model.PaymentMethodMessageLegalDisclosure
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -26,12 +27,14 @@ internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMes
         val imagesMap = getImages(content.optJSONArray(FIELD_IMAGES))
         val learnMore = getLearnMore(content) ?: return null
         val promotion = getPromotion(content) ?: return null
+        val legalDisclosure = getLegalDisclosure(content)
         return PaymentMethodMessage.MultiPartner(
             promotion = promotion,
             lightImages = imagesMap[FIELD_LIGHT_THEME_PNG] ?: emptyList(),
             darkImages = imagesMap[FIELD_DARK_THEME_PNG] ?: emptyList(),
             flatImages = imagesMap[FIELD_FLAT_THEME_PNG] ?: emptyList(),
             learnMore = learnMore,
+            legalDisclosure = legalDisclosure,
             paymentMethods = paymentMethods
         )
     }
@@ -54,6 +57,7 @@ internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMes
         val lightImage = getImage(imagesMap[FIELD_LIGHT_THEME_PNG]) ?: return null
         val darkImage = getImage(imagesMap[FIELD_DARK_THEME_PNG]) ?: return null
         val flatImage = getImage(imagesMap[FIELD_FLAT_THEME_PNG]) ?: return null
+        val legalDisclosure = getLegalDisclosure(content)
 
         return PaymentMethodMessage.SinglePartner(
             inlinePartnerPromotion = inlinePartnerPromotion,
@@ -61,6 +65,7 @@ internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMes
             darkImage = darkImage,
             flatImage = flatImage,
             learnMore = learnMore,
+            legalDisclosure = legalDisclosure,
             paymentMethods = paymentMethods
         )
     }
@@ -125,6 +130,18 @@ internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMes
         )
     }
 
+    private fun getLegalDisclosure(json: JSONObject): PaymentMethodMessageLegalDisclosure? {
+        val legalDisclosure = json.optJSONObject(FIELD_LEGAL_DISCLOSURE)
+        val message = legalDisclosure?.optString(FIELD_MESSAGE)
+        return if (!message.isNullOrBlank()) {
+            PaymentMethodMessageLegalDisclosure(
+                message = message
+            )
+        } else {
+            null
+        }
+    }
+
     /**
      * Images are sent as an array of objects, each object containing dark, flat, and light PNG and SVG URLs
      * for all payment methods (affirm, klarna, afterpay_clearpay) and image types (logo, icon).
@@ -176,5 +193,6 @@ internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMes
         const val FIELD_URL = "url"
         const val FIELD_CONTENT = "content"
         const val IMAGE_TYPE_LOGO = "logo"
+        const val FIELD_LEGAL_DISCLOSURE = "legal_disclosure"
     }
 }
