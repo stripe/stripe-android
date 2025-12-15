@@ -44,6 +44,12 @@ internal class PollingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Check if required args are present, finish gracefully if not
+        if (!hasRequiredArgs()) {
+            finish()
+            return
+        }
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
@@ -101,6 +107,10 @@ internal class PollingActivity : AppCompatActivity() {
             Intent().putExtras(result.toBundle())
         )
         finish()
+    }
+
+    private fun hasRequiredArgs(): Boolean {
+        return PollingContract.Args.fromIntent(intent) != null
     }
 
     override fun finish() {
