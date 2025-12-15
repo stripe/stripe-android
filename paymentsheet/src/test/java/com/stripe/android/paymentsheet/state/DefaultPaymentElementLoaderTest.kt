@@ -4357,7 +4357,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
             analyticsMetadataFactory = analyticsMetadataFactory,
             tapToAddConnectionManager = tapToAddConnectionManager,
-            paymentConfiguration = PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test")
+            paymentConfiguration = { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") }
         )
     }
 

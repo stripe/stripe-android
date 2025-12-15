@@ -59,6 +59,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -216,7 +217,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val userFacingLogger: UserFacingLogger,
     private val integrityRequestManager: IntegrityRequestManager,
     private val tapToAddConnectionManager: TapToAddConnectionManager,
-    private val paymentConfiguration: PaymentConfiguration,
+    private val paymentConfiguration: Provider<PaymentConfiguration>,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
 ) : PaymentElementLoader {
@@ -242,7 +243,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val configuration = integrationConfiguration.commonConfiguration
         // Validate configuration before loading
         initializationMode.validate()
-        configuration.validate(paymentConfiguration.isLiveMode(), paymentElementCallbackIdentifier)
+        configuration.validate(paymentConfiguration.get().isLiveMode(), paymentElementCallbackIdentifier)
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
         tapToAddConnectionManager.connect()
