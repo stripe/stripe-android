@@ -112,6 +112,12 @@ class OnrampFlowTest {
 
     @OptIn(ExperimentalTestApi::class)
     private fun waitForTag(tag: String, timeoutMs: Long = defaultTimeout.inWholeMilliseconds) {
+        composeRule.waitUntil(timeoutMs) {
+            composeRule.onAllNodes(hasTestTag(tag))
+                // We need to call fetchSemanticsNodes with atLeastOneRootRequired = false to ensure the activity is
+                // launched, which prevents flakes.
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).size == 1
+        }
         composeRule.waitUntilExactlyOneExists(
             hasTestTag(tag),
             timeoutMillis = timeoutMs
