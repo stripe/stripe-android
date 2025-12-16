@@ -1,6 +1,7 @@
 package com.stripe.android.connect
 
 import android.content.pm.ActivityInfo
+import android.os.SystemClock
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
@@ -245,9 +246,33 @@ class FullScreenComponentTest {
     }
 
     private fun checkDialogDoesNotExist() {
-        onView(rootView)
-            .noActivity()
-            .check(doesNotExist())
+        // Retry the check to handle async dialog dismissal (fragment transaction).
+        retryUntilSuccess {
+            onView(rootView)
+                .noActivity()
+                .check(doesNotExist())
+        }
+    }
+
+    private fun retryUntilSuccess(
+        timeoutMillis: Long = 3000,
+        pollIntervalMillis: Long = 100,
+        block: () -> Unit
+    ) {
+        val endTime = SystemClock.elapsedRealtime() + timeoutMillis
+        var lastError: Throwable? = null
+
+        while (SystemClock.elapsedRealtime() < endTime) {
+            try {
+                block()
+                return
+            } catch (e: AssertionError) {
+                lastError = e
+                SystemClock.sleep(pollIntervalMillis)
+            }
+        }
+
+        throw lastError ?: AssertionError("Condition not met within ${timeoutMillis}ms")
     }
 
     private fun performWebViewAlertWithoutChecks(method: String, alertJs: AlertJs) {
