@@ -19,6 +19,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import org.junit.Rule
 import org.junit.Test
+import kotlin.test.fail
 
 class CardInputWidgetTest {
     @get:Rule
@@ -26,6 +27,7 @@ class CardInputWidgetTest {
 
     @Test
     fun restoresViewWidthsWhenUsingSaveableState() {
+        fail()
         val cardInputWidgetState = mutableStateOf(value = State.Show)
 
         composeTestRule.activity.setTheme(R.style.StripeDefaultTheme)
