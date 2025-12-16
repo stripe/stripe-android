@@ -152,25 +152,9 @@ class TapToAddCollectionHandlerTest {
 
         assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
 
-        val retrievedSetupIntent = mock<SetupIntent>()
-        val retrieveSetupIntentCall = terminalScenario.retrieveSetupIntentCalls.awaitItem()
-        assertThat(retrieveSetupIntentCall.clientSecret).isEqualTo("si_123_secret")
-        retrieveSetupIntentCall.callback.onSuccess(retrievedSetupIntent)
-
-        val collectedIntent = mock<SetupIntent>()
-        val collectPaymentMethodCall = terminalScenario.collectPaymentMethodCalls.awaitItem()
-        assertThat(collectPaymentMethodCall.intent).isEqualTo(retrievedSetupIntent)
-        assertThat(collectPaymentMethodCall.allowRedisplay).isEqualTo(AllowRedisplay.UNSPECIFIED)
-        assertThat(collectPaymentMethodCall.config)
-            .isEqualTo(
-                SetupIntentConfiguration.Builder()
-                    .build()
-            )
-        collectPaymentMethodCall.callback.onSuccess(collectedIntent)
-
-        val confirmSetupIntentCall = terminalScenario.confirmSetupIntentCalls.awaitItem()
-        assertThat(confirmSetupIntentCall.intent).isEqualTo(collectedIntent)
-        confirmSetupIntentCall.callback.onSuccess(mock())
+        val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
+        val collectedIntent = checkCollectCall(retrievedSetupIntent)
+        checkConfirmCall(collectedIntent)
 
         assertThat(result.await()).isEqualTo(TapToAddCollectionHandler.CollectionState.Collected)
     }
@@ -221,9 +205,7 @@ class TapToAddCollectionHandlerTest {
 
         assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
 
-        val retrievedSetupIntent = mock<SetupIntent>()
-        val retrieveSetupIntentCall = terminalScenario.retrieveSetupIntentCalls.awaitItem()
-        retrieveSetupIntentCall.callback.onSuccess(retrievedSetupIntent)
+        val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
 
         val terminalException = TerminalException(
             errorCode = TerminalErrorCode.CANCELED,
@@ -257,15 +239,8 @@ class TapToAddCollectionHandlerTest {
 
         assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
 
-        val retrievedSetupIntent = mock<SetupIntent>()
-        val retrieveSetupIntentCall = terminalScenario.retrieveSetupIntentCalls.awaitItem()
-        assertThat(retrieveSetupIntentCall.clientSecret).isEqualTo("si_123_secret")
-        retrieveSetupIntentCall.callback.onSuccess(retrievedSetupIntent)
-
-        val collectedIntent = mock<SetupIntent>()
-        val collectPaymentMethodCall = terminalScenario.collectPaymentMethodCalls.awaitItem()
-        assertThat(collectPaymentMethodCall.intent).isEqualTo(retrievedSetupIntent)
-        collectPaymentMethodCall.callback.onSuccess(collectedIntent)
+        val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
+        val collectedIntent = checkCollectCall(retrievedSetupIntent)
 
         val terminalException = TerminalException(
             errorCode = TerminalErrorCode.DECLINED_BY_STRIPE_API,
@@ -299,9 +274,7 @@ class TapToAddCollectionHandlerTest {
 
         assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
 
-        val retrievedSetupIntent = mock<SetupIntent>()
-        val retrieveSetupIntentCall = terminalScenario.retrieveSetupIntentCalls.awaitItem()
-        retrieveSetupIntentCall.callback.onSuccess(retrievedSetupIntent)
+        val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
 
         val collectPaymentMethodCall = terminalScenario.collectPaymentMethodCalls.awaitItem()
         assertThat(collectPaymentMethodCall.intent).isEqualTo(retrievedSetupIntent)
@@ -326,13 +299,8 @@ class TapToAddCollectionHandlerTest {
 
         assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
 
-        val retrievedSetupIntent = mock<SetupIntent>()
-        val retrieveSetupIntentCall = terminalScenario.retrieveSetupIntentCalls.awaitItem()
-        retrieveSetupIntentCall.callback.onSuccess(retrievedSetupIntent)
-
-        val collectedIntent = mock<SetupIntent>()
-        val collectPaymentMethodCall = terminalScenario.collectPaymentMethodCalls.awaitItem()
-        collectPaymentMethodCall.callback.onSuccess(collectedIntent)
+        val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
+        val collectedIntent = checkCollectCall(retrievedSetupIntent)
 
         val confirmSetupIntentCall = terminalScenario.confirmSetupIntentCalls.awaitItem()
         assertThat(confirmSetupIntentCall.intent).isEqualTo(collectedIntent)
@@ -400,6 +368,37 @@ class TapToAddCollectionHandlerTest {
             collectPaymentMethodCalls = collectPaymentMethodCalls,
             confirmSetupIntentCalls = confirmSetupIntentCalls,
         )
+    }
+
+    private suspend fun Scenario.checkRetrieveSetupIntent(clientSecret: String): SetupIntent {
+        val retrievedSetupIntent = mock<SetupIntent>()
+        val retrieveSetupIntentCall = terminalScenario.retrieveSetupIntentCalls.awaitItem()
+        assertThat(retrieveSetupIntentCall.clientSecret).isEqualTo(clientSecret)
+        retrieveSetupIntentCall.callback.onSuccess(retrievedSetupIntent)
+        return retrievedSetupIntent
+    }
+
+    private suspend fun Scenario.checkCollectCall(
+        retrievedSetupIntent: SetupIntent,
+        expectedAllowRedisplay: AllowRedisplay = AllowRedisplay.UNSPECIFIED,
+    ): SetupIntent {
+        val collectedIntent = mock<SetupIntent>()
+        val collectPaymentMethodCall = terminalScenario.collectPaymentMethodCalls.awaitItem()
+        assertThat(collectPaymentMethodCall.intent).isEqualTo(retrievedSetupIntent)
+        assertThat(collectPaymentMethodCall.allowRedisplay).isEqualTo(expectedAllowRedisplay)
+        assertThat(collectPaymentMethodCall.config)
+            .isEqualTo(
+                SetupIntentConfiguration.Builder()
+                    .build()
+            )
+        collectPaymentMethodCall.callback.onSuccess(collectedIntent)
+        return collectedIntent
+    }
+
+    private suspend fun Scenario.checkConfirmCall(collectedSetupIntent: SetupIntent) {
+        val confirmSetupIntentCall = terminalScenario.confirmSetupIntentCalls.awaitItem()
+        assertThat(confirmSetupIntentCall.intent).isEqualTo(collectedSetupIntent)
+        confirmSetupIntentCall.callback.onSuccess(mock())
     }
 
     private fun KStubbing<Terminal>.mockRetrieveSetupIntent(
