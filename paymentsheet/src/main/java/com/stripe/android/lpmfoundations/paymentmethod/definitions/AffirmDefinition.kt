@@ -7,7 +7,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.ui.core.elements.AffirmHeaderElement
+import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as UiCoreR
 
@@ -27,16 +29,22 @@ internal object AffirmDefinition : PaymentMethodDefinition {
     override fun uiDefinitionFactory(): UiDefinitionFactory = AffirmUiDefinitionFactory
 }
 
-private object AffirmUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec,
-    ) = SupportedPaymentMethod(
-        paymentMethodDefinition = AffirmDefinition,
-        sharedDataSpec = sharedDataSpec,
+private object AffirmUiDefinitionFactory : UiDefinitionFactory.Simple {
+    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+        code = PaymentMethod.Type.Affirm.code,
+        lightThemeIconUrl = "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-affirm@3x-d2" +
+            "623d995950761883fca048ce6e0550.png",
+        darkThemeIconUrl = null,
         displayNameResource = UiCoreR.string.stripe_paymentsheet_payment_method_affirm,
         iconResource = UiCoreR.drawable.stripe_ic_paymentsheet_pm_affirm,
         iconResourceNight = null,
         subtitle = StripeR.string.stripe_affirm_buy_now_pay_later_plaintext.resolvableString
     )
+
+    override fun createFormElements(
+        metadata: PaymentMethodMetadata,
+        arguments: UiDefinitionFactory.Arguments
+    ): List<FormElement> {
+        return listOf(AffirmHeaderElement(identifier = IdentifierSpec.Generic("affirm_header")))
+    }
 }
