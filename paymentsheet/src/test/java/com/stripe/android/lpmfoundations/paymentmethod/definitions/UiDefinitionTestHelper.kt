@@ -1,7 +1,9 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import androidx.compose.runtime.Composable
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.TapToAddHelper
+import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -10,7 +12,13 @@ import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.ui.core.FormUI
+import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
+import com.stripe.android.uicore.elements.EmailElement
+import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.PhoneNumberElement
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.SimpleTextElement
 
 @Composable
 internal fun PaymentMethodDefinition.CreateFormUi(
@@ -40,4 +48,52 @@ internal fun PaymentMethodDefinition.CreateFormUi(
         elements = formElements,
         lastTextFieldIdentifier = null,
     )
+}
+
+internal fun checkNameField(
+    formElements: List<FormElement>,
+    position: Int,
+) {
+    val nameSection = checkSectionField(formElements, "billing_details[name]_section", position)
+    assertThat(nameSection.fields).hasSize(1)
+    assertThat(nameSection.fields[0]).isInstanceOf<SimpleTextElement>()
+}
+
+internal fun checkPhoneField(
+    formElements: List<FormElement>,
+    position: Int,
+) {
+    val phoneSection = checkSectionField(formElements, "billing_details[phone]_section", position)
+    assertThat(phoneSection.fields).hasSize(1)
+    assertThat(phoneSection.fields[0]).isInstanceOf<PhoneNumberElement>()
+}
+
+internal fun checkEmailField(
+    formElements: List<FormElement>,
+    position: Int,
+) {
+    val emailSection = checkSectionField(formElements, "billing_details[email]_section", position)
+    assertThat(emailSection.fields).hasSize(1)
+    assertThat(emailSection.fields[0]).isInstanceOf<EmailElement>()
+}
+
+internal fun checkBillingField(
+    formElements: List<FormElement>,
+    position: Int,
+) {
+    val billingSection = checkSectionField(formElements, "billing_details[address]_section", position)
+    assertThat(billingSection.fields).hasSize(1)
+    assertThat(billingSection.fields[0]).isInstanceOf<AddressElement>()
+}
+
+private fun checkSectionField(
+    formElements: List<FormElement>,
+    sectionName: String,
+    position: Int,
+): SectionElement {
+    assertThat(formElements[position].identifier.v1)
+        .isEqualTo(sectionName)
+    assertThat(formElements[position]).isInstanceOf<SectionElement>()
+
+    return formElements[position] as SectionElement
 }
