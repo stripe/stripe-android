@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -32,8 +33,7 @@ internal object AffirmDefinition : PaymentMethodDefinition {
 private object AffirmUiDefinitionFactory : UiDefinitionFactory.Simple {
     override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         code = PaymentMethod.Type.Affirm.code,
-        lightThemeIconUrl = "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-affirm@3x-d2" +
-            "623d995950761883fca048ce6e0550.png",
+        lightThemeIconUrl = null,
         darkThemeIconUrl = null,
         displayNameResource = UiCoreR.string.stripe_paymentsheet_payment_method_affirm,
         iconResource = UiCoreR.drawable.stripe_ic_paymentsheet_pm_affirm,
@@ -45,6 +45,8 @@ private object AffirmUiDefinitionFactory : UiDefinitionFactory.Simple {
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments
     ): List<FormElement> {
-        return listOf(AffirmHeaderElement(identifier = IdentifierSpec.Generic("affirm_header")))
+        return FormElementsBuilder(arguments)
+            .header(AffirmHeaderElement(identifier = IdentifierSpec.Generic("affirm_header")))
+            .build()
     }
 }
