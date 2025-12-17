@@ -8,7 +8,10 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
@@ -63,12 +66,15 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionsActivity
                     confirmValueChange = { !isProcessing },
                 )
 
-                LaunchedEffect(Unit) {
-                    viewModel.paymentOptionsActivityResult.filterNotNull().collect { sheetResult ->
-                        setActivityResult(sheetResult)
-                        bottomSheetState.hide()
-                        viewModel.navigationHandler.closeScreens()
-                        finish()
+                val lifecycleOwner = LocalLifecycleOwner.current
+                LaunchedEffect(lifecycleOwner) {
+                    lifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                        viewModel.paymentOptionsActivityResult.filterNotNull().collect { sheetResult ->
+                            setActivityResult(sheetResult)
+                            bottomSheetState.hide()
+                            viewModel.navigationHandler.closeScreens()
+                            finish()
+                        }
                     }
                 }
 

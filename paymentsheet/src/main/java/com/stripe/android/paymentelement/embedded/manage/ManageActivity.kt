@@ -20,6 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -96,11 +99,14 @@ internal class ManageActivity : AppCompatActivity() {
                         Box(modifier = Modifier.padding(bottom = 20.dp)) {
                             ScreenContent(manageNavigator, screen)
                         }
-                        LaunchedEffect(screen) {
-                            manageNavigator.result.collect { result ->
-                                setManageResult(result == true)
-                                finish()
-                                hasResult = true
+                        val lifecycleOwner = LocalLifecycleOwner.current
+                        LaunchedEffect(screen, lifecycleOwner) {
+                            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                                manageNavigator.result.collect { result ->
+                                    setManageResult(result == true)
+                                    finish()
+                                    hasResult = true
+                                }
                             }
                         }
                     }

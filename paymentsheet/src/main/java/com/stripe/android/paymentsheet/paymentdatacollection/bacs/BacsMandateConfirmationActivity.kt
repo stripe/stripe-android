@@ -8,6 +8,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.parseAppearance
@@ -53,14 +56,17 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
             StripeTheme {
                 val bottomSheetState = rememberStripeBottomSheetState()
 
-                LaunchedEffect(bottomSheetState) {
-                    viewModel.result.collectLatest { result ->
-                        setResult(
-                            Activity.RESULT_OK,
-                            BacsMandateConfirmationResult.toIntent(intent, result)
-                        )
-                        bottomSheetState.hide()
-                        finish()
+                val lifecycleOwner = LocalLifecycleOwner.current
+                LaunchedEffect(bottomSheetState, lifecycleOwner) {
+                    lifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                        viewModel.result.collectLatest { result ->
+                            setResult(
+                                Activity.RESULT_OK,
+                                BacsMandateConfirmationResult.toIntent(intent, result)
+                            )
+                            bottomSheetState.hide()
+                            finish()
+                        }
                     }
                 }
 

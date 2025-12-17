@@ -10,9 +10,12 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.LaunchedEffect
 import androidx.core.os.bundleOf
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -75,10 +78,13 @@ internal class LinkActivity : ComponentActivity() {
                 confirmValueChange = { vm.canDismissSheet },
             )
 
-            LaunchedEffect(Unit) {
-                vm.result.collect { result ->
-                    bottomSheetState.hide()
-                    dismissWithResult(result)
+            val lifecycleOwner = LocalLifecycleOwner.current
+            LaunchedEffect(lifecycleOwner) {
+                lifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    vm.result.collect { result ->
+                        bottomSheetState.hide()
+                        dismissWithResult(result)
+                    }
                 }
             }
 

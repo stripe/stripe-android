@@ -8,6 +8,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.uicore.StripeTheme
@@ -43,14 +46,17 @@ internal class CvcRecollectionActivity : AppCompatActivity() {
                 val bottomSheetState = rememberStripeBottomSheetState()
                 val state by viewModel.viewState.collectAsState()
 
-                LaunchedEffect(bottomSheetState) {
-                    viewModel.result.collectLatest { result ->
-                        setResult(
-                            Activity.RESULT_OK,
-                            CvcRecollectionResult.toIntent(intent, result)
-                        )
-                        bottomSheetState.hide()
-                        finish()
+                val lifecycleOwner = LocalLifecycleOwner.current
+                LaunchedEffect(bottomSheetState, lifecycleOwner) {
+                    lifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                        viewModel.result.collectLatest { result ->
+                            setResult(
+                                Activity.RESULT_OK,
+                                CvcRecollectionResult.toIntent(intent, result)
+                            )
+                            bottomSheetState.hide()
+                            finish()
+                        }
                     }
                 }
 

@@ -13,6 +13,9 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
@@ -45,23 +48,26 @@ internal class AutocompleteActivity : AppCompatActivity() {
         setContent {
             val bottomSheetState = rememberStripeBottomSheetState()
 
-            LaunchedEffect(Unit) {
-                viewModel.event.collectLatest { event ->
-                    val result = when (event) {
-                        is AutocompleteViewModel.Event.EnterManually -> AutocompleteContract.Result.EnterManually(
-                            id = starterArgs.id,
-                            address = event.address,
-                        )
-                        is AutocompleteViewModel.Event.GoBack -> AutocompleteContract.Result.Address(
-                            id = starterArgs.id,
-                            address = event.address,
-                        )
+            val lifecycleOwner = LocalLifecycleOwner.current
+            LaunchedEffect(lifecycleOwner) {
+                lifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    viewModel.event.collectLatest { event ->
+                        val result = when (event) {
+                            is AutocompleteViewModel.Event.EnterManually -> AutocompleteContract.Result.EnterManually(
+                                id = starterArgs.id,
+                                address = event.address,
+                            )
+                            is AutocompleteViewModel.Event.GoBack -> AutocompleteContract.Result.Address(
+                                id = starterArgs.id,
+                                address = event.address,
+                            )
+                        }
+
+                        setResult(result)
+
+                        bottomSheetState.hide()
+                        finish()
                     }
-
-                    setResult(result)
-
-                    bottomSheetState.hide()
-                    finish()
                 }
             }
 

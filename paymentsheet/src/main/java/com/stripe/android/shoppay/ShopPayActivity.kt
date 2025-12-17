@@ -26,8 +26,11 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.os.bundleOf
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.core.Logger
 import com.stripe.android.paymentsheet.BuildConfig
@@ -106,9 +109,12 @@ internal class ShopPayActivity : ComponentActivity() {
             }
         }
 
-        LaunchedEffect(Unit) {
-            viewModel.paymentResult.collect { result ->
-                dismiss(result)
+        val lifecycleOwner = LocalLifecycleOwner.current
+        LaunchedEffect(lifecycleOwner) {
+            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                viewModel.paymentResult.collect { result ->
+                    dismiss(result)
+                }
             }
         }
 
