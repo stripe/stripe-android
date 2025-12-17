@@ -30,6 +30,7 @@ dependencies {
     implementation libs.androidx.savedState
     implementation libs.androidx.viewModel
     implementation libs.androidx.webkit
+    implementation libs.androidx.startup
 
     // DI
     implementation libs.dagger
