@@ -30,7 +30,7 @@ internal object UsBankAccountDefinition : PaymentMethodDefinition {
     override fun uiDefinitionFactory(): UiDefinitionFactory = UsBankAccountUiDefinitionFactory
 }
 
-private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
+private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Custom {
     override fun createSupportedPaymentMethod(): SupportedPaymentMethod = SupportedPaymentMethod(
         code = UsBankAccountDefinition.type.code,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,

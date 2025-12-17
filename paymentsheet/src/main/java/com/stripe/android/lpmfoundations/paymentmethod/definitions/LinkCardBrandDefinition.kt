@@ -28,7 +28,7 @@ internal object LinkCardBrandDefinition : PaymentMethodDefinition {
     override fun uiDefinitionFactory(): UiDefinitionFactory = LinkCardBrandDefinitionFactory
 }
 
-private object LinkCardBrandDefinitionFactory : UiDefinitionFactory.Simple {
+private object LinkCardBrandDefinitionFactory : UiDefinitionFactory.Custom {
 
     override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
         return SupportedPaymentMethod(

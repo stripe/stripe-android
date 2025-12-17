@@ -10,7 +10,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.UpiElement
-import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.SectionElement
 
 internal object UpiDefinition : PaymentMethodDefinition {
@@ -29,7 +28,7 @@ internal object UpiDefinition : PaymentMethodDefinition {
     override fun uiDefinitionFactory(): UiDefinitionFactory = UpiUiDefinitionFactory
 }
 
-private object UpiUiDefinitionFactory : UiDefinitionFactory.Simple {
+private object UpiUiDefinitionFactory : UiDefinitionFactory.Simple() {
     override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         paymentMethodDefinition = UpiDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_upi,
@@ -37,14 +36,16 @@ private object UpiUiDefinitionFactory : UiDefinitionFactory.Simple {
         iconResourceNight = null,
     )
 
-    override fun createFormElements(
+    override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments
-    ): List<FormElement> {
+        arguments: UiDefinitionFactory.Arguments,
+        builder: FormElementsBuilder,
+    ) {
         val section = SectionElement.wrap(
             UpiElement(),
             label = resolvableString(R.string.stripe_paymentsheet_buy_using_upi_id)
         )
-        return FormElementsBuilder(arguments).element(section).build()
+
+        builder.element(section)
     }
 }
