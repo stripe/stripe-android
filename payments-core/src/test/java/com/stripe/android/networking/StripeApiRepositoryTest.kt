@@ -3291,6 +3291,10 @@ internal class StripeApiRepositoryTest {
         }
     }
 
+    /**
+     * If you've added a new PM and this test is failing, see https://go/add-pmo-param-elements-session for
+     * instructions to add a param for the PM to elements/session.
+     */
     @Test
     fun `elements session accepts PMO SFU params`() = runTest {
         val pmMap = mutableMapOf<String, Map<String, String>>()
