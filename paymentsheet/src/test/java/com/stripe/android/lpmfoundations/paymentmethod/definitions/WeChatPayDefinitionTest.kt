@@ -5,19 +5,19 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class AlipayDefinitionTest {
+class WeChatPayDefinitionTest {
     @Test
     fun `createFormElements returns no elements`() {
-        AlipayDefinition.basicEmptyFormTest()
+        WeChatPayDefinition.basicEmptyFormTest()
     }
 
     @Test
     fun `createFormElements returns requested contact information fields`() {
-        AlipayDefinition.basicFormWithContactFieldsTest()
+        WeChatPayDefinition.basicFormWithContactFieldsTest()
     }
 
     @Test
     fun `createFormElements returns all billing details fields`() {
-        AlipayDefinition.basicFormWithBillingInformationTest()
+        WeChatPayDefinition.basicFormWithBillingInformationTest()
     }
 }

@@ -7,7 +7,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal object TwintDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Twint
@@ -25,13 +24,9 @@ internal object TwintDefinition : PaymentMethodDefinition {
     override fun uiDefinitionFactory(): UiDefinitionFactory = TwintUiDefinitionFactory
 }
 
-private object TwintUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec,
-    ) = SupportedPaymentMethod(
+private object TwintUiDefinitionFactory : UiDefinitionFactory.Simple() {
+    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         paymentMethodDefinition = TwintDefinition,
-        sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_twint,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_twint,
         iconResourceNight = null,

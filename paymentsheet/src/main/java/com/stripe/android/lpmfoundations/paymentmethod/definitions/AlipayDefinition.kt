@@ -26,9 +26,7 @@ internal object AlipayDefinition : PaymentMethodDefinition {
 
 private object AlipayUiDefinitionFactory : UiDefinitionFactory.Simple() {
     override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
-        code = PaymentMethod.Type.Alipay.code,
-        lightThemeIconUrl = null,
-        darkThemeIconUrl = null,
+        paymentMethodDefinition = AlipayDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_alipay,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_alipay,
         iconResourceNight = null,

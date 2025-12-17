@@ -7,7 +7,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal object WeChatPayDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.WeChatPay
@@ -25,13 +24,9 @@ internal object WeChatPayDefinition : PaymentMethodDefinition {
     override fun uiDefinitionFactory(): UiDefinitionFactory = WeChatPayUiDefinitionFactory
 }
 
-private object WeChatPayUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec,
-    ) = SupportedPaymentMethod(
+private object WeChatPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
+    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         paymentMethodDefinition = WeChatPayDefinition,
-        sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_wechat,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_wechat_pay,
         iconResourceNight = null,

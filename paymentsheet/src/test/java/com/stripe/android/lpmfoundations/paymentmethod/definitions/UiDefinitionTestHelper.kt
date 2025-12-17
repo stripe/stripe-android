@@ -8,9 +8,12 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -48,6 +51,61 @@ internal fun PaymentMethodDefinition.CreateFormUi(
         elements = formElements,
         lastTextFieldIdentifier = null,
     )
+}
+
+internal fun PaymentMethodDefinition.basicEmptyFormTest() {
+    val formElements = formElements(
+        metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFactory.create(
+                paymentMethodTypes = listOf(type.code)
+            )
+        )
+    )
+
+    assertThat(formElements).isEmpty()
+}
+
+internal fun PaymentMethodDefinition.basicFormWithContactFieldsTest() {
+    val formElements = formElements(
+        metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFactory.create(
+                paymentMethodTypes = listOf(type.code)
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+            )
+        )
+    )
+
+    assertThat(formElements).hasSize(2)
+
+    checkPhoneField(formElements, 0)
+    checkEmailField(formElements, 1)
+}
+
+internal fun PaymentMethodDefinition.basicFormWithBillingInformationTest() {
+    val formElements = formElements(
+        metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFactory.create(
+                paymentMethodTypes = listOf(type.code)
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            )
+        )
+    )
+
+    assertThat(formElements).hasSize(4)
+
+    checkNameField(formElements, 0)
+    checkPhoneField(formElements, 1)
+    checkEmailField(formElements, 2)
+    checkBillingField(formElements, 3)
 }
 
 internal fun checkNameField(
