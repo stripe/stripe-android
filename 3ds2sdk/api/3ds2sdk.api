@@ -338,9 +338,8 @@ public abstract interface class com/stripe/android/stripe3ds2/observability/Erro
 }
 
 public abstract interface class com/stripe/android/stripe3ds2/observability/SentryConfig {
-	public abstract fun getKey ()Ljava/lang/String;
 	public abstract fun getProjectId ()Ljava/lang/String;
-	public abstract fun getSecret ()Ljava/lang/String;
+	public abstract fun getPublicKey ()Ljava/lang/String;
 	public abstract fun getTimestamp ()Ljava/lang/String;
 	public abstract fun getVersion ()Ljava/lang/String;
 }
