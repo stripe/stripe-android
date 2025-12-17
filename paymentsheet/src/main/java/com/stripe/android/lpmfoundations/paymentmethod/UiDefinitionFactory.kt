@@ -7,6 +7,7 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.FormHeaderInformation
+import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.InitialValuesFactory
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
@@ -153,7 +154,32 @@ internal sealed interface UiDefinitionFactory {
         }
     }
 
-    interface Simple : UiDefinitionFactory {
+    abstract class Simple : UiDefinitionFactory {
+        abstract fun createSupportedPaymentMethod(): SupportedPaymentMethod
+
+        open fun createFormHeaderInformation(
+            customerHasSavedPaymentMethods: Boolean,
+            incentive: PaymentMethodIncentive?,
+        ): FormHeaderInformation {
+            return createSupportedPaymentMethod().asFormHeaderInformation(incentive)
+        }
+
+        fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement> {
+            val builder = FormElementsBuilder(arguments)
+
+            buildFormElements(metadata, arguments, builder)
+
+            return builder.build()
+        }
+
+        protected open fun buildFormElements(
+            metadata: PaymentMethodMetadata,
+            arguments: Arguments,
+            builder: FormElementsBuilder,
+        ) {}
+    }
+
+    interface Custom : UiDefinitionFactory {
         fun createSupportedPaymentMethod(): SupportedPaymentMethod
 
         fun createFormHeaderInformation(
@@ -170,7 +196,9 @@ internal sealed interface UiDefinitionFactory {
         definition: PaymentMethodDefinition,
         sharedDataSpecs: List<SharedDataSpec>,
     ): Boolean = when (this) {
-        is Simple -> {
+        is Simple,
+
+        is Custom -> {
             true
         }
 
@@ -185,6 +213,10 @@ internal sealed interface UiDefinitionFactory {
         sharedDataSpecs: List<SharedDataSpec>,
     ): SupportedPaymentMethod? = when (this) {
         is Simple -> {
+            createSupportedPaymentMethod()
+        }
+
+        is Custom -> {
             createSupportedPaymentMethod()
         }
 
@@ -205,6 +237,13 @@ internal sealed interface UiDefinitionFactory {
         customerHasSavedPaymentMethods: Boolean,
     ): FormHeaderInformation? = when (this) {
         is Simple -> {
+            createFormHeaderInformation(
+                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
+                incentive = metadata.paymentMethodIncentive,
+            )
+        }
+
+        is Custom -> {
             createFormHeaderInformation(
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
                 incentive = metadata.paymentMethodIncentive,
@@ -232,6 +271,13 @@ internal sealed interface UiDefinitionFactory {
         arguments: Arguments,
     ): List<FormElement>? = when (this) {
         is Simple -> {
+            createFormElements(
+                metadata = metadata,
+                arguments = arguments,
+            )
+        }
+
+        is Custom -> {
             createFormElements(
                 metadata = metadata,
                 arguments = arguments,

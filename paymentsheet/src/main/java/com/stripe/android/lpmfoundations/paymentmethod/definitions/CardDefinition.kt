@@ -57,7 +57,7 @@ internal object CardDefinition : PaymentMethodDefinition {
     override fun uiDefinitionFactory(): UiDefinitionFactory = CardUiDefinitionFactory
 }
 
-private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
+private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
     override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         paymentMethodDefinition = CardDefinition,
         displayNameResource = PaymentsUiCoreR.string.stripe_paymentsheet_payment_method_card,

@@ -7,12 +7,11 @@ import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentM
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.ui.core.elements.StaticTextElement
-import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 internal class CustomPaymentMethodUiDefinitionFactory(
     private val displayableCustomPaymentMethod: DisplayableCustomPaymentMethod
-) : UiDefinitionFactory.Simple {
+) : UiDefinitionFactory.Simple() {
     override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = displayableCustomPaymentMethod.id,
@@ -26,12 +25,11 @@ internal class CustomPaymentMethodUiDefinitionFactory(
         )
     }
 
-    override fun createFormElements(
+    override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments
-    ): List<FormElement> {
-        val builder = FormElementsBuilder(arguments)
-
+        arguments: UiDefinitionFactory.Arguments,
+        builder: FormElementsBuilder,
+    ) {
         displayableCustomPaymentMethod.subtitle?.let { subtitle ->
             builder.header(
                 StaticTextElement(
@@ -45,7 +43,5 @@ internal class CustomPaymentMethodUiDefinitionFactory(
             builder.ignoreContactInformationRequirements()
             builder.ignoreBillingAddressRequirements()
         }
-
-        return builder.build()
     }
 }

@@ -177,7 +177,7 @@ internal class VerticalModeFormUITest {
 
     private fun createCardState(customerHasSavedPaymentMethods: Boolean): VerticalModeFormInteractor.State {
         val headerInformation =
-            (CardDefinition.uiDefinitionFactory() as UiDefinitionFactory.Simple).createFormHeaderInformation(
+            (CardDefinition.uiDefinitionFactory() as UiDefinitionFactory.Custom).createFormHeaderInformation(
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
                 incentive = null,
             )

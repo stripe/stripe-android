@@ -12,7 +12,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
@@ -36,7 +35,7 @@ internal object KonbiniDefinition : PaymentMethodDefinition {
     override fun uiDefinitionFactory(): UiDefinitionFactory = KonbiniUiDefinitionFactory
 }
 
-private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple {
+private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple() {
     override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         paymentMethodDefinition = KonbiniDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_konbini,
@@ -44,10 +43,11 @@ private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple {
         iconResourceNight = null,
     )
 
-    override fun createFormElements(
+    override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments
-    ): List<FormElement> {
+        arguments: UiDefinitionFactory.Arguments,
+        builder: FormElementsBuilder,
+    ) {
         val confirmationNumberElement = SimpleTextElement(
             identifier = IdentifierSpec.KonbiniConfirmationNumber,
             controller = SimpleTextFieldController(
@@ -60,10 +60,9 @@ private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple {
                 initialValue = arguments.initialValues[IdentifierSpec.KonbiniConfirmationNumber],
             ),
         )
-        return FormElementsBuilder(arguments)
+        builder
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
             .element(SectionElement.wrap(confirmationNumberElement))
-            .build()
     }
 }

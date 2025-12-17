@@ -9,7 +9,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.BlikElement
-import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.SectionElement
 
 internal object BlikDefinition : PaymentMethodDefinition {
@@ -28,7 +27,7 @@ internal object BlikDefinition : PaymentMethodDefinition {
     override fun uiDefinitionFactory(): UiDefinitionFactory = BlikUiDefinitionFactory
 }
 
-private object BlikUiDefinitionFactory : UiDefinitionFactory.Simple {
+private object BlikUiDefinitionFactory : UiDefinitionFactory.Simple() {
     override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         paymentMethodDefinition = BlikDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_blik,
@@ -36,10 +35,11 @@ private object BlikUiDefinitionFactory : UiDefinitionFactory.Simple {
         iconResourceNight = null
     )
 
-    override fun createFormElements(
+    override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments
-    ): List<FormElement> {
-        return FormElementsBuilder(arguments).element(SectionElement.wrap(BlikElement())).build()
+        arguments: UiDefinitionFactory.Arguments,
+        builder: FormElementsBuilder,
+    ) {
+        builder.element(SectionElement.wrap(BlikElement()))
     }
 }
