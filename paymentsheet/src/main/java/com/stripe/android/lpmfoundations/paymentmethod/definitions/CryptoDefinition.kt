@@ -7,7 +7,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal object CryptoDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Crypto
@@ -25,13 +24,9 @@ internal object CryptoDefinition : PaymentMethodDefinition {
     override fun uiDefinitionFactory(): UiDefinitionFactory = CryptoUiDefinitionFactory
 }
 
-private object CryptoUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec,
-    ) = SupportedPaymentMethod(
+private object CryptoUiDefinitionFactory : UiDefinitionFactory.Simple() {
+    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         paymentMethodDefinition = CryptoDefinition,
-        sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_crypto,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_crypto_day,
         iconResourceNight = R.drawable.stripe_ic_paymentsheet_pm_crypto_night,

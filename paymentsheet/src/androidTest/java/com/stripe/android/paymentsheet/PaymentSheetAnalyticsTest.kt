@@ -92,7 +92,7 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
-            query("hidden_payment_methods", Uri.encode("cashapp,affirm,alipay")),
+            query("hidden_payment_methods", Uri.encode("cashapp,affirm,alipay,wechat_pay")),
             query("visible_payment_methods", Uri.encode("link,card,afterpay_clearpay,klarna")),
             query("payment_method_layout", "horizontal"),
         )
@@ -174,7 +174,7 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
-            query("visible_payment_methods", Uri.encode("link,card,afterpay_clearpay,klarna,cashapp,affirm,alipay")),
+            query("visible_payment_methods", Uri.encode("link,card,afterpay_clearpay,klarna,cashapp,affirm,alipay,wechat_pay")),
             query("payment_method_layout", "vertical"),
         )
 

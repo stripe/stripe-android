@@ -100,7 +100,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             query("hidden_payment_methods", ""),
             query(
                 "visible_payment_methods",
-                Uri.encode("link,card,afterpay_clearpay,klarna,cashapp,affirm,alipay")
+                Uri.encode("link,card,afterpay_clearpay,klarna,cashapp,affirm,alipay,wechat_pay")
             ),
             query("payment_method_layout", "vertical")
         )
