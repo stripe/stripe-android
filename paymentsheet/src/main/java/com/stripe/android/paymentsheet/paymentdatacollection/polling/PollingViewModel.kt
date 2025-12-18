@@ -234,10 +234,11 @@ internal class PollingViewModel @Inject constructor(
                     config = config,
                     ioDispatcher = Dispatchers.IO,
                 )
-                .subcomponentBuilder
-                .args(args)
-                .savedStateHandle(extras.createSavedStateHandle())
-                .build()
+                .subcomponentFactory
+                .create(
+                    savedStateHandle = extras.createSavedStateHandle(),
+                    args = args,
+                )
                 .viewModel as T
         }
     }

@@ -10,17 +10,15 @@ import dagger.Subcomponent
 internal interface USBankAccountFormViewModelSubcomponent {
     val viewModel: USBankAccountFormViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-        @BindsInstance
-        fun savedStateHandle(handle: SavedStateHandle): Builder
-
-        @BindsInstance
-        fun configuration(configuration: USBankAccountFormViewModel.Args): Builder
-
-        @BindsInstance
-        fun autocompleteAddressInteractorFactory(interactorFactory: AutocompleteAddressInteractor.Factory?): Builder
-
-        fun build(): USBankAccountFormViewModelSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            savedStateHandle: SavedStateHandle,
+            @BindsInstance
+            configuration: USBankAccountFormViewModel.Args,
+            @BindsInstance
+            autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
+        ): USBankAccountFormViewModelSubcomponent
     }
 }

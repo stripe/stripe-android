@@ -17,7 +17,7 @@ import javax.inject.Singleton
     ]
 )
 internal interface USBankAccountFormComponent {
-    val subComponentBuilderProvider: Provider<USBankAccountFormViewModelSubcomponent.Builder>
+    val subComponentFactoryProvider: Provider<USBankAccountFormViewModelSubcomponent.Factory>
 
     @Component.Factory
     interface Factory {

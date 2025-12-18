@@ -22,7 +22,7 @@ import javax.inject.Singleton
     ]
 )
 internal interface PollingComponent {
-    val subcomponentBuilder: PollingViewModelSubcomponent.Builder
+    val subcomponentFactory: PollingViewModelSubcomponent.Factory
 
     @Component.Factory
     interface Factory {

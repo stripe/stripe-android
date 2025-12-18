@@ -273,14 +273,14 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val inputAddressViewModelSubcomponentBuilderProvider:
-        Provider<InputAddressViewModelSubcomponent.Builder>
+        private val inputAddressViewModelSubcomponentFactoryProvider:
+        Provider<InputAddressViewModelSubcomponent.Factory>
     ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return inputAddressViewModelSubcomponentBuilderProvider.get()
-                .build().inputAddressViewModel as T
+            return inputAddressViewModelSubcomponentFactoryProvider.get()
+                .create().inputAddressViewModel as T
         }
     }
 }

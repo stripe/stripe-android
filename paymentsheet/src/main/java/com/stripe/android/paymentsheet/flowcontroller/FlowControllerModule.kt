@@ -44,12 +44,12 @@ internal object FlowControllerModule {
     @Singleton
     @Named(FLOW_CONTROLLER_LINK_LAUNCHER)
     fun provideFlowControllerLinkLauncher(
-        linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
+        linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
         linkActivityContract: LinkActivityContract,
         @PaymentElementCallbackIdentifier identifier: String,
         linkStore: LinkStore,
     ) = LinkPaymentLauncher(
-        linkAnalyticsComponentBuilder,
+        linkAnalyticsComponentFactory,
         identifier,
         linkActivityContract,
         linkStore,
@@ -59,12 +59,12 @@ internal object FlowControllerModule {
     @Singleton
     @Named(WALLETS_BUTTON_LINK_LAUNCHER)
     fun provideWalletsButtonLinkLauncher(
-        linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
+        linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
         linkActivityContract: LinkActivityContract,
         @PaymentElementCallbackIdentifier identifier: String,
         linkStore: LinkStore,
     ) = LinkPaymentLauncher(
-        linkAnalyticsComponentBuilder,
+        linkAnalyticsComponentFactory,
         identifier,
         linkActivityContract,
         linkStore,

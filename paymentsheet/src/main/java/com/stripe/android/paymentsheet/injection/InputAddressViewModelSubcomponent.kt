@@ -7,9 +7,8 @@ import dagger.Subcomponent
 internal interface InputAddressViewModelSubcomponent {
     val inputAddressViewModel: InputAddressViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        fun build(): InputAddressViewModelSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(): InputAddressViewModelSubcomponent
     }
 }

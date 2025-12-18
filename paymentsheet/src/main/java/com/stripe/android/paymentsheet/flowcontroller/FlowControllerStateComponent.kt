@@ -49,7 +49,7 @@ import javax.inject.Singleton
     ]
 )
 internal interface FlowControllerStateComponent {
-    val flowControllerComponentBuilder: FlowControllerComponent.Builder
+    val flowControllerComponentFactory: FlowControllerComponent.Factory
     val confirmationHandler: ConfirmationHandler
     val linkHandler: LinkHandler
     val errorReporter: ErrorReporter

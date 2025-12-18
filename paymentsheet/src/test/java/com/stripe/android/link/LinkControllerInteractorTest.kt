@@ -60,8 +60,8 @@ class LinkControllerInteractorTest {
             linkAccountManager = linkAccountManager,
             linkAttestationCheck = linkAttestationCheck,
         )
-    private val linkComponentBuilderProvider: Provider<LinkComponent.Builder> =
-        Provider { FakeLinkComponent.Builder(linkComponent) }
+    private val linkComponentFactoryProvider: Provider<LinkComponent.Factory> =
+        Provider { FakeLinkComponent.Factory(linkComponent) }
 
     @Test
     fun `Initial state is correct`() = runTest {
@@ -977,7 +977,7 @@ class LinkControllerInteractorTest {
             logger = logger,
             linkConfigurationLoader = linkConfigurationLoader,
             linkAccountHolder = linkAccountHolder,
-            linkComponentBuilderProvider = linkComponentBuilderProvider,
+            linkComponentFactoryProvider = linkComponentFactoryProvider,
         )
     }
 

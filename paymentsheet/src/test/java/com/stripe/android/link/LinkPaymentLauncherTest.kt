@@ -375,8 +375,8 @@ internal class LinkPaymentLauncherTest {
         linkStore: LinkStore = mock()
     ): LinkPaymentLauncher {
         return LinkPaymentLauncher(
-            linkAnalyticsComponentBuilder = object : LinkAnalyticsComponent.Builder {
-                override fun build() = object : LinkAnalyticsComponent {
+            linkAnalyticsComponentFactory = object : LinkAnalyticsComponent.Factory {
+                override fun create() = object : LinkAnalyticsComponent {
                     override val linkAnalyticsHelper = linkAnalyticsHelper
                 }
             },
