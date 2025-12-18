@@ -1,8 +1,10 @@
 package com.stripe.android.paymentsheet.example.playground
 
 import android.app.Application
+import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -33,6 +35,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.Settings
+import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequestParams
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentRequest
@@ -763,6 +766,36 @@ internal class PaymentSheetPlaygroundViewModel(
                     }
                 }
             )
+        }
+    }
+
+    fun resetToDefaults() {
+        viewModelScope.launch {
+            // Reset appearance
+            AppearanceStore.reset()
+
+            // Clear SharedPreferences
+            withContext(Dispatchers.IO) {
+                val sharedPreferences = getApplication<Application>().getSharedPreferences(
+                    "PlaygroundSettings",
+                    Context.MODE_PRIVATE
+                )
+                sharedPreferences.edit {
+                    clear()
+                }
+            }
+
+            // Create and apply default settings
+            val defaultSettings = PlaygroundSettings.createFromDefaults()
+            playgroundSettingsFlow.value = defaultSettings
+
+            // Clear states
+            setPlaygroundState(null)
+            flowControllerState.value = null
+            customerSheetState.value = null
+
+            // Auto-reload
+            prepare(defaultSettings)
         }
     }
 

@@ -297,6 +297,8 @@ internal class PaymentSheetPlaygroundActivity :
                     QrCodeButton(playgroundSettings = localPlaygroundSettings)
 
                     ClearLinkDataButton()
+
+                    ResetToDefaultsButton()
                 },
                 bottomBarContent = {
                     ReloadButton(playgroundSettings = localPlaygroundSettings)
@@ -428,6 +430,18 @@ internal class PaymentSheetPlaygroundActivity :
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text("Clear Link customer")
+        }
+    }
+
+    @Composable
+    private fun ResetToDefaultsButton() {
+        Button(
+            onClick = {
+                viewModel.resetToDefaults()
+            },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Reset to defaults")
         }
     }
 
