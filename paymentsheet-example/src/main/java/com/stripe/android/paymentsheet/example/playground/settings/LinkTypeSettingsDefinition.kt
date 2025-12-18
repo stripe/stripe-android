@@ -20,8 +20,10 @@ internal object LinkTypeSettingsDefinition :
             return false
         }
 
-        // Delegate to LinkSettingsDefinition visibility logic
-        return LinkSettingsDefinition.applicable(configurationData, settings)
+        return (
+            LinkSettingsDefinition.applicable(configurationData, settings) &&
+                settings?.get(LinkSettingsDefinition) == true
+            )
     }
 
     override fun createOptions(

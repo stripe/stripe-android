@@ -37,8 +37,7 @@ internal class PlaygroundSettings private constructor(
     private val _configurationData = MutableStateFlow(initialConfigurationData)
     val configurationData = _configurationData.asStateFlow()
 
-    val displayableDefinitions = combineAsStateFlow(_configurationData, settings)
-    { data, settings ->
+    val displayableDefinitions = combineAsStateFlow(_configurationData, settings) { data, settings ->
         settings
             .filterKeys { it.applicable(data, settings) }
             .keys

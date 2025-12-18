@@ -18,9 +18,9 @@ internal object LinkSettingsDefinition : BooleanSettingsDefinition(
             return false
         }
 
-        // Only visible when merchant is US or StripeShop
         return (settings?.get(MerchantSettingsDefinition) as? Merchant) in listOf(
-            Merchant.US, Merchant.StripeShop
+            Merchant.US,
+            Merchant.StripeShop,
         )
     }
 

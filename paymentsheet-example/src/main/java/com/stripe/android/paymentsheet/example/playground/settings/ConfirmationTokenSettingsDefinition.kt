@@ -15,7 +15,6 @@ internal object ConfirmationTokenSettingsDefinition : BooleanSettingsDefinition(
             return false
         }
 
-        // Only visible when using deferred initialization types
         return when (settings?.get(InitializationTypeSettingsDefinition) as? InitializationType) {
             InitializationType.Normal -> false
             InitializationType.DeferredClientSideConfirmation,

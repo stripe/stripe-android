@@ -16,7 +16,6 @@ internal object CustomerSessionSaveSettingsDefinition : BooleanSettingsDefinitio
             return false
         }
 
-        // Only visible when Customer Session is enabled
         return settings?.get(CustomerSessionSettingsDefinition) == true
     }
 

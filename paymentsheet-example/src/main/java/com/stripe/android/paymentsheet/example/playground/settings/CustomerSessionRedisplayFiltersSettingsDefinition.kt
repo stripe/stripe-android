@@ -19,7 +19,6 @@ internal object CustomerSessionRedisplayFiltersSettingsDefinition :
         configurationData: PlaygroundConfigurationData,
         settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
     ): Boolean {
-        // Only visible when Customer Session is enabled
         return settings?.get(CustomerSessionSettingsDefinition) == true
     }
 

@@ -22,7 +22,6 @@ internal object CustomerSessionOverrideRedisplaySettingsDefinition :
             return false
         }
 
-        // Only visible when Customer Session is enabled
         return settings?.get(CustomerSessionSettingsDefinition) == true
     }
 
