@@ -104,12 +104,13 @@ internal class ExtendedPaymentElementConfirmationTestActivity : AppCompatActivit
 
         object Factory : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                val component = DaggerExtendedPaymentElementConfirmationTestComponent.builder()
-                    .application(extras.requireApplication())
-                    .allowsManualConfirmation(allowsManualConfirmation = false)
-                    .statusBarColor(null)
-                    .savedStateHandle(extras.createSavedStateHandle())
-                    .build()
+                val component = DaggerExtendedPaymentElementConfirmationTestComponent.factory()
+                    .create(
+                        application = extras.requireApplication(),
+                        savedStateHandle = extras.createSavedStateHandle(),
+                        statusBarColor = null,
+                        allowsManualConfirmation = false,
+                    )
 
                 @Suppress("UNCHECKED_CAST")
                 return component.viewModel as T
@@ -128,21 +129,20 @@ internal class ExtendedPaymentElementConfirmationTestActivity : AppCompatActivit
 internal interface ExtendedPaymentElementConfirmationTestComponent {
     val viewModel: ExtendedPaymentElementConfirmationTestActivity.TestViewModel
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
-
-        @BindsInstance
-        fun statusBarColor(@Named(STATUS_BAR_COLOR) statusBarColor: Int?): Builder
-
-        @BindsInstance
-        fun allowsManualConfirmation(@Named(ALLOWS_MANUAL_CONFIRMATION) allowsManualConfirmation: Boolean): Builder
-
-        fun build(): ExtendedPaymentElementConfirmationTestComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            application: Application,
+            @BindsInstance
+            savedStateHandle: SavedStateHandle,
+            @BindsInstance
+            @Named(STATUS_BAR_COLOR)
+            statusBarColor: Int?,
+            @BindsInstance
+            @Named(ALLOWS_MANUAL_CONFIRMATION)
+            allowsManualConfirmation: Boolean,
+        ): ExtendedPaymentElementConfirmationTestComponent
     }
 }
 

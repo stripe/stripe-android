@@ -31,12 +31,13 @@ class ExtendedPaymentElementConfirmationOrderTest {
     @Test
     fun `on register, should register contracts in expected order`() = runTest {
         DummyActivityResultCaller.test {
-            val viewModel = DaggerExtendedPaymentElementConfirmationTestComponent.builder()
-                .application(application)
-                .allowsManualConfirmation(allowsManualConfirmation = false)
-                .statusBarColor(statusBarColor = null)
-                .savedStateHandle(SavedStateHandle())
-                .build().viewModel
+            val viewModel = DaggerExtendedPaymentElementConfirmationTestComponent.factory()
+                .create(
+                    application = application,
+                    savedStateHandle = SavedStateHandle(),
+                    statusBarColor = null,
+                    allowsManualConfirmation = false,
+                ).viewModel
 
             viewModel.confirmationHandler.register(
                 activityResultCaller = activityResultCaller,

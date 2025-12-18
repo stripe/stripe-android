@@ -74,53 +74,40 @@ internal interface NativeLinkComponent {
     val webLinkAuthChannel: WebLinkAuthChannel
     val paymentMethodMetadata: PaymentMethodMetadata
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun configuration(configuration: LinkConfiguration): Builder
-
-        @BindsInstance
-        fun paymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata): Builder
-
-        @BindsInstance
-        fun publishableKeyProvider(@Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String): Builder
-
-        @BindsInstance
-        fun stripeAccountIdProvider(@Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?): Builder
-
-        @BindsInstance
-        fun paymentElementCallbackIdentifier(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String
-        ): Builder
-
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
-        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
-
-        @BindsInstance
-        fun statusBarColor(@Named(STATUS_BAR_COLOR) statusBarColor: Int?): Builder
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun linkExpressMode(
-            @Named(LINK_EXPRESS_MODE) linkExpressMode: LinkExpressMode
-        ): Builder
-
-        @BindsInstance
-        fun linkLaunchMode(linkLaunchMode: LinkLaunchMode): Builder
-
-        @BindsInstance
-        fun linkAccountUpdate(linkAccountUpdate: LinkAccountUpdate.Value): Builder
-
-        @BindsInstance
-        fun requestSurface(
-            requestSurface: RequestSurface
-        ): Builder
-
-        fun build(): NativeLinkComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            configuration: LinkConfiguration,
+            @BindsInstance
+            paymentMethodMetadata: PaymentMethodMetadata,
+            @BindsInstance
+            @Named(PUBLISHABLE_KEY)
+            publishableKeyProvider: () -> String,
+            @BindsInstance
+            @Named(STRIPE_ACCOUNT_ID)
+            stripeAccountIdProvider: () -> String?,
+            @BindsInstance
+            @PaymentElementCallbackIdentifier
+            paymentElementCallbackIdentifier: String,
+            @BindsInstance
+            context: Context,
+            @BindsInstance
+            savedStateHandle: SavedStateHandle,
+            @BindsInstance
+            @Named(STATUS_BAR_COLOR)
+            statusBarColor: Int?,
+            @BindsInstance
+            application: Application,
+            @BindsInstance
+            @Named(LINK_EXPRESS_MODE)
+            linkExpressMode: LinkExpressMode,
+            @BindsInstance
+            linkLaunchMode: LinkLaunchMode,
+            @BindsInstance
+            linkAccountUpdate: LinkAccountUpdate.Value,
+            @BindsInstance
+            requestSurface: RequestSurface,
+        ): NativeLinkComponent
     }
 }

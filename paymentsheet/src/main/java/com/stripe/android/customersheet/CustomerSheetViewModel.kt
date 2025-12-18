@@ -1300,13 +1300,14 @@ internal class CustomerSheetViewModel(
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val component = DaggerCustomerSheetViewModelComponent.builder()
-                .application(extras.requireApplication())
-                .configuration(args.configuration)
-                .integrationType(args.integrationType)
-                .statusBarColor(args.statusBarColor)
-                .savedStateHandle(extras.createSavedStateHandle())
-                .build()
+            val component = DaggerCustomerSheetViewModelComponent.factory()
+                .create(
+                    application = extras.requireApplication(),
+                    configuration = args.configuration,
+                    statusBarColor = args.statusBarColor,
+                    integrationType = args.integrationType,
+                    savedStateHandle = extras.createSavedStateHandle(),
+                )
 
             return component.viewModel as T
         }

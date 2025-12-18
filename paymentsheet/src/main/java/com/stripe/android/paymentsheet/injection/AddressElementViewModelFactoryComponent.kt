@@ -27,14 +27,11 @@ import javax.inject.Singleton
 internal interface AddressElementViewModelFactoryComponent {
     val addressElementViewModel: AddressElementViewModel
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
-        fun starterArgs(starterArgs: AddressElementActivityContract.Args): Builder
-
-        fun build(): AddressElementViewModelFactoryComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance context: Context,
+            @BindsInstance starterArgs: AddressElementActivityContract.Args,
+        ): AddressElementViewModelFactoryComponent
     }
 }
