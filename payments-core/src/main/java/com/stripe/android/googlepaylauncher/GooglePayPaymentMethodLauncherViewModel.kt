@@ -158,24 +158,26 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             val application = extras.requireApplication()
             val savedStateHandle = extras.createSavedStateHandle()
 
-            val subComponentBuilder = DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent.builder()
-                .context(application)
-                .enableLogging(BuildConfig.DEBUG)
-                .publishableKeyProvider {
-                    PaymentConfiguration.getInstance(application).publishableKey
-                }
-                .stripeAccountIdProvider {
-                    PaymentConfiguration.getInstance(application).stripeAccountId
-                }
-                .productUsage(setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN))
-                .googlePayConfig(args.config)
-                .cardBrandFilter(args.cardBrandFilter)
-                .build().subcomponentBuilder
+            val subComponentFactory = DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent.factory()
+                .create(
+                    context = application,
+                    enableLogging = BuildConfig.DEBUG,
+                    publishableKeyProvider = {
+                        PaymentConfiguration.getInstance(application).publishableKey
+                    },
+                    stripeAccountIdProvider = {
+                        PaymentConfiguration.getInstance(application).stripeAccountId
+                    },
+                    productUsage = setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN),
+                    config = args.config,
+                    cardBrandFilter = args.cardBrandFilter,
+                ).subcomponentFactory
 
-            return subComponentBuilder
-                .args(args)
-                .savedStateHandle(savedStateHandle)
-                .build().viewModel as T
+            return subComponentFactory
+                .create(
+                    args = args,
+                    savedStateHandle = savedStateHandle,
+                ).viewModel as T
         }
     }
 

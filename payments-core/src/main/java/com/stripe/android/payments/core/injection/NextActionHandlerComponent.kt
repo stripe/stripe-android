@@ -34,40 +34,34 @@ import kotlin.coroutines.CoroutineContext
 internal interface NextActionHandlerComponent {
     val registry: DefaultPaymentNextActionHandlerRegistry
 
-    @Suppress("TooManyFunctions")
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
-        fun analyticsRequestFactory(paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory): Builder
-
-        @BindsInstance
-        fun enableLogging(@Named(ENABLE_LOGGING) enableLogging: Boolean): Builder
-
-        @BindsInstance
-        fun workContext(@IOContext workContext: CoroutineContext): Builder
-
-        @BindsInstance
-        fun uiContext(@UIContext uiContext: CoroutineContext): Builder
-
-        @BindsInstance
-        fun publishableKeyProvider(
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String
-        ): Builder
-
-        @BindsInstance
-        fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
-
-        @BindsInstance
-        fun isInstantApp(@Named(IS_INSTANT_APP) isInstantApp: Boolean): Builder
-
-        @BindsInstance
-        fun includePaymentSheetNextActionHandlers(
-            @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) includePaymentSheetNextHandlers: Boolean
-        ): Builder
-
-        fun build(): NextActionHandlerComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            context: Context,
+            @BindsInstance
+            analyticsRequestFactory: PaymentAnalyticsRequestFactory,
+            @BindsInstance
+            @Named(ENABLE_LOGGING)
+            enableLogging: Boolean,
+            @BindsInstance
+            @IOContext
+            workContext: CoroutineContext,
+            @BindsInstance
+            @UIContext
+            uiContext: CoroutineContext,
+            @BindsInstance
+            @Named(PUBLISHABLE_KEY)
+            publishableKeyProvider: () -> String,
+            @BindsInstance
+            @Named(PRODUCT_USAGE)
+            productUsage: Set<String>,
+            @BindsInstance
+            @Named(IS_INSTANT_APP)
+            isInstantApp: Boolean,
+            @BindsInstance
+            @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS)
+            includePaymentSheetNextActionHandlers: Boolean,
+        ): NextActionHandlerComponent
     }
 }

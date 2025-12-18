@@ -26,22 +26,19 @@ import javax.inject.Singleton
 internal interface PassiveChallengeComponent {
     val passiveChallengeViewModel: PassiveChallengeViewModel
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
-        fun publishableKeyProvider(
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String
-        ): Builder
-
-        @BindsInstance
-        fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
-
-        @BindsInstance
-        fun passiveCaptchaParams(passiveCaptchaParams: PassiveCaptchaParams): Builder
-
-        fun build(): PassiveChallengeComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            context: Context,
+            @BindsInstance
+            @Named(PUBLISHABLE_KEY)
+            publishableKeyProvider: () -> String,
+            @BindsInstance
+            @Named(PRODUCT_USAGE)
+            productUsage: Set<String>,
+            @BindsInstance
+            passiveCaptchaParams: PassiveCaptchaParams,
+        ): PassiveChallengeComponent
     }
 }

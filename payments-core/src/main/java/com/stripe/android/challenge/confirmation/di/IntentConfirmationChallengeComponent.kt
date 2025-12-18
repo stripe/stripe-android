@@ -20,15 +20,13 @@ import javax.inject.Singleton
 internal interface IntentConfirmationChallengeComponent {
     val viewModel: IntentConfirmationChallengeViewModel
 
-    @Component.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
-        fun args(args: IntentConfirmationChallengeArgs): Builder
-
-        fun build(): IntentConfirmationChallengeComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            context: Context,
+            @BindsInstance
+            args: IntentConfirmationChallengeArgs,
+        ): IntentConfirmationChallengeComponent
     }
 }
