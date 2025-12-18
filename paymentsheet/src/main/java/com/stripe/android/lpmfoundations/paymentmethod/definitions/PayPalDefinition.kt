@@ -30,8 +30,8 @@ private object PayPalUiDefinitionFactory : UiDefinitionFactory.Simple() {
     override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         paymentMethodDefinition = PayPalDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_paypal,
-        iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
-        iconResourceNight = null,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal_day,
+        iconResourceNight = R.drawable.stripe_ic_paymentsheet_pm_paypal_night,
     )
 
     override fun buildFormElements(
