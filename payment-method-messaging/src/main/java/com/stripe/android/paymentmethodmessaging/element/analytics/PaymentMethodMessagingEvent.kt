@@ -2,11 +2,9 @@
 
 package com.stripe.android.paymentmethodmessaging.element.analytics
 
-import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElement
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElementPreview
-import com.stripe.android.uicore.StripeThemeDefaults
 import kotlin.time.Duration
 
 internal sealed class PaymentMethodMessagingEvent : AnalyticsEvent {
