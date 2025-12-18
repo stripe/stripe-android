@@ -118,12 +118,13 @@ interface CustomerAdapter {
             setupIntentClientSecretProvider: SetupIntentClientSecretProvider?,
             paymentMethodTypes: List<String>? = null
         ): CustomerAdapter {
-            val component = DaggerStripeCustomerAdapterComponent.builder()
-                .context(context.applicationContext)
-                .customerEphemeralKeyProvider(customerEphemeralKeyProvider)
-                .setupIntentClientSecretProvider(setupIntentClientSecretProvider)
-                .paymentMethodTypes(paymentMethodTypes)
-                .build()
+            val component = DaggerStripeCustomerAdapterComponent.factory()
+                .create(
+                    context = context.applicationContext,
+                    customerEphemeralKeyProvider = customerEphemeralKeyProvider,
+                    setupIntentClientSecretProvider = setupIntentClientSecretProvider,
+                    paymentMethodTypes = paymentMethodTypes,
+                )
             return component.stripeCustomerAdapter
         }
     }

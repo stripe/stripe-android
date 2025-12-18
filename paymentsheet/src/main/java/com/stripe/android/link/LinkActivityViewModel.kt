@@ -537,20 +537,22 @@ internal class LinkActivityViewModel @Inject constructor(
                 val app = this[APPLICATION_KEY] as Application
                 val args: NativeLinkArgs = getArgs(handle) ?: throw NoArgsException()
                 DaggerNativeLinkComponent
-                    .builder()
-                    .configuration(args.configuration)
-                    .paymentMethodMetadata(args.paymentMethodMetadata)
-                    .requestSurface(args.requestSurface)
-                    .publishableKeyProvider { args.publishableKey }
-                    .stripeAccountIdProvider { args.stripeAccountId }
-                    .paymentElementCallbackIdentifier(args.paymentElementCallbackIdentifier)
-                    .savedStateHandle(handle)
-                    .context(app)
-                    .application(app)
-                    .linkExpressMode(args.linkExpressMode)
-                    .linkLaunchMode(args.launchMode)
-                    .linkAccountUpdate(args.linkAccountInfo)
-                    .build()
+                    .factory()
+                    .create(
+                        configuration = args.configuration,
+                        paymentMethodMetadata = args.paymentMethodMetadata,
+                        publishableKeyProvider = { args.publishableKey },
+                        stripeAccountIdProvider = { args.stripeAccountId },
+                        paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
+                        context = app,
+                        savedStateHandle = handle,
+                        statusBarColor = null,
+                        application = app,
+                        linkExpressMode = args.linkExpressMode,
+                        linkLaunchMode = args.launchMode,
+                        linkAccountUpdate = args.linkAccountInfo,
+                        requestSurface = args.requestSurface,
+                    )
                     .viewModel
             }
         }

@@ -61,24 +61,19 @@ internal interface FlowControllerStateComponent {
 
     fun inject(paymentOptionsViewModel: PaymentOptionsViewModel.Factory)
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun statusBarColor(
-            @Named(STATUS_BAR_COLOR) statusBarColor: Int?
-        ): Builder
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun paymentElementCallbackIdentifier(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String
-        ): Builder
-
-        @BindsInstance
-        fun flowControllerViewModel(viewModel: FlowControllerViewModel): Builder
-
-        fun build(): FlowControllerStateComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            @Named(STATUS_BAR_COLOR)
+            statusBarColor: Int?,
+            @BindsInstance
+            application: Application,
+            @BindsInstance
+            @PaymentElementCallbackIdentifier
+            paymentElementCallbackIdentifier: String,
+            @BindsInstance
+            flowControllerViewModel: FlowControllerViewModel,
+        ): FlowControllerStateComponent
     }
 }

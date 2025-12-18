@@ -24,18 +24,12 @@ import javax.inject.Singleton
 internal interface PollingComponent {
     val subcomponentBuilder: PollingViewModelSubcomponent.Builder
 
-    @Component.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun config(config: IntentStatusPoller.Config): Builder
-
-        @BindsInstance
-        fun ioDispatcher(dispatcher: CoroutineDispatcher): Builder
-
-        fun build(): PollingComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance application: Application,
+            @BindsInstance config: IntentStatusPoller.Config,
+            @BindsInstance ioDispatcher: CoroutineDispatcher,
+        ): PollingComponent
     }
 }

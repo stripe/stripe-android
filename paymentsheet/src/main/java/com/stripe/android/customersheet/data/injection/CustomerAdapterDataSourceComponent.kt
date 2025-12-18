@@ -37,15 +37,11 @@ internal interface CustomerAdapterDataSourceComponent {
     val customerSheetIntentDataSource: CustomerSheetIntentDataSource
     val customerSheetInitializationDataSource: CustomerSheetInitializationDataSource
 
-    @Component.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun adapter(customerAdapter: CustomerAdapter): Builder
-
-        fun build(): CustomerAdapterDataSourceComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance application: Application,
+            @BindsInstance adapter: CustomerAdapter,
+        ): CustomerAdapterDataSourceComponent
     }
 }
