@@ -11,7 +11,19 @@ internal object ConfirmationTokenSettingsDefinition : BooleanSettingsDefinition(
         configurationData: PlaygroundConfigurationData,
         settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
     ): Boolean {
-        return configurationData.integrationType.isPaymentFlow()
+        if (!configurationData.integrationType.isPaymentFlow()) {
+            return false
+        }
+
+        // Only visible when using deferred initialization types
+        return when (settings?.get(InitializationTypeSettingsDefinition) as? InitializationType) {
+            InitializationType.Normal -> false
+            InitializationType.DeferredClientSideConfirmation,
+            InitializationType.DeferredServerSideConfirmation,
+            InitializationType.DeferredManualConfirmation,
+            InitializationType.DeferredMultiprocessor -> true
+            null -> true // Show by default if settings not available
+        }
     }
 
     override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {

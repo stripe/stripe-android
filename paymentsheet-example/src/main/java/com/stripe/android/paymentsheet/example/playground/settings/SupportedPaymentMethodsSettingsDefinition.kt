@@ -11,8 +11,12 @@ internal object SupportedPaymentMethodsSettingsDefinition :
         configurationData: PlaygroundConfigurationData,
         settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
     ): Boolean {
-        return configurationData.integrationType.isPaymentFlow() ||
-            configurationData.integrationType.isCustomerFlow()
+        if (!configurationData.integrationType.isPaymentFlow() && !configurationData.integrationType.isCustomerFlow()) {
+            return false
+        }
+
+        // Only visible when automatic payment methods is disabled
+        return settings?.get(AutomaticPaymentMethodsSettingsDefinition) == false
     }
 
     override fun configure(value: String, checkoutRequestBuilder: CheckoutRequest.Builder) {

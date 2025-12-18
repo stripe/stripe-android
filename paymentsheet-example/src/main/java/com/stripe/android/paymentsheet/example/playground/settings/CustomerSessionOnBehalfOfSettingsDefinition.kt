@@ -17,7 +17,12 @@ internal object CustomerSessionOnBehalfOfSettingsDefinition :
         configurationData: PlaygroundConfigurationData,
         settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
     ): Boolean {
-        return configurationData.integrationType.isCustomerFlow() || configurationData.integrationType.isPaymentFlow()
+        if (!configurationData.integrationType.isCustomerFlow() && !configurationData.integrationType.isPaymentFlow()) {
+            return false
+        }
+
+        // Only visible when Customer Session is enabled
+        return settings?.get(CustomerSessionSettingsDefinition) == true
     }
 
     override fun convertToString(value: OnBehalfOf): String {

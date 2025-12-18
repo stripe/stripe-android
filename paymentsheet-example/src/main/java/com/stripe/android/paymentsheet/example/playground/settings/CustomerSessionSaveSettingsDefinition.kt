@@ -12,7 +12,12 @@ internal object CustomerSessionSaveSettingsDefinition : BooleanSettingsDefinitio
         configurationData: PlaygroundConfigurationData,
         settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
     ): Boolean {
-        return configurationData.integrationType.isPaymentFlow()
+        if (!configurationData.integrationType.isPaymentFlow()) {
+            return false
+        }
+
+        // Only visible when Customer Session is enabled
+        return settings?.get(CustomerSessionSettingsDefinition) == true
     }
 
     override fun createOptions(

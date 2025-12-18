@@ -20,7 +20,12 @@ internal object CustomPaymentMethodsSettingDefinition :
         configurationData: PlaygroundConfigurationData,
         settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
     ): Boolean {
-        return configurationData.integrationType.isPaymentFlow()
+        if (!configurationData.integrationType.isPaymentFlow()) {
+            return false
+        }
+
+        // Only visible when merchant is US
+        return (settings?.get(MerchantSettingsDefinition) as? Merchant) == Merchant.US
     }
 
     override fun createOptions(

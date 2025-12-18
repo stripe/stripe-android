@@ -16,8 +16,12 @@ internal object LinkTypeSettingsDefinition :
         configurationData: PlaygroundConfigurationData,
         settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
     ): Boolean {
-        return configurationData.integrationType.isPaymentFlow() ||
-            configurationData.integrationType.isSptFlow()
+        if (!configurationData.integrationType.isPaymentFlow() && !configurationData.integrationType.isSptFlow()) {
+            return false
+        }
+
+        // Delegate to LinkSettingsDefinition visibility logic
+        return LinkSettingsDefinition.applicable(configurationData, settings)
     }
 
     override fun createOptions(

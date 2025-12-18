@@ -14,7 +14,14 @@ internal object LinkSettingsDefinition : BooleanSettingsDefinition(
         configurationData: PlaygroundConfigurationData,
         settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
     ): Boolean {
-        return configurationData.integrationType.isPaymentFlow()
+        if (!configurationData.integrationType.isPaymentFlow()) {
+            return false
+        }
+
+        // Only visible when merchant is US or StripeShop
+        return (settings?.get(MerchantSettingsDefinition) as? Merchant) in listOf(
+            Merchant.US, Merchant.StripeShop
+        )
     }
 
     override fun configure(
