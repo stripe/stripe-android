@@ -10,15 +10,13 @@ import dagger.Subcomponent
 internal interface GooglePayPaymentMethodLauncherViewModelSubcomponent {
     val viewModel: GooglePayPaymentMethodLauncherViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun args(args: GooglePayPaymentMethodLauncherContractV2.Args): Builder
-
-        @BindsInstance
-        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
-
-        fun build(): GooglePayPaymentMethodLauncherViewModelSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            args: GooglePayPaymentMethodLauncherContractV2.Args,
+            @BindsInstance
+            savedStateHandle: SavedStateHandle,
+        ): GooglePayPaymentMethodLauncherViewModelSubcomponent
     }
 }

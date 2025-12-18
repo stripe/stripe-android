@@ -34,31 +34,29 @@ import javax.inject.Singleton
     ]
 )
 internal interface GooglePayPaymentMethodLauncherViewModelFactoryComponent {
-    val subcomponentBuilder: GooglePayPaymentMethodLauncherViewModelSubcomponent.Builder
+    val subcomponentFactory: GooglePayPaymentMethodLauncherViewModelSubcomponent.Factory
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
-        fun enableLogging(@Named(ENABLE_LOGGING) enableLogging: Boolean): Builder
-
-        @BindsInstance
-        fun publishableKeyProvider(@Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String): Builder
-
-        @BindsInstance
-        fun stripeAccountIdProvider(@Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?): Builder
-
-        @BindsInstance
-        fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
-
-        @BindsInstance
-        fun googlePayConfig(config: GooglePayPaymentMethodLauncher.Config): Builder
-
-        @BindsInstance
-        fun cardBrandFilter(cardBrandFilter: CardBrandFilter): Builder
-
-        fun build(): GooglePayPaymentMethodLauncherViewModelFactoryComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            context: Context,
+            @BindsInstance
+            @Named(ENABLE_LOGGING)
+            enableLogging: Boolean,
+            @BindsInstance
+            @Named(PUBLISHABLE_KEY)
+            publishableKeyProvider: () -> String,
+            @BindsInstance
+            @Named(STRIPE_ACCOUNT_ID)
+            stripeAccountIdProvider: () -> String?,
+            @BindsInstance
+            @Named(PRODUCT_USAGE)
+            productUsage: Set<String>,
+            @BindsInstance
+            config: GooglePayPaymentMethodLauncher.Config,
+            @BindsInstance
+            cardBrandFilter: CardBrandFilter,
+        ): GooglePayPaymentMethodLauncherViewModelFactoryComponent
     }
 }

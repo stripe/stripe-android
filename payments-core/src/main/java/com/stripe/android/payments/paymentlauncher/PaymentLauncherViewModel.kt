@@ -406,14 +406,15 @@ internal class PaymentLauncherViewModel @Inject constructor(
             val application = extras.requireApplication()
             val savedStateHandle = extras.createSavedStateHandle()
 
-            val subcomponentBuilder = DaggerPaymentLauncherViewModelFactoryComponent.builder()
-                .context(application)
-                .enableLogging(arg.enableLogging)
-                .publishableKeyProvider { arg.publishableKey }
-                .stripeAccountIdProvider { arg.stripeAccountId }
-                .productUsage(arg.productUsage)
-                .includePaymentSheetNextHandlers(arg.includePaymentSheetNextHandlers)
-                .build().viewModelSubcomponentBuilder
+            val subcomponentFactory = DaggerPaymentLauncherViewModelFactoryComponent.factory()
+                .create(
+                    context = application,
+                    enableLogging = arg.enableLogging,
+                    publishableKeyProvider = { arg.publishableKey },
+                    stripeAccountIdProvider = { arg.stripeAccountId },
+                    productUsage = arg.productUsage,
+                    includePaymentSheetNextHandlers = arg.includePaymentSheetNextHandlers,
+                ).viewModelSubcomponentFactory
 
             val isPaymentIntent = when (arg) {
                 is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
@@ -430,10 +431,11 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 }
             }
 
-            return subcomponentBuilder
-                .isPaymentIntent(isPaymentIntent)
-                .savedStateHandle(savedStateHandle)
-                .build().viewModel as T
+            return subcomponentFactory
+                .create(
+                    isPaymentIntent = isPaymentIntent,
+                    handle = savedStateHandle,
+                ).viewModel as T
         }
     }
 

@@ -10,15 +10,14 @@ import javax.inject.Named
 internal interface PaymentLauncherViewModelSubcomponent {
     val viewModel: PaymentLauncherViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun isPaymentIntent(@Named(IS_PAYMENT_INTENT) isPaymentIntent: Boolean): Builder
-
-        @BindsInstance
-        fun savedStateHandle(handle: SavedStateHandle): Builder
-
-        fun build(): PaymentLauncherViewModelSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            @Named(IS_PAYMENT_INTENT)
+            isPaymentIntent: Boolean,
+            @BindsInstance
+            handle: SavedStateHandle,
+        ): PaymentLauncherViewModelSubcomponent
     }
 }

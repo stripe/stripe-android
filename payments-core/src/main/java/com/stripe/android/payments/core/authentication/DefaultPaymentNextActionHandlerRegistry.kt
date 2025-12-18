@@ -129,17 +129,18 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
             isInstantApp: Boolean,
             includePaymentSheetNextActionHandlers: Boolean,
         ): PaymentNextActionHandlerRegistry {
-            val component = DaggerNextActionHandlerComponent.builder()
-                .context(context)
-                .analyticsRequestFactory(paymentAnalyticsRequestFactory)
-                .enableLogging(enableLogging)
-                .workContext(workContext)
-                .uiContext(uiContext)
-                .publishableKeyProvider(publishableKeyProvider)
-                .productUsage(productUsage)
-                .isInstantApp(isInstantApp)
-                .includePaymentSheetNextActionHandlers(includePaymentSheetNextActionHandlers)
-                .build()
+            val component = DaggerNextActionHandlerComponent.factory()
+                .create(
+                    context = context,
+                    analyticsRequestFactory = paymentAnalyticsRequestFactory,
+                    enableLogging = enableLogging,
+                    workContext = workContext,
+                    uiContext = uiContext,
+                    publishableKeyProvider = publishableKeyProvider,
+                    productUsage = productUsage,
+                    isInstantApp = isInstantApp,
+                    includePaymentSheetNextActionHandlers = includePaymentSheetNextActionHandlers,
+                )
             return component.registry
         }
     }

@@ -24,27 +24,25 @@ import javax.inject.Singleton
     ]
 )
 internal interface Stripe3ds2TransactionViewModelFactoryComponent {
-    val subcomponentBuilder: Stripe3ds2TransactionViewModelSubcomponent.Builder
+    val subcomponentFactory: Stripe3ds2TransactionViewModelSubcomponent.Factory
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
-        fun enableLogging(@Named(ENABLE_LOGGING) enableLogging: Boolean): Builder
-
-        @BindsInstance
-        fun publishableKeyProvider(
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String
-        ): Builder
-
-        @BindsInstance
-        fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
-
-        @BindsInstance
-        fun isInstantApp(@Named(IS_INSTANT_APP) isInstantApp: Boolean): Builder
-
-        fun build(): Stripe3ds2TransactionViewModelFactoryComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            context: Context,
+            @BindsInstance
+            @Named(ENABLE_LOGGING)
+            enableLogging: Boolean,
+            @BindsInstance
+            @Named(PUBLISHABLE_KEY)
+            publishableKeyProvider: () -> String,
+            @BindsInstance
+            @Named(PRODUCT_USAGE)
+            productUsage: Set<String>,
+            @BindsInstance
+            @Named(IS_INSTANT_APP)
+            isInstantApp: Boolean,
+        ): Stripe3ds2TransactionViewModelFactoryComponent
     }
 }

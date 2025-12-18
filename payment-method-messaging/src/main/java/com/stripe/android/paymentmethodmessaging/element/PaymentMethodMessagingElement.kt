@@ -47,9 +47,10 @@ class PaymentMethodMessagingElement @Inject internal constructor(
 
     companion object {
         fun create(application: Application): PaymentMethodMessagingElement {
-            return DaggerPaymentMethodMessagingComponent.builder()
-                .application(application)
-                .build().element
+            return DaggerPaymentMethodMessagingComponent.factory()
+                .create(
+                    application = application,
+                ).element
         }
     }
 

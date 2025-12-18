@@ -53,10 +53,11 @@ interface ErrorReporter : FraudDetectionErrorReporter {
             productUsage: Set<String> = emptySet(),
         ): ErrorReporter {
             return DaggerDefaultErrorReporterComponent
-                .builder()
-                .context(context.applicationContext)
-                .productUsage(productUsage)
-                .build()
+                .factory()
+                .create(
+                    context = context.applicationContext,
+                    productUsage = productUsage,
+                )
                 .errorReporter
         }
 
@@ -373,15 +374,15 @@ interface ErrorReporter : FraudDetectionErrorReporter {
 internal interface DefaultErrorReporterComponent {
     val errorReporter: ErrorReporter
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
-        fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
-
-        fun build(): DefaultErrorReporterComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            context: Context,
+            @BindsInstance
+            @Named(PRODUCT_USAGE)
+            productUsage: Set<String>,
+        ): DefaultErrorReporterComponent
     }
 }
 
