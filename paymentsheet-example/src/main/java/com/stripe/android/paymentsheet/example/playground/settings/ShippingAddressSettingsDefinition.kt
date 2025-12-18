@@ -8,7 +8,10 @@ import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 internal object ShippingAddressSettingsDefinition : PlaygroundSettingDefinition<AddressDetails?> {
     override val defaultValue: AddressDetails? = null
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
+    ): Boolean {
         return configurationData.integrationType.isPaymentFlow()
     }
 

@@ -7,7 +7,10 @@ internal object ConfirmationTokenSettingsDefinition : BooleanSettingsDefinition(
     displayName = "Use Confirmation Token",
     defaultValue = false,
 ) {
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
+    ): Boolean {
         return configurationData.integrationType.isPaymentFlow()
     }
 

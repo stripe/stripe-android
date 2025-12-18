@@ -24,7 +24,10 @@ internal object CheckoutModeSettingsDefinition :
         option("Setup", CheckoutMode.SETUP),
     )
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
+    ): Boolean {
         return configurationData.integrationType.isPaymentFlow()
     }
 

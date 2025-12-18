@@ -8,7 +8,10 @@ internal object EmbeddedViewDisplaysMandateSettingDefinition : BooleanSettingsDe
     displayName = "Embedded View Displays Mandate",
     defaultValue = true,
 ) {
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
+    ): Boolean {
         return configurationData.integrationType == PlaygroundConfigurationData.IntegrationType.Embedded
     }
 

@@ -11,7 +11,10 @@ internal object AllowsRemovalOfLastSavedPaymentMethodSettingsDefinition : Boolea
     displayName = "Allows removal of last saved payment method",
     defaultValue = true,
 ) {
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
+    ): Boolean {
         return configurationData.integrationType.isPaymentFlow() ||
             configurationData.integrationType.isCustomerFlow()
     }

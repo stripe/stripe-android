@@ -10,7 +10,10 @@ internal object LinkSettingsDefinition : BooleanSettingsDefinition(
     displayName = "Link",
     defaultValue = true,
 ) {
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
+    ): Boolean {
         return configurationData.integrationType.isPaymentFlow()
     }
 

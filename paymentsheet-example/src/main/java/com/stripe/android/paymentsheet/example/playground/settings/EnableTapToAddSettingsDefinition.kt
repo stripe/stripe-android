@@ -8,7 +8,10 @@ internal object EnableTapToAddSettingsDefinition : FeatureFlagSettingsDefinition
     featureFlag = FeatureFlags.enableTapToAdd,
     allowedIntegrationTypes = PlaygroundConfigurationData.IntegrationType.paymentFlows().toList()
 ) {
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
+    ): Boolean {
         return BuildConfig.FLAVOR == "tapToAdd"
     }
 

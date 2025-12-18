@@ -7,7 +7,10 @@ internal object RequireCvcRecollectionDefinition : BooleanSettingsDefinition(
     displayName = "Require CVC Recollection",
     defaultValue = false
 ) {
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>?
+    ): Boolean {
         return configurationData.integrationType.isPaymentFlow()
     }
 

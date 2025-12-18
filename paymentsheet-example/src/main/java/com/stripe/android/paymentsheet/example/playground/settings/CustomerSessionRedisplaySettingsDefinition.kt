@@ -8,7 +8,10 @@ internal object CustomerSessionRedisplaySettingsDefinition : BooleanSettingsDefi
     displayName = "Customer Session Redisplay",
     key = "customer_session_payment_method_redisplay"
 ) {
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
+    ): Boolean {
         return configurationData.integrationType.isPaymentFlow()
     }
 

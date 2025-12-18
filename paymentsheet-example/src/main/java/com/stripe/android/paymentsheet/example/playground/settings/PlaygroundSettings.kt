@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,9 +37,10 @@ internal class PlaygroundSettings private constructor(
     private val _configurationData = MutableStateFlow(initialConfigurationData)
     val configurationData = _configurationData.asStateFlow()
 
-    val displayableDefinitions = _configurationData.mapAsStateFlow { data ->
-        settings.value
-            .filterKeys { it.applicable(data) }
+    val displayableDefinitions = combineAsStateFlow(_configurationData, settings)
+    { data, settings ->
+        settings
+            .filterKeys { it.applicable(data, settings) }
             .keys
             .filterIsInstance<PlaygroundSettingDefinition.Displayable<*>>()
     }
@@ -142,7 +144,7 @@ internal class PlaygroundSettings private constructor(
             val paymentSheetConfigurationData =
                 PlaygroundSettingDefinition.PaymentSheetConfigurationData(builder)
             settings.filter { (definition, _) ->
-                definition.applicable(configurationData)
+                definition.applicable(configurationData, settings)
             }.onEach { (settingDefinition, value) ->
                 settingDefinition
                     .configure(value, builder, playgroundState, paymentSheetConfigurationData, appSettings)
@@ -157,7 +159,7 @@ internal class PlaygroundSettings private constructor(
             val paymentSheetConfigurationData =
                 PlaygroundSettingDefinition.PaymentSheetConfigurationData(builder)
             settings.filter { (definition, _) ->
-                definition.applicable(configurationData)
+                definition.applicable(configurationData, settings)
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(value, builder, playgroundState, paymentSheetConfigurationData)
             }
@@ -170,7 +172,7 @@ internal class PlaygroundSettings private constructor(
             val builder = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
             val embeddedConfigurationData = PlaygroundSettingDefinition.EmbeddedConfigurationData(builder)
             settings.filter { (definition, _) ->
-                definition.applicable(configurationData)
+                definition.applicable(configurationData, settings)
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(value, builder, playgroundState, embeddedConfigurationData)
             }
@@ -189,7 +191,7 @@ internal class PlaygroundSettings private constructor(
             )
             val linkControllerConfigurationData = PlaygroundSettingDefinition.LinkControllerConfigurationData(builder)
             settings.filter { (definition, _) ->
-                definition.applicable(configurationData)
+                definition.applicable(configurationData, settings)
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(value, builder, playgroundState, linkControllerConfigurationData)
             }
@@ -203,7 +205,7 @@ internal class PlaygroundSettings private constructor(
             val customerSheetConfigurationData =
                 PlaygroundSettingDefinition.CustomerSheetConfigurationData(builder)
             settings.filter { (definition, _) ->
-                definition.applicable(configurationData)
+                definition.applicable(configurationData, settings)
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(value, builder, playgroundState, customerSheetConfigurationData)
             }
@@ -290,7 +292,7 @@ internal class PlaygroundSettings private constructor(
         fun checkoutRequest(): CheckoutRequest {
             val builder = CheckoutRequest.Builder()
             settings.filter { (definition, _) ->
-                definition.applicable(configurationData)
+                definition.applicable(configurationData, settings)
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(builder, value)
             }
@@ -300,7 +302,7 @@ internal class PlaygroundSettings private constructor(
         fun customerEphemeralKeyRequest(): CustomerEphemeralKeyRequest {
             val builder = CustomerEphemeralKeyRequest.Builder()
             settings.filter { (definition, _) ->
-                definition.applicable(configurationData)
+                definition.applicable(configurationData, settings)
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(builder, value)
             }

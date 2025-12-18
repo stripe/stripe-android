@@ -8,7 +8,10 @@ internal object CustomerSessionSettingsDefinition : BooleanSettingsDefinition(
     displayName = "Use Customer Session",
     key = "customer_session_enabled"
 ) {
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
+    ): Boolean {
         return configurationData.integrationType.isPaymentFlow() ||
             configurationData.integrationType.isCustomerFlow()
     }
