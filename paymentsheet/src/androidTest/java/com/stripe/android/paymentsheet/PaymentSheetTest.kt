@@ -233,7 +233,7 @@ internal class PaymentSheetTest {
         }
 
         page.clickPrimaryButton()
-        page.waitForText("Your card was declined")
+        page.waitForText("Your card has insufficient funds.")
         page.assertNoText("StripeException", substring = true)
         testContext.markTestSucceeded()
     }
