@@ -23,6 +23,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodMessageImage
 import com.stripe.android.model.PaymentMethodMessageLegalDisclosure
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -158,7 +160,7 @@ private fun MultiPartner(
             Text(
                 text = message.promotion.buildAnnotatedStringWithInfoIcon(),
                 style = style,
-                color = Color(appearance.colors.textColor),
+                color = Color(getTextColor(appearance.colors.textColor, appearance.theme)),
                 inlineContent = mapOf(
                     INLINE_ICON_KEY to InlineTextContent(
                         placeholder = Placeholder(
@@ -249,7 +251,7 @@ private fun TextWithLogo(
     Text(
         text = label.buildInlineLogoAnnotatedStringWithInfoIcon(),
         style = style,
-        color = Color(appearance.colors.textColor),
+        color = Color(getTextColor(appearance.colors.textColor, appearance.theme)),
         inlineContent = mapOf(
             INLINE_IMAGE_KEY to InlineTextContent(
                 placeholder = Placeholder(
@@ -321,7 +323,7 @@ private fun InfoIcon(
     Icon(
         painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_info),
         contentDescription = learnMoreMessage,
-        tint = Color(appearance.colors.infoIconColor),
+        tint = Color(getIconColor(appearance.colors.infoIconColor, appearance.theme)),
         modifier = Modifier.fillMaxSize().padding(start = 4.dp)
     )
 }
@@ -336,6 +338,18 @@ private fun LegalDisclosure(
         color = StripeThemeDefaults.colors(theme == PaymentMethodMessagingElement.Appearance.Theme.DARK).subtitle,
         style = MaterialTheme.typography.caption
     )
+}
+
+private fun getTextColor(textColor: Int?, theme: PaymentMethodMessagingElement.Appearance.Theme): Int {
+    return textColor ?: StripeTheme.getColors(
+        theme == PaymentMethodMessagingElement.Appearance.Theme.DARK
+    ).onComponent.toArgb()
+}
+
+private fun getIconColor(iconColor: Int?, theme: PaymentMethodMessagingElement.Appearance.Theme): Int {
+    return iconColor ?: StripeTheme.getColors(
+        theme == PaymentMethodMessagingElement.Appearance.Theme.DARK
+    ).subtitle.toArgb()
 }
 
 private const val DEFAULT_TEXT_SIZE = 16F
