@@ -16,18 +16,16 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class LinkConfigurationCoordinatorTest {
-    private val linkComponentBuilder: LinkComponent.Builder = mock()
+    private val linkComponentFactory: LinkComponent.Factory = mock()
 
-    private var linkConfigurationCoordinator = RealLinkConfigurationCoordinator(linkComponentBuilder)
+    private var linkConfigurationCoordinator = RealLinkConfigurationCoordinator(linkComponentFactory)
 
     init {
         FakeAndroidKeyStore.setup()
 
         val configurationCapture = argumentCaptor<LinkConfiguration>()
 
-        whenever(linkComponentBuilder.configuration(configurationCapture.capture()))
-            .thenReturn(linkComponentBuilder)
-        whenever(linkComponentBuilder.build()).thenAnswer {
+        whenever(linkComponentFactory.create(configurationCapture.capture())).thenAnswer {
             val component = mock<LinkComponent>()
             val linkAccountManager = FakeLinkAccountManager()
             whenever(component.linkAccountManager).thenReturn(linkAccountManager)

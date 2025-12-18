@@ -57,14 +57,14 @@ internal const val TEST_TAG_ATTRIBUTION_DRAWABLE = "AutocompleteAttributionDrawa
 
 @Composable
 internal fun AutocompleteScreen(
-    autoCompleteViewModelSubcomponentBuilderProvider: Provider<AutocompleteViewModelSubcomponent.Builder>,
+    autoCompleteViewModelSubcomponentFactoryProvider: Provider<AutocompleteViewModelSubcomponent.Factory>,
     navigator: AddressElementNavigator,
     country: String?
 ) {
     val viewModel: AutocompleteViewModel =
         viewModel(
             factory = AutocompleteViewModel.Factory(
-                autoCompleteViewModelSubcomponentBuilderProvider = autoCompleteViewModelSubcomponentBuilderProvider,
+                autoCompleteViewModelSubcomponentFactoryProvider = autoCompleteViewModelSubcomponentFactoryProvider,
                 args = AutocompleteViewModel.Args(
                     country = country
                 ),

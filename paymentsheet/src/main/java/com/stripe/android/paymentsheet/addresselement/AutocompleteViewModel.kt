@@ -200,11 +200,11 @@ internal class AutocompleteViewModel @Inject constructor(
         }
 
         constructor(
-            autoCompleteViewModelSubcomponentBuilderProvider:
-            Provider<AutocompleteViewModelSubcomponent.Builder>,
+            autoCompleteViewModelSubcomponentFactoryProvider:
+            Provider<AutocompleteViewModelSubcomponent.Factory>,
             args: Args,
         ) : this(
-            Type.WithinAddressElement(autoCompleteViewModelSubcomponentBuilderProvider, args)
+            Type.WithinAddressElement(autoCompleteViewModelSubcomponentFactoryProvider, args)
         )
 
         constructor(
@@ -217,16 +217,17 @@ internal class AutocompleteViewModel @Inject constructor(
             fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T
 
             class WithinAddressElement(
-                private val autoCompleteViewModelSubcomponentBuilderProvider:
-                Provider<AutocompleteViewModelSubcomponent.Builder>,
+                private val autoCompleteViewModelSubcomponentFactoryProvider:
+                Provider<AutocompleteViewModelSubcomponent.Factory>,
                 private val args: Args,
             ) : Type {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                    return autoCompleteViewModelSubcomponentBuilderProvider.get()
-                        .application(extras.requireApplication())
-                        .configuration(args)
-                        .build().autoCompleteViewModel as T
+                    return autoCompleteViewModelSubcomponentFactoryProvider.get()
+                        .create(
+                            application = extras.requireApplication(),
+                            configuration = args,
+                        ).autoCompleteViewModel as T
                 }
             }
 

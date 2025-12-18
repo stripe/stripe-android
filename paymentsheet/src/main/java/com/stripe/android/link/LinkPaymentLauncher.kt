@@ -16,12 +16,12 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class LinkPaymentLauncher @Inject internal constructor(
-    linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
+    linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val linkActivityContract: LinkActivityContract,
     private val linkStore: LinkStore
 ) {
-    private val analyticsHelper = linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
+    private val analyticsHelper = linkAnalyticsComponentFactory.create().linkAnalyticsHelper
 
     private var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null

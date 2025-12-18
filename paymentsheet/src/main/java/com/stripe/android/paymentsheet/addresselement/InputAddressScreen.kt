@@ -87,11 +87,11 @@ internal fun InputAddressScreen(
 
 @Composable
 internal fun InputAddressScreen(
-    inputAddressViewModelSubcomponentBuilderProvider: Provider<InputAddressViewModelSubcomponent.Builder>
+    inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>
 ) {
     val viewModel: InputAddressViewModel = viewModel(
         factory = InputAddressViewModel.Factory(
-            inputAddressViewModelSubcomponentBuilderProvider
+            inputAddressViewModelSubcomponentFactoryProvider
         )
     )
     val formController = viewModel.addressFormController

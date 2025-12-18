@@ -843,11 +843,12 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 .create(
                     application = extras.requireApplication(),
                 )
-                .subComponentBuilderProvider.get()
-                .configuration(argsSupplier())
-                .savedStateHandle(extras.createSavedStateHandle())
-                .autocompleteAddressInteractorFactory(autocompleteAddressInteractorFactory)
-                .build().viewModel as T
+                .subComponentFactoryProvider.get()
+                .create(
+                    savedStateHandle = extras.createSavedStateHandle(),
+                    configuration = argsSupplier(),
+                    autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                ).viewModel as T
         }
     }
 

@@ -97,7 +97,7 @@ internal class AddressElementActivity : ComponentActivity() {
                         startDestination = AddressElementScreen.InputAddress.route,
                     ) {
                         composable(AddressElementScreen.InputAddress.route) {
-                            InputAddressScreen(viewModel.inputAddressViewModelSubcomponentBuilderProvider)
+                            InputAddressScreen(viewModel.inputAddressViewModelSubcomponentFactoryProvider)
                         }
                         composable(
                             AddressElementScreen.Autocomplete.route,
@@ -113,7 +113,7 @@ internal class AddressElementActivity : ComponentActivity() {
                                     AddressElementScreen.Autocomplete.countryArg
                                 )
                             AutocompleteScreen(
-                                viewModel.autoCompleteViewModelSubcomponentBuilderProvider,
+                                viewModel.autoCompleteViewModelSubcomponentFactoryProvider,
                                 viewModel.navigator,
                                 country
                             )

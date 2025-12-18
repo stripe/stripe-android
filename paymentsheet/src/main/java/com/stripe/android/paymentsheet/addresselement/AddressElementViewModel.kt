@@ -11,8 +11,8 @@ import javax.inject.Provider
 
 internal class AddressElementViewModel @Inject internal constructor(
     val navigator: NavHostAddressElementNavigator,
-    val inputAddressViewModelSubcomponentBuilderProvider: Provider<InputAddressViewModelSubcomponent.Builder>,
-    val autoCompleteViewModelSubcomponentBuilderProvider: Provider<AutocompleteViewModelSubcomponent.Builder>,
+    val inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>,
+    val autoCompleteViewModelSubcomponentFactoryProvider: Provider<AutocompleteViewModelSubcomponent.Factory>,
 ) : ViewModel() {
 
     internal class Factory(
