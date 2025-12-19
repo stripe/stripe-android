@@ -9,9 +9,15 @@ internal object CustomerSessionRemoveSettingsDefinition : BooleanSettingsDefinit
     displayName = "Customer Session Remove",
     key = "customer_session_payment_method_remove"
 ) {
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isPaymentFlow() ||
-            configurationData.integrationType.isCustomerFlow()
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
+        if (!configurationData.integrationType.isPaymentFlow() && !configurationData.integrationType.isCustomerFlow()) {
+            return false
+        }
+
+        return settings[CustomerSessionSettingsDefinition] == true
     }
 
     override fun createOptions(

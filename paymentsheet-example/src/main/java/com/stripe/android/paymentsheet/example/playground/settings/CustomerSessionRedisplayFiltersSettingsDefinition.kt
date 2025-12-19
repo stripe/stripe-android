@@ -15,6 +15,13 @@ internal object CustomerSessionRedisplayFiltersSettingsDefinition :
     PlaygroundSettingDefinition.Displayable<CustomerSessionRedisplayFiltersSettingsDefinition.RedisplayFilterType> {
     override val displayName: String = "Customer Session Allow Redisplay Filters"
 
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
+        return settings[CustomerSessionSettingsDefinition] == true
+    }
+
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
     ) = listOf(

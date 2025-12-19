@@ -11,7 +11,10 @@ internal object ShopPaySettingsDefinition : BooleanSettingsDefinition(
     defaultValue = false
 ) {
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
         return when (configurationData.integrationType) {
             PlaygroundConfigurationData.IntegrationType.Embedded,
             PlaygroundConfigurationData.IntegrationType.FlowController,

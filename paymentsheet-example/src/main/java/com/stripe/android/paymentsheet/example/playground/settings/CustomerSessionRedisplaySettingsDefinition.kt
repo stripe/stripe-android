@@ -8,8 +8,15 @@ internal object CustomerSessionRedisplaySettingsDefinition : BooleanSettingsDefi
     displayName = "Customer Session Redisplay",
     key = "customer_session_payment_method_redisplay"
 ) {
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isPaymentFlow()
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
+        if (!configurationData.integrationType.isPaymentFlow()) {
+            return false
+        }
+
+        return settings[CustomerSessionSettingsDefinition] == true
     }
 
     override fun createOptions(

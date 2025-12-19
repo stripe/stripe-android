@@ -23,7 +23,14 @@ internal object CustomerSessionSetAsDefaultSettingsDefinition : BooleanSettingsD
         }
     }
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isPaymentFlow()
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
+        if (!configurationData.integrationType.isPaymentFlow()) {
+            return false
+        }
+
+        return settings[CustomerSessionSettingsDefinition] == true
     }
 }
