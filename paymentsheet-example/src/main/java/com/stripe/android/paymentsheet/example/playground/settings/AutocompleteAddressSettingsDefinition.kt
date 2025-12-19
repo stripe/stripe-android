@@ -13,7 +13,7 @@ internal object AutocompleteAddressSettingsDefinition : BooleanSettingsDefinitio
 ) {
     override fun applicable(
         configurationData: PlaygroundConfigurationData,
-        settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
     ): Boolean {
         return configurationData.integrationType == PlaygroundConfigurationData.IntegrationType.PaymentSheet ||
             configurationData.integrationType == PlaygroundConfigurationData.IntegrationType.FlowController ||

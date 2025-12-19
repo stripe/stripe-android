@@ -14,7 +14,7 @@ internal object LinkTypeSettingsDefinition :
 
     override fun applicable(
         configurationData: PlaygroundConfigurationData,
-        settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
     ): Boolean {
         if (!configurationData.integrationType.isPaymentFlow() && !configurationData.integrationType.isSptFlow()) {
             return false
@@ -22,7 +22,7 @@ internal object LinkTypeSettingsDefinition :
 
         return (
             LinkSettingsDefinition.applicable(configurationData, settings) &&
-                settings?.get(LinkSettingsDefinition) == true
+                settings[LinkSettingsDefinition] == true
             )
     }
 

@@ -10,13 +10,13 @@ internal object CustomerSessionSaveSettingsDefinition : BooleanSettingsDefinitio
 ) {
     override fun applicable(
         configurationData: PlaygroundConfigurationData,
-        settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
     ): Boolean {
         if (!configurationData.integrationType.isPaymentFlow()) {
             return false
         }
 
-        return settings?.get(CustomerSessionSettingsDefinition) == true
+        return settings[CustomerSessionSettingsDefinition] == true
     }
 
     override fun createOptions(

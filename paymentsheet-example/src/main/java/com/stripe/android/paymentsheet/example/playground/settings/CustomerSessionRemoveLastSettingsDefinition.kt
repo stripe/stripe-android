@@ -11,13 +11,13 @@ internal object CustomerSessionRemoveLastSettingsDefinition : BooleanSettingsDef
 ) {
     override fun applicable(
         configurationData: PlaygroundConfigurationData,
-        settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
     ): Boolean {
         if (!configurationData.integrationType.isPaymentFlow() && !configurationData.integrationType.isCustomerFlow()) {
             return false
         }
 
-        return settings?.get(CustomerSessionSettingsDefinition) == true
+        return settings[CustomerSessionSettingsDefinition] == true
     }
 
     override fun createOptions(

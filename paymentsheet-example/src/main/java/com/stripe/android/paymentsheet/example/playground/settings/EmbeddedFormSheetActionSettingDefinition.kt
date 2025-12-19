@@ -15,7 +15,7 @@ internal object EmbeddedFormSheetActionSettingDefinition :
     PlaygroundSettingDefinition.Displayable<EmbeddedFormSheetActionSettingDefinition.FormSheetAction> {
     override fun applicable(
         configurationData: PlaygroundConfigurationData,
-        settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
     ): Boolean {
         return configurationData.integrationType == PlaygroundConfigurationData.IntegrationType.Embedded
     }

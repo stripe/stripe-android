@@ -17,9 +17,9 @@ internal object CustomerSessionRedisplayFiltersSettingsDefinition :
 
     override fun applicable(
         configurationData: PlaygroundConfigurationData,
-        settings: Map<PlaygroundSettingDefinition<*>, Any?>?,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
     ): Boolean {
-        return settings?.get(CustomerSessionSettingsDefinition) == true
+        return settings[CustomerSessionSettingsDefinition] == true
     }
 
     override fun createOptions(

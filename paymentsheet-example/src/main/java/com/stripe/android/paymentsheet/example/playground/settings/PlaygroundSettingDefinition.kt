@@ -94,12 +94,13 @@ internal interface PlaygroundSettingDefinition<T> {
      * Determines whether this setting is applicable for the given configuration and settings.
      *
      * @param configurationData The current playground configuration
-     * @param settings Optional map of current settings. Can be used to check other setting values.
+     * @param settings Optional map of current settings used to determine if this specific setting is applicable or
+     * should be displayed
      * @return true if this setting should be displayed/used, false otherwise
      */
     fun applicable(
         configurationData: PlaygroundConfigurationData,
-        settings: Map<PlaygroundSettingDefinition<*>, Any?>? = null
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
     ): Boolean = true
 
     fun saveable(): Saveable<T>? {
