@@ -245,7 +245,7 @@ class PaymentSelectionUpdaterTest {
     fun `PaymentSelection is reset when payment method requires mandate after updating intent`() {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "paypal".resolvableString,
-            iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
+            iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal_day,
             iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
@@ -276,7 +276,7 @@ class PaymentSelectionUpdaterTest {
     fun `PaymentSelection is preserved when payment method no longer requires mandate after updating intent`() {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "paypal".resolvableString,
-            iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
+            iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal_day,
             iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
@@ -309,7 +309,7 @@ class PaymentSelectionUpdaterTest {
     fun `PaymentSelection is preserved when payment method still requires mandate after updating intent`() {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "paypal".resolvableString,
-            iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
+            iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal_day,
             iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
