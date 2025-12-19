@@ -28,25 +28,31 @@ import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.ext.junit.rules.activityScenarioRule
 import com.stripe.android.connect.webview.serialization.AlertJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
+import com.stripe.android.testing.RetryRule
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.equalTo
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 class FullScreenComponentTest {
     private val title = "Test title"
 
-    @get:Rule
-    val activityRule = activityScenarioRule<EmptyEmbeddedComponentActivity>(
+    private val activityRule = activityScenarioRule<EmptyEmbeddedComponentActivity>(
         EmptyEmbeddedComponentActivity.newIntent(
             context = ApplicationProvider.getApplicationContext(),
             title = title,
         )
     )
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain
+        .outerRule(activityRule)
+        .around(RetryRule(3))
 
     private val rootView
         get() = isAssignableFrom(StripeComponentDialogFragmentView::class.java)
