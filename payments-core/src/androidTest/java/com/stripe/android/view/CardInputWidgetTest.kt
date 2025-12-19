@@ -1,13 +1,17 @@
 package com.stripe.android.view
 
+import android.content.Context
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.typeText
@@ -15,44 +19,54 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withHint
 import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.ext.junit.rules.activityScenarioRule
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
+import com.stripe.android.testing.RetryRule
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 
 class CardInputWidgetTest {
+    private val composeTestRule = createEmptyComposeRule()
+    private val activityRule = activityScenarioRule<ComponentActivity>()
+
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    val rule = RuleChain.emptyRuleChain()
+        .around(composeTestRule)
+        .around(RetryRule(3))
+        .around(activityRule)
 
     @Test
     fun restoresViewWidthsWhenUsingSaveableState() {
         val cardInputWidgetState = mutableStateOf(value = State.Show)
 
-        composeTestRule.activity.setTheme(R.style.StripeDefaultTheme)
+        PaymentConfiguration.init(ApplicationProvider.getApplicationContext<Context>(), "publishable_key")
 
-        PaymentConfiguration.init(composeTestRule.activity, "publishable_key")
+        activityRule.scenario.onActivity {
+            it.setContent {
+                val stateHolder = rememberSaveableStateHolder()
 
-        composeTestRule.setContent {
-            val stateHolder = rememberSaveableStateHolder()
+                val state by cardInputWidgetState
 
-            val state by cardInputWidgetState
-
-            if (state == State.Show) {
-                stateHolder.SaveableStateProvider("stripe_elements") {
-                    AndroidView(
-                        modifier = Modifier.fillMaxWidth(),
-                        factory = { context ->
-                            CardInputWidget(context).apply {
-                                id = VIEW_ID
-                                postalCodeRequired = true
-                            }
-                        },
-                        update = {
-                            // do nothing
-                        },
-                        onRelease = {
-                        },
-                    )
+                if (state == State.Show) {
+                    stateHolder.SaveableStateProvider("stripe_elements") {
+                        AndroidView(
+                            modifier = Modifier.fillMaxWidth(),
+                            factory = { context ->
+                                val themedContext = ContextThemeWrapper(context, R.style.StripeDefaultTheme)
+                                CardInputWidget(themedContext).apply {
+                                    id = VIEW_ID
+                                    postalCodeRequired = true
+                                }
+                            },
+                            update = {
+                                // do nothing
+                            },
+                            onRelease = {
+                            },
+                        )
+                    }
                 }
             }
         }
