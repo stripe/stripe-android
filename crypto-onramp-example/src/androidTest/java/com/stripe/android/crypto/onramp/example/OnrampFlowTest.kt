@@ -7,37 +7,45 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.testing.FeatureFlagTestRule
-import org.junit.Before
+import com.stripe.android.testing.RetryRule
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(AndroidJUnit4::class)
 class OnrampFlowTest {
-    @get:Rule
-    internal val composeRule = createAndroidComposeRule<OnrampActivity>()
+    private val composeRule = createEmptyComposeRule()
 
-    @get:Rule
-    internal val attestationFeatureFlagTestRule = FeatureFlagTestRule(
+    private val activityRule = activityScenarioRule<OnrampActivity>()
+
+    private val attestationFeatureFlagTestRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.nativeLinkAttestationEnabled,
         isEnabled = false
     )
 
+    @get:Rule
+    val rule = RuleChain.emptyRuleChain()
+        .around(composeRule)
+        .around(attestationFeatureFlagTestRule)
+        .around(RetryRule(3))
+        .around(activityRule)
+
     private val defaultTimeout: Duration = 15.seconds
 
-    @Before
-    fun clearPrefs() {
+    private fun clearPrefs() {
         val context = ApplicationProvider.getApplicationContext<Context>()
 
         context.getSharedPreferences(ONRAMP_PREFS_NAME, Context.MODE_PRIVATE)
@@ -49,6 +57,8 @@ class OnrampFlowTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testCheckoutFlow() {
+        clearPrefs()
+
         waitForTag(LOGIN_EMAIL_TAG)
 
         // Enter test login credentials previously registered with the demo backend.
