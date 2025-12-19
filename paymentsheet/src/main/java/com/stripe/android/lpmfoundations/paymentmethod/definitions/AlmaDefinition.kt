@@ -7,7 +7,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal object AlmaDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Alma
@@ -25,13 +24,9 @@ internal object AlmaDefinition : PaymentMethodDefinition {
     override fun uiDefinitionFactory(): UiDefinitionFactory = AlmaUiDefinitionFactory
 }
 
-private object AlmaUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec,
-    ) = SupportedPaymentMethod(
+private object AlmaUiDefinitionFactory : UiDefinitionFactory.Simple() {
+    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         paymentMethodDefinition = AlmaDefinition,
-        sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_alma,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_alma_day,
         iconResourceNight = R.drawable.stripe_ic_paymentsheet_pm_alma_night,
