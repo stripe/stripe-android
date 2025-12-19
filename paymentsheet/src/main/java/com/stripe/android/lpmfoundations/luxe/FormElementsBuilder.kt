@@ -13,6 +13,8 @@ internal class FormElementsBuilder(
     private val footerFormElements: MutableList<FormElement> = mutableListOf()
 
     private val requiredContactInformationCollectionModes: MutableSet<ContactInformationCollectionMode> = mutableSetOf()
+    private val overriddenContactInformationCollectionModes: MutableSet<ContactInformationCollectionMode> =
+        mutableSetOf()
 
     private var requireBillingAddressCollection: Boolean = false
     private var availableCountries: Set<String> =
@@ -48,6 +50,14 @@ internal class FormElementsBuilder(
         }
     }
 
+    fun overrideContactInformationPosition(type: ContactInformationCollectionMode): FormElementsBuilder = apply {
+        if (type in requiredContactInformationCollectionModes) {
+            overriddenContactInformationCollectionModes += type
+
+            uiFormElements += type.formElement(arguments.initialValues)
+        }
+    }
+
     fun element(formElement: FormElement): FormElementsBuilder = apply {
         uiFormElements += formElement
     }
@@ -77,7 +87,9 @@ internal class FormElementsBuilder(
             addAll(headerFormElements) // Order headers first.
 
             for (collectionMode in requiredContactInformationCollectionModes) {
-                add(collectionMode.formElement(arguments.initialValues))
+                if (collectionMode !in overriddenContactInformationCollectionModes) {
+                    add(collectionMode.formElement(arguments.initialValues))
+                }
             }
 
             addAll(uiFormElements)
