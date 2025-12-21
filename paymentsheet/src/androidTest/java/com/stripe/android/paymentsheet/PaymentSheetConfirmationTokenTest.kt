@@ -8,7 +8,6 @@ import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
-import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
@@ -111,13 +110,38 @@ internal class PaymentSheetConfirmationTokenTest {
         paymentMethodType: PaymentMethodType,
         isPayment: Boolean = true,
     ) {
-        if (paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection) {
+        if (customerType == CustomerType.ReturningCustomer) {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("GET"),
                 path("/v1/elements/sessions"),
             ) { response ->
-                response.testBodyFromFile("elements-sessions-requires_cvc_recollection.json")
+                if (paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection) {
+                    response.testBodyFromFile("elements-sessions-requires_cvc_recollection.json")
+                } else {
+                    response.testBodyFromFile(
+                        "elements-sessions-returning-customer-with-customer-session.json"
+                    )
+                }
+            }
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("GET"),
+                path("/v1/customers/cus_1"),
+            ) { response ->
+                response.testBodyFromFile("customer-get-success.json")
+            }
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/mobile/sessions/lookup"),
+            ) { response ->
+                response.testBodyFromFile("consumer-session-lookup-success.json")
+            }
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/sessions/lookup"),
+            ) { response ->
+                response.testBodyFromFile("consumer-session-lookup-success.json")
             }
         } else {
             networkRule.enqueue(
@@ -125,17 +149,6 @@ internal class PaymentSheetConfirmationTokenTest {
                 path("/v1/elements/sessions"),
             ) { response ->
                 response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
-            }
-        }
-
-        if (customerType == CustomerType.ReturningCustomer) {
-            networkRule.enqueue(
-                method("GET"),
-                path("/v1/payment_methods"),
-                query("type", "card"),
-                query("customer", "cus_foobar"),
-            ) { response ->
-                response.testBodyFromFile("payment-methods-get-success.json")
             }
         }
 
@@ -162,9 +175,9 @@ internal class PaymentSheetConfirmationTokenTest {
                     .also {
                         if (customerType == CustomerType.ReturningCustomer) {
                             it.customer(
-                                PaymentSheet.CustomerConfiguration(
-                                    "cus_foobar",
-                                    "ek_test_foobar"
+                                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                                    "cus_1",
+                                    "cuss_test_foobar"
                                 )
                             )
                         }
