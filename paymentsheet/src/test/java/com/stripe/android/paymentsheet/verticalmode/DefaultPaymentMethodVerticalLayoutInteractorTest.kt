@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodLayoutInitialVisibilityTracker.Companion.EMBEDDED_PAYMENT_METHOD_LAYOUT_NAME
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -1468,13 +1469,14 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun visibilityTracker_doesNotEmitEventOnInit() = runScenario(
+    fun paymentMethodVisibilityTracker_doesNotEmitEventOnInit() = runScenario(
         initialPaymentMethods = PaymentMethodFixtures.createCards(1),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "cashapp")
             )
         ),
+        shouldTrackIndividualPaymentMethods = true,
     ) {
         val fakeLayoutCoordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
 
@@ -1486,12 +1488,13 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun visibilityTracker_emitsCorrectlyNoSaved() = runScenario(
+    fun paymentMethodVisibilityTracker_emitsCorrectlyNoSaved() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card")
             )
         ),
+        shouldTrackIndividualPaymentMethods = true,
     ) {
         val fakeLayoutCoordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
 
@@ -1511,7 +1514,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun visibilityTracker_emitsCorrectlyWithSaved() {
+    fun paymentMethodVisibilityTracker_emitsCorrectlyWithSaved() {
         runScenario(
             initialPaymentMethods = PaymentMethodFixtures.createCards(1),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -1519,6 +1522,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     paymentMethodTypes = listOf("card", "cashapp")
                 )
             ),
+            shouldTrackIndividualPaymentMethods = true,
         ) {
             val visibleCoordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
 
@@ -1557,8 +1561,9 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun visibilityTracker_doesNotEmitWhenCancellingTracking() = runScenario(
-        initialPaymentMethods = PaymentMethodFixtures.createCards(1)
+    fun paymentMethodVisibilityTracker_doesNotEmitWhenCancellingTracking() = runScenario(
+        initialPaymentMethods = PaymentMethodFixtures.createCards(1),
+        shouldTrackIndividualPaymentMethods = true,
     ) {
         val fakeLayoutCoordinates = FakeLayoutCoordinatesFixtures.FULLY_HIDDEN_COORDINATES
 
@@ -1578,6 +1583,72 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         testScope.testScheduler.advanceUntilIdle()
 
         visibilitySnapshotTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun paymentMethodLayoutVisibilityTracker_doesNotEmitEventOnInit() = runScenario(
+        initialPaymentMethods = PaymentMethodFixtures.createCards(1),
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp")
+            )
+        ),
+        shouldTrackIndividualPaymentMethods = false,
+    ) {
+        visibilitySnapshotTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun paymentMethodLayoutVisibilityTracker_emitsCorrectlyNoSaved() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card")
+            )
+        ),
+        shouldTrackIndividualPaymentMethods = false,
+    ) {
+        val fakeLayoutCoordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
+
+        interactor.handleViewAction(
+            ViewAction.UpdatePaymentMethodVisibility(
+                EMBEDDED_PAYMENT_METHOD_LAYOUT_NAME,
+                fakeLayoutCoordinates
+            )
+        )
+
+        testScope.testScheduler.advanceUntilIdle()
+
+        assertThat(visibilitySnapshotTurbine.awaitItem()).isEqualTo(
+            Pair(listOf("card"), emptyList<String>())
+        )
+    }
+
+    @Test
+    fun paymentMethodLayoutVisibilityTracker_emitsCorrectlyWithSaved() {
+        runScenario(
+            initialPaymentMethods = PaymentMethodFixtures.createCards(1),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp")
+                )
+            ),
+            shouldTrackIndividualPaymentMethods = false,
+        ) {
+            val visibleCoordinates = FakeLayoutCoordinatesFixtures.FULLY_VISIBLE_COORDINATES
+
+            interactor.handleViewAction(
+                ViewAction.UpdatePaymentMethodVisibility(
+                    EMBEDDED_PAYMENT_METHOD_LAYOUT_NAME,
+                    visibleCoordinates
+                )
+            )
+
+            testScope.testScheduler.advanceUntilIdle()
+
+            assertThat(visibilitySnapshotTurbine.awaitItem()).isEqualTo(
+                Pair(listOf("saved", "card", "cashapp"), emptyList<String>())
+            )
+        }
     }
 
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
@@ -1631,6 +1702,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         invokeRowSelectionCallback: (() -> Unit)? = null,
         initialWalletsState: WalletsState? = null,
         displaysMandatesInFormScreen: Boolean = false,
+        shouldTrackIndividualPaymentMethods: Boolean = true,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -1694,6 +1766,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             mainDispatcher = testDispatcher,
             invokeRowSelectionCallback = invokeRowSelectionCallback,
             displaysMandatesInFormScreen = displaysMandatesInFormScreen,
+            shouldTrackIndividualPaymentMethods = shouldTrackIndividualPaymentMethods,
             onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visibleItems, hiddenItems ->
                 visibilitySnapshotTurbine.add(
                     Pair(visibleItems, hiddenItems)

@@ -29,6 +29,7 @@ internal class EmbeddedContentPage(
     }
 
     fun clickOnLpm(code: String) {
+        composeTestRule.waitForIdle()
         waitUntilVisible()
 
         composeTestRule.onNode(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code"))
