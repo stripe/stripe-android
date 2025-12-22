@@ -7,6 +7,9 @@ import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
 import com.stripe.android.paymentsheet.example.playground.model.CreateConnectionTokenRequest
 import com.stripe.android.paymentsheet.example.playground.model.CreateConnectionTokenResponse
+import com.stripe.android.paymentsheet.example.playground.settings.CustomPublishableKeyDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomSecretKeyDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomStripeApiDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
@@ -26,6 +29,9 @@ internal class CreateConnectionTokenRequester(
                         CreateConnectionTokenRequest.serializer(),
                         CreateConnectionTokenRequest(
                             merchantCountryCode = playgroundSettings[MerchantSettingsDefinition].value,
+                            customStripeApi = playgroundSettings[CustomStripeApiDefinition],
+                            customSecretKey = playgroundSettings[CustomSecretKeyDefinition],
+                            customPublishableKey = playgroundSettings[CustomPublishableKeyDefinition],
                         )
                     )
                 )

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 
 internal object CustomStripeApiDefinition :
@@ -21,5 +22,9 @@ internal object CustomStripeApiDefinition :
         if (value.isNotEmpty()) {
             checkoutRequestBuilder.customStripeApi(value)
         }
+    }
+
+    override fun valueUpdated(value: String, playgroundSettings: PlaygroundSettings) {
+        ApiRequest.API_HOST_OVERRIDE = value
     }
 }

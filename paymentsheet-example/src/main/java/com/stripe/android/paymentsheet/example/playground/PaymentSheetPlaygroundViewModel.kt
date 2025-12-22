@@ -47,6 +47,9 @@ import com.stripe.android.paymentsheet.example.playground.network.CreateConnecti
 import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.network.SharedPaymentTokenPlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomPublishableKeyDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomSecretKeyDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomStripeApiDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
@@ -652,6 +655,9 @@ internal class PaymentSheetPlaygroundViewModel(
                     merchantCountryCode = playgroundState.merchantCode.countryCode,
                     mode = playgroundState.checkoutMode.value,
                     returnUrl = RETURN_URL,
+                    customStripeApi = playgroundState.snapshot[CustomStripeApiDefinition],
+                    customSecretKey = playgroundState.snapshot[CustomSecretKeyDefinition],
+                    customPublishableKey = playgroundState.snapshot[CustomPublishableKeyDefinition],
                 )
             }
 
@@ -661,6 +667,9 @@ internal class PaymentSheetPlaygroundViewModel(
                     confirmationTokenId = confirmationParams.id,
                     merchantCountryCode = playgroundState.merchantCode.countryCode,
                     mode = playgroundState.checkoutMode.value,
+                    customStripeApi = playgroundState.snapshot[CustomStripeApiDefinition],
+                    customSecretKey = playgroundState.snapshot[CustomSecretKeyDefinition],
+                    customPublishableKey = playgroundState.snapshot[CustomPublishableKeyDefinition],
                 )
             }
         }

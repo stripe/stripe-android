@@ -309,6 +309,12 @@ sealed interface ConfirmIntentRequestParams {
         val mode: String,
         @SerialName("return_url")
         val returnUrl: String,
+        @SerialName("custom_stripe_api")
+        val customStripeApi: String?,
+        @SerialName("custom_secret_key")
+        val customSecretKey: String?,
+        @SerialName("custom_publishable_key")
+        val customPublishableKey: String?,
     ) : ConfirmIntentRequestParams
 
     @Serializable
@@ -321,6 +327,12 @@ sealed interface ConfirmIntentRequestParams {
         val merchantCountryCode: String,
         @SerialName("mode")
         val mode: String,
+        @SerialName("custom_stripe_api")
+        val customStripeApi: String?,
+        @SerialName("custom_secret_key")
+        val customSecretKey: String?,
+        @SerialName("custom_publishable_key")
+        val customPublishableKey: String?,
     ) : ConfirmIntentRequestParams
 }
 
