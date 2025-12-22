@@ -167,25 +167,25 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
 
     internal companion object {
 
-        private const val listAccountsUrl: String =
+        private val listAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/list_accounts"
 
-        private const val sessionReceiptUrl: String =
+        private val sessionReceiptUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/session_receipt"
 
-        internal const val authorizationSessionUrl: String =
+        internal val authorizationSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions"
 
-        private const val completeUrl: String =
+        private val completeUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/complete"
 
-        private const val authorizationSessionOAuthResultsUrl: String =
+        private val authorizationSessionOAuthResultsUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/oauth_results"
 
-        internal const val authorizeSessionUrl: String =
+        internal val authorizeSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/authorized"
 
-        private const val paymentMethodsUrl: String =
+        private val paymentMethodsUrl: String =
             "${ApiRequest.API_HOST}/v1/payment_methods"
     }
 }

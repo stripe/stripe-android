@@ -75,10 +75,10 @@ private class FinancialConnectionsInstitutionsRepositoryImpl(
     }
 
     companion object {
-        internal const val institutionsUrl: String =
+        internal val institutionsUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/institutions"
 
-        internal const val featuredInstitutionsUrl: String =
+        internal val featuredInstitutionsUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/featured_institutions"
     }
 }

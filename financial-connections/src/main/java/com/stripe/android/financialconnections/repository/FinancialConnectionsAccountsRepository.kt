@@ -239,22 +239,22 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     companion object {
         private const val CachedPartnerAccountsKey = "CachedPartnerAccounts"
 
-        internal const val accountsSessionUrl: String =
+        internal val accountsSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/accounts"
 
-        internal const val networkedAccountsUrl: String =
+        internal val networkedAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/networked_accounts"
 
-        internal const val shareNetworkedAccountsUrl: String =
+        internal val shareNetworkedAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/share_networked_account"
 
-        internal const val attachPaymentAccountUrl: String =
+        internal val attachPaymentAccountUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/attach_payment_account"
 
-        internal const val authorizationSessionSelectedAccountsUrl: String =
+        internal val authorizationSessionSelectedAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/selected_accounts"
 
-        internal const val pollAccountsNumbersUrl: String =
+        internal val pollAccountsNumbersUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/poll_account_numbers"
     }
 }

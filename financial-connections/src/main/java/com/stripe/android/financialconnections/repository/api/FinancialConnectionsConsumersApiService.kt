@@ -63,7 +63,7 @@ private class FinancialConnectionsConsumersApiServiceImpl(
         /**
          * @return `https://api.stripe.com/v1/connections/link_account_sessions/consumer_sessions`
          */
-        const val consumerSessionsUrl: String =
+        val consumerSessionsUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/link_account_sessions/consumer_sessions"
     }
 }

@@ -615,40 +615,40 @@ private class FinancialConnectionsManifestRepositoryImpl(
         internal const val PARAMS_SUPPORT_APP_VERIFICATION = "supports_app_verification"
         internal const val PARAMS_VERIFY_APP_ID = "verified_app_id"
 
-        internal const val synchronizeSessionUrl: String =
+        internal val synchronizeSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"
 
-        internal const val cancelAuthSessionUrl: String =
+        internal val cancelAuthSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/cancel"
 
-        internal const val retrieveAuthSessionUrl: String =
+        internal val retrieveAuthSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/retrieve"
 
-        internal const val eventsAuthSessionUrl: String =
+        internal val eventsAuthSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/events"
 
-        internal const val consentAcquiredUrl: String =
+        internal val consentAcquiredUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/consent_acquired"
 
-        internal const val linkMoreAccountsUrl: String =
+        internal val linkMoreAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_more_accounts"
 
-        internal const val saveAccountToLinkUrl: String =
+        internal val saveAccountToLinkUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/save_accounts_to_link"
 
-        internal const val linkVerifiedUrl: String =
+        internal val linkVerifiedUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_verified"
 
-        internal const val linkStepUpVerifiedUrl: String =
+        internal val linkStepUpVerifiedUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_step_up_authentication_verified"
 
-        internal const val disableNetworking: String =
+        internal val disableNetworking: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/disable_networking"
 
-        internal const val generateRepairUrl: String =
+        internal val generateRepairUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/repair_sessions/generate_url"
 
-        private const val institutionSelectedUrl: String =
+        private val institutionSelectedUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/institution_selected"
     }
 }
