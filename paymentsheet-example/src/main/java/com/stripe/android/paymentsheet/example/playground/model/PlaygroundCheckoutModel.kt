@@ -55,6 +55,12 @@ class CheckoutRequest private constructor(
     val isConfirmationToken: Boolean?,
     @SerialName("allows_tap_to_add")
     val allowsTapToAdd: Boolean?,
+    @SerialName("custom_stripe_api")
+    val customStripeApi: String?,
+    @SerialName("custom_secret_key")
+    val customSecretKey: String?,
+    @SerialName("custom_publishable_key")
+    val customPublishableKey: String?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -94,6 +100,9 @@ class CheckoutRequest private constructor(
         private var overridePaymentMethodOptionsSetupFutureUsage: Map<String, String>? = null
         private var isConfirmationToken: Boolean? = null
         private var allowsTapToAdd: Boolean? = null
+        private var customStripeApi: String? = null
+        private var customSecretKey: String? = null
+        private var customPublishableKey: String? = null
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -191,6 +200,18 @@ class CheckoutRequest private constructor(
             this.onBehalfOf = onBehalfOf
         }
 
+        fun customStripeApi(customStripeApi: String?) = apply {
+            this.customStripeApi = customStripeApi
+        }
+
+        fun customSecretKey(customSecretKey: String?) = apply {
+            this.customSecretKey = customSecretKey
+        }
+
+        fun customPublishableKey(customPublishableKey: String?) = apply {
+            this.customPublishableKey = customPublishableKey
+        }
+
         fun build(): CheckoutRequest {
             return CheckoutRequest(
                 initialization = initialization,
@@ -220,6 +241,9 @@ class CheckoutRequest private constructor(
                     ?: paymentMethodOptionsSetupFutureUsage,
                 isConfirmationToken = isConfirmationToken,
                 allowsTapToAdd = allowsTapToAdd,
+                customStripeApi = customStripeApi,
+                customSecretKey = customSecretKey,
+                customPublishableKey = customPublishableKey,
             )
         }
     }
