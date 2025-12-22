@@ -142,6 +142,8 @@
   <string name="stripe_fpx_bank_offline">%s - Izvan mreže</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Vaš način plaćanja je odbijen.</string>
+  <!-- An error message displayed when the customer has not enough funds for payment. -->
+  <string name="stripe_insufficient_funds">Na vašoj kartici nema dovoljno sredstava.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Došlo je do pogreške sustava.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->

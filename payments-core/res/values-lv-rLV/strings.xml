@@ -142,6 +142,8 @@
   <string name="stripe_fpx_bank_offline">%s — bezsaistē</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Maksājuma veids tika noraidīts.</string>
+  <!-- An error message displayed when the customer has not enough funds for payment. -->
+  <string name="stripe_insufficient_funds">Jūsu kartē nav pietiekami daudz līdzekļu.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Radās iekšēja kļūda.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->

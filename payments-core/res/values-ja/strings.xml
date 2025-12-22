@@ -142,6 +142,8 @@
   <string name="stripe_fpx_bank_offline">%s - オフライン</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">お客様の支払い方法が拒否されました。</string>
+  <!-- An error message displayed when the customer has not enough funds for payment. -->
+  <string name="stripe_insufficient_funds">カードの残高が不足しています。</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">内部エラーが発生しました。</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
