@@ -28,7 +28,8 @@ data class StripeResponse<ResponseBody>(
     /**
      * the response headers
      */
-    val headers: Map<String, List<String>> = emptyMap()
+    val headers: Map<String, List<String>> = emptyMap(),
+    val endpoint: String? = null,
 ) {
     val isOk: Boolean = code == HttpURLConnection.HTTP_OK
     val isError: Boolean = code < HttpURLConnection.HTTP_OK || code >= HTTP_MULT_CHOICE
@@ -39,7 +40,9 @@ data class StripeResponse<ResponseBody>(
     )
 
     override fun toString(): String {
-        return "$HEADER_REQUEST_ID: $requestId, Status Code: $code"
+        // E.g. req_123 /elements/sessions (200)
+        val components = listOfNotNull(requestId, endpoint).joinToString(" ")
+        return "$components ($code)"
     }
 
     fun getHeaderValue(key: String): List<String>? {
