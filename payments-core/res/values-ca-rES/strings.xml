@@ -142,6 +142,8 @@
   <string name="stripe_fpx_bank_offline">%s - Fora de línia</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">S\'ha rebutjat el mètode de pagament.</string>
+  <!-- An error message displayed when the customer has not enough funds for payment. -->
+  <string name="stripe_insufficient_funds">La teva targeta no té fons suficients.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">S\'ha produït un error intern.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->

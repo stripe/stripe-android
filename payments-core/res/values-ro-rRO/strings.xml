@@ -142,6 +142,8 @@
   <string name="stripe_fpx_bank_offline">%s - Offline</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Metoda dvs. de plată a fost respinsă.</string>
+  <!-- An error message displayed when the customer has not enough funds for payment. -->
+  <string name="stripe_insufficient_funds">Cardul dvs. nu are fonduri suficiente.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">A apărut o eroare internă.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->

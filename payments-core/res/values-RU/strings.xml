@@ -142,6 +142,8 @@
   <string name="stripe_fpx_bank_offline">%s - не в сети</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Не удалось выполнить оплату этим способом.</string>
+  <!-- An error message displayed when the customer has not enough funds for payment. -->
+  <string name="stripe_insufficient_funds">На карте недостаточно средств.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Произошла внутренняя ошибка.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
