@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
 import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -9,6 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
@@ -17,6 +19,7 @@ import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 
@@ -33,7 +36,13 @@ internal object KlarnaDefinition : PaymentMethodDefinition {
         return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
     }
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = KlarnaUiDefinitionFactory
+    override fun uiDefinitionFactory(): UiDefinitionFactory {
+        return if (FeatureFlags.enableKlarnaFormRemoval.isEnabled) {
+            KlarnaRemovedFormUiDefinitionFactory
+        } else {
+            KlarnaUiDefinitionFactory
+        }
+    }
 }
 
 private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
@@ -102,5 +111,66 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
                     )
                 }
             }
+    }
+}
+
+private object KlarnaRemovedFormUiDefinitionFactory : UiDefinitionFactory.Simple() {
+    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+        paymentMethodDefinition = KlarnaDefinition,
+        displayNameResource = R.string.stripe_paymentsheet_payment_method_klarna,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_klarna,
+        iconResourceNight = null,
+        subtitle = R.string.stripe_klarna_pay_later.resolvableString
+    )
+
+    override fun buildFormElements(
+        metadata: PaymentMethodMetadata,
+        arguments: UiDefinitionFactory.Arguments,
+        builder: FormElementsBuilder
+    ) {
+        if (metadata.stripeIntent is SetupIntent &&
+            arguments.billingDetailsCollectionConfiguration.address !=
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+        ) {
+            builder
+                .header(
+                    StaticTextElement(
+                        IdentifierSpec.Generic("klarna_header_text"),
+                        stringResId = R.string.stripe_klarna_buy_now_pay_later
+                    )
+                )
+                .element(
+                    getKlarnaCountryElement(
+                        allowedCountryCodes = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
+                        initialValue = metadata.stripeIntent.countryCode
+                    )
+                )
+        }
+
+        if (KlarnaDefinition.requiresMandate(metadata)) {
+            builder.footer(
+                formElement = MandateTextElement(
+                    stringResId = R.string.stripe_klarna_mandate,
+                    args = listOf(arguments.merchantName, arguments.merchantName)
+                )
+            )
+        }
+    }
+
+    private fun getKlarnaCountryElement(
+        allowedCountryCodes: Set<String>,
+        initialValue: String?
+    ): FormElement {
+        val identifier = IdentifierSpec.Generic("billing_details[address][country]")
+
+        return SectionElement.wrap(
+            CountryElement(
+                identifier = identifier,
+                controller = DropdownFieldController(
+                    CountryConfig(allowedCountryCodes),
+                    initialValue = initialValue
+                )
+            )
+        )
     }
 }
