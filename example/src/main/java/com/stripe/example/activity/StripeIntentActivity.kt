@@ -21,9 +21,7 @@ import org.json.JSONObject
  * in order to display state of the interaction.
  */
 abstract class StripeIntentActivity : AppCompatActivity() {
-    internal val viewModel: StripeIntentViewModel by viewModels {
-        StripeIntentViewModel.StripeIntentViewModelFactory(application)
-    }
+    internal val viewModel: StripeIntentViewModel by viewModels()
     private val stripeAccountId: String? by lazy {
         Settings(this).stripeAccountId
     }
