@@ -90,7 +90,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         },
         config,
         readyCallback,
-        DefaultCardBrandFilter
+        config.cardBrandFilter
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -113,7 +113,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         },
         config,
         readyCallback,
-        DefaultCardBrandFilter
+        config.cardBrandFilter
     )
 
     /**
@@ -142,7 +142,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         },
         config,
         readyCallback,
-        DefaultCardBrandFilter
+        config.cardBrandFilter
     )
 
     internal constructor(
@@ -169,7 +169,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE_TOKEN),
-                )
+                ),
+                cardBrandFilter = cardBrandFilter
             )
         },
         cardBrandFilter = cardBrandFilter
@@ -293,6 +294,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
          * Set this property to enable other card networks in additional to the default list, such as "INTERAC"
          */
         internal val additionalEnabledNetworks: List<String> = emptyList(),
+
         /**
          * Allows to filter card brands while saving a payment method
          *
@@ -433,7 +435,7 @@ fun rememberGooglePayPaymentMethodLauncher(
             readyCallback = {
                 currentReadyCallback.onReady(it)
             },
-            cardBrandFilter = DefaultCardBrandFilter
+            cardBrandFilter = config.cardBrandFilter
         )
     }
 }
