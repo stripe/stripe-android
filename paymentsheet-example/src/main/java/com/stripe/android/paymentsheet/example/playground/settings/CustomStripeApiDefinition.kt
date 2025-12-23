@@ -25,6 +25,8 @@ internal object CustomStripeApiDefinition :
     }
 
     override fun setValue(value: String) {
-        ApiRequest.API_HOST_OVERRIDE = "https://$value"
+        if (value.isNotEmpty()) {
+            ApiRequest.API_HOST_OVERRIDE = "https://$value"
+        }
     }
 }
