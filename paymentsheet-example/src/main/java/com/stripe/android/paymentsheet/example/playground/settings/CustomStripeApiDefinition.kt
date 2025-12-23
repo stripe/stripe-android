@@ -24,7 +24,7 @@ internal object CustomStripeApiDefinition :
         }
     }
 
-    override fun valueUpdated(value: String, playgroundSettings: PlaygroundSettings) {
-        ApiRequest.API_HOST_OVERRIDE = value
+    override fun setValue(value: String) {
+        ApiRequest.API_HOST_OVERRIDE = "https://$value"
     }
 }

@@ -615,40 +615,40 @@ private class FinancialConnectionsManifestRepositoryImpl(
         internal const val PARAMS_SUPPORT_APP_VERIFICATION = "supports_app_verification"
         internal const val PARAMS_VERIFY_APP_ID = "verified_app_id"
 
-        internal val synchronizeSessionUrl: String =
-            "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"
+        internal val synchronizeSessionUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"
 
-        internal val cancelAuthSessionUrl: String =
-            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/cancel"
+        internal val cancelAuthSessionUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/connections/auth_sessions/cancel"
 
-        internal val retrieveAuthSessionUrl: String =
-            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/retrieve"
+        internal val retrieveAuthSessionUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/connections/auth_sessions/retrieve"
 
-        internal val eventsAuthSessionUrl: String =
-            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/events"
+        internal val eventsAuthSessionUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/connections/auth_sessions/events"
 
-        internal val consentAcquiredUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/consent_acquired"
+        internal val consentAcquiredUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/consent_acquired"
 
-        internal val linkMoreAccountsUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/link_more_accounts"
+        internal val linkMoreAccountsUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/link_more_accounts"
 
-        internal val saveAccountToLinkUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/save_accounts_to_link"
+        internal val saveAccountToLinkUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/save_accounts_to_link"
 
-        internal val linkVerifiedUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/link_verified"
+        internal val linkVerifiedUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/link_verified"
 
-        internal val linkStepUpVerifiedUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/link_step_up_authentication_verified"
+        internal val linkStepUpVerifiedUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/link_step_up_authentication_verified"
 
-        internal val disableNetworking: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/disable_networking"
+        internal val disableNetworking: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/disable_networking"
 
-        internal val generateRepairUrl: String =
-            "${ApiRequest.API_HOST}/v1/connections/repair_sessions/generate_url"
+        internal val generateRepairUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/connections/repair_sessions/generate_url"
 
-        private val institutionSelectedUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/institution_selected"
+        private val institutionSelectedUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/institution_selected"
     }
 }
