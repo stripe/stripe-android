@@ -18,8 +18,6 @@ import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -29,16 +27,6 @@ class KlarnaDefinitionNoFormTest {
         featureFlag = FeatureFlags.enableKlarnaFormRemoval,
         isEnabled = true
     )
-
-    @BeforeTest
-    fun enableKlarnaFormRemovalRule() {
-        enableKlarnaFormRemovalRule.setEnabled(true)
-    }
-
-    @AfterTest
-    fun disableKlarnaFormRemovalRule() {
-        enableKlarnaFormRemovalRule.setEnabled(false)
-    }
 
     @Test
     fun `createFormElements returns default set of fields when feature flag off`() {
