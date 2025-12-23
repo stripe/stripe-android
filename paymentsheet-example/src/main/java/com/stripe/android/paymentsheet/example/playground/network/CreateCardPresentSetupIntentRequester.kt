@@ -7,6 +7,9 @@ import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
 import com.stripe.android.paymentsheet.example.playground.model.CreateCardPresentSetupIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.CreateCardPresentSetupIntentResponse
+import com.stripe.android.paymentsheet.example.playground.settings.CustomPublishableKeyDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomSecretKeyDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomStripeApiDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
@@ -27,7 +30,10 @@ internal class CreateCardPresentSetupIntentRequester(
                         CreateCardPresentSetupIntentRequest(
                             customerId = customerId,
                             merchantCountryCode = playgroundSettings[MerchantSettingsDefinition].value,
-                            paymentMethodTypes = listOf("card_present")
+                            paymentMethodTypes = listOf("card_present"),
+                            customStripeApi = playgroundSettings[CustomStripeApiDefinition],
+                            customSecretKey = playgroundSettings[CustomSecretKeyDefinition],
+                            customPublishableKey = playgroundSettings[CustomPublishableKeyDefinition],
                         )
                     )
                 )

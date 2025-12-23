@@ -490,6 +490,8 @@ internal class PlaygroundSettings private constructor(
             LinkSettingsDefinition,
             LinkTypeSettingsDefinition,
             MerchantSettingsDefinition,
+            CustomSecretKeyDefinition,
+            CustomPublishableKeyDefinition,
             CurrencySettingsDefinition,
             GooglePaySettingsDefinition,
             DefaultBillingAddressSettingsDefinition,
@@ -556,6 +558,7 @@ internal class PlaygroundSettings private constructor(
             PassiveCaptchaDefinition,
             AttestationOnIntentConfirmationDefinition,
             EnableTapToAddSettingsDefinition,
+            CustomStripeApiDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

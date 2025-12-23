@@ -7,6 +7,12 @@ import kotlinx.serialization.Serializable
 data class CreateConnectionTokenRequest(
     @SerialName("merchant_country_code")
     val merchantCountryCode: String,
+    @SerialName("custom_stripe_api")
+    val customStripeApi: String?,
+    @SerialName("custom_secret_key")
+    val customSecretKey: String?,
+    @SerialName("custom_publishable_key")
+    val customPublishableKey: String?,
 )
 
 @Serializable

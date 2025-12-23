@@ -198,6 +198,10 @@ data class ApiRequest internal constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        const val API_HOST = "https://api.stripe.com"
+        @Volatile
+        var API_HOST_OVERRIDE: String? = null
+
+        val API_HOST: String
+            get() = API_HOST_OVERRIDE ?: "https://api.stripe.com"
     }
 }
