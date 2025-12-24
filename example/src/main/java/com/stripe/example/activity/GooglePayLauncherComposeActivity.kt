@@ -29,15 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.stripe.android.CardBrandFilter
-import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayLauncher
 import com.stripe.android.googlepaylauncher.rememberGooglePayLauncher
 import com.stripe.android.model.CardBrand
 import com.stripe.example.R
 import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
 
 class GooglePayLauncherComposeActivity : StripeIntentActivity() {
 
@@ -69,11 +66,9 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
                 isPhoneNumberRequired = false
             ),
             existingPaymentMethodRequired = false,
-            cardBrandFilter = if (checked) {
-                GooglePayLauncherAcceptableBrandsFilter(
-                    CardBrand.Visa
-                )
-            } else { DefaultCardBrandFilter }
+            cardBrandAcceptance = if (checked) {
+                CardBrand.CardBrandAcceptance.allowed(listOf(CardBrand.CardBrandAcceptance.BrandCategory.Visa))
+            } else { CardBrand.CardBrandAcceptance.all() }
         )
 
         LaunchedEffect(Unit) {
@@ -198,16 +193,5 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
 
     private companion object {
         private const val COUNTRY_CODE = "US"
-    }
-}
-
-@Parcelize
-private class GooglePayLauncherAcceptableBrandsFilter(
-    private val cardBrands: Set<CardBrand>
-) : CardBrandFilter {
-    constructor(vararg cardBrands: CardBrand) : this(cardBrands.toSet())
-
-    override fun isAccepted(cardBrand: CardBrand): Boolean {
-        return cardBrand in cardBrands
     }
 }

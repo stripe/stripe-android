@@ -12,6 +12,7 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentDataRequest
 import com.google.android.gms.wallet.PaymentsClient
+import com.stripe.android.AcceptanceCardBrandFilter
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
@@ -312,7 +313,7 @@ internal class GooglePayLauncherViewModel(
                 allowCreditCards = args.config.allowCreditCards,
                 errorReporter = errorReporter,
                 logger = logger,
-                cardBrandFilter = args.config.cardBrandFilter
+                cardBrandFilter = AcceptanceCardBrandFilter(args.config.cardBrandAcceptance)
             )
 
             return GooglePayLauncherViewModel(
@@ -334,7 +335,7 @@ internal class GooglePayLauncherViewModel(
                     googlePayConfig = GooglePayConfig(publishableKey, stripeAccountId),
                     isJcbEnabled = args.config.isJcbEnabled,
                     additionalEnabledNetworks = args.config.additionalEnabledNetworks,
-                    cardBrandFilter = args.config.cardBrandFilter
+                    cardBrandFilter = AcceptanceCardBrandFilter(args.config.cardBrandAcceptance)
                 ),
                 googlePayRepository = googlePayRepository,
                 savedStateHandle = extras.createSavedStateHandle(),

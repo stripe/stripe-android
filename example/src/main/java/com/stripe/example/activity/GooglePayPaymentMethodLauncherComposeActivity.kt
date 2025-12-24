@@ -55,11 +55,11 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
                 isPhoneNumberRequired = false
             ),
             existingPaymentMethodRequired = false,
-            cardBrandFilter = if (filterBrand) {
-                GooglePayPaymentMethodLauncherAcceptableBrandsFilter(
-                    CardBrand.Visa
+            cardBrandAcceptance = if (filterBrand) {
+                CardBrand.CardBrandAcceptance.allowed(
+                    listOf(CardBrand.CardBrandAcceptance.BrandCategory.Visa)
                 )
-            } else { DefaultCardBrandFilter }
+            } else { CardBrand.CardBrandAcceptance.all() }
         )
     }
 
@@ -150,16 +150,5 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-}
-
-@Parcelize
-private class GooglePayPaymentMethodLauncherAcceptableBrandsFilter(
-    private val cardBrands: Set<CardBrand>
-) : CardBrandFilter {
-    constructor(vararg cardBrands: CardBrand) : this(cardBrands.toSet())
-
-    override fun isAccepted(cardBrand: CardBrand): Boolean {
-        return cardBrand in cardBrands
     }
 }

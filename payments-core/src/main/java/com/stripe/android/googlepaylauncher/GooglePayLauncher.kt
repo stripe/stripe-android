@@ -13,14 +13,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.CardBrandFilter
-import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.AcceptanceCardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -91,7 +91,7 @@ class GooglePayLauncher internal constructor(
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks,
-                cardBrandFilter = config.cardBrandFilter
+                cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance)
             )
         },
         PaymentAnalyticsRequestFactory(
@@ -134,7 +134,7 @@ class GooglePayLauncher internal constructor(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
-                cardBrandFilter = config.cardBrandFilter
+                cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance)
             )
         },
         PaymentAnalyticsRequestFactory(
@@ -183,7 +183,7 @@ class GooglePayLauncher internal constructor(
                     productUsage = setOf(PRODUCT_USAGE)
                 ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks,
-                cardBrandFilter = config.cardBrandFilter
+                cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance)
             )
         },
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -323,7 +323,7 @@ class GooglePayLauncher internal constructor(
          * Allows to select the acceptable card brands
          * Default: Accepts all brands
          */
-        var cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+        var cardBrandAcceptance: CardBrand.CardBrandAcceptance = CardBrand.CardBrandAcceptance.All
     ) : Parcelable {
 
         internal val isJcbEnabled: Boolean
@@ -435,7 +435,7 @@ fun rememberGooglePayLauncher(
                         productUsage = setOf(GooglePayLauncher.PRODUCT_USAGE)
                     ),
                     additionalEnabledNetworks = config.additionalEnabledNetworks,
-                    cardBrandFilter = config.cardBrandFilter
+                    cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance)
                 )
             },
             PaymentAnalyticsRequestFactory(
