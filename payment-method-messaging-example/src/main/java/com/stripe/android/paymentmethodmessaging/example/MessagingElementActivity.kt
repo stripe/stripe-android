@@ -264,6 +264,7 @@ internal class MessagingElementActivity : AppCompatActivity() {
     )
 
     private fun colorList() = listOf(
+        ColorInfo(null, "Default"),
         ColorInfo(Color.Red, "Red"),
         ColorInfo(Color.Blue, "Blue"),
         ColorInfo(Color.Black, "Black"),

@@ -2,11 +2,9 @@
 
 package com.stripe.android.paymentmethodmessaging.element.analytics
 
-import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElement
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElementPreview
-import com.stripe.android.uicore.StripeThemeDefaults
 import kotlin.time.Duration
 
 internal sealed class PaymentMethodMessagingEvent : AnalyticsEvent {
@@ -70,8 +68,8 @@ internal sealed class PaymentMethodMessagingEvent : AnalyticsEvent {
 
     internal fun PaymentMethodMessagingElement.Appearance.State.toAnalyticsValue(): Map<String, Any?> {
         val setFont = this.font != null
-        val setTextColor = this.colors.textColor != StripeThemeDefaults.colorsLight.onComponent.toArgb()
-        val setIconColor = this.colors.infoIconColor != StripeThemeDefaults.colorsLight.subtitle.toArgb()
+        val setTextColor = this.colors.textColor != null
+        val setIconColor = this.colors.infoIconColor != null
         val setTheme = this.theme != PaymentMethodMessagingElement.Appearance.Theme.LIGHT
         return buildMap {
             put(FIELD_FONT, setFont)
