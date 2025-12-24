@@ -3,8 +3,6 @@ package com.stripe.example.module
 import android.app.Application
 import androidx.annotation.StringRes
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.example.R

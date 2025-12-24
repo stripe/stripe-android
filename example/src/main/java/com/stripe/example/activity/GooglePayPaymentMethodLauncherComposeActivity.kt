@@ -24,15 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.stripe.android.CardBrandFilter
-import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.rememberGooglePayPaymentMethodLauncher
 import com.stripe.android.model.CardBrand
 import com.stripe.example.R
 import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
 
 class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
 
