@@ -373,31 +373,6 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
-    fun createAlipaySource_withAttribution_shouldPopulateProductUsage() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                SourceFixtures.ALIPAY_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-            create().createSource(
-                SourceParams.createMultibancoParams(
-                    100,
-                    "return_url",
-                    "jenny@example.com"
-                ),
-                DEFAULT_OPTIONS
-            )
-
-            verifyFraudDetectionDataAndAnalyticsRequests(
-                PaymentAnalyticsEvent.SourceCreate,
-                productUsage = null
-            )
-        }
-
-    @Test
     fun createSource_withConnectAccount_keepsHeaderInAccount() = runTest {
         val connectAccountId = "acct_1Acj2PBUgO3KuWzz"
 

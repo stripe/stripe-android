@@ -5,41 +5,8 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class SourceJsonParserTest {
-
-    @Test
-    fun `should parse Redirect correctly`() {
-        assertThat(SourceFixtures.REDIRECT)
-            .isEqualTo(
-                Source.Redirect(
-                    returnUrl = "https://google.com",
-                    status = Source.Redirect.Status.Succeeded,
-                    url = "examplecompany://redirect-link"
-                )
-            )
-    }
-
-    @Test
-    fun `should parse CodeVertification correctly`() {
-        val codeVerification = SourceFixtures.SOURCE_CODE_VERIFICATION
-        assertEquals(3, codeVerification.attemptsRemaining)
-        assertEquals(Source.CodeVerification.Status.Pending, codeVerification.status)
-    }
-
-    @Test
-    fun `should parse Receiver correctly`() {
-        assertThat(SourceFixtures.SOURCE_RECEIVER)
-            .isEqualTo(
-                Source.Receiver(
-                    address = "test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N",
-                    amountCharged = 10,
-                    amountReceived = 20,
-                    amountReturned = 30
-                )
-            )
-    }
 
     @Test
     fun `should parse Owner with verified fields correctly`() {

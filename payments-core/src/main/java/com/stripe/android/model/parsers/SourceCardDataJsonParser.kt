@@ -21,9 +21,6 @@ internal class SourceCardDataJsonParser : ModelJsonParser<SourceTypeModel.Card> 
             expiryYear = StripeJsonUtils.optInteger(json, FIELD_EXP_YEAR),
             funding = CardFunding.fromCode(StripeJsonUtils.optString(json, FIELD_FUNDING)),
             last4 = StripeJsonUtils.optString(json, FIELD_LAST4),
-            threeDSecureStatus = SourceTypeModel.Card.ThreeDSecureStatus.fromCode(
-                StripeJsonUtils.optString(json, FIELD_THREE_D_SECURE)
-            ),
             tokenizationMethod = TokenizationMethod.fromCode(
                 StripeJsonUtils.optString(json, FIELD_TOKENIZATION_METHOD)
             )
@@ -41,7 +38,6 @@ internal class SourceCardDataJsonParser : ModelJsonParser<SourceTypeModel.Card> 
         private const val FIELD_EXP_YEAR = "exp_year"
         private const val FIELD_FUNDING = "funding"
         private const val FIELD_LAST4 = "last4"
-        private const val FIELD_THREE_D_SECURE = "three_d_secure"
         private const val FIELD_TOKENIZATION_METHOD = "tokenization_method"
     }
 }

@@ -46,52 +46,6 @@ internal object SourceFixtures {
         """.trimIndent()
     )
 
-    val WECHAT = requireNotNull(
-        PARSER.parse(
-            JSONObject(
-                """
-        {
-            "id": "src_1F4ZSkBNJ02",
-            "object": "source",
-            "amount": 100,
-            "client_secret": "src_client_secret_FZiuAs6g3ri",
-            "created": 1565124054,
-            "currency": "usd",
-            "flow": "none",
-            "livemode": true,
-            "metadata": {},
-            "owner": {
-                "address": null,
-                "email": null,
-                "name": null,
-                "phone": null,
-                "verified_address": null,
-                "verified_email": null,
-                "verified_name": null,
-                "verified_phone": null
-            },
-            "statement_descriptor": null,
-            "status": "pending",
-            "type": "wechat",
-            "usage": "single_use",
-            "wechat": {
-                "statement_descriptor": "ORDER AT11990",
-                "android_appId": "wxa0df8has9d78ce",
-                "android_nonceStr": "yFNjg8d9hsfaEPYID",
-                "android_package": "Sign=WXPay",
-                "android_partnerId": "268716457",
-                "android_prepayId": "wx070440550af89hAh8941913701900",
-                "android_sign": "1A98A09EA74DCF006598h89433DED3FF6BCED1C062C63B43AE773D8",
-                "android_timeStamp": "1565124055",
-                "ios_native_url": "weixin://app/wxa0df8has9d78ce/pay/",
-                "qr_code_url": null
-            }
-        }
-                """.trimIndent()
-            )
-        )
-    )
-
     val SOURCE_CARD_JSON = JSONObject(
         """
         {
@@ -202,45 +156,6 @@ internal object SourceFixtures {
         }
         """.trimIndent()
     )
-
-    private val SOURCE_REDIRECT_JSON = JSONObject(
-        """
-        {
-            "return_url": "https://google.com",
-            "status": "succeeded",
-            "url": "examplecompany://redirect-link"
-        }
-        """.trimIndent()
-    )
-
-    val REDIRECT = SourceJsonParser.RedirectJsonParser()
-        .parse(SOURCE_REDIRECT_JSON)
-
-    private val SOURCE_CODE_VERIFICATION_JSON = JSONObject(
-        """
-        {
-            "attempts_remaining": 3,
-            "status": "pending"
-        }
-        """.trimIndent()
-    )
-
-    val SOURCE_CODE_VERIFICATION =
-        SourceJsonParser.CodeVerificationJsonParser().parse(SOURCE_CODE_VERIFICATION_JSON)
-
-    private val SOURCE_RECEIVER_JSON = JSONObject(
-        """
-        {
-            "address": "test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N",
-            "amount_charged": 10,
-            "amount_received": 20,
-            "amount_returned": 30
-        }
-        """.trimIndent()
-    )
-
-    val SOURCE_RECEIVER = SourceJsonParser.ReceiverJsonParser()
-        .parse(SOURCE_RECEIVER_JSON)
 
     val SOURCE_OWNER_WITH_NULLS = JSONObject(
         """

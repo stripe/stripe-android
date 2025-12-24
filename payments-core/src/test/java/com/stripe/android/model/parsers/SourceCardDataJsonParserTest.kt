@@ -24,7 +24,6 @@ class SourceCardDataJsonParserTest {
                     addressZipCheck = "unchecked",
                     cvcCheck = "unchecked",
                     dynamicLast4 = "4242",
-                    threeDSecureStatus = SourceTypeModel.Card.ThreeDSecureStatus.Optional,
                     tokenizationMethod = TokenizationMethod.ApplePay
                 )
             )
