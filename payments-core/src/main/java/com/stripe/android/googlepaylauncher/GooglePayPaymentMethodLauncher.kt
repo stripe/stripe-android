@@ -15,14 +15,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.AcceptanceCardBrandFilter
 import com.stripe.android.CardBrandFilter
-import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -90,7 +91,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         },
         config,
         readyCallback,
-        DefaultCardBrandFilter
+        AcceptanceCardBrandFilter(config.cardBrandAcceptance)
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -113,7 +114,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         },
         config,
         readyCallback,
-        DefaultCardBrandFilter
+        AcceptanceCardBrandFilter(config.cardBrandAcceptance)
     )
 
     /**
@@ -142,7 +143,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         },
         config,
         readyCallback,
-        DefaultCardBrandFilter
+        AcceptanceCardBrandFilter(config.cardBrandAcceptance)
     )
 
     internal constructor(
@@ -169,7 +170,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE_TOKEN),
-                )
+                ),
+                cardBrandFilter = cardBrandFilter
             )
         },
         cardBrandFilter = cardBrandFilter
@@ -292,7 +294,14 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         /**
          * Set this property to enable other card networks in additional to the default list, such as "INTERAC"
          */
-        internal val additionalEnabledNetworks: List<String> = emptyList()
+        internal val additionalEnabledNetworks: List<String> = emptyList(),
+
+        /**
+         * Allows to filter card brands while saving a payment method
+         *
+         * Default: Accepts all card brands
+         */
+        var cardBrandAcceptance: CardBrand.CardBrandAcceptance = CardBrand.CardBrandAcceptance.All
     ) : Parcelable {
 
         internal val isJcbEnabled: Boolean
@@ -427,7 +436,7 @@ fun rememberGooglePayPaymentMethodLauncher(
             readyCallback = {
                 currentReadyCallback.onReady(it)
             },
-            cardBrandFilter = DefaultCardBrandFilter
+            cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance)
         )
     }
 }
