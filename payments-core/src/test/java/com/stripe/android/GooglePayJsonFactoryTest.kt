@@ -646,7 +646,6 @@ class GooglePayJsonFactoryTest {
         assertThat(allowedCardNetworks).containsExactly("VISA")
     }
 
-
     @Test
     fun `'merchantInfo' should have 'stripe-manual-api' by default when software identifier not provided`() {
         val factory = GooglePayJsonFactory(
