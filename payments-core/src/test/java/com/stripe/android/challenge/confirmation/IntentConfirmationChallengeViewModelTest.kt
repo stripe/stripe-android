@@ -1,7 +1,11 @@
 package com.stripe.android.challenge.confirmation
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -22,7 +26,8 @@ internal class IntentConfirmationChallengeViewModelTest {
     @Test
     fun `when Ready event is received, bridgeReady emits value`() = runTest {
         val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val viewModel = createViewModel(fakeBridgeHandler)
+        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
+        val viewModel = createViewModel(fakeBridgeHandler, fakeAnalyticsReporter)
 
         viewModel.bridgeReady.test {
             // Initial state
@@ -36,12 +41,19 @@ internal class IntentConfirmationChallengeViewModelTest {
 
             ensureAllEventsConsumed()
         }
+
+        // Verify analytics
+        assertThat(fakeAnalyticsReporter.calls).hasSize(1)
+        assertThat(fakeAnalyticsReporter.calls.last()).isEqualTo(
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.WebViewLoaded
+        )
     }
 
     @Test
     fun `when Success event is received, result emits Success with clientSecret`() = runTest {
         val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val viewModel = createViewModel(fakeBridgeHandler)
+        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
+        val viewModel = createViewModel(fakeBridgeHandler, fakeAnalyticsReporter)
         val expectedClientSecret = "pi_test_secret_123"
 
         viewModel.result.test {
@@ -56,17 +68,24 @@ internal class IntentConfirmationChallengeViewModelTest {
 
             ensureAllEventsConsumed()
         }
+
+        // Verify analytics
+        assertThat(fakeAnalyticsReporter.calls).hasSize(1)
+        assertThat(fakeAnalyticsReporter.calls.last()).isEqualTo(
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Success
+        )
     }
 
     @Test
     fun `when Error event is received, result emits Failed with error`() = runTest {
         val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val viewModel = createViewModel(fakeBridgeHandler)
-        val expectedError = IOException("Network error")
+        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
+        val viewModel = createViewModel(fakeBridgeHandler, fakeAnalyticsReporter)
+        val expectedError = BridgeException(IOException("Network error"))
 
         viewModel.result.test {
             fakeBridgeHandler.emitEvent(
-                ConfirmationChallengeBridgeEvent.Error(cause = expectedError)
+                ConfirmationChallengeBridgeEvent.Error(error = expectedError)
             )
 
             val result = awaitItem()
@@ -76,12 +95,21 @@ internal class IntentConfirmationChallengeViewModelTest {
 
             ensureAllEventsConsumed()
         }
+
+        // Verify analytics
+        assertThat(fakeAnalyticsReporter.calls).hasSize(1)
+        val errorCall =
+            fakeAnalyticsReporter.calls.last() as FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Error
+        assertThat(errorCall.errorType).isNull()
+        assertThat(errorCall.errorCode).isNull()
+        assertThat(errorCall.fromBridge).isTrue()
     }
 
     @Test
     fun `when handleWebViewError is called, result emits Failed with WebViewError`() = runTest {
         val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val viewModel = createViewModel(fakeBridgeHandler)
+        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
+        val viewModel = createViewModel(fakeBridgeHandler, fakeAnalyticsReporter)
         val webViewError = WebViewError(
             message = "net::ERR_FAILED",
             url = "https://example.com/payment",
@@ -100,12 +128,46 @@ internal class IntentConfirmationChallengeViewModelTest {
 
             ensureAllEventsConsumed()
         }
+
+        // Verify analytics
+        assertThat(fakeAnalyticsReporter.calls).hasSize(1)
+        val errorCall =
+            fakeAnalyticsReporter.calls.last() as FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Error
+        assertThat(errorCall.errorType).isEqualTo("generic_resource_error")
+        assertThat(errorCall.errorCode).isEqualTo("-2")
+        assertThat(errorCall.fromBridge).isFalse()
+    }
+
+    @Test
+    fun `when onStart is called, analytics start is reported`() = runTest {
+        val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
+        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
+        val viewModel = createViewModel(fakeBridgeHandler, fakeAnalyticsReporter)
+        val lifecycleOwner = object : LifecycleOwner {
+            private val registry = LifecycleRegistry(this)
+            override val lifecycle: Lifecycle = registry
+
+            fun start() {
+                registry.addObserver(viewModel)
+                registry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+            }
+        }
+
+        lifecycleOwner.start()
+
+        assertThat(fakeAnalyticsReporter.calls).hasSize(1)
+        assertThat(fakeAnalyticsReporter.calls.first()).isEqualTo(
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Start
+        )
     }
 
     private fun createViewModel(
-        bridgeHandler: ConfirmationChallengeBridgeHandler
+        bridgeHandler: ConfirmationChallengeBridgeHandler,
+        analyticsReporter: IntentConfirmationChallengeAnalyticsEventReporter =
+            FakeIntentConfirmationChallengeAnalyticsEventReporter()
     ) = IntentConfirmationChallengeViewModel(
         bridgeHandler = bridgeHandler,
-        workContext = testDispatcher
+        workContext = testDispatcher,
+        analyticsEventReporter = analyticsReporter
     )
 }
