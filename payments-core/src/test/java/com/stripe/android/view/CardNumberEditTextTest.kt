@@ -27,6 +27,7 @@ import com.stripe.android.CardNumberFixtures.UNIONPAY_16_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_BIN
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.AccountRangeFixtures
@@ -99,7 +100,8 @@ internal class CardNumberEditTextTest {
         workContext = testDispatcher,
         cardAccountRangeRepository = cardAccountRangeRepository,
         analyticsRequestExecutor = analyticsRequestExecutor,
-        paymentAnalyticsRequestFactory = analyticsRequestFactory
+        paymentAnalyticsRequestFactory = analyticsRequestFactory,
+        cardFundingFilter = DefaultCardFundingFilter
     ).also {
         it.completionCallback = completionCallback
         it.brandChangeCallback = brandChangeCallback
@@ -263,7 +265,8 @@ internal class CardNumberEditTextTest {
             workContext = testDispatcher,
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             analyticsRequestExecutor = analyticsRequestExecutor,
-            paymentAnalyticsRequestFactory = analyticsRequestFactory
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            cardFundingFilter = DefaultCardFundingFilter
         )
 
         var callbacks = 0
@@ -295,7 +298,8 @@ internal class CardNumberEditTextTest {
                 ) = listOf(AccountRangeFixtures.UNIONPAY19)
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
-            paymentAnalyticsRequestFactory = analyticsRequestFactory
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            cardFundingFilter = DefaultCardFundingFilter
         )
 
         var callbacks = 0
@@ -327,7 +331,8 @@ internal class CardNumberEditTextTest {
                 ) = emptyList<AccountRange>()
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
-            paymentAnalyticsRequestFactory = analyticsRequestFactory
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            cardFundingFilter = DefaultCardFundingFilter
         )
 
         cardNumberEditText.setText("6216828050000000000")
@@ -345,7 +350,8 @@ internal class CardNumberEditTextTest {
             workContext = testDispatcher,
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             analyticsRequestExecutor = analyticsRequestExecutor,
-            paymentAnalyticsRequestFactory = analyticsRequestFactory
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            cardFundingFilter = DefaultCardFundingFilter
         )
 
         cardNumberEditText.setText(UNIONPAY_16_NO_SPACES)
@@ -700,7 +706,8 @@ internal class CardNumberEditTextTest {
                         workContext = testDispatcher,
                         cardAccountRangeRepository = DelayedCardAccountRangeRepository(),
                         analyticsRequestExecutor = analyticsRequestExecutor,
-                        paymentAnalyticsRequestFactory = analyticsRequestFactory
+                        paymentAnalyticsRequestFactory = analyticsRequestFactory,
+                        cardFundingFilter = DefaultCardFundingFilter
                     )
 
                     activity.layout.addView(cardNumberEditText)
@@ -741,7 +748,8 @@ internal class CardNumberEditTextTest {
                 override val loading: StateFlow<Boolean> = stateFlowOf(false)
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
-            paymentAnalyticsRequestFactory = analyticsRequestFactory
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            cardFundingFilter = DefaultCardFundingFilter
         )
 
         cardNumberEditText.setText(VISA_BIN)
@@ -845,7 +853,8 @@ internal class CardNumberEditTextTest {
                 override val loading: StateFlow<Boolean> = stateFlowOf(false)
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
-            paymentAnalyticsRequestFactory = analyticsRequestFactory
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            cardFundingFilter = DefaultCardFundingFilter
         )
 
         // 620000 - valid BIN, call repo
@@ -910,7 +919,8 @@ internal class CardNumberEditTextTest {
             analyticsRequestExecutor = {
                 analyticsRequests.add(it)
             },
-            paymentAnalyticsRequestFactory = analyticsRequestFactory
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            cardFundingFilter = DefaultCardFundingFilter
         )
         cardNumberEditText.setText(UNIONPAY_16_NO_SPACES)
         idleLooper()
@@ -1096,6 +1106,7 @@ internal class CardNumberEditTextTest {
                     analyticsRequestExecutor = analyticsRequestExecutor,
                     paymentAnalyticsRequestFactory = analyticsRequestFactory,
                     viewModelStoreOwner = storeOwner,
+                    cardFundingFilter = DefaultCardFundingFilter
                 )
 
                 if (isCbcEligible) {

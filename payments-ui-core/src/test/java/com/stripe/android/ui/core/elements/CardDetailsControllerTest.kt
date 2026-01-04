@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardFundingFilter
+import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.cardscan.CardScanResult
@@ -25,10 +28,7 @@ class CardDetailsControllerTest {
 
     @Test
     fun `Verify the first field in error is returned in error flow`() = runTest {
-        val cardController = CardDetailsController(
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
-            initialValues = emptyMap(),
-        )
+        val cardController = createCardDetailsController()
 
         cardController.error.test {
             assertThat(awaitItem()).isNull()
@@ -54,13 +54,12 @@ class CardDetailsControllerTest {
 
     @Test
     fun `When eligible for card brand choice and preferred card brand is passed, initial value should have been set`() = runTest {
-        val cardController = CardDetailsController(
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+        val cardController = createCardDetailsController(
             initialValues = mapOf(
                 IdentifierSpec.CardNumber to "4000002500001001",
                 IdentifierSpec.PreferredCardBrand to CardBrand.CartesBancaires.code
             ),
-            cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf())
+            cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf()),
         )
 
         cardController.numberElement.controller.cardBrandFlow.test {
@@ -70,10 +69,7 @@ class CardDetailsControllerTest {
 
     @Test
     fun `When new card scanned with no existing card, fields properly filled in`() = runTest {
-        val cardController = CardDetailsController(
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
-            initialValues = emptyMap(),
-        )
+        val cardController = createCardDetailsController()
         assertThat(cardController.numberElement.controller.rawFieldValue.value)
             .isEqualTo("")
         assertThat(cardController.expirationDateElement.controller.rawFieldValue.value)
@@ -104,8 +100,7 @@ class CardDetailsControllerTest {
 
     @Test
     fun `When new card overwrites existing card, fields properly filled in`() = runTest {
-        val cardController = CardDetailsController(
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+        val cardController = createCardDetailsController(
             initialValues = mapOf(
                 IdentifierSpec.CardNumber to "4242424242424242",
                 IdentifierSpec.CardExpYear to "2042",
@@ -143,8 +138,7 @@ class CardDetailsControllerTest {
 
     @Test
     fun `When new card scanned with invalid expiry date, should not use invalid date`() = runTest {
-        val cardController = CardDetailsController(
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+        val cardController = createCardDetailsController(
             initialValues = mapOf(
                 IdentifierSpec.CardNumber to "4242424242424242",
                 IdentifierSpec.CardExpYear to "2042",
@@ -180,8 +174,7 @@ class CardDetailsControllerTest {
 
     @Test
     fun `When new card scanned with no expiry date, should clear date`() = runTest {
-        val cardController = CardDetailsController(
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+        val cardController = createCardDetailsController(
             initialValues = mapOf(
                 IdentifierSpec.CardNumber to "4242424242424242",
                 IdentifierSpec.CardExpYear to "2042",
@@ -213,5 +206,20 @@ class CardDetailsControllerTest {
             .isEqualTo("5555555555554444")
         assertThat(cardController.expirationDateElement.controller.rawFieldValue.value)
             .isEqualTo("")
+    }
+
+    private fun createCardDetailsController(
+        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory =
+            DefaultCardAccountRangeRepositoryFactory(context),
+        initialValues: Map<IdentifierSpec, String?> = emptyMap(),
+        cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
+        cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
+    ): CardDetailsController {
+        return CardDetailsController(
+            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+            initialValues = initialValues,
+            cbcEligibility = cbcEligibility,
+            cardFundingFilter = cardFundingFilter,
+        )
     }
 }

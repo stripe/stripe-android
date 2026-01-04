@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardFundingFilter
+import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
@@ -39,13 +42,11 @@ class CardDetailsElementTest {
         val cardController = CardDetailsController(
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
+            cardFundingFilter = DefaultCardFundingFilter,
             uiContext = testDispatcher,
             workContext = testDispatcher,
         )
-        val cardDetailsElement = CardDetailsElement(
-            IdentifierSpec.Generic("card_details"),
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
-            initialValues = emptyMap(),
+        val cardDetailsElement = createCardDetailsElement(
             controller = cardController
         )
 
@@ -69,9 +70,7 @@ class CardDetailsElementTest {
 
     @Test
     fun `test view only form field values returned and expiration date parsing`() = runTest {
-        val cardDetailsElement = CardDetailsElement(
-            IdentifierSpec.Generic("card_details"),
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+        val cardDetailsElement = createCardDetailsElement(
             initialValues = mapOf(
                 IdentifierSpec.CardNumber to "4242424242424242",
                 IdentifierSpec.CardBrand to CardBrand.Visa.code
@@ -101,13 +100,11 @@ class CardDetailsElementTest {
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
             collectName = true,
+            cardFundingFilter = DefaultCardFundingFilter,
             uiContext = testDispatcher,
             workContext = testDispatcher,
         )
-        val cardDetailsElement = CardDetailsElement(
-            IdentifierSpec.Generic("card_details"),
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
-            initialValues = emptyMap(),
+        val cardDetailsElement = createCardDetailsElement(
             collectName = true,
             controller = cardController,
         )
@@ -140,17 +137,15 @@ class CardDetailsElementTest {
             initialValues = emptyMap(),
             collectName = true,
             cbcEligibility = cbcEligibility,
+            cardFundingFilter = DefaultCardFundingFilter,
             uiContext = testDispatcher,
             workContext = testDispatcher,
         )
 
-        val cardDetailsElement = CardDetailsElement(
-            IdentifierSpec.Generic("card_details"),
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
-            initialValues = emptyMap(),
+        val cardDetailsElement = createCardDetailsElement(
             collectName = true,
+            cbcEligibility = cbcEligibility,
             controller = cardController,
-            cbcEligibility = cbcEligibility
         )
 
         assertThat(cardDetailsElement.controller.nameElement).isNotNull()
@@ -182,17 +177,15 @@ class CardDetailsElementTest {
             initialValues = emptyMap(),
             collectName = true,
             cbcEligibility = cbcEligibility,
+            cardFundingFilter = DefaultCardFundingFilter,
             uiContext = testDispatcher,
             workContext = testDispatcher,
         )
 
-        val cardDetailsElement = CardDetailsElement(
-            IdentifierSpec.Generic("card_details"),
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
-            initialValues = emptyMap(),
+        val cardDetailsElement = createCardDetailsElement(
             collectName = true,
+            cbcEligibility = cbcEligibility,
             controller = cardController,
-            cbcEligibility = cbcEligibility
         )
 
         assertThat(cardDetailsElement.controller.nameElement).isNotNull()
@@ -231,17 +224,15 @@ class CardDetailsElementTest {
             initialValues = emptyMap(),
             collectName = true,
             cbcEligibility = cbcEligibility,
+            cardFundingFilter = DefaultCardFundingFilter,
             uiContext = testDispatcher,
             workContext = testDispatcher,
         )
 
-        val cardDetailsElement = CardDetailsElement(
-            IdentifierSpec.Generic("card_details"),
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
-            initialValues = emptyMap(),
+        val cardDetailsElement = createCardDetailsElement(
             collectName = true,
+            cbcEligibility = cbcEligibility,
             controller = cardController,
-            cbcEligibility = cbcEligibility
         )
 
         assertThat(cardDetailsElement.controller.nameElement).isNotNull()
@@ -270,13 +261,11 @@ class CardDetailsElementTest {
         val cardController = CardDetailsController(
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
+            cardFundingFilter = DefaultCardFundingFilter,
             uiContext = testDispatcher,
             workContext = testDispatcher,
         )
-        val cardDetailsElement = CardDetailsElement(
-            IdentifierSpec.Generic("card_details"),
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
-            initialValues = emptyMap(),
+        val cardDetailsElement = createCardDetailsElement(
             controller = cardController
         )
 
@@ -305,20 +294,18 @@ class CardDetailsElementTest {
 
     @Test
     fun `test when validating, all fields show errors as expected`() = runTest {
-        val cardDetailsElement = CardDetailsElement(
-            IdentifierSpec.Generic("card_details"),
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
-            initialValues = emptyMap(),
+        val cardDetailsElement = createCardDetailsElement(
             collectName = true,
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             controller = CardDetailsController(
                 cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
                 initialValues = emptyMap(),
                 collectName = true,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                cardFundingFilter = DefaultCardFundingFilter,
                 uiContext = testDispatcher,
                 workContext = testDispatcher,
             ),
-            cbcEligibility = CardBrandChoiceEligibility.Ineligible
         )
 
         assertThat(cardDetailsElement.controller.nameElement).isNotNull()
@@ -353,5 +340,37 @@ class CardDetailsElementTest {
             .errorTest(FieldError(StripeR.string.stripe_invalid_cvc))
         cardDetailsElement.controller.expirationDateElement
             .errorTest(FieldError(UiCoreR.string.stripe_incomplete_expiry_date))
+    }
+
+    private fun createCardDetailsElement(
+        identifier: IdentifierSpec = IdentifierSpec.Generic("card_details"),
+        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory =
+            DefaultCardAccountRangeRepositoryFactory(context),
+        initialValues: Map<IdentifierSpec, String?> = emptyMap(),
+        collectName: Boolean = false,
+        cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
+        cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
+        controller: CardDetailsController? = null,
+    ): CardDetailsElement {
+        return if (controller != null) {
+            CardDetailsElement(
+                identifier = identifier,
+                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+                initialValues = initialValues,
+                collectName = collectName,
+                cbcEligibility = cbcEligibility,
+                cardFundingFilter = cardFundingFilter,
+                controller = controller,
+            )
+        } else {
+            CardDetailsElement(
+                identifier = identifier,
+                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+                initialValues = initialValues,
+                collectName = collectName,
+                cbcEligibility = cbcEligibility,
+                cardFundingFilter = cardFundingFilter,
+            )
+        }
     }
 }

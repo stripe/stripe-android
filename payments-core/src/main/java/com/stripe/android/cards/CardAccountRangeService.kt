@@ -3,12 +3,18 @@ package com.stripe.android.cards
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
@@ -23,17 +29,27 @@ class CardAccountRangeService(
     val staticCardAccountRanges: StaticCardAccountRanges,
     private val accountRangeResultListener: AccountRangeResultListener,
     private val isCbcEligible: () -> Boolean,
-    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val cardFundingFilter: CardFundingFilter
 ) {
 
+    private val needsRemoteFundingType = needsFundingType()
     val isLoading: StateFlow<Boolean> = cardAccountRangeRepository.loading
     private var lastBin: Bin? = null
 
-    var accountRanges: List<AccountRange> = emptyList()
-        private set
+    private val _accountRangesStateFlow = MutableStateFlow(emptyList<AccountRange>())
+    val accountRangesStateFlow: StateFlow<List<AccountRange>> = _accountRangesStateFlow
+
+    val accountRangeFlow = accountRangesStateFlow.map {
+        it.firstOrNull()
+    }.stateIn(
+        scope = CoroutineScope(uiContext),
+        started = SharingStarted.Lazily,
+        initialValue = accountRangesStateFlow.value.firstOrNull()
+    )
 
     val accountRange: AccountRange?
-        get() = accountRanges.firstOrNull()
+        get() = accountRangesStateFlow.value.firstOrNull()
 
     @VisibleForTesting
     var accountRangeRepositoryJob: Job? = null
@@ -60,7 +76,7 @@ class CardAccountRangeService(
 
         val staticAccountRanges = staticCardAccountRanges.filter(cardNumber)
 
-        if (isCbcEligible) {
+        if (isCbcEligible || needsRemoteFundingType) {
             queryAccountRangeRepository(cardNumber)
         } else {
             if (staticAccountRanges.isEmpty() || shouldQueryRepository(staticAccountRanges)) {
@@ -80,7 +96,7 @@ class CardAccountRangeService(
             cancelAccountRangeRepositoryJob()
 
             // invalidate accountRange before fetching
-            accountRanges = emptyList()
+            _accountRangesStateFlow.value = emptyList()
 
             accountRangeRepositoryJob = CoroutineScope(workContext).launch {
                 val bin = cardNumber.bin
@@ -104,8 +120,8 @@ class CardAccountRangeService(
     }
 
     fun updateAccountRangesResult(accountRanges: List<AccountRange>) {
-        this.accountRanges = accountRanges.filter { cardBrandFilter.isAccepted(it.brand) }
-        accountRangeResultListener.onAccountRangesResult(this.accountRanges, accountRanges)
+        _accountRangesStateFlow.value = accountRanges.filter { cardBrandFilter.isAccepted(it.brand) }
+        accountRangeResultListener.onAccountRangesResult(accountRangesStateFlow.value, accountRanges)
     }
 
     private fun shouldQueryRepository(
@@ -123,6 +139,10 @@ class CardAccountRangeService(
             cardNumber.bin != lastBin
         lastBin = cardNumber.bin
         return shouldQuery
+    }
+
+    private fun needsFundingType(): Boolean {
+        return CardFunding.entries.any { cardFundingFilter.isAccepted(it).not() }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

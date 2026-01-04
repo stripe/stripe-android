@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.coroutines.runCatching
@@ -27,7 +28,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.lpmfoundations.paymentmethod.create
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.ClientAttributionMetadata
@@ -220,6 +221,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val paymentConfiguration: Provider<PaymentConfiguration>,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
+    private val cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -293,6 +295,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             automaticPaymentMethodsEnabled = elementsSession.stripeIntent.automaticPaymentMethodsEnabled,
         )
 
+        val cardFundingFilter = cardFundingFilterFactory(
+            params = configuration.allowedCardFundingTypes(elementsSession.enableCardFundFiltering)
+        )
+
         val linkState = async {
             createLinkState(
                 elementsSession = elementsSession,
@@ -318,6 +324,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 isGooglePaySupported = isGooglePaySupported,
                 initializationMode = initializationMode,
                 clientAttributionMetadata = clientAttributionMetadata,
+                cardFundingFilter = cardFundingFilter,
             )
         }
 
@@ -328,11 +335,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 metadata = paymentMethodMetadata.await(),
                 savedSelection = savedSelection,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
-                cardFundingFilter = PaymentSheetCardFundingFilter(
-                    allowedCardFundingTypes = configuration.allowedCardFundingTypes(
-                        enabled = elementsSession.enableCardFundFiltering
-                    )
-                )
+                cardFundingFilter = cardFundingFilter
             )
         }
 
@@ -432,6 +435,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         isGooglePaySupported: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
+        cardFundingFilter: CardFundingFilter
     ): PaymentMethodMetadata {
         val configuration = integrationConfiguration.commonConfiguration
         val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
@@ -486,6 +490,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
             isTapToAddSupported = tapToAddConnectionManager.isSupported,
+            cardFundingFilter = cardFundingFilter,
         )
     }
 
@@ -585,7 +590,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         metadata: PaymentMethodMetadata,
         savedSelection: Deferred<SavedSelection>,
         cardBrandFilter: PaymentSheetCardBrandFilter,
-        cardFundingFilter: PaymentSheetCardFundingFilter
+        cardFundingFilter: CardFundingFilter
     ): CustomerState? {
         val customerState = when (customerInfo) {
             is CustomerInfo.CustomerSession -> {

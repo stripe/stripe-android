@@ -1,4 +1,5 @@
 apply from: configs.androidLibrary
+apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 
 android {
     defaultConfig {

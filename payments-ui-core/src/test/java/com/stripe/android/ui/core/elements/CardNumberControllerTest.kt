@@ -14,6 +14,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
@@ -752,14 +753,16 @@ internal class CardNumberControllerTest {
         return DefaultCardNumberController(
             cardTextFieldConfig = CardNumberConfig(
                 isCardBrandChoiceEligible = false,
-                cardBrandFilter = cardBrandFilter
+                cardBrandFilter = cardBrandFilter,
+                cardFundingFilter = DefaultCardFundingFilter,
             ),
             cardAccountRangeRepository = repository,
             uiContext = testDispatcher,
             workContext = testDispatcher,
             initialValue = initialValue,
             cardBrandChoiceConfig = cardBrandChoiceConfig,
-            cardBrandFilter = cardBrandFilter
+            cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = DefaultCardFundingFilter,
         )
     }
 

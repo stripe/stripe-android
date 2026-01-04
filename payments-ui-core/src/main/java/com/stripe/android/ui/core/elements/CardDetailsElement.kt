@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.strings.ResolvableString
@@ -28,12 +29,14 @@ internal class CardDetailsElement(
     collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val cardFundingFilter: CardFundingFilter,
     val controller: CardDetailsController = CardDetailsController(
         cardAccountRangeRepositoryFactory,
         initialValues,
         collectName,
         cbcEligibility,
         cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter
     )
 ) : SectionMultiFieldElement(identifier) {
 

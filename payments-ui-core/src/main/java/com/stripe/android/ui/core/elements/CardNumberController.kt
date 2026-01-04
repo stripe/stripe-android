@@ -14,6 +14,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardAccountRangeService
@@ -72,6 +73,7 @@ internal class DefaultCardNumberController(
     override val initialValue: String?,
     private val cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val cardFundingFilter: CardFundingFilter
 ) : CardNumberController() {
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
@@ -181,7 +183,8 @@ internal class DefaultCardNumberController(
             }
         },
         isCbcEligible = { isEligibleForCardBrandChoice },
-        cardBrandFilter = cardBrandFilter
+        cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter
     )
 
     override val trailingIcon: StateFlow<TextFieldIcon?> = combineAsStateFlow(
@@ -258,13 +261,18 @@ internal class DefaultCardNumberController(
         }
     }
 
-    private val _fieldState = combineAsStateFlow(impliedCardBrand, _fieldValue) { brand, fieldValue ->
+    private val _fieldState = combineAsStateFlow(
+        impliedCardBrand,
+        _fieldValue,
+        accountRangeService.accountRangeFlow
+    ) { brand, fieldValue, accountRange ->
         cardTextFieldConfig.determineState(
             brand,
+            accountRange?.funding,
             fieldValue,
             accountRangeService.accountRange?.panLength ?: brand.getMaxLengthForCardNumber(
                 fieldValue
-            )
+            ),
         )
     }
     override val fieldState: StateFlow<TextFieldState> = _fieldState

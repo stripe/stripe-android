@@ -10,6 +10,14 @@ enum class CardFunding(
     Prepaid("prepaid"),
     Unknown("unknown");
 
+    val displayName: String
+        get() = when (this) {
+            Credit -> "Credit"
+            Debit -> "Debit"
+            Prepaid -> "Prepaid"
+            Unknown -> "Unknown"
+        }
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun fromCode(code: String?): CardFunding {

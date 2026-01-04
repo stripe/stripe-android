@@ -4,17 +4,20 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.CardUtils
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.R as StripeR
 
 internal class CardNumberConfig(
     private val isCardBrandChoiceEligible: Boolean,
-    private val cardBrandFilter: CardBrandFilter
+    private val cardBrandFilter: CardBrandFilter,
+    private val cardFundingFilter: CardFundingFilter
 ) : CardDetailsTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "Card number"
@@ -24,6 +27,9 @@ internal class CardNumberConfig(
     // Hardcoded number of card digits + a buffer entered before we hit the card metadata service in CBC
     private var digitsRequiredToFetchBrands = 9
 
+    // Minimum number of digits required to fetch funding type from BIN lookup
+    private val digitsRequiredToFetchFunding = 6
+
     override fun determineVisualTransformation(number: String, panLength: Int): VisualTransformation {
         return when (panLength) {
             14, 15 -> CardNumberVisualTransformations.FourteenAndFifteenPanLength(SEPARATOR)
@@ -32,9 +38,15 @@ internal class CardNumberConfig(
         }
     }
 
-    override fun determineState(brand: CardBrand, number: String, numberAllowedDigits: Int): TextFieldState {
+    override fun determineState(
+        brand: CardBrand,
+        funding: CardFunding?,
+        number: String,
+        numberAllowedDigits: Int,
+    ): TextFieldState {
         val luhnValid = CardUtils.isValidLuhnNumber(number)
         val isDigitLimit = brand.getMaxLengthForCardNumber(number) != -1
+        val cardFundingAccepted = funding?.let(cardFundingFilter::isAccepted)
 
         return if (number.isBlank()) {
             TextFieldStateConstants.Error.Blank
@@ -48,6 +60,17 @@ internal class CardNumberConfig(
             return TextFieldStateConstants.Error.Invalid(
                 errorMessageResId = StripeR.string.stripe_disallowed_card_brand,
                 formatArgs = arrayOf(brand.displayName),
+                preventMoreInput = false,
+            )
+        } else if (number.length >= digitsRequiredToFetchFunding && cardFundingAccepted == false) {
+            /*
+              After 6+ digits, check if the funding type is accepted.
+              Show warning but don't prevent submission (preventMoreInput = false)
+              due to potential metadata service inaccuracy.
+             */
+            return TextFieldStateConstants.Error.Invalid(
+                errorMessageResId = StripeR.string.stripe_disallowed_card_funding,
+                formatArgs = arrayOf(funding.displayName),
                 preventMoreInput = false,
             )
         } else if (brand == CardBrand.Unknown) {
