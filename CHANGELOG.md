@@ -4,6 +4,8 @@
 
 ## 22.6.0 - 2026-01-05
 
+Bug fixes and improvements.
+
 ## 22.5.0 - 2025-12-15
 
 ### Payments
