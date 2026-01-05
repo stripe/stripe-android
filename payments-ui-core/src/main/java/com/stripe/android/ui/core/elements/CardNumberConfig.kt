@@ -44,58 +44,100 @@ internal class CardNumberConfig(
         number: String,
         numberAllowedDigits: Int,
     ): TextFieldState {
-        val luhnValid = CardUtils.isValidLuhnNumber(number)
-        val isDigitLimit = brand.getMaxLengthForCardNumber(number) != -1
-        val cardFundingAccepted = funding?.let(cardFundingFilter::isAccepted)
-        val fundingErrorMessageId = cardFundingFilter.allowedFundingTypesDisplayMessage()
-        val hasFundingError = number.length >= digitsRequiredToFetchFunding &&
-            cardFundingAccepted == false &&
-            fundingErrorMessageId != null
+        if (number.isBlank()) {
+            return TextFieldStateConstants.Error.Blank
+        }
 
-        return if (number.isBlank()) {
-            TextFieldStateConstants.Error.Blank
-        } else if (!cardBrandFilter.isAccepted(brand) &&
+        val brandError = checkBrandError(brand, number)
+        if (brandError != null) {
+            return brandError
+        }
+
+        if (brand == CardBrand.Unknown) {
+            return TextFieldStateConstants.Error.Invalid(
+                errorMessageResId = StripeR.string.stripe_invalid_card_number,
+                preventMoreInput = true,
+            )
+        }
+
+        val isDigitLimit = brand.getMaxLengthForCardNumber(number) != -1
+        val fundingErrorMessageId = cardFundingFilter.allowedFundingTypesDisplayMessage()
+        val hasFundingError = checkFundingError(funding, number, fundingErrorMessageId)
+
+        return when {
+            isDigitLimit && number.length < numberAllowedDigits -> {
+                handleIncompleteNumber(hasFundingError, fundingErrorMessageId)
+            }
+            !CardUtils.isValidLuhnNumber(number) -> {
+                TextFieldStateConstants.Error.Invalid(
+                    errorMessageResId = StripeR.string.stripe_invalid_card_number,
+                    preventMoreInput = true,
+                )
+            }
+            isDigitLimit && number.length == numberAllowedDigits -> {
+                handleCompleteNumber(hasFundingError, fundingErrorMessageId)
+            }
+            else -> {
+                TextFieldStateConstants.Error.Invalid(StripeR.string.stripe_invalid_card_number)
+            }
+        }
+    }
+
+    private fun checkBrandError(brand: CardBrand, number: String): TextFieldState? {
+        val shouldShowBrandError = !cardBrandFilter.isAccepted(brand) &&
             (!isCardBrandChoiceEligible || number.length > digitsRequiredToFetchBrands)
-        ) {
+
+        return if (shouldShowBrandError) {
             /*
               If the merchant is eligible for CBC do not show the disallowed error
               until we have had time to hit the card metadata service for a list of possible brands
              */
-            return TextFieldStateConstants.Error.Invalid(
+            TextFieldStateConstants.Error.Invalid(
                 errorMessageResId = StripeR.string.stripe_disallowed_card_brand,
                 formatArgs = arrayOf(brand.displayName),
                 preventMoreInput = false,
             )
-        } else if (brand == CardBrand.Unknown) {
-            TextFieldStateConstants.Error.Invalid(
-                errorMessageResId = StripeR.string.stripe_invalid_card_number,
-                preventMoreInput = true,
-            )
-        } else if (isDigitLimit && number.length < numberAllowedDigits) {
-            if (hasFundingError) {
-                TextFieldStateConstants.Error.Invalid(
-                    errorMessageResId = fundingErrorMessageId,
-                    preventMoreInput = false,
-                    isWarning = true
-                )
-            } else {
-                TextFieldStateConstants.Error.Incomplete(StripeR.string.stripe_invalid_card_number)
-            }
-        } else if (!luhnValid) {
-            TextFieldStateConstants.Error.Invalid(
-                errorMessageResId = StripeR.string.stripe_invalid_card_number,
-                preventMoreInput = true,
-            )
-        } else if (isDigitLimit && number.length == numberAllowedDigits) {
-            if (hasFundingError) {
-                TextFieldStateConstants.Valid.Full(
-                    errorMessageResId = fundingErrorMessageId,
-                )
-            } else {
-                TextFieldStateConstants.Valid.Full()
-            }
         } else {
-            TextFieldStateConstants.Error.Invalid(StripeR.string.stripe_invalid_card_number)
+            null
+        }
+    }
+
+    private fun checkFundingError(
+        funding: CardFunding?,
+        number: String,
+        fundingErrorMessageId: Int?
+    ): Boolean {
+        val cardFundingAccepted = funding?.let(cardFundingFilter::isAccepted)
+        return number.length >= digitsRequiredToFetchFunding &&
+            cardFundingAccepted == false &&
+            fundingErrorMessageId != null
+    }
+
+    private fun handleIncompleteNumber(
+        hasFundingError: Boolean,
+        fundingErrorMessageId: Int?
+    ): TextFieldState {
+        return if (hasFundingError && fundingErrorMessageId != null) {
+            TextFieldStateConstants.Error.Invalid(
+                errorMessageResId = fundingErrorMessageId,
+                preventMoreInput = false,
+                isWarning = true
+            )
+        } else {
+            TextFieldStateConstants.Error.Incomplete(StripeR.string.stripe_invalid_card_number)
+        }
+    }
+
+    private fun handleCompleteNumber(
+        hasFundingError: Boolean,
+        fundingErrorMessageId: Int?
+    ): TextFieldState {
+        return if (hasFundingError) {
+            TextFieldStateConstants.Valid.Full(
+                errorMessageResId = fundingErrorMessageId,
+            )
+        } else {
+            TextFieldStateConstants.Valid.Full()
         }
     }
 
