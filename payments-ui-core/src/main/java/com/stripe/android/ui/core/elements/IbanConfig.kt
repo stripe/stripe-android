@@ -100,7 +100,7 @@ class IbanConfig : TextFieldConfig {
 
         return if (isIbanValid(input)) {
             if (input.length == MAX_LENGTH) {
-                TextFieldStateConstants.Valid.Full
+                TextFieldStateConstants.Valid.Full()
             } else {
                 TextFieldStateConstants.Valid.Limitless
             }

@@ -24,7 +24,7 @@ class TextFieldStateTest {
 
     @Test
     fun `Accepts input on a full text field if it's a deletion`() {
-        val fieldState = TextFieldStateConstants.Valid.Full
+        val fieldState = TextFieldStateConstants.Valid.Full()
 
         val didAccept = fieldState.canAcceptInput(
             currentValue = "123",
@@ -36,7 +36,7 @@ class TextFieldStateTest {
 
     @Test
     fun `Does not accept input if text field is full`() {
-        val fieldState = TextFieldStateConstants.Valid.Full
+        val fieldState = TextFieldStateConstants.Valid.Full()
 
         val didAccept = fieldState.canAcceptInput(
             currentValue = "123",
@@ -44,5 +44,53 @@ class TextFieldStateTest {
         )
 
         assertThat(didAccept).isFalse()
+    }
+
+    @Test
+    fun `Accepts input on incomplete text field with warning`() {
+        val fieldState = TextFieldStateConstants.Error.Invalid(
+            errorMessageResId = StripeR.string.stripe_card_funding_only_debit_prepaid,
+            preventMoreInput = false,
+            isWarning = true
+        )
+
+        val didAccept = fieldState.canAcceptInput(
+            currentValue = "123",
+            proposedValue = "1234"
+        )
+
+        assertThat(didAccept).isTrue()
+    }
+
+    @Test
+    fun `Does not accept input on full text field with warning`() {
+        val fieldState = TextFieldStateConstants.Error.Invalid(
+            errorMessageResId = StripeR.string.stripe_card_funding_only_debit_prepaid,
+            preventMoreInput = true,
+            isWarning = true
+        )
+
+        val didAccept = fieldState.canAcceptInput(
+            currentValue = "123",
+            proposedValue = "1234"
+        )
+
+        assertThat(didAccept).isFalse()
+    }
+
+    @Test
+    fun `Accepts deletion on full text field with warning`() {
+        val fieldState = TextFieldStateConstants.Error.Invalid(
+            errorMessageResId = StripeR.string.stripe_card_funding_only_debit_prepaid,
+            preventMoreInput = true,
+            isWarning = true
+        )
+
+        val didAccept = fieldState.canAcceptInput(
+            currentValue = "123",
+            proposedValue = "12"
+        )
+
+        assertThat(didAccept).isTrue()
     }
 }

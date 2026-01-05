@@ -173,7 +173,7 @@ fun TextField(
 
     LaunchedEffect(fieldState) {
         // When field is in focus and full, move to next field so the user can keep typing
-        if (fieldState == TextFieldStateConstants.Valid.Full && hasFocus.value) {
+        if (fieldState is TextFieldStateConstants.Valid.Full && hasFocus.value) {
             focusManager.moveFocusSafely(nextFocusDirection)
         }
     }

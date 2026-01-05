@@ -14,8 +14,21 @@ class TextFieldStateConstants {
         override fun isBlank(): Boolean = false
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        object Full : Valid() {
+        class Full(
+            @StringRes private val errorMessageResId: Int? = null,
+            private val formatArgs: Array<out Any>? = null,
+        ) : Valid() {
             override fun isFull(): Boolean = true
+
+            override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean): Boolean {
+                return errorMessageResId != null
+            }
+
+            override fun getError(): FieldError? {
+                return errorMessageResId?.let {
+                    FieldError(it, formatArgs, isWarning = true)
+                }
+            }
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

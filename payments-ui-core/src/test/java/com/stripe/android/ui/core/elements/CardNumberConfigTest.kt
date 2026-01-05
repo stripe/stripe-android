@@ -324,7 +324,7 @@ class CardNumberConfigTest {
     }
 
     @Test
-    fun `determineState returns error for disallowed funding type with 6+ digits`() {
+    fun `determineState returns valid full for complete card with disallowed funding type`() {
         val cardNumberConfig = cardNumberConfigWithFundingFilter(
             disallowedFundingTypes = setOf(CardFunding.Credit),
             allowedFundingTypesDisplayMessage = StripeR.string.stripe_card_funding_only_debit_prepaid
@@ -332,19 +332,26 @@ class CardNumberConfigTest {
 
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
-            number = "4242424242424242", // 16 digits
+            number = "4242424242424242", // 16 digits - complete card
             numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242"),
             funding = CardFunding.Credit
         )
 
-        assertThat(state).isInstanceOf<TextFieldStateConstants.Error.Invalid>()
-        assertThat(state.getError()?.errorMessage)
-            .isEqualTo(StripeR.string.stripe_card_funding_only_debit_prepaid)
+        // Complete cards should return Valid.Full to trigger auto-advance
+        // But still show funding warning message
+        assertThat(state).isInstanceOf<TextFieldStateConstants.Valid.Full>()
+        val error = state.getError()
+        assertThat(error?.errorMessage).isEqualTo(StripeR.string.stripe_card_funding_only_debit_prepaid)
+        assertThat(error?.isWarning).isTrue()
+        assertThat(state.isFull()).isTrue()
     }
 
     @Test
     fun `determineState allows disallowed funding type with less than 6 digits`() {
-        val cardNumberConfig = cardNumberConfigWithFundingFilter(setOf(CardFunding.Credit))
+        val cardNumberConfig = cardNumberConfigWithFundingFilter(
+            disallowedFundingTypes = setOf(CardFunding.Credit),
+            allowedFundingTypesDisplayMessage = StripeR.string.stripe_card_funding_only_debit_prepaid
+        )
 
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
@@ -354,11 +361,14 @@ class CardNumberConfigTest {
         )
 
         // Should NOT show funding error yet - need 6+ digits
+        // Should show regular incomplete error message
         assertThat(state).isInstanceOf<TextFieldStateConstants.Error.Incomplete>()
+        assertThat(state.getError()?.errorMessage).isEqualTo(StripeR.string.stripe_invalid_card_number)
+        assertThat(state.getError()?.isWarning).isFalse()
     }
 
     @Test
-    fun `determineState returns error for disallowed funding type with exactly 6 digits`() {
+    fun `determineState returns warning for disallowed funding type with exactly 6 digits`() {
         val cardNumberConfig = cardNumberConfigWithFundingFilter(
             disallowedFundingTypes = setOf(CardFunding.Prepaid),
             allowedFundingTypesDisplayMessage = StripeR.string.stripe_card_funding_only_debit_credit
@@ -366,15 +376,17 @@ class CardNumberConfigTest {
 
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
-            number = "424242", // Exactly 6 digits
+            number = "424242", // Exactly 6 digits - incomplete
             numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("424242"),
             funding = CardFunding.Prepaid
         )
 
-        // Should show funding error at 6 digits
+        // Should show funding warning at 6 digits for incomplete card
         assertThat(state).isInstanceOf<TextFieldStateConstants.Error.Invalid>()
-        assertThat(state.getError()?.errorMessage)
-            .isEqualTo(StripeR.string.stripe_card_funding_only_debit_credit)
+        val error = state.getError()
+        assertThat(error?.errorMessage).isEqualTo(StripeR.string.stripe_card_funding_only_debit_credit)
+        assertThat(error?.isWarning).isTrue()
+        assertThat(state.isFull()).isFalse() // Should allow continued typing
     }
 
     @Test
@@ -389,23 +401,6 @@ class CardNumberConfigTest {
         )
 
         assertThat(state).isInstanceOf<TextFieldStateConstants.Valid.Full>()
-    }
-
-    @Test
-    fun `determineState does not prevent input for disallowed funding type`() {
-        val cardNumberConfig = cardNumberConfigWithFundingFilter(
-            disallowedFundingTypes = setOf(CardFunding.Debit),
-            allowedFundingTypesDisplayMessage = StripeR.string.stripe_card_funding_only_debit_credit
-        )
-
-        val state = cardNumberConfig.determineState(
-            brand = CardBrand.Visa,
-            number = "4242424242424242",
-            numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242"),
-            funding = CardFunding.Debit
-        )
-
-        assertThat(state.isFull()).isFalse()
     }
 
     private fun cardNumberConfigWithFundingFilter(

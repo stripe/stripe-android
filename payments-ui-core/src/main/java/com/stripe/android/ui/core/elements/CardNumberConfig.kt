@@ -48,6 +48,9 @@ internal class CardNumberConfig(
         val isDigitLimit = brand.getMaxLengthForCardNumber(number) != -1
         val cardFundingAccepted = funding?.let(cardFundingFilter::isAccepted)
         val fundingErrorMessageId = cardFundingFilter.allowedFundingTypesDisplayMessage()
+        val hasFundingError = number.length >= digitsRequiredToFetchFunding &&
+            cardFundingAccepted == false &&
+            fundingErrorMessageId != null
 
         return if (number.isBlank()) {
             TextFieldStateConstants.Error.Blank
@@ -63,29 +66,34 @@ internal class CardNumberConfig(
                 formatArgs = arrayOf(brand.displayName),
                 preventMoreInput = false,
             )
-        } else if (number.length >= digitsRequiredToFetchFunding &&
-            cardFundingAccepted == false &&
-            fundingErrorMessageId != null
-        ) {
-            return TextFieldStateConstants.Error.Invalid(
-                errorMessageResId = fundingErrorMessageId,
-                preventMoreInput = false,
-                isWarning = true
-            )
         } else if (brand == CardBrand.Unknown) {
             TextFieldStateConstants.Error.Invalid(
                 errorMessageResId = StripeR.string.stripe_invalid_card_number,
                 preventMoreInput = true,
             )
         } else if (isDigitLimit && number.length < numberAllowedDigits) {
-            TextFieldStateConstants.Error.Incomplete(StripeR.string.stripe_invalid_card_number)
+            if (hasFundingError) {
+                TextFieldStateConstants.Error.Invalid(
+                    errorMessageResId = fundingErrorMessageId,
+                    preventMoreInput = false,
+                    isWarning = true
+                )
+            } else {
+                TextFieldStateConstants.Error.Incomplete(StripeR.string.stripe_invalid_card_number)
+            }
         } else if (!luhnValid) {
             TextFieldStateConstants.Error.Invalid(
                 errorMessageResId = StripeR.string.stripe_invalid_card_number,
                 preventMoreInput = true,
             )
         } else if (isDigitLimit && number.length == numberAllowedDigits) {
-            TextFieldStateConstants.Valid.Full
+            if (hasFundingError) {
+                TextFieldStateConstants.Valid.Full(
+                    errorMessageResId = fundingErrorMessageId,
+                )
+            } else {
+                TextFieldStateConstants.Valid.Full()
+            }
         } else {
             TextFieldStateConstants.Error.Invalid(StripeR.string.stripe_invalid_card_number)
         }
