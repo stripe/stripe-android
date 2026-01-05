@@ -135,7 +135,7 @@ internal fun LinkOptionalInlineSignup(
         }
 
         LinkInlineSignupFields(
-            sectionError = sectionError?.errorMessage,
+            sectionError = sectionError?.message,
             emailController = emailController,
             phoneNumberController = phoneNumberController,
             nameController = nameController,

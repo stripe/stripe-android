@@ -29,7 +29,7 @@ import com.stripe.android.identity.networking.models.IdNumberParam
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
-import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
@@ -205,7 +205,7 @@ private object USIDConfig : SimpleTextFieldConfig(
 
         override fun isValid(): Boolean = input.isNotBlank()
 
-        override fun getError(): FieldError = FieldError(R.string.stripe_incomplete_id_number)
+        override fun getError(): FieldValidationMessage = FieldValidationMessage(R.string.stripe_incomplete_id_number)
 
         override fun isFull(): Boolean = input.length == 4
 
@@ -225,7 +225,7 @@ private object BRIDConfig : SimpleTextFieldConfig(
 
         override fun isValid(): Boolean = input.isNotBlank()
 
-        override fun getError(): FieldError = FieldError(R.string.stripe_incomplete_id_number)
+        override fun getError(): FieldValidationMessage = FieldValidationMessage(R.string.stripe_incomplete_id_number)
 
         override fun isFull(): Boolean = input.length == 11
 

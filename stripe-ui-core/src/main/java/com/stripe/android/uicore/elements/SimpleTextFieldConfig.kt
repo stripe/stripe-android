@@ -28,10 +28,10 @@ open class SimpleTextFieldConfig(
             return optional && input.isEmpty() || input.isNotBlank()
         }
 
-        override fun getError(): FieldError? = if (isValid()) {
+        override fun getError(): FieldValidationMessage? = if (isValid()) {
             null
         } else {
-            FieldError(R.string.stripe_blank_and_required)
+            FieldValidationMessage.Error(R.string.stripe_blank_and_required)
         }
 
         override fun isFull(): Boolean = false

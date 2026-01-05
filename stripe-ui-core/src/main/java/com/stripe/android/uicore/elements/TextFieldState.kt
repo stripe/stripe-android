@@ -30,7 +30,7 @@ interface TextFieldState {
      * If in a state where isValid() returns false, this function returns the error message.
      * It is up to calling shouldShowError to determine if it should be displayed on screen.
      */
-    fun getError(): FieldError?
+    fun getError(): FieldValidationMessage?
 
     /**
      * This is used to indicate the field contains the maximum number of characters.

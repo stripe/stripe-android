@@ -53,7 +53,7 @@ class SimpleTextFieldConfigTest {
         val state = textConfig.determineState("    ")
 
         assertThat(state.isValid()).isFalse()
-        assertThat(state.getError()?.errorMessage).isEqualTo(R.string.stripe_blank_and_required)
+        assertThat(state.getError()?.message).isEqualTo(R.string.stripe_blank_and_required)
     }
 
     @Test
@@ -67,7 +67,7 @@ class SimpleTextFieldConfigTest {
         val state = textConfig.determineState("")
 
         assertThat(state.isValid()).isFalse()
-        assertThat(state.getError()?.errorMessage).isEqualTo(R.string.stripe_blank_and_required)
+        assertThat(state.getError()?.message).isEqualTo(R.string.stripe_blank_and_required)
     }
 
     @Test

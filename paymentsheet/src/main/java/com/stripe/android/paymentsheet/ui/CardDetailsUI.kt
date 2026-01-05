@@ -165,13 +165,13 @@ private fun rememberError(
     billingDetailsForm: BillingDetailsForm?
 ): String? {
     val nameErrorState = remember(billingDetailsForm?.nameElement) {
-        billingDetailsForm?.nameElement?.controller?.error ?: stateFlowOf(null)
+        billingDetailsForm?.nameElement?.controller?.validationMessage ?: stateFlowOf(null)
     }
 
     val nameError by nameErrorState.collectAsState()
 
     val error = nameError?.let {
-        resolvableString(it.errorMessage, it.formatArgs)
+        resolvableString(it.message, it.formatArgs)
     } ?: cardDetailsState.expiryDateState.sectionError()
 
     return error?.resolve()

@@ -23,7 +23,7 @@ class SameAsShippingController(
     override val fieldValue: StateFlow<String> = value.mapAsStateFlow { it.toString() }
     override val rawFieldValue: StateFlow<String?> = fieldValue
 
-    override val error: StateFlow<FieldError?> = stateFlowOf(null)
+    override val validationMessage: StateFlow<FieldValidationMessage?> = stateFlowOf(null)
     override val showOptionalLabel: Boolean = false
     override val isComplete: StateFlow<Boolean> = stateFlowOf(true)
     override val formFieldValue: StateFlow<FormFieldEntry> =

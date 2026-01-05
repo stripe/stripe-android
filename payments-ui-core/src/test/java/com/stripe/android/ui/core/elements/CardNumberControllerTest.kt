@@ -66,11 +66,11 @@ internal class CardNumberControllerTest {
     fun `When invalid card number verify visible error`() = runTest {
         val cardNumberController = createController()
 
-        cardNumberController.error.test {
+        cardNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
             cardNumberController.onValueChange("012")
-            assertThat(awaitItem()?.errorMessage).isEqualTo(StripeUiCoreR.string.stripe_blank_and_required)
-            assertThat(awaitItem()?.errorMessage).isEqualTo(StripeR.string.stripe_invalid_card_number)
+            assertThat(awaitItem()?.message).isEqualTo(StripeUiCoreR.string.stripe_blank_and_required)
+            assertThat(awaitItem()?.message).isEqualTo(StripeR.string.stripe_invalid_card_number)
         }
     }
 
@@ -99,7 +99,7 @@ internal class CardNumberControllerTest {
     @Test
     fun `Verify error is visible based on the focus`() = runTest {
         val cardNumberController = createController()
-        cardNumberController.visibleError.test {
+        cardNumberController.visibleValidationMessage.test {
             assertThat(awaitItem()).isFalse()
 
             cardNumberController.onFocusChange(true)
@@ -705,14 +705,14 @@ internal class CardNumberControllerTest {
     fun `Verify 'onValidationStateChanged' with 'true' results in an error when incomplete card number`() = runTest {
         val cardNumberController = createController()
 
-        cardNumberController.error.test {
+        cardNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             cardNumberController.onFocusChange(true)
             cardNumberController.onValueChange("4242")
 
             cardNumberController.onValidationStateChanged(true)
-            assertThat(awaitItem()?.errorMessage).isEqualTo(StripeR.string.stripe_invalid_card_number)
+            assertThat(awaitItem()?.message).isEqualTo(StripeR.string.stripe_invalid_card_number)
         }
     }
 
@@ -720,7 +720,7 @@ internal class CardNumberControllerTest {
     fun `Verify 'onValidationStateChanged' with 'true' & complete card number shows no error`() = runTest {
         val cardNumberController = createController()
 
-        cardNumberController.error.test {
+        cardNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             cardNumberController.onValueChange("4242424242424242")
@@ -735,11 +735,11 @@ internal class CardNumberControllerTest {
     fun `Verify 'onValidationStateChanged' with 'true' results in an error when empty card number`() = runTest {
         val cardNumberController = createController()
 
-        cardNumberController.error.test {
+        cardNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             cardNumberController.onValidationStateChanged(true)
-            assertThat(awaitItem()?.errorMessage).isEqualTo(StripeUiCoreR.string.stripe_blank_and_required)
+            assertThat(awaitItem()?.message).isEqualTo(StripeUiCoreR.string.stripe_blank_and_required)
         }
     }
 

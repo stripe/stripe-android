@@ -605,7 +605,7 @@ internal class DefaultEditCardDetailsInteractorTest {
             assertThat(initialCardState.expiryDateState.sectionError()).isNull()
 
             assertThat(initialBillingForm.nameElement).isNotNull()
-            assertThat(initialBillingForm.nameElement?.controller?.error?.value).isNull()
+            assertThat(initialBillingForm.nameElement?.controller?.validationMessage?.value).isNull()
             assertThat(initialBillingForm.addressSectionElement.controller.error.value).isNull()
 
             handler.handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)
@@ -619,7 +619,7 @@ internal class DefaultEditCardDetailsInteractorTest {
             assertThat(validatingCardState.expiryDateState.sectionError()).isNotNull()
 
             assertThat(validatingBillingForm.nameElement).isNotNull()
-            assertThat(validatingBillingForm.nameElement?.controller?.error?.value).isNotNull()
+            assertThat(validatingBillingForm.nameElement?.controller?.validationMessage?.value).isNotNull()
             assertThat(validatingBillingForm.addressSectionElement.controller.error.value).isNotNull()
         }
     }

@@ -107,7 +107,7 @@ class PostalCodeConfigTest {
     fun `invalid US postal codes emit error`() {
         with(createConfigForCountry("US")) {
             Truth.assertThat(determineStateForInput("").getError()).isNull()
-            Truth.assertThat(determineStateForInput("1234").getError()?.errorMessage)
+            Truth.assertThat(determineStateForInput("1234").getError()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_zip_incomplete)
             Truth.assertThat(determineStateForInput("12345").getError()).isNull()
         }
@@ -118,9 +118,9 @@ class PostalCodeConfigTest {
         with(createConfigForCountry("CA")) {
             Truth.assertThat(determineStateForInput("").getError()).isNull()
             Truth.assertThat(determineStateForInput("1N8E8R").getError()).isNotNull()
-            Truth.assertThat(determineStateForInput("A0A").getError()?.errorMessage)
+            Truth.assertThat(determineStateForInput("A0A").getError()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_postal_code_incomplete)
-            Truth.assertThat(determineStateForInput("141124").getError()?.errorMessage)
+            Truth.assertThat(determineStateForInput("141124").getError()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
         }
     }
@@ -129,13 +129,13 @@ class PostalCodeConfigTest {
     fun `invalid GB postal codes emit error`() {
         with(createConfigForCountry("GB")) {
             Truth.assertThat(determineStateForInput("").getError()).isNull()
-            Truth.assertThat(determineStateForInput("N18E").getError()?.errorMessage)
+            Truth.assertThat(determineStateForInput("N18E").getError()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_postal_code_incomplete)
-            Truth.assertThat(determineStateForInput("4C1A 1BB").getError()?.errorMessage)
+            Truth.assertThat(determineStateForInput("4C1A 1BB").getError()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
-            Truth.assertThat(determineStateForInput("12345").getError()?.errorMessage)
+            Truth.assertThat(determineStateForInput("12345").getError()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
-            Truth.assertThat(determineStateForInput("141124").getError()?.errorMessage)
+            Truth.assertThat(determineStateForInput("141124").getError()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
         }
     }
@@ -163,7 +163,7 @@ class PostalCodeConfigTest {
             val blankInputState = determineState("   ")
 
             assertThat(blankInputState.isValid()).isFalse()
-            assertThat(blankInputState.getError()?.errorMessage)
+            assertThat(blankInputState.getError()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
         }
 
@@ -171,7 +171,7 @@ class PostalCodeConfigTest {
             val blankInputState = determineState("   ")
 
             assertThat(blankInputState.isValid()).isFalse()
-            assertThat(blankInputState.getError()?.errorMessage)
+            assertThat(blankInputState.getError()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
         }
 
@@ -179,7 +179,7 @@ class PostalCodeConfigTest {
             val blankInputState = determineState("   ")
 
             assertThat(blankInputState.isValid()).isFalse()
-            assertThat(blankInputState.getError()?.errorMessage)
+            assertThat(blankInputState.getError()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_zip_invalid)
         }
     }

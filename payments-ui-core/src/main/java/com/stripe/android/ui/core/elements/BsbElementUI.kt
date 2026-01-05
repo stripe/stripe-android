@@ -23,15 +23,16 @@ fun BsbElementUI(
     lastTextFieldIdentifier: IdentifierSpec?,
     modifier: Modifier = Modifier,
 ) {
-    val error by element.textElement.controller.error.collectAsState()
+    val error by element.textElement.controller.validationMessage.collectAsState()
     val bankName by element.bankName.collectAsState()
     val sectionErrorString = error?.let {
         it.formatArgs?.let { args ->
+            @Suppress("SpreadOperator")
             stringResource(
-                it.errorMessage,
+                it.message,
                 *args
             )
-        } ?: stringResource(it.errorMessage)
+        } ?: stringResource(it.message)
     }
     Column {
         Section(

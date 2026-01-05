@@ -47,7 +47,7 @@ internal class SimpleTextFieldControllerTest {
     fun `verify the error message is set when should be visible`() = runTest {
         val controller = createControllerWithState()
 
-        controller.error.test {
+        controller.validationMessage.test {
             assertThat(awaitItem()).isNull()
             controller.onValueChange("showWhenNoFocus")
             shadowOf(getMainLooper()).idle()
@@ -119,7 +119,7 @@ internal class SimpleTextFieldControllerTest {
     @Test
     fun `Verify is visible error is true when onValueChange and shouldShowError returns true`() = runTest {
         val controller = createControllerWithState()
-        controller.visibleError.test {
+        controller.visibleValidationMessage.test {
             assertThat(awaitItem()).isEqualTo(false)
 
             controller.onValueChange("full")
@@ -138,9 +138,9 @@ internal class SimpleTextFieldControllerTest {
         val controller = createControllerWithState()
 
         turbineScope {
-            val visibleErrors = controller.visibleError.testIn(backgroundScope)
+            val visibleErrors = controller.visibleValidationMessage.testIn(backgroundScope)
 
-            val errors = controller.error.testIn(backgroundScope)
+            val errors = controller.validationMessage.testIn(backgroundScope)
 
             assertThat(visibleErrors.awaitItem()).isEqualTo(false)
             assertThat(errors.awaitItem()).isNull()
@@ -166,7 +166,7 @@ internal class SimpleTextFieldControllerTest {
         // Initialize the fieldState
         controller.onValueChange("showWhenNoFocus")
 
-        controller.visibleError.test {
+        controller.visibleValidationMessage.test {
             controller.onFocusChange(false)
             assertThat(awaitItem()).isEqualTo(true)
 
@@ -245,8 +245,8 @@ internal class SimpleTextFieldControllerTest {
         )
 
         turbineScope {
-            val visibleErrorTurbine = controller.visibleError.testIn(this)
-            val errorTurbine = controller.error.testIn(this)
+            val visibleErrorTurbine = controller.visibleValidationMessage.testIn(this)
+            val errorTurbine = controller.validationMessage.testIn(this)
 
             assertThat(visibleErrorTurbine.awaitItem()).isFalse()
             assertThat(errorTurbine.awaitItem()).isNull()
@@ -254,7 +254,7 @@ internal class SimpleTextFieldControllerTest {
             controller.onValidationStateChanged(true)
 
             assertThat(visibleErrorTurbine.awaitItem()).isTrue()
-            assertThat(errorTurbine.awaitItem()?.errorMessage).isEqualTo(R.string.stripe_blank_and_required)
+            assertThat(errorTurbine.awaitItem()?.message).isEqualTo(R.string.stripe_blank_and_required)
 
             visibleErrorTurbine.cancelAndIgnoreRemainingEvents()
             errorTurbine.cancelAndIgnoreRemainingEvents()
@@ -268,8 +268,8 @@ internal class SimpleTextFieldControllerTest {
         )
 
         turbineScope {
-            val visibleErrorTurbine = controller.visibleError.testIn(this)
-            val errorTurbine = controller.error.testIn(this)
+            val visibleErrorTurbine = controller.visibleValidationMessage.testIn(this)
+            val errorTurbine = controller.validationMessage.testIn(this)
 
             assertThat(visibleErrorTurbine.awaitItem()).isFalse()
             assertThat(errorTurbine.awaitItem()).isNull()
@@ -291,8 +291,8 @@ internal class SimpleTextFieldControllerTest {
         )
 
         turbineScope {
-            val visibleErrorTurbine = controller.visibleError.testIn(this)
-            val errorTurbine = controller.error.testIn(this)
+            val visibleErrorTurbine = controller.visibleValidationMessage.testIn(this)
+            val errorTurbine = controller.validationMessage.testIn(this)
 
             assertThat(visibleErrorTurbine.awaitItem()).isFalse()
             assertThat(errorTurbine.awaitItem()).isNull()
@@ -345,7 +345,7 @@ internal class SimpleTextFieldControllerTest {
     }
 
     companion object {
-        val fieldError = FieldError(-1)
+        val fieldValidationMessage = FieldValidationMessage.Error(-1)
 
         object ShowWhenNoFocus : TextFieldState {
             override fun isValid(): Boolean = false
@@ -353,7 +353,7 @@ internal class SimpleTextFieldControllerTest {
             override fun isBlank(): Boolean = false
 
             override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean): Boolean = !hasFocus || isValidating
-            override fun getError() = fieldError
+            override fun getError() = fieldValidationMessage
         }
     }
 }

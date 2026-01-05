@@ -30,7 +30,7 @@ import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.EmailElement
-import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
@@ -192,11 +192,11 @@ internal class DefaultVerticalModeFormInteractorTest {
 
                 nextSectionElement.fields.errorTest(
                     identifierSpec = IdentifierSpec.Name,
-                    error = FieldError(UiCoreR.string.stripe_blank_and_required),
+                    error = FieldValidationMessage(UiCoreR.string.stripe_blank_and_required),
                 )
                 nextSectionElement.fields.errorTest(
                     identifierSpec = IdentifierSpec.Email,
-                    error = FieldError(UiCoreR.string.stripe_blank_and_required),
+                    error = FieldValidationMessage(UiCoreR.string.stripe_blank_and_required),
                 )
             }
         }

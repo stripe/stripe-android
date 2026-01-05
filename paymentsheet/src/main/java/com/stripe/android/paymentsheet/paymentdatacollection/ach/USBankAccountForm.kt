@@ -312,15 +312,15 @@ private fun PhoneSection(
     imeAction: ImeAction,
     modifier: Modifier = Modifier,
 ) {
-    val error by phoneController.error.collectAsState()
+    val error by phoneController.validationMessage.collectAsState()
 
     val sectionErrorString = error?.let {
         it.formatArgs?.let { args ->
             stringResource(
-                it.errorMessage,
+                it.message,
                 *args
             )
-        } ?: stringResource(it.errorMessage)
+        } ?: stringResource(it.message)
     }
 
     Box(
@@ -352,15 +352,15 @@ private fun AddressSection(
     sameAsShippingElement: SameAsShippingElement?,
     modifier: Modifier = Modifier,
 ) {
-    val error by addressController.error.collectAsState()
+    val error by addressController.validationMessage.collectAsState()
 
     val sectionErrorString = error?.let {
         it.formatArgs?.let { args ->
             stringResource(
-                it.errorMessage,
+                it.message,
                 *args
             )
-        } ?: stringResource(it.errorMessage)
+        } ?: stringResource(it.message)
     }
 
     Box(

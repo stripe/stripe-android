@@ -29,11 +29,12 @@ fun SectionElementUI(
         val error by controller.error.collectAsState()
         val sectionErrorString = error?.let {
             it.formatArgs?.let { args ->
+                @Suppress("SpreadOperator")
                 stringResource(
-                    it.errorMessage,
+                    it.message,
                     *args
                 )
-            } ?: stringResource(it.errorMessage)
+            } ?: stringResource(it.message)
         }
 
         Section(

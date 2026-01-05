@@ -10,7 +10,7 @@ class TextFieldStateConstants {
     sealed class Valid : TextFieldState {
         override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean): Boolean = false
         override fun isValid(): Boolean = true
-        override fun getError(): FieldError? = null
+        override fun getError(): FieldValidationMessage? = null
         override fun isBlank(): Boolean = false
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -31,7 +31,7 @@ class TextFieldStateConstants {
     ) : TextFieldState {
         override fun isValid(): Boolean = false
         override fun isFull(): Boolean = false
-        override fun getError() = FieldError(errorMessageResId, formatArgs)
+        override fun getError() = FieldValidationMessage.Error(errorMessageResId, formatArgs)
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Incomplete(

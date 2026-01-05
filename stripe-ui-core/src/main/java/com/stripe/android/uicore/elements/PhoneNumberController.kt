@@ -89,7 +89,7 @@ class PhoneNumberController private constructor(
         FormFieldEntry(rawFieldValue, isComplete)
     }
 
-    override val error: StateFlow<FieldError?> = combineAsStateFlow(
+    override val validationMessage: StateFlow<FieldValidationMessage?> = combineAsStateFlow(
         fieldValueAndComplete,
         _hasFocus,
         _validating,
@@ -98,7 +98,7 @@ class PhoneNumberController private constructor(
         val canShowWhenNotValidating = value.isNotBlank() && !complete && !hasFocus
 
         if (canShowWhenNotValidating || canShowWhenValidating) {
-            FieldError(R.string.stripe_incomplete_phone_number)
+            FieldValidationMessage.Error(R.string.stripe_incomplete_phone_number)
         } else {
             null
         }

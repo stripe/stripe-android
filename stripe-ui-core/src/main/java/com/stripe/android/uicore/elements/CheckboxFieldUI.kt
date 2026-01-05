@@ -41,7 +41,7 @@ fun CheckboxFieldUI(
     enabled: Boolean = true
 ) {
     val isChecked by controller.isChecked.collectAsState()
-    val error by controller.error.collectAsState()
+    val error by controller.validationMessage.collectAsState()
 
     CheckboxFieldUIView(
         modifier = modifier,
@@ -57,8 +57,8 @@ fun CheckboxFieldUI(
         error = error?.let { fieldError ->
             @ReadOnlyComposable {
                 fieldError.formatArgs?.let { args ->
-                    stringResource(id = fieldError.errorMessage, formatArgs = args)
-                } ?: stringResource(id = fieldError.errorMessage)
+                    stringResource(id = fieldError.message, formatArgs = args)
+                } ?: stringResource(id = fieldError.message)
             }
         }
     )

@@ -57,29 +57,29 @@ class PostalCodeConfig(
             }
         }
 
-        override fun getError(): FieldError? {
+        override fun getError(): FieldValidationMessage? {
             return when {
                 input.isNotBlank() && !isValid() && country == "US" -> {
                     // Check if it's too short (incomplete) vs invalid format
                     if (input.length < format.minimumLength) {
-                        FieldError(R.string.stripe_address_zip_incomplete)
+                        FieldValidationMessage.Error(R.string.stripe_address_zip_incomplete)
                     } else {
-                        FieldError(R.string.stripe_address_zip_invalid)
+                        FieldValidationMessage.Error(R.string.stripe_address_zip_invalid)
                     }
                 }
                 input.isNotBlank() && !isValid() -> {
                     // Check if it's too short (incomplete) vs invalid format
                     if (input.length < format.minimumLength) {
-                        FieldError(R.string.stripe_address_postal_code_incomplete)
+                        FieldValidationMessage.Error(R.string.stripe_address_postal_code_incomplete)
                     } else {
-                        FieldError(R.string.stripe_address_postal_code_invalid)
+                        FieldValidationMessage.Error(R.string.stripe_address_postal_code_invalid)
                     }
                 }
                 input.isNotEmpty() && !isValid() -> {
                     if (country == "US") {
-                        FieldError(R.string.stripe_address_zip_invalid)
+                        FieldValidationMessage.Error(R.string.stripe_address_zip_invalid)
                     } else {
-                        FieldError(R.string.stripe_address_postal_code_invalid)
+                        FieldValidationMessage.Error(R.string.stripe_address_postal_code_invalid)
                     }
                 }
                 else -> null

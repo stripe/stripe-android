@@ -59,7 +59,7 @@ internal data class ExpiryDateState(
             shouldShowError() && enabled
         }?.let { error ->
             resolvableString(
-                id = error.errorMessage,
+                id = error.message,
                 formatArgs = error.formatArgs.orEmpty()
             )
         }

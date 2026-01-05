@@ -81,7 +81,7 @@ class DropdownFieldControllerTest {
         )
         val controller = DropdownFieldController(countryConfig)
 
-        controller.error.test {
+        controller.validationMessage.test {
             assertThat(awaitItem()).isNull()
         }
     }
@@ -94,12 +94,12 @@ class DropdownFieldControllerTest {
         )
         val controller = DropdownFieldController(countryConfig)
 
-        controller.error.test {
+        controller.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             controller.onValidationStateChanged(true)
 
-            assertThat(awaitItem()?.errorMessage).isEqualTo(R.string.stripe_blank_and_required)
+            assertThat(awaitItem()?.message).isEqualTo(R.string.stripe_blank_and_required)
         }
     }
 
@@ -111,7 +111,7 @@ class DropdownFieldControllerTest {
         )
         val controller = DropdownFieldController(countryConfig)
 
-        controller.error.test {
+        controller.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             controller.onValueChange(0)

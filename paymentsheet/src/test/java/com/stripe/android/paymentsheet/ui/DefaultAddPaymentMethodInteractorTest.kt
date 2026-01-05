@@ -27,7 +27,7 @@ import com.stripe.android.paymentsheet.utils.errorTest
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.EmailElement
-import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
@@ -251,11 +251,11 @@ class DefaultAddPaymentMethodInteractorTest {
 
                 nextSectionElement.fields.errorTest(
                     identifierSpec = IdentifierSpec.Name,
-                    error = FieldError(UiCoreR.string.stripe_blank_and_required),
+                    error = FieldValidationMessage(UiCoreR.string.stripe_blank_and_required),
                 )
                 nextSectionElement.fields.errorTest(
                     identifierSpec = IdentifierSpec.Email,
-                    error = FieldError(UiCoreR.string.stripe_blank_and_required),
+                    error = FieldValidationMessage(UiCoreR.string.stripe_blank_and_required),
                 )
             }
 

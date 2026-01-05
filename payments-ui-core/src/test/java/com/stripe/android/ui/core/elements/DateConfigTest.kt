@@ -30,7 +30,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Incomplete>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getError()?.message
         ).isEqualTo(UiCoreR.string.stripe_incomplete_expiry_date)
     }
 
@@ -40,7 +40,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getError()?.message
         ).isEqualTo(UiCoreR.string.stripe_incomplete_expiry_date)
     }
 
@@ -50,7 +50,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getError()?.message
         ).isEqualTo(UiCoreR.string.stripe_incomplete_expiry_date)
     }
 
@@ -60,7 +60,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getError()?.message
         ).isEqualTo(UiCoreR.string.stripe_invalid_expiry_year)
     }
 
@@ -70,7 +70,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getError()?.message
         ).isEqualTo(UiCoreR.string.stripe_invalid_expiry_year)
     }
 
@@ -138,7 +138,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getError()?.message
         ).isEqualTo(expectedErrorMessage)
     }
 
@@ -154,7 +154,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getError()?.message
         ).isEqualTo(UiCoreR.string.stripe_invalid_expiry_year)
     }
 
@@ -170,7 +170,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getError()?.message
         ).isEqualTo(UiCoreR.string.stripe_invalid_expiry_year)
     }
 
@@ -202,7 +202,7 @@ class DateConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
-            state.getError()?.errorMessage
+            state.getError()?.message
         ).isEqualTo(UiCoreR.string.stripe_incomplete_expiry_date)
     }
 

@@ -26,7 +26,7 @@ class AutocompleteAddressController(
     private val sameAsShippingElement: SameAsShippingElement?,
     private val shippingValuesMap: Map<IdentifierSpec, String?>?,
     private val hideCountry: Boolean = false,
-) : SectionFieldErrorController, SectionFieldComposable {
+) : SectionFieldValidationController, SectionFieldComposable {
     private val interactor = interactorFactory.create()
 
     private val config = interactor.autocompleteConfig
@@ -65,8 +65,8 @@ class AutocompleteAddressController(
         it.addressController
     }
 
-    override val error: StateFlow<FieldError?> = addressController.flatMapLatestAsStateFlow {
-        it.error
+    override val validationMessage: StateFlow<FieldValidationMessage?> = addressController.flatMapLatestAsStateFlow {
+        it.validationMessage
     }
 
     init {

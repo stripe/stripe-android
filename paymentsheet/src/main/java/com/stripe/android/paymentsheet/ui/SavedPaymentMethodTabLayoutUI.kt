@@ -460,7 +460,7 @@ internal fun CvcRecollectionField(
     animationDelay: Int = ANIMATION_DELAY
 ) {
     val controller by cvcControllerFlow.collectAsState()
-    val error by controller.error.collectAsState()
+    val error by controller.validationMessage.collectAsState()
     val element = CvcElement(
         IdentifierSpec(),
         controller
@@ -508,7 +508,7 @@ internal fun CvcRecollectionField(
                     lastTextFieldIdentifier = null
                 )
             }
-            error?.errorMessage?.let {
+            error?.message?.let {
                 Row {
                     SectionError(error = stringResource(id = it))
                 }

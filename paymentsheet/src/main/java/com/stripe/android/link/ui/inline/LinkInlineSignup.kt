@@ -427,7 +427,7 @@ internal fun LinkFields(
                 )
             } else {
                 LinkInlineSignupFields(
-                    sectionError = sectionError?.errorMessage,
+                    sectionError = sectionError?.message,
                     emailController = emailController,
                     phoneNumberController = phoneNumberController,
                     nameController = nameController,

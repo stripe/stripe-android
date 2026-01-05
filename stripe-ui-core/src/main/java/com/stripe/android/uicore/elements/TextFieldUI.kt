@@ -104,15 +104,16 @@ fun TextFieldSection(
     @StringRes sectionTitle: Int? = null,
     content: @Composable () -> Unit,
 ) {
-    val error by textFieldController.error.collectAsState()
+    val error by textFieldController.validationMessage.collectAsState()
 
     val sectionErrorString = error?.let {
         it.formatArgs?.let { args ->
+            @Suppress("SpreadOperator")
             stringResource(
-                it.errorMessage,
+                it.message,
                 *args
             )
-        } ?: stringResource(it.errorMessage)
+        } ?: stringResource(it.message)
     }
 
     Section(
@@ -150,7 +151,7 @@ fun TextField(
     val focusManager = LocalFocusManager.current
     val value by textFieldController.fieldValue.collectAsState()
     val trailingIcon by textFieldController.trailingIcon.collectAsState()
-    val shouldShowError by textFieldController.visibleError.collectAsState()
+    val shouldShowValidationMessage by textFieldController.visibleValidationMessage.collectAsState()
     val loading by textFieldController.loading.collectAsState()
     val contentDescription by textFieldController.contentDescription.collectAsState()
     val visualTransformation by textFieldController.visualTransformation.collectAsState()
@@ -161,15 +162,7 @@ fun TextField(
     val fieldState by textFieldController.fieldState.collectAsState()
     val label by textFieldController.label.collectAsState()
 
-    val error by textFieldController.error.collectAsState()
-    val sectionErrorString = error?.let {
-        it.formatArgs?.let { args ->
-            stringResource(
-                it.errorMessage,
-                *args
-            )
-        } ?: stringResource(it.errorMessage)
-    }
+    val error by textFieldController.validationMessage.collectAsState()
 
     LaunchedEffect(fieldState) {
         // When field is in focus and full, move to next field so the user can keep typing
@@ -240,8 +233,8 @@ fun TextField(
         shouldAnnounceLabel = shouldAnnounceLabel,
         placeholder = placeHolder,
         trailingIcon = trailingIcon,
-        shouldShowError = shouldShowError,
-        errorMessage = sectionErrorString,
+        shouldShowValidationMessage = shouldShowValidationMessage,
+        validationMessage = error,
         visualTransformation = visualTransformation,
         layoutDirection = textFieldController.layoutDirection,
         keyboardOptions = KeyboardOptions(
@@ -269,8 +262,8 @@ internal fun TextFieldUi(
     placeholder: String?,
     trailingIcon: TextFieldIcon?,
     showOptionalLabel: Boolean,
-    shouldShowError: Boolean,
-    errorMessage: String?,
+    shouldShowValidationMessage: Boolean,
+    validationMessage: FieldValidationMessage?,
     shouldAnnounceLabel: Boolean = true,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
@@ -280,10 +273,25 @@ internal fun TextFieldUi(
     onValueChange: (value: TextFieldValue) -> Unit = {},
     onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit = {}
 ) {
-    val colors = TextFieldColors(shouldShowError)
+    val displayState = when (validationMessage) {
+        is FieldValidationMessage.Error -> FieldDisplayState.ERROR
+        is FieldValidationMessage.Warning -> FieldDisplayState.WARNING
+        null -> FieldDisplayState.NORMAL
+    }
+    val colors = TextFieldColors(displayState)
     val textFieldInsets = LocalTextFieldInsets.current
 
     val layoutDirectionToUse = layoutDirection ?: LocalLayoutDirection.current
+
+    val errorMessage = validationMessage?.let {
+        it.formatArgs?.let { args ->
+            @Suppress("SpreadOperator")
+            stringResource(
+                it.message,
+                *args
+            )
+        } ?: stringResource(it.message)
+    }
 
     CompositionLocalProvider(LocalLayoutDirection provides layoutDirectionToUse) {
         CompatTextField(
@@ -314,7 +322,7 @@ internal fun TextFieldUi(
                     icon.Composable(loading, onDropdownItemClicked)
                 }
             },
-            isError = shouldShowError,
+            isError = shouldShowValidationMessage,
             errorMessage = errorMessage,
             visualTransformation = visualTransformation,
             keyboardOptions = keyboardOptions,
@@ -390,16 +398,15 @@ fun AnimatedIcons(
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun TextFieldColors(
-    shouldShowError: Boolean = false,
+    fieldDisplayState: FieldDisplayState = FieldDisplayState.NORMAL,
     textColor: Color = MaterialTheme.stripeColors.onComponent,
     disabledTextColor: Color = textColor.copy(ContentAlpha.disabled),
     backgroundColor: Color = MaterialTheme.stripeColors.component,
     disabledIndicatorColor: Color = Color.Transparent,
 ) = TextFieldDefaults.textFieldColors(
-    textColor = if (shouldShowError) {
-        MaterialTheme.colors.error
-    } else {
-        textColor
+    textColor = when (fieldDisplayState) {
+        FieldDisplayState.ERROR -> MaterialTheme.colors.error
+        FieldDisplayState.NORMAL, FieldDisplayState.WARNING -> textColor
     },
     disabledTextColor = disabledTextColor,
     unfocusedLabelColor = MaterialTheme.stripeColors.placeholderText,
@@ -409,7 +416,15 @@ fun TextFieldColors(
     focusedIndicatorColor = Color.Transparent,
     disabledIndicatorColor = disabledIndicatorColor,
     unfocusedIndicatorColor = Color.Transparent,
-    cursorColor = MaterialTheme.stripeColors.textCursor
+    cursorColor = MaterialTheme.stripeColors.textCursor,
+    errorCursorColor = when (fieldDisplayState) {
+        FieldDisplayState.ERROR -> MaterialTheme.colors.error
+        FieldDisplayState.NORMAL, FieldDisplayState.WARNING -> MaterialTheme.stripeColors.textCursor
+    },
+    errorIndicatorColor = when (fieldDisplayState) {
+        FieldDisplayState.ERROR -> MaterialTheme.colors.error
+        FieldDisplayState.NORMAL, FieldDisplayState.WARNING -> Color.Transparent
+    },
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -569,3 +584,8 @@ const val DROPDOWN_MENU_CLICKABLE_TEST_TAG = "dropdown_menu_clickable"
 
 // Default size of Material Theme icons
 private const val LOADING_INDICATOR_SIZE = 24
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class FieldDisplayState {
+    NORMAL, ERROR, WARNING
+}

@@ -18,7 +18,7 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.DobParam
 import com.stripe.android.identity.networking.models.DobParam.Companion.toDob
-import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
@@ -117,7 +117,7 @@ internal object DobTextFieldConfig : SimpleTextFieldConfig(
 
         override fun isValid(): Boolean = input.isNotBlank()
 
-        override fun getError(): FieldError = FieldError(R.string.stripe_invalid_dob_error)
+        override fun getError(): FieldValidationMessage = FieldValidationMessage(R.string.stripe_invalid_dob_error)
 
         override fun isFull(): Boolean = input.length == DATE_LENGTH
 
