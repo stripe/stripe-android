@@ -62,15 +62,13 @@ class TextFieldUiScreenshotTest {
     fun testFilledWithError() {
         paparazziRule.snapshot {
             TextFieldUi(
-                label = "Email",
-                value = TextFieldValue("invalid@"),
+                label = "Search",
+                value = TextFieldValue("John Doe"),
                 enabled = true,
                 loading = false,
                 placeholder = null,
                 shouldShowValidationMessage = true,
-                validationMessage = FieldValidationMessage.Error(
-                    message = R.string.stripe_email_is_invalid
-                ),
+                validationMessage = null,
                 showOptionalLabel = false,
                 trailingIcon = null
             )

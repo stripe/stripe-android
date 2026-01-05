@@ -27,6 +27,7 @@ sealed interface FieldValidationMessage {
     val message: Int
     val formatArgs: Array<out Any>?
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Immutable
     data class Error(
         override val message: Int,
@@ -51,6 +52,7 @@ sealed interface FieldValidationMessage {
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Immutable
     data class Warning(
         override val message: Int,

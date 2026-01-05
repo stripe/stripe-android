@@ -273,10 +273,14 @@ internal fun TextFieldUi(
     onValueChange: (value: TextFieldValue) -> Unit = {},
     onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit = {}
 ) {
-    val displayState = when (validationMessage) {
-        is FieldValidationMessage.Error -> FieldDisplayState.ERROR
-        is FieldValidationMessage.Warning -> FieldDisplayState.WARNING
-        null -> FieldDisplayState.NORMAL
+    val displayState = when (shouldShowValidationMessage) {
+        true -> {
+            when (validationMessage) {
+                is FieldValidationMessage.Error, null -> FieldDisplayState.ERROR
+                is FieldValidationMessage.Warning -> FieldDisplayState.WARNING
+            }
+        }
+        false -> FieldDisplayState.NORMAL
     }
     val colors = TextFieldColors(displayState)
     val textFieldInsets = LocalTextFieldInsets.current
