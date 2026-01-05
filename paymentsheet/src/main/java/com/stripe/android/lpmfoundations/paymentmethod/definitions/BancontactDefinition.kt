@@ -1,16 +1,15 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.SharedDataSpec
-import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.MandateTextElement
 
 internal object BancontactDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Bancontact
@@ -23,37 +22,45 @@ internal object BancontactDefinition : PaymentMethodDefinition {
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods.takeIf { hasIntentToSetup },
     )
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type.code)
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean {
+        return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
+    }
 
     override fun uiDefinitionFactory(): UiDefinitionFactory = BancontactUiDefinitionFactory
 }
 
-private object BancontactUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec,
-    ) = SupportedPaymentMethod(
+private object BancontactUiDefinitionFactory : UiDefinitionFactory.Simple() {
+    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         paymentMethodDefinition = BancontactDefinition,
-        sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_bancontact,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
         iconResourceNight = null,
     )
 
-    override fun createFormElements(
+    override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec,
-        transformSpecToElements: TransformSpecToElements
-    ): List<FormElement> {
-        return transformSpecToElements.transform(
-            metadata = metadata,
-            specs = sharedDataSpec.fields,
-            placeholderOverrideList = if (metadata.hasIntentToSetup(BancontactDefinition.type.code)) {
-                listOf(IdentifierSpec.Name, IdentifierSpec.Email)
-            } else {
-                emptyList()
-            },
-            termsDisplay = metadata.termsDisplayForType(BancontactDefinition.type),
-        )
+        arguments: UiDefinitionFactory.Arguments,
+        builder: FormElementsBuilder
+    ) {
+        builder
+            .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
+            .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
+            .apply {
+                if (metadata.hasIntentToSetup(BancontactDefinition.type.code)) {
+                    requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
+                }
+            }
+            .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
+            .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
+            .apply {
+                if (BancontactDefinition.requiresMandate(metadata)) {
+                    footer(
+                        MandateTextElement(
+                            stringResId = R.string.stripe_sepa_mandate,
+                            args = listOf(arguments.merchantName)
+                        )
+                    )
+                }
+            }
     }
 }
