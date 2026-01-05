@@ -92,12 +92,12 @@ class CardAccountRangeServiceTest {
             on { loading } doReturn stateFlowOf(false)
         }
 
-        val serviceMockRemote = DefaultCardAccountRangeService(
+        val serviceMockRemote = CardAccountRangeService(
             createMockRemoteDefaultCardAccountRangeRepository(mockRemoteCardAccountRangeSource),
             testDispatcher,
             testDispatcher,
             DefaultStaticCardAccountRanges(),
-            object : DefaultCardAccountRangeService.AccountRangeResultListener {
+            object : CardAccountRangeService.AccountRangeResultListener {
                 override fun onAccountRangesResult(
                     accountRanges: List<AccountRange>,
                     unfilteredAccountRanges: List<AccountRange>
@@ -201,12 +201,12 @@ class CardAccountRangeServiceTest {
             createMockRemoteDefaultCardAccountRangeRepository(it)
         } ?: createDefaultCardAccountRangeRepository()
 
-        val service = DefaultCardAccountRangeService(
+        val service = CardAccountRangeService(
             cardAccountRangeRepository = repository,
             uiContext = testDispatcher,
             workContext = testDispatcher,
             staticCardAccountRanges = DefaultStaticCardAccountRanges(),
-            accountRangeResultListener = object : DefaultCardAccountRangeService.AccountRangeResultListener {
+            accountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
                 override fun onAccountRangesResult(
                     accountRanges: List<AccountRange>,
                     unfilteredAccountRanges: List<AccountRange>
@@ -289,12 +289,12 @@ class CardAccountRangeServiceTest {
     private fun verifyRemotePanLength(cardNumberString: String, expectedPanLength: Int) {
         var panLength: Int? = null
         val latch = CountDownLatch(1)
-        val serviceMockRemote = DefaultCardAccountRangeService(
+        val serviceMockRemote = CardAccountRangeService(
             createDefaultCardAccountRangeRepository(),
             testDispatcher,
             testDispatcher,
             DefaultStaticCardAccountRanges(),
-            object : DefaultCardAccountRangeService.AccountRangeResultListener {
+            object : CardAccountRangeService.AccountRangeResultListener {
                 override fun onAccountRangesResult(
                     accountRanges: List<AccountRange>,
                     unfilteredAccountRanges: List<AccountRange>
@@ -388,12 +388,12 @@ class CardAccountRangeServiceTest {
             on { loading } doReturn stateFlowOf(false)
         }
 
-        val serviceMockRemote = DefaultCardAccountRangeService(
+        val serviceMockRemote = CardAccountRangeService(
             createMockRemoteDefaultCardAccountRangeRepository(mockRemoteCardAccountRangeSource),
             testDispatcher,
             testDispatcher,
             DefaultStaticCardAccountRanges(),
-            object : DefaultCardAccountRangeService.AccountRangeResultListener {
+            object : CardAccountRangeService.AccountRangeResultListener {
                 override fun onAccountRangesResult(
                     accountRanges: List<AccountRange>,
                     unfilteredAccountRanges: List<AccountRange>
@@ -435,17 +435,18 @@ class CardAccountRangeServiceTest {
             override val loading: StateFlow<Boolean> = stateFlowOf(false)
         }
 
-        val service = DefaultCardAccountRangeService(
-            cardAccountRangeRepository = createMockRemoteDefaultCardAccountRangeRepository(mockRemoteCardAccountRangeSource),
+        val service = CardAccountRangeService(
+            cardAccountRangeRepository = createMockRemoteDefaultCardAccountRangeRepository(
+                mockRemoteCardAccountRangeSource
+            ),
             uiContext = testDispatcher,
             workContext = testDispatcher,
             staticCardAccountRanges = DefaultStaticCardAccountRanges(),
-            accountRangeResultListener = object : DefaultCardAccountRangeService.AccountRangeResultListener {
+            accountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
                 override fun onAccountRangesResult(
                     accountRanges: List<AccountRange>,
                     unfilteredAccountRanges: List<AccountRange>
-                ) {
-                }
+                ) = Unit
             },
             isCbcEligible = { true },
             cardFundingFilter = DefaultCardFundingFilter,
@@ -479,17 +480,18 @@ class CardAccountRangeServiceTest {
             override val loading: StateFlow<Boolean> = stateFlowOf(false)
         }
 
-        val service = DefaultCardAccountRangeService(
-            cardAccountRangeRepository = createMockRemoteDefaultCardAccountRangeRepository(mockRemoteCardAccountRangeSource),
+        val service = CardAccountRangeService(
+            cardAccountRangeRepository = createMockRemoteDefaultCardAccountRangeRepository(
+                mockRemoteCardAccountRangeSource
+            ),
             uiContext = testDispatcher,
             workContext = testDispatcher,
             staticCardAccountRanges = DefaultStaticCardAccountRanges(),
-            accountRangeResultListener = object : DefaultCardAccountRangeService.AccountRangeResultListener {
+            accountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
                 override fun onAccountRangesResult(
                     accountRanges: List<AccountRange>,
                     unfilteredAccountRanges: List<AccountRange>
-                ) {
-                }
+                ) = Unit
             },
             isCbcEligible = { true },
             cardFundingFilter = DefaultCardFundingFilter,
@@ -534,19 +536,18 @@ class CardAccountRangeServiceTest {
             override val loading: StateFlow<Boolean> = stateFlowOf(false)
         }
 
-        val service = DefaultCardAccountRangeService(
+        val service = CardAccountRangeService(
             cardAccountRangeRepository = createMockRemoteDefaultCardAccountRangeRepository(
                 mockRemoteCardAccountRangeSource
             ),
             uiContext = testDispatcher,
             workContext = testDispatcher,
             staticCardAccountRanges = DefaultStaticCardAccountRanges(),
-            accountRangeResultListener = object : DefaultCardAccountRangeService.AccountRangeResultListener {
+            accountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
                 override fun onAccountRangesResult(
                     accountRanges: List<AccountRange>,
                     unfilteredAccountRanges: List<AccountRange>
-                ) {
-                }
+                ) = Unit
             },
             isCbcEligible = { true },
             cardFundingFilter = DefaultCardFundingFilter,

@@ -47,6 +47,7 @@ internal class CardNumberConfig(
         val luhnValid = CardUtils.isValidLuhnNumber(number)
         val isDigitLimit = brand.getMaxLengthForCardNumber(number) != -1
         val cardFundingAccepted = funding?.let(cardFundingFilter::isAccepted)
+        val fundingErrorMessageId = cardFundingFilter.allowedFundingTypesDisplayMessage()
 
         return if (number.isBlank()) {
             TextFieldStateConstants.Error.Blank
@@ -62,15 +63,12 @@ internal class CardNumberConfig(
                 formatArgs = arrayOf(brand.displayName),
                 preventMoreInput = false,
             )
-        } else if (number.length >= digitsRequiredToFetchFunding && cardFundingAccepted == false) {
-            /*
-              After 6+ digits, check if the funding type is accepted.
-              Show warning but don't prevent submission (preventMoreInput = false)
-              due to potential metadata service inaccuracy.
-             */
+        } else if (number.length >= digitsRequiredToFetchFunding &&
+            cardFundingAccepted == false &&
+            fundingErrorMessageId != null
+        ) {
             return TextFieldStateConstants.Error.Invalid(
-                errorMessageResId = StripeR.string.stripe_disallowed_card_funding,
-                formatArgs = arrayOf(funding.displayName),
+                errorMessageResId = fundingErrorMessageId,
                 preventMoreInput = false,
             )
         } else if (brand == CardBrand.Unknown) {

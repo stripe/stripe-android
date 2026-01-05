@@ -325,7 +325,10 @@ class CardNumberConfigTest {
 
     @Test
     fun `determineState returns error for disallowed funding type with 6+ digits`() {
-        val cardNumberConfig = cardNumberConfigWithFundingFilter(setOf(CardFunding.Credit))
+        val cardNumberConfig = cardNumberConfigWithFundingFilter(
+            disallowedFundingTypes = setOf(CardFunding.Credit),
+            allowedFundingTypesDisplayMessage = StripeR.string.stripe_card_funding_only_debit_prepaid
+        )
 
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
@@ -336,7 +339,7 @@ class CardNumberConfigTest {
 
         assertThat(state).isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         assertThat(state.getError()?.errorMessage)
-            .isEqualTo(StripeR.string.stripe_disallowed_card_funding)
+            .isEqualTo(StripeR.string.stripe_card_funding_only_debit_prepaid)
     }
 
     @Test
@@ -356,7 +359,10 @@ class CardNumberConfigTest {
 
     @Test
     fun `determineState returns error for disallowed funding type with exactly 6 digits`() {
-        val cardNumberConfig = cardNumberConfigWithFundingFilter(setOf(CardFunding.Prepaid))
+        val cardNumberConfig = cardNumberConfigWithFundingFilter(
+            disallowedFundingTypes = setOf(CardFunding.Prepaid),
+            allowedFundingTypesDisplayMessage = StripeR.string.stripe_card_funding_only_debit_credit
+        )
 
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
@@ -368,7 +374,7 @@ class CardNumberConfigTest {
         // Should show funding error at 6 digits
         assertThat(state).isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         assertThat(state.getError()?.errorMessage)
-            .isEqualTo(StripeR.string.stripe_disallowed_card_funding)
+            .isEqualTo(StripeR.string.stripe_card_funding_only_debit_credit)
     }
 
     @Test
@@ -387,7 +393,10 @@ class CardNumberConfigTest {
 
     @Test
     fun `determineState does not prevent input for disallowed funding type`() {
-        val cardNumberConfig = cardNumberConfigWithFundingFilter(setOf(CardFunding.Debit))
+        val cardNumberConfig = cardNumberConfigWithFundingFilter(
+            disallowedFundingTypes = setOf(CardFunding.Debit),
+            allowedFundingTypesDisplayMessage = StripeR.string.stripe_card_funding_only_debit_credit
+        )
 
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
@@ -400,13 +409,10 @@ class CardNumberConfigTest {
     }
 
     private fun cardNumberConfigWithFundingFilter(
-        disallowedFundingTypes: Set<CardFunding> = emptySet()
+        disallowedFundingTypes: Set<CardFunding> = emptySet(),
+        allowedFundingTypesDisplayMessage: Int? = null
     ): CardNumberConfig {
-        val cardFundingFilter = if (disallowedFundingTypes.isEmpty()) {
-            DefaultCardFundingFilter
-        } else {
-            FakeCardFundingFilter(disallowedFundingTypes = disallowedFundingTypes)
-        }
+        val cardFundingFilter = FakeCardFundingFilter(disallowedFundingTypes, allowedFundingTypesDisplayMessage)
         return cardNumberConfig(
             isCardBrandChoiceEligible = false,
             cardBrandFilter = DefaultCardBrandFilter,
