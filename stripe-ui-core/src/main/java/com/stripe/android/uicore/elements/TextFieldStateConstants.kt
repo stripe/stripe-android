@@ -27,11 +27,12 @@ class TextFieldStateConstants {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class Error(
         @StringRes protected open val errorMessageResId: Int,
-        protected open val formatArgs: Array<out Any>? = null
+        protected open val formatArgs: Array<out Any>? = null,
+        protected open val isWarning: Boolean = false
     ) : TextFieldState {
-        override fun isValid(): Boolean = false
+        override fun isValid(): Boolean = isWarning.or(false)
         override fun isFull(): Boolean = false
-        override fun getError() = FieldError(errorMessageResId, formatArgs)
+        override fun getError() = FieldError(errorMessageResId, formatArgs, isWarning)
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Incomplete(
@@ -47,6 +48,7 @@ class TextFieldStateConstants {
             @StringRes override val errorMessageResId: Int,
             override val formatArgs: Array<out Any>? = null,
             private val preventMoreInput: Boolean = false,
+            override val isWarning: Boolean = false
         ) : Error(errorMessageResId, formatArgs) {
             override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean): Boolean = true
             override fun isBlank(): Boolean = false

@@ -70,6 +70,7 @@ internal class CardNumberConfig(
             return TextFieldStateConstants.Error.Invalid(
                 errorMessageResId = fundingErrorMessageId,
                 preventMoreInput = false,
+                isWarning = true
             )
         } else if (brand == CardBrand.Unknown) {
             TextFieldStateConstants.Error.Invalid(

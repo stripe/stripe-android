@@ -22,5 +22,6 @@ interface SectionFieldErrorController : Controller {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class FieldError(
     @StringRes val errorMessage: Int,
-    val formatArgs: Array<out Any>? = null
+    val formatArgs: Array<out Any>? = null,
+    val isWarning: Boolean = false
 )

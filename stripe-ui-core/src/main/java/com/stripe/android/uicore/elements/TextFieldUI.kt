@@ -241,6 +241,7 @@ fun TextField(
         placeholder = placeHolder,
         trailingIcon = trailingIcon,
         shouldShowError = shouldShowError,
+        isWarning = error?.isWarning ?: false,
         errorMessage = sectionErrorString,
         visualTransformation = visualTransformation,
         layoutDirection = textFieldController.layoutDirection,
@@ -272,6 +273,7 @@ internal fun TextFieldUi(
     shouldShowError: Boolean,
     errorMessage: String?,
     shouldAnnounceLabel: Boolean = true,
+    isWarning: Boolean = false,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     layoutDirection: LayoutDirection? = null,
@@ -280,7 +282,10 @@ internal fun TextFieldUi(
     onValueChange: (value: TextFieldValue) -> Unit = {},
     onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit = {}
 ) {
-    val colors = TextFieldColors(shouldShowError)
+    val colors = TextFieldColors(
+        shouldShowError = shouldShowError,
+        isWarning = isWarning
+    )
     val textFieldInsets = LocalTextFieldInsets.current
 
     val layoutDirectionToUse = layoutDirection ?: LocalLayoutDirection.current
@@ -391,12 +396,13 @@ fun AnimatedIcons(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun TextFieldColors(
     shouldShowError: Boolean = false,
+    isWarning: Boolean = false,
     textColor: Color = MaterialTheme.stripeColors.onComponent,
     disabledTextColor: Color = textColor.copy(ContentAlpha.disabled),
     backgroundColor: Color = MaterialTheme.stripeColors.component,
     disabledIndicatorColor: Color = Color.Transparent,
 ) = TextFieldDefaults.textFieldColors(
-    textColor = if (shouldShowError) {
+    textColor = if (shouldShowError && !isWarning) {
         MaterialTheme.colors.error
     } else {
         textColor
@@ -409,7 +415,9 @@ fun TextFieldColors(
     focusedIndicatorColor = Color.Transparent,
     disabledIndicatorColor = disabledIndicatorColor,
     unfocusedIndicatorColor = Color.Transparent,
-    cursorColor = MaterialTheme.stripeColors.textCursor
+    cursorColor = MaterialTheme.stripeColors.textCursor,
+    errorCursorColor = if (isWarning) MaterialTheme.stripeColors.textCursor else MaterialTheme.colors.error,
+    errorIndicatorColor = if (isWarning) Color.Transparent else MaterialTheme.colors.error,
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
