@@ -50,12 +50,12 @@ internal data class ExpiryDateState(
         )
 
     fun shouldShowError(): Boolean {
-        return textFieldState.shouldShowError(hasFocus = true, isValidating = validating)
+        return textFieldState.shouldShowValidationMessage(hasFocus = true, isValidating = validating)
     }
 
     @SuppressWarnings("SpreadOperator")
     fun sectionError(): ResolvableString? {
-        return textFieldState.getError()?.takeIf {
+        return textFieldState.getValidationMessage()?.takeIf {
             shouldShowError() && enabled
         }?.let { error ->
             resolvableString(

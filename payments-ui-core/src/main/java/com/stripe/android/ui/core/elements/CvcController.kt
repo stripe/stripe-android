@@ -77,7 +77,7 @@ class CvcController constructor(
 
     override val visibleValidationMessage: StateFlow<Boolean> =
         combineAsStateFlow(_fieldState, _hasFocus, _isValidating) { fieldState, hasFocus, isValidating ->
-            fieldState.shouldShowError(hasFocus, isValidating)
+            fieldState.shouldShowValidationMessage(hasFocus, isValidating)
         }
 
     /**
@@ -85,7 +85,7 @@ class CvcController constructor(
      **/
     override val validationMessage: StateFlow<FieldValidationMessage?> =
         combineAsStateFlow(visibleValidationMessage, _fieldState) { visibleError, fieldState ->
-            fieldState.getError()?.takeIf { visibleError }
+            fieldState.getValidationMessage()?.takeIf { visibleError }
         }
 
     override val isComplete: StateFlow<Boolean> = _fieldState.mapAsStateFlow { it.isValid() }

@@ -106,21 +106,21 @@ class PostalCodeConfigTest {
     @Test
     fun `invalid US postal codes emit error`() {
         with(createConfigForCountry("US")) {
-            Truth.assertThat(determineStateForInput("").getError()).isNull()
-            Truth.assertThat(determineStateForInput("1234").getError()?.message)
+            Truth.assertThat(determineStateForInput("").getValidationMessage()).isNull()
+            Truth.assertThat(determineStateForInput("1234").getValidationMessage()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_zip_incomplete)
-            Truth.assertThat(determineStateForInput("12345").getError()).isNull()
+            Truth.assertThat(determineStateForInput("12345").getValidationMessage()).isNull()
         }
     }
 
     @Test
     fun `invalid CA postal codes emit error`() {
         with(createConfigForCountry("CA")) {
-            Truth.assertThat(determineStateForInput("").getError()).isNull()
-            Truth.assertThat(determineStateForInput("1N8E8R").getError()).isNotNull()
-            Truth.assertThat(determineStateForInput("A0A").getError()?.message)
+            Truth.assertThat(determineStateForInput("").getValidationMessage()).isNull()
+            Truth.assertThat(determineStateForInput("1N8E8R").getValidationMessage()).isNotNull()
+            Truth.assertThat(determineStateForInput("A0A").getValidationMessage()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_postal_code_incomplete)
-            Truth.assertThat(determineStateForInput("141124").getError()?.message)
+            Truth.assertThat(determineStateForInput("141124").getValidationMessage()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
         }
     }
@@ -128,14 +128,14 @@ class PostalCodeConfigTest {
     @Test
     fun `invalid GB postal codes emit error`() {
         with(createConfigForCountry("GB")) {
-            Truth.assertThat(determineStateForInput("").getError()).isNull()
-            Truth.assertThat(determineStateForInput("N18E").getError()?.message)
+            Truth.assertThat(determineStateForInput("").getValidationMessage()).isNull()
+            Truth.assertThat(determineStateForInput("N18E").getValidationMessage()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_postal_code_incomplete)
-            Truth.assertThat(determineStateForInput("4C1A 1BB").getError()?.message)
+            Truth.assertThat(determineStateForInput("4C1A 1BB").getValidationMessage()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
-            Truth.assertThat(determineStateForInput("12345").getError()?.message)
+            Truth.assertThat(determineStateForInput("12345").getValidationMessage()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
-            Truth.assertThat(determineStateForInput("141124").getError()?.message)
+            Truth.assertThat(determineStateForInput("141124").getValidationMessage()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
         }
     }
@@ -145,14 +145,14 @@ class PostalCodeConfigTest {
         with(createConfigForCountry(country = "AZ", optional = true)) {
             val emptyInputState = determineStateForInput("")
 
-            assertThat(emptyInputState.getError()).isNull()
+            assertThat(emptyInputState.getValidationMessage()).isNull()
             assertThat(emptyInputState.isValid()).isTrue()
         }
 
         with(createConfigForCountry(country = "CA", optional = true)) {
             val emptyInputState = determineStateForInput("")
 
-            assertThat(emptyInputState.getError()).isNull()
+            assertThat(emptyInputState.getValidationMessage()).isNull()
             assertThat(emptyInputState.isValid()).isTrue()
         }
     }
@@ -163,7 +163,7 @@ class PostalCodeConfigTest {
             val blankInputState = determineState("   ")
 
             assertThat(blankInputState.isValid()).isFalse()
-            assertThat(blankInputState.getError()?.message)
+            assertThat(blankInputState.getValidationMessage()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
         }
 
@@ -171,7 +171,7 @@ class PostalCodeConfigTest {
             val blankInputState = determineState("   ")
 
             assertThat(blankInputState.isValid()).isFalse()
-            assertThat(blankInputState.getError()?.message)
+            assertThat(blankInputState.getValidationMessage()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
         }
 
@@ -179,7 +179,7 @@ class PostalCodeConfigTest {
             val blankInputState = determineState("   ")
 
             assertThat(blankInputState.isValid()).isFalse()
-            assertThat(blankInputState.getError()?.message)
+            assertThat(blankInputState.getValidationMessage()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_zip_invalid)
         }
     }
@@ -189,7 +189,7 @@ class PostalCodeConfigTest {
         with(createConfigForCountry("US")) {
             val state = determineStateForInput("123")
 
-            assertThat(state.shouldShowError(hasFocus = true, isValidating = true)).isTrue()
+            assertThat(state.shouldShowValidationMessage(hasFocus = true, isValidating = true)).isTrue()
         }
     }
 
@@ -198,7 +198,7 @@ class PostalCodeConfigTest {
         with(createConfigForCountry("US")) {
             val state = determineStateForInput("123")
 
-            assertThat(state.shouldShowError(hasFocus = true, isValidating = false)).isFalse()
+            assertThat(state.shouldShowValidationMessage(hasFocus = true, isValidating = false)).isFalse()
         }
     }
 
@@ -207,8 +207,8 @@ class PostalCodeConfigTest {
         with(createConfigForCountry("US")) {
             val state = determineStateForInput("123")
 
-            assertThat(state.shouldShowError(hasFocus = false, isValidating = true)).isTrue()
-            assertThat(state.shouldShowError(hasFocus = false, isValidating = false)).isTrue()
+            assertThat(state.shouldShowValidationMessage(hasFocus = false, isValidating = true)).isTrue()
+            assertThat(state.shouldShowValidationMessage(hasFocus = false, isValidating = false)).isTrue()
         }
     }
 
@@ -217,10 +217,10 @@ class PostalCodeConfigTest {
         with(createConfigForCountry("US")) {
             val state = determineStateForInput("12345")
 
-            assertThat(state.shouldShowError(hasFocus = true, isValidating = true)).isFalse()
-            assertThat(state.shouldShowError(hasFocus = true, isValidating = false)).isFalse()
-            assertThat(state.shouldShowError(hasFocus = false, isValidating = true)).isFalse()
-            assertThat(state.shouldShowError(hasFocus = false, isValidating = false)).isFalse()
+            assertThat(state.shouldShowValidationMessage(hasFocus = true, isValidating = true)).isFalse()
+            assertThat(state.shouldShowValidationMessage(hasFocus = true, isValidating = false)).isFalse()
+            assertThat(state.shouldShowValidationMessage(hasFocus = false, isValidating = true)).isFalse()
+            assertThat(state.shouldShowValidationMessage(hasFocus = false, isValidating = false)).isFalse()
         }
     }
 
@@ -229,10 +229,10 @@ class PostalCodeConfigTest {
         with(createConfigForCountry("US", optional = true)) {
             val state = determineStateForInput("")
 
-            assertThat(state.shouldShowError(hasFocus = true, isValidating = true)).isFalse()
-            assertThat(state.shouldShowError(hasFocus = false, isValidating = false)).isFalse()
-            assertThat(state.shouldShowError(hasFocus = true, isValidating = false)).isFalse()
-            assertThat(state.shouldShowError(hasFocus = false, isValidating = true)).isFalse()
+            assertThat(state.shouldShowValidationMessage(hasFocus = true, isValidating = true)).isFalse()
+            assertThat(state.shouldShowValidationMessage(hasFocus = false, isValidating = false)).isFalse()
+            assertThat(state.shouldShowValidationMessage(hasFocus = true, isValidating = false)).isFalse()
+            assertThat(state.shouldShowValidationMessage(hasFocus = false, isValidating = true)).isFalse()
         }
     }
 

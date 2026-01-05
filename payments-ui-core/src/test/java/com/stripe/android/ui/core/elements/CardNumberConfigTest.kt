@@ -118,7 +118,7 @@ class CardNumberConfigTest {
             assertThat(state)
                 .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
             assertThat(
-                state.getError()?.message
+                state.getValidationMessage()?.message
             ).isEqualTo(StripeR.string.stripe_invalid_card_number)
         }
     }
@@ -135,7 +135,7 @@ class CardNumberConfigTest {
             assertThat(state)
                 .isInstanceOf<TextFieldStateConstants.Error.Incomplete>()
             assertThat(
-                state.getError()?.message
+                state.getValidationMessage()?.message
             ).isEqualTo(StripeR.string.stripe_invalid_card_number)
         }
     }
@@ -155,7 +155,7 @@ class CardNumberConfigTest {
             assertThat(state)
                 .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
             assertThat(
-                state.getError()?.message
+                state.getValidationMessage()?.message
             ).isEqualTo(StripeR.string.stripe_invalid_card_number)
         }
     }
@@ -175,7 +175,7 @@ class CardNumberConfigTest {
             assertThat(state)
                 .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
             assertThat(
-                state.getError()?.message
+                state.getValidationMessage()?.message
             ).isEqualTo(StripeR.string.stripe_invalid_card_number)
         }
     }
@@ -229,7 +229,7 @@ class CardNumberConfigTest {
         )
 
         assertThat(state).isInstanceOf<TextFieldStateConstants.Error.Invalid>()
-        assertThat(state.getError()?.message)
+        assertThat(state.getValidationMessage()?.message)
             .isEqualTo(StripeR.string.stripe_disallowed_card_brand)
     }
 
@@ -266,7 +266,7 @@ class CardNumberConfigTest {
         )
 
         assertThat(state).isInstanceOf<TextFieldStateConstants.Error.Invalid>()
-        assertThat(state.getError()?.message)
+        assertThat(state.getValidationMessage()?.message)
             .isEqualTo(StripeR.string.stripe_disallowed_card_brand)
     }
 

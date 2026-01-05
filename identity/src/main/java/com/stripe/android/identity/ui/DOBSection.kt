@@ -112,12 +112,12 @@ internal object DobTextFieldConfig : SimpleTextFieldConfig(
     override val visualTransformation = MaskVisualTransformation(DATE_MASK)
 
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
-        override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean) =
+        override fun shouldShowValidationMessage(hasFocus: Boolean, isValidating: Boolean) =
             !hasFocus && input.isNotBlank() && !input.isValidDate()
 
         override fun isValid(): Boolean = input.isNotBlank()
 
-        override fun getError(): FieldValidationMessage = FieldValidationMessage(R.string.stripe_invalid_dob_error)
+        override fun getValidationMessage() = FieldValidationMessage.Error(R.string.stripe_invalid_dob_error)
 
         override fun isFull(): Boolean = input.length == DATE_LENGTH
 

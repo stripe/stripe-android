@@ -51,7 +51,7 @@ internal class SimpleTextFieldControllerTest {
             assertThat(awaitItem()).isNull()
             controller.onValueChange("showWhenNoFocus")
             shadowOf(getMainLooper()).idle()
-            assertThat(expectMostRecentItem()).isEqualTo(ShowWhenNoFocus.getError())
+            assertThat(expectMostRecentItem()).isEqualTo(ShowWhenNoFocus.getValidationMessage())
         }
     }
 
@@ -352,8 +352,11 @@ internal class SimpleTextFieldControllerTest {
             override fun isFull(): Boolean = false
             override fun isBlank(): Boolean = false
 
-            override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean): Boolean = !hasFocus || isValidating
-            override fun getError() = fieldValidationMessage
+            override fun shouldShowValidationMessage(
+                hasFocus: Boolean,
+                isValidating: Boolean
+            ): Boolean = !hasFocus || isValidating
+            override fun getValidationMessage() = fieldValidationMessage
         }
     }
 }

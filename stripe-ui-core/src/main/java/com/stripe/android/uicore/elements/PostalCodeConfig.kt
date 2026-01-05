@@ -38,8 +38,8 @@ class PostalCodeConfig(
     override val shouldAnnounceFieldValue = false
 
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
-        override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean) =
-            getError() != null && (!hasFocus || isValidating)
+        override fun shouldShowValidationMessage(hasFocus: Boolean, isValidating: Boolean) =
+            getValidationMessage() != null && (!hasFocus || isValidating)
 
         override fun isValid(): Boolean {
             val canBeEmpty = optional && input.isEmpty()
@@ -57,7 +57,7 @@ class PostalCodeConfig(
             }
         }
 
-        override fun getError(): FieldValidationMessage? {
+        override fun getValidationMessage(): FieldValidationMessage? {
             return when {
                 input.isNotBlank() && !isValid() && country == "US" -> {
                     // Check if it's too short (incomplete) vs invalid format

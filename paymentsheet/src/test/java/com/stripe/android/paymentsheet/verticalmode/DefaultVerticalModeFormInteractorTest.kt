@@ -192,11 +192,11 @@ internal class DefaultVerticalModeFormInteractorTest {
 
                 nextSectionElement.fields.errorTest(
                     identifierSpec = IdentifierSpec.Name,
-                    error = FieldValidationMessage(UiCoreR.string.stripe_blank_and_required),
+                    error = FieldValidationMessage.Error(UiCoreR.string.stripe_blank_and_required),
                 )
                 nextSectionElement.fields.errorTest(
                     identifierSpec = IdentifierSpec.Email,
-                    error = FieldValidationMessage(UiCoreR.string.stripe_blank_and_required),
+                    error = FieldValidationMessage.Error(UiCoreR.string.stripe_blank_and_required),
                 )
             }
         }

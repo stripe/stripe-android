@@ -276,7 +276,7 @@ internal class DefaultCardNumberController(
 
     override val visibleValidationMessage: StateFlow<Boolean> =
         combineAsStateFlow(_fieldState, _hasFocus, _isValidating) { fieldState, hasFocus, isValidating ->
-            fieldState.shouldShowError(hasFocus, isValidating)
+            fieldState.shouldShowValidationMessage(hasFocus, isValidating)
         }
 
     /**
@@ -284,7 +284,7 @@ internal class DefaultCardNumberController(
      **/
     override val validationMessage: StateFlow<FieldValidationMessage?> =
         combineAsStateFlow(visibleValidationMessage, _fieldState) { visibleError, fieldState ->
-            fieldState.getError()?.takeIf { visibleError }
+            fieldState.getValidationMessage()?.takeIf { visibleError }
         }
 
     override val isComplete: StateFlow<Boolean> = _fieldState.mapAsStateFlow { it.isValid() }
@@ -376,7 +376,7 @@ internal class DefaultCardNumberController(
                         lastLoggedCardBrand = null // Reset when valid
                     }
                     is TextFieldStateConstants.Error.Invalid -> {
-                        val error = state.getError()
+                        val error = state.getValidationMessage()
                         val isDisallowedError = error.message == PaymentsCoreR.string.stripe_disallowed_card_brand
                         if (isDisallowedError && lastLoggedCardBrand != impliedCardBrand.value) {
                             disallowedBrandReporter.onDisallowedCardBrandEntered(impliedCardBrand.value)

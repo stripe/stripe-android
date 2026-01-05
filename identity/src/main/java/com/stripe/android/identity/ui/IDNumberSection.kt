@@ -201,11 +201,16 @@ private object USIDConfig : SimpleTextFieldConfig(
     override val keyboard = KeyboardType.Number
     override val visualTransformation = Last4SSNTransformation
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
-        override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean) = !hasFocus && input.length < 4
+        override fun shouldShowValidationMessage(
+            hasFocus: Boolean,
+            isValidating: Boolean
+        ) = !hasFocus && input.length < 4
 
         override fun isValid(): Boolean = input.isNotBlank()
 
-        override fun getError(): FieldValidationMessage = FieldValidationMessage(R.string.stripe_incomplete_id_number)
+        override fun getValidationMessage(): FieldValidationMessage = FieldValidationMessage.Error(
+            message = R.string.stripe_incomplete_id_number
+        )
 
         override fun isFull(): Boolean = input.length == 4
 
@@ -221,11 +226,16 @@ private object BRIDConfig : SimpleTextFieldConfig(
     override val visualTransformation = BRVisualTransformation
     override val optional: Boolean = false
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
-        override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean) = !hasFocus && input.length < 11
+        override fun shouldShowValidationMessage(
+            hasFocus: Boolean,
+            isValidating: Boolean
+        ) = !hasFocus && input.length < 11
 
         override fun isValid(): Boolean = input.isNotBlank()
 
-        override fun getError(): FieldValidationMessage = FieldValidationMessage(R.string.stripe_incomplete_id_number)
+        override fun getValidationMessage(): FieldValidationMessage = FieldValidationMessage.Error(
+            message = R.string.stripe_incomplete_id_number
+        )
 
         override fun isFull(): Boolean = input.length == 11
 
@@ -239,11 +249,11 @@ private object SGIDConfig : SimpleTextFieldConfig(
     override val placeHolder = SINGAPORE_ID_PLACEHOLDER
     override val optional: Boolean = false
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
-        override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean) = false
+        override fun shouldShowValidationMessage(hasFocus: Boolean, isValidating: Boolean) = false
 
         override fun isValid(): Boolean = input.isNotBlank()
 
-        override fun getError() = null
+        override fun getValidationMessage() = null
 
         override fun isFull(): Boolean = false
 

@@ -39,7 +39,7 @@ class SimpleTextFieldConfigTest {
         val state = textConfig.determineState("")
 
         assertThat(state.isValid()).isTrue()
-        assertThat(state.getError()).isNull()
+        assertThat(state.getValidationMessage()).isNull()
     }
 
     @Test
@@ -53,7 +53,7 @@ class SimpleTextFieldConfigTest {
         val state = textConfig.determineState("    ")
 
         assertThat(state.isValid()).isFalse()
-        assertThat(state.getError()?.message).isEqualTo(R.string.stripe_blank_and_required)
+        assertThat(state.getValidationMessage()?.message).isEqualTo(R.string.stripe_blank_and_required)
     }
 
     @Test
@@ -67,7 +67,7 @@ class SimpleTextFieldConfigTest {
         val state = textConfig.determineState("")
 
         assertThat(state.isValid()).isFalse()
-        assertThat(state.getError()?.message).isEqualTo(R.string.stripe_blank_and_required)
+        assertThat(state.getValidationMessage()?.message).isEqualTo(R.string.stripe_blank_and_required)
     }
 
     @Test
@@ -80,8 +80,8 @@ class SimpleTextFieldConfigTest {
 
         val state = textConfig.determineState("")
 
-        assertThat(state.shouldShowError(hasFocus = true, isValidating = true)).isTrue()
-        assertThat(state.shouldShowError(hasFocus = false, isValidating = true)).isTrue()
+        assertThat(state.shouldShowValidationMessage(hasFocus = true, isValidating = true)).isTrue()
+        assertThat(state.shouldShowValidationMessage(hasFocus = false, isValidating = true)).isTrue()
     }
 
     @Test
@@ -94,8 +94,8 @@ class SimpleTextFieldConfigTest {
 
         val state = textConfig.determineState("")
 
-        assertThat(state.shouldShowError(hasFocus = true, isValidating = false)).isFalse()
-        assertThat(state.shouldShowError(hasFocus = false, isValidating = false)).isFalse()
+        assertThat(state.shouldShowValidationMessage(hasFocus = true, isValidating = false)).isFalse()
+        assertThat(state.shouldShowValidationMessage(hasFocus = false, isValidating = false)).isFalse()
     }
 
     @Test
@@ -108,10 +108,10 @@ class SimpleTextFieldConfigTest {
 
         val state = textConfig.determineState("valid input")
 
-        assertThat(state.shouldShowError(hasFocus = true, isValidating = true)).isFalse()
-        assertThat(state.shouldShowError(hasFocus = false, isValidating = true)).isFalse()
-        assertThat(state.shouldShowError(hasFocus = true, isValidating = false)).isFalse()
-        assertThat(state.shouldShowError(hasFocus = false, isValidating = false)).isFalse()
+        assertThat(state.shouldShowValidationMessage(hasFocus = true, isValidating = true)).isFalse()
+        assertThat(state.shouldShowValidationMessage(hasFocus = false, isValidating = true)).isFalse()
+        assertThat(state.shouldShowValidationMessage(hasFocus = true, isValidating = false)).isFalse()
+        assertThat(state.shouldShowValidationMessage(hasFocus = false, isValidating = false)).isFalse()
     }
 
     @Test
@@ -125,8 +125,8 @@ class SimpleTextFieldConfigTest {
         val state = textConfig.determineState("")
 
         // Optional field with empty input is valid -> no error should be shown
-        assertThat(state.shouldShowError(hasFocus = true, isValidating = true)).isFalse()
-        assertThat(state.shouldShowError(hasFocus = false, isValidating = true)).isFalse()
+        assertThat(state.shouldShowValidationMessage(hasFocus = true, isValidating = true)).isFalse()
+        assertThat(state.shouldShowValidationMessage(hasFocus = false, isValidating = true)).isFalse()
     }
 
     @Test
