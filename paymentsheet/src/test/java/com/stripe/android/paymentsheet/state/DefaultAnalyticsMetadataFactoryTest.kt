@@ -28,7 +28,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -499,7 +498,6 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(mpeConfig?.get("external_payment_methods")).isEqualTo("external_pm1,external_pm2")
     }
 
-    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     @Test
     fun `create returns custom payment methods`() = runScenario {
         val customPaymentMethod = ElementsSession.CustomPaymentMethod.Available(

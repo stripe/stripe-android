@@ -37,7 +37,6 @@ import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
@@ -312,7 +311,6 @@ class PaymentSheet internal constructor(
          * @param callback Called when a user confirms payment for a custom payment method. Use with
          * [Configuration.Builder.customPaymentMethods] to specify custom payment methods.
          */
-        @ExperimentalCustomPaymentMethodsApi
         fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
             callbacksBuilder.confirmCustomPaymentMethodCallback(callback)
         }
@@ -1116,7 +1114,6 @@ class PaymentSheet internal constructor(
              *
              * If set, Payment Sheet will display the defined list of custom payment methods in the UI.
              */
-            @ExperimentalCustomPaymentMethodsApi
             fun customPaymentMethods(
                 customPaymentMethods: List<CustomPaymentMethod>,
             ) = apply {
@@ -1214,7 +1211,6 @@ class PaymentSheet internal constructor(
 
         @OptIn(
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
-            ExperimentalCustomPaymentMethodsApi::class,
             WalletButtonsPreview::class,
             ShopPayPreview::class,
             CardFundingFilteringPrivatePreview::class
@@ -3512,7 +3508,6 @@ class PaymentSheet internal constructor(
         internal val subtitle: ResolvableString?,
         internal val disableBillingDetailCollection: Boolean,
     ) : Parcelable {
-        @ExperimentalCustomPaymentMethodsApi
         constructor(
             /**
              * The unique identifier for this custom payment method type in the format of "cmpt_...".
@@ -3540,7 +3535,6 @@ class PaymentSheet internal constructor(
             disableBillingDetailCollection = disableBillingDetailCollection,
         )
 
-        @ExperimentalCustomPaymentMethodsApi
         constructor(
             /**
              * The unique identifier for this custom payment method type in the format of "cmpt_...".
@@ -4110,7 +4104,6 @@ class PaymentSheet internal constructor(
             /**
              * @param callback Called when a user confirms payment for a custom payment method.
              */
-            @ExperimentalCustomPaymentMethodsApi
             fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
                 callbacksBuilder.confirmCustomPaymentMethodCallback(callback)
             }

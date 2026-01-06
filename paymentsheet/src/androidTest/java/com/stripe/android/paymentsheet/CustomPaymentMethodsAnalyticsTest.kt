@@ -17,7 +17,6 @@ import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CustomPaymentMethodResult
 import com.stripe.android.paymentelement.CustomPaymentMethodResultHandler
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -28,7 +27,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 @RunWith(AndroidJUnit4::class)
 class CustomPaymentMethodsAnalyticsTest {
     private val networkRule = NetworkRule(
