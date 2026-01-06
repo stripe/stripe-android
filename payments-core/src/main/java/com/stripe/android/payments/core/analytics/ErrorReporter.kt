@@ -232,6 +232,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         LINK_ATTACH_BANK_ACCOUNT_WITH_NULL_ACCOUNT(
             partialEventName = "link.create_new_bank_account.missing_link_account"
         ),
+        EXAMPLE_NEW_EVENT(
+            partialEventName = "example_new_alert"
+        ),
         LINK_WEB_FAILED_TO_PARSE_RESULT_URI(
             partialEventName = "link.web.result.parsing_failed"
         ),
