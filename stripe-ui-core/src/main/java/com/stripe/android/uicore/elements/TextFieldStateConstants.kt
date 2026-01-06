@@ -38,7 +38,7 @@ class TextFieldStateConstants {
 
         constructor(
             @StringRes errorMessageResId: Int,
-            formatArgs: Array<out Any>? = null
+            formatArgs: List<Any>? = null
         ) : this(FieldValidationMessage.Error(errorMessageResId, formatArgs))
 
         override fun isValid(): Boolean = false
@@ -68,7 +68,7 @@ class TextFieldStateConstants {
 
             constructor(
                 @StringRes errorMessageResId: Int,
-                formatArgs: Array<out Any>? = null,
+                formatArgs: List<Any>? = null,
                 preventMoreInput: Boolean = false,
             ) : this(
                 validationMessage = FieldValidationMessage.Error(errorMessageResId, formatArgs),

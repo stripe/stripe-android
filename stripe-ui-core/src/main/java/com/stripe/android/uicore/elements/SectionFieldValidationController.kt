@@ -27,12 +27,12 @@ interface SectionFieldValidationController : Controller {
 sealed interface FieldValidationMessage {
     @get:StringRes
     val message: Int
-    val formatArgs: Array<out Any>?
+    val formatArgs: List<Any>?
 
     @Suppress("SpreadOperator")
     val resolvable: ResolvableString
         get() {
-            val args = formatArgs ?: arrayOf()
+            val args = formatArgs?.toTypedArray() ?: arrayOf()
             return resolvableString(message, *args)
         }
 
@@ -40,49 +40,13 @@ sealed interface FieldValidationMessage {
     @Immutable
     data class Error(
         override val message: Int,
-        override val formatArgs: Array<out Any>? = null
-    ) : FieldValidationMessage {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as Error
-
-            if (message != other.message) return false
-            if (!formatArgs.contentEquals(other.formatArgs)) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result = message
-            result = 31 * result + (formatArgs?.contentHashCode() ?: 0)
-            return result
-        }
-    }
+        override val formatArgs: List<Any>? = null
+    ) : FieldValidationMessage
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Immutable
     data class Warning(
         override val message: Int,
-        override val formatArgs: Array<out Any>? = null
-    ) : FieldValidationMessage {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as Warning
-
-            if (message != other.message) return false
-            if (!formatArgs.contentEquals(other.formatArgs)) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result = message
-            result = 31 * result + (formatArgs?.contentHashCode() ?: 0)
-            return result
-        }
-    }
+        override val formatArgs: List<Any>? = null
+    ) : FieldValidationMessage
 }

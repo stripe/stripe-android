@@ -47,7 +47,7 @@ internal class CardNumberConfig(
              */
             return TextFieldStateConstants.Error.Invalid(
                 errorMessageResId = StripeR.string.stripe_disallowed_card_brand,
-                formatArgs = arrayOf(brand.displayName),
+                formatArgs = listOf(brand.displayName),
                 preventMoreInput = false,
             )
         } else if (brand == CardBrand.Unknown) {
