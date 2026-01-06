@@ -6,10 +6,8 @@ import androidx.annotation.FontRes
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEventReporter
-import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.utils.collectAsState
 import java.util.Locale
 import javax.inject.Inject
@@ -251,8 +249,8 @@ class PaymentMethodMessagingElement @Inject internal constructor(
         }
 
         class Colors {
-            private var textColor: Int = StripeThemeDefaults.colorsLight.onComponent.toArgb()
-            private var infoIconColor: Int = StripeThemeDefaults.colorsLight.subtitle.toArgb()
+            private var textColor: Int? = null
+            private var infoIconColor: Int? = null
 
             /**
              * The color used for the message text.
@@ -270,9 +268,9 @@ class PaymentMethodMessagingElement @Inject internal constructor(
 
             internal data class State(
                 @ColorInt
-                val textColor: Int,
+                val textColor: Int?,
                 @ColorInt
-                val infoIconColor: Int
+                val infoIconColor: Int?
             )
 
             internal fun build() = State(
