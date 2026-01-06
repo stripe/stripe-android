@@ -3,6 +3,8 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -157,6 +159,12 @@ internal data class PaymentMethodMetadata(
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
             definition.uiDefinitionFactory().supportedPaymentMethod(this, definition, sharedDataSpecs)
         }
+    }
+
+    fun displayNameForCode(
+        code: String?,
+    ): ResolvableString {
+        return code?.let { supportedPaymentMethodForCode(code) }?.displayName.orEmpty()
     }
 
     fun sortedSupportedPaymentMethods(): List<SupportedPaymentMethod> {

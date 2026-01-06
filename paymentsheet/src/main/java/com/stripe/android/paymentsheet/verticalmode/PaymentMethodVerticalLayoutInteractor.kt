@@ -97,7 +97,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val transitionToFormScreen: (selectedPaymentMethodCode: String) -> Unit,
     paymentMethods: StateFlow<List<PaymentMethod>>,
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
-    private val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val canRemove: StateFlow<Boolean>,
     private val walletsState: StateFlow<WalletsState?>,
     private val canUpdateFullPaymentMethodDetails: StateFlow<Boolean>,
@@ -158,7 +157,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 },
                 paymentMethods = customerStateHolder.paymentMethods,
                 mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
-                providePaymentMethodName = viewModel.savedPaymentMethodMutator.providePaymentMethodName,
                 canRemove = viewModel.customerStateHolder.canRemove,
                 onUpdatePaymentMethod = { viewModel.savedPaymentMethodMutator.updatePaymentMethod(it) },
                 updateSelection = { selection, isUserInput ->
@@ -421,8 +419,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
         )
         return paymentMethodToDisplay?.toDisplayableSavedPaymentMethod(
-            providePaymentMethodName,
-            paymentMethodMetadata,
+            paymentMethodMetadata = paymentMethodMetadata,
             defaultPaymentMethodId = null
         )
     }

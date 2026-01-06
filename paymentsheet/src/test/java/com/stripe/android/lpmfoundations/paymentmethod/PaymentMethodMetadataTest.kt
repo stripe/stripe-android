@@ -234,6 +234,40 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `displayNameForCode returns display name for supported payment method`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("klarna")
+            ),
+            sharedDataSpecs = listOf(SharedDataSpec("klarna")),
+        )
+        assertThat(metadata.displayNameForCode("klarna"))
+            .isEqualTo(R.string.stripe_paymentsheet_payment_method_klarna.resolvableString)
+    }
+
+    @Test
+    fun `displayNameForCode returns empty ResolvableString for unsupported payment method`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card")
+            ),
+            sharedDataSpecs = listOf(SharedDataSpec("card")),
+        )
+        assertThat(metadata.displayNameForCode("klarna")).isEqualTo("".resolvableString)
+    }
+
+    @Test
+    fun `displayNameForCode returns empty ResolvableString for null code`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card")
+            ),
+            sharedDataSpecs = listOf(SharedDataSpec("card")),
+        )
+        assertThat(metadata.displayNameForCode(null)).isEqualTo("".resolvableString)
+    }
+
+    @Test
     fun `sortedSupportedPaymentMethods returns list sorted by payment_method_types`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
