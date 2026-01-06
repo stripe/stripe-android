@@ -186,6 +186,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         HCAPTCHA_FAILURE(
             eventName = "elements.captcha.passive.expected_failure"
         ),
+        EXAMPLE_NEW_ERROR(
+            "example_new_error",
+        ),
         TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE(
             eventName = "elements.tap_to_add.discover_readers_call.failure"
         ),
