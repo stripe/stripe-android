@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 class AddressTextFieldController(
     label: ResolvableString,
     private val onNavigation: (() -> Unit)? = null,
-) : InputController, SectionFieldErrorController, SectionFieldComposable {
+) : InputController, SectionFieldValidationController, SectionFieldComposable {
     private val _isValidating = MutableStateFlow(false)
 
     override val showOptionalLabel: Boolean = false
@@ -25,8 +25,8 @@ class AddressTextFieldController(
     override val rawFieldValue: StateFlow<String> = stateFlowOf("")
     override val isComplete: StateFlow<Boolean> = stateFlowOf(false)
 
-    override val error: StateFlow<FieldError?> = _isValidating.mapAsStateFlow { isValidating ->
-        FieldError(R.string.stripe_blank_and_required).takeIf { isValidating }
+    override val validationMessage: StateFlow<FieldValidationMessage?> = _isValidating.mapAsStateFlow { isValidating ->
+        FieldValidationMessage.Error(R.string.stripe_blank_and_required).takeIf { isValidating }
     }
 
     override val formFieldValue: StateFlow<FormFieldEntry> =

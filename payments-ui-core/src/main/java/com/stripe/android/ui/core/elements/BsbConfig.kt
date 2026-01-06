@@ -91,7 +91,7 @@ class BsbConfig(private val banks: List<BecsDebitBanks.Bank>) : TextFieldConfig 
             )
         }
 
-        return TextFieldStateConstants.Valid.Full
+        return TextFieldStateConstants.Valid.Full()
     }
 
     private companion object {

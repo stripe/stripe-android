@@ -75,21 +75,12 @@ fun PhoneNumberCollectionSection(
     focusRequester: FocusRequester = remember { FocusRequester() },
     imeAction: ImeAction = ImeAction.Done
 ) {
-    val error by phoneNumberController.error.collectAsState()
-
-    val sectionErrorString = error?.let {
-        it.formatArgs?.let { args ->
-            stringResource(
-                it.errorMessage,
-                *args
-            )
-        } ?: stringResource(it.errorMessage)
-    }
+    val validationMessage by phoneNumberController.validationMessage.collectAsState()
 
     Section(
         modifier = Modifier.padding(vertical = 8.dp),
         title = sectionTitle?.let { resolvableString(it) },
-        error = sectionErrorString,
+        validationMessage = validationMessage,
         isSelected = isSelected
     ) {
         PhoneNumberElementUI(
@@ -126,11 +117,17 @@ fun PhoneNumberElementUI(
 
     val value by controller.fieldValue.collectAsState()
     val isComplete by controller.isComplete.collectAsState()
-    val shouldShowError by controller.error.collectAsState()
+    val shouldShowError by controller.validationMessage.collectAsState()
     val label by controller.label.collectAsState()
     val placeholder by controller.placeholder.collectAsState()
     val visualTransformation by controller.visualTransformation.collectAsState()
-    val colors = TextFieldColors(shouldShowError != null)
+    val colors = TextFieldColors(
+        fieldDisplayState = when (shouldShowError) {
+            is FieldValidationMessage.Error -> FieldDisplayState.ERROR
+            is FieldValidationMessage.Warning -> FieldDisplayState.WARNING
+            null -> FieldDisplayState.NORMAL
+        }
+    )
     var hasFocus by rememberSaveable { mutableStateOf(false) }
     val textFieldInsets = LocalTextFieldInsets.current
 

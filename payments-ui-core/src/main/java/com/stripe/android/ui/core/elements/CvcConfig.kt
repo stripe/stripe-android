@@ -32,11 +32,11 @@ class CvcConfig : CardDetailsTextFieldConfig {
             TextFieldStateConstants.Error.Blank
         } else if (brand == CardBrand.Unknown) {
             when (number.length) {
-                numberAllowedDigits -> TextFieldStateConstants.Valid.Full
+                numberAllowedDigits -> TextFieldStateConstants.Valid.Full()
                 else -> TextFieldStateConstants.Valid.Limitless
             }
         } else if (isDigitLimit && number.length == numberAllowedDigits) {
-            TextFieldStateConstants.Valid.Full
+            TextFieldStateConstants.Valid.Full()
         } else if (isDigitLimit && brand.cvcLength.contains(number.length)) {
             TextFieldStateConstants.Valid.Limitless
         } else if (isDigitLimit && number.length < numberAllowedDigits) {

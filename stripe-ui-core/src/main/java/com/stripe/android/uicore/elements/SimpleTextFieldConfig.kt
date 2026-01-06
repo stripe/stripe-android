@@ -22,16 +22,19 @@ open class SimpleTextFieldConfig(
     override val loading: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
-        override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean) = getError() != null && isValidating
+        override fun shouldShowValidationMessage(
+            hasFocus: Boolean,
+            isValidating: Boolean
+        ) = getValidationMessage() != null && isValidating
 
         override fun isValid(): Boolean {
             return optional && input.isEmpty() || input.isNotBlank()
         }
 
-        override fun getError(): FieldError? = if (isValid()) {
+        override fun getValidationMessage(): FieldValidationMessage? = if (isValid()) {
             null
         } else {
-            FieldError(R.string.stripe_blank_and_required)
+            FieldValidationMessage.Error(R.string.stripe_blank_and_required)
         }
 
         override fun isFull(): Boolean = false

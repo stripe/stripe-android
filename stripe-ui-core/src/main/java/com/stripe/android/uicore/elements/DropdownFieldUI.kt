@@ -99,7 +99,7 @@ fun DropDown(
     val shouldEnable = enabled && !shouldDisableDropdownWithSingleItem
 
     var expanded by remember { mutableStateOf(false) }
-    val error by controller.error.collectAsState()
+    val error by controller.validationMessage.collectAsState()
     val selectedItemIndex by controller.selectedIndex.collectAsState()
     val selectedItemLabel = remember(selectedItemIndex) {
         controller.getSelectedItemLabel(selectedIndex)
@@ -231,7 +231,10 @@ private fun LargeDropdownLabel(
         },
         contentPadding = textFieldInsets.asPaddingValues(),
         colors = TextFieldColors(
-            shouldShowError = isError,
+            fieldDisplayState = when (isError) {
+                true -> FieldDisplayState.ERROR
+                false -> FieldDisplayState.NORMAL
+            },
             disabledIndicatorColor = if (isError) {
                 MaterialTheme.colors.error
             } else {

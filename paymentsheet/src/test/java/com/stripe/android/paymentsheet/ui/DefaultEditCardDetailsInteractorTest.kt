@@ -602,11 +602,11 @@ internal class DefaultEditCardDetailsInteractorTest {
             val initialBillingForm = requireNotNull(initialState.billingDetailsForm)
 
             assertThat(initialCardState.expiryDateState.shouldShowError()).isFalse()
-            assertThat(initialCardState.expiryDateState.sectionError()).isNull()
+            assertThat(initialCardState.expiryDateState.sectionValidationMessage()).isNull()
 
             assertThat(initialBillingForm.nameElement).isNotNull()
-            assertThat(initialBillingForm.nameElement?.controller?.error?.value).isNull()
-            assertThat(initialBillingForm.addressSectionElement.controller.error.value).isNull()
+            assertThat(initialBillingForm.nameElement?.controller?.validationMessage?.value).isNull()
+            assertThat(initialBillingForm.addressSectionElement.controller.validationMessage.value).isNull()
 
             handler.handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)
 
@@ -616,11 +616,11 @@ internal class DefaultEditCardDetailsInteractorTest {
             val validatingBillingForm = requireNotNull(validatingState.billingDetailsForm)
 
             assertThat(validatingCardState.expiryDateState.shouldShowError()).isTrue()
-            assertThat(validatingCardState.expiryDateState.sectionError()).isNotNull()
+            assertThat(validatingCardState.expiryDateState.sectionValidationMessage()).isNotNull()
 
             assertThat(validatingBillingForm.nameElement).isNotNull()
-            assertThat(validatingBillingForm.nameElement?.controller?.error?.value).isNotNull()
-            assertThat(validatingBillingForm.addressSectionElement.controller.error.value).isNotNull()
+            assertThat(validatingBillingForm.nameElement?.controller?.validationMessage?.value).isNotNull()
+            assertThat(validatingBillingForm.addressSectionElement.controller.validationMessage.value).isNotNull()
         }
     }
 

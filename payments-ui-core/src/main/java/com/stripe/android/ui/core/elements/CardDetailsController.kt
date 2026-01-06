@@ -18,7 +18,7 @@ import com.stripe.android.uicore.elements.RowController
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionFieldComposable
 import com.stripe.android.uicore.elements.SectionFieldElement
-import com.stripe.android.uicore.elements.SectionFieldErrorController
+import com.stripe.android.uicore.elements.SectionFieldValidationController
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
@@ -35,7 +35,7 @@ internal class CardDetailsController(
     uiContext: CoroutineContext = Dispatchers.Main,
     workContext: CoroutineContext = Dispatchers.IO,
     cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
-) : SectionFieldErrorController, SectionFieldComposable {
+) : SectionFieldValidationController, SectionFieldComposable {
 
     val nameElement = if (collectName) {
         SimpleTextElement(
@@ -133,7 +133,7 @@ internal class CardDetailsController(
         )
     )
 
-    override val error = combineAsStateFlow(
+    override val validationMessage = combineAsStateFlow(
         listOfNotNull(
             nameElement,
             numberElement,
@@ -141,7 +141,7 @@ internal class CardDetailsController(
             cvcElement
         )
             .map { it.controller }
-            .map { it.error }
+            .map { it.validationMessage }
     ) {
         it.filterNotNull().firstOrNull()
     }

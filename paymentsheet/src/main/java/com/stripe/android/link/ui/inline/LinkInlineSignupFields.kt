@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +29,7 @@ import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.HyperlinkedText
 import com.stripe.android.uicore.elements.EmailConfig
+import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.PhoneNumberElementUI
@@ -41,9 +41,10 @@ import com.stripe.android.uicore.stripeShapes
 
 private val LinkLogoModifier = Modifier.padding(end = 16.dp)
 
+@Suppress("LongMethod")
 @Composable
 internal fun LinkInlineSignupFields(
-    sectionError: Int?,
+    validationMessage: FieldValidationMessage?,
     emailController: TextFieldController,
     phoneNumberController: PhoneNumberController,
     nameController: TextFieldController,
@@ -62,7 +63,7 @@ internal fun LinkInlineSignupFields(
 ) {
     Section(
         title = null,
-        error = sectionError?.let { stringResource(it) },
+        validationMessage = validationMessage,
         modifier = modifier,
     ) {
         if (isShowingPhoneFirst) {
@@ -223,7 +224,7 @@ private fun LinkInlineErrorText(
 @Preview
 internal fun PreviewLinkInlineSignupFields() {
     LinkInlineSignupFields(
-        sectionError = null,
+        validationMessage = null,
         emailController = EmailConfig.createController(
             initialValue = "test@test.com",
         ),

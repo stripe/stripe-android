@@ -2,17 +2,17 @@ package com.stripe.android.ui.core.elements
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionFieldElement
 
-internal suspend fun SectionFieldElement.errorTest(fieldError: FieldError?) {
-    sectionFieldErrorController().error.test {
-        fieldError?.let {
+internal suspend fun SectionFieldElement.errorTest(fieldValidationMessage: FieldValidationMessage?) {
+    sectionFieldErrorController().validationMessage.test {
+        fieldValidationMessage?.let {
             val error = awaitItem()
 
-            assertThat(error?.errorMessage).isEqualTo(it.errorMessage)
+            assertThat(error?.message).isEqualTo(it.message)
             assertThat(error?.formatArgs).isEqualTo(it.formatArgs)
         } ?: run {
             assertThat(awaitItem()).isNull()

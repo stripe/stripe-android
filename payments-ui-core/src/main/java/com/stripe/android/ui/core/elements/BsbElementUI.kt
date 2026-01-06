@@ -7,7 +7,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.Section
@@ -23,20 +22,12 @@ fun BsbElementUI(
     lastTextFieldIdentifier: IdentifierSpec?,
     modifier: Modifier = Modifier,
 ) {
-    val error by element.textElement.controller.error.collectAsState()
+    val validationMessage by element.textElement.controller.validationMessage.collectAsState()
     val bankName by element.bankName.collectAsState()
-    val sectionErrorString = error?.let {
-        it.formatArgs?.let { args ->
-            stringResource(
-                it.errorMessage,
-                *args
-            )
-        } ?: stringResource(it.errorMessage)
-    }
     Column {
         Section(
             null,
-            sectionErrorString,
+            validationMessage,
             modifier = modifier,
         ) {
             TextField(

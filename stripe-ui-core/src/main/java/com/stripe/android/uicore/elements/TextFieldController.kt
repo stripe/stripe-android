@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 @OptIn(ExperimentalComposeUiApi::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-interface TextFieldController : InputController, SectionFieldComposable, SectionFieldErrorController {
+interface TextFieldController : InputController, SectionFieldComposable, SectionFieldValidationController {
     fun onValueChange(displayFormatted: String): TextFieldState?
     fun onFocusChange(newHasFocus: Boolean)
     fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {}
@@ -41,7 +41,7 @@ interface TextFieldController : InputController, SectionFieldComposable, Section
     override val showOptionalLabel: Boolean
     val fieldState: StateFlow<TextFieldState>
     override val fieldValue: StateFlow<String>
-    val visibleError: StateFlow<Boolean>
+    val visibleValidationMessage: StateFlow<Boolean>
     val loading: StateFlow<Boolean>
     val placeHolder: StateFlow<String?>
         get() = stateFlowOf(null)
@@ -170,19 +170,19 @@ class SimpleTextFieldController(
     private val _isValidating = MutableStateFlow(false)
     private val _hasFocus = MutableStateFlow(false)
 
-    override val visibleError: StateFlow<Boolean> =
+    override val visibleValidationMessage: StateFlow<Boolean> =
         combineAsStateFlow(_fieldState, _hasFocus, _isValidating) { fieldState, hasFocus, isValidating ->
-            fieldState.shouldShowError(hasFocus, isValidating)
+            fieldState.shouldShowValidationMessage(hasFocus, isValidating)
         }
 
     /**
      * An error must be emitted if it is visible or not visible.
      **/
-    override val error: StateFlow<FieldError?> = combineAsStateFlow(
-        visibleError,
+    override val validationMessage: StateFlow<FieldValidationMessage?> = combineAsStateFlow(
+        visibleValidationMessage,
         _fieldState
     ) { visibleError, fieldState ->
-        fieldState.getError()?.takeIf { visibleError }
+        fieldState.getValidationMessage()?.takeIf { visibleError }
     }
 
     override val isComplete: StateFlow<Boolean> = _fieldState.mapAsStateFlow {

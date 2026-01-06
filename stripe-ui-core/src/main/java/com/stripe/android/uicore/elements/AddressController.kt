@@ -16,13 +16,13 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressController(
     val fieldsFlowable: StateFlow<List<SectionFieldElement>>
-) : SectionFieldErrorController, SectionFieldComposable {
+) : SectionFieldValidationController, SectionFieldComposable {
     @StringRes
     val label: Int? = null
 
-    override val error = fieldsFlowable.flatMapLatestAsStateFlow { sectionFieldElements ->
+    override val validationMessage = fieldsFlowable.flatMapLatestAsStateFlow { sectionFieldElements ->
         combineAsStateFlow(
-            sectionFieldElements.map { it.sectionFieldErrorController().error }
+            sectionFieldElements.map { it.sectionFieldErrorController().validationMessage }
         ) { fieldErrors ->
             fieldErrors.filterNotNull().firstOrNull()
         }

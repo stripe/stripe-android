@@ -447,9 +447,9 @@ class UpdateCardScreenViewModelTest {
                     val expiryDateState = requireNotNull(state.cardDetailsState?.expiryDateState)
 
                     assertThat(expiryDateState.shouldShowError()).isTrue()
-                    assertThat(expiryDateState.sectionError()).isNotNull()
+                    assertThat(expiryDateState.sectionValidationMessage()).isNotNull()
 
-                    requireNotNull(state.billingDetailsForm).addressSectionElement.controller.error.test {
+                    requireNotNull(state.billingDetailsForm).addressSectionElement.controller.validationMessage.test {
                         assertThat(awaitItem()).isNotNull()
                     }
                 }

@@ -399,7 +399,7 @@ internal fun LinkFields(
 ) {
     var didShowAllFields by rememberSaveable { mutableStateOf(false) }
 
-    val sectionError by sectionController.error.collectAsState()
+    val validationMessage by sectionController.validationMessage.collectAsState()
 
     val columnModifier = if (allowsDefaultOptIn) {
         Modifier
@@ -427,7 +427,7 @@ internal fun LinkFields(
                 )
             } else {
                 LinkInlineSignupFields(
-                    sectionError = sectionError?.errorMessage,
+                    validationMessage = validationMessage,
                     emailController = emailController,
                     phoneNumberController = phoneNumberController,
                     nameController = nameController,
