@@ -191,6 +191,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         TAP_TO_ADD_CONNECT_READER_CALL_FAILURE(
             eventName = "elements.tap_to_add.connect_reader_call.failure"
+        ),
+        EXAMPLE_NEW_ERROR(
+            eventName = "example_new_error",
         )
     }
 
