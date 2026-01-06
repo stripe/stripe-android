@@ -199,6 +199,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         AUTH_WEB_VIEW_BLANK_CLIENT_SECRET(
             partialEventName = "payments.auth_web_view.blank_client_secret"
         ),
+        EXAMPLE_NEW_ERROR(
+            partialEventName = "example new error",
+        ),
         MISSING_HOSTED_VOUCHER_URL(
             partialEventName = "payments.missing_hosted_voucher_url"
         ),
