@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 import androidx.compose.ui.R as ComposeR
@@ -41,7 +42,7 @@ fun CheckboxFieldUI(
     enabled: Boolean = true
 ) {
     val isChecked by controller.isChecked.collectAsState()
-    val error by controller.validationMessage.collectAsState()
+    val validationMessage by controller.validationMessage.collectAsState()
 
     CheckboxFieldUIView(
         modifier = modifier,
@@ -54,12 +55,8 @@ fun CheckboxFieldUI(
                 stringResource(id = resource.labelId, formatArgs = resource.formatArgs)
             } ?: ""
         },
-        error = error?.let { fieldError ->
-            @ReadOnlyComposable {
-                fieldError.formatArgs?.let { args ->
-                    stringResource(id = fieldError.message, formatArgs = args)
-                } ?: stringResource(id = fieldError.message)
-            }
+        error = @ReadOnlyComposable {
+            validationMessage?.resolvable?.resolve()
         }
     )
 }
@@ -72,7 +69,7 @@ internal fun CheckboxFieldUIView(
     debugTag: String,
     onValueChange: (value: Boolean) -> Unit,
     label: @Composable () -> String,
-    error: (@Composable () -> String)?,
+    error: (@Composable () -> String?)?,
 ) {
     val accessibilityDescription = stringResource(
         if (isChecked) {
@@ -82,6 +79,7 @@ internal fun CheckboxFieldUIView(
         }
     )
 
+    val errorMessage = error?.invoke()
     val errorColor = MaterialTheme.stripeColors.materialColors.error
 
     val checkboxColors = error?.run {
@@ -128,7 +126,7 @@ internal fun CheckboxFieldUIView(
                 color = MaterialTheme.stripeColors.placeholderText
             )
         }
-        error?.let { error ->
+        errorMessage?.let { error ->
             Error(error = error, color = errorColor)
         }
     }
@@ -136,7 +134,7 @@ internal fun CheckboxFieldUIView(
 
 @Composable
 private fun Error(
-    error: @Composable () -> String,
+    error: String,
     color: Color
 ) {
     Row(
@@ -152,7 +150,7 @@ private fun Error(
             tint = color
         )
         Text(
-            text = error(),
+            text = error,
             color = color
         )
     }

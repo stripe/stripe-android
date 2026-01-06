@@ -115,7 +115,7 @@ fun SectionValidationMessage(
     modifier: Modifier = Modifier
 ) {
     Text(
-        text = validationMessage.resolvableString().resolve(),
+        text = validationMessage.resolvable.resolve(),
         color = MaterialTheme.colors.error,
         style = MaterialTheme.typography.h6,
         modifier = modifier

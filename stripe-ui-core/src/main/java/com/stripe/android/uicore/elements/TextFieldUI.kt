@@ -307,7 +307,7 @@ internal fun TextFieldUi(
                 }
             },
             isError = shouldShowValidationMessage,
-            errorMessage = validationMessage?.resolvableString()?.resolve(),
+            errorMessage = validationMessage?.resolvable?.resolve(),
             visualTransformation = visualTransformation,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,

@@ -18,7 +18,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.uicore.elements.ExpiryDateVisualTransformation
 import com.stripe.android.uicore.elements.compat.errorSemanticsWithDefault
-import com.stripe.android.uicore.elements.resolvableString
 import com.stripe.android.uicore.strings.resolve
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -47,7 +46,7 @@ internal fun ExpiryTextField(
             )
             .errorSemanticsWithDefault(
                 isError = isError,
-                errorMessage = state.sectionValidationMessage()?.resolvableString()?.resolve()
+                errorMessage = state.sectionValidationMessage()?.resolvable?.resolve()
             ),
         value = state.text,
         onValueChange = onValueChange,

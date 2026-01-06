@@ -29,6 +29,13 @@ sealed interface FieldValidationMessage {
     val message: Int
     val formatArgs: Array<out Any>?
 
+    @Suppress("SpreadOperator")
+    val resolvable: ResolvableString
+        get() {
+            val args = formatArgs ?: arrayOf()
+            return resolvableString(message, *args)
+        }
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Immutable
     data class Error(
@@ -78,11 +85,4 @@ sealed interface FieldValidationMessage {
             return result
         }
     }
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Suppress("SpreadOperator")
-fun FieldValidationMessage.resolvableString(): ResolvableString {
-    val args = formatArgs ?: arrayOf()
-    return resolvableString(message, *args)
 }
