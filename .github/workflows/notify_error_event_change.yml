@@ -45,7 +45,7 @@ jobs:
 
             This PR modifies the `UnexpectedErrorEvent` enum in `ErrorReporter.kt`.
 
-            **Action Required:** Please ensure you have added the new error event to the `https://git.corp.stripe.com/stripe-internal/zoolander/blob/master/src/resources/com/stripe/dscore/analyticseventlogger/server/rpcserver/client_config.yaml` file in the `pay-server` repository.
+            **Action Required:** Please ensure you have added the new error event to the `https://git.corp.stripe.com/stripe-internal/zoolander/blob/master/src/resources/com/stripe/dscore/analyticseventlogger/server/rpcserver/client_config.yaml` file.
 
             Once you have verified that the error event has been added to `client_config.yaml`, please add the label `added-to-client-config` to this PR to acknowledge this requirement.
 
