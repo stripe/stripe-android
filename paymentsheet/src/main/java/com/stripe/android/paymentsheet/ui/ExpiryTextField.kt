@@ -18,9 +18,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.uicore.elements.ExpiryDateVisualTransformation
 import com.stripe.android.uicore.elements.compat.errorSemanticsWithDefault
+import com.stripe.android.uicore.elements.resolvableString
 import com.stripe.android.uicore.strings.resolve
 
-@SuppressWarnings("SpreadOperator")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun ExpiryTextField(
@@ -47,7 +47,7 @@ internal fun ExpiryTextField(
             )
             .errorSemanticsWithDefault(
                 isError = isError,
-                errorMessage = state.sectionError()?.resolve()
+                errorMessage = state.sectionValidationMessage()?.resolvableString()?.resolve()
             ),
         value = state.text,
         onValueChange = onValueChange,

@@ -75,22 +75,12 @@ fun PhoneNumberCollectionSection(
     focusRequester: FocusRequester = remember { FocusRequester() },
     imeAction: ImeAction = ImeAction.Done
 ) {
-    val error by phoneNumberController.validationMessage.collectAsState()
-
-    val sectionErrorString = error?.let {
-        it.formatArgs?.let { args ->
-            @Suppress("SpreadOperator")
-            stringResource(
-                it.message,
-                *args
-            )
-        } ?: stringResource(it.message)
-    }
+    val validationMessage by phoneNumberController.validationMessage.collectAsState()
 
     Section(
         modifier = Modifier.padding(vertical = 8.dp),
         title = sectionTitle?.let { resolvableString(it) },
-        error = sectionErrorString,
+        validationMessage = validationMessage,
         isSelected = isSelected
     ) {
         PhoneNumberElementUI(

@@ -24,7 +24,7 @@ class TextFieldStateTest {
 
     @Test
     fun `Accepts input on a full text field if it's a deletion`() {
-        val fieldState = TextFieldStateConstants.Valid.Full
+        val fieldState = TextFieldStateConstants.Valid.Full()
 
         val didAccept = fieldState.canAcceptInput(
             currentValue = "123",
@@ -36,7 +36,7 @@ class TextFieldStateTest {
 
     @Test
     fun `Does not accept input if text field is full`() {
-        val fieldState = TextFieldStateConstants.Valid.Full
+        val fieldState = TextFieldStateConstants.Valid.Full()
 
         val didAccept = fieldState.canAcceptInput(
             currentValue = "123",

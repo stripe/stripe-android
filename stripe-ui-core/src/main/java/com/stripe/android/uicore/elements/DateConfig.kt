@@ -86,7 +86,7 @@ class DateConfig : TextFieldConfig {
             } else if (isMonthInvalid) {
                 Error.Incomplete(R.string.stripe_invalid_expiry_month)
             } else {
-                Valid.Full
+                Valid.Full()
             }
         }
     }

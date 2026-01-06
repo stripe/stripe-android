@@ -255,7 +255,7 @@ class PaymentMethodViewModelTest {
 
             val sectionElement = formElements[1] as SectionElement
 
-            sectionElement.controller.error.test {
+            sectionElement.controller.validationMessage.test {
                 assertThat(expectMostRecentItem()).isNotNull()
             }
         }

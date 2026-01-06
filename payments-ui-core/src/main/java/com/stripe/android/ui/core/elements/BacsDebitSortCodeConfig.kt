@@ -41,7 +41,7 @@ class BacsDebitSortCodeConfig : TextFieldConfig {
             input.length < LENGTH -> TextFieldStateConstants.Error.Incomplete(
                 R.string.stripe_bacs_sort_code_incomplete
             )
-            else -> TextFieldStateConstants.Valid.Full
+            else -> TextFieldStateConstants.Valid.Full()
         }
     }
 

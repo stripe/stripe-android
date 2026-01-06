@@ -104,22 +104,12 @@ fun TextFieldSection(
     @StringRes sectionTitle: Int? = null,
     content: @Composable () -> Unit,
 ) {
-    val error by textFieldController.validationMessage.collectAsState()
-
-    val sectionErrorString = error?.let {
-        it.formatArgs?.let { args ->
-            @Suppress("SpreadOperator")
-            stringResource(
-                it.message,
-                *args
-            )
-        } ?: stringResource(it.message)
-    }
+    val validationMessage by textFieldController.validationMessage.collectAsState()
 
     Section(
         modifier = modifier,
         title = sectionTitle?.let { resolvableString(it) },
-        error = sectionErrorString,
+        validationMessage = validationMessage,
         isSelected = isSelected,
         content = content,
     )
@@ -166,7 +156,7 @@ fun TextField(
 
     LaunchedEffect(fieldState) {
         // When field is in focus and full, move to next field so the user can keep typing
-        if (fieldState == TextFieldStateConstants.Valid.Full && hasFocus.value) {
+        if (fieldState is TextFieldStateConstants.Valid.Full && hasFocus.value) {
             focusManager.moveFocusSafely(nextFocusDirection)
         }
     }
@@ -287,16 +277,6 @@ internal fun TextFieldUi(
 
     val layoutDirectionToUse = layoutDirection ?: LocalLayoutDirection.current
 
-    val errorMessage = validationMessage?.let {
-        it.formatArgs?.let { args ->
-            @Suppress("SpreadOperator")
-            stringResource(
-                it.message,
-                *args
-            )
-        } ?: stringResource(it.message)
-    }
-
     CompositionLocalProvider(LocalLayoutDirection provides layoutDirectionToUse) {
         CompatTextField(
             value = value,
@@ -327,7 +307,7 @@ internal fun TextFieldUi(
                 }
             },
             isError = shouldShowValidationMessage,
-            errorMessage = errorMessage,
+            errorMessage = validationMessage?.resolvableString()?.resolve(),
             visualTransformation = visualTransformation,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,

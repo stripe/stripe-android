@@ -313,7 +313,7 @@ internal class SimpleTextFieldControllerTest {
         nullPlaceHolder: Boolean = true,
     ): SimpleTextFieldController {
         val config: TextFieldConfig = mock {
-            on { determineState("full") } doReturn Full
+            on { determineState("full") } doReturn Full()
             on { filter("full") } doReturn "full"
 
             on { optional } doReturn isOptional

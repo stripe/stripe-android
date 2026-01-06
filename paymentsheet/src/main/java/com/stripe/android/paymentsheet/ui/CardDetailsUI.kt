@@ -29,11 +29,11 @@ import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor.ViewAction
+import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SectionFieldElementUI
-import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
@@ -99,13 +99,13 @@ private fun CardDetailsFormUI(
     onExpDateChanged: (String) -> Unit,
     nameElementForCardSection: SectionFieldElement?,
 ) {
-    val error = rememberError(cardDetailsState, billingDetailsForm)
+    val validationMessage = rememberValidationMessage(cardDetailsState, billingDetailsForm)
 
     Section(
         title = billingDetailsForm?.let {
             resolvableString(CoreR.string.stripe_paymentsheet_add_payment_method_card_information)
         },
-        error = error,
+        validationMessage = validationMessage,
         modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
     ) {
         Column {
@@ -160,21 +160,17 @@ private fun CardDetailsFormUI(
 }
 
 @Composable
-private fun rememberError(
+private fun rememberValidationMessage(
     cardDetailsState: EditCardDetailsInteractor.CardDetailsState,
     billingDetailsForm: BillingDetailsForm?
-): String? {
+): FieldValidationMessage? {
     val nameErrorState = remember(billingDetailsForm?.nameElement) {
         billingDetailsForm?.nameElement?.controller?.validationMessage ?: stateFlowOf(null)
     }
 
     val nameError by nameErrorState.collectAsState()
 
-    val error = nameError?.let {
-        resolvableString(it.message, it.formatArgs)
-    } ?: cardDetailsState.expiryDateState.sectionError()
-
-    return error?.resolve()
+    return nameError ?: cardDetailsState.expiryDateState.sectionValidationMessage()
 }
 
 /**

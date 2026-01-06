@@ -61,7 +61,7 @@ import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionCard
-import com.stripe.android.uicore.elements.SectionError
+import com.stripe.android.uicore.elements.SectionValidationMessage
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
@@ -460,7 +460,7 @@ internal fun CvcRecollectionField(
     animationDelay: Int = ANIMATION_DELAY
 ) {
     val controller by cvcControllerFlow.collectAsState()
-    val error by controller.validationMessage.collectAsState()
+    val validationMessage by controller.validationMessage.collectAsState()
     val element = CvcElement(
         IdentifierSpec(),
         controller
@@ -508,9 +508,9 @@ internal fun CvcRecollectionField(
                     lastTextFieldIdentifier = null
                 )
             }
-            error?.message?.let {
+            validationMessage?.let {
                 Row {
-                    SectionError(error = stringResource(id = it))
+                    SectionValidationMessage(it)
                 }
             }
         }

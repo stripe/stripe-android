@@ -3,6 +3,8 @@ package com.stripe.android.uicore.elements
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -76,4 +78,9 @@ sealed interface FieldValidationMessage {
             return result
         }
     }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun FieldValidationMessage.resolvableString(): ResolvableString {
+    return resolvableString(message, formatArgs)
 }

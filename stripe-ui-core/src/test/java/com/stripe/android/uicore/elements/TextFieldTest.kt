@@ -170,7 +170,7 @@ class TextFieldTest {
 
         override fun determineState(input: String): TextFieldState {
             return if (input.length == maxInputLength) {
-                TextFieldStateConstants.Valid.Full
+                TextFieldStateConstants.Valid.Full()
             } else if (input.length > maxInputLength) {
                 TextFieldStateConstants.Error.Invalid(
                     R.string.default_error_message

@@ -63,7 +63,7 @@ internal class CardNumberConfig(
                 preventMoreInput = true,
             )
         } else if (isDigitLimit && number.length == numberAllowedDigits) {
-            TextFieldStateConstants.Valid.Full
+            TextFieldStateConstants.Valid.Full()
         } else {
             TextFieldStateConstants.Error.Invalid(StripeR.string.stripe_invalid_card_number)
         }

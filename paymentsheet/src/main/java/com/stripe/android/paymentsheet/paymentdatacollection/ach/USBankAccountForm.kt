@@ -304,7 +304,6 @@ private fun BillingDetailsForm(
     }
 }
 
-@Suppress("SpreadOperator")
 @Composable
 private fun PhoneSection(
     enabled: Boolean,
@@ -312,16 +311,7 @@ private fun PhoneSection(
     imeAction: ImeAction,
     modifier: Modifier = Modifier,
 ) {
-    val error by phoneController.validationMessage.collectAsState()
-
-    val sectionErrorString = error?.let {
-        it.formatArgs?.let { args ->
-            stringResource(
-                it.message,
-                *args
-            )
-        } ?: stringResource(it.message)
-    }
+    val validationMessage by phoneController.validationMessage.collectAsState()
 
     Box(
         modifier = Modifier
@@ -332,7 +322,7 @@ private fun PhoneSection(
         Section(
             modifier = modifier,
             title = null,
-            error = sectionErrorString,
+            validationMessage = validationMessage,
         ) {
             PhoneNumberElementUI(
                 enabled = enabled,
@@ -343,7 +333,6 @@ private fun PhoneSection(
     }
 }
 
-@Suppress("SpreadOperator")
 @Composable
 private fun AddressSection(
     enabled: Boolean,
@@ -352,16 +341,7 @@ private fun AddressSection(
     sameAsShippingElement: SameAsShippingElement?,
     modifier: Modifier = Modifier,
 ) {
-    val error by addressController.validationMessage.collectAsState()
-
-    val sectionErrorString = error?.let {
-        it.formatArgs?.let { args ->
-            stringResource(
-                it.message,
-                *args
-            )
-        } ?: stringResource(it.message)
-    }
+    val validationMessage by addressController.validationMessage.collectAsState()
 
     Box(
         modifier = Modifier
@@ -372,7 +352,7 @@ private fun AddressSection(
         Column(modifier) {
             Section(
                 title = resolvableString(PaymentsUiCoreR.string.stripe_billing_details),
-                error = sectionErrorString,
+                validationMessage = validationMessage,
             ) {
                 AddressElementUI(
                     enabled = enabled,

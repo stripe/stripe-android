@@ -30,7 +30,7 @@ import com.stripe.android.uicore.stripeColors
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Section(
     title: ResolvableString?,
-    error: String?,
+    validationMessage: FieldValidationMessage?,
     modifier: Modifier = Modifier,
     isSelected: Boolean = false,
     content: @Composable () -> Unit
@@ -42,8 +42,8 @@ fun Section(
             content = content,
         )
 
-        if (error != null) {
-            SectionError(error)
+        if (validationMessage != null) {
+            SectionValidationMessage(validationMessage)
         }
     }
 }
@@ -110,12 +110,12 @@ fun SectionCard(
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
-fun SectionError(
-    error: String,
+fun SectionValidationMessage(
+    validationMessage: FieldValidationMessage,
     modifier: Modifier = Modifier
 ) {
     Text(
-        text = error,
+        text = validationMessage.resolvableString().resolve(),
         color = MaterialTheme.colors.error,
         style = MaterialTheme.typography.h6,
         modifier = modifier

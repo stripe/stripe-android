@@ -13,11 +13,11 @@ class SectionController(
     val label: ResolvableString?,
     sectionFieldValidationControllers: List<SectionFieldValidationController>
 ) : Controller {
-    val error: StateFlow<FieldValidationMessage?> = combineAsStateFlow(
+    val validationMessage: StateFlow<FieldValidationMessage?> = combineAsStateFlow(
         sectionFieldValidationControllers.map {
             it.validationMessage
         }
-    ) { errorArray ->
-        errorArray.firstNotNullOfOrNull { it }
+    ) { validationMessageArray ->
+        validationMessageArray.firstNotNullOfOrNull { it }
     }
 }
