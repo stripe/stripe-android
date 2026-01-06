@@ -4,7 +4,6 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -13,7 +12,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import javax.inject.Inject
 import javax.inject.Provider
 
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val confirmCustomPaymentMethodCallbackProvider: Provider<ConfirmCustomPaymentMethodCallback?>,

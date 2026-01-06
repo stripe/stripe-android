@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.utils
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -49,7 +48,6 @@ internal fun runProductIntegrationTest(
     }
 }
 
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class ProductIntegrationBuilder {
     private var createIntentCallback: CreateIntentCallback? = null
 

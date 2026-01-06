@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [Added] Custom Payment Methods is now generally available.
+
 ## 22.5.0 - 2025-12-15
 
 ### Payments

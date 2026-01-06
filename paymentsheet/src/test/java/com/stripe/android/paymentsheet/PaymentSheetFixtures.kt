@@ -10,7 +10,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.BILLING_DETAILS
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -127,7 +126,6 @@ internal object PaymentSheetFixtures {
             .externalPaymentMethods(listOf("external_paypal", "external_fawry"))
             .build()
 
-    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     internal val CONFIG_CUSTOMER_WITH_CUSTOM_PAYMENT_METHODS
         get() = CONFIG_CUSTOMER.newBuilder()
             .customPaymentMethods(
