@@ -78,7 +78,39 @@ class EpsDefinitionTest {
     ) {
         val bankSection = formElements[position] as SectionElement
         assertThat(bankSection.fields).hasSize(1)
+
         val dropdownElement = bankSection.fields[0] as SimpleDropdownElement
         assertThat(dropdownElement.identifier.v1).isEqualTo("eps[bank]")
+
+        val displayItems = dropdownElement.controller.displayItems
+        assertThat(displayItems).containsExactly(
+            "Ärzte- und Apothekerbank",
+            "Austrian Anadi Bank AG",
+            "Bank Austria",
+            "bank99 AG",
+            "Bankhaus Carl Spängler & Co.AG",
+            "Bankhaus Schelhammer & Schattera AG",
+            "BAWAG P.S.K. AG",
+            "BKS Bank AG",
+            "BTV VIER LÄNDER BANK",
+            "Capital Bank Grawe Gruppe AG",
+            "Dolomitenbank",
+            "Easybank AG",
+            "Erste Bank und Sparkassen",
+            "Hypo Alpe-Adria-Bank International AG",
+            "HYPO NOE LB für Niederösterreich u. Wien",
+            "HYPO Oberösterreich,Salzburg,Steiermark",
+            "Hypo Tirol Bank AG",
+            "Hypo Vorarlberg Bank AG",
+            "HYPO-BANK BURGENLAND Aktiengesellschaft",
+            "Marchfelder Bank",
+            "Oberbank AG",
+            "Raiffeisen Bankengruppe Österreich",
+            "Schoellerbank AG",
+            "Sparda-Bank Wien",
+            "Volksbank Gruppe",
+            "Volkskreditbank AG",
+            "VR-Bank Braunau",
+        ).inOrder()
     }
 }
