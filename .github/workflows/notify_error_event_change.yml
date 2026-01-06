@@ -19,7 +19,7 @@ jobs:
         id: check_unexpected_error
         run: |
           # Get the diff for the ErrorReporter.kt file
-          git diff origin/${{ github.base_ref }}...HEAD -- payments-core/src/main/java/com/stripe/android/payments/core/analytics/ErrorReporter.kt > diff.txt
+          git diff -U1000 origin/${{ github.base_ref }}...HEAD -- payments-core/src/main/java/com/stripe/android/payments/core/analytics/ErrorReporter.kt > diff.txt
 
           # Check if UnexpectedErrorEvent enum was modified (lines added or removed within the enum)
           if grep -A 200 'enum class UnexpectedErrorEvent' diff.txt | grep -E '^\+.*[A-Z_]+\(' > /dev/null; then
