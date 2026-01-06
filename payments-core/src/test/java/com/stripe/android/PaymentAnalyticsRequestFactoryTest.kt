@@ -75,7 +75,7 @@ class PaymentAnalyticsRequestFactoryTest {
     @Test
     fun getSourceCreationParams_withValidInput_createsCorrectMap() {
         val loggingParams = analyticsRequestFactory.createSourceCreation(
-            Source.SourceType.SEPA_DEBIT,
+            Source.SourceType.CARD,
             ATTRIBUTION
         ).params
 
@@ -84,7 +84,7 @@ class PaymentAnalyticsRequestFactoryTest {
             .hasSize(VALID_PARAM_FIELDS.size - 2)
 
         assertEquals(
-            Source.SourceType.SEPA_DEBIT,
+            Source.SourceType.CARD,
             loggingParams[PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE]
         )
         assertEquals(API_KEY, loggingParams[AnalyticsFields.PUBLISHABLE_KEY])
@@ -307,14 +307,14 @@ class PaymentAnalyticsRequestFactoryTest {
         val expectedUaName = AnalyticsRequestFactory.ANALYTICS_UA
 
         val params = analyticsRequestFactory.createSourceCreation(
-            Source.SourceType.SEPA_DEBIT
+            Source.SourceType.CARD
         ).params
 
         assertThat(params)
             .hasSize(VALID_PARAM_FIELDS.size - 3)
         assertEquals(API_KEY, params[AnalyticsFields.PUBLISHABLE_KEY])
         assertEquals(
-            Source.SourceType.SEPA_DEBIT,
+            Source.SourceType.CARD,
             params[PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE]
         )
 
