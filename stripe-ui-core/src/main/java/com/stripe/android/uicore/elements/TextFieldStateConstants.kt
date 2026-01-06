@@ -19,6 +19,9 @@ class TextFieldStateConstants {
         ) : Valid() {
             override fun isFull(): Boolean = true
 
+            override fun shouldShowValidationMessage(hasFocus: Boolean, isValidating: Boolean): Boolean =
+                validationMessage != null
+
             override fun getValidationMessage() = validationMessage
         }
 

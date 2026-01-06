@@ -81,6 +81,8 @@ sealed interface FieldValidationMessage {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Suppress("SpreadOperator")
 fun FieldValidationMessage.resolvableString(): ResolvableString {
-    return resolvableString(message, formatArgs)
+    val args = formatArgs ?: arrayOf()
+    return resolvableString(message, *args)
 }
