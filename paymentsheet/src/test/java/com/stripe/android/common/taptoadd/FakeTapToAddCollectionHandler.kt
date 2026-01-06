@@ -3,10 +3,10 @@ package com.stripe.android.common.taptoadd
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.testing.PaymentMethodFactory
 
 internal class FakeTapToAddCollectionHandler private constructor(
-    private val collectResult: TapToAddCollectionHandler.CollectionState =
-        TapToAddCollectionHandler.CollectionState.Collected,
+    private val collectResult: TapToAddCollectionHandler.CollectionState,
 ) : TapToAddCollectionHandler {
     private val collectCalls = Turbine<PaymentMethodMetadata>()
 
@@ -22,9 +22,11 @@ internal class FakeTapToAddCollectionHandler private constructor(
     )
 
     companion object {
+        private val DEFAULT_PAYMENT_METHOD = PaymentMethodFactory.card(last4 = "4242")
+
         suspend fun test(
             collectResult: TapToAddCollectionHandler.CollectionState =
-                TapToAddCollectionHandler.CollectionState.Collected,
+                TapToAddCollectionHandler.CollectionState.Collected(DEFAULT_PAYMENT_METHOD),
             block: suspend Scenario.() -> Unit,
         ) {
             val handler = FakeTapToAddCollectionHandler(collectResult)
@@ -41,7 +43,7 @@ internal class FakeTapToAddCollectionHandler private constructor(
 
         fun noOp(
             collectResult: TapToAddCollectionHandler.CollectionState =
-                TapToAddCollectionHandler.CollectionState.Collected,
+                TapToAddCollectionHandler.CollectionState.Collected(DEFAULT_PAYMENT_METHOD),
         ) = FakeTapToAddCollectionHandler(collectResult)
     }
 }
