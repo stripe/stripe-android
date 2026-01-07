@@ -6,11 +6,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.uicore.elements.TextFieldState
 
 /**
  * This is similar to the [com.stripe.android.uicore.elements.TextFieldConfig],
- * but in order to determine the state the card brand is required.
+ * but in order to determine the state the card brand and funding are required.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface CardDetailsTextFieldConfig {
@@ -19,7 +20,12 @@ interface CardDetailsTextFieldConfig {
     val label: ResolvableString
     val keyboard: KeyboardType
     fun determineVisualTransformation(number: String, panLength: Int): VisualTransformation
-    fun determineState(brand: CardBrand, number: String, numberAllowedDigits: Int): TextFieldState
+    fun determineState(
+        brand: CardBrand,
+        funding: CardFunding?,
+        number: String,
+        numberAllowedDigits: Int,
+    ): TextFieldState
     fun filter(userTyped: String): String
     fun convertToRaw(displayName: String): String
     fun convertFromRaw(rawValue: String): String

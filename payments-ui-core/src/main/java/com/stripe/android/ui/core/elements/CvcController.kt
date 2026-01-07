@@ -68,7 +68,7 @@ class CvcController constructor(
     }
 
     private val _fieldState = combineAsStateFlow(cardBrandFlow, _fieldValue) { brand, fieldValue ->
-        cvcTextFieldConfig.determineState(brand, fieldValue, brand.maxCvcLength)
+        cvcTextFieldConfig.determineState(brand, null, fieldValue, brand.maxCvcLength)
     }
     override val fieldState: StateFlow<TextFieldState> = _fieldState
 

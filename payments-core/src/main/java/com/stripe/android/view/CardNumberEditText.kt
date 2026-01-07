@@ -10,7 +10,9 @@ import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -50,7 +52,8 @@ class CardNumberEditText internal constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     internal var viewModelStoreOwner: ViewModelStoreOwner? = null,
-    private var cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+    private var cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     @JvmOverloads
@@ -65,7 +68,8 @@ class CardNumberEditText internal constructor(
         Dispatchers.Main,
         Dispatchers.IO,
         { PaymentConfiguration.getInstance(context).publishableKey },
-        cardBrandFilter = DefaultCardBrandFilter
+        cardBrandFilter = DefaultCardBrandFilter,
+        cardFundingFilter = DefaultCardFundingFilter
     )
 
     private constructor(
@@ -75,7 +79,8 @@ class CardNumberEditText internal constructor(
         uiContext: CoroutineContext,
         workContext: CoroutineContext,
         publishableKeySupplier: () -> String,
-        cardBrandFilter: CardBrandFilter
+        cardBrandFilter: CardBrandFilter,
+        cardFundingFilter: CardFundingFilter
     ) : this(
         context,
         attrs,
@@ -89,7 +94,8 @@ class CardNumberEditText internal constructor(
             context,
             publishableKeyProvider = publishableKeySupplier
         ),
-        cardBrandFilter = cardBrandFilter
+        cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter
     )
 
     @VisibleForTesting
@@ -178,6 +184,7 @@ class CardNumberEditText internal constructor(
     @VisibleForTesting
     val accountRangeService = CardAccountRangeService(
         cardAccountRangeRepository = cardAccountRangeRepository,
+        cardFundingFilter = cardFundingFilter,
         uiContext = uiContext,
         workContext = workContext,
         staticCardAccountRanges = staticCardAccountRanges,
@@ -241,7 +248,7 @@ class CardNumberEditText internal constructor(
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 this@CardNumberEditText.isCbcEligible = isCbcEligible
 
-                val brands = accountRangeService.accountRanges.map { it.brand }.distinct()
+                val brands = accountRangeService.accountRangesStateFlow.value.map { it.brand }.distinct()
 
                 if (isCbcEligible) {
                     implicitCardBrandForCbc = brands.firstOrNull() ?: CardBrand.Unknown

@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.CardFunding
 import org.junit.Test
+import com.stripe.android.R as StripeR
 
 internal class PaymentSheetCardFundingFilterTest {
 
@@ -78,5 +79,130 @@ internal class PaymentSheetCardFundingFilterTest {
         for (funding in CardFunding.entries) {
             assertThat(filter.isAccepted(funding)).isFalse()
         }
+    }
+
+    @Test
+    fun `allowedFundingTypesDisplayMessage returns null when all three types are allowed`() {
+        val filter = PaymentSheetCardFundingFilter(
+            listOf(
+                PaymentSheet.CardFundingType.Credit,
+                PaymentSheet.CardFundingType.Debit,
+                PaymentSheet.CardFundingType.Prepaid
+            )
+        )
+
+        assertThat(filter.allowedFundingTypesDisplayMessage()).isNull()
+    }
+
+    @Test
+    fun `allowedFundingTypesDisplayMessage returns debit_credit when only credit and debit are allowed`() {
+        val filter = PaymentSheetCardFundingFilter(
+            listOf(
+                PaymentSheet.CardFundingType.Credit,
+                PaymentSheet.CardFundingType.Debit
+            )
+        )
+
+        assertThat(filter.allowedFundingTypesDisplayMessage())
+            .isEqualTo(StripeR.string.stripe_card_funding_only_debit_credit)
+    }
+
+    @Test
+    fun `allowedFundingTypesDisplayMessage returns credit_prepaid when only credit and prepaid are allowed`() {
+        val filter = PaymentSheetCardFundingFilter(
+            listOf(
+                PaymentSheet.CardFundingType.Credit,
+                PaymentSheet.CardFundingType.Prepaid
+            )
+        )
+
+        assertThat(filter.allowedFundingTypesDisplayMessage())
+            .isEqualTo(StripeR.string.stripe_card_funding_only_credit_prepaid)
+    }
+
+    @Test
+    fun `allowedFundingTypesDisplayMessage returns debit_prepaid when only debit and prepaid are allowed`() {
+        val filter = PaymentSheetCardFundingFilter(
+            listOf(
+                PaymentSheet.CardFundingType.Debit,
+                PaymentSheet.CardFundingType.Prepaid
+            )
+        )
+
+        assertThat(filter.allowedFundingTypesDisplayMessage())
+            .isEqualTo(StripeR.string.stripe_card_funding_only_debit_prepaid)
+    }
+
+    @Test
+    fun `allowedFundingTypesDisplayMessage returns credit when only credit is allowed`() {
+        val filter = PaymentSheetCardFundingFilter(
+            listOf(PaymentSheet.CardFundingType.Credit)
+        )
+
+        assertThat(filter.allowedFundingTypesDisplayMessage())
+            .isEqualTo(StripeR.string.stripe_card_funding_only_credit)
+    }
+
+    @Test
+    fun `allowedFundingTypesDisplayMessage returns debit when only debit is allowed`() {
+        val filter = PaymentSheetCardFundingFilter(
+            listOf(PaymentSheet.CardFundingType.Debit)
+        )
+
+        assertThat(filter.allowedFundingTypesDisplayMessage())
+            .isEqualTo(StripeR.string.stripe_card_funding_only_debit)
+    }
+
+    @Test
+    fun `allowedFundingTypesDisplayMessage returns prepaid when only prepaid is allowed`() {
+        val filter = PaymentSheetCardFundingFilter(
+            listOf(PaymentSheet.CardFundingType.Prepaid)
+        )
+
+        assertThat(filter.allowedFundingTypesDisplayMessage())
+            .isEqualTo(StripeR.string.stripe_card_funding_only_prepaid)
+    }
+
+    @Test
+    fun `allowedFundingTypesDisplayMessage returns null when no types are allowed`() {
+        val filter = PaymentSheetCardFundingFilter(emptyList())
+
+        assertThat(filter.allowedFundingTypesDisplayMessage()).isNull()
+    }
+
+    @Test
+    fun `allowedFundingTypesDisplayMessage returns null when only unknown is allowed`() {
+        val filter = PaymentSheetCardFundingFilter(
+            listOf(PaymentSheet.CardFundingType.Unknown)
+        )
+
+        assertThat(filter.allowedFundingTypesDisplayMessage()).isNull()
+    }
+
+    @Test
+    fun `allowedFundingTypesDisplayMessage returns credit when credit and unknown are allowed`() {
+        val filter = PaymentSheetCardFundingFilter(
+            listOf(
+                PaymentSheet.CardFundingType.Credit,
+                PaymentSheet.CardFundingType.Unknown
+            )
+        )
+
+        assertThat(filter.allowedFundingTypesDisplayMessage())
+            .isEqualTo(StripeR.string.stripe_card_funding_only_credit)
+    }
+
+    @Test
+    fun `allowedFundingTypesDisplayMessage returns null when all four types including unknown are allowed`() {
+        val filter = PaymentSheetCardFundingFilter(
+            listOf(
+                PaymentSheet.CardFundingType.Credit,
+                PaymentSheet.CardFundingType.Debit,
+                PaymentSheet.CardFundingType.Prepaid,
+                PaymentSheet.CardFundingType.Unknown
+            )
+        )
+
+        assertThat(filter.allowedFundingTypesDisplayMessage()).isNull()
     }
 }

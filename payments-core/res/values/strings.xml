@@ -123,6 +123,18 @@
   <string name="stripe_delete_payment_method_prompt_title">Delete payment method?</string>
   <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
   <string name="stripe_disallowed_card_brand">%s is not accepted</string>
+  <!-- Warning shown when only credit cards are accepted -->
+  <string name="stripe_card_funding_only_credit">Only credit cards are accepted</string>
+  <!-- Warning shown when only debit cards are accepted -->
+  <string name="stripe_card_funding_only_debit">Only debit cards are accepted</string>
+  <!-- Warning shown when only prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_prepaid">Only prepaid cards are accepted</string>
+  <!-- Warning shown when only debit and credit cards are accepted -->
+  <string name="stripe_card_funding_only_debit_credit">Only debit and credit cards are accepted</string>
+  <!-- Warning shown when only debit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_debit_prepaid">Only debit and prepaid cards are accepted</string>
+  <!-- Warning shown when only credit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_credit_prepaid">Only credit and prepaid cards are accepted</string>
   <!-- Done button title -->
   <string name="stripe_done">Done</string>
   <!-- Button title to enter editing mode -->

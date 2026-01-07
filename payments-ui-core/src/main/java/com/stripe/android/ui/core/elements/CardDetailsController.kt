@@ -3,8 +3,11 @@ package com.stripe.android.ui.core.elements
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DateUtils
@@ -38,9 +41,11 @@ internal class CardDetailsController(
     uiContext: CoroutineContext = Dispatchers.Main,
     workContext: CoroutineContext = Dispatchers.IO,
     cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     cardDetailsTextFieldConfig: CardNumberTextFieldConfig = CardNumberConfig(
         isCardBrandChoiceEligible = cbcEligibility != CardBrandChoiceEligibility.Ineligible,
-        cardBrandFilter = cardBrandFilter
+        cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter
     ),
     cvcTextFieldConfig: CvcTextFieldConfig = CvcConfig(),
     dateConfig: TextFieldConfig = DateConfig(),
@@ -53,7 +58,7 @@ internal class CardDetailsController(
                 textFieldConfig = SimpleTextFieldConfig(
                     label = resolvableString(R.string.stripe_name_on_card),
                     capitalization = KeyboardCapitalization.Words,
-                    keyboard = androidx.compose.ui.text.input.KeyboardType.Text
+                    keyboard = KeyboardType.Text
                 ),
                 initialValue = initialValues[IdentifierSpec.Name],
             ),
@@ -83,7 +88,8 @@ internal class CardDetailsController(
                 )
                 is CardBrandChoiceEligibility.Ineligible -> CardBrandChoiceConfig.Ineligible
             },
-            cardBrandFilter = cardBrandFilter
+            cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = cardFundingFilter
         )
     )
 

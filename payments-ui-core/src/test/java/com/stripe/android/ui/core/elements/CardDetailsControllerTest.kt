@@ -5,9 +5,12 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cardscan.ScannedCard
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -34,7 +37,8 @@ class CardDetailsControllerTest {
         val cardDetailsTextFieldConfig = FakeCardNumberTextFieldConfig(
             defaultCardNumberTextFieldConfig = CardNumberConfig(
                 isCardBrandChoiceEligible = false,
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                cardFundingFilter = DefaultCardFundingFilter
             ),
             textFieldState = TextFieldStateConstants.Error.Invalid(
                 validationMessage = FieldValidationMessage.Warning(0)
@@ -243,9 +247,11 @@ class CardDetailsControllerTest {
         initialValues: Map<IdentifierSpec, String?> = emptyMap(),
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
         cardDetailsTextFieldConfig: CardNumberTextFieldConfig = CardNumberConfig(
             isCardBrandChoiceEligible = cbcEligibility != CardBrandChoiceEligibility.Ineligible,
-            cardBrandFilter = cardBrandFilter
+            cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = cardFundingFilter
         ),
         cvcTextFieldConfig: CvcTextFieldConfig = CvcConfig(),
         dateConfig: TextFieldConfig = DateConfig(),
@@ -278,7 +284,12 @@ class CardDetailsControllerTest {
         private val defaultCardNumberTextFieldConfig: CardNumberTextFieldConfig,
         var textFieldState: TextFieldState
     ) : CardNumberTextFieldConfig by defaultCardNumberTextFieldConfig {
-        override fun determineState(brand: CardBrand, number: String, numberAllowedDigits: Int): TextFieldState {
+        override fun determineState(
+            brand: CardBrand,
+            funding: CardFunding?,
+            number: String,
+            numberAllowedDigits: Int
+        ): TextFieldState {
             return textFieldState
         }
     }
@@ -287,7 +298,12 @@ class CardDetailsControllerTest {
         private val defaultCvcTextFieldConfig: CvcTextFieldConfig,
         var textFieldState: TextFieldState
     ) : CvcTextFieldConfig by defaultCvcTextFieldConfig {
-        override fun determineState(brand: CardBrand, number: String, numberAllowedDigits: Int): TextFieldState {
+        override fun determineState(
+            brand: CardBrand,
+            funding: CardFunding?,
+            number: String,
+            numberAllowedDigits: Int
+        ): TextFieldState {
             return textFieldState
         }
     }
