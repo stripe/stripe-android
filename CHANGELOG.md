@@ -3,7 +3,7 @@
 ## XX.XX.XX - 20XX-XX-XX
 
 ### Identity
-* [Added] More live feedback during document capture. 
+* [Added] More live feedback during document capture.
 
 ### PaymentSheet
 * [Added] Custom Payment Methods is now generally available, learn more by visiting the [docs](https://docs.stripe.com/payments/mobile/custom-payment-methods).
@@ -35,9 +35,7 @@
 
 ### Payments
 * [Added][12014](https://github.com/stripe/stripe-android/pull/12014) `ConfirmationToken.PaymentMethodPreview` now includes structured `Card` field with detailed card information (brand, country, expiry, funding, last4, etc.)
-
 * [Changed][12027](https://github.com/stripe/stripe-android/pull/12027) Undo the removal of the cardParams API on card form UIs. This API is marked as deprecated; please use PaymentMethodCreateParams instead.
-
 ## 22.2.0 - 2025-11-17
 
 ### Financial Connections
