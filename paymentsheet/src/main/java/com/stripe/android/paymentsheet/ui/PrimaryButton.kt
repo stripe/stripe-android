@@ -93,6 +93,9 @@ internal class PrimaryButton @JvmOverloads constructor(
         viewBinding.label.setViewCompositionStrategy(
             ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
         )
+
+        viewBinding.lockIcon.contentDescription = context.getString(R.string.stripe_secure_icon)
+
         getTextAttributeValue(attrs)?.let {
             setLabel(it.toString().resolvableString)
         }
