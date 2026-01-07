@@ -26,7 +26,6 @@ internal class StripeBrowserLauncherViewModel(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val browserCapabilities: BrowserCapabilities,
-    private val intentChooserTitle: String,
     private val resolveErrorMessage: String,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -53,7 +52,7 @@ internal class StripeBrowserLauncherViewModel(
             }
         }
 
-        return Intent.createChooser(intent, intentChooserTitle)
+        return intent
     }
 
     private fun createCustomTabsIntent(
@@ -137,7 +136,6 @@ internal class StripeBrowserLauncherViewModel(
                     publishableKey = config.publishableKey,
                 ),
                 browserCapabilities = browserCapabilitiesSupplier.get(),
-                intentChooserTitle = application.getString(R.string.stripe_verify_your_payment),
                 resolveErrorMessage = application.getString(R.string.stripe_failure_reason_authentication),
                 savedStateHandle = savedStateHandle,
             ) as T

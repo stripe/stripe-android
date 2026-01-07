@@ -118,6 +118,10 @@ class MainActivity : AppCompatActivity() {
                 MainScreen(items = items)
             }
         }
+
+        if (BuildConfig.DIRECTLY_TO_PLAYGROUND) {
+            startActivity(Intent(this, PaymentSheetPlaygroundActivity::class.java))
+        }
     }
 }
 

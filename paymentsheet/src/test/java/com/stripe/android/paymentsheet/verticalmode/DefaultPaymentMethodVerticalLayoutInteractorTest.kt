@@ -1671,7 +1671,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             },
             paymentMethods = paymentMethods,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
-            providePaymentMethodName = { it!!.resolvableString },
             canRemove = canRemove,
             walletsState = walletsState,
             canUpdateFullPaymentMethodDetails = stateFlowOf(canUpdateFullPaymentMethodDetails),

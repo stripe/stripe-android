@@ -839,14 +839,16 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return DaggerUSBankAccountFormComponent
-                .builder()
-                .application(extras.requireApplication())
-                .build()
-                .subComponentBuilderProvider.get()
-                .configuration(argsSupplier())
-                .savedStateHandle(extras.createSavedStateHandle())
-                .autocompleteAddressInteractorFactory(autocompleteAddressInteractorFactory)
-                .build().viewModel as T
+                .factory()
+                .create(
+                    application = extras.requireApplication(),
+                )
+                .subComponentFactoryProvider.get()
+                .create(
+                    savedStateHandle = extras.createSavedStateHandle(),
+                    configuration = argsSupplier(),
+                    autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                ).viewModel as T
         }
     }
 

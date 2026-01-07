@@ -12,7 +12,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
@@ -35,7 +34,7 @@ internal object BoletoDefinition : PaymentMethodDefinition {
     override fun uiDefinitionFactory(): UiDefinitionFactory = BoletoUiDefinitionFactory
 }
 
-private object BoletoUiDefinitionFactory : UiDefinitionFactory.Simple {
+private object BoletoUiDefinitionFactory : UiDefinitionFactory.Simple() {
     override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         paymentMethodDefinition = BoletoDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_boleto,
@@ -43,10 +42,11 @@ private object BoletoUiDefinitionFactory : UiDefinitionFactory.Simple {
         iconResourceNight = null
     )
 
-    override fun createFormElements(
+    override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments
-    ): List<FormElement> {
+        arguments: UiDefinitionFactory.Arguments,
+        builder: FormElementsBuilder
+    ) {
         val taxIdElementIdentifierSpec = IdentifierSpec.Generic("boleto[tax_id]")
         val taxIdElement = SimpleTextElement(
             taxIdElementIdentifierSpec,
@@ -59,11 +59,11 @@ private object BoletoUiDefinitionFactory : UiDefinitionFactory.Simple {
                 initialValue = arguments.initialValues[taxIdElementIdentifierSpec],
             )
         )
-        return FormElementsBuilder(arguments)
+
+        builder
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
             .element(SectionElement.wrap(taxIdElement))
             .requireBillingAddressIfAllowed(setOf("BR"))
-            .build()
     }
 }

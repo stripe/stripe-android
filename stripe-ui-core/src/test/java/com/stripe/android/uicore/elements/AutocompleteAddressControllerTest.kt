@@ -628,10 +628,10 @@ class AutocompleteAddressControllerTest {
             )
         )
 
-        controller.error.test {
+        controller.validationMessage.test {
             val error = awaitItem()
 
-            assertThat(error?.errorMessage).isEqualTo(R.string.stripe_address_zip_incomplete)
+            assertThat(error?.message).isEqualTo(R.string.stripe_address_zip_incomplete)
 
             controller.addressElementFlow.test {
                 val addressElement = awaitItem()
@@ -655,7 +655,7 @@ class AutocompleteAddressControllerTest {
 
             val nextError = expectMostRecentItem()
 
-            assertThat(nextError?.errorMessage).isEqualTo(R.string.stripe_incomplete_phone_number)
+            assertThat(nextError?.message).isEqualTo(R.string.stripe_incomplete_phone_number)
         }
     }
 
@@ -700,25 +700,25 @@ class AutocompleteAddressControllerTest {
         fieldsTest { controller ->
             val fields = awaitItem()
 
-            fields.element(IdentifierSpec.Country).errorTest(fieldError = null)
-            fields.element(IdentifierSpec.Line1).errorTest(fieldError = null)
-            fields.element(IdentifierSpec.Line2).errorTest(fieldError = null)
-            fields.element(IdentifierSpec.State).errorTest(fieldError = null)
-            fields.element(IdentifierSpec.PostalCode).errorTest(fieldError = null)
-            fields.element(IdentifierSpec.City).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.Country).errorTest(fieldValidationMessage = null)
+            fields.element(IdentifierSpec.Line1).errorTest(fieldValidationMessage = null)
+            fields.element(IdentifierSpec.Line2).errorTest(fieldValidationMessage = null)
+            fields.element(IdentifierSpec.State).errorTest(fieldValidationMessage = null)
+            fields.element(IdentifierSpec.PostalCode).errorTest(fieldValidationMessage = null)
+            fields.element(IdentifierSpec.City).errorTest(fieldValidationMessage = null)
 
             controller.onValidationStateChanged(true)
 
-            fields.element(IdentifierSpec.Country).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.Country).errorTest(fieldValidationMessage = null)
             fields.element(IdentifierSpec.Line1)
-                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
-            fields.element(IdentifierSpec.Line2).errorTest(fieldError = null)
+                .errorTest(fieldValidationMessage = FieldValidationMessage.Error(R.string.stripe_blank_and_required))
+            fields.element(IdentifierSpec.Line2).errorTest(fieldValidationMessage = null)
             fields.element(IdentifierSpec.State)
-                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+                .errorTest(fieldValidationMessage = FieldValidationMessage.Error(R.string.stripe_blank_and_required))
             fields.element(IdentifierSpec.PostalCode)
-                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+                .errorTest(fieldValidationMessage = FieldValidationMessage.Error(R.string.stripe_blank_and_required))
             fields.element(IdentifierSpec.City)
-                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+                .errorTest(fieldValidationMessage = FieldValidationMessage.Error(R.string.stripe_blank_and_required))
         }
 
     private fun noAutocompleteTest(
@@ -869,12 +869,12 @@ class AutocompleteAddressControllerTest {
         return null
     }
 
-    private suspend fun SectionFieldElement.errorTest(fieldError: FieldError?) {
-        sectionFieldErrorController().error.test {
-            fieldError?.let {
+    private suspend fun SectionFieldElement.errorTest(fieldValidationMessage: FieldValidationMessage?) {
+        sectionFieldErrorController().validationMessage.test {
+            fieldValidationMessage?.let {
                 val error = awaitItem()
 
-                assertThat(error?.errorMessage).isEqualTo(it.errorMessage)
+                assertThat(error?.message).isEqualTo(it.message)
                 assertThat(error?.formatArgs).isEqualTo(it.formatArgs)
             } ?: run {
                 assertThat(awaitItem()).isNull()

@@ -35,6 +35,7 @@ object PaymentMethodFactory {
         brand: CardBrand = CardBrand.Visa,
         fingerprint: String? = card?.fingerprint,
         billingDetails: PaymentMethod.BillingDetails? = null,
+        funding: String? = card?.funding
     ): PaymentMethod {
         return copy(
             card = card?.copy(
@@ -48,6 +49,7 @@ object PaymentMethodFactory {
                 displayBrand = "cartes_bancaries".takeIf { addCbcNetworks },
                 brand = brand,
                 fingerprint = fingerprint,
+                funding = funding
             ),
             billingDetails = billingDetails,
         )

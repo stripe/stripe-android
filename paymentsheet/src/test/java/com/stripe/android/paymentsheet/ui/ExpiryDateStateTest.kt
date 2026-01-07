@@ -68,21 +68,21 @@ internal class ExpiryDateStateTest {
     fun `section should return non-null message for expired date`() {
         val state = ExpiryDateState(text = EXPIRED_EXPIRY_TEXT, enabled = true, validating = false)
 
-        assertThat(state.sectionError()).isNotNull()
+        assertThat(state.sectionValidationMessage()).isNotNull()
     }
 
     @Test
     fun `sectionError should return null for valid date`() {
         val state = ExpiryDateState(text = VALID_EXPIRY_TEXT, enabled = true, validating = false)
 
-        assertThat(state.sectionError()).isNull()
+        assertThat(state.sectionValidationMessage()).isNull()
     }
 
     @Test
     fun `sectionError should return null when not enabled even if invalid`() {
         val state = ExpiryDateState(text = INVALID_FORMAT_EXPIRY_TEXT, enabled = false, validating = false)
 
-        assertThat(state.sectionError()).isNull()
+        assertThat(state.sectionValidationMessage()).isNull()
     }
 
     @Test
@@ -144,7 +144,7 @@ internal class ExpiryDateStateTest {
 
         assertThat(state.validating).isTrue()
         assertThat(state.shouldShowError()).isTrue()
-        assertThat(state.sectionError()).isNotNull()
+        assertThat(state.sectionValidationMessage()).isNotNull()
     }
 
     private fun createCard(expiryMonth: Int?, expiryYear: Int?): EditCardPayload {

@@ -30,7 +30,7 @@ class CardDetailsControllerTest {
             initialValues = emptyMap(),
         )
 
-        cardController.error.test {
+        cardController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             cardController.numberElement.controller.onValueChange("4242424242424243")
@@ -39,14 +39,14 @@ class CardDetailsControllerTest {
 
             idleLooper()
 
-            assertThat(awaitItem()?.errorMessage).isEqualTo(
+            assertThat(awaitItem()?.message).isEqualTo(
                 StripeR.string.stripe_invalid_card_number
             )
 
             cardController.numberElement.controller.onValueChange("4242424242424242")
             idleLooper()
 
-            assertThat(awaitItem()?.errorMessage).isEqualTo(
+            assertThat(awaitItem()?.message).isEqualTo(
                 UiCoreR.string.stripe_incomplete_expiry_date
             )
         }

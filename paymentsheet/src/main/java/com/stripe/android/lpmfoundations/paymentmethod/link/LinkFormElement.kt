@@ -33,7 +33,11 @@ internal class LinkFormElement(
     }
 
     @Composable
-    override fun ComposeUI(enabled: Boolean) {
+    override fun ComposeUI(
+        enabled: Boolean,
+        hiddenIdentifiers: Set<IdentifierSpec>,
+        lastTextFieldIdentifier: IdentifierSpec?,
+    ) {
         val modifier = Modifier.run {
             if (LocalSectionSpacing.current == null) {
                 padding(vertical = 6.dp)

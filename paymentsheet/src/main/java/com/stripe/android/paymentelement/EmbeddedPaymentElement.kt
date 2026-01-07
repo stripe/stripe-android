@@ -32,6 +32,7 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementViewModel
 import com.stripe.android.paymentelement.embedded.content.EmbeddedStateHelper
 import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDataHolder
+import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -182,12 +183,15 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
             private set
 
-        @OptIn(ExperimentalCustomPaymentMethodsApi::class)
         internal var confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback? = null
             private set
 
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)
         internal var analyticEventCallback: AnalyticEventCallback? = null
+            private set
+
+        @OptIn(TapToAddPreview::class)
+        internal var createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback? = null
             private set
 
         internal var rowSelectionBehavior: RowSelectionBehavior = RowSelectionBehavior.default()
@@ -202,7 +206,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
         /**
          * Called when a user confirms payment for a custom payment method.
          */
-        @ExperimentalCustomPaymentMethodsApi
         fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
             this.confirmCustomPaymentMethodCallback = callback
         }
@@ -213,6 +216,17 @@ class EmbeddedPaymentElement @Inject internal constructor(
         @ExperimentalAnalyticEventCallbackApi
         fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
             this.analyticEventCallback = callback
+        }
+
+        /**
+         * @param callback called when the customer attempts to save their card by tapping it on their device.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @TapToAddPreview
+        fun createCardPresentSetupIntentCallback(
+            callback: CreateCardPresentSetupIntentCallback,
+        ) = apply {
+            this.createCardPresentSetupIntentCallback = callback
         }
 
         /**
@@ -258,6 +272,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val paymentMethodOrder: List<String>,
         internal val externalPaymentMethods: List<String>,
         internal val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+        internal val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
         internal val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         internal val embeddedViewDisplaysMandateText: Boolean,
         internal val link: PaymentSheet.LinkConfiguration,
@@ -291,6 +306,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
+            private var allowedCardFundingTypes: List<PaymentSheet.CardFundingType> =
+                ConfigurationDefaults.allowedCardFundingTypes
             private var embeddedViewDisplaysMandateText: Boolean = ConfigurationDefaults.embeddedViewDisplaysMandateText
             private var customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -457,11 +474,27 @@ class EmbeddedPaymentElement @Inject internal constructor(
             }
 
             /**
+             * By default, the embedded payment element will accept cards of all funding types
+             * (credit, debit, prepaid, unknown).
+             * You can specify which card funding types to allow.
+             *
+             * **Note**: This is only a client-side solution.
+             * **Note**: Card funding filtering is not currently supported in Link.
+             *
+             * @param cardFundingTypes The list of allowed card funding types.
+             */
+            @CardFundingFilteringPrivatePreview
+            fun allowedCardFundingTypes(
+                cardFundingTypes: List<PaymentSheet.CardFundingType>
+            ): Builder = apply {
+                this.allowedCardFundingTypes = cardFundingTypes
+            }
+
+            /**
              * Configuration related to custom payment methods.
              *
              * If set, Embedded Payment Element will display the defined list of custom payment methods in the UI.
              */
-            @ExperimentalCustomPaymentMethodsApi
             fun customPaymentMethods(
                 customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
             ) = apply {
@@ -536,6 +569,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 paymentMethodOrder = paymentMethodOrder,
                 externalPaymentMethods = externalPaymentMethods,
                 cardBrandAcceptance = cardBrandAcceptance,
+                allowedCardFundingTypes = allowedCardFundingTypes,
                 customPaymentMethods = customPaymentMethods,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
                 link = link,

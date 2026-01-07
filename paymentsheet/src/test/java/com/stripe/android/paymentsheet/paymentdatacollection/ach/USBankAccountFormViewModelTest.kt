@@ -1930,11 +1930,11 @@ class USBankAccountFormViewModelTest {
         )
 
         turbineScope {
-            val nameErrorTurbine = viewModel.nameController.error.testIn(this)
-            val emailErrorTurbine = viewModel.emailController.error.testIn(this)
-            val phoneErrorTurbine = viewModel.phoneController.error.testIn(this)
+            val nameErrorTurbine = viewModel.nameController.validationMessage.testIn(this)
+            val emailErrorTurbine = viewModel.emailController.validationMessage.testIn(this)
+            val phoneErrorTurbine = viewModel.phoneController.validationMessage.testIn(this)
             val addressErrorTurbine =
-                viewModel.addressElement.sectionFieldErrorController().error.testIn(this)
+                viewModel.addressElement.sectionFieldErrorController().validationMessage.testIn(this)
 
             assertThat(nameErrorTurbine.awaitItem()).isNull()
             assertThat(emailErrorTurbine.awaitItem()).isNull()

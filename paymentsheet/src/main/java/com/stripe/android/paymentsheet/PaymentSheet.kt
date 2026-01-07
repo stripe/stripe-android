@@ -26,6 +26,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -33,12 +34,13 @@ import com.stripe.android.paymentelement.AddressAutocompletePreview
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
+import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -309,7 +311,6 @@ class PaymentSheet internal constructor(
          * @param callback Called when a user confirms payment for a custom payment method. Use with
          * [Configuration.Builder.customPaymentMethods] to specify custom payment methods.
          */
-        @ExperimentalCustomPaymentMethodsApi
         fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
             callbacksBuilder.confirmCustomPaymentMethodCallback(callback)
         }
@@ -354,6 +355,17 @@ class PaymentSheet internal constructor(
             handler: PreparePaymentMethodHandler
         ) = apply {
             callbacksBuilder.preparePaymentMethodHandler(handler)
+        }
+
+        /**
+         * @param callback called when the customer attempts to save their card by tapping it on their device.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @TapToAddPreview
+        fun createCardPresentSetupIntentCallback(
+            callback: CreateCardPresentSetupIntentCallback,
+        ) = apply {
+            callbacksBuilder.createCardPresentSetupIntentCallback(callback)
         }
 
         /**
@@ -808,6 +820,8 @@ class PaymentSheet internal constructor(
 
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
 
+        internal val allowedCardFundingTypes: List<CardFundingType> = ConfigurationDefaults.allowedCardFundingTypes,
+
         internal val customPaymentMethods: List<CustomPaymentMethod> =
             ConfigurationDefaults.customPaymentMethods,
 
@@ -966,6 +980,7 @@ class PaymentSheet internal constructor(
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
+            private var allowedCardFundingTypes: List<CardFundingType> = ConfigurationDefaults.allowedCardFundingTypes
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
             private var walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons
             private var shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration
@@ -1078,11 +1093,27 @@ class PaymentSheet internal constructor(
             }
 
             /**
+             * By default, PaymentSheet will accept cards of all funding types (credit, debit,
+             * prepaid, unknown).
+             * You can specify which card funding types to allow.
+             *
+             * **Note**: This is only a client-side solution.
+             * **Note**: Card funding filtering is not currently supported in Link.
+             *
+             * @param cardFundingTypes The list of allowed card funding types.
+             */
+            @CardFundingFilteringPrivatePreview
+            fun allowedCardFundingTypes(
+                cardFundingTypes: List<CardFundingType>
+            ): Builder = apply {
+                this.allowedCardFundingTypes = cardFundingTypes
+            }
+
+            /**
              * Configuration related to custom payment methods.
              *
              * If set, Payment Sheet will display the defined list of custom payment methods in the UI.
              */
-            @ExperimentalCustomPaymentMethodsApi
             fun customPaymentMethods(
                 customPaymentMethods: List<CustomPaymentMethod>,
             ) = apply {
@@ -1159,6 +1190,7 @@ class PaymentSheet internal constructor(
                 externalPaymentMethods = externalPaymentMethods,
                 paymentMethodLayout = paymentMethodLayout,
                 cardBrandAcceptance = cardBrandAcceptance,
+                allowedCardFundingTypes = allowedCardFundingTypes,
                 customPaymentMethods = customPaymentMethods,
                 link = link,
                 walletButtons = walletButtons,
@@ -1179,9 +1211,9 @@ class PaymentSheet internal constructor(
 
         @OptIn(
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
-            ExperimentalCustomPaymentMethodsApi::class,
             WalletButtonsPreview::class,
-            ShopPayPreview::class
+            ShopPayPreview::class,
+            CardFundingFilteringPrivatePreview::class
         )
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
@@ -1198,6 +1230,7 @@ class PaymentSheet internal constructor(
             .externalPaymentMethods(externalPaymentMethods)
             .paymentMethodLayout(paymentMethodLayout)
             .cardBrandAcceptance(cardBrandAcceptance)
+            .allowedCardFundingTypes(CardFundingType.entries)
             .customPaymentMethods(customPaymentMethods)
             .link(link)
             .walletButtons(walletButtons)
@@ -3430,6 +3463,42 @@ class PaymentSheet internal constructor(
     }
 
     /**
+     * Card funding categories that can be filtered.
+     */
+    @Parcelize
+    enum class CardFundingType : Parcelable {
+        /**
+         * Debit cards
+         */
+        Debit,
+
+        /**
+         * Credit cards
+         */
+        Credit,
+
+        /**
+         * Prepaid cards
+         */
+        Prepaid,
+
+        /**
+         * Unknown funding type
+         */
+        Unknown;
+
+        internal val cardFunding: CardFunding
+            get() {
+                return when (this) {
+                    Debit -> CardFunding.Debit
+                    Credit -> CardFunding.Credit
+                    Prepaid -> CardFunding.Prepaid
+                    Unknown -> CardFunding.Unknown
+                }
+            }
+    }
+
+    /**
      * Defines a custom payment method type that can be displayed in Payment Element.
      */
     @Poko
@@ -3439,7 +3508,6 @@ class PaymentSheet internal constructor(
         internal val subtitle: ResolvableString?,
         internal val disableBillingDetailCollection: Boolean,
     ) : Parcelable {
-        @ExperimentalCustomPaymentMethodsApi
         constructor(
             /**
              * The unique identifier for this custom payment method type in the format of "cmpt_...".
@@ -3467,7 +3535,6 @@ class PaymentSheet internal constructor(
             disableBillingDetailCollection = disableBillingDetailCollection,
         )
 
-        @ExperimentalCustomPaymentMethodsApi
         constructor(
             /**
              * The unique identifier for this custom payment method type in the format of "cmpt_...".
@@ -4037,7 +4104,6 @@ class PaymentSheet internal constructor(
             /**
              * @param callback Called when a user confirms payment for a custom payment method.
              */
-            @ExperimentalCustomPaymentMethodsApi
             fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
                 callbacksBuilder.confirmCustomPaymentMethodCallback(callback)
             }
@@ -4086,6 +4152,17 @@ class PaymentSheet internal constructor(
                 handler: PreparePaymentMethodHandler
             ) = apply {
                 callbacksBuilder.preparePaymentMethodHandler(handler)
+            }
+
+            /**
+             * @param callback called when the customer attempts to save their card by tapping it on their device.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @TapToAddPreview
+            fun createCardPresentSetupIntentCallback(
+                callback: CreateCardPresentSetupIntentCallback,
+            ) = apply {
+                callbacksBuilder.createCardPresentSetupIntentCallback(callback)
             }
 
             /**

@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.CardMetadata
 import org.json.JSONObject
 import kotlin.test.Test
@@ -24,6 +25,7 @@ class CardMetadataJsonParserTest {
                             ),
                             panLength = 16,
                             brandInfo = AccountRange.BrandInfo.Visa,
+                            funding = CardFunding.Unknown,
                             country = "GB"
                         ),
                         AccountRange(
@@ -33,6 +35,7 @@ class CardMetadataJsonParserTest {
                             ),
                             panLength = 16,
                             brandInfo = AccountRange.BrandInfo.Visa,
+                            funding = CardFunding.Unknown,
                             country = "GB"
                         )
                     )
@@ -54,6 +57,7 @@ class CardMetadataJsonParserTest {
                             ),
                             panLength = 16,
                             brandInfo = AccountRange.BrandInfo.Visa,
+                            funding = CardFunding.Unknown,
                             country = "GB"
                         )
                     )

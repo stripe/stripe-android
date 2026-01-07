@@ -23,11 +23,11 @@ internal interface PaymentMethodMessagingComponent {
     @OptIn(PaymentMethodMessagingElementPreview::class)
     val element: PaymentMethodMessagingElement
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        fun build(): PaymentMethodMessagingComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            application: Application,
+        ): PaymentMethodMessagingComponent
     }
 }

@@ -7,7 +7,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal object SunbitDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Sunbit
@@ -25,13 +24,9 @@ internal object SunbitDefinition : PaymentMethodDefinition {
     override fun uiDefinitionFactory(): UiDefinitionFactory = SunbitUiDefinitionFactory
 }
 
-private object SunbitUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec,
-    ) = SupportedPaymentMethod(
+private object SunbitUiDefinitionFactory : UiDefinitionFactory.Simple() {
+    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         paymentMethodDefinition = SunbitDefinition,
-        sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_sunbit,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_sunbit_day,
         iconResourceNight = R.drawable.stripe_ic_paymentsheet_pm_sunbit_night,

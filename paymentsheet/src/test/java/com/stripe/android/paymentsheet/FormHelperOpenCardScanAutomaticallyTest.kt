@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -153,7 +154,8 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 linkGateFactory = FakeLinkGate.Factory(),
                 linkPaymentLauncher = mock<LinkPaymentLauncher>(),
-                linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+                tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
             )
         }
     }
@@ -199,7 +201,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                         return FakeCvcRecollectionInteractor()
                     }
                 },
-                isLiveModeProvider = { false }
+                tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
             )
         }
     }

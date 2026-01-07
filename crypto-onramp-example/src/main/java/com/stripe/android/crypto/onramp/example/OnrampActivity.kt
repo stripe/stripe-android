@@ -3,13 +3,14 @@ package com.stripe.android.crypto.onramp.example
 import android.R
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,6 +36,10 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Snackbar
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
@@ -50,11 +55,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -69,6 +75,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
+import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -131,6 +138,21 @@ internal class OnrampActivity : ComponentActivity() {
 
         setContent {
             val showAddressModal by viewModel.updateAddressEvent.collectAsStateWithLifecycle()
+            val message by viewModel.message.collectAsStateWithLifecycle()
+            val snackbarHostState = remember { SnackbarHostState() }
+
+            // Show toast messages
+            LaunchedEffect(message) {
+                message?.let {
+                    snackbarHostState.showSnackbar(
+                        message = it,
+                        duration = SnackbarDuration.Short
+                    )
+
+                    Log.d("OnrampExample", it)
+                    viewModel.clearMessage()
+                }
+            }
 
             OnrampExampleTheme {
                 Scaffold(
@@ -140,6 +162,20 @@ internal class OnrampActivity : ComponentActivity() {
                             title = { Text("Onramp Coordinator") },
                         )
                     },
+                    snackbarHost = {
+                        SnackbarHost(
+                            hostState = snackbarHostState,
+                            modifier = Modifier.testTag("OnrampSnackbarHost"),
+                            snackbar = { data ->
+                                Snackbar(modifier = Modifier.testTag(SNACKBAR_TAG)) {
+                                    Text(
+                                        data.message,
+                                        modifier = Modifier.testTag(SNACKBAR_TEXT_TAG)
+                                    )
+                                }
+                            }
+                        )
+                    }
                 ) { innerPadding ->
                     ModalBottomSheetLayout(
                         sheetContent = {
@@ -185,6 +221,7 @@ internal class OnrampActivity : ComponentActivity() {
                                 onrampPresenter.verifyIdentity()
                             },
                             onCollectPayment = { type ->
+                                viewModel.updateSelectedPaymentMethod(type)
                                 onrampPresenter.collectPaymentMethod(type)
                             },
                             onCreatePaymentToken = {
@@ -345,6 +382,7 @@ internal fun LoginSignupScreen(
                 imeAction = ImeAction.Next
             ),
             modifier = Modifier
+                .testTag(LOGIN_EMAIL_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
                 .onPreviewKeyEvent {
@@ -367,6 +405,7 @@ internal fun LoginSignupScreen(
                 imeAction = ImeAction.Done
             ),
             modifier = Modifier
+                .testTag(LOGIN_PASSWORD_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
         )
@@ -374,6 +413,7 @@ internal fun LoginSignupScreen(
         Button(
             onClick = { onLogin(email, password) },
             modifier = Modifier.fillMaxWidth()
+                .testTag(LOGIN_LOGIN_BUTTON_TAG)
                 .padding(bottom = 16.dp)
         ) {
             Text("Login")
@@ -382,6 +422,7 @@ internal fun LoginSignupScreen(
         Button(
             onClick = { onRegister(email, password) },
             modifier = Modifier.fillMaxWidth()
+                .testTag(LOGIN_REGISTER_BUTTON_TAG)
         ) {
             Text("Register")
         }
@@ -401,20 +442,9 @@ internal fun OnrampScreen(
     onVerifyKyc: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val message by viewModel.message.collectAsStateWithLifecycle()
-    val context = LocalContext.current
 
     BackHandler(enabled = uiState.screen != Screen.LoginSignup) {
         viewModel.onBackToLoginSignup()
-    }
-
-    // Show toast messages
-    LaunchedEffect(message) {
-        message?.let {
-            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-            Log.d("OnrampExample", it)
-            viewModel.clearMessage()
-        }
     }
 
     Column(
@@ -473,6 +503,8 @@ internal fun OnrampScreen(
                     email = uiState.email,
                     consentedLinkAuthIntentIds = uiState.consentedLinkAuthIntentIds,
                     onrampSessionResponse = uiState.onrampSession,
+                    selectedPaymentType = uiState.selectedPaymentType,
+                    selectedSettlementSpeed = uiState.settlementSpeed,
                     selectedPaymentData = uiState.selectedPaymentData,
                     onAuthenticate = onAuthenticateUser,
                     onRegisterWalletAddress = onRegisterWalletAddress,
@@ -486,6 +518,9 @@ internal fun OnrampScreen(
                     onLogOut = { viewModel.logOut() },
                     onBack = {
                         viewModel.onBackToLoginSignup()
+                    },
+                    onSelectSettlementSpeed = {
+                        viewModel.updateSettlementSpeed(it)
                     }
                 )
             }
@@ -679,6 +714,7 @@ fun AuthenticateSection(
     Button(
         onClick = { onAuthenticate(oauthScopes) },
         modifier = Modifier
+            .testTag(AUTHENTICATE_BUTTON_TAG)
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     ) {
@@ -693,6 +729,8 @@ private fun AuthenticatedOperationsScreen(
     consentedLinkAuthIntentIds: List<String>,
     onrampSessionResponse: OnrampSessionResponse?,
     selectedPaymentData: PaymentMethodDisplayData?,
+    selectedPaymentType: PaymentMethodType?,
+    selectedSettlementSpeed: SettlementSpeed?,
     onAuthenticate: (oauthScopes: String?) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
@@ -703,12 +741,14 @@ private fun AuthenticatedOperationsScreen(
     onCreateSession: () -> Unit,
     onPerformCheckout: () -> Unit,
     onLogOut: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onSelectSettlementSpeed: (SettlementSpeed) -> Unit,
 ) {
     // hardcoded sample ETH wallet
     var walletAddressInput by remember { mutableStateOf("0x742d35Cc6634C0532925a3b844Bc454e4438f44e") }
     var selectedNetwork by remember { mutableStateOf(CryptoNetwork.Ethereum) }
     var isDropdownExpanded by remember { mutableStateOf(false) }
+
     val scrollState = rememberScrollState()
 
     Column(
@@ -774,6 +814,34 @@ private fun AuthenticatedOperationsScreen(
         }
 
         selectedPaymentData?.let {
+            if (selectedPaymentType == PaymentMethodType.BankAccount) {
+                Text(
+                    text = "Settlement Speed",
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                ) {
+                    SettlementSpeed.entries.forEach { speed ->
+                        val isSelected = selectedSettlementSpeed == speed
+                        Box(
+                            modifier = Modifier
+                                .background(if (isSelected) MaterialTheme.colors.primary else Color.LightGray)
+                                .clickable { onSelectSettlementSpeed(speed) }
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = speed.name.lowercase().replaceFirstChar { it.uppercase() },
+                                color = if (isSelected) Color.White else Color.Black
+                            )
+                        }
+                    }
+                }
+            }
+
             Image(
                 painter = painterResource(selectedPaymentData.iconRes),
                 contentDescription = selectedPaymentData.label,
@@ -856,6 +924,7 @@ private fun AuthenticatedOperationsScreen(
         Button(
             onClick = { onRegisterWalletAddress(walletAddressInput, selectedNetwork) },
             modifier = Modifier
+                .testTag(REGISTER_WALLET_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 24.dp)
         ) {
@@ -898,6 +967,7 @@ private fun AuthenticatedOperationsScreen(
         Button(
             onClick = { onCollectPayment(PaymentMethodType.Card) },
             modifier = Modifier
+                .testTag(COLLECT_CARD_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
@@ -916,6 +986,7 @@ private fun AuthenticatedOperationsScreen(
         Button(
             onClick = onCreatePaymentToken,
             modifier = Modifier
+                .testTag(CREATE_CRYPTO_TOKEN_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
@@ -925,6 +996,7 @@ private fun AuthenticatedOperationsScreen(
         Button(
             onClick = onCreateSession,
             modifier = Modifier
+                .testTag(CREATE_SESSION_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
@@ -935,6 +1007,7 @@ private fun AuthenticatedOperationsScreen(
             onClick = onPerformCheckout,
             enabled = onrampSessionResponse != null,
             modifier = Modifier
+                .testTag(CHECKOUT_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
@@ -1100,3 +1173,16 @@ fun OnrampExampleTheme(
         content = content,
     )
 }
+
+internal const val LOGIN_EMAIL_TAG = "LoginEmailTag"
+internal const val LOGIN_PASSWORD_TAG = "LoginPasswordTag"
+internal const val LOGIN_LOGIN_BUTTON_TAG = "LoginLoginButtonTag"
+internal const val LOGIN_REGISTER_BUTTON_TAG = "LoginRegisterButtonTag"
+internal const val AUTHENTICATE_BUTTON_TAG = "AuthenticateButtonTag"
+internal const val REGISTER_WALLET_BUTTON_TAG = "RegisterWalletButtonTag"
+internal const val COLLECT_CARD_BUTTON_TAG = "CollectCardButtonTag"
+internal const val CREATE_CRYPTO_TOKEN_BUTTON_TAG = "CreateCryptoTokenButtonTag"
+internal const val CREATE_SESSION_BUTTON_TAG = "CreateSessionButtonTag"
+internal const val CHECKOUT_BUTTON_TAG = "CheckoutButtonTag"
+internal const val SNACKBAR_TAG = "SnackbarTag"
+internal const val SNACKBAR_TEXT_TAG = "SnackbarTextTag"

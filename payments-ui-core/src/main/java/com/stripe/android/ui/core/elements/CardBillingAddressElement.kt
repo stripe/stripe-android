@@ -17,13 +17,13 @@ import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
-import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionFieldComposable
 import com.stripe.android.uicore.elements.SectionFieldElement
-import com.stripe.android.uicore.elements.SectionFieldErrorController
+import com.stripe.android.uicore.elements.SectionFieldValidationController
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -107,8 +107,8 @@ class CardBillingAddressElement(
 
     private val addressElementSectionController = addressElement.sectionFieldErrorController()
     private val cardBillingAddressElementSectionErrorController =
-        object : SectionFieldErrorController by addressElementSectionController, SectionFieldComposable {
-            override val error: StateFlow<FieldError?> =
+        object : SectionFieldValidationController by addressElementSectionController, SectionFieldComposable {
+            override val validationMessage: StateFlow<FieldValidationMessage?> =
                 addressElement.addressController
                     .flatMapLatestAsStateFlow { addressController ->
                         combineAsStateFlow(
@@ -129,7 +129,7 @@ class CardBillingAddressElement(
                     }
                     .flatMapLatestAsStateFlow { fields ->
                         combineAsStateFlow(
-                            fields.map { it.sectionFieldErrorController().error }
+                            fields.map { it.sectionFieldErrorController().validationMessage }
                         ) { fieldErrors ->
                             fieldErrors.filterNotNull().firstOrNull()
                         }
@@ -202,7 +202,7 @@ class CardBillingAddressElement(
 
     override fun getFormFieldValueFlow() = addressElement.getFormFieldValueFlow()
 
-    override fun sectionFieldErrorController(): SectionFieldErrorController =
+    override fun sectionFieldErrorController(): SectionFieldValidationController =
         cardBillingAddressElementSectionErrorController
 
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) = addressElement.setRawValue(rawValuesMap)

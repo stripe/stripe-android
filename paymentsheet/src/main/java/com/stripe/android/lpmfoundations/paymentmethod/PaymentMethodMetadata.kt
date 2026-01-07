@@ -3,6 +3,8 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -81,6 +83,8 @@ internal data class PaymentMethodMetadata(
     val onBehalfOf: String?,
     val integrationMetadata: IntegrationMetadata,
     val analyticsMetadata: AnalyticsMetadata,
+    val experimentsData: ElementsSession.ExperimentsData?,
+    val isTapToAddSupported: Boolean,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -155,6 +159,12 @@ internal data class PaymentMethodMetadata(
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
             definition.uiDefinitionFactory().supportedPaymentMethod(this, definition, sharedDataSpecs)
         }
+    }
+
+    fun displayNameForCode(
+        code: String?,
+    ): ResolvableString {
+        return code?.let { supportedPaymentMethodForCode(code) }?.displayName.orEmpty()
     }
 
     fun sortedSupportedPaymentMethods(): List<SupportedPaymentMethod> {
@@ -326,6 +336,7 @@ internal data class PaymentMethodMetadata(
             clientAttributionMetadata: ClientAttributionMetadata,
             integrationMetadata: IntegrationMetadata,
             analyticsMetadata: AnalyticsMetadata,
+            isTapToAddSupported: Boolean,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
@@ -373,6 +384,8 @@ internal data class PaymentMethodMetadata(
                 onBehalfOf = elementsSession.onBehalfOf,
                 integrationMetadata = integrationMetadata,
                 analyticsMetadata = analyticsMetadata,
+                experimentsData = elementsSession.experimentsData,
+                isTapToAddSupported = isTapToAddSupported,
             )
         }
 
@@ -383,6 +396,7 @@ internal data class PaymentMethodMetadata(
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
             customerMetadata: CustomerMetadata,
+            integrationMetadata: IntegrationMetadata.CustomerSheet,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
@@ -433,8 +447,10 @@ internal data class PaymentMethodMetadata(
                 attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation,
                 appearance = configuration.appearance,
                 onBehalfOf = elementsSession.onBehalfOf,
-                integrationMetadata = IntegrationMetadata.CustomerSheet,
+                integrationMetadata = integrationMetadata,
                 analyticsMetadata = AnalyticsMetadata(emptyMap()), // This is unused in customer sheet.
+                isTapToAddSupported = false, // This is unused in customer sheet.
+                experimentsData = elementsSession.experimentsData,
             )
         }
     }

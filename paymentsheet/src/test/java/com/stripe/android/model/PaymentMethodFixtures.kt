@@ -468,7 +468,7 @@ internal object PaymentMethodFixtures {
     )
 
     val GENERIC_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
-        iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal_day,
         iconResourceNight = null,
         label = "PayPal".resolvableString,
         paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL,

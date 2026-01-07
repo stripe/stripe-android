@@ -2,6 +2,33 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Identity
+* [Added] More live feedback during document capture. 
+
+### PaymentSheet
+* [Added] Custom Payment Methods is now generally available, learn more by visiting the [docs](https://docs.stripe.com/payments/mobile/custom-payment-methods).
+
+## 22.5.0 - 2025-12-15
+
+### Payments
+* [Added] Added support for [PayPay](https://docs.stripe.com/payments/paypay) payments.
+
+### PaymentSheet
+* [Added][12073](https://github.com/stripe/stripe-android/pull/12073) Added support for [PromptPay](https://docs.stripe.com/payments/promptpay) to PaymentSheet.
+
+## 22.4.0 - 2025-12-08
+
+### PaymentSheet
+* [CHANGED][12036](https://github.com/stripe/stripe-android/pull/12036) Updates the google places SDK from 3.5.0 to 5.0.0.
+
+### Identity
+* [FIXED] [12083](https://github.com/stripe/stripe-android/pull/12083) Improved exception handling for TFLite selfie models to prevent rare crashes in the Identity verification flow.
+
+## 22.3.0 - 2025-12-01
+
+### Payment Method Messaging
+* [Added] Payment Method Messaging Element is now available in public preview.
+
 ### PaymentSheet
 * [Added][12011](https://github.com/stripe/stripe-android/pull/12011) Builder APIs for PaymentSheet appearance customization (Colors, Shapes, Typography, PrimaryButtonColors, and embedded row styles)
 * [Added] opensCardScannerAutomatically configuration is now available.
@@ -9,8 +36,7 @@
 ### Payments
 * [Added][12014](https://github.com/stripe/stripe-android/pull/12014) `ConfirmationToken.PaymentMethodPreview` now includes structured `Card` field with detailed card information (brand, country, expiry, funding, last4, etc.)
 
-### Identity
-* [Added] More live feedback during document capture. 
+* [Changed][12027](https://github.com/stripe/stripe-android/pull/12027) Undo the removal of the cardParams API on card form UIs. This API is marked as deprecated; please use PaymentMethodCreateParams instead.
 
 ## 22.2.0 - 2025-11-17
 

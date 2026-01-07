@@ -13,17 +13,15 @@ import dagger.Subcomponent
 internal interface Stripe3ds2TransactionViewModelSubcomponent {
     val viewModel: Stripe3ds2TransactionViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-        @BindsInstance
-        fun args(args: Stripe3ds2TransactionContract.Args): Builder
-
-        @BindsInstance
-        fun savedStateHandle(handle: SavedStateHandle): Builder
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        fun build(): Stripe3ds2TransactionViewModelSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            args: Stripe3ds2TransactionContract.Args,
+            @BindsInstance
+            handle: SavedStateHandle,
+            @BindsInstance
+            application: Application,
+        ): Stripe3ds2TransactionViewModelSubcomponent
     }
 }

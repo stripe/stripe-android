@@ -43,7 +43,7 @@ internal class IntentConfirmationDefinition(
                 ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.ephemeralKeySecret,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
             )
-        } catch (e: DeferredIntentCallbackNotFoundException) {
+        } catch (e: CallbackNotFoundException) {
             return ConfirmationDefinition.Action.Fail(
                 cause = IllegalStateException(e.message),
                 message = e.resolvableError,

@@ -29,20 +29,17 @@ internal interface CollectBankAccountComponent {
 
     fun inject(factory: CollectBankAccountViewModel.Factory)
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun viewEffect(application: MutableSharedFlow<CollectBankAccountViewEffect>): Builder
-
-        @BindsInstance
-        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
-
-        @BindsInstance
-        fun configuration(configuration: CollectBankAccountContract.Args): Builder
-
-        fun build(): CollectBankAccountComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            application: Application,
+            @BindsInstance
+            viewEffect: MutableSharedFlow<CollectBankAccountViewEffect>,
+            @BindsInstance
+            savedStateHandle: SavedStateHandle,
+            @BindsInstance
+            configuration: CollectBankAccountContract.Args,
+        ): CollectBankAccountComponent
     }
 }

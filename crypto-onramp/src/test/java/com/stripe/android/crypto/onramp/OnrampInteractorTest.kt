@@ -3,11 +3,14 @@ package com.stripe.android.crypto.onramp
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
+import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
+import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
 import com.stripe.android.crypto.onramp.model.KycInfo
+import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
@@ -23,8 +26,12 @@ import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
+import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
+import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
+import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
+import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkController.ConfigureResult
@@ -315,13 +322,6 @@ class OnrampInteractorTest {
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.CollectPaymentMethodCompleted(null))
     }
 
-    private fun mockLinkAccount(): LinkController.LinkAccount = LinkController.LinkAccount(
-        email = "test@email.com",
-        redactedPhoneNumber = "***-***-1234",
-        sessionState = LinkController.SessionState.LoggedIn,
-        consumerSessionClientSecret = "secret_123"
-    )
-
     @Test
     fun testOnAuthorize() {
         interactor.onLinkControllerState(mockLinkStateWithAccount())
@@ -355,12 +355,196 @@ class OnrampInteractorTest {
         )
     }
 
-    private fun mockLinkStateWithAccount(): LinkController.State = LinkController.State(
-        internalLinkAccount = mockLinkAccount(),
+    @Test
+    fun testAttachKycInfoFailsMissingSecret() = runTest {
+        whenever(
+            linkController.state(any())
+        ).thenReturn(
+            MutableStateFlow(mockLinkStateWithAccount(mockLinkAccountWithoutSecret()))
+        )
+
+        val kycInfo = KycInfo(
+            firstName = "A",
+            lastName = "B",
+            idNumber = "111-22-3333",
+            dateOfBirth = DateOfBirth(1, 1, 1990),
+            address = PaymentSheet.Address(city = "City")
+        )
+
+        val result = interactor.attachKycInfo(kycInfo)
+
+        assertThat(result).isInstanceOf(OnrampAttachKycInfoResult.Failed::class.java)
+        val failed = result as OnrampAttachKycInfoResult.Failed
+        assertThat(failed.error).isInstanceOf(MissingConsumerSecretException::class.java)
+    }
+
+    @Test
+    fun testRegisterWalletAddressFailsMissingSecret() = runTest {
+        whenever(
+            linkController.state(any())
+        ).thenReturn(
+            MutableStateFlow(mockLinkStateWithAccount(mockLinkAccountWithoutSecret()))
+        )
+
+        val result = interactor.registerWalletAddress(
+            walletAddress = "0xabc",
+            network = CryptoNetwork.Bitcoin
+        )
+
+        assertThat(result).isInstanceOf(OnrampRegisterWalletAddressResult.Failed::class.java)
+        val failed = result as OnrampRegisterWalletAddressResult.Failed
+        assertThat(failed.error).isInstanceOf(MissingConsumerSecretException::class.java)
+    }
+
+    @Test
+    fun testStartKycVerificationIsSuccessful() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+
+        val response = KycRetrieveResponse(
+            firstName = "Test",
+            lastName = "User",
+            idNumberLastFour = "7777",
+            idType = "SOCIAL_SECURITY_NUMBER",
+            dateOfBirth = DateOfBirth(1, 1, 1990),
+            address = PaymentSheet.Address(city = "City")
+        )
+
+        whenever(
+            cryptoApiRepository.retrieveKycInfo(
+                consumerSessionClientSecret = any()
+            )
+        ).thenReturn(Result.success(response))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.startKycVerification(null)
+        assert(result is OnrampStartKycVerificationResult.Completed)
+
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.KycVerificationStarted)
+    }
+
+    @Test
+    fun testHandleVerifyKycResultConfirmedSuccess() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val refreshInfo = RefreshKycInfo(
+            firstName = "Jane",
+            lastName = "Doe",
+            idNumberLastFour = "9999",
+            idType = "SOCIAL_SECURITY_NUMBER",
+            dateOfBirth = DateOfBirth(2, 2, 1980),
+            address = PaymentSheet.Address(city = "Tampa")
+        )
+        whenever(
+            cryptoApiRepository.refreshKycData(
+                kycInfo = any(),
+                consumerSessionClientSecret = any()
+            )
+        ).thenReturn(Result.success(Unit))
+
+        val result = interactor.handleVerifyKycResult(
+            VerifyKycActivityResult(
+                KycRefreshScreenAction.Confirm(info = refreshInfo)
+            )
+        )
+
+        assertThat(result).isEqualTo(OnrampVerifyKycInfoResult.Confirmed)
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.KycVerificationCompleted)
+    }
+
+    @Test
+    fun testHandleVerifyKycResultConfirmedFailure() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val error = RuntimeException("refresh failed")
+        whenever(
+            cryptoApiRepository.refreshKycData(
+                kycInfo = any(),
+                consumerSessionClientSecret = any()
+            )
+        ).thenReturn(Result.failure(error))
+
+        val refreshInfo = RefreshKycInfo(
+            firstName = "Jane",
+            lastName = "Doe",
+            idNumberLastFour = "9999",
+            idType = "SOCIAL_SECURITY_NUMBER",
+            dateOfBirth = DateOfBirth(2, 2, 1980),
+            address = PaymentSheet.Address(city = "Tampa")
+        )
+
+        val result = interactor.handleVerifyKycResult(
+            VerifyKycActivityResult(
+                KycRefreshScreenAction.Confirm(info = refreshInfo)
+            )
+        )
+
+        assertThat(result).isInstanceOf(OnrampVerifyKycInfoResult.Failed::class.java)
+        val failed = result as OnrampVerifyKycInfoResult.Failed
+        assertThat(failed.error.message).contains("refresh failed")
+    }
+
+    @Test
+    fun testHandleVerifyKycResultConfirmedMissingSecret() = runTest {
+        whenever(
+            linkController.state(any())
+        ).thenReturn(
+            MutableStateFlow(mockLinkStateWithAccount(mockLinkAccountWithoutSecret()))
+        )
+
+        val refreshInfo = RefreshKycInfo(
+            firstName = "Jane",
+            lastName = "Doe",
+            idNumberLastFour = "9999",
+            idType = "SOCIAL_SECURITY_NUMBER",
+            dateOfBirth = DateOfBirth(2, 2, 1980),
+            address = PaymentSheet.Address(city = "Tampa")
+        )
+
+        val result = interactor.handleVerifyKycResult(
+            VerifyKycActivityResult(
+                KycRefreshScreenAction.Confirm(info = refreshInfo)
+            )
+        )
+
+        assertThat(result).isInstanceOf(OnrampVerifyKycInfoResult.Failed::class.java)
+        val failed = result as OnrampVerifyKycInfoResult.Failed
+        assertThat(failed.error).isInstanceOf(MissingConsumerSecretException::class.java)
+    }
+
+    @Test
+    fun testCreateCryptoPaymentTokenFailsMissingCryptoCustomer() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.createCryptoPaymentToken()
+
+        assertThat(result).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Failed::class.java)
+        val failed = result as OnrampCreateCryptoPaymentTokenResult.Failed
+        assertThat(failed.error).isInstanceOf(MissingCryptoCustomerException::class.java)
+    }
+
+    private fun mockLinkStateWithAccount(
+        account: LinkController.LinkAccount = mockLinkAccount()
+    ): LinkController.State = LinkController.State(
+        internalLinkAccount = account,
         merchantLogoUrl = null,
         selectedPaymentMethodPreview = null,
         createdPaymentMethod = null,
         elementsSessionId = "test-elements-session-id"
+    )
+
+    private fun mockLinkAccount(): LinkController.LinkAccount = LinkController.LinkAccount(
+        email = "test@email.com",
+        redactedPhoneNumber = "***-***-1234",
+        sessionState = LinkController.SessionState.LoggedIn,
+        consumerSessionClientSecret = "secret_123"
+    )
+
+    private fun mockLinkAccountWithoutSecret(): LinkController.LinkAccount = LinkController.LinkAccount(
+        email = "test@email.com",
+        redactedPhoneNumber = "***-***-1234",
+        sessionState = LinkController.SessionState.LoggedIn,
+        consumerSessionClientSecret = null
     )
 
     private fun createConfiguration(

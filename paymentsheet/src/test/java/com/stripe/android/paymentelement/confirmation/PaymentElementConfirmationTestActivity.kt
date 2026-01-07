@@ -32,6 +32,8 @@ import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -101,12 +103,13 @@ internal class PaymentElementConfirmationTestActivity : AppCompatActivity() {
 
         object Factory : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                val component = DaggerPaymentElementConfirmationTestComponent.builder()
-                    .application(extras.requireApplication())
-                    .allowsManualConfirmation(allowsManualConfirmation = false)
-                    .statusBarColor(null)
-                    .savedStateHandle(extras.createSavedStateHandle())
-                    .build()
+                val component = DaggerPaymentElementConfirmationTestComponent.factory()
+                    .create(
+                        application = extras.requireApplication(),
+                        savedStateHandle = extras.createSavedStateHandle(),
+                        statusBarColor = null,
+                        allowsManualConfirmation = false,
+                    )
 
                 @Suppress("UNCHECKED_CAST")
                 return component.viewModel as T
@@ -125,21 +128,20 @@ internal class PaymentElementConfirmationTestActivity : AppCompatActivity() {
 internal interface PaymentElementConfirmationTestComponent {
     val viewModel: PaymentElementConfirmationTestActivity.TestViewModel
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
-
-        @BindsInstance
-        fun statusBarColor(@Named(STATUS_BAR_COLOR) statusBarColor: Int?): Builder
-
-        @BindsInstance
-        fun allowsManualConfirmation(@Named(ALLOWS_MANUAL_CONFIRMATION) allowsManualConfirmation: Boolean): Builder
-
-        fun build(): PaymentElementConfirmationTestComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            application: Application,
+            @BindsInstance
+            savedStateHandle: SavedStateHandle,
+            @BindsInstance
+            @Named(STATUS_BAR_COLOR)
+            statusBarColor: Int?,
+            @BindsInstance
+            @Named(ALLOWS_MANUAL_CONFIRMATION)
+            allowsManualConfirmation: Boolean,
+        ): PaymentElementConfirmationTestComponent
     }
 }
 
@@ -147,6 +149,11 @@ internal interface PaymentElementConfirmationTestComponent {
 internal interface PaymentElementConfirmationTestModule {
     @Binds
     fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
+
+    @Binds
+    fun bindCardFundingFilter(
+        cardFundingFilterFactory: PaymentSheetCardFundingFilter.Factory
+    ): PaymentSheetCardFundingFilterFactory
 
     @Binds
     fun bindsAnalyticsRequestFactory(factory: PaymentAnalyticsRequestFactory): AnalyticsRequestFactory

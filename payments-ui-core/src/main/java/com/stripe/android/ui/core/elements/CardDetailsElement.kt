@@ -9,7 +9,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.CardDetailsUtil.getExpiryMonthFormFieldEntry
 import com.stripe.android.ui.core.elements.CardDetailsUtil.getExpiryYearFormFieldEntry
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.SectionFieldErrorController
+import com.stripe.android.uicore.elements.SectionFieldValidationController
 import com.stripe.android.uicore.elements.SectionMultiFieldElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -40,7 +40,7 @@ internal class CardDetailsElement(
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
 
-    override fun sectionFieldErrorController(): SectionFieldErrorController =
+    override fun sectionFieldErrorController(): SectionFieldValidationController =
         controller
 
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {

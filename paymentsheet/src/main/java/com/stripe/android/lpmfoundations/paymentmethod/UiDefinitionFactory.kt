@@ -2,10 +2,12 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.FormHeaderInformation
+import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.InitialValuesFactory
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
@@ -46,6 +48,7 @@ internal sealed interface UiDefinitionFactory {
         val isLinkUI: Boolean = false,
         val previousLinkSignupCheckboxSelection: Boolean? = null,
         val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
+        val tapToAddHelper: TapToAddHelper? = null,
     ) {
         interface Factory {
             fun create(
@@ -69,6 +72,7 @@ internal sealed interface UiDefinitionFactory {
                 private val previousLinkSignupCheckboxSelection: Boolean? = null,
                 private val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? =
                     null,
+                private val tapToAddHelper: TapToAddHelper? = null,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
@@ -97,6 +101,7 @@ internal sealed interface UiDefinitionFactory {
                         isLinkUI = isLinkUI,
                         previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection,
                         automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+                        tapToAddHelper = tapToAddHelper,
                     )
                 }
 
@@ -149,7 +154,32 @@ internal sealed interface UiDefinitionFactory {
         }
     }
 
-    interface Simple : UiDefinitionFactory {
+    abstract class Simple : UiDefinitionFactory {
+        abstract fun createSupportedPaymentMethod(): SupportedPaymentMethod
+
+        open fun createFormHeaderInformation(
+            customerHasSavedPaymentMethods: Boolean,
+            incentive: PaymentMethodIncentive?,
+        ): FormHeaderInformation {
+            return createSupportedPaymentMethod().asFormHeaderInformation(incentive)
+        }
+
+        fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement> {
+            val builder = FormElementsBuilder(arguments)
+
+            buildFormElements(metadata, arguments, builder)
+
+            return builder.build()
+        }
+
+        protected open fun buildFormElements(
+            metadata: PaymentMethodMetadata,
+            arguments: Arguments,
+            builder: FormElementsBuilder,
+        ) {}
+    }
+
+    interface Custom : UiDefinitionFactory {
         fun createSupportedPaymentMethod(): SupportedPaymentMethod
 
         fun createFormHeaderInformation(
@@ -166,7 +196,9 @@ internal sealed interface UiDefinitionFactory {
         definition: PaymentMethodDefinition,
         sharedDataSpecs: List<SharedDataSpec>,
     ): Boolean = when (this) {
-        is Simple -> {
+        is Simple,
+
+        is Custom -> {
             true
         }
 
@@ -181,6 +213,10 @@ internal sealed interface UiDefinitionFactory {
         sharedDataSpecs: List<SharedDataSpec>,
     ): SupportedPaymentMethod? = when (this) {
         is Simple -> {
+            createSupportedPaymentMethod()
+        }
+
+        is Custom -> {
             createSupportedPaymentMethod()
         }
 
@@ -201,6 +237,13 @@ internal sealed interface UiDefinitionFactory {
         customerHasSavedPaymentMethods: Boolean,
     ): FormHeaderInformation? = when (this) {
         is Simple -> {
+            createFormHeaderInformation(
+                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
+                incentive = metadata.paymentMethodIncentive,
+            )
+        }
+
+        is Custom -> {
             createFormHeaderInformation(
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
                 incentive = metadata.paymentMethodIncentive,
@@ -228,6 +271,13 @@ internal sealed interface UiDefinitionFactory {
         arguments: Arguments,
     ): List<FormElement>? = when (this) {
         is Simple -> {
+            createFormElements(
+                metadata = metadata,
+                arguments = arguments,
+            )
+        }
+
+        is Custom -> {
             createFormElements(
                 metadata = metadata,
                 arguments = arguments,

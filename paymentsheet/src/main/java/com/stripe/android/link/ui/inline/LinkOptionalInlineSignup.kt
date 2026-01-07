@@ -113,7 +113,7 @@ internal fun LinkOptionalInlineSignup(
         val nameFocusRequester = remember { FocusRequester() }
 
         var didShowAllFields by rememberSaveable { mutableStateOf(false) }
-        val sectionError by sectionController.error.collectAsState()
+        val validationMessage by sectionController.validationMessage.collectAsState()
 
         if (signUpState == SignUpState.InputtingRemainingFields) {
             LaunchedEffect(signUpState) {
@@ -135,7 +135,7 @@ internal fun LinkOptionalInlineSignup(
         }
 
         LinkInlineSignupFields(
-            sectionError = sectionError?.errorMessage,
+            validationMessage = validationMessage,
             emailController = emailController,
             phoneNumberController = phoneNumberController,
             nameController = nameController,

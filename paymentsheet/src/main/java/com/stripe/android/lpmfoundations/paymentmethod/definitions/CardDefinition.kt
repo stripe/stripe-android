@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.stripe.android.common.taptoadd.TapToAddFormWrapperElement
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -56,7 +57,7 @@ internal object CardDefinition : PaymentMethodDefinition {
     override fun uiDefinitionFactory(): UiDefinitionFactory = CardUiDefinitionFactory
 }
 
-private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
+private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
     override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
         paymentMethodDefinition = CardDefinition,
         displayNameResource = PaymentsUiCoreR.string.stripe_paymentsheet_payment_method_card,
@@ -85,7 +86,23 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
     ): List<FormElement> {
+        val elements = buildElements(metadata, arguments)
+
+        val tapToAddHelper = arguments.tapToAddHelper
+
+        return if (metadata.isTapToAddSupported && tapToAddHelper != null) {
+            listOf(TapToAddFormWrapperElement(tapToAddHelper, elements))
+        } else {
+            elements
+        }
+    }
+
+    private fun buildElements(
+        metadata: PaymentMethodMetadata,
+        arguments: UiDefinitionFactory.Arguments,
+    ): List<FormElement> {
         val billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration
+
         return buildList {
             add(
                 CardDetailsSectionElement(
@@ -272,7 +289,11 @@ internal class CombinedLinkMandateElement(
     }
 
     @Composable
-    override fun ComposeUI(enabled: Boolean) {
+    override fun ComposeUI(
+        enabled: Boolean,
+        hiddenIdentifiers: Set<IdentifierSpec>,
+        lastTextFieldIdentifier: IdentifierSpec?
+    ) {
         val linkState by linkSignupStateFlow.collectAsState()
         Mandate(
             // when displaying the mandate from Link UI (add card to Link) we always want the

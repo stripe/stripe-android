@@ -15,9 +15,9 @@ object FeatureFlags {
     val forceEnableLinkPaymentSelectionHint = FeatureFlag("Link: Force enable payment selection hint")
     val enablePassiveCaptcha = FeatureFlag("Enable Passive Captcha")
     val forceLinkWebAuth = FeatureFlag("Link: Force web auth")
-    val enablePromptPay = FeatureFlag("Enable PromptPay")
     val enableAttestationOnIntentConfirmation = FeatureFlag("Enable Attestation on Intent Confirmation")
     val enableTapToAdd = FeatureFlag("Enable Tap to Add")
+    val enableKlarnaFormRemoval = FeatureFlag("Remove forms from Klarna")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

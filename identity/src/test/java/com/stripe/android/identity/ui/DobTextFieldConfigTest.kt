@@ -47,5 +47,5 @@ class DobTextFieldConfigTest {
     }
 
     private fun shouldShowErrorWithFocus(dateString: String) =
-        DobTextFieldConfig.determineState(dateString).shouldShowError(false)
+        DobTextFieldConfig.determineState(dateString).shouldShowValidationMessage(false)
 }

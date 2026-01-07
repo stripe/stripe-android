@@ -28,7 +28,14 @@ internal sealed class IntegrationMetadata : Parcelable {
     // CustomerSheet doesn't really fit the bill of any of the other integrations, so making it's own, even though it's
     // not ideal.
     @Parcelize
-    object CustomerSheet : IntegrationMetadata()
+    data class CustomerSheet(
+        val attachmentStyle: AttachmentStyle,
+    ) : IntegrationMetadata() {
+        enum class AttachmentStyle {
+            SetupIntent,
+            CreateAttach
+        }
+    }
 
     @Parcelize
     object CryptoOnramp : IntegrationMetadata()

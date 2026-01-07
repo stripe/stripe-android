@@ -4,7 +4,6 @@ import androidx.annotation.Keep
 import androidx.annotation.StringDef
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.SourceJsonParser
-import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import org.json.JSONObject
@@ -35,12 +34,6 @@ data class Source internal constructor(
     val clientSecret: String? = null,
 
     /**
-     * Information related to the code verification flow. Present if the source is authenticated
-     * by a verification code (`flow` is `code_verification`).
-     */
-    val codeVerification: CodeVerification? = null,
-
-    /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.
      */
     val created: Long? = null,
@@ -53,12 +46,6 @@ data class Source internal constructor(
     val currency: String? = null,
 
     /**
-     * The authentication `flow` of the source.
-     * `flow` is one of `redirect`, `receiver`, `code_verification`, `none`.
-     */
-    val flow: Flow? = null,
-
-    /**
      * Has the value true if the object exists in live mode or the value false if the object
      * exists in test mode.
      */
@@ -69,18 +56,6 @@ data class Source internal constructor(
      * particular source types.
      */
     val owner: Owner? = null,
-
-    /**
-     * Information related to the receiver flow.
-     * Present if the source is a receiver ([flow] is [Flow.Receiver]).
-     */
-    val receiver: Receiver? = null,
-
-    /**
-     * Information related to the redirect flow. Present if the source is authenticated by a
-     * redirect ([flow] is [Flow.REDIRECT]).
-     */
-    val redirect: Redirect? = null,
 
     /**
      * The status of the source, one of `canceled`, `chargeable`, `consumed`, `failed`,
@@ -116,8 +91,6 @@ data class Source internal constructor(
      */
     val usage: Usage? = null,
 
-    private val _weChat: WeChat? = null,
-
     /**
      * Information about the items and shipping associated with the source. Required for
      * transactional credit (for example Klarna) sources before you can charge it.
@@ -131,34 +104,11 @@ data class Source internal constructor(
     val statementDescriptor: String? = null
 ) : StripeModel, StripePaymentSource {
 
-    val weChat: WeChat
-        get() {
-            check(SourceType.WECHAT == type) {
-                "Source type must be '${SourceType.WECHAT}'"
-            }
-
-            return requireNotNull(_weChat)
-        }
-
     @Retention(AnnotationRetention.SOURCE)
-    @StringDef(
-        SourceType.ALIPAY, SourceType.CARD, SourceType.THREE_D_SECURE,
-        SourceType.SEPA_DEBIT, SourceType.IDEAL, SourceType.BANCONTACT,
-        SourceType.P24, SourceType.EPS, SourceType.MULTIBANCO, SourceType.WECHAT,
-        SourceType.UNKNOWN
-    )
+    @StringDef(SourceType.CARD)
     annotation class SourceType {
         companion object {
-            const val ALIPAY: String = "alipay"
             const val CARD: String = "card"
-            const val THREE_D_SECURE: String = "three_d_secure"
-            const val SEPA_DEBIT: String = "sepa_debit"
-            const val IDEAL: String = "ideal"
-            const val BANCONTACT: String = "bancontact"
-            const val P24: String = "p24"
-            const val EPS: String = "eps"
-            const val MULTIBANCO: String = "multibanco"
-            const val WECHAT: String = "wechat"
             const val UNKNOWN: String = "unknown"
         }
     }
@@ -198,135 +148,6 @@ data class Source internal constructor(
             fun fromCode(code: String?) = entries.firstOrNull { it.code == code }
         }
     }
-
-    /**
-     * The authentication `flow` of the source.
-     */
-    enum class Flow(internal val code: String) {
-        Redirect("redirect"),
-        Receiver("receiver"),
-        CodeVerification("code_verification"),
-        None("none");
-
-        @Keep
-        override fun toString(): String = code
-
-        internal companion object {
-            fun fromCode(code: String?) = entries.firstOrNull { it.code == code }
-        }
-    }
-
-    /**
-     * Information related to the redirect flow. Present if the source is authenticated by a
-     * redirect ([flow] is [Flow.Redirect]).
-     */
-    @Parcelize
-    @Poko
-    class Redirect(
-        /**
-         * The URL you provide to redirect the customer to after they authenticated their payment.
-         */
-        val returnUrl: String?,
-
-        /**
-         * The status of the redirect, either
-         * `pending` (ready to be used by your customer to authenticate the transaction),
-         * `succeeded` (succesful authentication, cannot be reused) or
-         * `not_required` (redirect should not be used) or
-         * `failed` (failed authentication, cannot be reused).
-         */
-        val status: Status?,
-
-        /**
-         * The URL provided to you to redirect a customer to as part of a `redirect`
-         * authentication flow.
-         */
-        val url: String?
-    ) : StripeModel {
-
-        enum class Status(private val code: String) {
-            Pending("pending"),
-            Succeeded("succeeded"),
-            NotRequired("not_required"),
-            Failed("failed");
-
-            @Keep
-            override fun toString(): String = code
-
-            internal companion object {
-                fun fromCode(code: String?) = entries.firstOrNull { it.code == code }
-            }
-        }
-    }
-
-    /**
-     * Information related to the code verification flow. Present if the source is authenticated
-     * by a verification code ([flow] is [Flow.CodeVerification]).
-     */
-    @Parcelize
-    data class CodeVerification internal constructor(
-        /**
-         * The number of attempts remaining to authenticate the source object with a verification
-         * code.
-         */
-        val attemptsRemaining: Int,
-
-        /**
-         * The status of the code verification, either
-         * `pending` (awaiting verification, `attempts_remaining` should be greater than 0),
-         * `succeeded` (successful verification) or
-         * `failed` (failed verification, cannot be verified anymore as `attempts_remaining` should be 0).
-         */
-        val status: Status?
-    ) : StripeModel {
-
-        enum class Status(private val code: String) {
-            Pending("pending"),
-            Succeeded("succeeded"),
-            Failed("failed");
-
-            @Keep
-            override fun toString(): String = code
-
-            internal companion object {
-                fun fromCode(code: String?) = entries.firstOrNull { it.code == code }
-            }
-        }
-    }
-
-    /**
-     * Information related to the receiver flow. Present if [flow] is [Source.Flow.Receiver].
-     */
-    @Parcelize
-    data class Receiver internal constructor(
-        /**
-         * The address of the receiver source. This is the value that should be communicated to the
-         * customer to send their funds to.
-         */
-        val address: String?,
-
-        /**
-         * The total amount that was moved to your balance. This is almost always equal to the amount
-         * charged. In rare cases when customers deposit excess funds and we are unable to refund
-         * those, those funds get moved to your balance and show up in amount_charged as well.
-         * The amount charged is expressed in the source’s currency.
-         */
-        val amountCharged: Long,
-
-        /**
-         * The total amount received by the receiver source.
-         * `amount_received = amount_returned + amount_charged` should be true for consumed sources
-         * unless customers deposit excess funds. The amount received is expressed in the source’s
-         * currency.
-         */
-        val amountReceived: Long,
-
-        /**
-         * The total amount that was returned to the customer. The amount returned is expressed in
-         * the source’s currency.
-         */
-        val amountReturned: Long
-    ) : StripeModel
 
     /**
      * Information about the owner of the payment instrument that may be used or required by
@@ -399,16 +220,6 @@ data class Source internal constructor(
         fun asSourceType(sourceType: String?): String {
             return when (sourceType) {
                 SourceType.CARD -> SourceType.CARD
-                SourceType.THREE_D_SECURE -> SourceType.THREE_D_SECURE
-                SourceType.SEPA_DEBIT -> SourceType.SEPA_DEBIT
-                SourceType.IDEAL -> SourceType.IDEAL
-                SourceType.BANCONTACT -> SourceType.BANCONTACT
-                SourceType.ALIPAY -> SourceType.ALIPAY
-                SourceType.EPS -> SourceType.EPS
-                SourceType.P24 -> SourceType.P24
-                SourceType.MULTIBANCO -> SourceType.MULTIBANCO
-                SourceType.WECHAT -> SourceType.WECHAT
-                SourceType.UNKNOWN -> SourceType.UNKNOWN
                 else -> SourceType.UNKNOWN
             }
         }

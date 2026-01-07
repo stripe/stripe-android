@@ -44,6 +44,18 @@ class StripeErrorMappingTest {
     }
 
     @Test
+    fun `Defer to decline code first`() {
+        runStripeErrorMappingTest(
+            message = null,
+            declineCode = "insufficient_funds",
+            code = "generic_decline",
+            context = context,
+        ) { actualMessage ->
+            assertThat(actualMessage).isEqualTo("Your card has insufficient funds.")
+        }
+    }
+
+    @Test
     fun `Uses localized client error for error code, Locale is not US`() {
         localeTestRule.setTemporarily(Locale.FRANCE)
 

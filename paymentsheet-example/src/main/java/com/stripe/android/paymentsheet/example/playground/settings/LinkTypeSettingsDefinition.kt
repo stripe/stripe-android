@@ -12,9 +12,18 @@ internal object LinkTypeSettingsDefinition :
     PlaygroundSettingDefinition.Displayable<LinkType> {
     override val displayName: String = "Link Type"
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isPaymentFlow() ||
-            configurationData.integrationType.isSptFlow()
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
+        if (!configurationData.integrationType.isPaymentFlow() && !configurationData.integrationType.isSptFlow()) {
+            return false
+        }
+
+        return (
+            LinkSettingsDefinition.applicable(configurationData, settings) &&
+                settings[LinkSettingsDefinition] == true
+            )
     }
 
     override fun createOptions(

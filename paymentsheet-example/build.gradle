@@ -24,6 +24,10 @@ def getSentryDsn() {
     }
 }
 
+def directlyToPlayground() {
+    return project.hasProperty("DIRECTLY_TO_PLAYGROUND") && project.DIRECTLY_TO_PLAYGROUND.contains("true")
+}
+
 emerge {
     // Api token is implicitly set to the EMERGE_API_TOKEN env variable
 
@@ -43,6 +47,50 @@ sentry {
     org = "stripe"
     projectName = "elements-mobile-android"
     includeProguardMapping = false
+}
+
+android {
+    defaultConfig {
+        applicationId "com.stripe.android.paymentsheet.example"
+        versionCode 11
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
+        buildConfigField "boolean", "IS_BROWSERSTACK_BUILD", "$gradle.ext.isBrowserstackBuild"
+        buildConfigField "boolean", "DIRECTLY_TO_PLAYGROUND", "${directlyToPlayground()}"
+
+        manifestPlaceholders = [
+                BACKEND_URL: getBackendUrl(),
+                GOOGLE_PLACES_API_KEY: getGooglePlacesApiKey(),
+                SENTRY_DSN: getSentryDsn(),
+        ]
+    }
+    buildFeatures {
+        viewBinding true
+        compose true
+    }
+    buildTypes {
+        release {
+            firebaseAppDistribution {
+                appId = "1:577365562050:android:5b7e92d18f8ca8d1e9a15b"
+                groups = "elements-mobile"
+            }
+        }
+    }
+    flavorDimensions = ["base"]
+    productFlavors {
+        base {
+            isDefault true
+            dimension "base"
+        }
+
+        tapToAdd {
+            applicationIdSuffix ".tta"
+            minSdkVersion 26
+            dimension "base"
+        }
+    }
 }
 
 dependencies {
@@ -75,6 +123,9 @@ dependencies {
     implementation libs.retrofitKotlinSerializationConverter
     implementation libs.zxing
 
+    tapToAddImplementation libs.terminal.core
+    tapToAddImplementation libs.terminal.tapToPay
+
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.leakCanary
@@ -102,34 +153,4 @@ dependencies {
     androidTestImplementation testLibs.espresso.web
     androidTestImplementation testLibs.leakCanaryInstrumentation
     androidTestImplementation testLibs.truth
-}
-
-android {
-    defaultConfig {
-        applicationId "com.stripe.android.paymentsheet.example"
-        versionCode 11
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
-        buildConfigField "boolean", "IS_BROWSERSTACK_BUILD", "$gradle.ext.isBrowserstackBuild"
-
-        manifestPlaceholders = [
-                BACKEND_URL: getBackendUrl(),
-                GOOGLE_PLACES_API_KEY: getGooglePlacesApiKey(),
-                SENTRY_DSN: getSentryDsn(),
-        ]
-    }
-    buildFeatures {
-        viewBinding true
-        compose true
-    }
-    buildTypes {
-        release {
-            firebaseAppDistribution {
-                appId = "1:577365562050:android:5b7e92d18f8ca8d1e9a15b"
-                groups = "elements-mobile"
-            }
-        }
-    }
 }

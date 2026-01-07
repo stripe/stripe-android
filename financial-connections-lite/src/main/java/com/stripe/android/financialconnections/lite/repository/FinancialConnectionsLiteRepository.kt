@@ -72,10 +72,10 @@ internal class FinancialConnectionsLiteRepositoryImpl(
         internal const val PARAMS_MOBILE_SDK_TYPE = "mobile_sdk_type"
         internal const val PARAMS_CLIENT_SECRET = "client_secret"
 
-        internal const val synchronizeSessionUrl: String =
-            "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"
+        internal val synchronizeSessionUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"
 
-        private const val sessionReceiptUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/session_receipt"
+        private val sessionReceiptUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/session_receipt"
     }
 }

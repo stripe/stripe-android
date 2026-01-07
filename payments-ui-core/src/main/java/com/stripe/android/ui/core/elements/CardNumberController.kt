@@ -29,7 +29,7 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.events.LocalAnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
-import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.TextFieldController
@@ -274,17 +274,17 @@ internal class DefaultCardNumberController(
 
     override val loading: StateFlow<Boolean> = accountRangeService.isLoading
 
-    override val visibleError: StateFlow<Boolean> =
+    override val visibleValidationMessage: StateFlow<Boolean> =
         combineAsStateFlow(_fieldState, _hasFocus, _isValidating) { fieldState, hasFocus, isValidating ->
-            fieldState.shouldShowError(hasFocus, isValidating)
+            fieldState.shouldShowValidationMessage(hasFocus, isValidating)
         }
 
     /**
      * An error must be emitted if it is visible or not visible.
      **/
-    override val error: StateFlow<FieldError?> =
-        combineAsStateFlow(visibleError, _fieldState) { visibleError, fieldState ->
-            fieldState.getError()?.takeIf { visibleError }
+    override val validationMessage: StateFlow<FieldValidationMessage?> =
+        combineAsStateFlow(visibleValidationMessage, _fieldState) { visibleError, fieldState ->
+            fieldState.getValidationMessage()?.takeIf { visibleError }
         }
 
     override val isComplete: StateFlow<Boolean> = _fieldState.mapAsStateFlow { it.isValid() }
@@ -376,8 +376,8 @@ internal class DefaultCardNumberController(
                         lastLoggedCardBrand = null // Reset when valid
                     }
                     is TextFieldStateConstants.Error.Invalid -> {
-                        val error = state.getError()
-                        val isDisallowedError = error?.errorMessage == PaymentsCoreR.string.stripe_disallowed_card_brand
+                        val error = state.getValidationMessage()
+                        val isDisallowedError = error.message == PaymentsCoreR.string.stripe_disallowed_card_brand
                         if (isDisallowedError && lastLoggedCardBrand != impliedCardBrand.value) {
                             disallowedBrandReporter.onDisallowedCardBrandEntered(impliedCardBrand.value)
                             lastLoggedCardBrand = impliedCardBrand.value

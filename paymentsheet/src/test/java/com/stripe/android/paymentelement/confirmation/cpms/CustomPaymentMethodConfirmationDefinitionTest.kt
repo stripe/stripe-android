@@ -7,7 +7,6 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
@@ -27,7 +26,6 @@ import com.stripe.android.utils.FakeActivityResultLauncher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 class CustomPaymentMethodConfirmationDefinitionTest {
     @Test
     fun `'key' should be 'CustomPaymentMethod'`() = test {

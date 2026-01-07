@@ -303,47 +303,56 @@ internal class CryptoApiRepository @Inject constructor(
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/customers`
          */
-        internal val customersUrl: String = getApiUrl("crypto/internal/customers")
+        internal val customersUrl: String
+            get() = getApiUrl("crypto/internal/customers")
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/kyc_data_collection`
          */
-        internal val collectKycDataUrl: String = getApiUrl("crypto/internal/kyc_data_collection")
+        internal val collectKycDataUrl: String
+            get() = getApiUrl("crypto/internal/kyc_data_collection")
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/wallet`
          */
-        internal val setWalletAddressUrl: String = getApiUrl("crypto/internal/wallet")
+        internal val setWalletAddressUrl: String
+            get() = getApiUrl("crypto/internal/wallet")
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/start_identity_verification`
          */
-        internal val startIdentityVerificationUrl: String = getApiUrl("crypto/internal/start_identity_verification")
+        internal val startIdentityVerificationUrl: String
+            get() = getApiUrl("crypto/internal/start_identity_verification")
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/platform_settings`
          */
-        internal val platformSettings: String = getApiUrl("crypto/internal/platform_settings")
+        internal val platformSettings: String
+            get() = getApiUrl("crypto/internal/platform_settings")
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/payment_token`
          */
-        internal val paymentToken: String = getApiUrl("crypto/internal/payment_token")
+        internal val paymentToken: String
+            get() = getApiUrl("crypto/internal/payment_token")
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/onramp_session`
          */
-        internal val getOnrampSessionUrl: String = getApiUrl("crypto/internal/onramp_session")
+        internal val getOnrampSessionUrl: String
+            get() = getApiUrl("crypto/internal/onramp_session")
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/kyc_data_retrieve`
          */
-        internal val retrieveKycInfoUrl: String = getApiUrl("crypto/internal/kyc_data_retrieve")
+        internal val retrieveKycInfoUrl: String
+            get() = getApiUrl("crypto/internal/kyc_data_retrieve")
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/refresh_consumer_person`
          */
-        internal val refreshConsumerPersonUrl: String = getApiUrl("crypto/internal/refresh_consumer_person")
+        internal val refreshConsumerPersonUrl: String
+            get() = getApiUrl("crypto/internal/refresh_consumer_person")
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"

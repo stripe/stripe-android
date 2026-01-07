@@ -142,6 +142,8 @@
   <string name="stripe_fpx_bank_offline">%s ─ hors ligne</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Votre moyen de paiement a été refusé.</string>
+  <!-- An error message displayed when the customer has not enough funds for payment. -->
+  <string name="stripe_insufficient_funds">Votre carte ne dispose pas des fonds nécessaires.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Une erreur interne s\'est produite.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->

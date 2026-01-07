@@ -1,0 +1,326 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>Builder</title>
+<link href="../../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
+<script type="text/javascript" src="../../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../../index.html" tabindex="1">
+                    stripe-android
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":paymentsheet/main">androidJvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":paymentsheet/main" data-filter=":paymentsheet/main">
+                                <span class="checkbox--icon"></span>
+                                androidJvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    stripe-android
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="paymentsheet::com.stripe.android.paymentsheet/PaymentSheet.Colors.Builder///PointingToDeclaration//-1685933200">
+  <div class="breadcrumbs"><a href="../../../../index.html">paymentsheet</a><span class="delimiter">/</span><a href="../../../index.html">com.stripe.android.paymentsheet</a><span class="delimiter">/</span><a href="../../index.html">PaymentSheet</a><span class="delimiter">/</span><a href="../index.html">Colors</a><span class="delimiter">/</span><span class="current">Builder</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Builder</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">Builder</a></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-318630460%2FClasslikes%2F-1685933200" anchor-label="Companion" id="-318630460%2FClasslikes%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-318630460%2FClasslikes%2F-1685933200"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="1941905539%2FFunctions%2F-1685933200" anchor-label="appBarIcon" id="1941905539%2FFunctions%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="app-bar-icon.html"><span>app</span><wbr><span>Bar</span><wbr><span><span>Icon</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1941905539%2FFunctions%2F-1685933200"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="app-bar-icon.html"><span class="token function">appBarIcon</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="app-bar-icon.html"><span class="token function">appBarIcon</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/ColorInt.html"><span class="token annotation builtin">ColorInt</span></a>&nbsp;</span>color<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="brief "><p class="paragraph">The color used for icons in PaymentSheet, such as the close or back icons.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1738254897%2FFunctions%2F-1685933200" anchor-label="build" id="-1738254897%2FFunctions%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="build.html"><span><span>build</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1738254897%2FFunctions%2F-1685933200"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="build.html"><span class="token function">build</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../index.html">PaymentSheet.Colors</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1884803815%2FFunctions%2F-1685933200" anchor-label="component" id="-1884803815%2FFunctions%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="component.html"><span><span>component</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1884803815%2FFunctions%2F-1685933200"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="component.html"><span class="token function">component</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="component.html"><span class="token function">component</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/ColorInt.html"><span class="token annotation builtin">ColorInt</span></a>&nbsp;</span>color<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="brief "><p class="paragraph">The color used for the background of inputs, tabs, and other components.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-708692799%2FFunctions%2F-1685933200" anchor-label="componentBorder" id="-708692799%2FFunctions%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="component-border.html"><span>component</span><wbr><span><span>Border</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-708692799%2FFunctions%2F-1685933200"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="component-border.html"><span class="token function">componentBorder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="component-border.html"><span class="token function">componentBorder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/ColorInt.html"><span class="token annotation builtin">ColorInt</span></a>&nbsp;</span>color<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="brief "><p class="paragraph">The color used for borders of inputs, tabs, and other components.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="826187555%2FFunctions%2F-1685933200" anchor-label="componentDivider" id="826187555%2FFunctions%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="component-divider.html"><span>component</span><wbr><span><span>Divider</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="826187555%2FFunctions%2F-1685933200"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="component-divider.html"><span class="token function">componentDivider</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="component-divider.html"><span class="token function">componentDivider</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/ColorInt.html"><span class="token annotation builtin">ColorInt</span></a>&nbsp;</span>color<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="brief "><p class="paragraph">The color of the divider lines used inside inputs, tabs, and other components.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1925352957%2FFunctions%2F-1685933200" anchor-label="error" id="-1925352957%2FFunctions%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="error.html"><span><span>error</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1925352957%2FFunctions%2F-1685933200"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="error.html"><span class="token function">error</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="error.html"><span class="token function">error</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/ColorInt.html"><span class="token annotation builtin">ColorInt</span></a>&nbsp;</span>color<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="brief "><p class="paragraph">A color used to indicate errors or destructive actions in PaymentSheet.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1811462615%2FFunctions%2F-1685933200" anchor-label="onComponent" id="1811462615%2FFunctions%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-component.html"><span>on</span><wbr><span><span>Component</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1811462615%2FFunctions%2F-1685933200"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="on-component.html"><span class="token function">onComponent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="on-component.html"><span class="token function">onComponent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/ColorInt.html"><span class="token annotation builtin">ColorInt</span></a>&nbsp;</span>color<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="brief "><p class="paragraph">The default color used for text and on other elements that live on components.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-921075593%2FFunctions%2F-1685933200" anchor-label="onSurface" id="-921075593%2FFunctions%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-surface.html"><span>on</span><wbr><span><span>Surface</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-921075593%2FFunctions%2F-1685933200"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="on-surface.html"><span class="token function">onSurface</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="on-surface.html"><span class="token function">onSurface</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/ColorInt.html"><span class="token annotation builtin">ColorInt</span></a>&nbsp;</span>color<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="brief "><p class="paragraph">The color used for items appearing over the background in Payment Sheet.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1158709651%2FFunctions%2F-1685933200" anchor-label="placeholderText" id="1158709651%2FFunctions%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="placeholder-text.html"><span>placeholder</span><wbr><span><span>Text</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1158709651%2FFunctions%2F-1685933200"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="placeholder-text.html"><span class="token function">placeholderText</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="placeholder-text.html"><span class="token function">placeholderText</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/ColorInt.html"><span class="token annotation builtin">ColorInt</span></a>&nbsp;</span>color<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="brief "><p class="paragraph">The color used for input placeholder text.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1725204879%2FFunctions%2F-1685933200" anchor-label="primary" id="1725204879%2FFunctions%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="primary.html"><span><span>primary</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1725204879%2FFunctions%2F-1685933200"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="primary.html"><span class="token function">primary</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="primary.html"><span class="token function">primary</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/ColorInt.html"><span class="token annotation builtin">ColorInt</span></a>&nbsp;</span>color<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="brief "><p class="paragraph">The primary color used throughout PaymentSheet.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-328008797%2FFunctions%2F-1685933200" anchor-label="subtitle" id="-328008797%2FFunctions%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="subtitle.html"><span><span>subtitle</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-328008797%2FFunctions%2F-1685933200"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="subtitle.html"><span class="token function">subtitle</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="subtitle.html"><span class="token function">subtitle</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/ColorInt.html"><span class="token annotation builtin">ColorInt</span></a>&nbsp;</span>color<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="brief "><p class="paragraph">The color used for text of secondary importance. For example, this color is used for the label above input fields.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1177177209%2FFunctions%2F-1685933200" anchor-label="surface" id="1177177209%2FFunctions%2F-1685933200" data-filterable-set=":paymentsheet/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":paymentsheet/main" data-filterable-set=":paymentsheet/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="surface.html"><span><span>surface</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1177177209%2FFunctions%2F-1685933200"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="surface.html"><span class="token function">surface</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="surface.html"><span class="token function">surface</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/ColorInt.html"><span class="token annotation builtin">ColorInt</span></a>&nbsp;</span>color<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">PaymentSheet.Colors.Builder</a></div><div class="brief "><p class="paragraph">The color used for the surfaces (backgrounds) of PaymentSheet.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2025 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

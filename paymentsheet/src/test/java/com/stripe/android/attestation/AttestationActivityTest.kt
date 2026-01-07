@@ -3,9 +3,11 @@ package com.stripe.android.attestation
 import android.content.Context
 import android.content.Intent
 import androidx.core.os.BundleCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReporter
@@ -102,6 +104,21 @@ internal class AttestationActivityTest {
         val retrievedArgs = AttestationActivity.getArgs(savedStateHandle)
 
         assertThat(retrievedArgs).isNull()
+    }
+
+    @Test
+    fun `activity finishes gracefully when required args are missing`() = runTest {
+        ActivityScenario.launchActivityForResult<AttestationActivity>(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                AttestationActivity::class.java
+            )
+        ).use { scenario ->
+            advanceUntilIdle()
+
+            // Activity should finish gracefully without crashing
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        }
     }
 
     private fun launchActivityForResult(

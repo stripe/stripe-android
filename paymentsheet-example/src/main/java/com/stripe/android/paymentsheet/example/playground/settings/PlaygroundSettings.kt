@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,29 +29,28 @@ import kotlinx.serialization.json.Json
 
 internal class PlaygroundSettings private constructor(
     initialConfigurationData: PlaygroundConfigurationData,
-    private val settings: MutableMap<PlaygroundSettingDefinition<*>, MutableStateFlow<Any?>>
+    initialSettings: Map<PlaygroundSettingDefinition<*>, Any?>
 ) {
+    private val _settings = MutableStateFlow(initialSettings)
+    val settings: StateFlow<Map<PlaygroundSettingDefinition<*>, Any?>> = _settings.asStateFlow()
+
     private val _configurationData = MutableStateFlow(initialConfigurationData)
     val configurationData = _configurationData.asStateFlow()
 
-    val displayableDefinitions = _configurationData.mapAsStateFlow { data ->
+    val displayableDefinitions = combineAsStateFlow(_configurationData, settings) { data, settings ->
         settings
-            .filterKeys { it.applicable(data) }
-            .map { (definition, _) -> definition }
+            .filterKeys { it.applicable(data, settings) }
+            .keys
             .filterIsInstance<PlaygroundSettingDefinition.Displayable<*>>()
     }
 
     operator fun <T> get(settingsDefinition: PlaygroundSettingDefinition<T>): StateFlow<T> {
         @Suppress("UNCHECKED_CAST")
-        return settings[settingsDefinition]?.asStateFlow() as StateFlow<T>
+        return settings.mapAsStateFlow { it[settingsDefinition] as T }
     }
 
     operator fun <T> set(settingsDefinition: PlaygroundSettingDefinition<T>, value: T) {
-        if (settings.containsKey(settingsDefinition)) {
-            settings[settingsDefinition]?.value = value
-        } else {
-            settings[settingsDefinition] = MutableStateFlow(value)
-        }
+        _settings.value += (settingsDefinition to value)
         settingsDefinition.valueUpdated(value, this)
     }
 
@@ -58,6 +58,7 @@ internal class PlaygroundSettings private constructor(
         updater: (PlaygroundConfigurationData) -> PlaygroundConfigurationData
     ) {
         val configurationData = updater(_configurationData.value)
+        var currentSettings = settings.value
 
         /*
          * Resets value of definitions if the definition's selected option not applicable to the selected
@@ -77,14 +78,14 @@ internal class PlaygroundSettings private constructor(
                 return@forEach
             }
 
-            val value = settings[definition]?.value
+            val value = currentSettings[definition]
 
             /*
              * Keeps the existing customer ID if the country value can be shared between integration types
              */
             if (definition == CustomerSettingsDefinition && value is CustomerType.Existing) {
                 val countryOptions = MerchantSettingsDefinition.createOptions(configurationData)
-                val country = settings[MerchantSettingsDefinition]?.value
+                val country = currentSettings[MerchantSettingsDefinition]
 
                 if (countryOptions.any { it.value == country }) {
                     return@forEach
@@ -92,10 +93,11 @@ internal class PlaygroundSettings private constructor(
             }
 
             if (!values.contains(value)) {
-                settings[definition]?.value = values.firstOrNull()
+                currentSettings = currentSettings + (definition to values.firstOrNull())
             }
         }
 
+        _settings.value = currentSettings
         _configurationData.value = configurationData
     }
 
@@ -121,7 +123,7 @@ internal class PlaygroundSettings private constructor(
 
         constructor(playgroundSettings: PlaygroundSettings) : this(
             playgroundSettings.configurationData.value,
-            playgroundSettings.settings.map { it.key to it.value.value }.toMap()
+            playgroundSettings.settings.value
         )
 
         operator fun <T> get(settingsDefinition: PlaygroundSettingDefinition<T>): T {
@@ -130,10 +132,7 @@ internal class PlaygroundSettings private constructor(
         }
 
         fun playgroundSettings(): PlaygroundSettings {
-            val mutableSettings = settings.map {
-                it.key to MutableStateFlow(it.value)
-            }.toMap().toMutableMap()
-            return PlaygroundSettings(configurationData, mutableSettings)
+            return PlaygroundSettings(configurationData, settings)
         }
 
         fun paymentSheetConfiguration(
@@ -144,7 +143,7 @@ internal class PlaygroundSettings private constructor(
             val paymentSheetConfigurationData =
                 PlaygroundSettingDefinition.PaymentSheetConfigurationData(builder)
             settings.filter { (definition, _) ->
-                definition.applicable(configurationData)
+                definition.applicable(configurationData, settings)
             }.onEach { (settingDefinition, value) ->
                 settingDefinition
                     .configure(value, builder, playgroundState, paymentSheetConfigurationData, appSettings)
@@ -159,7 +158,7 @@ internal class PlaygroundSettings private constructor(
             val paymentSheetConfigurationData =
                 PlaygroundSettingDefinition.PaymentSheetConfigurationData(builder)
             settings.filter { (definition, _) ->
-                definition.applicable(configurationData)
+                definition.applicable(configurationData, settings)
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(value, builder, playgroundState, paymentSheetConfigurationData)
             }
@@ -172,7 +171,7 @@ internal class PlaygroundSettings private constructor(
             val builder = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
             val embeddedConfigurationData = PlaygroundSettingDefinition.EmbeddedConfigurationData(builder)
             settings.filter { (definition, _) ->
-                definition.applicable(configurationData)
+                definition.applicable(configurationData, settings)
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(value, builder, playgroundState, embeddedConfigurationData)
             }
@@ -191,7 +190,7 @@ internal class PlaygroundSettings private constructor(
             )
             val linkControllerConfigurationData = PlaygroundSettingDefinition.LinkControllerConfigurationData(builder)
             settings.filter { (definition, _) ->
-                definition.applicable(configurationData)
+                definition.applicable(configurationData, settings)
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(value, builder, playgroundState, linkControllerConfigurationData)
             }
@@ -205,7 +204,7 @@ internal class PlaygroundSettings private constructor(
             val customerSheetConfigurationData =
                 PlaygroundSettingDefinition.CustomerSheetConfigurationData(builder)
             settings.filter { (definition, _) ->
-                definition.applicable(configurationData)
+                definition.applicable(configurationData, settings)
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(value, builder, playgroundState, customerSheetConfigurationData)
             }
@@ -292,7 +291,7 @@ internal class PlaygroundSettings private constructor(
         fun checkoutRequest(): CheckoutRequest {
             val builder = CheckoutRequest.Builder()
             settings.filter { (definition, _) ->
-                definition.applicable(configurationData)
+                definition.applicable(configurationData, settings)
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(builder, value)
             }
@@ -302,7 +301,7 @@ internal class PlaygroundSettings private constructor(
         fun customerEphemeralKeyRequest(): CustomerEphemeralKeyRequest {
             val builder = CustomerEphemeralKeyRequest.Builder()
             settings.filter { (definition, _) ->
-                definition.applicable(configurationData)
+                definition.applicable(configurationData, settings)
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(builder, value)
             }
@@ -417,14 +416,12 @@ internal class PlaygroundSettings private constructor(
         fun createFromDefaults(): PlaygroundSettings {
             val defaultConfigurationData = PlaygroundConfigurationData()
             val settings = allSettingDefinitions.associateWith { settingDefinition ->
-                MutableStateFlow(settingDefinition.defaultValue)
-            }.toMutableMap()
+                settingDefinition.defaultValue
+            }
             return PlaygroundSettings(defaultConfigurationData, settings)
         }
 
         fun createFromJsonString(jsonString: String): PlaygroundSettings {
-            val settings: MutableMap<PlaygroundSettingDefinition<*>, MutableStateFlow<Any?>> = mutableMapOf()
-
             val unserializedSettings = try {
                 Json.decodeFromString(SerializableSettings.serializer(), jsonString)
             } catch (exception: SerializationException) {
@@ -433,16 +430,12 @@ internal class PlaygroundSettings private constructor(
                 return createFromDefaults()
             }
 
-            for (settingDefinition in allSettingDefinitions) {
+            val settings = allSettingDefinitions.associateWith { settingDefinition ->
                 settingDefinition.saveable()?.let { saveable ->
-                    val value = unserializedSettings.settings[saveable.key]?.let { stringValue ->
+                    unserializedSettings.settings[saveable.key]?.let { stringValue ->
                         saveable.convertToValue(stringValue)
                     } ?: saveable.defaultValue
-
-                    settings[settingDefinition] = MutableStateFlow(value)
-                } ?: run {
-                    settings[settingDefinition] = MutableStateFlow(settingDefinition.defaultValue)
-                }
+                } ?: settingDefinition.defaultValue
             }
 
             return PlaygroundSettings(unserializedSettings.configurationData, settings)
@@ -497,6 +490,8 @@ internal class PlaygroundSettings private constructor(
             LinkSettingsDefinition,
             LinkTypeSettingsDefinition,
             MerchantSettingsDefinition,
+            CustomSecretKeyDefinition,
+            CustomPublishableKeyDefinition,
             CurrencySettingsDefinition,
             GooglePaySettingsDefinition,
             DefaultBillingAddressSettingsDefinition,
@@ -522,6 +517,15 @@ internal class PlaygroundSettings private constructor(
             CustomPaymentMethodsSettingDefinition,
             LayoutSettingsDefinition,
             CardBrandAcceptanceSettingsDefinition,
+            CardFundingAcceptanceSettingsDefinition,
+            FeatureFlagSettingsDefinition(
+                FeatureFlags.enableKlarnaFormRemoval,
+                listOf(
+                    PlaygroundConfigurationData.IntegrationType.PaymentSheet,
+                    PlaygroundConfigurationData.IntegrationType.FlowController,
+                    PlaygroundConfigurationData.IntegrationType.Embedded,
+                ),
+            ),
             FeatureFlagSettingsDefinition(
                 FeatureFlags.instantDebitsIncentives,
                 PlaygroundConfigurationData.IntegrationType.paymentFlows().toList(),
@@ -553,8 +557,8 @@ internal class PlaygroundSettings private constructor(
             TermsDisplaySettingsDefinition,
             PassiveCaptchaDefinition,
             AttestationOnIntentConfirmationDefinition,
-            EnablePromptPaySettingsDefinition,
             EnableTapToAddSettingsDefinition,
+            CustomStripeApiDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

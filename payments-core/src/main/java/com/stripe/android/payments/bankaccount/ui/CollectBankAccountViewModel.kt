@@ -292,11 +292,13 @@ internal class CollectBankAccountViewModel @Inject constructor(
             val application = extras.requireApplication()
             val savedStateHandle = extras.createSavedStateHandle()
 
-            return DaggerCollectBankAccountComponent.builder()
-                .savedStateHandle(savedStateHandle)
-                .application(application)
-                .viewEffect(MutableSharedFlow())
-                .configuration(argsSupplier()).build()
+            return DaggerCollectBankAccountComponent.factory()
+                .create(
+                    application = application,
+                    viewEffect = MutableSharedFlow(),
+                    savedStateHandle = savedStateHandle,
+                    configuration = argsSupplier(),
+                )
                 .viewModel as T
         }
     }

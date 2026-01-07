@@ -24,30 +24,28 @@ import javax.inject.Singleton
 )
 internal interface PaymentLauncherViewModelFactoryComponent {
 
-    val viewModelSubcomponentBuilder: PaymentLauncherViewModelSubcomponent.Builder
+    val viewModelSubcomponentFactory: PaymentLauncherViewModelSubcomponent.Factory
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
-        fun enableLogging(@Named(ENABLE_LOGGING) enableLogging: Boolean): Builder
-
-        @BindsInstance
-        fun publishableKeyProvider(@Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String): Builder
-
-        @BindsInstance
-        fun stripeAccountIdProvider(@Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?): Builder
-
-        @BindsInstance
-        fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
-
-        @BindsInstance
-        fun includePaymentSheetNextHandlers(
-            @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) includePaymentSheetNextHandlers: Boolean
-        ): Builder
-
-        fun build(): PaymentLauncherViewModelFactoryComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            context: Context,
+            @BindsInstance
+            @Named(ENABLE_LOGGING)
+            enableLogging: Boolean,
+            @BindsInstance
+            @Named(PUBLISHABLE_KEY)
+            publishableKeyProvider: () -> String,
+            @BindsInstance
+            @Named(STRIPE_ACCOUNT_ID)
+            stripeAccountIdProvider: () -> String?,
+            @BindsInstance
+            @Named(PRODUCT_USAGE)
+            productUsage: Set<String>,
+            @BindsInstance
+            @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS)
+            includePaymentSheetNextHandlers: Boolean,
+        ): PaymentLauncherViewModelFactoryComponent
     }
 }

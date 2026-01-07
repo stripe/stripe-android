@@ -35,6 +35,12 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Check if required args are present, finish gracefully if not
+        if (!hasRequiredArgs()) {
+            finish()
+            return
+        }
+
         renderEdgeToEdge()
 
         onBackPressedDispatcher.addCallback {
@@ -85,6 +91,10 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun hasRequiredArgs(): Boolean {
+        return BacsMandateConfirmationContract.Args.fromIntent(intent) != null
     }
 
     override fun finish() {

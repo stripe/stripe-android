@@ -75,10 +75,11 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
                     ?: throw IllegalArgumentException("No IntentConfirmationChallengeArgs found")
 
                 DaggerIntentConfirmationChallengeComponent
-                    .builder()
-                    .context(app)
-                    .args(args)
-                    .build()
+                    .factory()
+                    .create(
+                        context = app,
+                        args = args,
+                    )
                     .viewModel
             }
         }

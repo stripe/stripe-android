@@ -31,6 +31,7 @@ import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.TestNavigationManager
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -99,6 +100,7 @@ class WalletViewModelTest {
                 collectMissingBillingDetailsForExistingPaymentMethods = true,
                 signupToggleEnabled = false,
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             )
         )
         assertThat(state.selectedItem).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull())
@@ -331,8 +333,11 @@ class WalletViewModelTest {
         advanceUntilIdle()
         assertThat(viewModel.uiState.value.expiryDateInput).isEqualTo(FormFieldEntry("12", isComplete = false))
 
-        viewModel.expiryDateController.onRawValueChange("12/25")
-        assertThat(viewModel.uiState.value.expiryDateInput).isEqualTo(FormFieldEntry("1225", isComplete = true))
+        val futureYear = getTwoDigitFutureYear()
+
+        viewModel.expiryDateController.onRawValueChange("12/$futureYear")
+        assertThat(viewModel.uiState.value.expiryDateInput)
+            .isEqualTo(FormFieldEntry("12$futureYear", isComplete = true))
     }
 
     @Test
@@ -352,10 +357,13 @@ class WalletViewModelTest {
     fun `expiryDateController and cvcController reset when new item is selected`() = runTest(dispatcher) {
         val viewModel = createViewModel()
 
-        viewModel.expiryDateController.onRawValueChange("12/25")
+        val futureYear = getTwoDigitFutureYear()
+
+        viewModel.expiryDateController.onRawValueChange("12/$futureYear")
         viewModel.cvcController.onRawValueChange("123")
 
-        assertThat(viewModel.uiState.value.expiryDateInput).isEqualTo(FormFieldEntry("1225", isComplete = true))
+        assertThat(viewModel.uiState.value.expiryDateInput)
+            .isEqualTo(FormFieldEntry("12$futureYear", isComplete = true))
         assertThat(viewModel.uiState.value.cvcInput).isEqualTo(FormFieldEntry("123", isComplete = true))
 
         val newCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "new_card_id")

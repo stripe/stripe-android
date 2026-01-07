@@ -86,6 +86,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">退出 Link</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">出错了。检查您的连接并重试。</string>
+  <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
+  <string name="stripe_or_enter_manually">或手动输入</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
   <string name="stripe_pay_with_link">用 Link 支付</string>
   <!-- Text providing link to terms for ACH payments -->

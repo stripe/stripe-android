@@ -90,6 +90,9 @@ data class ElementsSession(
                 FeatureFlags.enableAttestationOnIntentConfirmation.isEnabled
         }
 
+    val enableCardFundFiltering: Boolean
+        get() = flags[Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING] == true
+
     val onBehalfOf: String?
         get() = accountId.takeIf { !it.equals(merchantId) }
 
@@ -241,7 +244,8 @@ data class ElementsSession(
         ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT(
             "elements_mobile_force_setup_future_use_behavior_and_new_mandate_text"
         ),
-        ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION("elements_mobile_attest_on_intent_confirmation")
+        ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION("elements_mobile_attest_on_intent_confirmation"),
+        ELEMENTS_MOBILE_CARD_FUND_FILTERING("elements_mobile_card_funding_filtering")
     }
 
     /**
@@ -252,6 +256,7 @@ data class ElementsSession(
         LINK_GLOBAL_HOLD_BACK("link_global_holdback"),
         LINK_GLOBAL_HOLD_BACK_AA("link_global_holdback_aa"),
         LINK_AB_TEST("link_ab_test"),
+        OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA("ocs_mobile_horizontal_mode_android_aa"),
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

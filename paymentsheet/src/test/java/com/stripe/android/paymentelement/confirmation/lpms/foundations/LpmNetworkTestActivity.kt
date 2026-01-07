@@ -85,15 +85,16 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
         ) : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
                 val args = starterArgsSupplier()
-                val component = DaggerLpmNetworkTestViewModelComponent.builder()
-                    .application(extras.requireApplication())
-                    .paymentElementCallbackIdentifier(args.paymentElementCallbackIdentifier)
-                    .publishableKeyProvider { args.publishableKey }
-                    .stripeAccountIdProvider { null }
-                    .allowsManualConfirmation(args.allowsManualConfirmation)
-                    .savedStateHandle(extras.createSavedStateHandle())
-                    .userFacingLogger(FakeUserFacingLogger())
-                    .build()
+                val component = DaggerLpmNetworkTestViewModelComponent.factory()
+                    .create(
+                        application = extras.requireApplication(),
+                        publishableKeyProvider = { args.publishableKey },
+                        stripeAccountIdProvider = { null },
+                        allowsManualConfirmation = args.allowsManualConfirmation,
+                        paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
+                        savedStateHandle = extras.createSavedStateHandle(),
+                        userFacingLogger = FakeUserFacingLogger(),
+                    )
 
                 @Suppress("UNCHECKED_CAST")
                 return component.viewModel as T
@@ -141,40 +142,28 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
 internal interface LpmNetworkTestViewModelComponent {
     val viewModel: LpmNetworkTestActivity.TestViewModel
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun publishableKeyProvider(
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        ): Builder
-
-        @BindsInstance
-        fun stripeAccountIdProvider(
-            @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
-        ): Builder
-
-        @BindsInstance
-        fun allowsManualConfirmation(
-            @Named(ALLOWS_MANUAL_CONFIRMATION) allowsManualConfirmation: Boolean
-        ): Builder
-
-        @BindsInstance
-        fun paymentElementCallbackIdentifier(
-            @PaymentElementCallbackIdentifier identifier: String,
-        ): Builder
-
-        @BindsInstance
-        fun savedStateHandle(
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            application: Application,
+            @BindsInstance
+            @Named(PUBLISHABLE_KEY)
+            publishableKeyProvider: () -> String,
+            @BindsInstance
+            @Named(STRIPE_ACCOUNT_ID)
+            stripeAccountIdProvider: () -> String?,
+            @BindsInstance
+            @Named(ALLOWS_MANUAL_CONFIRMATION)
+            allowsManualConfirmation: Boolean,
+            @BindsInstance
+            @PaymentElementCallbackIdentifier
+            paymentElementCallbackIdentifier: String,
+            @BindsInstance
             savedStateHandle: SavedStateHandle,
-        ): Builder
-
-        @BindsInstance
-        fun userFacingLogger(userFacingLogger: UserFacingLogger): Builder
-
-        fun build(): LpmNetworkTestViewModelComponent
+            @BindsInstance
+            userFacingLogger: UserFacingLogger,
+        ): LpmNetworkTestViewModelComponent
     }
 }
 

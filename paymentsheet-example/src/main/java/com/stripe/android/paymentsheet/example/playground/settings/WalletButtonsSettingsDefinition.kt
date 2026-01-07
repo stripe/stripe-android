@@ -20,7 +20,10 @@ internal object WalletButtonsSettingsDefinition :
         option(it.displayName, it)
     }
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
         return when (configurationData.integrationType) {
             PlaygroundConfigurationData.IntegrationType.Embedded,
             PlaygroundConfigurationData.IntegrationType.FlowController,

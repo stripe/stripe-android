@@ -13,6 +13,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
@@ -22,7 +23,6 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
@@ -398,7 +398,6 @@ class ConfirmationHandlerOptionKtxTest {
         assertThat(linkConfirmationOption.extraParams).isEqualTo(paymentMethodExtraParams)
     }
 
-    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     @Test
     fun `On Custom Payment Method selection with no custom payment method of expected ID, should return null`() {
         val customPaymentMethodSelection = PaymentSelection.CustomPaymentMethod(
@@ -420,7 +419,6 @@ class ConfirmationHandlerOptionKtxTest {
         assertThat(confirmationOption).isNull()
     }
 
-    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     @Test
     fun `On Custom Payment Method selection with custom payment method of expected ID, should return option`() {
         val billingDetails = PaymentMethod.BillingDetails(name = "John Doe")
@@ -635,6 +633,7 @@ class ConfirmationHandlerOptionKtxTest {
             forceSetupFutureUseBehaviorAndNewMandate = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
         )
     }
 }

@@ -228,15 +228,17 @@ internal class PollingViewModel @Inject constructor(
             )
 
             return DaggerPollingComponent
-                .builder()
-                .application(extras.requireApplication())
-                .config(config)
-                .ioDispatcher(Dispatchers.IO)
-                .build()
-                .subcomponentBuilder
-                .args(args)
-                .savedStateHandle(extras.createSavedStateHandle())
-                .build()
+                .factory()
+                .create(
+                    application = extras.requireApplication(),
+                    config = config,
+                    ioDispatcher = Dispatchers.IO,
+                )
+                .subcomponentFactory
+                .create(
+                    savedStateHandle = extras.createSavedStateHandle(),
+                    args = args,
+                )
                 .viewModel as T
         }
     }

@@ -40,7 +40,7 @@ class LinkOptionalInlineSignupScreenshotTest {
 
         val sectionController = SectionController(
             label = null,
-            sectionFieldErrorControllers = listOf(
+            sectionFieldValidationControllers = listOf(
                 emailController,
                 phoneNumberController,
                 nameController,
@@ -70,7 +70,7 @@ class LinkOptionalInlineSignupScreenshotTest {
 
         val sectionController = SectionController(
             label = null,
-            sectionFieldErrorControllers = listOf(
+            sectionFieldValidationControllers = listOf(
                 emailController,
                 phoneNumberController,
                 nameController,
@@ -100,7 +100,7 @@ class LinkOptionalInlineSignupScreenshotTest {
 
         val sectionController = SectionController(
             label = null,
-            sectionFieldErrorControllers = listOf(
+            sectionFieldValidationControllers = listOf(
                 emailController,
                 phoneNumberController,
                 nameController,
@@ -133,7 +133,7 @@ class LinkOptionalInlineSignupScreenshotTest {
 
         val sectionController = SectionController(
             label = null,
-            sectionFieldErrorControllers = listOf(
+            sectionFieldValidationControllers = listOf(
                 emailController,
                 phoneNumberController,
                 nameController,
@@ -166,7 +166,7 @@ class LinkOptionalInlineSignupScreenshotTest {
 
         val sectionController = SectionController(
             label = null,
-            sectionFieldErrorControllers = listOf(
+            sectionFieldValidationControllers = listOf(
                 emailController,
                 phoneNumberController,
                 nameController,

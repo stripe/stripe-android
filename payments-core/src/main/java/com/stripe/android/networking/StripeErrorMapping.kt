@@ -54,6 +54,7 @@ internal fun Context.mapErrorCodeToLocalizedMessage(code: String?): String? {
         "processing_error" -> R.string.stripe_processing_error
         "invalid_owner_name" -> R.string.stripe_invalid_owner_name
         "invalid_bank_account_iban" -> R.string.stripe_invalid_bank_account_iban
+        "insufficient_funds" -> R.string.stripe_insufficient_funds
         "generic_decline" -> R.string.stripe_generic_decline
         else -> null
     }
@@ -67,16 +68,18 @@ private fun getErrorMessage(
     context: Context,
 ): String {
     /**
-     * Defer to the error code first. For the error_codes that we localize:
+     * Defer to the decline code first.
+     *
+     * For the error_codes that we localize:
      * incorrect_number, invalid_number, invalid_expiry_month, invalid_expiry_year, invalid_cvc,
      * expired_card, incorrect_cvc, card_declined, processing_error, invalid_owner_name,
      * invalid_bank_account_iban, generic_decline.
      * there are no discrepancies between the payserver English translation and the local English translation
      */
-    // https://docs.stripe.com/error-codes
-    return context.mapErrorCodeToLocalizedMessage(code)
-        // https://docs.stripe.com/declines/codes
-        ?: context.mapErrorCodeToLocalizedMessage(declineCode)
+    // https://docs.stripe.com/declines/codes
+    return context.mapErrorCodeToLocalizedMessage(declineCode)
+        // https://docs.stripe.com/error-codes
+        ?: context.mapErrorCodeToLocalizedMessage(code)
         ?: originalMessage
         ?: context.getString(stripeCoreR.string.stripe_unexpected_error_try_again)
 }

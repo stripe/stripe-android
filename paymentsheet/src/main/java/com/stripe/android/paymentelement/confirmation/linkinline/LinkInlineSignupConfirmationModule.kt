@@ -20,12 +20,12 @@ internal object LinkInlineSignupConfirmationModule {
     fun providesLinkConfirmationDefinition(
         linkStore: LinkStore,
         linkConfigurationCoordinator: LinkConfigurationCoordinator,
-        linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
+        linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
     ): ConfirmationDefinition<*, *, *, *> {
         return LinkInlineSignupConfirmationDefinition(
             linkStore = linkStore,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
-            linkAnalyticsHelper = linkAnalyticsComponentBuilder.build().linkAnalyticsHelper,
+            linkAnalyticsHelper = linkAnalyticsComponentFactory.create().linkAnalyticsHelper,
         )
     }
 }

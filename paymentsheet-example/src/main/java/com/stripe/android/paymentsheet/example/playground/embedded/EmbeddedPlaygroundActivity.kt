@@ -17,6 +17,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,15 +29,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.stripe.android.common.taptoadd.TerminalConnectionTokenCallbackHolder
+import com.stripe.android.common.taptoadd.TerminalLocationHolder
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
+import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
+import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
@@ -58,15 +64,16 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSe
 import kotlinx.coroutines.launch
 
 @OptIn(
-    ExperimentalCustomPaymentMethodsApi::class,
     ExperimentalAnalyticEventCallbackApi::class,
     WalletButtonsPreview::class,
+    TapToAddPreview::class,
 )
 internal class EmbeddedPlaygroundActivity :
     AppCompatActivity(),
     ConfirmCustomPaymentMethodCallback,
     ExternalPaymentMethodConfirmHandler,
-    AnalyticEventCallback {
+    AnalyticEventCallback,
+    CreateCardPresentSetupIntentCallback {
     companion object {
         private const val PLAYGROUND_STATE_KEY = "playgroundState"
         const val EMBEDDED_PAYMENT_ELEMENT_STATE_KEY = "EMBEDDED_PAYMENT_ELEMENT_STATE_KEY"
@@ -124,11 +131,11 @@ internal class EmbeddedPlaygroundActivity :
         val embeddedViewDisplaysMandateText =
             initialPlaygroundState.snapshot[EmbeddedViewDisplaysMandateSettingDefinition]
         setContent {
+            SetupTapToAddAlpha()
+
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)
 
-            var loadingState: LoadingState by remember {
-                mutableStateOf(LoadingState.Loading)
-            }
+            var loadingState: LoadingState by remember { mutableStateOf(LoadingState.Loading) }
 
             val coroutineScope = rememberCoroutineScope()
 
@@ -242,6 +249,26 @@ internal class EmbeddedPlaygroundActivity :
                 configure()
             },
         )
+    }
+
+    @Composable
+    private fun SetupTapToAddAlpha() {
+        val lifecycleOwner = LocalLifecycleOwner.current
+
+        DisposableEffect(playgroundState, lifecycleOwner) {
+            TerminalConnectionTokenCallbackHolder.set(
+                lifecycleOwner = lifecycleOwner,
+                callback = {
+                    viewModel.createConnectionToken(playgroundState, applicationContext)
+                }
+            )
+
+            TerminalLocationHolder.locationId = playgroundState.terminalLocationId
+
+            onDispose {
+                TerminalLocationHolder.locationId = null
+            }
+        }
     }
 
     @Composable
@@ -408,5 +435,9 @@ internal class EmbeddedPlaygroundActivity :
 
     override fun onEvent(event: AnalyticEvent) {
         Log.d("AnalyticEvent", "Event: $event")
+    }
+
+    override suspend fun createCardPresentSetupIntent(): CreateIntentResult {
+        return viewModel.createCardPresentSetupIntent(playgroundState, applicationContext)
     }
 }

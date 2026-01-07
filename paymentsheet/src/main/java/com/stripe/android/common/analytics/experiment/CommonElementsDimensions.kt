@@ -1,0 +1,42 @@
+package com.stripe.android.common.analytics.experiment
+
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import kotlin.collections.joinToString
+import kotlin.collections.plus
+
+internal object CommonElementsDimensions {
+    fun getDimensions(paymentMethodMetadata: PaymentMethodMetadata): Map<String, String> {
+        val paymentMethodTypes = paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code }
+        val isGooglePayAvailable = paymentMethodMetadata.isGooglePayReady
+        val isLinkDisplayed = paymentMethodMetadata.linkState != null
+
+        return mapOf(
+            "displayed_payment_method_types" to paymentMethodTypes.joinToString(","),
+            "displayed_payment_method_types_including_wallets" to getPaymentMethodTypesPlusWallets(
+                paymentMethodTypes,
+                isGooglePayAvailable = isGooglePayAvailable,
+                isLinkDisplayed = isLinkDisplayed,
+            ).joinToString(","),
+        )
+    }
+
+    private fun getPaymentMethodTypesPlusWallets(
+        paymentMethodTypes: List<String>,
+        isGooglePayAvailable: Boolean,
+        isLinkDisplayed: Boolean,
+    ): List<String> {
+        return paymentMethodTypes.plus(
+            if (isGooglePayAvailable) {
+                "google_pay"
+            } else {
+                null
+            }
+        ).plus(
+            if (isLinkDisplayed) {
+                "link"
+            } else {
+                null
+            }
+        ).filterNotNull()
+    }
+}

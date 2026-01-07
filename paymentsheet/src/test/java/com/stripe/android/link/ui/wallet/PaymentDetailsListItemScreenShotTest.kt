@@ -38,7 +38,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
                     networks = emptyList(),
-                    funding = "CREDIT",
+                    funding = ConsumerPaymentDetails.Card.Funding.Credit,
                     nickname = null,
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
                         name = null,
@@ -71,7 +71,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
                     networks = emptyList(),
-                    funding = "CREDIT",
+                    funding = ConsumerPaymentDetails.Card.Funding.Credit,
                     nickname = null,
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
                         name = null,
@@ -104,7 +104,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
                     networks = emptyList(),
-                    funding = "CREDIT",
+                    funding = ConsumerPaymentDetails.Card.Funding.Credit,
                     nickname = "My Personal Card",
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
                         name = null,
@@ -137,7 +137,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
                     networks = emptyList(),
-                    funding = "CREDIT",
+                    funding = ConsumerPaymentDetails.Card.Funding.Credit,
                     nickname = null,
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
                         name = null,
@@ -170,7 +170,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
                     networks = emptyList(),
-                    funding = "CREDIT",
+                    funding = ConsumerPaymentDetails.Card.Funding.Credit,
                     nickname = null,
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
                         name = null,

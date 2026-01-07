@@ -53,6 +53,7 @@ internal sealed interface PlaygroundState : Parcelable {
         val paymentMethodTypes: List<String>,
         val customerConfig: PaymentSheet.CustomerConfiguration?,
         val clientSecret: String,
+        val terminalLocationId: String?,
         private val defaultEndpoint: String,
     ) : PlaygroundState {
         override val integrationType
@@ -240,6 +241,7 @@ internal sealed interface PlaygroundState : Parcelable {
                 paymentMethodTypes = paymentMethodTypes,
                 customerConfig = makeCustomerConfig(snapshot.checkoutRequest().customerKeyType),
                 clientSecret = intentClientSecret,
+                terminalLocationId = terminalLocationId,
                 defaultEndpoint = defaultEndpoint
             )
         }

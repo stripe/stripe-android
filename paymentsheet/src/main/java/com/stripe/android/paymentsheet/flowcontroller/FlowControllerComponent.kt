@@ -15,30 +15,22 @@ internal interface FlowControllerComponent {
     val flowController: DefaultFlowController
     val stateComponent: FlowControllerStateComponent
 
-    @Subcomponent.Builder
-    interface Builder {
-        @BindsInstance
-        fun lifeCycleOwner(lifecycleOwner: LifecycleOwner): Builder
-
-        @BindsInstance
-        fun activityResultCaller(
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            lifecycleOwner: LifecycleOwner,
+            @BindsInstance
             activityResultCaller: ActivityResultCaller,
-        ): Builder
-
-        @BindsInstance
-        fun activityResultRegistryOwner(
+            @BindsInstance
             activityResultRegistryOwner: ActivityResultRegistryOwner,
-        ): Builder
-
-        @BindsInstance
-        fun paymentOptionResultCallback(paymentOptionResultCallback: PaymentOptionResultCallback): Builder
-
-        @BindsInstance
-        fun paymentResultCallback(paymentResultCallback: PaymentSheetResultCallback): Builder
-
-        @BindsInstance
-        fun initializedViaCompose(@InitializedViaCompose initializedViaCompose: Boolean): Builder
-
-        fun build(): FlowControllerComponent
+            @BindsInstance
+            paymentOptionResultCallback: PaymentOptionResultCallback,
+            @BindsInstance
+            paymentResultCallback: PaymentSheetResultCallback,
+            @BindsInstance
+            @InitializedViaCompose
+            initializedViaCompose: Boolean,
+        ): FlowControllerComponent
     }
 }

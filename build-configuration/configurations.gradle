@@ -1,0 +1,9 @@
+tasks.register('printConfigurations') {
+    notCompatibleWithConfigurationCache("Accesses project configurations at runtime")
+    
+    doLast {
+        project.configurations.each { config ->
+            println "${config.name}"
+        }
+    }
+}

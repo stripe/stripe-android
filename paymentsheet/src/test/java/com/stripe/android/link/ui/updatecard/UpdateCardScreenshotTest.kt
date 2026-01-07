@@ -220,7 +220,7 @@ internal class UpdateCardScreenshotTest(
             isDefault = false,
             networks = listOf("VISA"),
             nickname = null,
-            funding = "credit",
+            funding = ConsumerPaymentDetails.Card.Funding.Credit,
             billingAddress = ConsumerPaymentDetails.BillingAddress(
                 name = null,
                 line1 = null,

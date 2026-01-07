@@ -5,6 +5,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -29,7 +30,7 @@ import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.EmailElement
-import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
@@ -191,11 +192,11 @@ internal class DefaultVerticalModeFormInteractorTest {
 
                 nextSectionElement.fields.errorTest(
                     identifierSpec = IdentifierSpec.Name,
-                    error = FieldError(UiCoreR.string.stripe_blank_and_required),
+                    error = FieldValidationMessage.Error(UiCoreR.string.stripe_blank_and_required),
                 )
                 nextSectionElement.fields.errorTest(
                     identifierSpec = IdentifierSpec.Email,
-                    error = FieldError(UiCoreR.string.stripe_blank_and_required),
+                    error = FieldValidationMessage.Error(UiCoreR.string.stripe_blank_and_required),
                 )
             }
         }
@@ -256,6 +257,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
             selectedPaymentMethodCode = "",
+            tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
         )
         val eventReporter = FakeEventReporter()
         val setAsDefaultInteractor = EmbeddedFormInteractorFactory(
@@ -305,6 +307,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
             selectedPaymentMethodCode = selectedPaymentMethodCode,
+            tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
         )
         val eventReporter = FakeEventReporter()
         val setAsDefaultInteractor = EmbeddedFormInteractorFactory(

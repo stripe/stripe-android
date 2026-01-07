@@ -30,6 +30,8 @@ module:identity
 com.stripe.android.identity
 com.stripe.android.identity.navigation
 com.stripe.android.identity.utils
+module:payment-method-messaging
+com.stripe.android.paymentmethodmessaging.element
 module:payments-core
 com.stripe.android
 com.stripe.android.exception
@@ -52,6 +54,7 @@ module:paymentsheet
 com.stripe.android
 com.stripe.android.customersheet
 com.stripe.android.link.ui.verification
+com.stripe.android.lpmfoundations.paymentmethod
 com.stripe.android.paymentelement
 com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.addresselement

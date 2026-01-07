@@ -10,7 +10,6 @@ import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
@@ -33,7 +32,6 @@ private typealias NextActionHandler = @JvmSuppressWildcards PaymentNextActionHan
 @Singleton
 internal class DefaultPaymentNextActionHandlerRegistry @Inject internal constructor(
     private val noOpIntentNextActionHandler: NoOpIntentNextActionHandler,
-    private val sourceNextActionHandler: SourceNextActionHandler,
     @IntentAuthenticatorMap private val paymentNextActionHandlers: Map<NextActionHandlerKey, NextActionHandler>,
     @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) private val includePaymentSheetNextActionHandlers: Boolean,
     applicationContext: Context,
@@ -47,7 +45,6 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
     internal val allNextActionHandlers: Set<PaymentNextActionHandler<out StripeModel>>
         get() = buildSet {
             add(noOpIntentNextActionHandler)
-            add(sourceNextActionHandler)
             addAll(paymentNextActionHandlers.values)
             addAll(paymentSheetNextActionHandlers.values)
         }
@@ -80,9 +77,6 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
                 } ?: noOpIntentNextActionHandler
 
                 return nextActionHandler as PaymentNextActionHandler<Actionable>
-            }
-            is Source -> {
-                sourceNextActionHandler as PaymentNextActionHandler<Actionable>
             }
             else -> {
                 error("No suitable PaymentNextActionHandler for $actionable")
@@ -129,17 +123,18 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
             isInstantApp: Boolean,
             includePaymentSheetNextActionHandlers: Boolean,
         ): PaymentNextActionHandlerRegistry {
-            val component = DaggerNextActionHandlerComponent.builder()
-                .context(context)
-                .analyticsRequestFactory(paymentAnalyticsRequestFactory)
-                .enableLogging(enableLogging)
-                .workContext(workContext)
-                .uiContext(uiContext)
-                .publishableKeyProvider(publishableKeyProvider)
-                .productUsage(productUsage)
-                .isInstantApp(isInstantApp)
-                .includePaymentSheetNextActionHandlers(includePaymentSheetNextActionHandlers)
-                .build()
+            val component = DaggerNextActionHandlerComponent.factory()
+                .create(
+                    context = context,
+                    analyticsRequestFactory = paymentAnalyticsRequestFactory,
+                    enableLogging = enableLogging,
+                    workContext = workContext,
+                    uiContext = uiContext,
+                    publishableKeyProvider = publishableKeyProvider,
+                    productUsage = productUsage,
+                    isInstantApp = isInstantApp,
+                    includePaymentSheetNextActionHandlers = includePaymentSheetNextActionHandlers,
+                )
             return component.registry
         }
     }

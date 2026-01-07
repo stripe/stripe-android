@@ -34,13 +34,13 @@ class AddressTextFieldControllerTest {
         val controller = createAddressController()
 
         turbineScope {
-            val errorTurbine = controller.error.testIn(this)
+            val errorTurbine = controller.validationMessage.testIn(this)
 
             assertThat(errorTurbine.awaitItem()).isNull()
 
             controller.onValidationStateChanged(true)
 
-            assertThat(errorTurbine.awaitItem()?.errorMessage).isEqualTo(R.string.stripe_blank_and_required)
+            assertThat(errorTurbine.awaitItem()?.message).isEqualTo(R.string.stripe_blank_and_required)
 
             errorTurbine.cancelAndIgnoreRemainingEvents()
         }

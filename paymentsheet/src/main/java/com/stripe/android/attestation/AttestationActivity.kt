@@ -22,6 +22,13 @@ internal class AttestationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Check if required args are present, finish gracefully if not
+        if (!hasRequiredArgs()) {
+            finish()
+            return
+        }
+
         lifecycleScope.launch {
             viewModel.result.collect { result ->
                 dismissWithResult(result)
@@ -35,6 +42,10 @@ internal class AttestationActivity : AppCompatActivity() {
         )
         setResult(RESULT_COMPLETE, Intent().putExtras(bundle))
         finish()
+    }
+
+    private fun hasRequiredArgs(): Boolean {
+        return intent?.extras?.containsKey(EXTRA_ARGS) == true
     }
 
     companion object {

@@ -13,7 +13,6 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CustomPaymentMethodResult
 import com.stripe.android.paymentelement.CustomPaymentMethodResultHandler
 import com.stripe.android.paymentelement.EmbeddedContentPage
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.assertCompleted
 import com.stripe.android.paymentelement.runEmbeddedPaymentElementTest
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
@@ -25,7 +24,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 @RunWith(TestParameterInjector::class)
 internal class CustomPaymentMethodsTest {
     @get:Rule

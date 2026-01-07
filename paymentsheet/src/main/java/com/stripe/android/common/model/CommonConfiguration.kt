@@ -31,6 +31,7 @@ internal data class CommonConfiguration(
     val paymentMethodOrder: List<String>,
     val externalPaymentMethods: List<String>,
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+    private val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val googlePlacesApiKey: String?,
@@ -41,6 +42,11 @@ internal data class CommonConfiguration(
     val userOverrideCountry: String?,
     val appearance: PaymentSheet.Appearance,
 ) : Parcelable {
+
+    fun allowedCardFundingTypes(enabled: Boolean): List<PaymentSheet.CardFundingType> {
+        if (enabled) return allowedCardFundingTypes
+        return ConfigurationDefaults.allowedCardFundingTypes
+    }
 
     fun validate(isLiveMode: Boolean, @PaymentElementCallbackIdentifier callbackIdentifier: String) {
         customerAndMerchantValidate()
@@ -192,6 +198,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     opensCardScannerAutomatically = opensCardScannerAutomatically,
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
+    allowedCardFundingTypes = allowedCardFundingTypes,
 )
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -217,6 +224,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     opensCardScannerAutomatically = opensCardScannerAutomatically,
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
+    allowedCardFundingTypes = allowedCardFundingTypes,
 )
 
 internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -249,6 +257,7 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
     opensCardScannerAutomatically = false,
     userOverrideCountry = null,
     appearance = PaymentSheet.Appearance(),
+    allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
 )
 
 private fun String.isEKClientSecretValid(): Boolean {

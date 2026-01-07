@@ -21,7 +21,10 @@ internal object MerchantSettingsDefinition :
 
     override val displayName: String = "Merchant"
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
         return configurationData.integrationType.isPaymentFlow() ||
             configurationData.integrationType.isCustomerFlow()
     }
@@ -40,7 +43,8 @@ internal object MerchantSettingsDefinition :
         }.map { country ->
             option(country.name, convertToValue(country.code.value))
         }.toList() + listOf(
-            option(Merchant.StripeShop.name, convertToValue(Merchant.StripeShop.value))
+            option(Merchant.StripeShop.name, convertToValue(Merchant.StripeShop.value)),
+            option(Merchant.Custom.name, convertToValue(Merchant.Custom.value))
         )
     }
 
@@ -69,6 +73,12 @@ internal object MerchantSettingsDefinition :
         if (playgroundSettings[CustomerSettingsDefinition].value is CustomerType.Existing) {
             playgroundSettings[CustomerSettingsDefinition] = CustomerType.NEW
         }
+
+        // Reset the values that are only applicable when using a custom merchant.
+        if (value != Merchant.Custom) {
+            playgroundSettings[CustomSecretKeyDefinition] = ""
+            playgroundSettings[CustomPublishableKeyDefinition] = ""
+        }
     }
 
     private val Merchant.currency: Currency
@@ -89,6 +99,7 @@ internal object MerchantSettingsDefinition :
                 Merchant.IT -> Currency.EUR
                 Merchant.TH -> Currency.THB
                 Merchant.StripeShop -> Currency.USD
+                Merchant.Custom -> Currency.USD
             }
         }
 }
@@ -108,7 +119,8 @@ enum class Merchant(override val value: String) : ValueEnum {
     DE("DE"),
     IT("IT"),
     TH("TH"),
-    StripeShop("stripe_shop_test")
+    StripeShop("stripe_shop_test"),
+    Custom("custom")
 }
 
 val Merchant.countryCode: String
@@ -129,5 +141,6 @@ val Merchant.countryCode: String
             Merchant.IT -> value
             Merchant.TH -> value
             Merchant.StripeShop -> "US"
+            Merchant.Custom -> "US"
         }
     }

@@ -27,24 +27,20 @@ import javax.inject.Named
 internal interface CustomerSheetViewModelComponent {
     val viewModel: CustomerSheetViewModel
 
-    @Component.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun configuration(configuration: CustomerSheet.Configuration): Builder
-
-        @BindsInstance
-        fun statusBarColor(@Named(STATUS_BAR_COLOR) statusBarColor: Int?): Builder
-
-        @BindsInstance
-        fun integrationType(integrationType: CustomerSheetIntegration.Type): Builder
-
-        @BindsInstance
-        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
-
-        fun build(): CustomerSheetViewModelComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            application: Application,
+            @BindsInstance
+            configuration: CustomerSheet.Configuration,
+            @BindsInstance
+            @Named(STATUS_BAR_COLOR)
+            statusBarColor: Int?,
+            @BindsInstance
+            integrationType: CustomerSheetIntegration.Type,
+            @BindsInstance
+            savedStateHandle: SavedStateHandle,
+        ): CustomerSheetViewModelComponent
     }
 }

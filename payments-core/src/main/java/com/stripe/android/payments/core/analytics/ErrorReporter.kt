@@ -53,10 +53,11 @@ interface ErrorReporter : FraudDetectionErrorReporter {
             productUsage: Set<String> = emptySet(),
         ): ErrorReporter {
             return DaggerDefaultErrorReporterComponent
-                .builder()
-                .context(context.applicationContext)
-                .productUsage(productUsage)
-                .build()
+                .factory()
+                .create(
+                    context = context.applicationContext,
+                    productUsage = productUsage,
+                )
                 .errorReporter
         }
 
@@ -179,9 +180,18 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         PREPARE_PAYMENT_METHOD_HANDLER_NULL(
             eventName = "paymentsheet.prepare_payment_method_handler.is_null"
         ),
+        CREATE_CARD_PRESENT_SETUP_INTENT_CALLBACK_NULL(
+            eventName = "elements.tap_to_add.create_card_present_setup_intent_callback.is_null"
+        ),
         HCAPTCHA_FAILURE(
             eventName = "elements.captcha.passive.expected_failure"
         ),
+        TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE(
+            eventName = "elements.tap_to_add.discover_readers_call.failure"
+        ),
+        TAP_TO_ADD_CONNECT_READER_CALL_FAILURE(
+            eventName = "elements.tap_to_add.connect_reader_call.failure"
+        )
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -284,8 +294,19 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         PAYMENT_METHOD_MESSAGING_ELEMENT_UNABLE_TO_PARSE_RESPONSE(
             partialEventName = "paymentmethodmessaging.element.unable_to_parse_response"
-        )
-        ;
+        ),
+        CUSTOMER_SHEET_METADATA_NULL_ON_CONFIRM(
+            partialEventName = "customersheet.confirmation.no_payment_method_metadata"
+        ),
+        TAP_TO_ADD_LOCATION_PERMISSIONS_FAILURE(
+            partialEventName = "elements.tap_to_add.location_permission_required_unexpectedly"
+        ),
+        TAP_TO_ADD_NO_READER_FOUND(
+            partialEventName = "elements.tap_to_add.no_reader_found"
+        ),
+        TAP_TO_ADD_NO_GENERATED_CARD_AFTER_SUCCESSFUL_INTENT_CONFIRMATION(
+            partialEventName = "elements.tap_to_add.no_generated_card_after_successful_intent_confirmation"
+        );
 
         override val eventName: String
             get() = "unexpected_error.$partialEventName"
@@ -340,6 +361,15 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         FOUND_PREPARE_PAYMENT_METHOD_HANDLER_WHILE_POLLING(
             eventName = "paymentsheet.polling_for_prepare_payment_method_handler.found"
         ),
+        TAP_TO_ADD_DISCOVER_READERS_CALL_SUCCESS(
+            eventName = "elements.tap_to_add.discover_readers_call.success"
+        ),
+        TAP_TO_ADD_CONNECT_READER_CALL_SUCCESS(
+            eventName = "elements.tap_to_add.connect_reader_call.success"
+        ),
+        FOUND_CREATE_CARD_PRESENT_SETUP_INTENT_CALLBACK_WHILE_POLLING(
+            eventName = "elements.tap_to_add.polling_for_create_card_present_setup_intent_callback.success"
+        )
     }
 }
 
@@ -347,15 +377,15 @@ interface ErrorReporter : FraudDetectionErrorReporter {
 internal interface DefaultErrorReporterComponent {
     val errorReporter: ErrorReporter
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
-        fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
-
-        fun build(): DefaultErrorReporterComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            context: Context,
+            @BindsInstance
+            @Named(PRODUCT_USAGE)
+            productUsage: Set<String>,
+        ): DefaultErrorReporterComponent
     }
 }
 

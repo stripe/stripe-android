@@ -1,6 +1,7 @@
 package com.stripe.android.connect
 
 import android.content.pm.ActivityInfo
+import android.os.SystemClock
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
@@ -27,25 +28,31 @@ import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.ext.junit.rules.activityScenarioRule
 import com.stripe.android.connect.webview.serialization.AlertJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
+import com.stripe.android.testing.RetryRule
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.equalTo
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 class FullScreenComponentTest {
     private val title = "Test title"
 
-    @get:Rule
-    val activityRule = activityScenarioRule<EmptyEmbeddedComponentActivity>(
+    private val activityRule = activityScenarioRule<EmptyEmbeddedComponentActivity>(
         EmptyEmbeddedComponentActivity.newIntent(
             context = ApplicationProvider.getApplicationContext(),
             title = title,
         )
     )
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain
+        .outerRule(activityRule)
+        .around(RetryRule(3))
 
     private val rootView
         get() = isAssignableFrom(StripeComponentDialogFragmentView::class.java)
@@ -245,9 +252,33 @@ class FullScreenComponentTest {
     }
 
     private fun checkDialogDoesNotExist() {
-        onView(rootView)
-            .noActivity()
-            .check(doesNotExist())
+        // Retry the check to handle async dialog dismissal (fragment transaction).
+        retryUntilSuccess {
+            onView(rootView)
+                .noActivity()
+                .check(doesNotExist())
+        }
+    }
+
+    private fun retryUntilSuccess(
+        timeoutMillis: Long = 3000,
+        pollIntervalMillis: Long = 100,
+        block: () -> Unit
+    ) {
+        val endTime = SystemClock.elapsedRealtime() + timeoutMillis
+        var lastError: Throwable? = null
+
+        while (SystemClock.elapsedRealtime() < endTime) {
+            try {
+                block()
+                return
+            } catch (e: AssertionError) {
+                lastError = e
+                SystemClock.sleep(pollIntervalMillis)
+            }
+        }
+
+        throw lastError ?: AssertionError("Condition not met within ${timeoutMillis}ms")
     }
 
     private fun performWebViewAlertWithoutChecks(method: String, alertJs: AlertJs) {

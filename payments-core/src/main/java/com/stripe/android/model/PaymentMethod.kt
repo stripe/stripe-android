@@ -528,6 +528,15 @@ constructor(
             hasDelayedSettlement = false,
             requiresMandateForPaymentIntent = false,
         ),
+        PayPay(
+            "paypay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION),
+        ),
         PromptPay(
             "promptpay",
             isReusable = false,

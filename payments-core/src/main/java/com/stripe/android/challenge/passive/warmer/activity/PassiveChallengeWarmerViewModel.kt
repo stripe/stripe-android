@@ -38,12 +38,13 @@ internal class PassiveChallengeWarmerViewModel @Inject constructor(
                 val args: PassiveChallengeWarmerArgs = getArgs(createSavedStateHandle())
                     ?: throw NoArgsException()
                 val app = this[APPLICATION_KEY] as Application
-                DaggerPassiveChallengeWarmerActivityComponent.builder()
-                    .passiveCaptchaParams(args.passiveCaptchaParams)
-                    .context(app)
-                    .publishableKeyProvider { args.publishableKey }
-                    .productUsage(args.productUsage.toSet())
-                    .build()
+                DaggerPassiveChallengeWarmerActivityComponent.factory()
+                    .create(
+                        context = app,
+                        publishableKeyProvider = { args.publishableKey },
+                        productUsage = args.productUsage.toSet(),
+                        passiveCaptchaParams = args.passiveCaptchaParams,
+                    )
                     .passiveChallengeWarmerViewModel
             }
         }

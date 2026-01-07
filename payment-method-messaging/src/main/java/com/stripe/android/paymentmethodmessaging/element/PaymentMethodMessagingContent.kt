@@ -4,6 +4,7 @@ package com.stripe.android.paymentmethodmessaging.element
 
 import android.content.Context
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -38,6 +40,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodMessageImage
+import com.stripe.android.model.PaymentMethodMessageLegalDisclosure
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.navigation.rememberKeyboardController
@@ -110,12 +115,22 @@ private fun SinglePartner(
             launchLearnMore(context, message.learnMore.url, appearance.theme)
         }
     ) {
-        TextWithLogo(
-            label = message.inlinePartnerPromotion,
-            image = image,
-            appearance = appearance,
-            learnMoreMessage = message.learnMore.message
-        )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            TextWithLogo(
+                label = message.inlinePartnerPromotion,
+                image = image,
+                appearance = appearance,
+                learnMoreMessage = message.learnMore.message
+            )
+            message.legalDisclosure?.let {
+                LegalDisclosure(
+                    legalDisclosure = it,
+                    theme = appearance.theme
+                )
+            }
+        }
     }
 }
 
@@ -137,14 +152,15 @@ private fun MultiPartner(
             scope.launch { keyboardController.dismiss() }
             analyticsOnClick()
             launchLearnMore(context, message.learnMore.url, appearance.theme)
-        }
+        },
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Images(getImages(message, appearance.theme), appearance)
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = message.promotion.buildAnnotatedStringWithInfoIcon(),
                 style = style,
-                color = Color(appearance.colors.textColor),
+                color = Color(getTextColor(appearance.colors.textColor, appearance.theme)),
                 inlineContent = mapOf(
                     INLINE_ICON_KEY to InlineTextContent(
                         placeholder = Placeholder(
@@ -159,6 +175,12 @@ private fun MultiPartner(
                         )
                     }
                 )
+            )
+        }
+        message.legalDisclosure?.let {
+            LegalDisclosure(
+                legalDisclosure = it,
+                theme = appearance.theme
             )
         }
     }
@@ -185,17 +207,18 @@ private fun Images(
     val fontSize = appearance.font?.fontSizeSp ?: DEFAULT_TEXT_SIZE
     val scaleFactor = fontSize / DEFAULT_TEXT_SIZE
     val iconHeight = DEFAULT_ICON_SIZE * scaleFactor
-
-    Row {
-        imageList.forEachIndexed { index, messagingImage ->
-            StripeImage(
-                url = messagingImage.url,
-                imageLoader = imageLoader,
-                contentDescription = messagingImage.text,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.align(Alignment.CenterVertically).height(iconHeight.dp)
-            )
-            if (index != imageList.lastIndex) Spacer(Modifier.width(8.dp))
+    if (imageList.isNotEmpty()) {
+        Row {
+            imageList.forEachIndexed { index, messagingImage ->
+                StripeImage(
+                    url = messagingImage.url,
+                    imageLoader = imageLoader,
+                    contentDescription = messagingImage.text,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.align(Alignment.CenterVertically).height(iconHeight.dp)
+                )
+                if (index != imageList.lastIndex) Spacer(Modifier.width(8.dp))
+            }
         }
     }
 }
@@ -228,12 +251,12 @@ private fun TextWithLogo(
     Text(
         text = label.buildInlineLogoAnnotatedStringWithInfoIcon(),
         style = style,
-        color = Color(appearance.colors.textColor),
+        color = Color(getTextColor(appearance.colors.textColor, appearance.theme)),
         inlineContent = mapOf(
             INLINE_IMAGE_KEY to InlineTextContent(
                 placeholder = Placeholder(
                     width = style.fontSize * INLINE_LOGO_SCALE_FACTOR,
-                    height = style.fontSize * INLINE_LOGO_SCALE_FACTOR,
+                    height = style.fontSize,
                     placeholderVerticalAlign = PlaceholderVerticalAlign.Center
                 )
             ) {
@@ -300,9 +323,33 @@ private fun InfoIcon(
     Icon(
         painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_info),
         contentDescription = learnMoreMessage,
-        tint = Color(appearance.colors.infoIconColor),
+        tint = Color(getIconColor(appearance.colors.infoIconColor, appearance.theme)),
         modifier = Modifier.fillMaxSize().padding(start = 4.dp)
     )
+}
+
+@Composable
+private fun LegalDisclosure(
+    legalDisclosure: PaymentMethodMessageLegalDisclosure,
+    theme: PaymentMethodMessagingElement.Appearance.Theme
+) {
+    Text(
+        text = legalDisclosure.message,
+        color = StripeThemeDefaults.colors(theme == PaymentMethodMessagingElement.Appearance.Theme.DARK).subtitle,
+        style = MaterialTheme.typography.caption
+    )
+}
+
+private fun getTextColor(textColor: Int?, theme: PaymentMethodMessagingElement.Appearance.Theme): Int {
+    return textColor ?: StripeTheme.getColors(
+        theme == PaymentMethodMessagingElement.Appearance.Theme.DARK
+    ).onComponent.toArgb()
+}
+
+private fun getIconColor(iconColor: Int?, theme: PaymentMethodMessagingElement.Appearance.Theme): Int {
+    return iconColor ?: StripeTheme.getColors(
+        theme == PaymentMethodMessagingElement.Appearance.Theme.DARK
+    ).subtitle.toArgb()
 }
 
 private const val DEFAULT_TEXT_SIZE = 16F

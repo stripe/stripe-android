@@ -27,12 +27,13 @@ internal class FlowControllerViewModel(
 
     val flowControllerStateComponent: FlowControllerStateComponent =
         DaggerFlowControllerStateComponent
-            .builder()
-            .application(application)
-            .statusBarColor(statusBarColor)
-            .paymentElementCallbackIdentifier(paymentElementCallbackIdentifier)
-            .flowControllerViewModel(this)
-            .build()
+            .factory()
+            .create(
+                statusBarColor = statusBarColor,
+                application = application,
+                paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+                flowControllerViewModel = this,
+            )
 
     var walletButtonsRendered: Boolean = false
 

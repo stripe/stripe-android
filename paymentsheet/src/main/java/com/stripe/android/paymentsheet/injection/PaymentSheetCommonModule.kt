@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.common.taptoadd.TapToAddModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -22,6 +23,8 @@ import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkCommonModule
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.PaymentsIntegrityModule
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -68,6 +71,7 @@ import javax.inject.Singleton
     ],
     includes = [
         LinkCommonModule::class,
+        TapToAddModule::class,
         PaymentsIntegrityModule::class
     ]
 )
@@ -133,6 +137,11 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
+
+    @Binds
+    abstract fun bindCardFundingFilter(
+        cardFundingFilterFactory: PaymentSheetCardFundingFilter.Factory
+    ): PaymentSheetCardFundingFilterFactory
 
     @Binds
     abstract fun bindsCardAccountRangeRepositoryFactory(

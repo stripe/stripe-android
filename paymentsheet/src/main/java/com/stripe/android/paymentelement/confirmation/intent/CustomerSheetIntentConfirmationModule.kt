@@ -11,6 +11,12 @@ internal interface CustomerSheetIntentConfirmationModule {
     ): CustomerSheetSetupIntentInterceptor.Factory
 
     @Binds
+    fun bindsAttachPaymentMethodInterceptorFactory(
+        defaultCustomerSheetAttachPaymentMethodInterceptorFactory:
+        DefaultCustomerSheetAttachPaymentMethodInterceptorFactory
+    ): CustomerSheetAttachPaymentMethodInterceptor.Factory
+
+    @Binds
     fun bindsIntentConfirmationInterceptorFactory(
         customerSheetConfirmationInterceptorFactory: CustomerSheetIntentConfirmationInterceptorFactory
     ): IntentConfirmationInterceptor.Factory

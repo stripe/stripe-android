@@ -56,7 +56,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
         clientAttributionMetadata: ClientAttributionMetadata,
     ): IntentConfirmationInterceptor {
         return when (integrationMetadata) {
-            IntegrationMetadata.CustomerSheet -> {
+            is IntegrationMetadata.CustomerSheet -> {
                 // CustomerSheet doesn't call confirm with IntegrationMetadata.CustomerSheet.
                 // CustomerSheet calls confirm with an IntegrationMetadata.IntentFirst setup intent.
                 throw IllegalStateException("CustomerSheet not supported by default confirmation interceptor!")

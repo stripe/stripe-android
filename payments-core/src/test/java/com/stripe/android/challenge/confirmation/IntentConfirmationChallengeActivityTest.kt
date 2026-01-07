@@ -7,9 +7,11 @@ import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.core.os.BundleCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
@@ -74,6 +76,21 @@ internal class IntentConfirmationChallengeActivityTest {
         val retrievedArgs = IntentConfirmationChallengeActivity.getArgs(savedStateHandle)
 
         assertThat(retrievedArgs).isNull()
+    }
+
+    @Test
+    fun `activity finishes gracefully when required args are missing`() = runTest {
+        ActivityScenario.launchActivityForResult<IntentConfirmationChallengeActivity>(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                IntentConfirmationChallengeActivity::class.java
+            )
+        ).use { scenario ->
+            advanceUntilIdle()
+
+            // Activity should finish gracefully without crashing
+            assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        }
     }
 
     @Test

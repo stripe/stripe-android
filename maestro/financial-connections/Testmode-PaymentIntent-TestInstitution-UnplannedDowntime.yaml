@@ -20,11 +20,11 @@ tags:
 - tapOn:
     id: "consent_cta"
 # Select Down institution
-- tapOn: "Down Bank (Unscheduled)"
+- tapOn: "Down (Unscheduled)"
 # Selecting another bank resets the flow
 - tapOn: "Select another bank"
 # Assert flow correctly returns to institution picker
-- tapOn: "Down Bank (Unscheduled)"
+- tapOn: "Down (Unscheduled)"
 # Close flow from error page
 - tapOn: "Close icon"
 - scrollUntilVisible:

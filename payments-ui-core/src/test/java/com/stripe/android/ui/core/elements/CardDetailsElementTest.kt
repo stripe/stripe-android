@@ -11,7 +11,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cardscan.ScannedCard
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -333,13 +333,13 @@ class CardDetailsElementTest {
         cardDetailsElement.onValidationStateChanged(isValidating = true)
 
         nameElement
-            .errorTest(FieldError(UiCoreR.string.stripe_blank_and_required))
+            .errorTest(FieldValidationMessage.Error(UiCoreR.string.stripe_blank_and_required))
         cardDetailsElement.controller.numberElement
-            .errorTest(FieldError(UiCoreR.string.stripe_blank_and_required))
+            .errorTest(FieldValidationMessage.Error(UiCoreR.string.stripe_blank_and_required))
         cardDetailsElement.controller.cvcElement
-            .errorTest(FieldError(UiCoreR.string.stripe_blank_and_required))
+            .errorTest(FieldValidationMessage.Error(UiCoreR.string.stripe_blank_and_required))
         cardDetailsElement.controller.expirationDateElement
-            .errorTest(FieldError(UiCoreR.string.stripe_blank_and_required))
+            .errorTest(FieldValidationMessage.Error(UiCoreR.string.stripe_blank_and_required))
 
         nameElement.controller.onValueChange("Sa")
         cardDetailsElement.controller.numberElement.controller.onValueChange("4000")
@@ -348,10 +348,10 @@ class CardDetailsElementTest {
 
         nameElement.errorTest(null)
         cardDetailsElement.controller.numberElement
-            .errorTest(FieldError(StripeR.string.stripe_invalid_card_number))
+            .errorTest(FieldValidationMessage.Error(StripeR.string.stripe_invalid_card_number))
         cardDetailsElement.controller.cvcElement
-            .errorTest(FieldError(StripeR.string.stripe_invalid_cvc))
+            .errorTest(FieldValidationMessage.Error(StripeR.string.stripe_invalid_cvc))
         cardDetailsElement.controller.expirationDateElement
-            .errorTest(FieldError(UiCoreR.string.stripe_incomplete_expiry_date))
+            .errorTest(FieldValidationMessage.Error(UiCoreR.string.stripe_incomplete_expiry_date))
     }
 }

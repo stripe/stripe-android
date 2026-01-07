@@ -15,8 +15,13 @@ import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
+import com.stripe.android.uicore.elements.EmailElement
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.SectionFieldElement
+import com.stripe.android.uicore.elements.SimpleTextElement
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -212,6 +217,79 @@ class FormElementsBuilderTest {
             "\uD83C\uDDFA\uD83C\uDDF8 United States",
             "\uD83C\uDDE8\uD83C\uDDE6 Canada"
         )
+    }
+
+    @Test
+    fun `build orders all overridden contact information fields based on function order`() {
+        val arguments = arguments(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                allowedCountries = setOf("US", "CA")
+            )
+        )
+        val formElements = FormElementsBuilder(arguments)
+            .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
+            .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
+            .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
+            .build()
+
+        assertThat(formElements).hasSize(3)
+
+        val phoneSection = getSection(formElements, "billing_details[phone]_section", 0)
+        phoneSection.assertSingleElementInSection<PhoneNumberElement>()
+
+        val nameSection = getSection(formElements, "billing_details[name]_section", 1)
+        nameSection.assertSingleElementInSection<SimpleTextElement>()
+
+        val emailSection = getSection(formElements, "billing_details[email]_section", 2)
+        emailSection.assertSingleElementInSection<EmailElement>()
+    }
+
+    @Test
+    fun `build orders only overridden contact information fields based on function order`() {
+        val arguments = arguments(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                allowedCountries = setOf("US", "CA")
+            )
+        )
+        val formElements = FormElementsBuilder(arguments)
+            .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
+            .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
+            .build()
+
+        assertThat(formElements).hasSize(3)
+
+        val emailSection = getSection(formElements, "billing_details[email]_section", 0)
+        emailSection.assertSingleElementInSection<EmailElement>()
+
+        val phoneSection = getSection(formElements, "billing_details[phone]_section", 1)
+        phoneSection.assertSingleElementInSection<PhoneNumberElement>()
+
+        val nameSection = getSection(formElements, "billing_details[name]_section", 2)
+        nameSection.assertSingleElementInSection<SimpleTextElement>()
+    }
+
+    private inline fun <reified T : SectionFieldElement> SectionElement.assertSingleElementInSection() {
+        assertThat(fields).hasSize(1)
+        assertThat(fields[0]).isInstanceOf<T>()
+    }
+
+    private fun getSection(
+        formElements: List<FormElement>,
+        identifierName: String,
+        position: Int,
+    ): SectionElement {
+        assertThat(formElements[position].identifier.v1).isEqualTo(identifierName)
+        assertThat(formElements[position]).isInstanceOf<SectionElement>()
+
+        return formElements[position] as SectionElement
     }
 
     private fun arguments(

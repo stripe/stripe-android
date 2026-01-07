@@ -137,7 +137,7 @@ internal class LinkInlineSignupViewTest {
     ) {
         val sectionController = SectionController(
             label = null,
-            sectionFieldErrorControllers = listOf(
+            sectionFieldValidationControllers = listOf(
                 emailController,
                 phoneController,
                 nameController,

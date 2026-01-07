@@ -28,7 +28,7 @@ internal object InstantDebitsDefinition : PaymentMethodDefinition {
     override fun uiDefinitionFactory(): UiDefinitionFactory = InstantDebitsUiDefinitionFactory
 }
 
-private object InstantDebitsUiDefinitionFactory : UiDefinitionFactory.Simple {
+private object InstantDebitsUiDefinitionFactory : UiDefinitionFactory.Custom {
 
     override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
         return SupportedPaymentMethod(

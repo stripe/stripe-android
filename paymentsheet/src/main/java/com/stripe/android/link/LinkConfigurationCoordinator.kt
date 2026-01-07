@@ -45,7 +45,7 @@ internal interface LinkConfigurationCoordinator {
 
 @Singleton
 internal class RealLinkConfigurationCoordinator @Inject internal constructor(
-    private val linkComponentBuilder: LinkComponent.Builder,
+    private val linkComponentFactory: LinkComponent.Factory,
 ) : LinkConfigurationCoordinator {
     private val componentFlow = MutableStateFlow<LinkComponent?>(null)
 
@@ -129,9 +129,10 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
      */
     private fun getLinkPaymentLauncherComponent(configuration: LinkConfiguration) =
         componentFlow.value?.takeIf { it.configuration == configuration }
-            ?: linkComponentBuilder
-                .configuration(configuration)
-                .build()
+            ?: linkComponentFactory
+                .create(
+                    configuration = configuration,
+                )
                 .also {
                     componentFlow.value = it
                 }

@@ -5,11 +5,13 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Flag
@@ -26,7 +28,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -252,6 +253,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(billingConfig?.get("email")).isEqualTo("Automatic")
         assertThat(billingConfig?.get("phone")).isEqualTo("Automatic")
         assertThat(billingConfig?.get("address")).isEqualTo("Automatic")
+        assertThat(billingConfig?.get("allowed_countries")).isNull()
     }
 
     @Test
@@ -264,6 +266,7 @@ class DefaultAnalyticsMetadataFactoryTest {
                 phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 attachDefaultsToPaymentMethod = true,
+                allowedCountries = setOf("US", "CA", "UK", "JP")
             )
         )
 
@@ -281,6 +284,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(billingConfig?.get("email")).isEqualTo("Never")
         assertThat(billingConfig?.get("phone")).isEqualTo("Always")
         assertThat(billingConfig?.get("address")).isEqualTo("Full")
+        assertThat(billingConfig?.get("allowed_countries")).isEqualTo("US,CA,UK,JP")
     }
 
     @Test
@@ -494,7 +498,6 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(mpeConfig?.get("external_payment_methods")).isEqualTo("external_pm1,external_pm2")
     }
 
-    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     @Test
     fun `create returns custom payment methods`() = runScenario {
         val customPaymentMethod = ElementsSession.CustomPaymentMethod.Available(
@@ -674,6 +677,20 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(appearance?.get("usage")).isEqualTo(true)
     }
 
+    @Test
+    fun `create returns true for link_native_available when native link is available`() = runScenario {
+        val fakeLinkGate = FakeLinkGate().apply {
+            setUseNativeLink(true)
+        }
+        val linkGateFactory = FakeLinkGate.Factory(fakeLinkGate)
+
+        val resultMap = createAnalyticsMetadata(
+            linkGateFactory = linkGateFactory
+        )
+
+        assertThat(resultMap["link_native_available"]).isEqualTo(true)
+    }
+
     private fun runScenario(
         mode: EventReporter.Mode = EventReporter.Mode.Complete,
         block: Scenario.() -> Unit
@@ -696,11 +713,14 @@ class DefaultAnalyticsMetadataFactoryTest {
         val mode: EventReporter.Mode,
     )
 
-    private fun Scenario.createFactory(): DefaultAnalyticsMetadataFactory {
+    private fun Scenario.createFactory(
+        linkGateFactory: FakeLinkGate.Factory = FakeLinkGate.Factory()
+    ): DefaultAnalyticsMetadataFactory {
         return DefaultAnalyticsMetadataFactory(
             cvcRecollectionHandler = cvcRecollectionHandler,
             mode = mode,
             analyticEventCallbackProvider = analyticEventCallbackProvider,
+            linkGateFactory = linkGateFactory,
         )
     }
 
@@ -718,8 +738,9 @@ class DefaultAnalyticsMetadataFactoryTest {
         ),
         customerMetadata: CustomerMetadata? = null,
         linkStateResult: LinkStateResult? = null,
+        linkGateFactory: FakeLinkGate.Factory = FakeLinkGate.Factory(),
     ): Map<String, Any?> {
-        val factory = createFactory()
+        val factory = createFactory(linkGateFactory = linkGateFactory)
         return factory.create(
             initializationMode = initializationMode,
             integrationMetadata = integrationMetadata,
@@ -877,6 +898,7 @@ class DefaultAnalyticsMetadataFactoryTest {
                 forceSetupFutureUseBehaviorAndNewMandate = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = emptyList(),
                 clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+                cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             ),
             loginState = LinkState.LoginState.LoggedOut,
             signupModeResult = signupModeResult,

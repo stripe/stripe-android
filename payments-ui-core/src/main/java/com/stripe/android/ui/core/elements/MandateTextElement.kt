@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class MandateTextElement(
-    override val identifier: IdentifierSpec,
+    override val identifier: IdentifierSpec = IdentifierSpec.Generic("mandate"),
     val stringResId: Int,
     val args: List<String>,
     val topPadding: Dp = 8.dp,

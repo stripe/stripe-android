@@ -798,14 +798,15 @@ internal class DefaultFlowController @Inject internal constructor(
             val flowControllerStateComponent = flowControllerViewModel.flowControllerStateComponent
 
             val flowControllerComponent: FlowControllerComponent =
-                flowControllerStateComponent.flowControllerComponentBuilder
-                    .lifeCycleOwner(lifecycleOwner)
-                    .activityResultRegistryOwner(activityResultRegistryOwner)
-                    .activityResultCaller(activityResultCaller)
-                    .paymentOptionResultCallback(paymentOptionResultCallback)
-                    .paymentResultCallback(paymentResultCallback)
-                    .initializedViaCompose(initializedViaCompose)
-                    .build()
+                flowControllerStateComponent.flowControllerComponentFactory
+                    .create(
+                        lifecycleOwner = lifecycleOwner,
+                        activityResultCaller = activityResultCaller,
+                        activityResultRegistryOwner = activityResultRegistryOwner,
+                        paymentOptionResultCallback = paymentOptionResultCallback,
+                        paymentResultCallback = paymentResultCallback,
+                        initializedViaCompose = initializedViaCompose,
+                    )
             val flowController = flowControllerComponent.flowController
             flowController.flowControllerComponent = flowControllerComponent
             return flowController

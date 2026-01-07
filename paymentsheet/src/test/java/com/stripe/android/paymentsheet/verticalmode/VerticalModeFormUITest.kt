@@ -83,6 +83,15 @@ internal class VerticalModeFormUITest {
     }
 
     @Test
+    fun testCardDoesNotShowHeaderWhenShowWalletIsTrue() = runScenario(
+        initialState = createCardState(customerHasSavedPaymentMethods = true),
+        showsWalletHeader = true
+    ) {
+        formPage.headerIcon.assertDoesNotExist()
+        formPage.title.assertDoesNotExist()
+    }
+
+    @Test
     fun testCardShowsAddCardHeader_whenCustomerHasNoSavedPMs() = runScenario(
         createCardState(customerHasSavedPaymentMethods = false)
     ) {
@@ -93,6 +102,16 @@ internal class VerticalModeFormUITest {
 
     @Test
     fun testLpmShowsHeader() = runScenario(createKlarnaState()) {
+        formPage.headerIcon.assertExists()
+        formPage.title.assertExists()
+        formPage.title.assert(hasText("Klarna"))
+    }
+
+    @Test
+    fun testLpmShowsHeaderWhenShowsWalletHeaderIsTrue() = runScenario(
+        initialState = createKlarnaState(),
+        showsWalletHeader = true
+    ) {
         formPage.headerIcon.assertExists()
         formPage.title.assertExists()
         formPage.title.assert(hasText("Klarna"))
@@ -118,6 +137,7 @@ internal class VerticalModeFormUITest {
 
     private fun runScenario(
         initialState: VerticalModeFormInteractor.State,
+        showsWalletHeader: Boolean = false,
         block: Scenario.() -> Unit
     ) {
         val stateFlow = MutableStateFlow(initialState)
@@ -130,7 +150,7 @@ internal class VerticalModeFormUITest {
                 LocalCardNumberCompletedEventReporter provides { },
                 LocalCardBrandDisallowedReporter provides { }
             ) {
-                VerticalModeFormUI(interactor, showsWalletHeader = false)
+                VerticalModeFormUI(interactor, showsWalletHeader = showsWalletHeader)
             }
         }
 
@@ -157,7 +177,7 @@ internal class VerticalModeFormUITest {
 
     private fun createCardState(customerHasSavedPaymentMethods: Boolean): VerticalModeFormInteractor.State {
         val headerInformation =
-            (CardDefinition.uiDefinitionFactory() as UiDefinitionFactory.Simple).createFormHeaderInformation(
+            (CardDefinition.uiDefinitionFactory() as UiDefinitionFactory.Custom).createFormHeaderInformation(
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
                 incentive = null,
             )

@@ -58,7 +58,7 @@ internal class LinkControllerInteractor @Inject constructor(
     private val logger: Logger,
     private val linkConfigurationLoader: LinkConfigurationLoader,
     private val linkAccountHolder: LinkAccountHolder,
-    private val linkComponentBuilderProvider: Provider<LinkComponent.Builder>,
+    private val linkComponentFactoryProvider: Provider<LinkComponent.Factory>,
 ) {
 
     private val tag = "LinkControllerViewInteractor"
@@ -123,9 +123,10 @@ internal class LinkControllerInteractor @Inject constructor(
         )
         return linkConfigurationLoader.load(configuration)
             .flatMapCatching { linkMetadata ->
-                val component = linkComponentBuilderProvider.get()
-                    .configuration(linkMetadata.linkConfiguration)
-                    .build()
+                val component = linkComponentFactoryProvider.get()
+                    .create(
+                        configuration = linkMetadata.linkConfiguration,
+                    )
                 component.linkAttestationCheck.invoke()
                     .toResult()
                     .map { Pair(component, linkMetadata.paymentMethodMetadata) }
@@ -714,7 +715,7 @@ internal fun ConsumerPaymentDetails.PaymentDetails.getIconDrawableRes(isDarkThem
                 isDarkTheme
             )
         is ConsumerPaymentDetails.Card ->
-            getIconDrawableRes(PaymentMethodPreviewDetails.Card(brand, funding, last4), isDarkTheme)
+            getIconDrawableRes(PaymentMethodPreviewDetails.Card(brand, funding.code, last4), isDarkTheme)
         is ConsumerPaymentDetails.Passthrough ->
             getLinkIcon(iconOnly = true)
     }

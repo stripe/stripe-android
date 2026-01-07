@@ -1,8 +1,10 @@
 package com.stripe.android.paymentsheet.example.playground
 
 import android.app.Application
+import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -15,6 +17,7 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.taptoadd.CreateConnectionTokenResult
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheet
@@ -25,21 +28,28 @@ import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
+import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.Settings
+import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequestParams
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyResponse
+import com.stripe.android.paymentsheet.example.playground.network.CreateCardPresentSetupIntentRequester
+import com.stripe.android.paymentsheet.example.playground.network.CreateConnectionTokenRequester
 import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.network.SharedPaymentTokenPlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomPublishableKeyDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomSecretKeyDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomStripeApiDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
@@ -180,6 +190,60 @@ internal class PaymentSheetPlaygroundViewModel(
                 )
             )
         }
+    }
+
+    @OptIn(TapToAddPreview::class)
+    suspend fun createConnectionToken(): CreateConnectionTokenResult {
+        val snapshot = state.value?.snapshot
+            ?: return CreateConnectionTokenResult.Failure(
+                cause = IllegalStateException("No playground state!"),
+                message = "No playground state on token creation!"
+            )
+
+        return CreateConnectionTokenRequester(snapshot, getApplication())
+            .fetch()
+            .fold(
+                onSuccess = {
+                    CreateConnectionTokenResult.Success(it)
+                },
+                onFailure = {
+                    CreateConnectionTokenResult.Failure(
+                        cause = IllegalStateException("No playground state!"),
+                        message = "No playground state on token creation!"
+                    )
+                }
+            )
+    }
+
+    suspend fun createCardPresentSetupIntent(): CreateIntentResult {
+        val state = state.value
+            ?: return CreateIntentResult.Failure(
+                cause = IllegalStateException("No playground state!"),
+                displayMessage = "No playground state on token creation!"
+            )
+
+        val customerId = state.customerId()
+            ?: return CreateIntentResult.Failure(
+                cause = IllegalStateException("No customer found!"),
+                displayMessage = "No customer found!"
+            )
+
+        return CreateCardPresentSetupIntentRequester(
+            playgroundSettings = state.snapshot,
+            applicationContext = getApplication()
+        )
+            .fetch(customerId)
+            .fold(
+                onSuccess = {
+                    CreateIntentResult.Success(it)
+                },
+                onFailure = {
+                    CreateIntentResult.Failure(
+                        cause = Exception(it),
+                        displayMessage = it.message,
+                    )
+                }
+            )
     }
 
     fun createCustomerAdapter(
@@ -591,6 +655,9 @@ internal class PaymentSheetPlaygroundViewModel(
                     merchantCountryCode = playgroundState.merchantCode.countryCode,
                     mode = playgroundState.checkoutMode.value,
                     returnUrl = RETURN_URL,
+                    customStripeApi = playgroundState.snapshot[CustomStripeApiDefinition],
+                    customSecretKey = playgroundState.snapshot[CustomSecretKeyDefinition],
+                    customPublishableKey = playgroundState.snapshot[CustomPublishableKeyDefinition],
                 )
             }
 
@@ -600,6 +667,9 @@ internal class PaymentSheetPlaygroundViewModel(
                     confirmationTokenId = confirmationParams.id,
                     merchantCountryCode = playgroundState.merchantCode.countryCode,
                     mode = playgroundState.checkoutMode.value,
+                    customStripeApi = playgroundState.snapshot[CustomStripeApiDefinition],
+                    customSecretKey = playgroundState.snapshot[CustomSecretKeyDefinition],
+                    customPublishableKey = playgroundState.snapshot[CustomPublishableKeyDefinition],
                 )
             }
         }
@@ -705,6 +775,36 @@ internal class PaymentSheetPlaygroundViewModel(
                     }
                 }
             )
+        }
+    }
+
+    fun resetToDefaults() {
+        viewModelScope.launch {
+            // Reset appearance
+            AppearanceStore.reset()
+
+            // Clear SharedPreferences
+            withContext(Dispatchers.IO) {
+                val sharedPreferences = getApplication<Application>().getSharedPreferences(
+                    "PlaygroundSettings",
+                    Context.MODE_PRIVATE
+                )
+                sharedPreferences.edit {
+                    clear()
+                }
+            }
+
+            // Create and apply default settings
+            val defaultSettings = PlaygroundSettings.createFromDefaults()
+            playgroundSettingsFlow.value = defaultSettings
+
+            // Clear states
+            setPlaygroundState(null)
+            flowControllerState.value = null
+            customerSheetState.value = null
+
+            // Auto-reload
+            prepare(defaultSettings)
         }
     }
 

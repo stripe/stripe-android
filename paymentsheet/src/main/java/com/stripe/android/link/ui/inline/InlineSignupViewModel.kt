@@ -110,7 +110,7 @@ internal class InlineSignupViewModel(
 
     val sectionController: SectionController = SectionController(
         label = null,
-        sectionFieldErrorControllers = listOfNotNull(
+        sectionFieldValidationControllers = listOfNotNull(
             emailController,
             phoneController,
             nameController.takeIf { requiresNameCollection },

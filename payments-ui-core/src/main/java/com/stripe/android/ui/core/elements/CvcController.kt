@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
-import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.elements.TextFieldState
@@ -75,17 +75,17 @@ class CvcController constructor(
     private val _isValidating = MutableStateFlow(false)
     private val _hasFocus = MutableStateFlow(false)
 
-    override val visibleError: StateFlow<Boolean> =
+    override val visibleValidationMessage: StateFlow<Boolean> =
         combineAsStateFlow(_fieldState, _hasFocus, _isValidating) { fieldState, hasFocus, isValidating ->
-            fieldState.shouldShowError(hasFocus, isValidating)
+            fieldState.shouldShowValidationMessage(hasFocus, isValidating)
         }
 
     /**
      * An error must be emitted if it is visible or not visible.
      **/
-    override val error: StateFlow<FieldError?> =
-        combineAsStateFlow(visibleError, _fieldState) { visibleError, fieldState ->
-            fieldState.getError()?.takeIf { visibleError }
+    override val validationMessage: StateFlow<FieldValidationMessage?> =
+        combineAsStateFlow(visibleValidationMessage, _fieldState) { visibleError, fieldState ->
+            fieldState.getValidationMessage()?.takeIf { visibleError }
         }
 
     override val isComplete: StateFlow<Boolean> = _fieldState.mapAsStateFlow { it.isValid() }

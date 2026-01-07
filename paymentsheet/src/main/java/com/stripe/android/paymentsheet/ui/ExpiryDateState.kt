@@ -1,10 +1,9 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Immutable
-import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.ui.core.elements.CardDetailsUtil
 import com.stripe.android.uicore.elements.DateConfig
+import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
@@ -50,18 +49,12 @@ internal data class ExpiryDateState(
         )
 
     fun shouldShowError(): Boolean {
-        return textFieldState.shouldShowError(hasFocus = true, isValidating = validating)
+        return textFieldState.shouldShowValidationMessage(hasFocus = true, isValidating = validating)
     }
 
-    @SuppressWarnings("SpreadOperator")
-    fun sectionError(): ResolvableString? {
-        return textFieldState.getError()?.takeIf {
+    fun sectionValidationMessage(): FieldValidationMessage? {
+        return textFieldState.getValidationMessage()?.takeIf {
             shouldShowError() && enabled
-        }?.let { error ->
-            resolvableString(
-                id = error.errorMessage,
-                formatArgs = error.formatArgs.orEmpty()
-            )
         }
     }
 
