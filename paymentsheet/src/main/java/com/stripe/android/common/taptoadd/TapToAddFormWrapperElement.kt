@@ -17,6 +17,8 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 
 internal class TapToAddFormWrapperElement(
@@ -61,12 +63,18 @@ internal class TapToAddFormWrapperElement(
     }
 
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
-        return combineAsStateFlow(
-            elements.map {
-                it.getFormFieldValueFlow()
+        return tapToAddHelper.collectedPaymentMethod.flatMapLatestAsStateFlow { collectedPaymentMethod ->
+            if (collectedPaymentMethod != null) {
+                stateFlowOf(emptyList())
+            } else {
+                combineAsStateFlow(
+                    elements.map {
+                        it.getFormFieldValueFlow()
+                    }
+                ) {
+                    it.flatten()
+                }
             }
-        ) {
-            it.flatten()
         }
     }
 }
