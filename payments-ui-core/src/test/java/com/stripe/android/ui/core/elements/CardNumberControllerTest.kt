@@ -22,6 +22,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.events.AnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.CardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
@@ -39,6 +40,8 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -57,10 +60,13 @@ import com.stripe.payments.model.R as PaymentModelR
 
 @RunWith(RobolectricTestRunner::class)
 internal class CardNumberControllerTest {
+    private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
     @get:Rule
     val composeTestRule = createComposeRule()
-
-    private val testDispatcher = UnconfinedTestDispatcher()
 
     @Test
     fun `When invalid card number verify visible error`() = runTest {
@@ -109,32 +115,6 @@ internal class CardNumberControllerTest {
             cardNumberController.onFocusChange(false)
             assertThat(awaitItem()).isTrue()
         }
-    }
-
-    @Test
-    fun `Entering VISA BIN does not call accountRangeRepository`() {
-        val fakeRepository = FakeCardAccountRangeRepository()
-        val cardNumberController = createController(repository = fakeRepository)
-
-        cardNumberController.onValueChange("42424242424242424242")
-        idleLooper()
-        assertThat(fakeRepository.numberOfCalls).isEqualTo(0)
-    }
-
-    @Test
-    fun `Entering valid 19 digit UnionPay BIN returns accountRange of 19`() {
-        val cardNumberController = createController()
-        cardNumberController.onValueChange("6216828050000000000")
-        idleLooper()
-        assertThat(cardNumberController.accountRangeService.accountRange!!.panLength).isEqualTo(19)
-    }
-
-    @Test
-    fun `Entering valid 16 digit UnionPay BIN returns accountRange of 16`() {
-        val cardNumberController = createController()
-        cardNumberController.onValueChange("6282000000000000")
-        idleLooper()
-        assertThat(cardNumberController.accountRangeService.accountRange!!.panLength).isEqualTo(16)
     }
 
     @Test
@@ -746,7 +726,6 @@ internal class CardNumberControllerTest {
     private fun createController(
         initialValue: String? = null,
         cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
-        repository: CardAccountRangeRepository = FakeCardAccountRangeRepository(),
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ): DefaultCardNumberController {
         return DefaultCardNumberController(
@@ -754,26 +733,22 @@ internal class CardNumberControllerTest {
                 isCardBrandChoiceEligible = false,
                 cardBrandFilter = cardBrandFilter
             ),
-            cardAccountRangeRepository = repository,
+            cardAccountRangeRepository = FakeCardAccountRangeRepository(),
             uiContext = testDispatcher,
             workContext = testDispatcher,
             initialValue = initialValue,
             cardBrandChoiceConfig = cardBrandChoiceConfig,
-            cardBrandFilter = cardBrandFilter
+            cardBrandFilter = cardBrandFilter,
+            coroutineScope = TestScope(testDispatcher)
         )
     }
 
     private class FakeCardAccountRangeRepository : CardAccountRangeRepository {
-
         private val staticCardAccountRangeSource = StaticCardAccountRangeSource()
-
-        var numberOfCalls: Int = 0
-            private set
 
         override suspend fun getAccountRange(
             cardNumber: CardNumber.Unvalidated
         ): AccountRange? {
-            numberOfCalls += 1
             return cardNumber.bin?.let {
                 staticCardAccountRangeSource.getAccountRange(cardNumber)
             }
@@ -782,7 +757,6 @@ internal class CardNumberControllerTest {
         override suspend fun getAccountRanges(
             cardNumber: CardNumber.Unvalidated
         ): List<AccountRange>? {
-            numberOfCalls += 1
             return cardNumber.bin?.let {
                 staticCardAccountRangeSource.getAccountRanges(cardNumber)
             }

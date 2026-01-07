@@ -17,19 +17,19 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.cards.DefaultCardAccountRangeService
 import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
-import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.CoroutineContext
 import androidx.appcompat.R as AppCompatR
@@ -42,15 +42,22 @@ class CardNumberEditText internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = AppCompatR.attr.editTextStyle,
-    uiContext: CoroutineContext,
+    private val uiContext: CoroutineContext,
     @get:VisibleForTesting
     var workContext: CoroutineContext,
     private val cardAccountRangeRepository: CardAccountRangeRepository,
-    staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
+    private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     internal var viewModelStoreOwner: ViewModelStoreOwner? = null,
-    private var cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+    private var cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    val accountRangeService: CardAccountRangeService = DefaultCardAccountRangeService(
+        cardAccountRangeRepository = cardAccountRangeRepository,
+        uiContext = uiContext,
+        workContext = workContext,
+        staticCardAccountRanges = staticCardAccountRanges,
+    ),
+    private val coroutineScope: CoroutineScope = CoroutineScope(uiContext)
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     @JvmOverloads
@@ -152,7 +159,7 @@ class CardNumberEditText internal constructor(
 
     internal val panLength: Int
         get() = accountRangeService.accountRange?.panLength
-            ?: accountRangeService.staticCardAccountRanges.first(unvalidatedCardNumber)?.panLength
+            ?: staticCardAccountRanges.first(unvalidatedCardNumber)?.panLength
             ?: CardNumber.DEFAULT_PAN_LENGTH
 
     private val formattedPanLength: Int
@@ -175,35 +182,11 @@ class CardNumberEditText internal constructor(
 
     private var isCbcEligible = false
 
-    @VisibleForTesting
-    val accountRangeService = CardAccountRangeService(
-        cardAccountRangeRepository = cardAccountRangeRepository,
-        uiContext = uiContext,
-        workContext = workContext,
-        staticCardAccountRanges = staticCardAccountRanges,
-        isCbcEligible = { isCbcEligible },
-        accountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
-            override fun onAccountRangesResult(
-                accountRanges: List<AccountRange>,
-                unfilteredAccountRanges: List<AccountRange>
-            ) {
-                updateLengthFilter()
-
-                val brands = accountRanges.map { it.brand }.distinct()
-                cardBrand = brands.singleOrNull() ?: CardBrand.Unknown
-
-                if (isCbcEligible) {
-                    implicitCardBrandForCbc = brands.firstOrNull() ?: CardBrand.Unknown
-                    possibleCardBrands = unfilteredAccountRanges.map { it.brand }.distinct()
-                }
-            }
-        }
-    )
-
     @JvmSynthetic
     internal var isLoadingCallback: (Boolean) -> Unit = {}
 
     private var loadingJob: Job? = null
+    private var accountRangeResultJob: Job? = null
 
     init {
         setNumberOnlyInputType()
@@ -224,16 +207,31 @@ class CardNumberEditText internal constructor(
         updateLengthFilter()
 
         this.layoutDirection = LAYOUT_DIRECTION_LTR
+
+        // Start collecting account range results immediately
+        accountRangeResultJob = coroutineScope.launch {
+            accountRangeService.accountRangeResultFlow
+                .filterIsInstance<CardAccountRangeService.AccountRangesResult.Success>()
+                .collect { result ->
+                    updateLengthFilter()
+
+                    val brands = result.accountRanges.map { it.brand }.distinct()
+                    cardBrand = brands.singleOrNull() ?: CardBrand.Unknown
+
+                    if (isCbcEligible) {
+                        implicitCardBrandForCbc = brands.firstOrNull() ?: CardBrand.Unknown
+                        possibleCardBrands = result.unfilteredAccountRanges.map { it.brand }.distinct()
+                    }
+                }
+        }
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        loadingJob = CoroutineScope(workContext).launch {
+        loadingJob = coroutineScope.launch(uiContext) {
             cardAccountRangeRepository.loading.collect {
-                withContext(Dispatchers.Main) {
-                    isLoadingCallback(it)
-                }
+                isLoadingCallback(it)
             }
         }
 
@@ -241,7 +239,7 @@ class CardNumberEditText internal constructor(
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 this@CardNumberEditText.isCbcEligible = isCbcEligible
 
-                val brands = accountRangeService.accountRanges.map { it.brand }.distinct()
+                val brands = accountRangeService.accountRangesStateFlow.value.map { it.brand }.distinct()
 
                 if (isCbcEligible) {
                     implicitCardBrandForCbc = brands.firstOrNull() ?: CardBrand.Unknown
@@ -261,6 +259,9 @@ class CardNumberEditText internal constructor(
     override fun onDetachedFromWindow() {
         loadingJob?.cancel()
         loadingJob = null
+
+        accountRangeResultJob?.cancel()
+        accountRangeResultJob = null
 
         accountRangeService.cancelAccountRangeRepositoryJob()
 
@@ -359,7 +360,7 @@ class CardNumberEditText internal constructor(
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
             val cardNumber = CardNumber.Unvalidated(s?.toString().orEmpty())
-            accountRangeService.onCardNumberChanged(cardNumber)
+            accountRangeService.onCardNumberChanged(cardNumber, isCbcEligible)
 
             isPastedPan = isPastedPan(start, before, count, cardNumber)
 
