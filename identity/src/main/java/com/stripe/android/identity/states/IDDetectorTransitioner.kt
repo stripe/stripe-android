@@ -204,13 +204,13 @@ internal class IDDetectorTransitioner(
         }
 
         // Distance gating: if the detected document is too small or too large, keep in Found and reset timer
-        isNormalizedBox(analyzerOutput.boundingBox) && tooSmall(analyzerOutput.boundingBox) -> {
+        tooSmall(analyzerOutput.boundingBox) -> {
             foundState.reachedStateAt = TimeSource.Monotonic.markNow()
             foundState.withFeedback(
                 com.stripe.android.identity.R.string.stripe_move_closer
             )
         }
-        isNormalizedBox(analyzerOutput.boundingBox) && tooLarge(analyzerOutput.boundingBox) -> {
+        tooLarge(analyzerOutput.boundingBox) -> {
             foundState.reachedStateAt = TimeSource.Monotonic.markNow()
             foundState.withFeedback(
                 com.stripe.android.identity.R.string.stripe_move_farther
@@ -311,11 +311,6 @@ internal class IDDetectorTransitioner(
 
     private fun moreResultsRequired(foundState: Found): Boolean {
         return foundState.reachedStateAt.elapsedNow() < timeRequired.milliseconds
-    }
-
-    // Returns true if the bounding box looks normalized to [0, 1]
-    private fun isNormalizedBox(box: BoundingBox): Boolean {
-        return box.left in 0f..1f && box.top in 0f..1f && box.width in 0f..1f && box.height in 0f..1f
     }
 
     private fun coverage(box: BoundingBox): Float {
