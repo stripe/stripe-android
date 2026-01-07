@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
@@ -22,6 +24,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromParams
 import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -623,6 +626,45 @@ internal class FormHelperTest {
         assertThat(formHelper.formTypeForCode("link")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
     }
 
+    @Test
+    fun `onFormFieldValuesChanged returns Saved selection when collectedPaymentMethod is provided`() = runTest {
+        val collectedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
+            displayName = "Visa •••• 4242".resolvableString,
+            paymentMethod = collectedPaymentMethod,
+        )
+
+        FakeTapToAddHelper.test {
+            val formFieldValues = FormFieldValues(
+                fieldValuePairs = mapOf(
+                    IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
+                ),
+                userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+            )
+
+            val selection = MutableStateFlow<PaymentSelection?>(null)
+
+            selection.test {
+                assertThat(awaitItem()).isNull()
+
+                val formHelper = createFormHelper(
+                    selectionUpdater = { selection.value = it },
+                    newPaymentSelectionProvider = { null },
+                    tapToAddHelper = helper,
+                )
+
+                mutableCollectedPaymentMethod.value = displayableSavedPaymentMethod
+                formHelper.onFormFieldValuesChanged(formFieldValues, "card")
+
+                val paymentSelection = awaitItem()
+                assertThat(paymentSelection).isInstanceOf<PaymentSelection.Saved>()
+
+                val savedSelection = paymentSelection as PaymentSelection.Saved
+                assertThat(savedSelection.paymentMethod).isEqualTo(collectedPaymentMethod)
+            }
+        }
+    }
+
     private fun runLinkInlineTest(
         formFieldValues: FormFieldValues,
         inlineSignupViewState: InlineSignupViewState?,
@@ -658,6 +700,7 @@ internal class FormHelperTest {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
         eventReporter: FakeEventReporter = FakeEventReporter(),
+        tapToAddHelper: TapToAddHelper? = null,
         newPaymentSelectionProvider: () -> NewPaymentOptionSelection? = { throw AssertionError("Not implemented") },
         selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
     ): FormHelper {
@@ -674,7 +717,7 @@ internal class FormHelperTest {
             savedStateHandle = SavedStateHandle(),
             autocompleteAddressInteractorFactory = null,
             automaticallyLaunchedCardScanFormDataHelper = null,
-            tapToAddHelper = null,
+            tapToAddHelper = tapToAddHelper,
         )
     }
 

@@ -24,6 +24,7 @@
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
     <ID>LargeClass:DefaultPaymentElementLoaderTest.kt$DefaultPaymentElementLoaderTest</ID>
     <ID>LargeClass:ElementsSessionRepositoryTest.kt$ElementsSessionRepositoryTest</ID>
+    <ID>LargeClass:FormHelperTest.kt$FormHelperTest</ID>
     <ID>LargeClass:InputAddressViewModelTest.kt$InputAddressViewModelTest</ID>
     <ID>LargeClass:PaymentMethodMetadataTest.kt$PaymentMethodMetadataTest</ID>
     <ID>LargeClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest</ID>
@@ -59,7 +60,6 @@
     <ID>LongMethod:LinkInlineSignupConfirmationDefinitionTest.kt$LinkInlineSignupConfirmationDefinitionTest$@Test fun `'action' should return 'Launch' after successful sign-in &amp; attach`()</ID>
     <ID>LongMethod:LinkInlineSignupConfirmationDefinitionTest.kt$LinkInlineSignupConfirmationDefinitionTest$private fun testSuccessfulSignupWithNewCard( saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption, expectedSetupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?, expectedShouldSave: Boolean, )</ID>
     <ID>LongMethod:LinkInlineSignupConfirmationDefinitionTest.kt$LinkInlineSignupConfirmationDefinitionTest$private fun testSuccessfulSignupWithSavedLinkCard( saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption, expectedSetupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage, verifyBillingDetails: Boolean = false, includePaymentMethod: Boolean = false, )</ID>
-    <ID>LongMethod:LinkInlineSignupFields.kt$@Composable internal fun LinkInlineSignupFields( sectionError: Int?, emailController: TextFieldController, phoneNumberController: PhoneNumberController, nameController: TextFieldController, signUpState: SignUpState, enabled: Boolean, isShowingPhoneFirst: Boolean, requiresNameCollection: Boolean, allowsDefaultOptIn: Boolean, errorMessage: String?, didShowAllFields: Boolean, onShowingAllFields: () -> Unit, modifier: Modifier = Modifier, emailFocusRequester: FocusRequester = remember { FocusRequester() }, phoneFocusRequester: FocusRequester = remember { FocusRequester() }, nameFocusRequester: FocusRequester = remember { FocusRequester() }, )</ID>
     <ID>LongMethod:PaymentDetails.kt$@Preview(showBackground = true) @Composable private fun PaymentDetailsListItemPreview()</ID>
     <ID>LongMethod:PaymentMethodVerticalLayoutInteractor.kt$DefaultPaymentMethodVerticalLayoutInteractor.Companion$fun create( viewModel: BaseSheetViewModel, paymentMethodMetadata: PaymentMethodMetadata, customerStateHolder: CustomerStateHolder, bankFormInteractor: BankFormInteractor, ): PaymentMethodVerticalLayoutInteractor</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt$@OptIn(AppearanceAPIAdditionsPreview::class) internal fun PaymentSheet.Appearance.parseAppearance()</ID>
