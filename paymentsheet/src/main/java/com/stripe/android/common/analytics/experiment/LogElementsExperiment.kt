@@ -16,6 +16,7 @@ internal interface LogElementsExperiment {
 
 internal class DefaultLogElementsExperiment @Inject constructor(
     private val eventReporter: EventReporter,
+    private val mode: EventReporter.Mode,
 ): LogElementsExperiment {
     override fun logHorizontalModeAndroidAAExposure(
         experimentsData: ElementsSession.ExperimentsData,
@@ -23,7 +24,7 @@ internal class DefaultLogElementsExperiment @Inject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         hasSavedPaymentMethod: Boolean,
     ) {
-        val dimensions = CommonElementsDimensions.getDimensions(paymentMethodMetadata) +
+        val dimensions = CommonElementsDimensions.getDimensions(paymentMethodMetadata, mode) +
             mapOf("has_saved_payment_method" to hasSavedPaymentMethod.toString())
         eventReporter.onExperimentExposure(
             LoggableExperiment.OcsMobileHorizontalModeAndroidAA(
