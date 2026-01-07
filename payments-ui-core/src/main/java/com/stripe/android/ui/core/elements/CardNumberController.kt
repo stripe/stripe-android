@@ -64,7 +64,7 @@ internal sealed class CardNumberController : TextFieldController {
  *  `CardBrand.getCardBrands`. Look into merging Account Service and Card Brand logic.
  */
 internal class DefaultCardNumberController(
-    private val cardTextFieldConfig: CardNumberConfig,
+    private val cardTextFieldConfig: CardDetailsTextFieldConfig,
     cardAccountRangeRepository: CardAccountRangeRepository,
     uiContext: CoroutineContext,
     workContext: CoroutineContext,
