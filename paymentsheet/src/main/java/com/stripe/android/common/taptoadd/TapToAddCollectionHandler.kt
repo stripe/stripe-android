@@ -4,9 +4,11 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.stripeterminal.external.callable.Callback
@@ -25,7 +27,7 @@ internal interface TapToAddCollectionHandler {
     suspend fun collect(metadata: PaymentMethodMetadata): CollectionState
 
     sealed interface CollectionState {
-        data object Collected : CollectionState
+        data class Collected(val paymentMethod: PaymentMethod) : CollectionState
 
         data class FailedCollection(
             val error: Throwable,
@@ -39,12 +41,14 @@ internal interface TapToAddCollectionHandler {
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             terminalWrapper: TerminalWrapper,
             connectionManager: TapToAddConnectionManager,
+            errorReporter: ErrorReporter,
             createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
         ): TapToAddCollectionHandler {
             return if (isStripeTerminalSdkAvailable()) {
                 DefaultTapToAddCollectionHandler(
                     terminalWrapper = terminalWrapper,
                     connectionManager = connectionManager,
+                    errorReporter = errorReporter,
                     createCardPresentSetupIntentCallbackRetriever = createCardPresentSetupIntentCallbackRetriever,
                 )
             } else {
@@ -58,6 +62,7 @@ internal interface TapToAddCollectionHandler {
 internal class DefaultTapToAddCollectionHandler(
     private val terminalWrapper: TerminalWrapper,
     private val connectionManager: TapToAddConnectionManager,
+    private val errorReporter: ErrorReporter,
     private val createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
 ) : TapToAddCollectionHandler {
     override suspend fun collect(
@@ -107,10 +112,10 @@ internal class DefaultTapToAddCollectionHandler(
     ): TapToAddCollectionHandler.CollectionState {
         val setupIntent = retrieveSetupIntent(clientSecret)
         val setupIntentWithAttachedPaymentMethod = collectPaymentMethod(setupIntent, metadata)
+        val confirmedIntent = confirmSetupIntent(setupIntentWithAttachedPaymentMethod)
+        val paymentMethod = createPaymentMethod(confirmedIntent)
 
-        confirmSetupIntent(setupIntentWithAttachedPaymentMethod)
-
-        return TapToAddCollectionHandler.CollectionState.Collected
+        return TapToAddCollectionHandler.CollectionState.Collected(paymentMethod)
     }
 
     private suspend fun retrieveSetupIntent(clientSecret: String) = suspendCoroutine { continuation ->
@@ -186,6 +191,36 @@ internal class DefaultTapToAddCollectionHandler(
             PaymentMethod.AllowRedisplay.LIMITED -> AllowRedisplay.LIMITED
             PaymentMethod.AllowRedisplay.ALWAYS -> AllowRedisplay.ALWAYS
         }
+    }
+
+    private fun createPaymentMethod(intent: SetupIntent): PaymentMethod {
+        val paymentMethodDetails = intent.latestAttempt?.paymentMethodDetails
+        val presentDetails = paymentMethodDetails?.cardPresentDetails
+            ?: paymentMethodDetails?.interacPresentDetails
+        val generatedCard = presentDetails?.generatedCardExpanded
+            ?: run {
+                errorReporter.report(
+                    ErrorReporter
+                        .UnexpectedErrorEvent
+                        .TAP_TO_ADD_NO_GENERATED_CARD_AFTER_SUCCESSFUL_INTENT_CONFIRMATION
+                )
+
+                throw IllegalStateException(
+                    "No generated card payment method after collecting through tap!"
+                )
+            }
+
+        return PaymentMethod.Builder()
+            .setCode(PaymentMethod.Type.Card.code)
+            .setType(PaymentMethod.Type.Card)
+            .setId(generatedCard.id)
+            .setCard(
+                PaymentMethod.Card(
+                    last4 = generatedCard.cardDetails?.last4,
+                    brand = CardBrand.fromCode(generatedCard.cardDetails?.brand)
+                )
+            )
+            .build()
     }
 
     private fun terminal() = terminalWrapper.getInstance()
