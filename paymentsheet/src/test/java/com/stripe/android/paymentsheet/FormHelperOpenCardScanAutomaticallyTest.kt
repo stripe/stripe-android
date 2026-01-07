@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.analytics.experiment.FakeLogElementsExperiment
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.core.Logger
@@ -156,6 +157,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 linkPaymentLauncher = mock<LinkPaymentLauncher>(),
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
+                logElementsExperiment = FakeLogElementsExperiment(),
             )
         }
     }
@@ -202,6 +204,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                     }
                 },
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
+                logElementsExperiment = FakeLogElementsExperiment(),
             )
         }
     }

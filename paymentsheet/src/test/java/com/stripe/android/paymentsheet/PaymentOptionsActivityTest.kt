@@ -26,6 +26,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.analytics.experiment.FakeLogElementsExperiment
 import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
@@ -472,6 +473,7 @@ internal class PaymentOptionsActivityTest {
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 linkPaymentLauncher = mock(),
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
+                logElementsExperiment = FakeLogElementsExperiment(),
             )
         }
 

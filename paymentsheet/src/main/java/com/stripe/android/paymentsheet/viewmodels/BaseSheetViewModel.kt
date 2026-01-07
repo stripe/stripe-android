@@ -6,7 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
-import com.stripe.android.common.analytics.experiment.LoggableExperiment
+import com.stripe.android.common.analytics.experiment.LogElementsExperiment
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -62,6 +62,7 @@ internal abstract class BaseSheetViewModel(
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     val isCompleteFlow: Boolean,
     val tapToAddCollectionHandler: TapToAddCollectionHandler,
+    val logElementsExperiment: LogElementsExperiment,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)
@@ -239,13 +240,11 @@ internal abstract class BaseSheetViewModel(
         experimentsData.experimentAssignments[
             ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA
         ]?.let { variant ->
-            eventReporter.onExperimentExposure(
-                LoggableExperiment.OcsMobileHorizontalModeAndroidAA(
+            logElementsExperiment.logHorizontalModeAndroidAAExposure(
                     experimentsData = experimentsData,
-                    group = variant,
+                    variant = variant,
                     paymentMethodMetadata = paymentMethodMetadata,
                     hasSavedPaymentMethod = customerStateHolder.paymentMethods.value.isNotEmpty(),
-                )
             )
         }
 

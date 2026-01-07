@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.analytics.experiment.LogElementsExperiment
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.core.injection.IOContext
@@ -68,6 +69,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkHandler: LinkHandler,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     tapToAddCollectionHandler: TapToAddCollectionHandler,
+    logElementsExperiment: LogElementsExperiment,
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -78,6 +80,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = false,
     tapToAddCollectionHandler = tapToAddCollectionHandler,
+    logElementsExperiment = logElementsExperiment,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(

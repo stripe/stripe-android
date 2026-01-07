@@ -18,14 +18,12 @@ internal sealed class LoggableExperiment(
     class OcsMobileHorizontalModeAndroidAA(
         val experimentsData: ElementsSession.ExperimentsData,
         override val group: String,
-        paymentMethodMetadata: PaymentMethodMetadata,
-        hasSavedPaymentMethod: Boolean,
+        override val dimensions: Map<String, String>,
     ) : LoggableExperiment(
         arbId = experimentsData.arbId,
         experiment = ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA,
         group = group,
-        dimensions = CommonElementsDimensions.getDimensions(paymentMethodMetadata) +
-            mapOf("has_saved_payment_method" to hasSavedPaymentMethod.toString()),
+        dimensions = dimensions,
     )
 
     data class LinkHoldback(

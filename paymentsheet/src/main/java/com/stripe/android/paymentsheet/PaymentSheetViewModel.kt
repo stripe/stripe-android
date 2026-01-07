@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.analytics.experiment.LogElementsExperiment
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
@@ -88,6 +89,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
     tapToAddCollectionHandler: TapToAddCollectionHandler,
+    logElementsExperiment: LogElementsExperiment,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -98,6 +100,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
     tapToAddCollectionHandler = tapToAddCollectionHandler,
+    logElementsExperiment = logElementsExperiment,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(

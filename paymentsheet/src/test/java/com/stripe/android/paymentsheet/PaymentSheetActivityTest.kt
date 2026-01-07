@@ -35,6 +35,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.analytics.experiment.FakeLogElementsExperiment
 import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
@@ -1292,6 +1293,7 @@ internal class PaymentSheetActivityTest {
                     }
                 },
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
+                logElementsExperiment = FakeLogElementsExperiment(),
             )
         }
     }
