@@ -15,7 +15,7 @@ import com.stripe.android.R as StripeR
 internal class CardNumberConfig(
     private val isCardBrandChoiceEligible: Boolean,
     private val cardBrandFilter: CardBrandFilter
-) : CardDetailsTextFieldConfig {
+) : CardNumberTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "Card number"
     override val label: ResolvableString = resolvableString(StripeR.string.stripe_acc_label_card_number)

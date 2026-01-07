@@ -11,13 +11,14 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class SectionController(
     val label: ResolvableString?,
-    sectionFieldValidationControllers: List<SectionFieldValidationController>
+    sectionFieldValidationControllers: List<SectionFieldValidationController>,
+    private val validationMessageComparator: FieldValidationMessageComparator = DefaultFieldValidationMessageComparator
 ) : Controller {
     val validationMessage: StateFlow<FieldValidationMessage?> = combineAsStateFlow(
         sectionFieldValidationControllers.map {
             it.validationMessage
         }
     ) { validationMessageArray ->
-        validationMessageArray.firstNotNullOfOrNull { it }
+        validationMessageArray.sortedWith(validationMessageComparator).firstNotNullOfOrNull { it }
     }
 }

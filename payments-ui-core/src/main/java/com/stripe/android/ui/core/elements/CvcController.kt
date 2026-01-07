@@ -25,7 +25,7 @@ import com.stripe.android.R as StripeR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CvcController constructor(
-    private val cvcTextFieldConfig: CvcConfig = CvcConfig(),
+    private val cvcTextFieldConfig: CvcTextFieldConfig = CvcConfig(),
     cardBrandFlow: StateFlow<CardBrand>,
     override val initialValue: String? = null,
 ) : TextFieldController {

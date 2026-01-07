@@ -12,7 +12,7 @@ import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.R as StripeR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class CvcConfig : CardDetailsTextFieldConfig {
+class CvcConfig : CvcTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "cvc"
     override val label: ResolvableString = resolvableString(StripeR.string.stripe_cvc_number_hint)
