@@ -9,6 +9,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cardscan.ScannedCard
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -21,12 +22,16 @@ import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class CardDetailsControllerTest {
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
@@ -85,19 +90,20 @@ class CardDetailsControllerTest {
     }
 
     @Test
-    fun `When eligible for card brand choice and preferred card brand is passed, initial value should have been set`() = runTest {
-        val cardController = cardDetailsController(
-            initialValues = mapOf(
-                IdentifierSpec.CardNumber to "4000002500001001",
-                IdentifierSpec.PreferredCardBrand to CardBrand.CartesBancaires.code
-            ),
-            cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf())
-        )
+    fun `When eligible for card brand choice and preferred card brand is passed, initial value should have been set`() =
+        runTest {
+            val cardController = cardDetailsController(
+                initialValues = mapOf(
+                    IdentifierSpec.CardNumber to "4000002500001001",
+                    IdentifierSpec.PreferredCardBrand to CardBrand.CartesBancaires.code
+                ),
+                cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf())
+            )
 
-        cardController.numberElement.controller.cardBrandFlow.test {
-            assertThat(awaitItem()).isEqualTo(CardBrand.CartesBancaires)
+            cardController.numberElement.controller.cardBrandFlow.test {
+                assertThat(awaitItem()).isEqualTo(CardBrand.CartesBancaires)
+            }
         }
-    }
 
     @Test
     fun `When new card scanned with no existing card, fields properly filled in`() = runTest {

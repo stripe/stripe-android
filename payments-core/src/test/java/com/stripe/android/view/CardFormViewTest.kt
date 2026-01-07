@@ -25,6 +25,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
@@ -41,6 +42,9 @@ import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 internal class CardFormViewTest {
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
+
     private val context: Context = ApplicationProvider.getApplicationContext()
 
     @get:Rule
