@@ -38,11 +38,11 @@ internal class CardDetailsController(
     uiContext: CoroutineContext = Dispatchers.Main,
     workContext: CoroutineContext = Dispatchers.IO,
     cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
-    cardDetailsTextFieldConfig: CardDetailsTextFieldConfig = CardNumberConfig(
+    cardDetailsTextFieldConfig: CardNumberTextFieldConfig = CardNumberConfig(
         isCardBrandChoiceEligible = cbcEligibility != CardBrandChoiceEligibility.Ineligible,
         cardBrandFilter = cardBrandFilter
     ),
-    cvcTextFieldConfig: CardDetailsTextFieldConfig = CvcConfig(),
+    cvcTextFieldConfig: CvcTextFieldConfig = CvcConfig(),
     dateConfig: TextFieldConfig = DateConfig(),
     private val validationMessageComparator: FieldValidationMessageComparator = DefaultFieldValidationMessageComparator
 ) : SectionFieldValidationController, SectionFieldComposable {

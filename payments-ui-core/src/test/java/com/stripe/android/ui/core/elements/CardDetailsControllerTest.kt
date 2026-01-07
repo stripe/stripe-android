@@ -31,8 +31,8 @@ class CardDetailsControllerTest {
 
     @Test
     fun `Validation message uses comparator to determine which message to show`() = runTest {
-        val cardDetailsTextFieldConfig = FakeCardDetailsTextFieldConfig(
-            defaultCardDetailsTextFieldConfig = CardNumberConfig(
+        val cardDetailsTextFieldConfig = FakeCardNumberTextFieldConfig(
+            defaultCardNumberTextFieldConfig = CardNumberConfig(
                 isCardBrandChoiceEligible = false,
                 cardBrandFilter = DefaultCardBrandFilter
             ),
@@ -40,8 +40,8 @@ class CardDetailsControllerTest {
                 validationMessage = FieldValidationMessage.Warning(0)
             )
         )
-        val cvcTextFieldConfig = FakeCardDetailsTextFieldConfig(
-            defaultCardDetailsTextFieldConfig = CvcConfig(),
+        val cvcTextFieldConfig = FakeCvcTextFieldConfig(
+            defaultCvcTextFieldConfig = CvcConfig(),
             textFieldState = TextFieldStateConstants.Error.Invalid(
                 validationMessage = FieldValidationMessage.Warning(1)
             )
@@ -243,11 +243,11 @@ class CardDetailsControllerTest {
         initialValues: Map<IdentifierSpec, String?> = emptyMap(),
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
-        cardDetailsTextFieldConfig: CardDetailsTextFieldConfig = CardNumberConfig(
+        cardDetailsTextFieldConfig: CardNumberTextFieldConfig = CardNumberConfig(
             isCardBrandChoiceEligible = cbcEligibility != CardBrandChoiceEligibility.Ineligible,
             cardBrandFilter = cardBrandFilter
         ),
-        cvcTextFieldConfig: CardDetailsTextFieldConfig = CvcConfig(),
+        cvcTextFieldConfig: CvcTextFieldConfig = CvcConfig(),
         dateConfig: TextFieldConfig = DateConfig(),
     ): CardDetailsController {
         return CardDetailsController(
@@ -274,10 +274,19 @@ class CardDetailsControllerTest {
         )
     }
 
-    private class FakeCardDetailsTextFieldConfig(
-        private val defaultCardDetailsTextFieldConfig: CardDetailsTextFieldConfig,
+    private class FakeCardNumberTextFieldConfig(
+        private val defaultCardNumberTextFieldConfig: CardNumberTextFieldConfig,
         var textFieldState: TextFieldState
-    ) : CardDetailsTextFieldConfig by defaultCardDetailsTextFieldConfig {
+    ) : CardNumberTextFieldConfig by defaultCardNumberTextFieldConfig {
+        override fun determineState(brand: CardBrand, number: String, numberAllowedDigits: Int): TextFieldState {
+            return textFieldState
+        }
+    }
+
+    private class FakeCvcTextFieldConfig(
+        private val defaultCvcTextFieldConfig: CvcTextFieldConfig,
+        var textFieldState: TextFieldState
+    ) : CvcTextFieldConfig by defaultCvcTextFieldConfig {
         override fun determineState(brand: CardBrand, number: String, numberAllowedDigits: Int): TextFieldState {
             return textFieldState
         }
