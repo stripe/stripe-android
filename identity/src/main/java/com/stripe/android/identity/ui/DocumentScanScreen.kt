@@ -98,16 +98,16 @@ internal fun DocumentScanScreen(
 
         // run once to initialize
         LaunchedEffect(Unit) {
-            Log.i(IDENTITY_DOC_SCAN_TAG, "DocumentScanScreen: initializing scan flow")
+            Log.i(IDENTITY_DOC_SCAN_TAG, "WNTEST: DocumentScanScreen: initializing scan flow")
             documentScanViewModel.initializeScanFlowAndUpdateState(pageAndModelFiles, cameraManager)
-            Log.i(IDENTITY_DOC_SCAN_TAG, "DocumentScanScreen: scan flow initialized")
+            Log.i(IDENTITY_DOC_SCAN_TAG, "WNTEST: DocumentScanScreen: scan flow initialized")
         }
         val documentScannerState by documentScanViewModel.scannerState.collectAsState()
         val feedback by documentScanViewModel.scanFeedback.collectAsState()
 
         Log.i(
             IDENTITY_DOC_SCAN_TAG,
-            "DocumentScanScreen: scannerState=" + documentScannerState +
+            "WNTEST: DocumentScanScreen: scannerState=" + documentScannerState +
                 ", targetScanType=" + targetScanType
         )
 
@@ -179,7 +179,7 @@ private fun DocumentCaptureScreen(
 
         Log.i(
             IDENTITY_DOC_SCAN_TAG,
-            "DocumentCaptureScreen: LaunchedEffect start, hasFrontUploaded=" + hasFrontUploaded +
+            "WNTEST: DocumentCaptureScreen: LaunchedEffect start, hasFrontUploaded=" + hasFrontUploaded +
                 ", shouldStartFromBack=" + shouldStartFromBack
         )
 
@@ -285,7 +285,7 @@ private fun CameraViewFinder(
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->
-                Log.i(IDENTITY_DOC_SCAN_TAG, "CameraView factory invoked for ID viewfinder")
+                Log.i(IDENTITY_DOC_SCAN_TAG, "WNTEST: CameraView factory invoked for ID viewfinder")
                 CameraView(
                     context,
                     CameraView.ViewFinderType.ID,
@@ -295,7 +295,7 @@ private fun CameraViewFinder(
             update = { cameraView ->
                 Log.i(
                     IDENTITY_DOC_SCAN_TAG,
-                    "CameraView update called, view=" + cameraView.hashCode()
+                    "WNTEST: CameraView update called, view=" + cameraView.hashCode()
                 )
                 cameraManager.onCameraViewUpdate(cameraView)
             }

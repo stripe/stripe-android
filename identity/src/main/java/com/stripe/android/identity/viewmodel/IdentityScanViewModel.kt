@@ -101,7 +101,7 @@ internal abstract class IdentityScanViewModel(
 
         Log.i(
             TAG,
-            "displayState: kind=" + stateKind +
+            "WNTEST: displayState: kind=" + stateKind +
                 ", scanType=" + scanType +
                 ", feedbackRes=" + feedbackRes +
                 ", unsatisfiedReason=" + unsatisfiedReason +
@@ -145,7 +145,7 @@ internal abstract class IdentityScanViewModel(
     ) {
         Log.i(
             TAG,
-            "startScan: scanType=" + scanType +
+            "WNTEST: startScan: scanType=" + scanType +
                 ", hasCameraView=" + runCatching { cameraManager.requireCameraView() != null }
                 .getOrDefault(false) +
                 ", hasAdapter=" + (cameraManager.cameraAdapter != null) +
@@ -158,20 +158,20 @@ internal abstract class IdentityScanViewModel(
         runCatching {
             cameraManager.requireCameraAdapter().bindToLifecycle(lifecycleOwner)
         }.onSuccess {
-            Log.i(TAG, "startScan: bindToLifecycle succeeded for scanType=" + scanType)
+            Log.i(TAG, "WNTEST: startScan: bindToLifecycle succeeded for scanType=" + scanType)
         }.onFailure { throwable ->
-            Log.e(TAG, "startScan: bindToLifecycle FAILED for scanType=" + scanType, throwable)
+            Log.e(TAG, "WNTEST: startScan: bindToLifecycle FAILED for scanType=" + scanType, throwable)
         }
 
         cameraManager.toggleInitial()
-        Log.i(TAG, "startScan: toggleInitial invoked for scanType=" + scanType)
+        Log.i(TAG, "WNTEST: startScan: toggleInitial invoked for scanType=" + scanType)
 
         scanState = null
         scanStatePrevious = null
 
         try {
             if (identityScanFlow == null) {
-                Log.e(TAG, "startScan: identityScanFlow is null, cannot start scan (scanType=" + scanType + ")")
+                Log.e(TAG, "WNTEST: startScan: identityScanFlow is null, cannot start scan (scanType=" + scanType + ")")
             } else {
                 identityScanFlow?.startFlow(
                     context = applicationContext,
@@ -181,16 +181,16 @@ internal abstract class IdentityScanViewModel(
                     coroutineScope = viewModelScope,
                     parameters = scanType,
                     errorHandler = { e ->
-                        Log.e(TAG, "startScan: identityScanFlow errorHandler invoked for scanType=" + scanType, e)
+                        Log.e(TAG, "WNTEST: startScan: identityScanFlow errorHandler invoked for scanType=" + scanType, e)
                         verificationFlowFinishable.finishWithResult(
                             IdentityVerificationSheet.VerificationFlowResult.Failed(e)
                         )
                     }
                 )
-                Log.i(TAG, "startScan: identityScanFlow.startFlow started for scanType=" + scanType)
+                Log.i(TAG, "WNTEST: startScan: identityScanFlow.startFlow started for scanType=" + scanType)
             }
         } catch (t: Throwable) {
-            Log.e(TAG, "startScan: startFlow threw for scanType=" + scanType, t)
+            Log.e(TAG, "WNTEST: startScan: startFlow threw for scanType=" + scanType, t)
             throw t
         }
     }

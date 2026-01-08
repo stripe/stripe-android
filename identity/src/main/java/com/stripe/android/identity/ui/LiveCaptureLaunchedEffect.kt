@@ -35,12 +35,12 @@ internal fun LiveCaptureLaunchedEffect(
     cameraManager: IdentityCameraManager? = null
 ) {
     LaunchedEffect(scannerState) {
-        Log.i(LIVE_CAPTURE_TAG, "LiveCaptureLaunchedEffect: scannerState=" + scannerState)
+        Log.i(LIVE_CAPTURE_TAG, "WNTEST: LiveCaptureLaunchedEffect: scannerState=" + scannerState)
         if (scannerState is IdentityScanViewModel.State.Scanned) {
             val scanResult = scannerState.result
             Log.i(
                 LIVE_CAPTURE_TAG,
-                "LiveCaptureLaunchedEffect: Scanned, resultType=" + scanResult.result::class.simpleName +
+                "WNTEST: LiveCaptureLaunchedEffect: Scanned, resultType=" + scanResult.result::class.simpleName +
                     ", identityState=" + scanResult.identityState
             )
             // Capture selfie virtual camera flag while camera is still bound
@@ -87,7 +87,7 @@ internal fun LiveCaptureLaunchedEffect(
         } else if (scannerState is IdentityScanViewModel.State.Timeout) {
             Log.w(
                 LIVE_CAPTURE_TAG,
-                "LiveCaptureLaunchedEffect: Timeout, fromSelfie=" + scannerState.fromSelfie
+                "WNTEST: LiveCaptureLaunchedEffect: Timeout, fromSelfie=" + scannerState.fromSelfie
             )
             navController.navigateTo(
                 CouldNotCaptureDestination(fromSelfie = scannerState.fromSelfie)

@@ -25,19 +25,19 @@ internal abstract class IdentityCameraManager {
         if (cameraView == null) {
             Log.i(
                 TAG,
-                "onCameraViewUpdate: first cameraView, creating CameraAdapter, view=" + view.hashCode()
+                "WNTEST: onCameraViewUpdate: first cameraView, creating CameraAdapter, view=" + view.hashCode()
             )
             cameraView = view
             cameraAdapter = createCameraAdapter(view)
             Log.i(
                 TAG,
-                "onCameraViewUpdate: cameraAdapter=" + cameraAdapter?.javaClass?.simpleName
+                "WNTEST: onCameraViewUpdate: cameraAdapter=" + cameraAdapter?.javaClass?.simpleName
             )
             onInitialized()
         } else {
             Log.i(
                 TAG,
-                "onCameraViewUpdate: reusing existing cameraView, newView=" + view.hashCode() +
+                "WNTEST: onCameraViewUpdate: reusing existing cameraView, newView=" + view.hashCode() +
                     ", storedView=" + cameraView?.hashCode()
             )
         }

@@ -243,15 +243,15 @@ internal class IdentityViewModel(
 
     fun initializeTfLite() {
         viewModelScope.launch(workContext) {
-            Log.i(TAG, "initializeTfLite: starting TFLite initialization")
+            Log.i(TAG, "WNTEST: initializeTfLite: starting TFLite initialization")
             tfLiteInitializer.initialize(
                 getApplication(),
                 {
-                    Log.i(TAG, "initializeTfLite: TFLite initialized successfully")
+                    Log.i(TAG, "WNTEST: initializeTfLite: TFLite initialized successfully")
                     _isTfLiteInitialized.postValue(true)
                 },
                 {
-                    Log.e(TAG, "initializeTfLite: failed to initialize TFLite runtime", it)
+                    Log.e(TAG, "WNTEST: initializeTfLite: failed to initialize TFLite runtime", it)
                     throw IllegalStateException("Failed to initialize TFLite runtime: $it")
                 }
             )
@@ -922,7 +922,7 @@ internal class IdentityViewModel(
                 onSuccess = { verificationPage ->
                     Log.i(
                         TAG,
-                        "retrieveAndBufferVerificationPage: success, verificationPageId=" + verificationPage.id +
+                        "WNTEST: retrieveAndBufferVerificationPage: success, verificationPageId=" + verificationPage.id +
                             ", allowlist=" + (
                             verificationPage.documentSelect
                                 ?.idDocumentTypeAllowlist
@@ -938,7 +938,7 @@ internal class IdentityViewModel(
                     }
 
                     val missingSet = verificationPage.requirements.missing.toSet()
-                    Log.i(TAG, "retrieveAndBufferVerificationPage: initial missingRequirements=" + missingSet)
+                    Log.i(TAG, "WNTEST: retrieveAndBufferVerificationPage: initial missingRequirements=" + missingSet)
                     if (missingSet.contains(Requirement.IDDOCUMENTFRONT)) {
                         _collectedData.updateStateAndSave { it.clearData(Requirement.IDDOCUMENTFRONT) }
                         _documentFrontUploadedState.updateStateAndSave { SingleSideDocumentUploadState() }
@@ -1097,7 +1097,7 @@ internal class IdentityViewModel(
      */
     private fun downloadModelAndPost(modelUrl: String, target: MutableLiveData<Resource<File>>) {
         viewModelScope.launch {
-            Log.i(TAG, "downloadModelAndPost: start downloading model from " + modelUrl)
+            Log.i(TAG, "WNTEST: downloadModelAndPost: start downloading model from " + modelUrl)
             runCatching {
                 target.postValue(Resource.loading())
                 identityModelFetcher.fetchIdentityModel(modelUrl)
@@ -1105,7 +1105,7 @@ internal class IdentityViewModel(
                 onSuccess = { file ->
                     Log.i(
                         TAG,
-                        "downloadModelAndPost: successfully downloaded model from " + modelUrl +
+                        "WNTEST: downloadModelAndPost: successfully downloaded model from " + modelUrl +
                             ", path=" + file.absolutePath +
                             ", exists=" + file.exists()
                     )
@@ -1114,7 +1114,7 @@ internal class IdentityViewModel(
                 onFailure = { throwable ->
                     Log.e(
                         TAG,
-                        "downloadModelAndPost: failed to download model from " + modelUrl,
+                        "WNTEST: downloadModelAndPost: failed to download model from " + modelUrl,
                         throwable
                     )
                     target.postValue(
@@ -1465,13 +1465,13 @@ internal class IdentityViewModel(
             onCameraReady = {
                 identityAnalyticsRequestFactory.cameraPermissionGranted()
                 _cameraPermissionGranted.update { true }
-                Log.i(TAG, "checkPermissionAndNavigate: camera permission granted, navigating to DocumentScanDestination")
+                Log.i(TAG, "WNTEST: checkPermissionAndNavigate: camera permission granted, navigating to DocumentScanDestination")
                 navController.navigateTo(DocumentScanDestination)
             },
             onUserDeniedCameraPermission = {
                 identityAnalyticsRequestFactory.cameraPermissionDenied()
                 _cameraPermissionGranted.update { false }
-                Log.i(TAG, "checkPermissionAndNavigate: camera permission denied, navigating to CameraPermissionDeniedDestination")
+                Log.i(TAG, "WNTEST: checkPermissionAndNavigate: camera permission denied, navigating to CameraPermissionDeniedDestination")
                 navController.navigateTo(CameraPermissionDeniedDestination)
             }
         )

@@ -42,7 +42,7 @@ internal abstract class CameraViewModel(
     ) {
         Log.i(
             TAG,
-            "initializeScanFlow: creating IdentityScanFlow, idDetectorModelExists=" + idDetectorModelFile.exists() +
+            "WNTEST: initializeScanFlow: creating IdentityScanFlow, idDetectorModelExists=" + idDetectorModelFile.exists() +
                 ", faceDetectorModelExists=" + (faceDetectorModelFile?.exists() ?: false) +
                 ", verificationPageId=" + verificationPage.id
         )
@@ -60,10 +60,10 @@ internal abstract class CameraViewModel(
             )
         }.onSuccess { flow ->
             identityScanFlow = flow
-            Log.i(TAG, "initializeScanFlow: IdentityScanFlow created successfully")
+            Log.i(TAG, "WNTEST: initializeScanFlow: IdentityScanFlow created successfully")
         }.onFailure { throwable ->
             identityScanFlow = null
-            Log.e(TAG, "initializeScanFlow: failed to create IdentityScanFlow", throwable)
+            Log.e(TAG, "WNTEST: initializeScanFlow: failed to create IdentityScanFlow", throwable)
         }
     }
 

@@ -23,7 +23,7 @@ internal class DocumentScanCameraManager(
     )
 
     override fun onInitialized() {
-        Log.i(TAG, "onInitialized: setting viewfinder background")
+        Log.i(TAG, "WNTEST: onInitialized: setting viewfinder background")
         requireCameraView().viewFinderWindowView
             .setBackgroundResource(
                 R.drawable.stripe_viewfinder_background
@@ -31,7 +31,7 @@ internal class DocumentScanCameraManager(
     }
 
     override fun toggleInitial() {
-        Log.i(TAG, "toggleInitial: showing initial border & starting animation")
+        Log.i(TAG, "WNTEST: toggleInitial: showing initial border & starting animation")
         requireCameraView().viewFinderBackgroundView.visibility = View.VISIBLE
         requireCameraView().viewFinderWindowView.visibility = View.VISIBLE
         requireCameraView().viewFinderBorderView.visibility = View.VISIBLE
@@ -39,12 +39,12 @@ internal class DocumentScanCameraManager(
     }
 
     override fun toggleFound() {
-        Log.i(TAG, "toggleFound: starting 'found' animation")
+        Log.i(TAG, "WNTEST: toggleFound: starting 'found' animation")
         requireCameraView().viewFinderBorderView.startAnimationIfNotRunning(R.drawable.stripe_viewfinder_border_found)
     }
 
     override fun toggleFinished() {
-        Log.i(TAG, "toggleFinished: hiding viewfinder UI")
+        Log.i(TAG, "WNTEST: toggleFinished: hiding viewfinder UI")
         requireCameraView().viewFinderBackgroundView.visibility = View.INVISIBLE
         requireCameraView().viewFinderWindowView.visibility = View.INVISIBLE
         requireCameraView().viewFinderBorderView.visibility = View.INVISIBLE
