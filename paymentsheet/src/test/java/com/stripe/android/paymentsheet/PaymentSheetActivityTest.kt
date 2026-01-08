@@ -1292,6 +1292,7 @@ internal class PaymentSheetActivityTest {
                     }
                 },
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
+                mode = EventReporter.Mode.Complete,
             )
         }
     }
