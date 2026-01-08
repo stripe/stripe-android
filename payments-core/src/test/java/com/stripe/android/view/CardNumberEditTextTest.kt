@@ -69,7 +69,6 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 /**
  * Test class for [CardNumberEditText].
@@ -88,14 +87,6 @@ internal class CardNumberEditTextTest {
 
     @get:Rule
     val testActivityRule = createTestActivityRule<TestActivity>()
-
-    private var completionCallbackInvocations = 0
-    private val completionCallback: () -> Unit = { completionCallbackInvocations++ }
-
-    private var lastBrandChangeCallbackInvocation: CardBrand? = null
-    private val brandChangeCallback: (CardBrand) -> Unit = {
-        lastBrandChangeCallbackInvocation = it
-    }
 
     private val cardAccountRangeRepository = FakeCardAccountRangeRepository()
 
@@ -250,23 +241,25 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun setText_whenTextIsValidCommonLengthNumber_changesCardValidState() {
-        val cardNumberEditText = createCardNumberEditText()
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
         updateCardNumberAndIdle(cardNumberEditText, VISA_WITH_SPACES)
 
         assertThat(cardNumberEditText.isCardNumberValid)
             .isTrue()
-        assertThat(completionCallbackInvocations)
+        assertThat(callbacks.completionCallbackInvocations)
             .isEqualTo(1)
     }
 
     @Test
     fun setText_whenTextIsSpacelessValidNumber_changesToSpaceNumberAndValidates() {
-        val cardNumberEditText = createCardNumberEditText()
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
         updateCardNumberAndIdle(cardNumberEditText, VISA_NO_SPACES)
 
         assertThat(cardNumberEditText.isCardNumberValid)
             .isTrue()
-        assertThat(completionCallbackInvocations)
+        assertThat(callbacks.completionCallbackInvocations)
             .isEqualTo(1)
     }
 
@@ -374,7 +367,8 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun `full Amex typed as BIN followed by remaining number should change isCardNumberValid to true and invoke completion callback`() {
-        val cardNumberEditText = createCardNumberEditText()
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
         // type Amex BIN
         updateCardNumberAndIdle(cardNumberEditText, AMEX_BIN)
         // type rest of card number
@@ -383,28 +377,31 @@ internal class CardNumberEditTextTest {
 
         assertThat(cardNumberEditText.isCardNumberValid)
             .isTrue()
-        assertThat(completionCallbackInvocations)
+        assertThat(callbacks.completionCallbackInvocations)
             .isEqualTo(1)
     }
 
     @Test
     fun `full Amex typed typed at once should change isCardNumberValid to true and invoke completion callback`() {
-        val cardNumberEditText = createCardNumberEditText()
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
         updateCardNumberAndIdle(cardNumberEditText, AMEX_NO_SPACES)
         idleLooper()
 
         assertThat(cardNumberEditText.isCardNumberValid)
             .isTrue()
-        assertThat(completionCallbackInvocations)
+        assertThat(callbacks.completionCallbackInvocations)
             .isEqualTo(1)
     }
 
     @Test
     fun setText_whenTextChangesFromValidToInvalid_changesCardValidState() {
-        val cardNumberEditText = createCardNumberEditText()
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
         updateCardNumberAndIdle(cardNumberEditText, VISA_WITH_SPACES)
-        // Simply setting the value interacts with this mock once -- that is tested elsewhere
-        completionCallbackInvocations = 0
+
+        // Callback should have been invoked once for the valid card
+        assertThat(callbacks.completionCallbackInvocations).isEqualTo(1)
 
         // Removing last character should make this invalid
         cardNumberEditText.setText(
@@ -413,13 +410,15 @@ internal class CardNumberEditTextTest {
 
         assertThat(cardNumberEditText.isCardNumberValid)
             .isFalse()
-        assertThat(completionCallbackInvocations)
-            .isEqualTo(0)
+        // Callback should not have been invoked again
+        assertThat(callbacks.completionCallbackInvocations)
+            .isEqualTo(1)
     }
 
     @Test
     fun setText_whenTextIsInvalidCommonLengthNumber_doesNotNotifyListener() {
-        val cardNumberEditText = createCardNumberEditText()
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
         // This creates a full-length but not valid number: 4242 4242 4242 4243
         updateCardNumberAndIdle(
             cardNumberEditText,
@@ -428,7 +427,7 @@ internal class CardNumberEditTextTest {
 
         assertThat(cardNumberEditText.isCardNumberValid)
             .isFalse()
-        assertThat(completionCallbackInvocations)
+        assertThat(callbacks.completionCallbackInvocations)
             .isEqualTo(0)
     }
 
@@ -564,80 +563,89 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun setCardBrandChangeListener_callsSetCardBrand() {
-        createCardNumberEditText()
-        assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
+        val callbacks = TestCallbacks()
+        createCardNumberEditText(callbacks = callbacks)
+        assertEquals(CardBrand.Unknown, callbacks.lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun enterVisaBin_callsBrandListener() {
-        val cardNumberEditText = createCardNumberEditText()
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
         updateCardNumberAndIdle(cardNumberEditText, VISA_BIN)
-        assertEquals(CardBrand.Visa, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.Visa, callbacks.lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun addAmExBin_callsBrandListener() {
-        val cardNumberEditText = createCardNumberEditText()
-        verifyCardBrandBin(cardNumberEditText, CardBrand.AmericanExpress, AMEX_BIN)
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
+        verifyCardBrandBin(cardNumberEditText, callbacks, CardBrand.AmericanExpress, AMEX_BIN)
     }
 
     @Test
     fun addDinersClubBin_callsBrandListener() {
-        val cardNumberEditText = createCardNumberEditText()
-        verifyCardBrandBin(cardNumberEditText, CardBrand.DinersClub, CardNumberFixtures.DINERS_CLUB_14_BIN)
-        verifyCardBrandBin(cardNumberEditText, CardBrand.DinersClub, CardNumberFixtures.DINERS_CLUB_16_BIN)
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
+        verifyCardBrandBin(cardNumberEditText, callbacks, CardBrand.DinersClub, CardNumberFixtures.DINERS_CLUB_14_BIN)
+        verifyCardBrandBin(cardNumberEditText, callbacks, CardBrand.DinersClub, CardNumberFixtures.DINERS_CLUB_16_BIN)
     }
 
     @Test
     fun addDiscoverBin_callsBrandListener() {
-        val cardNumberEditText = createCardNumberEditText()
-        verifyCardBrandBin(cardNumberEditText, CardBrand.Discover, CardNumberFixtures.DISCOVER_BIN)
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
+        verifyCardBrandBin(cardNumberEditText, callbacks, CardBrand.Discover, CardNumberFixtures.DISCOVER_BIN)
     }
 
     @Test
     fun addJcbBin_callsBrandListener() {
-        val cardNumberEditText = createCardNumberEditText()
-        verifyCardBrandBin(cardNumberEditText, CardBrand.JCB, CardNumberFixtures.JCB_BIN)
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
+        verifyCardBrandBin(cardNumberEditText, callbacks, CardBrand.JCB, CardNumberFixtures.JCB_BIN)
     }
 
     @Test
     fun enterCompleteNumberInParts_onlyCallsBrandListenerOnce() {
-        val cardNumberEditText = createCardNumberEditText()
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
         cardNumberEditText.append(AMEX_WITH_SPACES.take(2))
         idleLooper()
         cardNumberEditText.append(AMEX_WITH_SPACES.drop(2))
         idleLooper()
-        assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.AmericanExpress, callbacks.lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun enterBrandBin_thenDelete_callsUpdateWithUnknown() {
-        val cardNumberEditText = createCardNumberEditText()
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
         updateCardNumberAndIdle(cardNumberEditText, UNIONPAY_16_BIN)
-        assertEquals(CardBrand.UnionPay, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.UnionPay, callbacks.lastBrandChangeCallbackInvocation)
 
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
         idleLooper()
-        assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.Unknown, callbacks.lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun enterBrandBin_thenClearAllText_callsUpdateWithUnknown() {
-        val cardNumberEditText = createCardNumberEditText()
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
         updateCardNumberAndIdle(cardNumberEditText, VISA_BIN)
-        assertEquals(CardBrand.Visa, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.Visa, callbacks.lastBrandChangeCallbackInvocation)
 
         // Just adding some other text. Not enough to invalidate the card or complete it.
-        lastBrandChangeCallbackInvocation = null
         cardNumberEditText.append("123")
         idleLooper()
 
-        assertNull(lastBrandChangeCallbackInvocation)
+        // Brand shouldn't change yet
+        assertEquals(CardBrand.Visa, callbacks.lastBrandChangeCallbackInvocation)
 
         // This simulates the user selecting all text and deleting it.
         updateCardNumberAndIdle(cardNumberEditText, "")
 
-        assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.Unknown, callbacks.lastBrandChangeCallbackInvocation)
     }
 
     @Test
@@ -717,19 +725,21 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun `queryAccountRangeRepository() should update cardBrand value`() {
-        val cardNumberEditText = createCardNumberEditText()
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
         updateCardNumberAndIdle(cardNumberEditText, CardNumberFixtures.DINERS_CLUB_14.normalized)
-        assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.DinersClub, callbacks.lastBrandChangeCallbackInvocation)
 
         updateCardNumberAndIdle(cardNumberEditText, CardNumberFixtures.AMEX.normalized)
-        assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.AmericanExpress, callbacks.lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun `queryAccountRangeRepository() with null bin should set cardBrand to Unknown`() {
-        val cardNumberEditText = createCardNumberEditText()
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
         updateCardNumberAndIdle(cardNumberEditText, "")
-        assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.Unknown, callbacks.lastBrandChangeCallbackInvocation)
     }
 
     @Test
@@ -798,9 +808,10 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun `when first two digits match a single account, show a card brand`() {
-        val cardNumberEditText = createCardNumberEditText()
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
         updateCardNumberAndIdle(cardNumberEditText, "37")
-        assertThat(lastBrandChangeCallbackInvocation)
+        assertThat(callbacks.lastBrandChangeCallbackInvocation)
             .isEqualTo(CardBrand.AmericanExpress)
         assertThat(cardNumberEditText.isCardNumberValid)
             .isFalse()
@@ -810,10 +821,11 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun `when first digit matches multiple accounts, don't show an error`() {
-        val cardNumberEditText = createCardNumberEditText()
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
         // matches Amex and diners
         updateCardNumberAndIdle(cardNumberEditText, "3")
-        assertThat(lastBrandChangeCallbackInvocation)
+        assertThat(callbacks.lastBrandChangeCallbackInvocation)
             .isEqualTo(CardBrand.Unknown)
         assertThat(cardNumberEditText.isCardNumberValid)
             .isFalse()
@@ -834,10 +846,11 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun `when first digit matches multiple accounts, don't show a card brand`() {
-        val cardNumberEditText = createCardNumberEditText()
+        val callbacks = TestCallbacks()
+        val cardNumberEditText = createCardNumberEditText(callbacks = callbacks)
         // matches Discover and Union Pay
         updateCardNumberAndIdle(cardNumberEditText, "6")
-        assertThat(lastBrandChangeCallbackInvocation)
+        assertThat(callbacks.lastBrandChangeCallbackInvocation)
             .isEqualTo(CardBrand.Unknown)
     }
 
@@ -1100,13 +1113,12 @@ internal class CardNumberEditTextTest {
 
     private fun verifyCardBrandBin(
         cardNumberEditText: CardNumberEditText,
+        callbacks: TestCallbacks,
         cardBrand: CardBrand,
         bin: String
     ) {
-        // Reset inside the loop so we don't count each prefix
-        lastBrandChangeCallbackInvocation = null
         updateCardNumberAndIdle(cardNumberEditText, bin)
-        assertEquals(cardBrand, lastBrandChangeCallbackInvocation)
+        assertEquals(cardBrand, callbacks.lastBrandChangeCallbackInvocation)
         updateCardNumberAndIdle(cardNumberEditText, "")
     }
 
@@ -1174,6 +1186,7 @@ internal class CardNumberEditTextTest {
     private fun createCardNumberEditText(
         accountRangeService: CardAccountRangeService? = null,
         cardAccountRangeRepository: CardAccountRangeRepository = this.cardAccountRangeRepository,
+        callbacks: TestCallbacks = TestCallbacks()
     ): CardNumberEditText {
         val accountRangeService = accountRangeService ?: DefaultCardAccountRangeService(
             cardAccountRangeRepository = cardAccountRangeRepository,
@@ -1190,8 +1203,20 @@ internal class CardNumberEditTextTest {
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             accountRangeService = accountRangeService
         ).also {
-            it.completionCallback = completionCallback
-            it.brandChangeCallback = brandChangeCallback
+            it.completionCallback = callbacks.completionCallback
+            it.brandChangeCallback = callbacks.brandChangeCallback
+        }
+    }
+
+    private class TestCallbacks {
+        var completionCallbackInvocations = 0
+            private set
+        var lastBrandChangeCallbackInvocation: CardBrand? = null
+            private set
+
+        val completionCallback: () -> Unit = { completionCallbackInvocations++ }
+        val brandChangeCallback: (CardBrand) -> Unit = {
+            lastBrandChangeCallbackInvocation = it
         }
     }
 
