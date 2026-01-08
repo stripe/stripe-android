@@ -243,12 +243,17 @@ internal class IdentityViewModel(
 
     fun initializeTfLite() {
         viewModelScope.launch(workContext) {
+            Log.i(TAG, "initializeTfLite: starting TFLite initialization")
             tfLiteInitializer.initialize(
                 getApplication(),
                 {
+                    Log.i(TAG, "initializeTfLite: TFLite initialized successfully")
                     _isTfLiteInitialized.postValue(true)
                 },
-                { throw IllegalStateException("Failed to initialize TFLite runtime: $it") }
+                {
+                    Log.e(TAG, "initializeTfLite: failed to initialize TFLite runtime", it)
+                    throw IllegalStateException("Failed to initialize TFLite runtime: $it")
+                }
             )
         }
     }
@@ -915,6 +920,17 @@ internal class IdentityViewModel(
                 )
             }.fold(
                 onSuccess = { verificationPage ->
+                    Log.i(
+                        TAG,
+                        "retrieveAndBufferVerificationPage: success, verificationPageId=" + verificationPage.id +
+                            ", allowlist=" + (
+                            verificationPage.documentSelect
+                                ?.idDocumentTypeAllowlist
+                                ?.keys
+                                ?.joinToString(",") ?: "null"
+                            )
+                    )
+
                     _verificationPage.postValue(Resource.success(verificationPage))
                     identityAnalyticsRequestFactory.verificationPage = verificationPage
                     _missingRequirements.updateStateAndSave {
@@ -922,6 +938,7 @@ internal class IdentityViewModel(
                     }
 
                     val missingSet = verificationPage.requirements.missing.toSet()
+                    Log.i(TAG, "retrieveAndBufferVerificationPage: initial missingRequirements=" + missingSet)
                     if (missingSet.contains(Requirement.IDDOCUMENTFRONT)) {
                         _collectedData.updateStateAndSave { it.clearData(Requirement.IDDOCUMENTFRONT) }
                         _documentFrontUploadedState.updateStateAndSave { SingleSideDocumentUploadState() }
@@ -1080,23 +1097,35 @@ internal class IdentityViewModel(
      */
     private fun downloadModelAndPost(modelUrl: String, target: MutableLiveData<Resource<File>>) {
         viewModelScope.launch {
+            Log.i(TAG, "downloadModelAndPost: start downloading model from " + modelUrl)
             runCatching {
                 target.postValue(Resource.loading())
                 identityModelFetcher.fetchIdentityModel(modelUrl)
             }.fold(
-                onSuccess = {
-                    target.postValue(Resource.success(it))
+                onSuccess = { file ->
+                    Log.i(
+                        TAG,
+                        "downloadModelAndPost: successfully downloaded model from " + modelUrl +
+                            ", path=" + file.absolutePath +
+                            ", exists=" + file.exists()
+                    )
+                    target.postValue(Resource.success(file))
                 },
-                onFailure = {
+                onFailure = { throwable ->
+                    Log.e(
+                        TAG,
+                        "downloadModelAndPost: failed to download model from " + modelUrl,
+                        throwable
+                    )
                     target.postValue(
                         Resource.error(
                             "Failed to download model from $modelUrl",
-                            it
+                            throwable
                         )
                     )
 
                     // Exit with failure
-                    finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Failed(it))
+                    finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Failed(throwable))
                 }
             )
         }
@@ -1436,11 +1465,13 @@ internal class IdentityViewModel(
             onCameraReady = {
                 identityAnalyticsRequestFactory.cameraPermissionGranted()
                 _cameraPermissionGranted.update { true }
+                Log.i(TAG, "checkPermissionAndNavigate: camera permission granted, navigating to DocumentScanDestination")
                 navController.navigateTo(DocumentScanDestination)
             },
             onUserDeniedCameraPermission = {
                 identityAnalyticsRequestFactory.cameraPermissionDenied()
                 _cameraPermissionGranted.update { false }
+                Log.i(TAG, "checkPermissionAndNavigate: camera permission denied, navigating to CameraPermissionDeniedDestination")
                 navController.navigateTo(CameraPermissionDeniedDestination)
             }
         )

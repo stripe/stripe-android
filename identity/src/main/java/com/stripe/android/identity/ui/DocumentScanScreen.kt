@@ -1,5 +1,6 @@
 package com.stripe.android.identity.ui
 
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -61,6 +62,8 @@ internal const val SCAN_MESSAGE_TAG = "Message"
 internal const val CHECK_MARK_TAG = "CheckMark"
 internal const val VIEW_FINDER_ASPECT_RATIO = 1f
 
+private const val IDENTITY_DOC_SCAN_TAG = "StripeIdentityDocScan"
+
 @Composable
 internal fun DocumentScanScreen(
     navController: NavController,
@@ -95,10 +98,18 @@ internal fun DocumentScanScreen(
 
         // run once to initialize
         LaunchedEffect(Unit) {
+            Log.i(IDENTITY_DOC_SCAN_TAG, "DocumentScanScreen: initializing scan flow")
             documentScanViewModel.initializeScanFlowAndUpdateState(pageAndModelFiles, cameraManager)
+            Log.i(IDENTITY_DOC_SCAN_TAG, "DocumentScanScreen: scan flow initialized")
         }
         val documentScannerState by documentScanViewModel.scannerState.collectAsState()
         val feedback by documentScanViewModel.scanFeedback.collectAsState()
+
+        Log.i(
+            IDENTITY_DOC_SCAN_TAG,
+            "DocumentScanScreen: scannerState=" + documentScannerState +
+                ", targetScanType=" + targetScanType
+        )
 
         LiveCaptureLaunchedEffect(
             scannerState = documentScannerState,
@@ -163,7 +174,15 @@ private fun DocumentCaptureScreen(
 ) {
     val collectedData by identityViewModel.collectedData.collectAsState()
     LaunchedEffect(Unit) {
-        val shouldStartFromBack = collectedData.idDocumentFront != null
+        val hasFrontUploaded = collectedData.idDocumentFront != null
+        val shouldStartFromBack = hasFrontUploaded
+
+        Log.i(
+            IDENTITY_DOC_SCAN_TAG,
+            "DocumentCaptureScreen: LaunchedEffect start, hasFrontUploaded=" + hasFrontUploaded +
+                ", shouldStartFromBack=" + shouldStartFromBack
+        )
+
         if (shouldStartFromBack) {
             startScanning(
                 scanType = IdentityScanState.ScanType.DOC_BACK,
@@ -265,16 +284,20 @@ private fun CameraViewFinder(
     ) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
-            factory = {
+            factory = { context ->
+                Log.i(IDENTITY_DOC_SCAN_TAG, "CameraView factory invoked for ID viewfinder")
                 CameraView(
-                    it,
+                    context,
                     CameraView.ViewFinderType.ID,
                     R.drawable.stripe_viewfinder_border_initial
                 )
             },
-            update =
-            {
-                cameraManager.onCameraViewUpdate(it)
+            update = { cameraView ->
+                Log.i(
+                    IDENTITY_DOC_SCAN_TAG,
+                    "CameraView update called, view=" + cameraView.hashCode()
+                )
+                cameraManager.onCameraViewUpdate(cameraView)
             }
         )
         if (shouldShowFinished) {

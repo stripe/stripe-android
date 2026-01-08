@@ -1,6 +1,7 @@
 package com.stripe.android.identity.camera
 
 import android.graphics.Bitmap
+import android.util.Log
 import android.util.Size
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
@@ -22,9 +23,23 @@ internal abstract class IdentityCameraManager {
      */
     fun onCameraViewUpdate(view: CameraView) {
         if (cameraView == null) {
+            Log.i(
+                TAG,
+                "onCameraViewUpdate: first cameraView, creating CameraAdapter, view=" + view.hashCode()
+            )
             cameraView = view
             cameraAdapter = createCameraAdapter(view)
+            Log.i(
+                TAG,
+                "onCameraViewUpdate: cameraAdapter=" + cameraAdapter?.javaClass?.simpleName
+            )
             onInitialized()
+        } else {
+            Log.i(
+                TAG,
+                "onCameraViewUpdate: reusing existing cameraView, newView=" + view.hashCode() +
+                    ", storedView=" + cameraView?.hashCode()
+            )
         }
     }
 
@@ -84,6 +99,7 @@ internal abstract class IdentityCameraManager {
     open fun toggleFinished() {}
 
     protected companion object {
+        private const val TAG: String = "IdentityCameraManager"
         val MINIMUM_RESOLUTION = Size(1440, 1080)
     }
 }

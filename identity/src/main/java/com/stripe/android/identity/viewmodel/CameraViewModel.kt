@@ -40,16 +40,31 @@ internal abstract class CameraViewModel(
         idDetectorModelFile: File,
         faceDetectorModelFile: File?
     ) {
-        identityScanFlow = IdentityScanFlow(
-            this,
-            this,
-            idDetectorModelFile,
-            faceDetectorModelFile,
-            verificationPage,
-            modelPerformanceTracker,
-            laplacianBlurDetector,
-            identityAnalyticsRequestFactory,
+        Log.i(
+            TAG,
+            "initializeScanFlow: creating IdentityScanFlow, idDetectorModelExists=" + idDetectorModelFile.exists() +
+                ", faceDetectorModelExists=" + (faceDetectorModelFile?.exists() ?: false) +
+                ", verificationPageId=" + verificationPage.id
         )
+
+        runCatching {
+            IdentityScanFlow(
+                this,
+                this,
+                idDetectorModelFile,
+                faceDetectorModelFile,
+                verificationPage,
+                modelPerformanceTracker,
+                laplacianBlurDetector,
+                identityAnalyticsRequestFactory,
+            )
+        }.onSuccess { flow ->
+            identityScanFlow = flow
+            Log.i(TAG, "initializeScanFlow: IdentityScanFlow created successfully")
+        }.onFailure { throwable ->
+            identityScanFlow = null
+            Log.e(TAG, "initializeScanFlow: failed to create IdentityScanFlow", throwable)
+        }
     }
 
     override var scanState: IdentityScanState? = null

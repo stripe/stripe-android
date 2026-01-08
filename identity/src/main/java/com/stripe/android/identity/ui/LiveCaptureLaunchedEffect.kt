@@ -1,5 +1,6 @@
 package com.stripe.android.identity.ui
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -21,6 +22,8 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
  * [IdentityScanViewModel.scannerState].
  * TODO(IDPROD-6662) - decouple any logic related to IdentityViewModel and handle them inside IdentityScanViewModel.
  */
+private const val LIVE_CAPTURE_TAG = "LiveCaptureEffect"
+
 @Composable
 internal fun LiveCaptureLaunchedEffect(
     scannerState: IdentityScanViewModel.State,
@@ -32,8 +35,14 @@ internal fun LiveCaptureLaunchedEffect(
     cameraManager: IdentityCameraManager? = null
 ) {
     LaunchedEffect(scannerState) {
+        Log.i(LIVE_CAPTURE_TAG, "LiveCaptureLaunchedEffect: scannerState=" + scannerState)
         if (scannerState is IdentityScanViewModel.State.Scanned) {
             val scanResult = scannerState.result
+            Log.i(
+                LIVE_CAPTURE_TAG,
+                "LiveCaptureLaunchedEffect: Scanned, resultType=" + scanResult.result::class.simpleName +
+                    ", identityState=" + scanResult.identityState
+            )
             // Capture selfie virtual camera flag while camera is still bound
             if (scanResult.result is FaceDetectorOutput) {
                 identityViewModel.setSelfieIsVirtualCamera(cameraManager?.isVirtualCamera())
@@ -76,6 +85,10 @@ internal fun LiveCaptureLaunchedEffect(
                 }
             }
         } else if (scannerState is IdentityScanViewModel.State.Timeout) {
+            Log.w(
+                LIVE_CAPTURE_TAG,
+                "LiveCaptureLaunchedEffect: Timeout, fromSelfie=" + scannerState.fromSelfie
+            )
             navController.navigateTo(
                 CouldNotCaptureDestination(fromSelfie = scannerState.fromSelfie)
             )
