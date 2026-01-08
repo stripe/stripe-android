@@ -25,7 +25,7 @@ internal object TwintDefinition : PaymentMethodDefinition {
 }
 
 private object TwintUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = TwintDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_twint,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_twint,

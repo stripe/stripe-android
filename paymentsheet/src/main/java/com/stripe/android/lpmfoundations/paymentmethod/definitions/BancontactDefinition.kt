@@ -30,7 +30,7 @@ internal object BancontactDefinition : PaymentMethodDefinition {
 }
 
 private object BancontactUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = BancontactDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_bancontact,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
