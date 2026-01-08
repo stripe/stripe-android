@@ -39,15 +39,18 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.ShampooRule
 import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
 import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
 import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.parcelize.Parcelize
 import org.hamcrest.CoreMatchers.anything
 import org.junit.Rule
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -62,15 +65,18 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 internal class CardInputWidgetTest {
     private val testDispatcher = UnconfinedTestDispatcher()
-
-    @get:Rule
+//    private val testDispatcher = StandardTestDispatcher()
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
-
-    @get:Rule
     val testActivityRule = createTestActivityRule<CardInputWidgetTestActivity>()
+    val composeTestRule = createComposeRule()
+    val shampooRule = ShampooRule(50)
 
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val rule = RuleChain.emptyRuleChain()
+        .around(composeTestRule)
+        .around(coroutineTestRule)
+        .around(testActivityRule)
+        .around(shampooRule)
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
