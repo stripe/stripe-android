@@ -43,6 +43,7 @@ import com.stripe.android.testing.ShampooRule
 import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
+import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
 import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -65,18 +66,17 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 internal class CardInputWidgetTest {
     private val testDispatcher = UnconfinedTestDispatcher()
-//    private val testDispatcher = StandardTestDispatcher()
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
     val testActivityRule = createTestActivityRule<CardInputWidgetTestActivity>()
     val composeTestRule = createComposeRule()
-    val shampooRule = ShampooRule(50)
+//    val shampooRule = ShampooRule(50)
 
     @get:Rule
     val rule = RuleChain.emptyRuleChain()
         .around(composeTestRule)
         .around(coroutineTestRule)
         .around(testActivityRule)
-        .around(shampooRule)
+//        .around(shampooRule)
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
@@ -1687,6 +1687,7 @@ internal class CardInputWidgetTest {
     fun `getBrand returns the right brands`() = runCardInputWidgetTest {
         setCardNumber(null)
         idleLooper()
+        // Default brand should be Unknown
         assertThat(brand).isEqualTo(CardBrand.Unknown)
 
         setCardNumber(VISA_NO_SPACES)
@@ -1712,6 +1713,11 @@ internal class CardInputWidgetTest {
         setCardNumber(DINERS_CLUB_14_NO_SPACES)
         idleLooper()
         assertThat(brand).isEqualTo(CardBrand.DinersClub)
+
+        // Test that empty string returns to Unknown
+        setCardNumber("")
+        idleLooper()
+        assertThat(brand).isEqualTo(CardBrand.Unknown)
     }
 
     @Test
@@ -1818,10 +1824,12 @@ internal class CardInputWidgetTest {
         true
     ) {
         cardNumberEditText.setText("4000 0026 0000 1001")
+        idleLooper()
         assertThat(cardBrandView.possibleBrands.size).isEqualTo(0)
         updateCardNumberAndIdle("0000 1001")
         assertThat(cardBrandView.possibleBrands.size).isEqualTo(0)
         cardNumberEditText.setText("4000 0025 0000 1001")
+        idleLooper()
         assertThat(cardBrandView.possibleBrands.size).isEqualTo(2)
     }
 
@@ -1831,14 +1839,18 @@ internal class CardInputWidgetTest {
         block: CardInputWidget.(FakeCardInputListener) -> Unit,
     ) {
         val cardInputListener = FakeCardInputListener()
-        val activityScenario = ActivityScenario.launch<CardInputWidgetTestActivity>(
+        val activityScenario = injectableActivityScenario<CardInputWidgetTestActivity> {
+            injectActivity {
+                setWorkContext(testDispatcher)
+            }
+        }
+        activityScenario.launch(
             Intent(context, CardInputWidgetTestActivity::class.java).apply {
                 putExtra("args", CardInputWidgetTestActivity.Args(isCbcEligible = isCbcEligible))
             }
         )
 
         activityScenario.onActivity { activity ->
-            activity.setWorkContext(testDispatcher)
 
             val widget = activity.findViewById<CardInputWidget>(CardInputWidgetTestActivity.VIEW_ID)
             widget.setCardInputListener(cardInputListener)

@@ -67,7 +67,7 @@ class DefaultCardAccountRangeService(
     private val workContext: CoroutineContext,
     val staticCardAccountRanges: StaticCardAccountRanges,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
-    private val coroutineScope: CoroutineScope = CoroutineScope(workContext)
+    private val coroutineScope: CoroutineScope = CoroutineScope(uiContext)
 ) : CardAccountRangeService {
 
     override val isLoading: StateFlow<Boolean> = cardAccountRangeRepository.loading

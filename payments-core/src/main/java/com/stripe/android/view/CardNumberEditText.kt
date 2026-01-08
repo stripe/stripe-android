@@ -51,13 +51,13 @@ class CardNumberEditText internal constructor(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     internal var viewModelStoreOwner: ViewModelStoreOwner? = null,
     private var cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val coroutineScope: CoroutineScope = CoroutineScope(uiContext),
     val accountRangeService: CardAccountRangeService = DefaultCardAccountRangeService(
         cardAccountRangeRepository = cardAccountRangeRepository,
         uiContext = uiContext,
         workContext = workContext,
         staticCardAccountRanges = staticCardAccountRanges,
-    ),
-    private val coroutineScope: CoroutineScope = CoroutineScope(uiContext)
+    )
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     @JvmOverloads
@@ -209,7 +209,7 @@ class CardNumberEditText internal constructor(
         this.layoutDirection = LAYOUT_DIRECTION_LTR
 
         // Start collecting account range results immediately
-        accountRangeResultJob = coroutineScope.launch {
+        accountRangeResultJob = coroutineScope.launch(uiContext) {
             accountRangeService.accountRangeResultFlow
                 .filterIsInstance<CardAccountRangeService.AccountRangesResult.Success>()
                 .collect { result ->

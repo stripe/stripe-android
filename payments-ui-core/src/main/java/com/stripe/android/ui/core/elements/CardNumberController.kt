@@ -75,14 +75,15 @@ internal class DefaultCardNumberController(
     override val initialValue: String?,
     cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val coroutineScope: CoroutineScope = CoroutineScope(workContext),
     private val accountRangeService: CardAccountRangeService = DefaultCardAccountRangeService(
         cardAccountRangeRepository,
         uiContext,
         workContext,
         staticCardAccountRanges,
-        cardBrandFilter = cardBrandFilter
+        cardBrandFilter = cardBrandFilter,
+        coroutineScope = coroutineScope
     ),
-    private val coroutineScope: CoroutineScope = CoroutineScope(workContext)
 ) : CardNumberController() {
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
