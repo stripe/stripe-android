@@ -80,7 +80,6 @@ internal class CardInputWidgetTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
-    private val cardInputListener = FakeCardInputListener()
     private val accountRangeStore = DefaultCardAccountRangeStore(context)
 
     @BeforeTest
@@ -566,21 +565,19 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun onCompleteCardNumber_whenValid_shiftsFocusToExpiryDate() = runCardInputWidgetTest {
+    fun onCompleteCardNumber_whenValid_shiftsFocusToExpiryDate() = runCardInputWidgetTest { listener ->
         updateCardNumberAndIdle(VISA_WITH_SPACES)
 
-        assertThat(cardInputListener.cardCompleteCalls)
+        assertThat(listener.cardCompleteCalls)
             .isEqualTo(1)
-        assertThat(cardInputListener.focusedFields)
+        assertThat(listener.focusedFields)
             .isEqualTo(
                 listOf(CardInputListener.FocusField.ExpiryDate)
             )
     }
 
     @Test
-    fun onDeleteFromExpiryDate_whenEmpty_shiftsFocusToCardNumberAndDeletesDigit() = runCardInputWidgetTest {
-        setCardInputListener(cardInputListener)
-
+    fun onDeleteFromExpiryDate_whenEmpty_shiftsFocusToCardNumberAndDeletesDigit() = runCardInputWidgetTest { listener ->
         updateCardNumberAndIdle(VISA_WITH_SPACES)
 
         assertThat(expiryDateEditText.hasFocus())
@@ -588,7 +585,7 @@ internal class CardInputWidgetTest {
 
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
 
-        assertThat(cardInputListener.focusedFields)
+        assertThat(listener.focusedFields)
             .isEqualTo(
                 listOf(
                     CardInputListener.FocusField.ExpiryDate,
@@ -620,12 +617,12 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun onDeleteFromCvcDate_whenEmpty_shiftsFocusToExpiryAndDeletesDigit() = runCardInputWidgetTest {
+    fun onDeleteFromCvcDate_whenEmpty_shiftsFocusToExpiryAndDeletesDigit() = runCardInputWidgetTest { listener ->
         updateCardNumberAndIdle(VISA_WITH_SPACES)
 
-        assertThat(cardInputListener.cardCompleteCalls)
+        assertThat(listener.cardCompleteCalls)
             .isEqualTo(1)
-        assertThat(cardInputListener.focusedFields)
+        assertThat(listener.focusedFields)
             .isEqualTo(
                 listOf(CardInputListener.FocusField.ExpiryDate)
             )
@@ -634,9 +631,9 @@ internal class CardInputWidgetTest {
         expiryDateEditText.append("79")
         idleLooper()
 
-        assertThat(cardInputListener.expirationCompleteCalls)
+        assertThat(listener.expirationCompleteCalls)
             .isEqualTo(1)
-        assertThat(cardInputListener.focusedFields)
+        assertThat(listener.focusedFields)
             .isEqualTo(
                 listOf(
                     CardInputListener.FocusField.ExpiryDate,
@@ -647,7 +644,7 @@ internal class CardInputWidgetTest {
             .isTrue()
 
         ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
-        assertThat(cardInputListener.focusedFields)
+        assertThat(listener.focusedFields)
             .isEqualTo(
                 listOf(
                     CardInputListener.FocusField.ExpiryDate,
@@ -710,14 +707,14 @@ internal class CardInputWidgetTest {
         }
 
     @Test
-    fun onDeleteFromCvcDate_whenEmptyAndExpiryDateIsEmpty_shiftsFocusOnly() = runCardInputWidgetTest {
+    fun onDeleteFromCvcDate_whenEmptyAndExpiryDateIsEmpty_shiftsFocusOnly() = runCardInputWidgetTest { listener ->
         updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
 
         // Simulates user tapping into this text field without filling out the date first.
         cvcEditText.requestFocus()
 
         ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
-        assertThat(cardInputListener.focusedFields)
+        assertThat(listener.focusedFields)
             .isEqualTo(
                 listOf(
                     CardInputListener.FocusField.ExpiryDate,
@@ -1197,7 +1194,7 @@ internal class CardInputWidgetTest {
         }
 
     @Test
-    fun addValues_thenClear_withPostalCodeDisabled_leavesAllTextFieldsEmpty() = runCardInputWidgetTest {
+    fun addValues_thenClear_withPostalCodeDisabled_leavesAllTextFieldsEmpty() = runCardInputWidgetTest { listener ->
         postalCodeEnabled = false
         updateCardNumberAndIdle(VISA_NO_SPACES)
 
@@ -1212,7 +1209,7 @@ internal class CardInputWidgetTest {
         assertThat(cvcEditText.fieldText)
             .isEmpty()
 
-        assertThat(cardInputListener.focusedFields)
+        assertThat(listener.focusedFields)
             .isEqualTo(
                 listOf(
                     CardInputListener.FocusField.ExpiryDate,
@@ -1223,7 +1220,7 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun addValues_thenClear_withPostalCodeEnabled_leavesAllTextFieldsEmpty() = runCardInputWidgetTest {
+    fun addValues_thenClear_withPostalCodeEnabled_leavesAllTextFieldsEmpty() = runCardInputWidgetTest { listener ->
         postalCodeEnabled = true
         setCardNumber(VISA_NO_SPACES)
         setExpiryDate(12, 2079)
@@ -1240,7 +1237,7 @@ internal class CardInputWidgetTest {
         assertThat(postalCodeEditText.fieldText)
             .isEmpty()
 
-        assertThat(cardInputListener.focusedFields)
+        assertThat(listener.focusedFields)
             .isEqualTo(
                 listOf(
                     CardInputListener.FocusField.Cvc,
@@ -1560,45 +1557,45 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun usZipCodeRequired_whenFalse_shouldCallOnPostalCodeComplete() = runCardInputWidgetTest {
+    fun usZipCodeRequired_whenFalse_shouldCallOnPostalCodeComplete() = runCardInputWidgetTest { listener ->
         usZipCodeRequired = false
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
-        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(1)
+        assertThat(listener.onPostalCodeCompleteCalls).isEqualTo(1)
     }
 
     @Test
-    fun usZipCodeRequired_whenTrue_withValidZip_shouldCallOnPostalCodeComplete() = runCardInputWidgetTest {
+    fun usZipCodeRequired_whenTrue_withValidZip_shouldCallOnPostalCodeComplete() = runCardInputWidgetTest { listener ->
         usZipCodeRequired = true
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
-        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(1)
+        assertThat(listener.onPostalCodeCompleteCalls).isEqualTo(1)
     }
 
     @Test
-    fun postalCodeEnabled_whenFalse_shouldNotCallOnPostalCodeComplete() = runCardInputWidgetTest {
+    fun postalCodeEnabled_whenFalse_shouldNotCallOnPostalCodeComplete() = runCardInputWidgetTest { listener ->
         postalCodeEnabled = false
         postalCodeEditText.setText("123")
-        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
+        assertThat(listener.onPostalCodeCompleteCalls).isEqualTo(0)
     }
 
     @Test
-    fun usZipCodeRequired_whenTrue_withInvalidZip_shouldNotCallOnPostalCodeComplete() = runCardInputWidgetTest {
+    fun usZipCodeRequired_whenTrue_withInvalidZip_shouldNotCallOnPostalCodeComplete() = runCardInputWidgetTest { listener ->
         usZipCodeRequired = true
         postalCodeEditText.setText("1234")
-        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
+        assertThat(listener.onPostalCodeCompleteCalls).isEqualTo(0)
     }
 
     @Test
-    fun postalCode_whenTrue_withNonEmptyZip_shouldCallOnPostalCodeComplete() = runCardInputWidgetTest {
+    fun postalCode_whenTrue_withNonEmptyZip_shouldCallOnPostalCodeComplete() = runCardInputWidgetTest { listener ->
         postalCodeRequired = true
         postalCodeEditText.setText("1234")
-        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(1)
+        assertThat(listener.onPostalCodeCompleteCalls).isEqualTo(1)
     }
 
     @Test
-    fun postalCode_whenTrue_withEmptyZip_shouldNotCallOnPostalCodeComplete() = runCardInputWidgetTest {
+    fun postalCode_whenTrue_withEmptyZip_shouldNotCallOnPostalCodeComplete() = runCardInputWidgetTest { listener ->
         postalCodeRequired = true
         postalCodeEditText.setText("")
-        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
+        assertThat(listener.onPostalCodeCompleteCalls).isEqualTo(0)
     }
 
     @Test
@@ -1609,38 +1606,38 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun `Verify on postal code focus change listeners trigger the callback`() = runCardInputWidgetTest {
+    fun `Verify on postal code focus change listeners trigger the callback`() = runCardInputWidgetTest { listener ->
         postalCodeEditText.getParentOnFocusChangeListener()
             .onFocusChange(postalCodeEditText, true)
 
-        assertThat(cardInputListener.focusedFields)
+        assertThat(listener.focusedFields)
             .contains(CardInputListener.FocusField.PostalCode)
     }
 
     @Test
-    fun `Verify on cvc focus change listeners trigger the callback`() = runCardInputWidgetTest {
+    fun `Verify on cvc focus change listeners trigger the callback`() = runCardInputWidgetTest { listener ->
         cvcEditText.getParentOnFocusChangeListener()
             .onFocusChange(cvcEditText, true)
 
-        assertThat(cardInputListener.focusedFields)
+        assertThat(listener.focusedFields)
             .contains(CardInputListener.FocusField.Cvc)
     }
 
     @Test
-    fun `Verify on expiration date focus change listeners trigger the callback`() = runCardInputWidgetTest {
+    fun `Verify on expiration date focus change listeners trigger the callback`() = runCardInputWidgetTest { listener ->
         expiryDateEditText.getParentOnFocusChangeListener()
             .onFocusChange(expiryDateEditText, true)
 
-        assertThat(cardInputListener.focusedFields)
+        assertThat(listener.focusedFields)
             .contains(CardInputListener.FocusField.ExpiryDate)
     }
 
     @Test
-    fun `Verify on card number focus change listeners trigger the callback`() = runCardInputWidgetTest {
+    fun `Verify on card number focus change listeners trigger the callback`() = runCardInputWidgetTest { listener ->
         cardNumberEditText.getParentOnFocusChangeListener()
             .onFocusChange(cardNumberEditText, true)
 
-        assertThat(cardInputListener.focusedFields)
+        assertThat(listener.focusedFields)
             .contains(CardInputListener.FocusField.CardNumber)
     }
 
@@ -1689,24 +1686,31 @@ internal class CardInputWidgetTest {
     @Test
     fun `getBrand returns the right brands`() = runCardInputWidgetTest {
         setCardNumber(null)
+        idleLooper()
         assertThat(brand).isEqualTo(CardBrand.Unknown)
 
         setCardNumber(VISA_NO_SPACES)
+        idleLooper()
         assertThat(brand).isEqualTo(CardBrand.Visa)
 
         setCardNumber(CardNumberFixtures.MASTERCARD_NO_SPACES)
+        idleLooper()
         assertThat(brand).isEqualTo(CardBrand.MasterCard)
 
         setCardNumber(AMEX_NO_SPACES)
+        idleLooper()
         assertThat(brand).isEqualTo(CardBrand.AmericanExpress)
 
         setCardNumber(CardNumberFixtures.DISCOVER_NO_SPACES)
+        idleLooper()
         assertThat(brand).isEqualTo(CardBrand.Discover)
 
         setCardNumber(CardNumberFixtures.JCB_NO_SPACES)
+        idleLooper()
         assertThat(brand).isEqualTo(CardBrand.JCB)
 
         setCardNumber(DINERS_CLUB_14_NO_SPACES)
+        idleLooper()
         assertThat(brand).isEqualTo(CardBrand.DinersClub)
     }
 
@@ -1823,9 +1827,10 @@ internal class CardInputWidgetTest {
 
     private fun runCardInputWidgetTest(
         isCbcEligible: Boolean = false,
-        afterRecreation: (CardInputWidget.() -> Unit)? = null,
-        block: CardInputWidget.() -> Unit,
+        afterRecreation: (CardInputWidget.(FakeCardInputListener) -> Unit)? = null,
+        block: CardInputWidget.(FakeCardInputListener) -> Unit,
     ) {
+        val cardInputListener = FakeCardInputListener()
         val activityScenario = ActivityScenario.launch<CardInputWidgetTestActivity>(
             Intent(context, CardInputWidgetTestActivity::class.java).apply {
                 putExtra("args", CardInputWidgetTestActivity.Args(isCbcEligible = isCbcEligible))
@@ -1837,7 +1842,7 @@ internal class CardInputWidgetTest {
 
             val widget = activity.findViewById<CardInputWidget>(CardInputWidgetTestActivity.VIEW_ID)
             widget.setCardInputListener(cardInputListener)
-            widget.block()
+            widget.block(cardInputListener)
         }
 
         if (afterRecreation != null) {
@@ -1848,7 +1853,7 @@ internal class CardInputWidgetTest {
 
                 val widget = activity.findViewById<CardInputWidget>(CardInputWidgetTestActivity.VIEW_ID)
                 widget.setCardInputListener(cardInputListener)
-                widget.afterRecreation()
+                widget.afterRecreation(cardInputListener)
             }
         }
 
