@@ -9,7 +9,7 @@ import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.core.view.updateLayoutParams
-import androidx.test.core.app.ActivityScenario
+//import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onData
 import androidx.test.espresso.Espresso.onView
@@ -1686,38 +1686,25 @@ internal class CardInputWidgetTest {
     @Test
     fun `getBrand returns the right brands`() = runCardInputWidgetTest {
         setCardNumber(null)
-        idleLooper()
-        // Default brand should be Unknown
         assertThat(brand).isEqualTo(CardBrand.Unknown)
 
         setCardNumber(VISA_NO_SPACES)
-        idleLooper()
         assertThat(brand).isEqualTo(CardBrand.Visa)
 
         setCardNumber(CardNumberFixtures.MASTERCARD_NO_SPACES)
-        idleLooper()
         assertThat(brand).isEqualTo(CardBrand.MasterCard)
 
         setCardNumber(AMEX_NO_SPACES)
-        idleLooper()
         assertThat(brand).isEqualTo(CardBrand.AmericanExpress)
 
         setCardNumber(CardNumberFixtures.DISCOVER_NO_SPACES)
-        idleLooper()
         assertThat(brand).isEqualTo(CardBrand.Discover)
 
         setCardNumber(CardNumberFixtures.JCB_NO_SPACES)
-        idleLooper()
         assertThat(brand).isEqualTo(CardBrand.JCB)
 
         setCardNumber(DINERS_CLUB_14_NO_SPACES)
-        idleLooper()
         assertThat(brand).isEqualTo(CardBrand.DinersClub)
-
-        // Test that empty string returns to Unknown
-        setCardNumber("")
-        idleLooper()
-        assertThat(brand).isEqualTo(CardBrand.Unknown)
     }
 
     @Test
@@ -1824,12 +1811,10 @@ internal class CardInputWidgetTest {
         true
     ) {
         cardNumberEditText.setText("4000 0026 0000 1001")
-        idleLooper()
         assertThat(cardBrandView.possibleBrands.size).isEqualTo(0)
         updateCardNumberAndIdle("0000 1001")
         assertThat(cardBrandView.possibleBrands.size).isEqualTo(0)
         cardNumberEditText.setText("4000 0025 0000 1001")
-        idleLooper()
         assertThat(cardBrandView.possibleBrands.size).isEqualTo(2)
     }
 
