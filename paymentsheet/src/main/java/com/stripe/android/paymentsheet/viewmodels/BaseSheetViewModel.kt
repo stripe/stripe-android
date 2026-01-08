@@ -236,8 +236,25 @@ internal abstract class BaseSheetViewModel(
             return paymentMethodLayout
         }
 
+        val horizontalModeAAExperiments = listOf(
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA,
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA,
+        )
+
+        horizontalModeAAExperiments.forEach { experiment ->
+            logExperimentExposure(experimentsData, experiment, paymentMethodMetadata)
+        }
+
+        return paymentMethodLayout
+    }
+
+    private fun logExperimentExposure(
+        experimentsData: ElementsSession.ExperimentsData,
+        experiment: ElementsSession.ExperimentAssignment,
+        paymentMethodMetadata: PaymentMethodMetadata
+    ) {
         experimentsData.experimentAssignments[
-            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA
+            experiment
         ]?.let { variant ->
             eventReporter.onExperimentExposure(
                 LoggableExperiment.OcsMobileHorizontalModeAndroidAA(
@@ -248,8 +265,6 @@ internal abstract class BaseSheetViewModel(
                 )
             )
         }
-
-        return paymentMethodLayout
     }
 
     abstract fun onUserCancel()
