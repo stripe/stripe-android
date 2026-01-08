@@ -236,13 +236,24 @@ internal abstract class BaseSheetViewModel(
             return paymentMethodLayout
         }
 
-        val horizontalModeAAExperiments = listOf(
+        val horizontalModeExperiments = listOf(
             ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA,
             ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA,
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE,
         )
 
-        horizontalModeAAExperiments.forEach { experiment ->
+        horizontalModeExperiments.forEach { experiment ->
             logExperimentExposure(experimentsData, experiment, paymentMethodMetadata)
+        }
+
+        experimentsData.experimentAssignments[
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE
+        ]?.let { variant ->
+            return if (variant == "control") {
+                PaymentSheet.PaymentMethodLayout.Vertical
+            } else {
+                PaymentSheet.PaymentMethodLayout.Horizontal
+            }
         }
 
         return paymentMethodLayout
