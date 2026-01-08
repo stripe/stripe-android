@@ -25,7 +25,7 @@ internal object ZipDefinition : PaymentMethodDefinition {
 }
 
 private object ZipUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = ZipDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_zip,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_zip,

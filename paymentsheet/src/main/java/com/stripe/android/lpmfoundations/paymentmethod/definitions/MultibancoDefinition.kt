@@ -28,7 +28,7 @@ internal object MultibancoDefinition : PaymentMethodDefinition {
 }
 
 private object MultibancoUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = MultibancoDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_multibanco,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_multibanco_day,

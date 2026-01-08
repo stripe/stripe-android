@@ -25,7 +25,7 @@ internal object GrabPayDefinition : PaymentMethodDefinition {
 }
 
 private object GrabPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = GrabPayDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_grabpay,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_grabpay,

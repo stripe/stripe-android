@@ -46,7 +46,7 @@ internal object KlarnaDefinition : PaymentMethodDefinition {
 }
 
 private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = KlarnaDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_klarna,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_klarna,
@@ -115,7 +115,7 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
 }
 
 private object KlarnaRemovedFormUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = KlarnaDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_klarna,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_klarna,

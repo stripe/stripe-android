@@ -27,7 +27,7 @@ internal object PayPalDefinition : PaymentMethodDefinition {
 }
 
 private object PayPalUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = PayPalDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_paypal,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal_day,

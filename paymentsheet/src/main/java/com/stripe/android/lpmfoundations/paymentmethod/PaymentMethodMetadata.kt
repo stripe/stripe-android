@@ -152,9 +152,11 @@ internal data class PaymentMethodMetadata(
         code: String,
     ): SupportedPaymentMethod? {
         return if (isExternalPaymentMethod(code)) {
-            getUiDefinitionFactoryForExternalPaymentMethod(code)?.createSupportedPaymentMethod()
+            getUiDefinitionFactoryForExternalPaymentMethod(code)
+                ?.createSupportedPaymentMethod(metadata = this)
         } else if (isCustomPaymentMethod(code)) {
-            getUiDefinitionFactoryForCustomPaymentMethod(code)?.createSupportedPaymentMethod()
+            getUiDefinitionFactoryForCustomPaymentMethod(code)
+                ?.createSupportedPaymentMethod(metadata = this)
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
             definition.uiDefinitionFactory().supportedPaymentMethod(this, definition, sharedDataSpecs)
@@ -263,11 +265,13 @@ internal data class PaymentMethodMetadata(
     ): FormHeaderInformation? {
         return if (isExternalPaymentMethod(code)) {
             getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormHeaderInformation(
+                metadata = this,
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
                 incentive = null,
             )
         } else if (isCustomPaymentMethod(code)) {
             getUiDefinitionFactoryForCustomPaymentMethod(code)?.createFormHeaderInformation(
+                metadata = this,
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
                 incentive = null,
             )

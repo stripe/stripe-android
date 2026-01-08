@@ -25,7 +25,7 @@ internal object AlmaDefinition : PaymentMethodDefinition {
 }
 
 private object AlmaUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = AlmaDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_alma,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_alma_day,
