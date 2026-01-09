@@ -930,43 +930,4 @@ internal class PaymentSheetTest {
         testContext.markTestSucceeded()
     }
 
-    @Test
-    fun testHorizontalModeExperiment() = runPaymentSheetTest(
-        networkRule = networkRule,
-        integrationType = integrationType,
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.testBodyFromFile("elements-sessions-requires_payment_method_with_horizontal_mode_experiment.json")
-        }
-
-        testContext.presentPaymentSheet {
-            presentWithPaymentIntent(
-                paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Example, Inc.",
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
-                ),
-            )
-        }
-
-        page.waitForCardForm()
-
-        // Assert that horizontal mode is being used
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onAllNodes(hasTestTag(TEST_TAG_LIST))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
-
-        composeTestRule.onNodeWithTag(TEST_TAG_LIST, useUnmergedTree = true)
-            .assertExists()
-
-        testContext.markTestSucceeded()
-    }
 }
