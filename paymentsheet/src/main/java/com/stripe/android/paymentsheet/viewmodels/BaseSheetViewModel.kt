@@ -246,7 +246,7 @@ internal abstract class BaseSheetViewModel(
                     group = variant,
                     paymentMethodMetadata = paymentMethodMetadata,
                     hasSavedPaymentMethod = customerStateHolder.paymentMethods.value.isNotEmpty(),
-                    mode = EventReporter.Mode.Complete,
+                    mode = mode,
                 )
             )
         }
