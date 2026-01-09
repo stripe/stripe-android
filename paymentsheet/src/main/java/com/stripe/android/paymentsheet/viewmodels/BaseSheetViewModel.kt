@@ -237,21 +237,36 @@ internal abstract class BaseSheetViewModel(
             return paymentMethodLayout
         }
 
-        experimentsData.experimentAssignments[
-            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA
-        ]?.let { variant ->
-            eventReporter.onExperimentExposure(
-                LoggableExperiment.OcsMobileHorizontalModeAndroidAA(
-                    experimentsData = experimentsData,
-                    group = variant,
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    hasSavedPaymentMethod = customerStateHolder.paymentMethods.value.isNotEmpty(),
-                    mode = EventReporter.Mode.Complete,
-                )
-            )
-        }
+        logHorizontalModeExperimentExposures(
+            experimentsData = experimentsData,
+            paymentMethodMetadata = paymentMethodMetadata,
+        )
 
         return paymentMethodLayout
+    }
+
+    private fun logHorizontalModeExperimentExposures(
+        experimentsData: ElementsSession.ExperimentsData,
+        paymentMethodMetadata: PaymentMethodMetadata,
+    ) {
+        listOf(
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA,
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA,
+        ).forEach { experimentAssignment ->
+            experimentsData.experimentAssignments[
+                experimentAssignment,
+            ]?.let { variant ->
+                eventReporter.onExperimentExposure(
+                    LoggableExperiment.OcsMobileHorizontalModeAndroidAA(
+                        experimentsData = experimentsData,
+                        group = variant,
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        hasSavedPaymentMethod = customerStateHolder.paymentMethods.value.isNotEmpty(),
+                        mode = mode,
+                    )
+                )
+            }
+        }
     }
 
     abstract fun onUserCancel()
