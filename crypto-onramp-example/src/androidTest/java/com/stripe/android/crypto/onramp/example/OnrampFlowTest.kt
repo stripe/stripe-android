@@ -57,6 +57,7 @@ class OnrampFlowTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testCheckoutFlow() {
+        // I wonder if this test is failing on master?
         clearPrefs()
 
         waitForTag(LOGIN_EMAIL_TAG)
