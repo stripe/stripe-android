@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -14,6 +16,7 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
@@ -923,6 +926,46 @@ internal class PaymentSheetTest {
         }
 
         page.waitForCardForm()
+
+        testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testHorizontalModeExperiment() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method_with_horizontal_mode_experiment.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Example, Inc.",
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
+                ),
+            )
+        }
+
+        page.waitForCardForm()
+
+        // Assert that horizontal mode is being used
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodes(hasTestTag(TEST_TAG_LIST))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithTag(TEST_TAG_LIST, useUnmergedTree = true)
+            .assertExists()
 
         testContext.markTestSucceeded()
     }
