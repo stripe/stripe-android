@@ -68,6 +68,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkHandler: LinkHandler,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     tapToAddCollectionHandler: TapToAddCollectionHandler,
+    mode: EventReporter.Mode,
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -78,6 +79,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = false,
     tapToAddCollectionHandler = tapToAddCollectionHandler,
+    mode = mode,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(

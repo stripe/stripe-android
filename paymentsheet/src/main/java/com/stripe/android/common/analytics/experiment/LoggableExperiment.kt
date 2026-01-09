@@ -3,6 +3,7 @@ package com.stripe.android.common.analytics.experiment
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.utils.filterNotNullValues
 
 /**
@@ -20,11 +21,12 @@ internal sealed class LoggableExperiment(
         override val group: String,
         paymentMethodMetadata: PaymentMethodMetadata,
         hasSavedPaymentMethod: Boolean,
+        mode: EventReporter.Mode,
     ) : LoggableExperiment(
         arbId = experimentsData.arbId,
         experiment = ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA,
         group = group,
-        dimensions = CommonElementsDimensions.getDimensions(paymentMethodMetadata) +
+        dimensions = CommonElementsDimensions.getDimensions(paymentMethodMetadata, mode) +
             mapOf("has_saved_payment_method" to hasSavedPaymentMethod.toString()),
     )
 

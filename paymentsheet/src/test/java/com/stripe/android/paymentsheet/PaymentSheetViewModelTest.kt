@@ -3501,6 +3501,7 @@ internal class PaymentSheetViewModelTest {
                     }
                 },
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
+                mode = EventReporter.Mode.Complete,
             )
         }
     }

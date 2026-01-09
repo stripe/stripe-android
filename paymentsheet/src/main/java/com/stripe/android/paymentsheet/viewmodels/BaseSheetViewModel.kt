@@ -62,6 +62,7 @@ internal abstract class BaseSheetViewModel(
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     val isCompleteFlow: Boolean,
     val tapToAddCollectionHandler: TapToAddCollectionHandler,
+    val mode: EventReporter.Mode,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)
@@ -245,6 +246,7 @@ internal abstract class BaseSheetViewModel(
                     group = variant,
                     paymentMethodMetadata = paymentMethodMetadata,
                     hasSavedPaymentMethod = customerStateHolder.paymentMethods.value.isNotEmpty(),
+                    mode = EventReporter.Mode.Complete,
                 )
             )
         }

@@ -88,6 +88,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
     tapToAddCollectionHandler: TapToAddCollectionHandler,
+    mode: EventReporter.Mode,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -98,6 +99,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
     tapToAddCollectionHandler = tapToAddCollectionHandler,
+    mode = mode,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
