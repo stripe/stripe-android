@@ -8,6 +8,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cardscan.ScannedCard
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -278,7 +279,12 @@ class CardDetailsControllerTest {
         private val defaultCardNumberTextFieldConfig: CardNumberTextFieldConfig,
         var textFieldState: TextFieldState
     ) : CardNumberTextFieldConfig by defaultCardNumberTextFieldConfig {
-        override fun determineState(brand: CardBrand, number: String, numberAllowedDigits: Int): TextFieldState {
+        override fun determineState(
+            brand: CardBrand,
+            funding: CardFunding?,
+            number: String,
+            numberAllowedDigits: Int
+        ): TextFieldState {
             return textFieldState
         }
     }
@@ -287,7 +293,12 @@ class CardDetailsControllerTest {
         private val defaultCvcTextFieldConfig: CvcTextFieldConfig,
         var textFieldState: TextFieldState
     ) : CvcTextFieldConfig by defaultCvcTextFieldConfig {
-        override fun determineState(brand: CardBrand, number: String, numberAllowedDigits: Int): TextFieldState {
+        override fun determineState(
+            brand: CardBrand,
+            funding: CardFunding?,
+            number: String,
+            numberAllowedDigits: Int
+        ): TextFieldState {
             return textFieldState
         }
     }

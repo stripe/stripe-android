@@ -260,9 +260,10 @@ internal class DefaultCardNumberController(
 
     private val _fieldState = combineAsStateFlow(impliedCardBrand, _fieldValue) { brand, fieldValue ->
         cardTextFieldConfig.determineState(
-            brand,
-            fieldValue,
-            accountRangeService.accountRange?.panLength ?: brand.getMaxLengthForCardNumber(
+            brand = brand,
+            funding = null,
+            number = fieldValue,
+            numberAllowedDigits = accountRangeService.accountRange?.panLength ?: brand.getMaxLengthForCardNumber(
                 fieldValue
             )
         )
