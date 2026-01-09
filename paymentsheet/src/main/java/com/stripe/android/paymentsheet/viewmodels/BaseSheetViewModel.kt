@@ -242,6 +242,16 @@ internal abstract class BaseSheetViewModel(
             paymentMethodMetadata = paymentMethodMetadata,
         )
 
+        experimentsData.experimentAssignments[
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE,
+        ]?.let { variant ->
+            return when (variant) {
+                "control" -> PaymentSheet.PaymentMethodLayout.Vertical
+                "treatment" -> PaymentSheet.PaymentMethodLayout.Horizontal
+                else -> paymentMethodLayout
+            }
+        }
+
         return paymentMethodLayout
     }
 
@@ -252,6 +262,7 @@ internal abstract class BaseSheetViewModel(
         listOf(
             ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA,
             ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA,
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE,
         ).forEach { experimentAssignment ->
             experimentsData.experimentAssignments[
                 experimentAssignment,
