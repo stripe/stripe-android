@@ -1,0 +1,3 @@
+# Stripe ML core base consumer Proguard/R8 rules
+# Keep all ml-core-base classes to avoid R8 stripping wrappers/helpers
+-keep class com.stripe.android.mlcore.** { *; }
