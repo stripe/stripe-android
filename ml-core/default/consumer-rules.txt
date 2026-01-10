@@ -1,7 +1,4 @@
 # Stripe ML core default consumer Proguard/R8 rules
 # This flavor uses LiteRT / TFLite runtime; keep relevant namespaces generous.
 
--keep class com.stripe.android.mlcore.** { *; }
 -keep class org.tensorflow.lite.** { *; }
--keep class org.tensorflow.lite.support.** { *; }
--keep class com.google.android.litert.** { *; }
