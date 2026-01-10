@@ -1,4 +1,2 @@
-# Stripe ML core googleplay consumer Proguard/R8 rules
-# This flavor uses the Google Play Services TFLite runtime; keep its APIs.
-
+# Consumer Proguard/R8 rules for Stripe ML core (googleplay / Play Services TFLite)
 -keep class org.tensorflow.lite.** { *; }
