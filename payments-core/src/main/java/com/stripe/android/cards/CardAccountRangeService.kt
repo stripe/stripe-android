@@ -23,10 +23,10 @@ interface CardAccountRangeService {
 
     val isLoading: StateFlow<Boolean>
     val accountRangeResultFlow: Flow<AccountRangesResult>
-    val accountRangesStateFlow: StateFlow<List<AccountRange>?>
+    val accountRangesStateFlow: StateFlow<AccountRangesState>
 
     val accountRange: AccountRange?
-        get() = accountRangesStateFlow.value?.firstOrNull()
+        get() = accountRangesStateFlow.value.ranges.firstOrNull()
 
     fun onCardNumberChanged(
         cardNumber: CardNumber.Unvalidated,
@@ -50,6 +50,16 @@ interface CardAccountRangeService {
     interface AccountRangeResultListener {
         fun onAccountRangesResult(accountRanges: List<AccountRange>, unfilteredAccountRanges: List<AccountRange>)
     }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface AccountRangesState {
+        val ranges: List<AccountRange>
+        data object Loading : AccountRangesState {
+            override val ranges: List<AccountRange> = emptyList()
+        }
+
+        data class Success(override val ranges: List<AccountRange>) : AccountRangesState
+    }
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -69,9 +79,11 @@ class DefaultCardAccountRangeService(
     private val _accountRangeResultFlow = MutableSharedFlow<CardAccountRangeService.AccountRangesResult>(replay = 1)
     override val accountRangeResultFlow = _accountRangeResultFlow
 
-    private val _accountRangesStateFlow = MutableStateFlow<List<AccountRange>?>(emptyList())
+    private val _accountRangesStateFlow = MutableStateFlow<CardAccountRangeService.AccountRangesState>(
+        value = CardAccountRangeService.AccountRangesState.Success(emptyList())
+    )
 
-    override val accountRangesStateFlow: StateFlow<List<AccountRange>?> = _accountRangesStateFlow
+    override val accountRangesStateFlow: StateFlow<CardAccountRangeService.AccountRangesState> = _accountRangesStateFlow
 
     @VisibleForTesting
     var accountRangeRepositoryJob: Job? = null
@@ -117,7 +129,7 @@ class DefaultCardAccountRangeService(
             cancelAccountRangeRepositoryJob()
 
             // Emit loading state before fetching
-            _accountRangesStateFlow.value = null
+            _accountRangesStateFlow.value = CardAccountRangeService.AccountRangesState.Loading
 
             accountRangeRepositoryJob = coroutineScope.launch(workContext) {
                 val bin = cardNumber.bin
@@ -152,7 +164,7 @@ class DefaultCardAccountRangeService(
             accountRanges = filteredAccountRanges,
             unfilteredAccountRanges = accountRanges
         )
-        _accountRangesStateFlow.value = filteredAccountRanges
+        _accountRangesStateFlow.value = CardAccountRangeService.AccountRangesState.Success(filteredAccountRanges)
     }
 
     private fun shouldQueryRepository(
@@ -164,12 +176,13 @@ class DefaultCardAccountRangeService(
     }
 
     private fun shouldQueryAccountRange(cardNumber: CardNumber.Unvalidated): Boolean {
-        val accountRange = accountRangesStateFlow.value?.firstOrNull()
-        val shouldQuery = accountRange == null ||
-            cardNumber.bin == null ||
-            !accountRange.binRange.matches(cardNumber) ||
-            cardNumber.bin != lastBin
-        lastBin = cardNumber.bin
-        return shouldQuery
+        return with(accountRange) {
+            val shouldQuery = this == null ||
+                cardNumber.bin == null ||
+                !binRange.matches(cardNumber) ||
+                cardNumber.bin != lastBin
+            lastBin = cardNumber.bin
+            shouldQuery
+        }
     }
 }

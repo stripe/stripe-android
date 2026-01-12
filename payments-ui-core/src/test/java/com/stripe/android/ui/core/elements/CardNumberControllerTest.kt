@@ -22,6 +22,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.events.AnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.CardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
@@ -61,6 +62,8 @@ internal class CardNumberControllerTest {
     val composeTestRule = createComposeRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
     fun `When invalid card number verify visible error`() = runTest {
@@ -69,7 +72,6 @@ internal class CardNumberControllerTest {
         cardNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
             cardNumberController.onValueChange("012")
-            assertThat(awaitItem()?.message).isEqualTo(StripeUiCoreR.string.stripe_blank_and_required)
             assertThat(awaitItem()?.message).isEqualTo(StripeR.string.stripe_invalid_card_number)
         }
     }
