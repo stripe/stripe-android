@@ -22,7 +22,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsEvent
-import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.events.AnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.CardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
@@ -40,8 +39,6 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -60,13 +57,10 @@ import com.stripe.payments.model.R as PaymentModelR
 
 @RunWith(RobolectricTestRunner::class)
 internal class CardNumberControllerTest {
-    private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
-
-    @get:Rule
-    val coroutineTestRule = CoroutineTestRule(testDispatcher)
-
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @Test
     fun `When invalid card number verify visible error`() = runTest {
@@ -738,8 +732,7 @@ internal class CardNumberControllerTest {
             workContext = testDispatcher,
             initialValue = initialValue,
             cardBrandChoiceConfig = cardBrandChoiceConfig,
-            cardBrandFilter = cardBrandFilter,
-            coroutineScope = TestScope(testDispatcher)
+            cardBrandFilter = cardBrandFilter
         )
     }
 

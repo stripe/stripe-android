@@ -291,15 +291,13 @@ internal class DefaultCardNumberController(
         coroutineScope.launch(uiContext) {
             accountRangeService.accountRangeResultFlow
                 .collect { result ->
-                    withContext(uiContext) {
-                        val newAccountRange = result.accountRanges.firstOrNull()
-                        newAccountRange?.panLength?.let { panLength ->
-                            latestBinBasedPanLength.value = panLength
-                        }
-
-                        val newBrandChoices = result.unfilteredAccountRanges.map { it.brand }.distinct()
-                        brandChoices.value = newBrandChoices
+                    val newAccountRange = result.accountRanges.firstOrNull()
+                    newAccountRange?.panLength?.let { panLength ->
+                        latestBinBasedPanLength.value = panLength
                     }
+
+                    val newBrandChoices = result.unfilteredAccountRanges.map { it.brand }.distinct()
+                    brandChoices.value = newBrandChoices
                 }
         }
     }
