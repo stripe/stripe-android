@@ -38,7 +38,6 @@ import com.stripe.android.model.Networks
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
-import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
@@ -61,9 +60,6 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 internal class CardInputWidgetTest {
-
-    @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
 
     @get:Rule
     val testActivityRule = createTestActivityRule<CardInputWidgetTestActivity>()

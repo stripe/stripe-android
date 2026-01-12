@@ -226,7 +226,7 @@ internal class DefaultCardNumberController(
                 hide = brands.size < 2
             )
         } else {
-            val accountRange = accountRangeService.accountRangesStateFlow.value.firstOrNull()
+            val accountRange = accountRangeService.accountRangesStateFlow.value?.firstOrNull()
             if (accountRange != null) {
                 TextFieldIcon.Trailing(accountRange.brand.icon, isTintable = false)
             } else {
@@ -290,7 +290,6 @@ internal class DefaultCardNumberController(
 
         coroutineScope.launch(uiContext) {
             accountRangeService.accountRangeResultFlow
-                .filterIsInstance<CardAccountRangeService.AccountRangesResult.Success>()
                 .collect { result ->
                     withContext(uiContext) {
                         val newAccountRange = result.accountRanges.firstOrNull()
