@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -95,19 +94,6 @@ class DefaultCardAccountRangeService(
     @VisibleForTesting
     var accountRangeRepositoryJob: Job? = null
 
-    init {
-        coroutineScope.launch {
-            accountRangeResultFlow
-                .filterIsInstance<CardAccountRangeService.AccountRangesResult.Success>()
-                .collect {
-                    accountRangeResultListener?.onAccountRangesResult(
-                        accountRanges = it.accountRanges,
-                        unfilteredAccountRanges = it.unfilteredAccountRanges
-                    )
-                }
-        }
-    }
-
     override fun onCardNumberChanged(cardNumber: CardNumber.Unvalidated, isCbcEligible: Boolean) {
         val shouldQuery = !isCbcEligible || cardNumber.length >= MIN_CARD_NUMBER_LENGTH
         if (!shouldQuery) {
@@ -178,6 +164,10 @@ class DefaultCardAccountRangeService(
                 accountRanges = filteredAccountRanges,
                 unfilteredAccountRanges = accountRanges
             )
+        )
+        accountRangeResultListener?.onAccountRangesResult(
+            accountRanges = filteredAccountRanges,
+            unfilteredAccountRanges = accountRanges
         )
     }
 

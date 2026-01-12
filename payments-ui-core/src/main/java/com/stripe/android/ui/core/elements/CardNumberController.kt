@@ -288,7 +288,7 @@ internal class DefaultCardNumberController(
     init {
         onRawValueChange(initialValue ?: "")
 
-        coroutineScope.launch {
+        coroutineScope.launch(uiContext) {
             accountRangeService.accountRangeResultFlow
                 .filterIsInstance<CardAccountRangeService.AccountRangesResult.Success>()
                 .collect { result ->
