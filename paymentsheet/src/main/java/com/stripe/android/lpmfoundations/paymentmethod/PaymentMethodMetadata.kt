@@ -2,6 +2,8 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
@@ -73,6 +75,7 @@ internal data class PaymentMethodMetadata(
     val paymentMethodIncentive: PaymentMethodIncentive?,
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val cardBrandFilter: CardBrandFilter,
+    val cardFundingFilter: CardFundingFilter,
     val termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay>,
     val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
     val passiveCaptchaParams: PassiveCaptchaParams?,
@@ -376,6 +379,11 @@ internal data class PaymentMethodMetadata(
                 isGooglePayReady = isGooglePayReady,
                 displayableCustomPaymentMethods = elementsSession.toDisplayableCustomPaymentMethods(configuration),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
+                cardFundingFilter = PaymentSheetCardFundingFilter(
+                    allowedCardFundingTypes = configuration.allowedCardFundingTypes(
+                        enabled = elementsSession.enableCardFundFiltering
+                    )
+                ),
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 termsDisplay = configuration.termsDisplay,
                 forceSetupFutureUseBehaviorAndNewMandate = elementsSession
@@ -434,6 +442,7 @@ internal data class PaymentMethodMetadata(
                 externalPaymentMethodSpecs = emptyList(),
                 displayableCustomPaymentMethods = emptyList(),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
+                cardFundingFilter = PaymentSheetCardFundingFilter(ConfigurationDefaults.allowedCardFundingTypes),
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 termsDisplay = emptyMap(),
                 forceSetupFutureUseBehaviorAndNewMandate = elementsSession

@@ -89,8 +89,11 @@ class CardAccountRangeServiceTest {
             on { loading } doReturn stateFlowOf(false)
         }
 
+        val mockRepository = createMockRemoteDefaultCardAccountRangeRepository(
+            mockRemoteCardAccountRangeSource
+        )
         val serviceMockRemote = createCardAccountRangeService(
-            cardAccountRangeRepository = createMockRemoteDefaultCardAccountRangeRepository(mockRemoteCardAccountRangeSource),
+            cardAccountRangeRepository = mockRepository,
             isCbcEligible = { isCbcEligible }
         )
 
@@ -347,15 +350,20 @@ class CardAccountRangeServiceTest {
         )
     }
 
-    private fun createCardAccountRangeService(
-        cardAccountRangeRepository: CardAccountRangeRepository = createDefaultCardAccountRangeRepository(),
-        staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
-        accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
+    private fun createNoOpAccountRangeResultListener(): CardAccountRangeService.AccountRangeResultListener {
+        return object : CardAccountRangeService.AccountRangeResultListener {
             override fun onAccountRangesResult(
                 accountRanges: List<AccountRange>,
                 unfilteredAccountRanges: List<AccountRange>
             ) = Unit
-        },
+        }
+    }
+
+    private fun createCardAccountRangeService(
+        cardAccountRangeRepository: CardAccountRangeRepository = createDefaultCardAccountRangeRepository(),
+        staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
+        accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener =
+            createNoOpAccountRangeResultListener(),
         isCbcEligible: () -> Boolean = { false },
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ): CardAccountRangeService {
