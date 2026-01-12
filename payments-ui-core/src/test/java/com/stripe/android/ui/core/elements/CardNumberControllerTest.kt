@@ -62,6 +62,7 @@ internal class CardNumberControllerTest {
     val composeTestRule = createComposeRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
+
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
