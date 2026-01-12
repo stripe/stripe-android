@@ -10,7 +10,7 @@ internal class FakePaymentMethodFilter private constructor(
 ) : PaymentMethodFilter {
     private val filterCalls = Turbine<FilterCall>()
 
-    override fun filter(
+    override suspend fun filter(
         paymentMethods: List<PaymentMethod>,
         params: PaymentMethodFilter.FilterParams
     ): List<PaymentMethod> {

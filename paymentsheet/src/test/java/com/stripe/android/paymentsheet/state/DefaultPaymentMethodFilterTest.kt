@@ -1,7 +1,8 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.Address
@@ -13,14 +14,15 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
 class DefaultPaymentMethodFilterTest {
     @Test
-    fun `When DefaultPaymentMethod not null, no saved selection, defaultPaymentMethod first`() {
+    fun `When DefaultPaymentMethod not null, no saved selection, defaultPaymentMethod first`() = runTest {
         val observedElements = filter(
             paymentMethods = paymentMethodsForTestingOrdering,
-            localSavedSelection = null,
             isPaymentMethodSetAsDefaultEnabled = true,
             remoteDefaultPaymentMethodId = paymentMethodsForTestingOrdering[2].id,
         )
@@ -30,7 +32,7 @@ class DefaultPaymentMethodFilterTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod not null, saved selection, defaultPaymentMethod first`() {
+    fun `When DefaultPaymentMethod not null, saved selection, defaultPaymentMethod first`() = runTest {
         val observedElements = filter(
             paymentMethods = paymentMethodsForTestingOrdering,
             localSavedSelection = SavedSelection.PaymentMethod(paymentMethodsForTestingOrdering[1].id),
@@ -43,19 +45,20 @@ class DefaultPaymentMethodFilterTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod not null, saved selection is defaultPaymentMethod, defaultPaymentMethod first`() {
-        val observedElements = filter(
-            paymentMethods = paymentMethodsForTestingOrdering,
-            localSavedSelection = SavedSelection.PaymentMethod(paymentMethodsForTestingOrdering[2].id),
-            remoteDefaultPaymentMethodId = paymentMethodsForTestingOrdering[2].id,
-        )
+    fun `When DefaultPaymentMethod not null, saved selection is defaultPaymentMethod, defaultPaymentMethod first`() =
+        runTest {
+            val observedElements = filter(
+                paymentMethods = paymentMethodsForTestingOrdering,
+                localSavedSelection = SavedSelection.PaymentMethod(paymentMethodsForTestingOrdering[2].id),
+                remoteDefaultPaymentMethodId = paymentMethodsForTestingOrdering[2].id,
+            )
 
-        val expectedElements = expectedPaymentMethodsWithDefaultPaymentMethod
-        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
-    }
+            val expectedElements = expectedPaymentMethodsWithDefaultPaymentMethod
+            assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+        }
 
     @Test
-    fun `Should filter out saved cards with disallowed brands`() {
+    fun `Should filter out saved cards with disallowed brands`() = runTest {
         val paymentMethods = listOf(
             PaymentMethodFactory.card(id = "pm_12345").update(
                 last4 = "1001",
@@ -83,7 +86,7 @@ class DefaultPaymentMethodFilterTest {
     }
 
     @Test
-    fun `Filters out countries not in 'allowedCountries' array`() {
+    fun `Filters out countries not in 'allowedCountries' array`() = runTest {
         val paymentMethods = createCardsWithDifferentBillingDetails()
 
         val observedElements = filter(
@@ -101,7 +104,7 @@ class DefaultPaymentMethodFilterTest {
 
     @OptIn(CardFundingFilteringPrivatePreview::class)
     @Test
-    fun `Should filter saved cards with credit funding type only`() {
+    fun `Should filter saved cards with credit funding type only`() = runTest {
         val paymentMethodsData = createFundingPaymentMethods()
 
         val observedElements = filter(
@@ -117,7 +120,7 @@ class DefaultPaymentMethodFilterTest {
 
     @OptIn(CardFundingFilteringPrivatePreview::class)
     @Test
-    fun `Should filter saved cards with debit funding type only`() {
+    fun `Should filter saved cards with debit funding type only`() = runTest {
         val paymentMethodsData = createFundingPaymentMethods()
 
         val observedElements = filter(
@@ -133,7 +136,7 @@ class DefaultPaymentMethodFilterTest {
 
     @OptIn(CardFundingFilteringPrivatePreview::class)
     @Test
-    fun `Should filter saved cards with prepaid funding type only`() {
+    fun `Should filter saved cards with prepaid funding type only`() = runTest {
         val paymentMethodsData = createFundingPaymentMethods()
 
         val observedElements = filter(
@@ -149,7 +152,7 @@ class DefaultPaymentMethodFilterTest {
 
     @OptIn(CardFundingFilteringPrivatePreview::class)
     @Test
-    fun `Should filter saved cards with credit and debit funding type only`() {
+    fun `Should filter saved cards with credit and debit funding type only`() = runTest {
         val paymentMethodsData = createFundingPaymentMethods()
 
         val observedElements = filter(
@@ -167,7 +170,7 @@ class DefaultPaymentMethodFilterTest {
     }
 
     @Test
-    fun `Moves last-used customer payment method to the front of the list`() {
+    fun `Moves last-used customer payment method to the front of the list`() = runTest {
         val paymentMethods = PaymentMethodFixtures.createCards(10)
         val lastUsed = paymentMethods[6]
 
@@ -181,13 +184,13 @@ class DefaultPaymentMethodFilterTest {
         assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
     }
 
-    private fun filter(
+    private suspend fun filter(
         paymentMethods: List<PaymentMethod>,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
         isPaymentMethodSetAsDefaultEnabled: Boolean = false,
         remoteDefaultPaymentMethodId: String? = null,
-        localSavedSelection: SavedSelection.PaymentMethod? = null,
+        localSavedSelection: SavedSelection = SavedSelection.None,
         cardBrandFilter: PaymentSheetCardBrandFilter = PaymentSheetCardBrandFilter(
             cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
         ),
@@ -198,13 +201,21 @@ class DefaultPaymentMethodFilterTest {
         return DefaultPaymentMethodFilter().filter(
             paymentMethods = paymentMethods,
             params = PaymentMethodFilter.FilterParams(
-                metadata = PaymentMethodMetadataFactory.create(
-                    billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-                    hasCustomerConfiguration = true,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                customerMetadata = CustomerMetadata(
+                    id = "cus_1",
+                    ephemeralKeySecret = "ek_123",
+                    customerSessionClientSecret = "cuss_123",
                     isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                    permissions = CustomerMetadata.Permissions(
+                        removePaymentMethod = PaymentMethodRemovePermission.Full,
+                        canRemoveLastPaymentMethod = false,
+                        canRemoveDuplicates = false,
+                        canUpdateFullPaymentMethodDetails = false,
+                    )
                 ),
                 remoteDefaultPaymentMethodId = remoteDefaultPaymentMethodId,
-                localSavedSelection = localSavedSelection,
+                localSavedSelection = CompletableDeferred(localSavedSelection),
                 cardBrandFilter = cardBrandFilter,
                 cardFundingFilter = cardFundingFilter,
             )

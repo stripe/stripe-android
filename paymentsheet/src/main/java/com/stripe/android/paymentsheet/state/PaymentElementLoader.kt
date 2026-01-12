@@ -606,11 +606,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 paymentMethods = paymentMethodFilter.filter(
                     paymentMethods = state.paymentMethods,
                     params = PaymentMethodFilter.FilterParams(
-                        metadata = metadata,
+                        billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
+                        customerMetadata = metadata.customerMetadata,
                         cardBrandFilter = cardBrandFilter,
                         cardFundingFilter = cardFundingFilter,
                         remoteDefaultPaymentMethodId = state.defaultPaymentMethodId,
-                        localSavedSelection = savedSelection.await() as? SavedSelection.PaymentMethod,
+                        localSavedSelection = savedSelection,
                     )
                 )
             )

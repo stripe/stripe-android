@@ -1521,8 +1521,9 @@ internal class DefaultPaymentElementLoaderTest {
             val filterCall = paymentMethodFilterScenario.filterCalls.awaitItem()
 
             assertThat(filterCall.paymentMethods).isEqualTo(unfilteredPaymentMethods)
-            assertThat(filterCall.params.metadata).isEqualTo(result.paymentMethodMetadata)
-            assertThat(filterCall.params.localSavedSelection)
+            assertThat(filterCall.params.billingDetailsCollectionConfiguration)
+                .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration())
+            assertThat(filterCall.params.localSavedSelection.await())
                 .isEqualTo(SavedSelection.PaymentMethod(lastUsed.id))
             assertThat(filterCall.params.remoteDefaultPaymentMethodId).isNull()
             assertThat(filterCall.params.cardBrandFilter).isEqualTo(
@@ -1562,7 +1563,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         val filterCall = paymentMethodFilterScenario.filterCalls.awaitItem()
 
-        assertThat(filterCall.params.localSavedSelection)
+        assertThat(filterCall.params.localSavedSelection.await())
             .isEqualTo(SavedSelection.PaymentMethod(lastUsed.id))
     }
 
@@ -2363,7 +2364,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         val filterCall = paymentMethodFilterScenario.filterCalls.awaitItem()
 
-        assertThat(filterCall.params.metadata.billingDetailsCollectionConfiguration)
+        assertThat(filterCall.params.billingDetailsCollectionConfiguration)
             .isEqualTo(billingDetailsCollectionConfiguration)
     }
 
@@ -3028,7 +3029,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         val filterCall = paymentMethodFilterScenario.filterCalls.awaitItem()
 
-        assertThat(filterCall.params.localSavedSelection)
+        assertThat(filterCall.params.localSavedSelection.await())
             .isEqualTo(SavedSelection.PaymentMethod(lastUsed.id))
     }
 
