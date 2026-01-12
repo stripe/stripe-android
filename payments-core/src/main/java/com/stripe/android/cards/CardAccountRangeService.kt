@@ -8,6 +8,7 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,11 +30,14 @@ class CardAccountRangeService(
     val isLoading: StateFlow<Boolean> = cardAccountRangeRepository.loading
     private var lastBin: Bin? = null
 
-    var accountRanges: List<AccountRange> = emptyList()
-        private set
+    private val _accountRangeState = MutableStateFlow<AccountRangeState>(
+        value = AccountRangeState.Success(emptyList())
+    )
+
+    val accountRangeState: StateFlow<AccountRangeState> = _accountRangeState
 
     val accountRange: AccountRange?
-        get() = accountRanges.firstOrNull()
+        get() = accountRangeState.value.ranges.firstOrNull()
 
     @VisibleForTesting
     var accountRangeRepositoryJob: Job? = null
@@ -80,7 +84,7 @@ class CardAccountRangeService(
             cancelAccountRangeRepositoryJob()
 
             // invalidate accountRange before fetching
-            accountRanges = emptyList()
+            _accountRangeState.value = AccountRangeState.Loading
 
             accountRangeRepositoryJob = CoroutineScope(workContext).launch {
                 val bin = cardNumber.bin
@@ -104,8 +108,9 @@ class CardAccountRangeService(
     }
 
     fun updateAccountRangesResult(accountRanges: List<AccountRange>) {
-        this.accountRanges = accountRanges.filter { cardBrandFilter.isAccepted(it.brand) }
-        accountRangeResultListener.onAccountRangesResult(this.accountRanges, accountRanges)
+        val filteredAccountRanges = accountRanges.filter { cardBrandFilter.isAccepted(it.brand) }
+        this._accountRangeState.value = AccountRangeState.Success(filteredAccountRanges)
+        accountRangeResultListener.onAccountRangesResult(filteredAccountRanges, accountRanges)
     }
 
     private fun shouldQueryRepository(
@@ -128,5 +133,16 @@ class CardAccountRangeService(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     interface AccountRangeResultListener {
         fun onAccountRangesResult(accountRanges: List<AccountRange>, unfilteredAccountRanges: List<AccountRange>)
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface AccountRangeState {
+        val ranges: List<AccountRange>
+
+        data object Loading : AccountRangeState {
+            override val ranges = emptyList<AccountRange>()
+        }
+
+        data class Success(override val ranges: List<AccountRange>) : AccountRangeState
     }
 }

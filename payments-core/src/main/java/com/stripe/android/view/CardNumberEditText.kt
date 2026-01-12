@@ -241,7 +241,7 @@ class CardNumberEditText internal constructor(
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 this@CardNumberEditText.isCbcEligible = isCbcEligible
 
-                val brands = accountRangeService.accountRanges.map { it.brand }.distinct()
+                val brands = accountRangeService.accountRangeState.value.ranges.map { it.brand }.distinct()
 
                 if (isCbcEligible) {
                     implicitCardBrandForCbc = brands.firstOrNull() ?: CardBrand.Unknown
