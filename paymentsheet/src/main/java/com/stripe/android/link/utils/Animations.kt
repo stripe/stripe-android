@@ -7,6 +7,8 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 
 internal const val LINK_SCREEN_SIZE_ANIMATION_DURATION_MILLIS: Int =
     AnimationConstants.DefaultDurationMillis
@@ -28,8 +30,14 @@ internal const val LINK_DEFAULT_ANIMATION_DELAY_MILLIS: Long =
 
 internal val LinkScreenTransition: ContentTransform =
     ContentTransform(
-        targetContentEnter = fadeIn(tween(durationMillis = 300)),
-        initialContentExit = fadeOut(tween(durationMillis = 300)),
+        targetContentEnter = slideInHorizontally(
+            animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing),
+            initialOffsetX = { fullWidth -> fullWidth }
+        ) + fadeIn(animationSpec = tween(durationMillis = 350)),
+        initialContentExit = slideOutHorizontally(
+            animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing),
+            targetOffsetX = { fullWidth -> -fullWidth }
+        ) + fadeOut(animationSpec = tween(durationMillis = 350)),
         sizeTransform = SizeTransform(
             sizeAnimationSpec = { _, _ ->
                 tween(

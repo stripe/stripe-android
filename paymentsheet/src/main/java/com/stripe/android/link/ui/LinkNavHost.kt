@@ -1,6 +1,12 @@
 package com.stripe.android.link.ui
 
 import androidx.annotation.VisibleForTesting
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.imeAnimationSource
@@ -47,6 +53,18 @@ internal fun LinkNavHost(
             startDestination = startDestination,
             enterTransition = { LinkScreenTransition.targetContentEnter },
             exitTransition = { LinkScreenTransition.initialContentExit },
+            popEnterTransition = {
+                slideInHorizontally(
+                    animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing),
+                    initialOffsetX = { fullWidth -> -fullWidth }
+                ) + fadeIn(animationSpec = tween(durationMillis = 350))
+            },
+            popExitTransition =  {
+                slideOutHorizontally(
+                    animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing),
+                    targetOffsetX = { fullWidth -> fullWidth }
+                ) + fadeOut(animationSpec = tween(durationMillis = 350))
+            },
             // Workaround a race condition where the route changes while the soft keyboard is
             // animating in/out. Imagine navigating from screen A to B, where both screens are
             // supposed to be equal height. If the soft keyboard closes immediately after the
