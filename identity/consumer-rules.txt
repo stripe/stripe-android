@@ -1,0 +1,2 @@
+# Consumer Proguard/R8 rules for Stripe ML core (default / LiteRT)
+-keep class org.tensorflow.lite.** { *; }
