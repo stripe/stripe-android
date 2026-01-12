@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+* [CHANGED][12036](https://github.com/stripe/stripe-android/pull/12095) Upgrade minimum SDK version from 21 to 24
+
 ### PaymentSheet
 * [Added] Custom Payment Methods is now generally available, learn more by visiting the [docs](https://docs.stripe.com/payments/mobile/custom-payment-methods).
 
