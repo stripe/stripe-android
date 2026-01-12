@@ -110,6 +110,18 @@
   <string name="stripe_card_declined">카드가 거절되었습니다</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="stripe_card_ending_in">%2$s(으)로 끝나는 %1$s</string>
+  <!-- Warning shown when only credit cards are accepted -->
+  <string name="stripe_card_funding_only_credit">신용 카드만 허용됨</string>
+  <!-- Warning shown when only credit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_credit_prepaid">신용 카드 및 선불 카드만 허용됨</string>
+  <!-- Warning shown when only debit cards are accepted -->
+  <string name="stripe_card_funding_only_debit">직불 카드만 허용됨</string>
+  <!-- Warning shown when only debit and credit cards are accepted -->
+  <string name="stripe_card_funding_only_debit_credit">직불 카드 및 신용 카드만 허용됨</string>
+  <!-- Warning shown when only debit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_debit_prepaid">직불 카드 및 선불 카드만 허용됨</string>
+  <!-- Warning shown when only prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_prepaid">선불 카드만 허용됨</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
   <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->

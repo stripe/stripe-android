@@ -110,6 +110,18 @@
   <string name="stripe_card_declined">Il-karta tiegħek m\'għaddietx</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="stripe_card_ending_in">%1$s li jispiċċa %2$s</string>
+  <!-- Warning shown when only credit cards are accepted -->
+  <string name="stripe_card_funding_only_credit">Kards ta\' kreditu biss huma aċċettati</string>
+  <!-- Warning shown when only credit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_credit_prepaid">Kards ta\' kreditu u kards bi ħlas antiċipat biss huma aċċettati</string>
+  <!-- Warning shown when only debit cards are accepted -->
+  <string name="stripe_card_funding_only_debit">Kards ta\' deditu biss huma aċċettati</string>
+  <!-- Warning shown when only debit and credit cards are accepted -->
+  <string name="stripe_card_funding_only_debit_credit">Kards ta\' deditu u kards ta’ kreditu biss huma aċċettati</string>
+  <!-- Warning shown when only debit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_debit_prepaid">Kards ta\' deditu u kards bi ħlas antiċipat biss huma aċċettati</string>
+  <!-- Warning shown when only prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_prepaid">Kards bi ħlas antiċipat biss huma aċċettati</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
   <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
