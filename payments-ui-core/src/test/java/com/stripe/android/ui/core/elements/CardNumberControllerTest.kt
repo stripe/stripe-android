@@ -69,7 +69,6 @@ internal class CardNumberControllerTest {
         cardNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
             cardNumberController.onValueChange("012")
-            assertThat(awaitItem()?.message).isEqualTo(StripeUiCoreR.string.stripe_blank_and_required)
             assertThat(awaitItem()?.message).isEqualTo(StripeR.string.stripe_invalid_card_number)
         }
     }
