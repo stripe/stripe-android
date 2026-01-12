@@ -54,10 +54,13 @@ interface CardAccountRangeService {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface AccountRangesState {
         val ranges: List<AccountRange>
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data object Loading : AccountRangesState {
             override val ranges: List<AccountRange> = emptyList()
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class Success(override val ranges: List<AccountRange>) : AccountRangesState
     }
 }
