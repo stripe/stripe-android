@@ -3,6 +3,7 @@ package com.stripe.android.cards
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
@@ -88,19 +89,9 @@ class CardAccountRangeServiceTest {
             on { loading } doReturn stateFlowOf(false)
         }
 
-        val serviceMockRemote = CardAccountRangeService(
-            createMockRemoteDefaultCardAccountRangeRepository(mockRemoteCardAccountRangeSource),
-            testDispatcher,
-            testDispatcher,
-            DefaultStaticCardAccountRanges(),
-            object : CardAccountRangeService.AccountRangeResultListener {
-                override fun onAccountRangesResult(
-                    accountRanges: List<AccountRange>,
-                    unfilteredAccountRanges: List<AccountRange>
-                ) {
-                }
-            },
-            isCbcEligible = { isCbcEligible },
+        val serviceMockRemote = createCardAccountRangeService(
+            cardAccountRangeRepository = createMockRemoteDefaultCardAccountRangeRepository(mockRemoteCardAccountRangeSource),
+            isCbcEligible = { isCbcEligible }
         )
 
         val cardNumber = CardNumber.Unvalidated(cardNumberString)
@@ -263,6 +254,87 @@ class CardAccountRangeServiceTest {
             assertThat(filteredAccountRanges).isNotEmpty()
         }
 
+    @Test
+    fun `accountRangeState starts with Success state and empty list`() = runTest {
+        val service = createCardAccountRangeService()
+
+        val initialState = service.accountRangeState.value
+        assertThat(initialState).isInstanceOf(CardAccountRangeService.AccountRangeState.Success::class.java)
+        assertThat(initialState.ranges).isEmpty()
+    }
+
+    @Test
+    fun `accountRangeState transitions to Loading when card number changes`() = runTest {
+        val emptyStaticRanges = object : StaticCardAccountRanges {
+            override fun first(cardNumber: CardNumber.Unvalidated): AccountRange? = null
+            override fun filter(cardNumber: CardNumber.Unvalidated): List<AccountRange> = emptyList()
+        }
+
+        val service = createCardAccountRangeService(
+            staticCardAccountRanges = emptyStaticRanges
+        )
+
+        service.accountRangeState.test {
+            // Initial state
+            assertThat(awaitItem()).isInstanceOf(CardAccountRangeService.AccountRangeState.Success::class.java)
+
+            // Trigger state change
+            service.onCardNumberChanged(CardNumber.Unvalidated("4"))
+
+            // Should transition to Loading
+            val loadingState = awaitItem()
+            assertThat(loadingState).isInstanceOf(CardAccountRangeService.AccountRangeState.Loading::class.java)
+            assertThat(loadingState.ranges).isEmpty()
+
+            // Should eventually transition to Success
+            val successState = awaitItem()
+            assertThat(successState).isInstanceOf(CardAccountRangeService.AccountRangeState.Success::class.java)
+        }
+    }
+
+    @Test
+    fun `accountRangeState transitions to Success with filtered ranges`() = runTest {
+        val expectedAccountRanges = listOf(
+            AccountRange(
+                binRange = BinRange(
+                    low = "4000000000000000",
+                    high = "4999999999999999",
+                ),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.Visa,
+                funding = CardFunding.Unknown,
+            )
+        )
+
+        val mockSource = object : CardAccountRangeSource {
+            override suspend fun getAccountRanges(cardNumber: CardNumber.Unvalidated): List<AccountRange> {
+                return expectedAccountRanges
+            }
+            override val loading: StateFlow<Boolean> = stateFlowOf(false)
+        }
+
+        val service = createCardAccountRangeService(
+            cardAccountRangeRepository = createMockRemoteDefaultCardAccountRangeRepository(mockSource),
+            isCbcEligible = { true }
+        )
+
+        service.accountRangeState.test {
+            // Initial state
+            assertThat(awaitItem()).isInstanceOf(CardAccountRangeService.AccountRangeState.Success::class.java)
+
+            // Trigger state change with 8 digits (required for CBC eligible)
+            service.onCardNumberChanged(CardNumber.Unvalidated("40000000"))
+
+            // Should transition to Loading
+            assertThat(awaitItem()).isInstanceOf(CardAccountRangeService.AccountRangeState.Loading::class.java)
+
+            // Should transition to Success with ranges
+            val successState = awaitItem()
+            assertThat(successState).isInstanceOf(CardAccountRangeService.AccountRangeState.Success::class.java)
+            assertThat(successState.ranges).containsExactlyElementsIn(expectedAccountRanges)
+        }
+    }
+
     private fun createMockRemoteDefaultCardAccountRangeRepository(
         mockRemoteCardAccountRangeSource: CardAccountRangeSource
     ): CardAccountRangeRepository {
@@ -275,6 +347,29 @@ class CardAccountRangeServiceTest {
         )
     }
 
+    private fun createCardAccountRangeService(
+        cardAccountRangeRepository: CardAccountRangeRepository = createDefaultCardAccountRangeRepository(),
+        staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
+        accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
+            override fun onAccountRangesResult(
+                accountRanges: List<AccountRange>,
+                unfilteredAccountRanges: List<AccountRange>
+            ) = Unit
+        },
+        isCbcEligible: () -> Boolean = { false },
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+    ): CardAccountRangeService {
+        return CardAccountRangeService(
+            cardAccountRangeRepository = cardAccountRangeRepository,
+            uiContext = testDispatcher,
+            workContext = testDispatcher,
+            staticCardAccountRanges = staticCardAccountRanges,
+            accountRangeResultListener = accountRangeResultListener,
+            isCbcEligible = isCbcEligible,
+            cardBrandFilter = cardBrandFilter
+        )
+    }
+
     @Test
     fun `test card metadata service pan length`() = runTest {
         verifyRemotePanLength("6500079999999999999", 16)
@@ -283,12 +378,8 @@ class CardAccountRangeServiceTest {
     private fun verifyRemotePanLength(cardNumberString: String, expectedPanLength: Int) {
         var panLength: Int? = null
         val latch = CountDownLatch(1)
-        val serviceMockRemote = CardAccountRangeService(
-            createDefaultCardAccountRangeRepository(),
-            testDispatcher,
-            testDispatcher,
-            DefaultStaticCardAccountRanges(),
-            object : CardAccountRangeService.AccountRangeResultListener {
+        val serviceMockRemote = createCardAccountRangeService(
+            accountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
                 override fun onAccountRangesResult(
                     accountRanges: List<AccountRange>,
                     unfilteredAccountRanges: List<AccountRange>
@@ -297,8 +388,7 @@ class CardAccountRangeServiceTest {
                     panLength = newAccountRange?.panLength
                     latch.countDown()
                 }
-            },
-            isCbcEligible = { false },
+            }
         )
 
         val cardNumber = CardNumber.Unvalidated(cardNumberString)
