@@ -40,11 +40,10 @@ import com.stripe.android.model.Networks
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
-import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.parcelize.Parcelize
 import org.hamcrest.CoreMatchers.anything
 import org.hamcrest.Matchers
@@ -65,10 +64,7 @@ import kotlin.test.Test
  */
 @RunWith(RobolectricTestRunner::class)
 internal class CardMultilineWidgetTest {
-    private val testDispatcher = UnconfinedTestDispatcher()
-
-    @get:Rule
-    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+    private val testDispatcher = StandardTestDispatcher()
 
     private val fullCardListener: CardInputListener = mock()
     private val noZipCardListener: CardInputListener = mock()

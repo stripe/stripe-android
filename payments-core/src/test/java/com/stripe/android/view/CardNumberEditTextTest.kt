@@ -43,7 +43,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.testharness.ViewTestUtils
-import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCardElementConfigRepository
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -72,10 +71,6 @@ import kotlin.test.assertNull
 @RunWith(RobolectricTestRunner::class)
 internal class CardNumberEditTextTest {
     private val testDispatcher = UnconfinedTestDispatcher()
-
-    @get:Rule
-    val coroutineTestRule = CoroutineTestRule(testDispatcher)
-
     private val context = ContextThemeWrapper(
         ApplicationProvider.getApplicationContext(),
         R.style.StripeDefaultTheme

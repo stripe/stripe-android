@@ -32,7 +32,7 @@ interface CardAccountRangeService {
 
     fun onCardNumberChanged(
         cardNumber: CardNumber.Unvalidated,
-        isCbcEligible: Boolean
+        isCbcEligible: () -> Boolean
     )
 
     @JvmSynthetic
@@ -94,14 +94,15 @@ class DefaultCardAccountRangeService(
     @VisibleForTesting
     var accountRangeRepositoryJob: Job? = null
 
-    override fun onCardNumberChanged(cardNumber: CardNumber.Unvalidated, isCbcEligible: Boolean) {
+    override fun onCardNumberChanged(cardNumber: CardNumber.Unvalidated, isCbcEligible: () -> Boolean) {
+        val isCbcEligible = isCbcEligible()
         val shouldQuery = !isCbcEligible || cardNumber.length >= MIN_CARD_NUMBER_LENGTH
         if (!shouldQuery) {
             updateAccountRangesResult(emptyList())
             return
         }
 
-        val testAccountRanges = if (isCbcEligible) {
+        val testAccountRanges = if (isCbcEligible()) {
             CbcTestCardDelegate.onCardNumberChanged(cardNumber)
         } else {
             emptyList()

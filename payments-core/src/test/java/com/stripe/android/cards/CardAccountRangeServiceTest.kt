@@ -98,7 +98,7 @@ class CardAccountRangeServiceTest {
         )
 
         val cardNumber = CardNumber.Unvalidated(cardNumberString)
-        serviceMockRemote.onCardNumberChanged(cardNumber, isCbcEligible)
+        serviceMockRemote.onCardNumberChanged(cardNumber, isCbcEligible = { isCbcEligible })
         verify(
             mockRemoteCardAccountRangeSource,
             if (expectedRemoteCall) {
@@ -187,7 +187,7 @@ class CardAccountRangeServiceTest {
             cardBrandFilter = cardBrandFilter
         )
 
-        service.onCardNumberChanged(CardNumber.Unvalidated(cardNumber), isCbcEligible)
+        service.onCardNumberChanged(CardNumber.Unvalidated(cardNumber), isCbcEligible = { isCbcEligible })
 
         service.accountRangeResultFlow.test {
             validate(this)
@@ -268,14 +268,14 @@ class CardAccountRangeServiceTest {
             brandInfo = AccountRange.BrandInfo.Mastercard,
         )
 
-        service.onCardNumberChanged(CardNumber.Unvalidated("4"), isCbcEligible = false)
+        service.onCardNumberChanged(CardNumber.Unvalidated("4"), isCbcEligible = { false })
         with(fakeListener.awaitItem()) {
             assertThat(accountRanges).containsExactly(expectedAccountRange1, expectedAccountRange2)
             assertThat(unfilteredAccountRanges).containsExactly(expectedAccountRange1, expectedAccountRange2)
         }
         fakeListener.ensureAllEventsConsumed()
 
-        service.onCardNumberChanged(CardNumber.Unvalidated("2"), isCbcEligible = false)
+        service.onCardNumberChanged(CardNumber.Unvalidated("2"), isCbcEligible = { false })
         with(fakeListener.awaitItem()) {
             assertThat(accountRanges).containsExactly(expectedAccountRange3)
             assertThat(unfilteredAccountRanges).containsExactly(expectedAccountRange3)
@@ -304,7 +304,7 @@ class CardAccountRangeServiceTest {
         )
 
         val cardNumber = CardNumber.Unvalidated(cardNumberString)
-        serviceMockRemote.onCardNumberChanged(cardNumber, isCbcEligible = false)
+        serviceMockRemote.onCardNumberChanged(cardNumber, isCbcEligible = { false })
 
         serviceMockRemote.accountRangeResultFlow.test {
             val newAccountRange = awaitItem().accountRanges.firstOrNull()
