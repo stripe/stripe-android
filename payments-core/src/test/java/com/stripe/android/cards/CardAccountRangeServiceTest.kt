@@ -3,11 +3,14 @@ package com.stripe.android.cards
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.ACCOUNTS
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.CARTES_BANCAIRES_ACCOUNT_RANGES
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.UNIONPAY16_ACCOUNTS
@@ -21,6 +24,7 @@ import com.stripe.android.model.CardFunding
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.testing.FakeCardFundingFilter
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.TestUtils
 import kotlinx.coroutines.CompletableDeferred
@@ -338,6 +342,52 @@ class CardAccountRangeServiceTest {
         }
     }
 
+    @Test
+    fun `When funding filter is enabled, remote is always queried for non-CBC cards`() = runTest {
+        // Disallow credit cards
+        val fundingFilter = FakeCardFundingFilter(
+            disallowedFundingTypes = setOf(CardFunding.Credit)
+        )
+
+        val fakeRemoteSource = FakeCardAccountRangeSource()
+        val repository = createMockRemoteDefaultCardAccountRangeRepository(fakeRemoteSource)
+        val service = createCardAccountRangeService(
+            cardAccountRangeRepository = repository,
+            isCbcEligible = { false },
+            cardFundingFilter = fundingFilter
+        )
+
+        // Use a Visa card that would normally not trigger a remote call when CBC is disabled
+        val cardNumber = CardNumber.Unvalidated("4242424242424242")
+        service.onCardNumberChanged(cardNumber)
+
+        // Should call remote because funding filtering is enabled
+        val calledWith = fakeRemoteSource.calls.awaitItem()
+        assertThat(calledWith).isEqualTo(cardNumber)
+        fakeRemoteSource.calls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `When funding filter is disabled, remote is not queried for non-CBC non-UnionPay cards`() = runTest {
+        // Allow all funding types (default behavior)
+        val fundingFilter = DefaultCardFundingFilter
+
+        val fakeRemoteSource = FakeCardAccountRangeSource()
+        val repository = createMockRemoteDefaultCardAccountRangeRepository(fakeRemoteSource)
+        val service = createCardAccountRangeService(
+            cardAccountRangeRepository = repository,
+            isCbcEligible = { false },
+            cardFundingFilter = fundingFilter
+        )
+
+        // Use a Visa card - should not trigger remote call
+        val cardNumber = CardNumber.Unvalidated("4242424242424242")
+        service.onCardNumberChanged(cardNumber)
+
+        // Should NOT call remote because funding filtering is disabled and it's not UnionPay
+        fakeRemoteSource.calls.expectNoEvents()
+    }
+
     private fun createMockRemoteDefaultCardAccountRangeRepository(
         mockRemoteCardAccountRangeSource: CardAccountRangeSource
     ): CardAccountRangeRepository {
@@ -365,7 +415,8 @@ class CardAccountRangeServiceTest {
         accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener =
             createNoOpAccountRangeResultListener(),
         isCbcEligible: () -> Boolean = { false },
-        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter
     ): CardAccountRangeService {
         return CardAccountRangeService(
             cardAccountRangeRepository = cardAccountRangeRepository,
@@ -374,7 +425,8 @@ class CardAccountRangeServiceTest {
             staticCardAccountRanges = staticCardAccountRanges,
             accountRangeResultListener = accountRangeResultListener,
             isCbcEligible = isCbcEligible,
-            cardBrandFilter = cardBrandFilter
+            cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = cardFundingFilter
         )
     }
 
@@ -435,4 +487,20 @@ private class FakeCardBrandFilter(
     override fun isAccepted(cardBrand: CardBrand): Boolean {
         return !disallowedBrands.contains(cardBrand)
     }
+}
+
+private class FakeCardAccountRangeSource(
+    private val accountRanges: List<AccountRange>? = null,
+    isLoading: Boolean = false
+) : CardAccountRangeSource {
+    val calls = Turbine<CardNumber.Unvalidated>()
+
+    override suspend fun getAccountRanges(
+        cardNumber: CardNumber.Unvalidated
+    ): List<AccountRange>? {
+        calls.add(cardNumber)
+        return accountRanges
+    }
+
+    override val loading: StateFlow<Boolean> = stateFlowOf(isLoading)
 }
