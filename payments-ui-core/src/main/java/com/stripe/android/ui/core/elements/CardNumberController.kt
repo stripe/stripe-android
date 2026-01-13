@@ -13,7 +13,9 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.CardAccountRangeService.AccountRangesState
@@ -81,6 +83,7 @@ internal class DefaultCardNumberController(
     override val initialValue: String?,
     cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     private val coroutineScope: CoroutineScope = CoroutineScope(uiContext),
     private val accountRangeService: CardAccountRangeService = DefaultCardAccountRangeService(
         cardAccountRangeRepository,
@@ -88,6 +91,7 @@ internal class DefaultCardNumberController(
         workContext,
         staticCardAccountRanges,
         cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter,
         coroutineScope = coroutineScope
     ),
 ) : CardNumberController() {
