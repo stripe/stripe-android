@@ -16,6 +16,7 @@ internal sealed class LoggableExperiment(
     open val dimensions: Map<String, String>
 ) {
 
+    // TODO: send the correct experiment name!!!!!!!!
     class OcsMobileHorizontalModeAndroidAA(
         val experimentsData: ElementsSession.ExperimentsData,
         override val group: String,

@@ -1,12 +1,6 @@
 {
   "apple_pay_preference": "enabled",
   "business_name": "Mobile Example Account",
-  "experiments": {
-    "elements_link_aa": "control",
-    "elements_link_in_payment_element_only": "treatment",
-    "elements_link_longterm_holdback": "control",
-    "lpm_discoverability_upe_experiment_1": "rotating_cycle_treatment"
-  },
   "experiments_data": {
     "arb_id": "232dd033-0b45-4456-b834-ecdcb02ab1fb",
     "experiment_assignments": {

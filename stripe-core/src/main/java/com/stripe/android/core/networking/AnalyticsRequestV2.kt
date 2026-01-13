@@ -191,8 +191,8 @@ data class AnalyticsRequestV2 private constructor(
         )
     }
 
-    internal companion object {
-        internal const val ANALYTICS_HOST = "https://r.stripe.com/0"
+    companion object {
+        const val ANALYTICS_HOST = "https://r.stripe.com/0"
         internal const val HEADER_ORIGIN = "origin"
 
         internal const val PARAM_CLIENT_ID = "client_id"
