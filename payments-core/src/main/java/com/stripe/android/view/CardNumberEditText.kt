@@ -17,6 +17,7 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.cards.DefaultCardAccountRangeService
 import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -46,7 +47,7 @@ class CardNumberEditText internal constructor(
     @get:VisibleForTesting
     var workContext: CoroutineContext,
     private val cardAccountRangeRepository: CardAccountRangeRepository,
-    staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
+    private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     internal var viewModelStoreOwner: ViewModelStoreOwner? = null,
@@ -176,12 +177,11 @@ class CardNumberEditText internal constructor(
     private var isCbcEligible = false
 
     @VisibleForTesting
-    val accountRangeService = CardAccountRangeService(
+    internal val accountRangeService = DefaultCardAccountRangeService(
         cardAccountRangeRepository = cardAccountRangeRepository,
         uiContext = uiContext,
         workContext = workContext,
         staticCardAccountRanges = staticCardAccountRanges,
-        isCbcEligible = { isCbcEligible },
         accountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
             override fun onAccountRangesResult(
                 accountRanges: List<AccountRange>,
@@ -241,7 +241,7 @@ class CardNumberEditText internal constructor(
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 this@CardNumberEditText.isCbcEligible = isCbcEligible
 
-                val brands = accountRangeService.accountRanges.map { it.brand }.distinct()
+                val brands = accountRangeService.accountRangesStateFlow.value.ranges.map { it.brand }.distinct()
 
                 if (isCbcEligible) {
                     implicitCardBrandForCbc = brands.firstOrNull() ?: CardBrand.Unknown
@@ -359,7 +359,7 @@ class CardNumberEditText internal constructor(
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
             val cardNumber = CardNumber.Unvalidated(s?.toString().orEmpty())
-            accountRangeService.onCardNumberChanged(cardNumber)
+            accountRangeService.onCardNumberChanged(cardNumber, isCbcEligible = isCbcEligible)
 
             isPastedPan = isPastedPan(start, before, count, cardNumber)
 
