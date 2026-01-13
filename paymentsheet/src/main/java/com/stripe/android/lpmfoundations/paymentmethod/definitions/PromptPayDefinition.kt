@@ -27,7 +27,7 @@ internal object PromptPayDefinition : PaymentMethodDefinition {
 }
 
 private object PromptPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = PromptPayDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_promptpay,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_promptpay_day,
