@@ -9,9 +9,10 @@ import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
@@ -54,14 +55,19 @@ interface CardAccountRangeService {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface AccountRangesState {
         val ranges: List<AccountRange>
+        val unfilteredRanges: List<AccountRange>
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data object Loading : AccountRangesState {
             override val ranges: List<AccountRange> = emptyList()
+            override val unfilteredRanges: List<AccountRange> = emptyList()
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class Success(override val ranges: List<AccountRange>) : AccountRangesState
+        data class Success(
+            override val ranges: List<AccountRange>,
+            override val unfilteredRanges: List<AccountRange>
+        ) : AccountRangesState
     }
 }
 
@@ -79,14 +85,22 @@ class DefaultCardAccountRangeService(
     override val isLoading: StateFlow<Boolean> = cardAccountRangeRepository.loading
     private var lastBin: Bin? = null
 
-    private val _accountRangeResultFlow = MutableSharedFlow<CardAccountRangeService.AccountRangesResult>(replay = 1)
-    override val accountRangeResultFlow = _accountRangeResultFlow
-
     private val _accountRangesStateFlow = MutableStateFlow<CardAccountRangeService.AccountRangesState>(
-        value = CardAccountRangeService.AccountRangesState.Success(emptyList())
+        value = CardAccountRangeService.AccountRangesState.Success(emptyList(), emptyList())
     )
 
-    override val accountRangesStateFlow: StateFlow<CardAccountRangeService.AccountRangesState> = _accountRangesStateFlow
+    override val accountRangesStateFlow: StateFlow<CardAccountRangeService.AccountRangesState> =
+        _accountRangesStateFlow
+
+    override val accountRangeResultFlow: Flow<CardAccountRangeService.AccountRangesResult> =
+        accountRangesStateFlow
+            .filterIsInstance<CardAccountRangeService.AccountRangesState.Success>()
+            .map { state ->
+                CardAccountRangeService.AccountRangesResult(
+                    accountRanges = state.ranges,
+                    unfilteredAccountRanges = state.unfilteredRanges
+                )
+            }
 
     @VisibleForTesting
     var accountRangeRepositoryJob: Job? = null
@@ -157,17 +171,18 @@ class DefaultCardAccountRangeService(
 
     override fun updateAccountRangesResult(accountRanges: List<AccountRange>) {
         val filteredAccountRanges = accountRanges.filter { cardBrandFilter.isAccepted(it.brand) }
-        _accountRangeResultFlow.tryEmit(
-            value = CardAccountRangeService.AccountRangesResult(
-                accountRanges = filteredAccountRanges,
-                unfilteredAccountRanges = accountRanges
-            )
+
+        // Single source update - both filtered and unfiltered
+        _accountRangesStateFlow.value = CardAccountRangeService.AccountRangesState.Success(
+            ranges = filteredAccountRanges,
+            unfilteredRanges = accountRanges
         )
+
+        // Listener callback (maintains backward compatibility)
         accountRangeResultListener?.onAccountRangesResult(
             accountRanges = filteredAccountRanges,
             unfilteredAccountRanges = accountRanges
         )
-        _accountRangesStateFlow.value = CardAccountRangeService.AccountRangesState.Success(filteredAccountRanges)
     }
 
     private fun shouldQueryRepository(
