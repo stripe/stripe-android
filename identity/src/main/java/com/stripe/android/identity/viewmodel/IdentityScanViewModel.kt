@@ -88,6 +88,15 @@ internal abstract class IdentityScanViewModel(
         )
     }
 
+    override fun onAnalyzerFailure(t: Throwable): Boolean {
+        verificationFlowFinishable.finishWithResult(
+            IdentityVerificationSheet.VerificationFlowResult.Failed(
+                t as? Exception ?: Exception(t)
+            )
+        )
+        return true
+    }
+
     override fun displayState(newState: IdentityScanState, previousState: IdentityScanState?) {
         // toggle UX transition in CameraManager
         //  Done intentionally outside Jetpack Compose as cameraManger uses a traditional AndroidView
