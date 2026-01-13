@@ -219,16 +219,6 @@ internal class DefaultCardNumberController(
         initialValue = textFieldState(),
         started = SharingStarted.Eagerly
     )
-// private val _fieldState = combineAsStateFlow(impliedCardBrand, _fieldValue) { brand, fieldValue ->
-//    cardTextFieldConfig.determineState(
-//        brand = brand,
-//        funding = null,
-//        number = fieldValue,
-//        numberAllowedDigits = accountRangeService.accountRange?.panLength ?: brand.getMaxLengthForCardNumber(
-//            fieldValue
-//        )
-//    )
-// }
 
     override val fieldState: StateFlow<TextFieldState> = _fieldState
 

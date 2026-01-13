@@ -177,7 +177,7 @@ class CardNumberEditText internal constructor(
     private var isCbcEligible = false
 
     @VisibleForTesting
-    val accountRangeService = DefaultCardAccountRangeService(
+    internal val accountRangeService = DefaultCardAccountRangeService(
         cardAccountRangeRepository = cardAccountRangeRepository,
         uiContext = uiContext,
         workContext = workContext,
