@@ -177,6 +177,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         put("billing_details_collection_configuration", Nested(billingDetailsCollectionConfiguration.analyticsMap()))
 
         put("appearance", Nested(appearance.analyticsMap()))
+        put("card_funding_acceptance", SimpleBoolean(allowedCardFundingTypes.toAnalyticsValue()))
     }
 
     private fun PaymentSheet.BillingDetailsCollectionConfiguration.analyticsMap() =
@@ -314,6 +315,10 @@ private fun CommonConfiguration.getExternalPaymentMethodsAnalyticsValue(): List<
 
 private fun PaymentSheet.CardBrandAcceptance.toAnalyticsValue(): Boolean {
     return this !is PaymentSheet.CardBrandAcceptance.All
+}
+
+private fun List<PaymentSheet.CardFundingType>.toAnalyticsValue(): Boolean {
+    return this.toSet() != PaymentSheet.CardFundingType.entries.toSet()
 }
 
 private fun PaymentSheet.PaymentMethodLayout.toAnalyticsValue(): String {
