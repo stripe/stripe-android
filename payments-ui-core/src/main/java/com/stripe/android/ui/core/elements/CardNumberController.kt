@@ -280,7 +280,7 @@ internal class DefaultCardNumberController(
     override fun onValueChange(displayFormatted: String): TextFieldState? {
         _fieldValue.value = cardTextFieldConfig.filter(displayFormatted)
         val cardNumber = CardNumber.Unvalidated(displayFormatted)
-        accountRangeService.onCardNumberChanged(cardNumber, isCbcEligible = { isEligibleForCardBrandChoice })
+        accountRangeService.onCardNumberChanged(cardNumber, isCbcEligible = isEligibleForCardBrandChoice)
 
         return null
     }

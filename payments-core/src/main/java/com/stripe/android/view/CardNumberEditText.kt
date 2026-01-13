@@ -359,7 +359,7 @@ class CardNumberEditText internal constructor(
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
             val cardNumber = CardNumber.Unvalidated(s?.toString().orEmpty())
-            accountRangeService.onCardNumberChanged(cardNumber, isCbcEligible = { isCbcEligible })
+            accountRangeService.onCardNumberChanged(cardNumber, isCbcEligible = isCbcEligible)
 
             isPastedPan = isPastedPan(start, before, count, cardNumber)
 
