@@ -31,7 +31,7 @@ internal data class CommonConfiguration(
     val paymentMethodOrder: List<String>,
     val externalPaymentMethods: List<String>,
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
-    private val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
+    internal val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val googlePlacesApiKey: String?,
