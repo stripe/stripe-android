@@ -404,6 +404,29 @@ class ConfirmPaymentIntentParamsFactoryTest {
     )
 
     @Test
+    fun `create() with 'OffSession' SFU should contain mandate data for satispay`() = mandateDataTest(
+        setupFutureUsage = StripeIntent.Usage.OffSession,
+        expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+        paymentMethod = PaymentMethodFactory.satispay(),
+    )
+
+    @Test
+    fun `create() with 'OffSession' PMO SFU should contain mandate data for satispay`() {
+        mandateDataTest(
+            setupFutureUsage = null,
+            expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+            paymentMethod = PaymentMethodFactory.satispay(),
+            paymentMethodOptionsJsonString = """
+                {
+                    "satispay": {
+                        "setup_future_usage": "off_session"
+                    }
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `create() with 'OffSession' PMO SFU should contain any mandate data`() {
         mandateDataTest(
             setupFutureUsage = null,
