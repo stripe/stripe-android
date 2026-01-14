@@ -54,7 +54,7 @@ internal fun GooglePayButton(
         } else {
             JSONArray().put(
                 GooglePayJsonFactory(
-                    context,
+                    context = context,
                     cardBrandFilter = cardBrandFilter,
                     additionalEnabledNetworks = additionalEnabledNetworks
                 ).createCardPaymentMethod(
