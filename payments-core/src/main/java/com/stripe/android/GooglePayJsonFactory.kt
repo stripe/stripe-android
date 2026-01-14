@@ -54,7 +54,8 @@ class GooglePayJsonFactory internal constructor(
          */
         isJcbEnabled: Boolean = false,
 
-        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        additionalEnabledNetworks: List<String> = emptyList()
     ) : this(
         googlePayConfig = GooglePayConfig(context),
         isJcbEnabled = isJcbEnabled,
