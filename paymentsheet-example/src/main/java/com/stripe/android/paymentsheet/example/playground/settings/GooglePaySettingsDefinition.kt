@@ -102,5 +102,5 @@ enum class GooglePayMode(
 ) : ValueEnum {
     Off("off"),
     Test("test"),
-    Production("off")
+    Production("production")
 }
