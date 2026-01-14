@@ -119,7 +119,8 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 customAmount = googlePay.amount,
                 customLabel = googlePay.label,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
-                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
+                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
+                additionalEnabledNetworks = googlePay.additionalEnabledNetworks
             ),
         )
     }

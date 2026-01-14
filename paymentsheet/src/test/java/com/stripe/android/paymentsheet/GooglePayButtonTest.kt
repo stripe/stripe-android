@@ -41,7 +41,8 @@ class GooglePayButtonTest {
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 isEnabled = true,
                 onPressed = {},
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                additionalEnabledNetworks = emptyList()
             )
         }
 
@@ -59,7 +60,8 @@ class GooglePayButtonTest {
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 isEnabled = true,
                 onPressed = {},
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                additionalEnabledNetworks = emptyList()
             )
         }
 
@@ -77,7 +79,8 @@ class GooglePayButtonTest {
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 isEnabled = true,
                 onPressed = {},
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                additionalEnabledNetworks = emptyList()
             )
         }
 
@@ -95,7 +98,8 @@ class GooglePayButtonTest {
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 isEnabled = true,
                 onPressed = {},
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                additionalEnabledNetworks = emptyList()
             )
         }
 

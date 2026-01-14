@@ -60,6 +60,7 @@ internal data class WalletsState(
         val buttonType: GooglePayButtonType,
         val allowCreditCards: Boolean,
         val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?,
+        val additionalEnabledNetworks: List<String>
     )
 
     companion object {
@@ -98,6 +99,7 @@ internal data class WalletsState(
             val googlePay = GooglePay(
                 allowCreditCards = googlePayLauncherConfig?.allowCreditCards ?: false,
                 buttonType = googlePayButtonType,
+                additionalEnabledNetworks = googlePayLauncherConfig?.additionalEnabledNetworks.orEmpty(),
                 billingAddressParameters = googlePayLauncherConfig?.let {
                     GooglePayJsonFactory.BillingAddressParameters(
                         isRequired = it.billingAddressConfig.isRequired,
