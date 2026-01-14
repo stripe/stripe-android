@@ -494,6 +494,7 @@ internal class PlaygroundSettings private constructor(
             CustomPublishableKeyDefinition,
             CurrencySettingsDefinition,
             GooglePaySettingsDefinition,
+            GooglePayCustomerSheetSettingsDefinition,
             DefaultBillingAddressSettingsDefinition,
             AttachBillingDetailsToPaymentMethodSettingsDefinition,
             CollectNameSettingsDefinition,
