@@ -436,15 +436,21 @@ internal class PaymentSheetPage(
         composeTestRule.waitForIdle()
     }
 
-    fun assertIsInVerticalMode() {
+    fun assertLayout(isVerticalMode: Boolean) {
+        val testTagForLayout = if (isVerticalMode) {
+            TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+        } else {
+            TEST_TAG_LIST
+        }
+
         composeTestRule.waitUntil {
             composeTestRule.onAllNodes(
-                hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT)
+                hasTestTag(testTagForLayout)
             )
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
-        composeTestRule.onNodeWithTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT).assertExists()
+        composeTestRule.onNodeWithTag(testTagForLayout).assertExists()
     }
 
     fun assertIsOnFormPage() {

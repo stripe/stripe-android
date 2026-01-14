@@ -3,9 +3,7 @@
   "business_name": "Mobile Example Account",
   "experiments_data": {
     "arb_id": "232dd033-0b45-4456-b834-ecdcb02ab1fb",
-    "experiment_assignments": {
-      "ocs_mobile_horizontal_mode_aa": "treatment"
-    }
+    "experiment_assignments": [EXPERIMENT_ASSIGNMENTS_HERE]
   },
   "google_pay_preference": "enabled",
   "link_consumer_info": null,
