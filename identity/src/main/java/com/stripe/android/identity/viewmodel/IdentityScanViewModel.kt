@@ -89,6 +89,12 @@ internal abstract class IdentityScanViewModel(
     }
 
     override fun onAnalyzerFailure(t: Throwable): Boolean {
+        identityAnalyticsRequestFactory.verificationFailed(
+            isFromFallbackUrl = false,
+            scanType = targetScanTypeFlow.value,
+            throwable = t
+        )
+
         verificationFlowFinishable.finishWithResult(
             IdentityVerificationSheet.VerificationFlowResult.Failed(
                 t as? Exception ?: Exception(t)
