@@ -6,11 +6,13 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
@@ -44,7 +46,38 @@ internal class HorizontalModeExperimentsTest {
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
     @Test
-    fun testHorizontalModeExperiment() = runProductIntegrationTest(
+    fun testHorizontalModeAAExperiment_control() = testHorizontalModeExperiment(
+        experimentAssignment = ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA,
+        experimentVariant = "control",
+        showsVerticalMode = true,
+    )
+
+    @Test
+    fun testHorizontalModeAAExperiment_controlTest() = testHorizontalModeExperiment(
+        experimentAssignment = ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA,
+        experimentVariant = "control_test",
+        showsVerticalMode = true,
+    )
+
+    @Test
+    fun testHorizontalModeExperiment_control_showsVerticalMode() = testHorizontalModeExperiment(
+        experimentAssignment = ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE,
+        experimentVariant = "control",
+        showsVerticalMode = true,
+    )
+
+    @Test
+    fun testHorizontalModeExperiment_treatment_showsHorizontalMode() = testHorizontalModeExperiment(
+        experimentAssignment = ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE,
+        experimentVariant = "treatment",
+        showsVerticalMode = false,
+    )
+
+    fun testHorizontalModeExperiment(
+        experimentAssignment: ElementsSession.ExperimentAssignment,
+        experimentVariant: String,
+        showsVerticalMode: Boolean,
+    ) = runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -54,7 +87,15 @@ internal class HorizontalModeExperimentsTest {
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
-            response.testBodyFromFile("elements-sessions-requires_payment_method_with_horizontal_mode_experiment.json")
+            response.testBodyFromFile(
+                filename = "elements-sessions-requires_payment_method_with_horizontal_mode_experiment.json",
+                replacements = listOf(
+                    ResponseReplacement(
+                        "[EXPERIMENT_ASSIGNMENTS_HERE]",
+                        "{ ${experimentAssignment.experimentValue} : \"${experimentVariant}\" }"
+                    ),
+                )
+            )
         }
 
         val expectedIntegrationType = when (integrationType) {
@@ -66,7 +107,7 @@ internal class HorizontalModeExperimentsTest {
             host("r.stripe.com"),
             method("POST"),
             bodyPart("event_name", "elements.experiment_exposure"),
-            bodyPart("experiment_retrieved", "ocs_mobile_horizontal_mode_aa"),
+            bodyPart("experiment_retrieved", experimentAssignment.experimentValue),
             bodyPart("dimensions-in_app_elements_integration_type", expectedIntegrationType),
             bodyPart("dimensions-has_saved_payment_method", "false"),
             bodyPart("dimensions-displayed_payment_method_types", urlEncode("card,afterpay_clearpay,klarna")),
@@ -82,7 +123,7 @@ internal class HorizontalModeExperimentsTest {
             ),
         )
 
-        page.assertIsInVerticalMode()
+        page.assertLayout(isVerticalMode = showsVerticalMode)
 
         testContext.markTestSucceeded()
     }
