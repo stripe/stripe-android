@@ -257,8 +257,9 @@ internal abstract class BaseSheetViewModel(
                 experimentAssignment,
             ]?.let { variant ->
                 eventReporter.onExperimentExposure(
-                    LoggableExperiment.OcsMobileHorizontalModeAndroidAA(
+                    LoggableExperiment.OcsMobileHorizontalMode(
                         experimentsData = experimentsData,
+                        experiment = experimentAssignment,
                         group = variant,
                         paymentMethodMetadata = paymentMethodMetadata,
                         hasSavedPaymentMethod = customerStateHolder.paymentMethods.value.isNotEmpty(),

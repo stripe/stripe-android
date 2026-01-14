@@ -436,6 +436,17 @@ internal class PaymentSheetPage(
         composeTestRule.waitForIdle()
     }
 
+    fun assertIsInVerticalMode() {
+        composeTestRule.waitUntil {
+            composeTestRule.onAllNodes(
+                hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT)
+            )
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT).assertExists()
+    }
+
     fun assertIsOnFormPage() {
         composeTestRule.waitUntil {
             composeTestRule

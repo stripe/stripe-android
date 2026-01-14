@@ -3288,7 +3288,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         verify(eventReporter).onExperimentExposure(
-            any<LoggableExperiment.OcsMobileHorizontalModeAndroidAA>()
+            any<LoggableExperiment.OcsMobileHorizontalMode>()
         )
     }
 
@@ -3302,7 +3302,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.getPaymentMethodLayout()
 
         verify(eventReporter, never()).onExperimentExposure(
-            any<LoggableExperiment.OcsMobileHorizontalModeAndroidAA>()
+            any<LoggableExperiment.OcsMobileHorizontalMode>()
         )
     }
 
@@ -3321,7 +3321,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.getPaymentMethodLayout()
 
         verify(eventReporter, never()).onExperimentExposure(
-            any<LoggableExperiment.OcsMobileHorizontalModeAndroidAA>()
+            any<LoggableExperiment.OcsMobileHorizontalMode>()
         )
     }
 
