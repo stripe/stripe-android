@@ -3,9 +3,12 @@ package com.stripe.android.cards
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -78,9 +81,14 @@ class DefaultCardAccountRangeService(
     private val workContext: CoroutineContext,
     val staticCardAccountRanges: StaticCardAccountRanges,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     private val accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener? = null,
     private val coroutineScope: CoroutineScope = CoroutineScope(uiContext)
 ) : CardAccountRangeService {
+
+    private val needsRemoteQueryForFunding = CardFunding.entries.any {
+        cardFundingFilter.isAccepted(it).not()
+    }
 
     override val isLoading: StateFlow<Boolean> = cardAccountRangeRepository.loading
     private var lastBin: Bin? = null
@@ -125,7 +133,7 @@ class DefaultCardAccountRangeService(
 
         val staticAccountRanges = staticCardAccountRanges.filter(cardNumber)
 
-        if (isCbcEligible) {
+        if (isCbcEligible || needsRemoteQueryForFunding) {
             queryAccountRangeRepository(cardNumber)
         } else {
             if (staticAccountRanges.isEmpty() || shouldQueryRepository(staticAccountRanges)) {

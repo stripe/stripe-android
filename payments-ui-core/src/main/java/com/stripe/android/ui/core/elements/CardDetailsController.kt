@@ -4,7 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DateUtils
@@ -38,9 +40,11 @@ internal class CardDetailsController(
     uiContext: CoroutineContext = Dispatchers.Main,
     workContext: CoroutineContext = Dispatchers.IO,
     cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     cardDetailsTextFieldConfig: CardNumberTextFieldConfig = CardNumberConfig(
         isCardBrandChoiceEligible = cbcEligibility != CardBrandChoiceEligibility.Ineligible,
-        cardBrandFilter = cardBrandFilter
+        cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter
     ),
     cvcTextFieldConfig: CvcTextFieldConfig = CvcConfig(),
     dateConfig: TextFieldConfig = DateConfig(),
@@ -83,7 +87,8 @@ internal class CardDetailsController(
                 )
                 is CardBrandChoiceEligibility.Ineligible -> CardBrandChoiceConfig.Ineligible
             },
-            cardBrandFilter = cardBrandFilter
+            cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = cardFundingFilter
         )
     )
 

@@ -112,6 +112,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                     collectName = billingDetailsCollectionConfiguration.collectsName,
                     cbcEligibility = arguments.cbcEligibility,
                     cardBrandFilter = arguments.cardBrandFilter,
+                    cardFundingFilter = arguments.cardFundingFilter,
                     automaticallyLaunchedCardScanFormDataHelper = arguments.automaticallyLaunchedCardScanFormDataHelper,
                 )
             )

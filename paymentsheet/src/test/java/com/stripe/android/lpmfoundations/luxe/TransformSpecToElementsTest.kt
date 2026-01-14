@@ -5,6 +5,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -450,6 +451,7 @@ private object TransformSpecToElementsFactory {
                 linkConfigurationCoordinator = null,
                 onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
                 cardBrandFilter = DefaultCardBrandFilter,
+                cardFundingFilter = DefaultCardFundingFilter,
                 setAsDefaultMatchesSaveForFutureUse = false,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
                 linkInlineHandler = null,

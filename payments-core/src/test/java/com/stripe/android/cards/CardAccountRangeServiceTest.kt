@@ -9,7 +9,9 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.ACCOUNTS
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.CARTES_BANCAIRES_ACCOUNT_RANGES
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.UNIONPAY16_ACCOUNTS
@@ -24,6 +26,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeCardFundingFilter
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -95,6 +98,7 @@ class CardAccountRangeServiceTest {
             testDispatcher,
             testDispatcher,
             DefaultStaticCardAccountRanges(),
+            cardFundingFilter = DefaultCardFundingFilter
         )
 
         val cardNumber = CardNumber.Unvalidated(cardNumberString)
@@ -173,6 +177,7 @@ class CardAccountRangeServiceTest {
         isCbcEligible: Boolean,
         mockRemoteCardAccountRangeSource: CardAccountRangeSource? = null,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
         validate: suspend TurbineTestContext<CardAccountRangeService.AccountRangesResult>.() -> Unit,
     ) {
         val repository = mockRemoteCardAccountRangeSource?.let {
@@ -184,7 +189,8 @@ class CardAccountRangeServiceTest {
             uiContext = testDispatcher,
             workContext = testDispatcher,
             staticCardAccountRanges = DefaultStaticCardAccountRanges(),
-            cardBrandFilter = cardBrandFilter
+            cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = cardFundingFilter
         )
 
         service.onCardNumberChanged(CardNumber.Unvalidated(cardNumber), isCbcEligible = isCbcEligible)
@@ -253,6 +259,7 @@ class CardAccountRangeServiceTest {
             uiContext = testDispatcher,
             workContext = testDispatcher,
             staticCardAccountRanges = DefaultStaticCardAccountRanges(),
+            cardFundingFilter = DefaultCardFundingFilter,
             accountRangeResultListener = fakeListener,
         )
 
@@ -283,6 +290,60 @@ class CardAccountRangeServiceTest {
         fakeListener.ensureAllEventsConsumed()
     }
 
+    @Test
+    fun `test the card metadata service is called when funding filter is restrictive`() = runTest {
+        // Disallow credit cards
+        val restrictiveFundingFilter = FakeCardFundingFilter(disallowedFundingTypes = setOf(CardFunding.Credit))
+
+        val fakeRemoteCardAccountRangeSource = FakeCardAccountRangeSource(isLoading = false)
+
+        val service = DefaultCardAccountRangeService(
+            createRemoteDefaultCardAccountRangeRepository(fakeRemoteCardAccountRangeSource),
+            testDispatcher,
+            testDispatcher,
+            DefaultStaticCardAccountRanges(),
+            cardFundingFilter = restrictiveFundingFilter
+        )
+
+        val cardNumber = CardNumber.Unvalidated("4242424242424242")
+        service.onCardNumberChanged(cardNumber, isCbcEligible = false)
+
+        assertThat(fakeRemoteCardAccountRangeSource.calls.awaitItem()).isEqualTo(cardNumber)
+        fakeRemoteCardAccountRangeSource.calls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `test the card metadata service is not called when funding filter is default`() = runTest {
+        val defaultFundingFilter = DefaultCardFundingFilter
+
+        val fakeRemoteCardAccountRangeSource = FakeCardAccountRangeSource(isLoading = false)
+
+        val service = DefaultCardAccountRangeService(
+            createRemoteDefaultCardAccountRangeRepository(fakeRemoteCardAccountRangeSource),
+            testDispatcher,
+            testDispatcher,
+            DefaultStaticCardAccountRanges(),
+            cardFundingFilter = defaultFundingFilter
+        )
+
+        val cardNumber = CardNumber.Unvalidated("4242424242424242")
+        service.onCardNumberChanged(cardNumber, isCbcEligible = false)
+
+        fakeRemoteCardAccountRangeSource.calls.expectNoEvents()
+    }
+
+    private fun createRemoteDefaultCardAccountRangeRepository(
+        remoteCardAccountRangeSource: CardAccountRangeSource
+    ): CardAccountRangeRepository {
+        val store = DefaultCardAccountRangeStore(applicationContext)
+        return DefaultCardAccountRangeRepository(
+            inMemorySource = InMemoryCardAccountRangeSource(store),
+            remoteSource = remoteCardAccountRangeSource,
+            staticSource = StaticCardAccountRangeSource(),
+            store = store
+        )
+    }
+
     private fun createMockRemoteDefaultCardAccountRangeRepository(
         mockRemoteCardAccountRangeSource: CardAccountRangeSource
     ): CardAccountRangeRepository {
@@ -301,6 +362,7 @@ class CardAccountRangeServiceTest {
             testDispatcher,
             testDispatcher,
             DefaultStaticCardAccountRanges(),
+            cardFundingFilter = DefaultCardFundingFilter
         )
 
         val cardNumber = CardNumber.Unvalidated(cardNumberString)
@@ -382,4 +444,19 @@ private class FakeAccountRangeResultListener : CardAccountRangeService.AccountRa
         val accountRanges: List<AccountRange>,
         val unfilteredAccountRanges: List<AccountRange>
     )
+}
+
+private class FakeCardAccountRangeSource(
+    isLoading: Boolean = false
+) : CardAccountRangeSource {
+    val calls = Turbine<CardNumber.Unvalidated>()
+
+    override suspend fun getAccountRanges(
+        cardNumber: CardNumber.Unvalidated
+    ): List<AccountRange>? {
+        calls.add(cardNumber)
+        return null
+    }
+
+    override val loading: StateFlow<Boolean> = stateFlowOf(isLoading)
 }
