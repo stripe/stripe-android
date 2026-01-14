@@ -53,7 +53,7 @@ internal class HorizontalModeExperimentsTest {
     )
 
     @Test
-    fun testHorizontalModeAAExperiment() = testHorizontalModeExperiment(
+    fun testHorizontalModeAAExperiment_controlTest() = testHorizontalModeExperiment(
         experimentAssignment = ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA,
         experimentVariant = "control_test",
         showsVerticalMode = true,
