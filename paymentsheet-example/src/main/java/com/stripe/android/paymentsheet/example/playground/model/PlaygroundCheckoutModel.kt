@@ -275,8 +275,6 @@ data class CheckoutResponse(
     val amount: Long,
     @SerialName("paymentMethodTypes")
     val paymentMethodTypes: String? = null,
-    @SerialName("sessionId")
-    val sessionId: String? = null,
 ) {
     fun makeCustomerConfig(
         customerKeyType: CheckoutRequest.CustomerKeyType?
