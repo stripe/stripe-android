@@ -21,7 +21,8 @@ interface GooglePayRepositoryFactory {
     ): GooglePayRepository
 }
 
-internal class DefaultGooglePayRepositoryFactory @Inject constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DefaultGooglePayRepositoryFactory @Inject constructor(
     private val appContext: Context,
     private val logger: Logger,
     private val errorReporter: ErrorReporter,

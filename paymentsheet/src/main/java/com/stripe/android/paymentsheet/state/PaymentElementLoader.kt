@@ -674,30 +674,32 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return elementsSession.isGooglePayEnabled && isGooglePaySupportedByConfiguration.await()
     }
 
+    // Default filters are used here because this only determines the ready state,
+    // not what's presented to Google Pay. This check runs async before we fetch the
+    // elements session, so using merchant-defined filters would add latency.
+    private suspend fun isGooglePayReadyForEnvironment(environment: GooglePayEnvironment): Boolean {
+        return googlePayRepositoryFactory(
+            environment = environment,
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter
+        ).isReady().first()
+    }
+
     private suspend fun CommonConfiguration.isGooglePayReady(): Boolean {
         return googlePay?.environment?.let { environment ->
-            googlePayRepositoryFactory(
-                environment = when (environment) {
+            isGooglePayReadyForEnvironment(
+                when (environment) {
                     PaymentSheet.GooglePayConfiguration.Environment.Production ->
                         GooglePayEnvironment.Production
                     PaymentSheet.GooglePayConfiguration.Environment.Test ->
                         GooglePayEnvironment.Test
-                },
-                // Default filters are used here because this only determines the ready state,
-                // not what's presented to Google Pay. This check runs async before we fetch the
-                // elements session, so using merchant-defined filters would add latency.
-                cardFundingFilter = DefaultCardFundingFilter,
-                cardBrandFilter = DefaultCardBrandFilter
+                }
             )
-        }?.isReady()?.first() ?: false
+        } ?: false
     }
 
     private suspend fun isGooglePaySupportedOnDevice(): Boolean {
-        return googlePayRepositoryFactory(
-            environment = GooglePayEnvironment.Production,
-            cardBrandFilter = DefaultCardBrandFilter,
-            cardFundingFilter = DefaultCardFundingFilter
-        ).isReady().first()
+        return isGooglePayReadyForEnvironment(GooglePayEnvironment.Production)
     }
 
     private suspend fun retrieveInitialPaymentSelection(
