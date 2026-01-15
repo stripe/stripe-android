@@ -27,9 +27,7 @@ tags:
 - tapOn: "Agree and continue"
 # SELECT OAUTH INSTITUTION
 - tapOn:
-    id: "bcinst_LLQZzmKZMjl0j0"
-- tapOn:
-    id: "prepane_cta"
+    id: "bcinst_Jg18xEfPHevfHP"
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
