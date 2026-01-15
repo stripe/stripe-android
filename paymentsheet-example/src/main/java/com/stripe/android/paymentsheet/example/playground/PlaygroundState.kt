@@ -55,7 +55,7 @@ internal sealed interface PlaygroundState : Parcelable {
         val clientSecret: String,
         val terminalLocationId: String?,
         private val defaultEndpoint: String,
-        val sessionId: String? = null,
+        val sessionId: String?,
     ) : PlaygroundState {
         override val integrationType
             get() = snapshot.configurationData.integrationType
