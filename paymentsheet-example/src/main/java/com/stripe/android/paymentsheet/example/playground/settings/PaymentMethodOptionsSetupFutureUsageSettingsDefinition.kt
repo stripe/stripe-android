@@ -36,7 +36,7 @@ internal object PaymentMethodOptionsSetupFutureUsageSettingsDefinition :
 
     override fun configure(
         value: PaymentMethodOptionsSetupFutureUsageType,
-        checkoutRequestBuilder: CheckoutRequest.Builder,
+        checkoutRequestBuilder: CheckoutRequest.Builder
     ) {
         if (value.valuesMap.isNotEmpty()) {
             checkoutRequestBuilder.paymentMethodOptionsSetupFutureUsage(value.valuesMap)

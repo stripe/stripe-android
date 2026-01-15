@@ -293,7 +293,7 @@ internal class PlaygroundSettings private constructor(
             settings.filter { (definition, _) ->
                 definition.applicable(configurationData, settings)
             }.onEach { (settingDefinition, value) ->
-                settingDefinition.configure(builder, value, settings)
+                settingDefinition.configure(builder, value)
             }
             return builder.build()
         }
@@ -311,10 +311,9 @@ internal class PlaygroundSettings private constructor(
         private fun <T> PlaygroundSettingDefinition<T>.configure(
             checkoutRequestBuilder: CheckoutRequest.Builder,
             value: Any?,
-            settings: Map<PlaygroundSettingDefinition<*>, Any?>,
         ) {
             @Suppress("UNCHECKED_CAST")
-            configure(value as T, checkoutRequestBuilder, settings)
+            configure(value as T, checkoutRequestBuilder)
         }
 
         private fun <T> PlaygroundSettingDefinition<T>.configure(
