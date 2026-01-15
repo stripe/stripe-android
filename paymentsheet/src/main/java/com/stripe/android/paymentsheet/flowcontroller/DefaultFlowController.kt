@@ -531,6 +531,7 @@ internal class DefaultFlowController @Inject internal constructor(
             val confirmationOption = paymentSelection?.toConfirmationOption(
                 configuration = state.config,
                 linkConfiguration = state.linkConfiguration,
+                cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter
             )
 
             confirmationOption?.let { option ->

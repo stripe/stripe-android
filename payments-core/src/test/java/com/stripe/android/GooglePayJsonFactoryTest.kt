@@ -5,14 +5,14 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.CardBrand
-import org.json.JSONException
+import com.stripe.android.model.CardFunding
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class GooglePayJsonFactoryTest {
@@ -32,7 +32,9 @@ class GooglePayJsonFactoryTest {
                     "type": "CARD",
                     "parameters": {
                         "allowedAuthMethods": ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA"]
+                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA"],
+                        "allowCreditCards": true,
+                        "allowPrepaidCards": true
                     },
                     "tokenizationSpecification": {
                         "type": "PAYMENT_GATEWAY",
@@ -73,7 +75,9 @@ class GooglePayJsonFactoryTest {
                         "billingAddressParameters": {
                             "phoneNumberRequired": true,
                             "format": "FULL"
-                        }
+                        },
+                        "allowCreditCards": true,
+                        "allowPrepaidCards": true
                     },
                     "tokenizationSpecification": {
                         "type": "PAYMENT_GATEWAY",
@@ -109,7 +113,9 @@ class GooglePayJsonFactoryTest {
                         "billingAddressParameters": {
                             "phoneNumberRequired": true,
                             "format": "FULL"
-                        }
+                        },
+                        "allowCreditCards": true,
+                        "allowPrepaidCards": true
                     },
                     "tokenizationSpecification": {
                         "type": "PAYMENT_GATEWAY",
@@ -331,15 +337,57 @@ class GooglePayJsonFactoryTest {
     }
 
     @Test
-    fun allowCreditCards_whenNull_shouldNotIncludeAllowCreditCardsInRequest() {
-        assertFailsWith<JSONException> {
-            GooglePayJsonFactory(googlePayConfig)
-                .createIsReadyToPayRequest()
-                .getJSONArray("allowedPaymentMethods")
-                .getJSONObject(0)
-                .getJSONObject("parameters")
-                .getBoolean("allowCreditCards")
-        }
+    fun allowCreditCards_whenNull_shouldBeTrueWhenAcceptedByCardFundingFilter() {
+        assertCardFundingParameter(
+            parameterName = "allowCreditCards",
+            cardFundingFilter = FakeCardFundingFilter(acceptCredit = true),
+            expectedValue = true
+        )
+    }
+
+    @Test
+    fun allowCreditCards_whenNull_shouldBeFalseWhenRejectedByCardFundingFilter() {
+        assertCardFundingParameter(
+            parameterName = "allowCreditCards",
+            cardFundingFilter = FakeCardFundingFilter(acceptCredit = false),
+            expectedValue = false
+        )
+    }
+
+    @Test
+    fun allowPrepaidCards_shouldBeTrueWhenAcceptedByCardFundingFilter() {
+        assertCardFundingParameter(
+            parameterName = "allowPrepaidCards",
+            cardFundingFilter = FakeCardFundingFilter(acceptPrepaid = true),
+            expectedValue = true
+        )
+    }
+
+    @Test
+    fun allowPrepaidCards_shouldBeFalseWhenRejectedByCardFundingFilter() {
+        assertCardFundingParameter(
+            parameterName = "allowPrepaidCards",
+            cardFundingFilter = FakeCardFundingFilter(acceptPrepaid = false),
+            expectedValue = false
+        )
+    }
+
+    private fun assertCardFundingParameter(
+        parameterName: String,
+        cardFundingFilter: CardFundingFilter,
+        expectedValue: Boolean
+    ) {
+        val actualValue = GooglePayJsonFactory(
+            googlePayConfig,
+            cardFundingFilter = cardFundingFilter
+        )
+            .createIsReadyToPayRequest()
+            .getJSONArray("allowedPaymentMethods")
+            .getJSONObject(0)
+            .getJSONObject("parameters")
+            .getBoolean(parameterName)
+
+        assertThat(actualValue).isEqualTo(expectedValue)
     }
 
     @Test
@@ -663,4 +711,20 @@ class GooglePayJsonFactoryTest {
 
         assertThat(softwareInfo.getString("id")).isEqualTo("android/stripe-elements")
     }
+}
+
+@Parcelize
+private class FakeCardFundingFilter(
+    private val acceptCredit: Boolean = true,
+    private val acceptPrepaid: Boolean = true
+) : CardFundingFilter {
+    override fun isAccepted(cardFunding: CardFunding): Boolean {
+        return when (cardFunding) {
+            CardFunding.Credit -> acceptCredit
+            CardFunding.Prepaid -> acceptPrepaid
+            else -> true
+        }
+    }
+
+    override fun allowedFundingTypesDisplayMessage(): Int? = null
 }

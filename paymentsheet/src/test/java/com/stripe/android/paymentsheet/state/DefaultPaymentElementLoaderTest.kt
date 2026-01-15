@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
@@ -14,7 +16,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.link.LinkConfiguration
@@ -4353,8 +4357,14 @@ internal class DefaultPaymentElementLoaderTest {
 
         return DefaultPaymentElementLoader(
             prefsRepositoryFactory = { prefsRepository },
-            googlePayRepositoryFactory = {
-                GooglePayRepository { flowOf(isGooglePayReady) }
+            googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
+                override fun invoke(
+                    environment: GooglePayEnvironment,
+                    cardFundingFilter: CardFundingFilter,
+                    cardBrandFilter: CardBrandFilter
+                ): GooglePayRepository {
+                    return GooglePayRepository { flowOf(isGooglePayReady) }
+                }
             },
             elementsSessionRepository = elementsSessionRepository,
             customerRepository = customerRepo,
@@ -4373,6 +4383,7 @@ internal class DefaultPaymentElementLoaderTest {
             tapToAddConnectionManager = tapToAddConnectionManager,
             paymentConfiguration = { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") },
             paymentMethodFilter = paymentMethodFilter,
+            cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory(),
         )
     }
 

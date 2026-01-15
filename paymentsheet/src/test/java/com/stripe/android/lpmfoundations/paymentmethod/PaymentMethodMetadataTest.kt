@@ -1158,7 +1158,7 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
-            isTapToAddSupported = false,
+            isTapToAddSupported = false
         )
 
         val expectedMetadata = PaymentMethodMetadata(
