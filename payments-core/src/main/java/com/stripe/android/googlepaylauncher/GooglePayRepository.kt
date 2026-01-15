@@ -50,7 +50,7 @@ internal class DefaultGooglePayRepository(
     private val environment: GooglePayEnvironment,
     private val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
     private val existingPaymentMethodRequired: Boolean,
-    private val allowCreditCards: Boolean?,
+    private val allowCreditCards: Boolean,
     private val paymentsClientFactory: PaymentsClientFactory = DefaultPaymentsClientFactory(context),
     private val errorReporter: ErrorReporter,
     private val logger: Logger = Logger.noop(),

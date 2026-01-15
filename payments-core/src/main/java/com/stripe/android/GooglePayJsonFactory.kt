@@ -330,7 +330,8 @@ class GooglePayJsonFactory internal constructor(
                             .put("format", billingAddressParameters.format.code)
                     )
                 }
-                val allowCreditCards = allowCreditCards ?: cardFundingFilter.isAccepted(CardFunding.Credit)
+                val allowCreditCards = cardFundingFilter.isAccepted(CardFunding.Credit)
+                    .and(allowCreditCards ?: true)
                 put("allowCreditCards", allowCreditCards)
                 put("allowPrepaidCards", cardFundingFilter.isAccepted(CardFunding.Prepaid))
             }

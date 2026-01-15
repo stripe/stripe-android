@@ -283,7 +283,7 @@ class GooglePayConfirmationDefinitionTest {
             assertThat(createGooglePayLauncherCall.config.environment).isEqualTo(GooglePayEnvironment.Test)
             assertThat(createGooglePayLauncherCall.config.merchantName).isEqualTo("Test merchant Inc.")
             assertThat(createGooglePayLauncherCall.config.merchantCountryCode).isEqualTo("US")
-            assertThat(createGooglePayLauncherCall.config.allowCreditCards).isNull()
+            assertThat(createGooglePayLauncherCall.config.allowCreditCards).isTrue()
             assertThat(createGooglePayLauncherCall.config.existingPaymentMethodRequired).isTrue()
             assertThat(createGooglePayLauncherCall.config.isEmailRequired).isFalse()
             assertThat(createGooglePayLauncherCall.config.billingAddressConfig.isRequired).isTrue()
@@ -543,7 +543,7 @@ class GooglePayConfirmationDefinitionTest {
             // Should always be the same value
             assertThat(createGooglePayLauncherCall.activityResultLauncher).isEqualTo(launcher)
             assertThat(createGooglePayLauncherCall.skipReadyCheck).isTrue()
-            assertThat(createGooglePayLauncherCall.config.allowCreditCards).isNull()
+            assertThat(createGooglePayLauncherCall.config.allowCreditCards).isTrue()
             assertThat(createGooglePayLauncherCall.config.existingPaymentMethodRequired).isTrue()
 
             // Can vary on merchant's config

@@ -2,7 +2,6 @@ package com.stripe.android.paymentelement.confirmation
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
@@ -267,9 +266,7 @@ class ConfirmationHandlerOptionKtxTest {
                     cardBrandFilter = PaymentSheetCardBrandFilter(
                         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
                     ),
-                    cardFundingFilter = PaymentSheetCardFundingFilter(
-                        allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes
-                    ),
+                    cardFundingFilter = DefaultCardFundingFilter,
                     additionalEnabledNetworks = emptyList(),
                 ),
             )
@@ -295,6 +292,7 @@ class ConfirmationHandlerOptionKtxTest {
                 .build()
                 .asCommonConfiguration(),
             linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter
         )
 
         assertThat(

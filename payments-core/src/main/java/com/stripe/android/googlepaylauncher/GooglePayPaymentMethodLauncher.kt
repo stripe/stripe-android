@@ -309,7 +309,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
          *
          * Default: The credit card class is supported for the card networks specified.
          */
-        var allowCreditCards: Boolean? = null,
+        var allowCreditCards: Boolean = true,
 
         /**
          * Set this property to enable other card networks in additional to the default list, such as "INTERAC"
