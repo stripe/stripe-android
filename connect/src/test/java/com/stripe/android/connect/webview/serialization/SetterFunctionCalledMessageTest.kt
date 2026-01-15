@@ -45,7 +45,8 @@ class SetterFunctionCalledMessageTest {
         val obj = SetterFunctionCalledMessage(
             SetOnLoadError(SetOnLoadError.LoadError(EmbeddedErrorType.API_ERROR, "Test error"))
         )
-        val expectedJson = """{"setter":"setOnLoadError","value":{"error":{"type":"api_error","message":"Test error"}}}"""
+        val expectedJson =
+            """{"setter":"setOnLoadError","value":{"error":{"type":"api_error","message":"Test error"}}}"""
         val json = ConnectJson.encodeToString(obj)
         assertThat(json).isEqualTo(expectedJson)
         assertThat(ConnectJson.decodeFromString<SetterFunctionCalledMessage>(json)).isEqualTo(obj)

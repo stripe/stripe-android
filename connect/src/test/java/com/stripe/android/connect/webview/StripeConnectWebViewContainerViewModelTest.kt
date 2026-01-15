@@ -19,9 +19,9 @@ import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.Colors
 import com.stripe.android.connect.manager.EmbeddedComponentCoordinator
 import com.stripe.android.connect.util.Clock
+import com.stripe.android.connect.webview.serialization.EmbeddedErrorType
 import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
 import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
-import com.stripe.android.connect.webview.serialization.EmbeddedErrorType
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoadError.LoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
