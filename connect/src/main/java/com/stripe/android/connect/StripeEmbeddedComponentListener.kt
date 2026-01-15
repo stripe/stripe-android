@@ -34,7 +34,7 @@ internal open class ComponentListenerDelegate<Listener : StripeEmbeddedComponent
                     is SetOnLoaderStart -> listener.onLoaderStart()
                     is SetOnLoadError -> {
                         // TODO - wrap error better
-                        listener.onLoadError(RuntimeException("${value.error.type}: ${value.error.message}"))
+                        listener.onLoadError(RuntimeException("${value.error.type.value}: ${value.error.message}"))
                     }
                     else -> {
                         delegate(listener, event.message)

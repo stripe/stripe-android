@@ -21,6 +21,7 @@ import com.stripe.android.connect.manager.EmbeddedComponentCoordinator
 import com.stripe.android.connect.util.Clock
 import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
 import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
+import com.stripe.android.connect.webview.serialization.EmbeddedErrorType
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoadError.LoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
@@ -202,9 +203,45 @@ class StripeConnectWebViewContainerViewModelTest {
     @Test
     fun `should handle SetOnLoadError`() = runTest(testDispatcher) {
         collectComponentEvents()
-        val message = SetterFunctionCalledMessage(SetOnLoadError(LoadError("", null)))
+        val message = SetterFunctionCalledMessage(SetOnLoadError(LoadError(EmbeddedErrorType.API_ERROR, null)))
         viewModel.delegate.onReceivedSetterFunctionCalled(message)
 
+        assertThat(receivedComponentEvents).contains(ComponentEvent.Message(message))
+    }
+
+    @Test
+    fun `should handle all EmbeddedErrorType values`() = runTest(testDispatcher) {
+        collectComponentEvents()
+
+        EmbeddedErrorType.entries.forEach { errorType ->
+            val message = SetterFunctionCalledMessage(
+                SetOnLoadError(LoadError(errorType, "Test message"))
+            )
+            viewModel.delegate.onReceivedSetterFunctionCalled(message)
+            assertThat(receivedComponentEvents).contains(ComponentEvent.Message(message))
+        }
+    }
+
+    @Test
+    fun `should fallback to API_ERROR for unknown error types`() {
+        val unknownType = "unknown_error_type"
+        val result = EmbeddedErrorType.fromValue(unknownType)
+        assertThat(result).isEqualTo(EmbeddedErrorType.API_ERROR)
+    }
+
+    @Test
+    fun `should fallback to API_ERROR for null error type`() {
+        val result = EmbeddedErrorType.fromValue(null)
+        assertThat(result).isEqualTo(EmbeddedErrorType.API_ERROR)
+    }
+
+    @Test
+    fun `should handle render_error type`() = runTest(testDispatcher) {
+        collectComponentEvents()
+        val message = SetterFunctionCalledMessage(
+            SetOnLoadError(LoadError(EmbeddedErrorType.RENDER_ERROR, "Failed to render"))
+        )
+        viewModel.delegate.onReceivedSetterFunctionCalled(message)
         assertThat(receivedComponentEvents).contains(ComponentEvent.Message(message))
     }
 

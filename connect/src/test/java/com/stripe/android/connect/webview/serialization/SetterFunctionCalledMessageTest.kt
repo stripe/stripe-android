@@ -39,4 +39,57 @@ class SetterFunctionCalledMessageTest {
             assertThat(ConnectJson.decodeFromString<SetterFunctionCalledMessage>(json)).isEqualTo(obj)
         }
     }
+
+    @Test
+    fun `should serialize and deserialize SetOnLoadError correctly`() {
+        val obj = SetterFunctionCalledMessage(
+            SetOnLoadError(SetOnLoadError.LoadError(EmbeddedErrorType.API_ERROR, "Test error"))
+        )
+        val expectedJson = """{"setter":"setOnLoadError","value":{"error":{"type":"api_error","message":"Test error"}}}"""
+        val json = ConnectJson.encodeToString(obj)
+        assertThat(json).isEqualTo(expectedJson)
+        assertThat(ConnectJson.decodeFromString<SetterFunctionCalledMessage>(json)).isEqualTo(obj)
+    }
+
+    @Test
+    fun `should deserialize all EmbeddedErrorType values correctly`() {
+        EmbeddedErrorType.entries.forEach { errorType ->
+            val json = """{"setter":"setOnLoadError","value":{"error":{"type":"${errorType.value}","message":"msg"}}}"""
+            val result = ConnectJson.decodeFromString<SetterFunctionCalledMessage>(json)
+            val expected = SetterFunctionCalledMessage(
+                SetOnLoadError(SetOnLoadError.LoadError(errorType, "msg"))
+            )
+            assertThat(result).isEqualTo(expected)
+        }
+    }
+
+    @Test
+    fun `should deserialize unknown error type as API_ERROR`() {
+        val json = """{"setter":"setOnLoadError","value":{"error":{"type":"unknown_future_error","message":"msg"}}}"""
+        val result = ConnectJson.decodeFromString<SetterFunctionCalledMessage>(json)
+        val expected = SetterFunctionCalledMessage(
+            SetOnLoadError(SetOnLoadError.LoadError(EmbeddedErrorType.API_ERROR, "msg"))
+        )
+        assertThat(result).isEqualTo(expected)
+    }
+
+    @Test
+    fun `should deserialize null error type as API_ERROR`() {
+        val json = """{"setter":"setOnLoadError","value":{"error":{"type":null,"message":"msg"}}}"""
+        val result = ConnectJson.decodeFromString<SetterFunctionCalledMessage>(json)
+        val expected = SetterFunctionCalledMessage(
+            SetOnLoadError(SetOnLoadError.LoadError(EmbeddedErrorType.API_ERROR, "msg"))
+        )
+        assertThat(result).isEqualTo(expected)
+    }
+
+    @Test
+    fun `should deserialize render_error type correctly`() {
+        val json = """{"setter":"setOnLoadError","value":{"error":{"type":"render_error","message":"Render failed"}}}"""
+        val result = ConnectJson.decodeFromString<SetterFunctionCalledMessage>(json)
+        val expected = SetterFunctionCalledMessage(
+            SetOnLoadError(SetOnLoadError.LoadError(EmbeddedErrorType.RENDER_ERROR, "Render failed"))
+        )
+        assertThat(result).isEqualTo(expected)
+    }
 }
