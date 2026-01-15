@@ -261,8 +261,10 @@ class CheckoutRequest private constructor(
 data class CheckoutResponse(
     @SerialName("publishableKey")
     val publishableKey: String,
-    @SerialName("clientSecret")
-    val clientSecret: String,
+    @SerialName("intentClientSecret")
+    val intentClientSecret: String? = null,
+    @SerialName("checkoutSessionClientSecret")
+    val checkoutSessionClientSecret: String? = null,
     @SerialName("customerId")
     val customerId: String? = null,
     @SerialName("customerEphemeralKeySecret")
@@ -276,6 +278,10 @@ data class CheckoutResponse(
     @SerialName("paymentMethodTypes")
     val paymentMethodTypes: String? = null,
 ) {
+
+    val clientSecret: String = intentClientSecret ?: checkoutSessionClientSecret
+        ?: error("Either intentClientSecret or checkoutSessionClientSecret must be non-null")
+
     fun makeCustomerConfig(
         customerKeyType: CheckoutRequest.CustomerKeyType?
     ) = customerId?.let { id ->
