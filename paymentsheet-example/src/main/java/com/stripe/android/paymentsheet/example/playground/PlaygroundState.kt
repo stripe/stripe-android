@@ -240,9 +240,9 @@ internal sealed interface PlaygroundState : Parcelable {
                 amount = amount,
                 paymentMethodTypes = paymentMethodTypes,
                 customerConfig = makeCustomerConfig(snapshot.checkoutRequest().customerKeyType),
-                clientSecret = intentClientSecret,
+                clientSecret = clientSecret,
                 terminalLocationId = terminalLocationId,
-                defaultEndpoint = defaultEndpoint
+                defaultEndpoint = defaultEndpoint,
             )
         }
     }
