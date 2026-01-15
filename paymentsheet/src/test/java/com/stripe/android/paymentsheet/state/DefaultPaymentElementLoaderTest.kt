@@ -1628,6 +1628,29 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `Returns failure if configuring checkout session with invalid id prefix`() = runScenario {
+        assertFailsWith<IllegalArgumentException>("Must use a checkout session id.") {
+            PaymentElementLoader.InitializationMode.CheckoutSession(
+                id = "pi_test_123",
+            ).validate()
+        }
+    }
+
+    @Test
+    fun `CheckoutSession validate succeeds with valid id`() = runScenario {
+        PaymentElementLoader.InitializationMode.CheckoutSession(
+            id = "cs_test_123",
+        ).validate()
+    }
+
+    @Test
+    fun `integrationMetadata returns checkout session for checkout session mode`() = runScenario {
+        val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession("cs_test_123")
+        assertThat(checkoutSession.integrationMetadata(null))
+            .isEqualTo(IntegrationMetadata.CheckoutSession("cs_test_123"))
+    }
+
+    @Test
     fun `integrationMetadata returns intent first for payment intent`() = runScenario {
         val paymentIntent = PaymentElementLoader.InitializationMode.PaymentIntent("secret")
         assertThat(paymentIntent.integrationMetadata(null))
