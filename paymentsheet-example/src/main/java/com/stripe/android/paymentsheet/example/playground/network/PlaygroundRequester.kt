@@ -38,7 +38,7 @@ internal class PlaygroundRequester(
 
             is Result.Success -> {
                 val checkoutResponse = apiResponse.value
-                println("StripeIntent ${checkoutResponse.intentClientSecret.substringBefore("_secret_")}")
+                println("StripeIntent ${checkoutResponse.clientSecret.substringBefore("_secret_")}")
 
                 // Init PaymentConfiguration with the publishable key returned from the backend,
                 // which will be used on all Stripe API calls

@@ -620,6 +620,10 @@ internal class PaymentSheetPlaygroundViewModel(
                 error("createAndConfirmIntent should not be called when initialization type is Normal")
             }
 
+            InitializationType.CheckoutSession -> {
+                error("createAndConfirmIntent is not yet implemented for CheckoutSession")
+            }
+
             InitializationType.DeferredClientSideConfirmation -> {
                 createIntent(playgroundState)
             }
