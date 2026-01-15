@@ -1,6 +1,7 @@
 package com.stripe.android.connect.webview.serialization
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.connect.EmbeddedComponentError
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Test
@@ -43,7 +44,7 @@ class SetterFunctionCalledMessageTest {
     @Test
     fun `should serialize and deserialize SetOnLoadError correctly`() {
         val obj = SetterFunctionCalledMessage(
-            SetOnLoadError(SetOnLoadError.LoadError(EmbeddedErrorType.API_ERROR, "Test error"))
+            SetOnLoadError(SetOnLoadError.LoadError(EmbeddedComponentError.ErrorType.API_ERROR, "Test error"))
         )
         val expectedJson =
             """{"setter":"setOnLoadError","value":{"error":{"type":"api_error","message":"Test error"}}}"""
@@ -53,8 +54,8 @@ class SetterFunctionCalledMessageTest {
     }
 
     @Test
-    fun `should deserialize all EmbeddedErrorType values correctly`() {
-        EmbeddedErrorType.entries.forEach { errorType ->
+    fun `should deserialize all EmbeddedComponentError.ErrorType values correctly`() {
+        EmbeddedComponentError.ErrorType.entries.forEach { errorType ->
             val json = """{"setter":"setOnLoadError","value":{"error":{"type":"${errorType.value}","message":"msg"}}}"""
             val result = ConnectJson.decodeFromString<SetterFunctionCalledMessage>(json)
             val expected = SetterFunctionCalledMessage(
@@ -69,7 +70,7 @@ class SetterFunctionCalledMessageTest {
         val json = """{"setter":"setOnLoadError","value":{"error":{"type":"unknown_future_error","message":"msg"}}}"""
         val result = ConnectJson.decodeFromString<SetterFunctionCalledMessage>(json)
         val expected = SetterFunctionCalledMessage(
-            SetOnLoadError(SetOnLoadError.LoadError(EmbeddedErrorType.API_ERROR, "msg"))
+            SetOnLoadError(SetOnLoadError.LoadError(EmbeddedComponentError.ErrorType.API_ERROR, "msg"))
         )
         assertThat(result).isEqualTo(expected)
     }
@@ -79,7 +80,7 @@ class SetterFunctionCalledMessageTest {
         val json = """{"setter":"setOnLoadError","value":{"error":{"type":null,"message":"msg"}}}"""
         val result = ConnectJson.decodeFromString<SetterFunctionCalledMessage>(json)
         val expected = SetterFunctionCalledMessage(
-            SetOnLoadError(SetOnLoadError.LoadError(EmbeddedErrorType.API_ERROR, "msg"))
+            SetOnLoadError(SetOnLoadError.LoadError(EmbeddedComponentError.ErrorType.API_ERROR, "msg"))
         )
         assertThat(result).isEqualTo(expected)
     }
@@ -89,7 +90,7 @@ class SetterFunctionCalledMessageTest {
         val json = """{"setter":"setOnLoadError","value":{"error":{"type":"render_error","message":"Render failed"}}}"""
         val result = ConnectJson.decodeFromString<SetterFunctionCalledMessage>(json)
         val expected = SetterFunctionCalledMessage(
-            SetOnLoadError(SetOnLoadError.LoadError(EmbeddedErrorType.RENDER_ERROR, "Render failed"))
+            SetOnLoadError(SetOnLoadError.LoadError(EmbeddedComponentError.ErrorType.RENDER_ERROR, "Render failed"))
         )
         assertThat(result).isEqualTo(expected)
     }

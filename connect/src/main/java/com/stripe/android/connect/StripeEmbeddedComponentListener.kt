@@ -12,6 +12,9 @@ interface StripeEmbeddedComponentListener {
 
     /**
      * The component executes this callback function when a load failure occurs.
+     *
+     * @param error The error that occurred. This will be an [EmbeddedComponentError] which
+     * provides access to the error [EmbeddedComponentError.type] and [EmbeddedComponentError.message].
      */
     fun onLoadError(error: Throwable) {}
 }
@@ -33,8 +36,12 @@ internal open class ComponentListenerDelegate<Listener : StripeEmbeddedComponent
                 when (val value = event.message.value) {
                     is SetOnLoaderStart -> listener.onLoaderStart()
                     is SetOnLoadError -> {
-                        // TODO - wrap error better
-                        listener.onLoadError(RuntimeException("${value.error.type.value}: ${value.error.message}"))
+                        listener.onLoadError(
+                            EmbeddedComponentError(
+                                type = value.error.type,
+                                message = value.error.message
+                            )
+                        )
                     }
                     else -> {
                         delegate(listener, event.message)
