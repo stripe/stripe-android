@@ -65,6 +65,14 @@ internal interface PlaygroundSettingDefinition<T> {
     fun configure(
         value: T,
         checkoutRequestBuilder: CheckoutRequest.Builder,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ) {
+        configure(value, checkoutRequestBuilder)
+    }
+
+    fun configure(
+        value: T,
+        checkoutRequestBuilder: CheckoutRequest.Builder,
     ) {
     }
 

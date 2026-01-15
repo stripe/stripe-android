@@ -36,9 +36,11 @@ internal object PaymentMethodOptionsSetupFutureUsageSettingsDefinition :
 
     override fun configure(
         value: PaymentMethodOptionsSetupFutureUsageType,
-        checkoutRequestBuilder: CheckoutRequest.Builder
+        checkoutRequestBuilder: CheckoutRequest.Builder,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
     ) {
-        if (value.valuesMap.isNotEmpty()) {
+        val initializationType = settings[InitializationTypeSettingsDefinition] as? InitializationType
+        if (value.valuesMap.isNotEmpty() && initializationType == InitializationType.Normal) {
             checkoutRequestBuilder.paymentMethodOptionsSetupFutureUsage(value.valuesMap)
         }
     }

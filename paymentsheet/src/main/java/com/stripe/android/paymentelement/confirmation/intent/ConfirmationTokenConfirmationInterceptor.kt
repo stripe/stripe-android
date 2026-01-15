@@ -13,6 +13,7 @@ import com.stripe.android.model.ConfirmationTokenClientContextParams
 import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.MandateDataParams
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.StripeIntent
@@ -29,6 +30,7 @@ import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.toDeferredIntentParams
+import com.stripe.android.utils.hasIntentToSetup
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -220,14 +222,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             setUpFutureUsage = resolveSetupFutureUsage(confirmationOption.optionsParams),
             shipping = shippingValues,
             mandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT).takeIf {
-                when (confirmationOption) {
-                    is PaymentMethodConfirmationOption.New -> {
-                        confirmationOption.createParams.requiresMandate
-                    }
-                    is PaymentMethodConfirmationOption.Saved -> {
-                        confirmationOption.paymentMethod.type?.requiresMandate == true
-                    }
-                }
+                confirmationOption.requiresMandateData()
             },
             setAsDefaultPaymentMethod = confirmationOption.shouldSaveAsDefault(),
             cvc = if (intentConfiguration.requireCvcRecollection) {
@@ -304,4 +299,26 @@ internal class CreateIntentWithConfirmationTokenCallbackFailureException(
     override val cause: Throwable?
 ) : StripeException() {
     override fun analyticsValue(): String = "merchantReturnedCreateIntentWithConfirmationTokenCallbackFailure"
+}
+
+/**
+ * Determines if mandate data should be included in the confirmation token params.
+ *
+ * For new payment methods, this checks:
+ * 1. The existing requiresMandate flag (handles intent-first and deferred with top-level SFU)
+ * 2. PMO SFU case: if PM type requires mandate AND PMO SFU is set in optionsParams
+ *
+ * For saved payment methods, this checks the payment method type's requiresMandate property.
+ */
+private fun PaymentMethodConfirmationOption.requiresMandateData(): Boolean {
+    return when (this) {
+        is PaymentMethodConfirmationOption.New -> {
+            val pmTypeRequiresMandate = PaymentMethod.Type.fromCode(createParams.typeCode)?.requiresMandate == true
+            val hasPmoSfuSet = optionsParams?.setupFutureUsage()?.hasIntentToSetup() == true
+            createParams.requiresMandate || (pmTypeRequiresMandate && hasPmoSfuSet)
+        }
+        is PaymentMethodConfirmationOption.Saved -> {
+            paymentMethod.type?.requiresMandate == true
+        }
+    }
 }
