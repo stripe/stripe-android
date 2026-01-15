@@ -37,7 +37,8 @@ internal fun GooglePayButton(
     isEnabled: Boolean,
     onPressed: () -> Unit,
     modifier: Modifier = Modifier,
-    cardBrandFilter: CardBrandFilter
+    cardBrandFilter: CardBrandFilter,
+    additionalEnabledNetworks: List<String>
 ) {
     val context = LocalContext.current
     val isInspectionMode = LocalInspectionMode.current
@@ -52,7 +53,11 @@ internal fun GooglePayButton(
             ""
         } else {
             JSONArray().put(
-                GooglePayJsonFactory(context, cardBrandFilter = cardBrandFilter).createCardPaymentMethod(
+                GooglePayJsonFactory(
+                    context = context,
+                    cardBrandFilter = cardBrandFilter,
+                    additionalEnabledNetworks = additionalEnabledNetworks
+                ).createCardPaymentMethod(
                     billingAddressParameters = billingAddressParameters,
                     allowCreditCards = allowCreditCards
                 )

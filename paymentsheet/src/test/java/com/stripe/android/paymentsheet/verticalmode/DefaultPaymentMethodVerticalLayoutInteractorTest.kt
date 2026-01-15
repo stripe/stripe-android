@@ -492,6 +492,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 buttonType = GooglePayButtonType.Pay,
                 allowCreditCards = true,
                 billingAddressParameters = null,
+                additionalEnabledNetworks = emptyList()
             ),
             buttonsEnabled = true,
             dividerTextResource = 0,
@@ -523,6 +524,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 buttonType = GooglePayButtonType.Pay,
                 allowCreditCards = true,
                 billingAddressParameters = null,
+                additionalEnabledNetworks = emptyList()
             ),
             buttonsEnabled = true,
             dividerTextResource = 0,
@@ -557,6 +559,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     buttonType = GooglePayButtonType.Pay,
                     allowCreditCards = true,
                     billingAddressParameters = null,
+                    additionalEnabledNetworks = emptyList()
                 ),
                 buttonsEnabled = true,
                 dividerTextResource = 0,
@@ -657,6 +660,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 buttonType = GooglePayButtonType.Pay,
                 allowCreditCards = true,
                 billingAddressParameters = null,
+                additionalEnabledNetworks = emptyList()
             ),
             buttonsEnabled = true,
             dividerTextResource = 0,
@@ -1588,6 +1592,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             buttonType = GooglePayButtonType.Pay,
             allowCreditCards = true,
             billingAddressParameters = null,
+            additionalEnabledNetworks = emptyList()
         ),
         buttonsEnabled = true,
         dividerTextResource = 0,

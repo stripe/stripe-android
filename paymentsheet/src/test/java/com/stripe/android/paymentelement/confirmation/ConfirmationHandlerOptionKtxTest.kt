@@ -255,10 +255,37 @@ class ConfirmationHandlerOptionKtxTest {
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
                     cardBrandFilter = PaymentSheetCardBrandFilter(
                         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
-                    )
+                    ),
+                    additionalEnabledNetworks = emptyList()
                 ),
             )
         )
+    }
+
+    @Test
+    fun `On Google Pay selection with additionalEnabledNetworks, should return expected option with networks`() {
+        val additionalNetworks = listOf("INTERAC")
+
+        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                        countryCode = "US",
+                        currencyCode = "USD",
+                        amount = 5000,
+                        label = "Merchant Payments",
+                        additionalEnabledNetworks = additionalNetworks
+                    )
+                )
+                .build()
+                .asCommonConfiguration(),
+            linkConfiguration = null,
+        )
+
+        assertThat(
+            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.additionalEnabledNetworks
+        ).isEqualTo(additionalNetworks)
     }
 
     @Test

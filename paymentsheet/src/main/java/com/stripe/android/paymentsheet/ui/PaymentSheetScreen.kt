@@ -427,7 +427,8 @@ internal fun Wallet(
                 billingAddressParameters = googlePay.billingAddressParameters,
                 isEnabled = state.buttonsEnabled,
                 onPressed = onGooglePayPressed,
-                cardBrandFilter = cardBrandFilter
+                cardBrandFilter = cardBrandFilter,
+                additionalEnabledNetworks = googlePay.additionalEnabledNetworks
             )
         }
 

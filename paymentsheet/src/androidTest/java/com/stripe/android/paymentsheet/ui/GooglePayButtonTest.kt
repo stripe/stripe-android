@@ -32,7 +32,8 @@ class GooglePayButtonTest {
                 onPressed = { didCallOnPressed = true },
                 modifier = Modifier.testTag(testTag),
                 buttonType = GooglePayButtonType.Pay,
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                additionalEnabledNetworks = emptyList()
             )
         }
 
@@ -59,7 +60,8 @@ class GooglePayButtonTest {
                 onPressed = { didCallOnPressed = true },
                 modifier = Modifier.testTag(testTag),
                 buttonType = GooglePayButtonType.Pay,
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                additionalEnabledNetworks = emptyList()
             )
         }
 

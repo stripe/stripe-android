@@ -94,6 +94,7 @@ internal interface WalletButtonsInteractor {
             val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
             val allowCreditCards: Boolean,
             val cardBrandFilter: CardBrandFilter,
+            val additionalEnabledNetworks: List<String>
         ) : WalletButton {
             override val walletType = WalletType.GooglePay
 
@@ -102,11 +103,13 @@ internal interface WalletButtonsInteractor {
                 billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
                 allowCreditCards: Boolean,
                 cardBrandFilter: CardBrandFilter,
+                additionalEnabledNetworks: List<String>
             ) : this(
                 googlePayButtonType = buttonType.asGooglePayButtonType,
                 billingAddressParameters = billingDetailsCollectionConfiguration.toBillingAddressParameters(),
                 allowCreditCards = allowCreditCards,
                 cardBrandFilter = cardBrandFilter,
+                additionalEnabledNetworks = additionalEnabledNetworks
             )
 
             override fun createSelection(): PaymentSelection {
@@ -173,6 +176,7 @@ internal class DefaultWalletButtonsInteractor constructor(
                         ),
                         billingDetailsCollectionConfiguration = configuration
                             .billingDetailsCollectionConfiguration,
+                        additionalEnabledNetworks = configuration.googlePay?.additionalEnabledNetworks.orEmpty()
                     ).takeIf {
                         walletsAllowedByMerchant.contains(WalletType.GooglePay)
                     }
