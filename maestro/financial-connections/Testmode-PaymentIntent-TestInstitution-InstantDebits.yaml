@@ -35,7 +35,7 @@ tags:
 - tapOn: "Continue with Link"
 # Select "Payment Success" institution
 - tapOn:
-    id: "bcinst_QsDedeogZ5PA7V"
+    id: "bcinst_TnVRZgYuGF7EJA"
 # Bypass Chrome on-boarding screen
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
