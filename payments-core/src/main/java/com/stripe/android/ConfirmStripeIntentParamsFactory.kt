@@ -224,6 +224,41 @@ private fun mandateData(
     }
 }
 
+/**
+ * Determines if mandate data should be included when we don't have a StripeIntent yet.
+ * This is used for ConfirmationToken creation in the deferred intent flow.
+ *
+ * @param paymentMethodType The payment method type
+ * @param requiresMandateFromCreateParams Whether requiresMandate was set on createParams (computed from
+ *     synthetic PaymentIntent from elements/sessions)
+ * @param optionsParams The payment method options params (for PMO SFU)
+ * @param intentConfigSetupFutureUsage The intent configuration level SFU
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun mandateDataForDeferredIntent(
+    paymentMethodType: PaymentMethod.Type?,
+    requiresMandateFromCreateParams: Boolean,
+    optionsParams: PaymentMethodOptionsParams?,
+    intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
+): MandateDataParams? {
+    return paymentMethodType?.let { type ->
+        // For deferred intent, we check:
+        // 1. requiresMandateFromCreateParams - computed from synthetic PaymentIntent's SFU
+        // 2. type.requiresMandateForPaymentIntent - PM types that always need mandate for PaymentIntent
+        // 3. optionsParams SFU - PMO setup future usage
+        // 4. intentConfigSetupFutureUsage - intent configuration level SFU
+        val supportsAddingMandateData =
+            requiresMandateFromCreateParams ||
+                type.requiresMandateForPaymentIntent ||
+                optionsParams?.setupFutureUsage()?.hasIntentToSetup() == true ||
+                intentConfigSetupFutureUsage?.hasIntentToSetup() == true
+
+        return MandateDataParams(MandateDataParams.Type.Online.DEFAULT).takeIf {
+            supportsAddingMandateData && type.requiresMandate
+        }
+    }
+}
+
 private fun PaymentIntent.canSetupFutureUsage(paymentMethodCode: PaymentMethodCode): Boolean {
     return isSetupFutureUsageSet(paymentMethodCode)
 }
