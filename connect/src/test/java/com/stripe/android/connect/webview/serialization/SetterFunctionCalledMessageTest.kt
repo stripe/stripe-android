@@ -54,7 +54,7 @@ class SetterFunctionCalledMessageTest {
     }
 
     @Test
-    fun `should deserialize all EmbeddedComponentError.ErrorType values correctly`() {
+    fun `should deserialize all EmbeddedComponentError ErrorType values correctly`() {
         EmbeddedComponentError.ErrorType.entries.forEach { errorType ->
             val json = """{"setter":"setOnLoadError","value":{"error":{"type":"${errorType.value}","message":"msg"}}}"""
             val result = ConnectJson.decodeFromString<SetterFunctionCalledMessage>(json)

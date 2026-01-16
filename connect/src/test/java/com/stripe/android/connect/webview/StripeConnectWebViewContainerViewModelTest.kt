@@ -203,7 +203,11 @@ class StripeConnectWebViewContainerViewModelTest {
     @Test
     fun `should handle SetOnLoadError`() = runTest(testDispatcher) {
         collectComponentEvents()
-        val message = SetterFunctionCalledMessage(SetOnLoadError(LoadError(EmbeddedComponentError.ErrorType.API_ERROR, null)))
+        val message = SetterFunctionCalledMessage(
+            SetOnLoadError(
+                LoadError(EmbeddedComponentError.ErrorType.API_ERROR, null)
+            )
+        )
         viewModel.delegate.onReceivedSetterFunctionCalled(message)
 
         assertThat(receivedComponentEvents).contains(ComponentEvent.Message(message))
