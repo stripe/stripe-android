@@ -1032,7 +1032,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 options = options.copy(stripeAccount = null),
                 params = mapOf("key" to options.apiKey, "bin_prefix" to bin.value),
             ),
-            jsonParser = CardMetadataJsonParser(bin),
+            jsonParser = CardMetadataJsonParser(bin, isNetwork = true),
         ).onFailure {
             fireAnalyticsRequest(PaymentAnalyticsEvent.CardMetadataLoadFailure)
         }
