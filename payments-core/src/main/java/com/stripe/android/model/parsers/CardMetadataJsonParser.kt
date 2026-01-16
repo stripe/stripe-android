@@ -7,9 +7,10 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 internal class CardMetadataJsonParser(
-    private val bin: Bin
+    private val bin: Bin,
+    isNetwork: Boolean
 ) : ModelJsonParser<CardMetadata> {
-    private val accountRangeJsonParser = AccountRangeJsonParser()
+    private val accountRangeJsonParser = AccountRangeJsonParser(isNetwork)
 
     override fun parse(json: JSONObject): CardMetadata {
         val data = json.optJSONArray("data") ?: JSONArray()
