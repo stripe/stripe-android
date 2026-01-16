@@ -3,13 +3,12 @@ package com.stripe.android.paymentelement
 import androidx.annotation.RestrictTo
 
 /**
- * Marks checkout session APIs as being in private preview.
  * This feature allows initializing PaymentSheet/FlowController/EmbeddedPaymentElement
  * with a Checkout Session client secret instead of a PaymentIntent or SetupIntent.
  */
 @RequiresOptIn(
     level = RequiresOptIn.Level.ERROR,
-    message = "Checkout session support is in private preview and may change without notice."
+    message = "Checkout session support is under construction and may change without notice."
 )
 @Retention(AnnotationRetention.BINARY)
 @Target(
@@ -19,4 +18,4 @@ import androidx.annotation.RestrictTo
     AnnotationTarget.TYPEALIAS
 )
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-annotation class CheckoutSessionPrivatePreview
+annotation class CheckoutSessionPreview
