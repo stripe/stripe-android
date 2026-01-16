@@ -10,6 +10,10 @@ import org.json.JSONObject
 internal class AccountRangeJsonParser(
     private val isNetwork: Boolean
 ) : ModelJsonParser<AccountRange> {
+
+    fun interface Factory {
+        fun create(isNetwork: Boolean): AccountRangeJsonParser
+    }
     override fun parse(json: JSONObject): AccountRange? {
         val accountRangeHigh = StripeJsonUtils.optString(json, FIELD_ACCOUNT_RANGE_HIGH)
         val accountRangeLow = StripeJsonUtils.optString(json, FIELD_ACCOUNT_RANGE_LOW)
