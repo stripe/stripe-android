@@ -22,7 +22,7 @@ interface CardDetailsTextFieldConfig {
     fun determineVisualTransformation(number: String, panLength: Int): VisualTransformation
     fun determineState(
         brand: CardBrand,
-        funding: CardFunding?,
+        fundingTypes: List<CardFunding>,
         number: String,
         numberAllowedDigits: Int
     ): TextFieldState

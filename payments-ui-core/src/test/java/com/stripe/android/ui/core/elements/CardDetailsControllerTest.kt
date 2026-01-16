@@ -287,7 +287,7 @@ class CardDetailsControllerTest {
     ) : CardNumberTextFieldConfig by defaultCardNumberTextFieldConfig {
         override fun determineState(
             brand: CardBrand,
-            funding: CardFunding?,
+            fundingTypes: List<CardFunding>,
             number: String,
             numberAllowedDigits: Int
         ): TextFieldState {
@@ -301,7 +301,7 @@ class CardDetailsControllerTest {
     ) : CvcTextFieldConfig by defaultCvcTextFieldConfig {
         override fun determineState(
             brand: CardBrand,
-            funding: CardFunding?,
+            fundingTypes: List<CardFunding>,
             number: String,
             numberAllowedDigits: Int
         ): TextFieldState {

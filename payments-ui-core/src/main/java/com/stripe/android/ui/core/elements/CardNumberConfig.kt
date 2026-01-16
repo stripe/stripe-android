@@ -42,7 +42,7 @@ internal class CardNumberConfig(
 
     override fun determineState(
         brand: CardBrand,
-        funding: CardFunding?,
+        fundingTypes: List<CardFunding>,
         number: String,
         numberAllowedDigits: Int
     ): TextFieldState {
@@ -63,7 +63,7 @@ internal class CardNumberConfig(
         }
 
         val isDigitLimit = brand.getMaxLengthForCardNumber(number) != -1
-        val fundingErrorMessageId = getFundingErrorMessage(funding, number)
+        val fundingErrorMessageId = getFundingErrorMessage(fundingTypes, number)
 
         return when {
             isDigitLimit && number.length < numberAllowedDigits -> {
@@ -127,11 +127,13 @@ internal class CardNumberConfig(
     }
 
     private fun getFundingErrorMessage(
-        funding: CardFunding?,
+        fundingTypes: List<CardFunding>,
         number: String,
     ): Int? {
-        val cardFundingAccepted = funding?.let(cardFundingFilter::isAccepted)
-        val hasError = number.length >= digitsRequiredToFetchFunding && cardFundingAccepted == false
+        val anyFundingAccepted = fundingTypes.any { cardFundingFilter.isAccepted(it) }
+        val hasError = number.length >= digitsRequiredToFetchFunding &&
+            fundingTypes.isNotEmpty() &&
+            !anyFundingAccepted
         return cardFundingFilter.allowedFundingTypesDisplayMessage()?.takeIf { hasError }
     }
 
