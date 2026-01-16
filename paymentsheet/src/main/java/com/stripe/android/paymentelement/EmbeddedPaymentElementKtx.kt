@@ -84,6 +84,7 @@ fun rememberEmbeddedPaymentElement(
             .analyticEventCallback(builder.analyticEventCallback)
             .createCardPresentSetupIntentCallback(builder.createCardPresentSetupIntentCallback)
             .rowSelectionImmediateActionCallback(builder.rowSelectionBehavior, embeddedPaymentElement)
+            .googlePayDynamicUpdateHandler(builder.googlePayDynamicUpdateHandler)
             .build()
     }
 

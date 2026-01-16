@@ -51,11 +51,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.taptoadd.TerminalConnectionTokenCallbackHolder
 import com.stripe.android.common.taptoadd.TerminalLocationHolder
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
+import com.stripe.android.googlepaylauncher.GooglePayDynamicUpdateHandler
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.GooglePayReceivedUpdate
+import com.stripe.android.googlepaylauncher.GooglePayUpdate
+import com.stripe.android.googlepaylauncher.rememberGooglePayPaymentMethodLauncher
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -79,13 +86,18 @@ import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlayg
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.ConfirmationTokenSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedTwoStepSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePayMode
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.SettingsUi
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsPlaygroundType
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.countryCode
 import com.stripe.android.paymentsheet.example.playground.spt.SharedPaymentTokenPlaygroundContract
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
@@ -174,6 +186,14 @@ internal class PaymentSheetPlaygroundActivity :
                     .confirmCustomPaymentMethodCallback(this)
                     .analyticEventCallback(viewModel::analyticCallback)
                     .createCardPresentSetupIntentCallback(viewModel::createCardPresentSetupIntent)
+                    .googlePayDynamicUpdateHandler(
+                        object : GooglePayDynamicUpdateHandler {
+                            override fun handle(
+                                receivedUpdate: GooglePayReceivedUpdate,
+                                onUpdate: (update: GooglePayUpdate) -> Unit
+                            ) {}
+                        }
+                    )
                     .also {
                         if (playgroundState?.snapshot[ConfirmationTokenSettingsDefinition] == true) {
                             it.createIntentCallback(viewModel::createIntentWithConfirmationTokenCallback)
@@ -192,6 +212,14 @@ internal class PaymentSheetPlaygroundActivity :
                     .confirmCustomPaymentMethodCallback(this)
                     .createCardPresentSetupIntentCallback(viewModel::createCardPresentSetupIntent)
                     .analyticEventCallback(viewModel::analyticCallback)
+                    .googlePayDynamicUpdateHandler(
+                        object : GooglePayDynamicUpdateHandler {
+                            override fun handle(
+                                receivedUpdate: GooglePayReceivedUpdate,
+                                onUpdate: (update: GooglePayUpdate) -> Unit
+                            ) {}
+                        }
+                    )
                     .also {
                         if (playgroundState?.snapshot[ConfirmationTokenSettingsDefinition] == true) {
                             it.createIntentCallback(viewModel::createIntentWithConfirmationTokenCallback)
@@ -484,6 +512,47 @@ internal class PaymentSheetPlaygroundActivity :
                     )
                 }
 
+                val snapshot = playgroundState.snapshot
+                val googlePayMode = snapshot[GooglePaySettingsDefinition]
+
+                if (googlePayMode != GooglePayMode.Off) {
+                    GooglePayButton(
+                        rememberGooglePayPaymentMethodLauncher(
+                            config = GooglePayPaymentMethodLauncher.Config(
+                                environment = if (googlePayMode == GooglePayMode.Test) {
+                                    GooglePayEnvironment.Test
+                                } else {
+                                    GooglePayEnvironment.Production
+                                },
+                                merchantName = "Example, Inc.",
+                                merchantCountryCode = snapshot[MerchantSettingsDefinition].countryCode,
+                                shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
+                                    isRequired = true
+                                ),
+                                shippingOptionParameters = GooglePayJsonFactory.ShippingOptionParameters(
+                                    shippingOptions = listOf(
+                                        GooglePayJsonFactory.ShippingOptionParameters.SelectionOption(
+                                            id = "id_1",
+                                            label = "Default",
+                                        ),
+                                    ),
+                                ),
+                            ),
+                            readyCallback = {},
+                            resultCallback = {},
+                            updateHandler = remember {
+                                object : GooglePayDynamicUpdateHandler {
+                                    override fun handle(
+                                        receivedUpdate: GooglePayReceivedUpdate,
+                                        onUpdate: (update: GooglePayUpdate) -> Unit
+                                    ) {}
+                                }
+                            }
+                        ),
+                        playgroundState,
+                    )
+                }
+
                 when (playgroundState.integrationType) {
                     PlaygroundConfigurationData.IntegrationType.PaymentSheet -> {
                         PaymentSheetUi(
@@ -517,6 +586,26 @@ internal class PaymentSheetPlaygroundActivity :
                 playgroundState = playgroundState,
             )
             is PlaygroundState.SharedPaymentToken -> FlowControllerWithSptUi(playgroundState)
+        }
+    }
+
+    @Composable
+    private fun GooglePayButton(
+        launcher: GooglePayPaymentMethodLauncher,
+        paymentState: PlaygroundState.Payment,
+    ) {
+        Button(
+            onClick = {
+                launcher.present(
+                    currencyCode = paymentState.currencyCode.value,
+                    amount = paymentState.amount,
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(CHECKOUT_TEST_TAG),
+        ) {
+            Text("Google Pay")
         }
     }
 

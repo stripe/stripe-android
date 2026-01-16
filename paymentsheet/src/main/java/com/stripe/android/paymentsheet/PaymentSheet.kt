@@ -23,6 +23,7 @@ import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.googlepaylauncher.GooglePayDynamicUpdateHandler
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
@@ -367,6 +368,13 @@ class PaymentSheet internal constructor(
             callback: CreateCardPresentSetupIntentCallback,
         ) = apply {
             callbacksBuilder.createCardPresentSetupIntentCallback(callback)
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun googlePayDynamicUpdateHandler(
+            handler: GooglePayDynamicUpdateHandler,
+        ) = apply {
+            callbacksBuilder.googlePayDynamicUpdateHandler(handler)
         }
 
         /**
@@ -4183,6 +4191,13 @@ class PaymentSheet internal constructor(
                 callback: CreateCardPresentSetupIntentCallback,
             ) = apply {
                 callbacksBuilder.createCardPresentSetupIntentCallback(callback)
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun googlePayDynamicUpdateHandler(
+                handler: GooglePayDynamicUpdateHandler,
+            ) = apply {
+                callbacksBuilder.googlePayDynamicUpdateHandler(handler)
             }
 
             /**

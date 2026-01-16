@@ -181,6 +181,7 @@ internal fun createTestConfirmationHandlerFactory(
                 GooglePayConfirmationDefinition(
                     googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
                     userFacingLogger = FakeUserFacingLogger(),
+                    updateHandler = { null },
                 ),
                 ExternalPaymentMethodConfirmationDefinition(
                     paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,

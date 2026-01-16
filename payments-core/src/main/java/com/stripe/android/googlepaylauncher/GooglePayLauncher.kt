@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.DefaultCardFundingFilter
@@ -42,12 +43,14 @@ import java.util.Locale
  */
 class GooglePayLauncher internal constructor(
     lifecycleScope: CoroutineScope,
+    lifecycleOwner: LifecycleOwner,
     private val config: Config,
     private val readyCallback: ReadyCallback,
     private val activityResultLauncher: ActivityResultLauncher<GooglePayLauncherContract.Args>,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
-    analyticsRequestExecutor: AnalyticsRequestExecutor
+    analyticsRequestExecutor: AnalyticsRequestExecutor,
+    updateHandler: GooglePayDynamicUpdateHandler?,
 ) {
     private var isReady = false
 
@@ -62,13 +65,16 @@ class GooglePayLauncher internal constructor(
      *
      * @param resultCallback called with the result of the [GooglePayLauncher] operation
      */
+    @JvmOverloads
     constructor(
         activity: ComponentActivity,
         config: Config,
         readyCallback: ReadyCallback,
-        resultCallback: ResultCallback
+        resultCallback: ResultCallback,
+        updateHandler: GooglePayDynamicUpdateHandler? = null,
     ) : this(
         activity.lifecycleScope,
+        activity,
         config,
         readyCallback,
         activity.registerForActivityResult(
@@ -98,7 +104,8 @@ class GooglePayLauncher internal constructor(
             PaymentConfiguration.getInstance(activity).publishableKey,
             setOf(PRODUCT_USAGE)
         ),
-        DefaultAnalyticsRequestExecutor()
+        DefaultAnalyticsRequestExecutor(),
+        updateHandler
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -108,9 +115,11 @@ class GooglePayLauncher internal constructor(
         signal: UnregisterSignal,
         config: Config,
         readyCallback: ReadyCallback,
-        resultCallback: ResultCallback
+        resultCallback: ResultCallback,
+        updateHandler: GooglePayDynamicUpdateHandler? = null,
     ) : this(
         activity.lifecycleScope,
+        activity,
         config,
         readyCallback,
         registerForReactNativeActivityResult(
@@ -141,7 +150,8 @@ class GooglePayLauncher internal constructor(
             PaymentConfiguration.getInstance(activity).publishableKey,
             setOf(PRODUCT_USAGE)
         ),
-        DefaultAnalyticsRequestExecutor()
+        DefaultAnalyticsRequestExecutor(),
+        updateHandler,
     )
 
     /**
@@ -155,13 +165,16 @@ class GooglePayLauncher internal constructor(
      *
      * @param resultCallback called with the result of the [GooglePayLauncher] operation
      */
+    @JvmOverloads
     constructor(
         fragment: Fragment,
         config: Config,
         readyCallback: ReadyCallback,
-        resultCallback: ResultCallback
+        resultCallback: ResultCallback,
+        updateHandler: GooglePayDynamicUpdateHandler? = null,
     ) : this(
         lifecycleScope = fragment.lifecycleScope,
+        lifecycleOwner = fragment,
         config = config,
         readyCallback = readyCallback,
         activityResultLauncher = fragment.registerForActivityResult(
@@ -191,6 +204,7 @@ class GooglePayLauncher internal constructor(
             defaultProductUsageTokens = setOf(PRODUCT_USAGE),
         ),
         analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
+        updateHandler = updateHandler,
     )
 
     init {
@@ -208,6 +222,10 @@ class GooglePayLauncher internal constructor(
                     isReady = it
                 }
             )
+        }
+
+        updateHandler?.let {
+            GooglePayDynamicUpdateCallbacks.register("GPAY_LAUNCHER", it, lifecycleOwner)
         }
     }
 
@@ -232,6 +250,8 @@ class GooglePayLauncher internal constructor(
         check(isReady) {
             "presentForPaymentIntent() may only be called when Google Pay is available on this device."
         }
+
+        GooglePayDynamicUpdateCallbacks.setUpdateReceiver("GPAY_LAUNCHER")
 
         activityResultLauncher.launch(
             GooglePayLauncherContract.PaymentIntentArgs(
@@ -267,6 +287,8 @@ class GooglePayLauncher internal constructor(
         check(isReady) {
             "presentForSetupIntent() may only be called when Google Pay is available on this device."
         }
+
+        GooglePayDynamicUpdateCallbacks.setUpdateReceiver("GPAY_LAUNCHER")
 
         activityResultLauncher.launch(
             GooglePayLauncherContract.SetupIntentArgs(
@@ -397,12 +419,13 @@ class GooglePayLauncher internal constructor(
 fun rememberGooglePayLauncher(
     config: GooglePayLauncher.Config,
     readyCallback: GooglePayLauncher.ReadyCallback,
-    resultCallback: GooglePayLauncher.ResultCallback
+    resultCallback: GooglePayLauncher.ResultCallback,
+    updateHandler: GooglePayDynamicUpdateHandler? = null,
 ): GooglePayLauncher {
     val currentReadyCallback by rememberUpdatedState(readyCallback)
 
     val context = LocalContext.current
-    val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
+    val lifecycleOwner = LocalLifecycleOwner.current
     val activityResultLauncher = rememberLauncherForActivityResult(
         GooglePayLauncherContract(),
         resultCallback::onResult
@@ -410,7 +433,8 @@ fun rememberGooglePayLauncher(
 
     return remember(config) {
         GooglePayLauncher(
-            lifecycleScope = lifecycleScope,
+            lifecycleScope = lifecycleOwner.lifecycleScope,
+            lifecycleOwner = lifecycleOwner,
             config = config,
             readyCallback = {
                 currentReadyCallback.onReady(it)
@@ -436,7 +460,8 @@ fun rememberGooglePayLauncher(
                 PaymentConfiguration.getInstance(context).publishableKey,
                 setOf(GooglePayLauncher.PRODUCT_USAGE)
             ),
-            DefaultAnalyticsRequestExecutor()
+            DefaultAnalyticsRequestExecutor(),
+            updateHandler,
         )
     }
 }

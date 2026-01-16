@@ -19,6 +19,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.core.utils.StatusBarCompat
+import com.stripe.android.googlepaylauncher.GooglePayDynamicUpdateHandler
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -196,6 +197,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
 
         internal var rowSelectionBehavior: RowSelectionBehavior = RowSelectionBehavior.default()
 
+        internal var googlePayDynamicUpdateHandler: GooglePayDynamicUpdateHandler? = null
+
         /**
          * Called when a user confirms payment for an external payment method.
          */
@@ -237,6 +240,13 @@ class EmbeddedPaymentElement @Inject internal constructor(
          */
         fun rowSelectionBehavior(rowSelectionBehavior: RowSelectionBehavior) = apply {
             this.rowSelectionBehavior = rowSelectionBehavior
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun googlePayDynamicUpdateHandler(
+            handler: GooglePayDynamicUpdateHandler,
+        ) = apply {
+            this.googlePayDynamicUpdateHandler = handler
         }
 
         @OptIn(SharedPaymentTokenSessionPreview::class)

@@ -2,15 +2,20 @@ package com.stripe.android.paymentelement.confirmation.gpay
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.googlepaylauncher.GooglePayDynamicUpdateCallbacks
+import com.stripe.android.googlepaylauncher.GooglePayDynamicUpdateHandler
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
+import com.stripe.android.googlepaylauncher.GooglePayReceivedUpdate
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -20,11 +25,14 @@ import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
+import javax.inject.Provider
 import com.stripe.android.R as PaymentsCoreR
 
 internal class GooglePayConfirmationDefinition @Inject constructor(
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     private val userFacingLogger: UserFacingLogger?,
+    private val updateHandler: Provider<GooglePayDynamicUpdateHandler?>,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
 ) : ConfirmationDefinition<
     GooglePayConfirmationOption,
     ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
@@ -68,10 +76,18 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         activityResultCaller: ActivityResultCaller,
         onResult: (GooglePayPaymentMethodLauncher.Result) -> Unit
     ): ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args> {
+        updateHandler.get()?.let {
+            GooglePayDynamicUpdateCallbacks.register(paymentElementCallbackIdentifier, it)
+        }
+
         return activityResultCaller.registerForActivityResult(
             GooglePayPaymentMethodLauncherContractV2(),
             onResult,
         )
+    }
+
+    override fun unregister(launcher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>) {
+        GooglePayDynamicUpdateCallbacks.unregister(paymentElementCallbackIdentifier)
     }
 
     override fun launch(
@@ -88,6 +104,8 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             config = confirmationOption.config,
             confirmationArgs = confirmationArgs,
         )
+
+        GooglePayDynamicUpdateCallbacks.setUpdateReceiver(paymentElementCallbackIdentifier)
 
         googlePayLauncher.present(
             currencyCode = intent.asPaymentIntent()?.currency
@@ -159,6 +177,15 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                     ?: config.merchantName,
                 isEmailRequired = config.billingDetailsCollectionConfiguration.collectsEmail,
                 billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
+                shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(isRequired = true),
+                shippingOptionParameters = GooglePayJsonFactory.ShippingOptionParameters(
+                    shippingOptions = listOf(
+                        GooglePayJsonFactory.ShippingOptionParameters.SelectionOption(
+                            id = "id_1",
+                            label = "Default",
+                        ),
+                    ),
+                ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks
             ),
             readyCallback = {
