@@ -25,7 +25,7 @@ class CvcConfig : CvcTextFieldConfig {
 
     override fun determineState(
         brand: CardBrand,
-        funding: CardFunding?,
+        fundingTypes: List<CardFunding>,
         number: String,
         numberAllowedDigits: Int
     ): TextFieldState {

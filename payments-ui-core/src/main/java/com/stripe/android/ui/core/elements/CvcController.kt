@@ -70,7 +70,7 @@ class CvcController constructor(
     private val _fieldState = combineAsStateFlow(cardBrandFlow, _fieldValue) { brand, fieldValue ->
         cvcTextFieldConfig.determineState(
             brand = brand,
-            funding = null,
+            fundingTypes = emptyList(),
             number = fieldValue,
             numberAllowedDigits = brand.maxCvcLength
         )

@@ -215,7 +215,7 @@ internal class DefaultCardNumberController(
     ) { brand, fieldValue, accountRanges ->
         textFieldState(
             brand = brand,
-            funding = accountRanges.ranges.firstOrNull()?.funding,
+            fundingTypes = accountRanges.ranges.map { it.funding },
             number = fieldValue
         )
     }.stateIn(
@@ -392,12 +392,12 @@ internal class DefaultCardNumberController(
 
     private fun textFieldState(
         brand: CardBrand = impliedCardBrand.value,
-        funding: CardFunding? = null,
+        fundingTypes: List<CardFunding> = emptyList(),
         number: String = _fieldValue.value
     ): TextFieldState {
         return cardTextFieldConfig.determineState(
             brand,
-            funding,
+            fundingTypes,
             number,
             numberAllowedDigits = accountRangeService.accountRange?.panLength
                 ?: brand.getMaxLengthForCardNumber(number)

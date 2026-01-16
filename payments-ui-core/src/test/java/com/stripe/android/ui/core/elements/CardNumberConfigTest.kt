@@ -98,7 +98,7 @@ class CardNumberConfigTest {
             assertThat(
                 cardNumberConfig.determineState(
                     brand = CardBrand.Visa,
-                    funding = null,
+                    fundingTypes = emptyList(),
                     number = "",
                     numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("")
                 )
@@ -116,7 +116,7 @@ class CardNumberConfigTest {
             )
             val state = cardNumberConfig.determineState(
                 brand = CardBrand.Unknown,
-                funding = null,
+                fundingTypes = emptyList(),
                 number = "0",
                 numberAllowedDigits = CardBrand.Unknown.getMaxLengthForCardNumber("0")
             )
@@ -137,7 +137,7 @@ class CardNumberConfigTest {
             )
             val state = cardNumberConfig.determineState(
                 brand = CardBrand.Visa,
-                funding = null,
+                fundingTypes = emptyList(),
                 number = "12",
                 numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("12")
             )
@@ -158,7 +158,7 @@ class CardNumberConfigTest {
             )
             val state = cardNumberConfig.determineState(
                 brand = CardBrand.Visa,
-                funding = null,
+                fundingTypes = emptyList(),
                 number = "1234567890123456789",
                 numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("1234567890123456789")
             )
@@ -179,7 +179,7 @@ class CardNumberConfigTest {
             )
             val state = cardNumberConfig.determineState(
                 brand = CardBrand.Visa,
-                funding = null,
+                fundingTypes = emptyList(),
                 number = "4242424242424243",
                 numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242424243")
             )
@@ -200,7 +200,7 @@ class CardNumberConfigTest {
             )
             val state = cardNumberConfig.determineState(
                 brand = CardBrand.Visa,
-                funding = null,
+                fundingTypes = emptyList(),
                 number = "4242424242424242",
                 numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242")
             )
@@ -219,7 +219,7 @@ class CardNumberConfigTest {
 
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
-            funding = null,
+            fundingTypes = emptyList(),
             number = "4242424242424242",
             numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242")
         )
@@ -237,7 +237,7 @@ class CardNumberConfigTest {
 
         val state = cardNumberConfig.determineState(
             brand = CardBrand.MasterCard,
-            funding = null,
+            fundingTypes = emptyList(),
             number = "5555555555554444",
             numberAllowedDigits = CardBrand.MasterCard.getMaxLengthForCardNumber("5555555555554444")
         )
@@ -257,7 +257,7 @@ class CardNumberConfigTest {
 
         val state = cardNumberConfig.determineState(
             brand = CardBrand.MasterCard,
-            funding = null,
+            fundingTypes = emptyList(),
             number = "55555555", // Length is 8
             numberAllowedDigits = CardBrand.MasterCard.getMaxLengthForCardNumber("55555555")
         )
@@ -276,7 +276,7 @@ class CardNumberConfigTest {
 
         val state = cardNumberConfig.determineState(
             brand = CardBrand.MasterCard,
-            funding = null,
+            fundingTypes = emptyList(),
             number = "5555555555554444", // Length is greater than 8
             numberAllowedDigits = CardBrand.MasterCard.getMaxLengthForCardNumber("5555555555554444")
         )
@@ -297,7 +297,7 @@ class CardNumberConfigTest {
 
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
-            funding = null,
+            fundingTypes = emptyList(),
             number = "4242424242424242",
             numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242")
         )
@@ -320,7 +320,7 @@ class CardNumberConfigTest {
         // 5 digits, with debit funding (which is disallowed)
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
-            funding = CardFunding.Debit,
+            fundingTypes = listOf(CardFunding.Debit),
             number = "42424",
             numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("42424")
         )
@@ -346,7 +346,7 @@ class CardNumberConfigTest {
         // 10 digits (incomplete), with debit funding (which is disallowed)
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
-            funding = CardFunding.Debit,
+            fundingTypes = listOf(CardFunding.Debit),
             number = "4242424242",
             numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242")
         )
@@ -373,7 +373,7 @@ class CardNumberConfigTest {
         // Complete valid card with debit funding (which is disallowed)
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
-            funding = CardFunding.Debit,
+            fundingTypes = listOf(CardFunding.Debit),
             number = "4242424242424242",
             numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242")
         )
@@ -399,7 +399,7 @@ class CardNumberConfigTest {
         // Complete valid card with credit funding (which is allowed)
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
-            funding = CardFunding.Credit,
+            fundingTypes = listOf(CardFunding.Credit),
             number = "4242424242424242",
             numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242")
         )
@@ -410,7 +410,7 @@ class CardNumberConfigTest {
     }
 
     @Test
-    fun `determineState returns valid when funding is null`() {
+    fun `determineState returns valid when funding list is empty`() {
         val cardFundingFilter = FakeCardFundingFilter(
             disallowedFundingTypes = setOf(CardFunding.Debit),
             messageResId = StripeR.string.stripe_card_funding_only_credit
@@ -421,15 +421,40 @@ class CardNumberConfigTest {
             cardFundingFilter
         )
 
-        // Complete valid card with null funding (funding not yet determined)
+        // Complete valid card with empty funding list (funding not yet determined)
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
-            funding = null,
+            fundingTypes = emptyList(),
             number = "4242424242424242",
             numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242")
         )
 
         // Should show valid state without warning
+        assertThat(state).isInstanceOf<TextFieldStateConstants.Valid.Full>()
+        assertThat(state.getValidationMessage()).isNull()
+    }
+
+    @Test
+    fun `determineState returns valid without warning when any funding type is accepted`() {
+        val cardFundingFilter = FakeCardFundingFilter(
+            disallowedFundingTypes = setOf(CardFunding.Debit),
+            messageResId = StripeR.string.stripe_card_funding_only_credit
+        )
+        val cardNumberConfig = CardNumberConfig(
+            false,
+            DefaultCardBrandFilter,
+            cardFundingFilter
+        )
+
+        // Complete valid card with both debit (disallowed) and credit (allowed) funding
+        val state = cardNumberConfig.determineState(
+            brand = CardBrand.Visa,
+            fundingTypes = listOf(CardFunding.Debit, CardFunding.Credit),
+            number = "4242424242424242",
+            numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242")
+        )
+
+        // Should show valid state without warning because credit is accepted
         assertThat(state).isInstanceOf<TextFieldStateConstants.Valid.Full>()
         assertThat(state.getValidationMessage()).isNull()
     }
@@ -449,7 +474,7 @@ class CardNumberConfigTest {
         // Complete valid card with debit funding (which is disallowed but has no message)
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
-            funding = CardFunding.Debit,
+            fundingTypes = listOf(CardFunding.Debit),
             number = "4242424242424242",
             numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242")
         )
