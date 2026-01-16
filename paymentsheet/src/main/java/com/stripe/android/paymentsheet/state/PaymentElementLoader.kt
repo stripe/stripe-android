@@ -177,6 +177,23 @@ internal interface PaymentElementLoader {
                 return IntegrationMetadata.CryptoOnramp
             }
         }
+
+        @Parcelize
+        data class CheckoutSession(
+            val id: String,
+        ) : InitializationMode() {
+            override fun validate() {
+                if (!id.startsWith("cs_")) {
+                    throw IllegalArgumentException(
+                        "Must use a checkout session id."
+                    )
+                }
+            }
+
+            override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
+                return IntegrationMetadata.CheckoutSession(id)
+            }
+        }
     }
 
     @Parcelize

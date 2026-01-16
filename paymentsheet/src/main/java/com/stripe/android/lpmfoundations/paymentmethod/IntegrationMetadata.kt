@@ -39,4 +39,7 @@ internal sealed class IntegrationMetadata : Parcelable {
 
     @Parcelize
     object CryptoOnramp : IntegrationMetadata()
+
+    @Parcelize
+    data class CheckoutSession(val id: String) : IntegrationMetadata()
 }

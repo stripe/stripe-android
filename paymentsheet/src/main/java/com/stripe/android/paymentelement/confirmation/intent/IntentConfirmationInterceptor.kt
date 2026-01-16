@@ -93,6 +93,9 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }
+            is IntegrationMetadata.CheckoutSession -> {
+                TODO("CheckoutSession confirmation not yet supported.")
+            }
         }
     }
 }
