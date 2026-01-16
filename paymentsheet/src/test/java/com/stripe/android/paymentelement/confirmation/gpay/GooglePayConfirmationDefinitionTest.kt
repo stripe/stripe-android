@@ -655,6 +655,7 @@ class GooglePayConfirmationDefinitionTest {
         return GooglePayConfirmationDefinition(
             googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
             userFacingLogger = userFacingLogger,
+            updateHandler = { null },
         )
     }
 

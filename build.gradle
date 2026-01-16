@@ -6,6 +6,7 @@ buildscript {
     apply from: './build-configuration/build-environment.gradle'
 
     repositories {
+        mavenLocal()
         mavenCentral()
         google()
         gradlePluginPortal()
@@ -43,6 +44,7 @@ allprojects { project ->
     group = GROUP
 
     repositories {
+        mavenLocal()
         mavenCentral()
         google()
         gradlePluginPortal()

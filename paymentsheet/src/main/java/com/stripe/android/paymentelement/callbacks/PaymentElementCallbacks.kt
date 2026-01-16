@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.callbacks
 
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.googlepaylauncher.GooglePayDynamicUpdateHandler
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
@@ -34,6 +35,7 @@ internal data class PaymentElementCallbacks private constructor(
     val shopPayHandlers: ShopPayHandlers?,
     val preparePaymentMethodHandler: PreparePaymentMethodHandler?,
     val createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback?,
+    val googlePayDynamicUpdateHandler: GooglePayDynamicUpdateHandler?,
 ) {
     class Builder {
         private var createIntentCallback: CreateIntentCallback? = null
@@ -45,6 +47,7 @@ internal data class PaymentElementCallbacks private constructor(
         private var shopPayHandlers: ShopPayHandlers? = null
         private var preparePaymentMethodHandler: PreparePaymentMethodHandler? = null
         private var createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback? = null
+        private var googlePayDynamicUpdateHandler: GooglePayDynamicUpdateHandler? = null
 
         fun createIntentCallback(createIntentCallback: CreateIntentCallback?) = apply {
             this.createIntentCallback = createIntentCallback
@@ -78,6 +81,10 @@ internal data class PaymentElementCallbacks private constructor(
 
         fun createCardPresentSetupIntentCallback(callback: CreateCardPresentSetupIntentCallback?) = apply {
             this.createCardPresentSetupIntentCallback = callback
+        }
+
+        fun googlePayDynamicUpdateHandler(handler: GooglePayDynamicUpdateHandler?) = apply {
+            this.googlePayDynamicUpdateHandler = handler
         }
 
         fun rowSelectionImmediateActionCallback(
@@ -124,6 +131,7 @@ internal data class PaymentElementCallbacks private constructor(
                 shopPayHandlers = shopPayHandlers,
                 preparePaymentMethodHandler = preparePaymentMethodHandler,
                 createCardPresentSetupIntentCallback = createCardPresentSetupIntentCallback,
+                googlePayDynamicUpdateHandler = googlePayDynamicUpdateHandler,
             )
         }
     }

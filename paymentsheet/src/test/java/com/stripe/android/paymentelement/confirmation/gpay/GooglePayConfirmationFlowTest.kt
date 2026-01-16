@@ -37,6 +37,7 @@ class GooglePayConfirmationFlowTest {
                     definition = GooglePayConfirmationDefinition(
                         googlePayPaymentMethodLauncherFactory = factory,
                         userFacingLogger = null,
+                        updateHandler = { null },
                     ),
                 )
 
@@ -86,6 +87,7 @@ class GooglePayConfirmationFlowTest {
         definition = GooglePayConfirmationDefinition(
             googlePayPaymentMethodLauncherFactory = RecordingGooglePayPaymentMethodLauncherFactory.noOp(mock()),
             userFacingLogger = null,
+            updateHandler = { null },
         ),
         launcherResult = GooglePayPaymentMethodLauncher.Result.Completed(PAYMENT_METHOD),
         launcherArgs = EmptyConfirmationLauncherArgs,
