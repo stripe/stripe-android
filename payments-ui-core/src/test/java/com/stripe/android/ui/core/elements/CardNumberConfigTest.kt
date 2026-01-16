@@ -3,6 +3,8 @@ package com.stripe.android.ui.core.elements
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.model.AccountRange
+import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
 import com.stripe.android.testing.FakeCardFundingFilter
@@ -320,7 +322,7 @@ class CardNumberConfigTest {
         // 5 digits, with debit funding (which is disallowed)
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
-            accountRanges = listOf(CardFunding.Debit),
+            accountRanges = listOf(createAccountRange(CardFunding.Debit)),
             number = "42424",
             numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("42424")
         )
@@ -346,7 +348,7 @@ class CardNumberConfigTest {
         // 10 digits (incomplete), with debit funding (which is disallowed)
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
-            accountRanges = listOf(CardFunding.Debit),
+            accountRanges = listOf(createAccountRange(CardFunding.Debit)),
             number = "4242424242",
             numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242")
         )
@@ -373,7 +375,7 @@ class CardNumberConfigTest {
         // Complete valid card with debit funding (which is disallowed)
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
-            accountRanges = listOf(CardFunding.Debit),
+            accountRanges = listOf(createAccountRange(CardFunding.Debit)),
             number = "4242424242424242",
             numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242")
         )
@@ -399,7 +401,7 @@ class CardNumberConfigTest {
         // Complete valid card with credit funding (which is allowed)
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
-            accountRanges = listOf(CardFunding.Credit),
+            accountRanges = listOf(createAccountRange(CardFunding.Credit)),
             number = "4242424242424242",
             numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242")
         )
@@ -449,7 +451,10 @@ class CardNumberConfigTest {
         // Complete valid card with both debit (disallowed) and credit (allowed) funding
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
-            accountRanges = listOf(CardFunding.Debit, CardFunding.Credit),
+            accountRanges = listOf(
+                createAccountRange(CardFunding.Debit),
+                createAccountRange(CardFunding.Credit)
+            ),
             number = "4242424242424242",
             numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242")
         )
@@ -474,7 +479,7 @@ class CardNumberConfigTest {
         // Complete valid card with debit funding (which is disallowed but has no message)
         val state = cardNumberConfig.determineState(
             brand = CardBrand.Visa,
-            accountRanges = listOf(CardFunding.Debit),
+            accountRanges = listOf(createAccountRange(CardFunding.Debit)),
             number = "4242424242424242",
             numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242")
         )
@@ -483,4 +488,43 @@ class CardNumberConfigTest {
         assertThat(state).isInstanceOf<TextFieldStateConstants.Valid.Full>()
         assertThat(state.getValidationMessage()).isNull()
     }
+
+    @Test
+    fun `determineState ignores static account ranges when checking funding`() {
+        val cardFundingFilter = FakeCardFundingFilter(
+            disallowedFundingTypes = setOf(CardFunding.Debit),
+            messageResId = StripeR.string.stripe_card_funding_only_credit
+        )
+        val cardNumberConfig = CardNumberConfig(
+            false,
+            DefaultCardBrandFilter,
+            cardFundingFilter
+        )
+
+        // Complete valid card with static debit funding (should be ignored)
+        val state = cardNumberConfig.determineState(
+            brand = CardBrand.Visa,
+            accountRanges = listOf(createAccountRange(CardFunding.Debit, isStatic = true)),
+            number = "4242424242424242",
+            numberAllowedDigits = CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242")
+        )
+
+        // Should show valid state without warning because static ranges are ignored
+        assertThat(state).isInstanceOf<TextFieldStateConstants.Valid.Full>()
+        assertThat(state.getValidationMessage()).isNull()
+    }
+
+    private fun createAccountRange(
+        funding: CardFunding,
+        isStatic: Boolean = false
+    ) = AccountRange(
+        binRange = BinRange(
+            low = "4242420000000000",
+            high = "4242424239999999",
+            isStatic = isStatic
+        ),
+        panLength = 16,
+        brandInfo = AccountRange.BrandInfo.Visa,
+        funding = funding
+    )
 }
