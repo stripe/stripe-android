@@ -1628,24 +1628,47 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Returns failure if configuring checkout session with invalid id prefix`() = runScenario {
-        assertFailsWith<IllegalArgumentException>("Must use a checkout session id.") {
+    fun `Returns failure if configuring checkout session with invalid prefix`() = runScenario {
+        assertFailsWith<IllegalArgumentException>(
+            "Must use a checkout session client secret (format: cs_*_secret_*)."
+        ) {
             PaymentElementLoader.InitializationMode.CheckoutSession(
-                id = "pi_test_123",
+                clientSecret = "pi_test_123_secret_abc",
             ).validate()
         }
     }
 
     @Test
-    fun `CheckoutSession validate succeeds with valid id`() = runScenario {
+    fun `Returns failure if configuring checkout session without secret part`() = runScenario {
+        assertFailsWith<IllegalArgumentException>(
+            "Must use a checkout session client secret (format: cs_*_secret_*)."
+        ) {
+            PaymentElementLoader.InitializationMode.CheckoutSession(
+                clientSecret = "cs_test_123",
+            ).validate()
+        }
+    }
+
+    @Test
+    fun `CheckoutSession validate succeeds with valid client secret`() = runScenario {
         PaymentElementLoader.InitializationMode.CheckoutSession(
-            id = "cs_test_123",
+            clientSecret = "cs_test_123_secret_abc",
         ).validate()
     }
 
     @Test
-    fun `integrationMetadata returns checkout session for checkout session mode`() = runScenario {
-        val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession("cs_test_123")
+    fun `CheckoutSession id property extracts id from client secret`() = runScenario {
+        val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = "cs_test_123_secret_abc",
+        )
+        assertThat(checkoutSession.id).isEqualTo("cs_test_123")
+    }
+
+    @Test
+    fun `integrationMetadata returns checkout session with extracted id`() = runScenario {
+        val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = "cs_test_123_secret_abc"
+        )
         assertThat(checkoutSession.integrationMetadata(null))
             .isEqualTo(IntegrationMetadata.CheckoutSession("cs_test_123"))
     }

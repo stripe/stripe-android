@@ -180,12 +180,18 @@ internal interface PaymentElementLoader {
 
         @Parcelize
         data class CheckoutSession(
-            val id: String,
+            val clientSecret: String,
         ) : InitializationMode() {
+            /**
+             * The checkout session ID extracted from the client secret.
+             */
+            val id: String
+                get() = clientSecret.substringBefore("_secret_")
+
             override fun validate() {
-                if (!id.startsWith("cs_")) {
+                if (!clientSecret.startsWith("cs_") || !clientSecret.contains("_secret_")) {
                     throw IllegalArgumentException(
-                        "Must use a checkout session id."
+                        "Must use a checkout session client secret."
                     )
                 }
             }
