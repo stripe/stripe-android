@@ -80,6 +80,28 @@ public final class com/stripe/android/connect/BuildConfig {
 	public fun <init> ()V
 }
 
+public final class com/stripe/android/connect/EmbeddedComponentError : java/lang/RuntimeException {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/connect/EmbeddedComponentError$ErrorType;Ljava/lang/String;)V
+	public fun getMessage ()Ljava/lang/String;
+	public final fun getType ()Lcom/stripe/android/connect/EmbeddedComponentError$ErrorType;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/connect/EmbeddedComponentError$ErrorType : java/lang/Enum {
+	public static final field ACCOUNT_SESSION_CREATE_ERROR Lcom/stripe/android/connect/EmbeddedComponentError$ErrorType;
+	public static final field API_CONNECTION_ERROR Lcom/stripe/android/connect/EmbeddedComponentError$ErrorType;
+	public static final field API_ERROR Lcom/stripe/android/connect/EmbeddedComponentError$ErrorType;
+	public static final field AUTHENTICATION_ERROR Lcom/stripe/android/connect/EmbeddedComponentError$ErrorType;
+	public static final field INVALID_REQUEST_ERROR Lcom/stripe/android/connect/EmbeddedComponentError$ErrorType;
+	public static final field RATE_LIMIT_ERROR Lcom/stripe/android/connect/EmbeddedComponentError$ErrorType;
+	public static final field RENDER_ERROR Lcom/stripe/android/connect/EmbeddedComponentError$ErrorType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/connect/EmbeddedComponentError$ErrorType;
+	public static fun values ()[Lcom/stripe/android/connect/EmbeddedComponentError$ErrorType;
+}
+
 public final class com/stripe/android/connect/EmbeddedComponentManager {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/connect/EmbeddedComponentManager$Companion;
@@ -490,26 +512,6 @@ public synthetic class com/stripe/android/connect/appearance/fonts/CustomFontSou
 }
 
 public final class com/stripe/android/connect/appearance/fonts/CustomFontSource$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/connect/webview/serialization/EmbeddedErrorType : java/lang/Enum {
-	public static final field ACCOUNT_SESSION_CREATE_ERROR Lcom/stripe/android/connect/webview/serialization/EmbeddedErrorType;
-	public static final field API_CONNECTION_ERROR Lcom/stripe/android/connect/webview/serialization/EmbeddedErrorType;
-	public static final field API_ERROR Lcom/stripe/android/connect/webview/serialization/EmbeddedErrorType;
-	public static final field AUTHENTICATION_ERROR Lcom/stripe/android/connect/webview/serialization/EmbeddedErrorType;
-	public static final field Companion Lcom/stripe/android/connect/webview/serialization/EmbeddedErrorType$Companion;
-	public static final field INVALID_REQUEST_ERROR Lcom/stripe/android/connect/webview/serialization/EmbeddedErrorType;
-	public static final field RATE_LIMIT_ERROR Lcom/stripe/android/connect/webview/serialization/EmbeddedErrorType;
-	public static final field RENDER_ERROR Lcom/stripe/android/connect/webview/serialization/EmbeddedErrorType;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public final fun getValue ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/connect/webview/serialization/EmbeddedErrorType;
-	public static fun values ()[Lcom/stripe/android/connect/webview/serialization/EmbeddedErrorType;
-}
-
-public final class com/stripe/android/connect/webview/serialization/EmbeddedErrorType$Companion {
-	public final fun fromValue (Ljava/lang/String;)Lcom/stripe/android/connect/webview/serialization/EmbeddedErrorType;
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
