@@ -26,6 +26,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -59,6 +60,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
@@ -169,12 +172,15 @@ fun CompatTextField(
     }
     val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
 
+    val focusRequester = remember { FocusRequester() }
+
     @OptIn(ExperimentalMaterialApi::class)
     BasicTextField(
         value = value,
         modifier = modifier
             .indicatorLine(enabled, isError, interactionSource, colors)
-            .errorSemanticsWithDefault(isError, errorMessage),
+            .errorSemanticsWithDefault(isError, errorMessage)
+            .focusRequester(focusRequester),
         onValueChange = onValueChange,
         enabled = enabled,
         readOnly = readOnly,
@@ -203,6 +209,7 @@ fun CompatTextField(
                 colors = colors,
                 shape = shape,
                 contentPadding = contentPadding,
+                focusRequester = focusRequester,
             )
         }
     )
@@ -299,12 +306,15 @@ fun CompatTextField(
     }
     val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
 
+    val focusRequester = remember { FocusRequester() }
+
     @OptIn(ExperimentalMaterialApi::class)
     BasicTextField(
         value = value,
         modifier = modifier
             .indicatorLine(enabled, isError, interactionSource, colors)
-            .errorSemanticsWithDefault(isError, errorMessage),
+            .errorSemanticsWithDefault(isError, errorMessage)
+            .focusRequester(focusRequester),
         onValueChange = onValueChange,
         enabled = enabled,
         readOnly = readOnly,
@@ -333,6 +343,7 @@ fun CompatTextField(
                 colors = colors,
                 shape = shape,
                 contentPadding = contentPadding,
+                focusRequester = focusRequester,
             )
         }
     )
@@ -359,14 +370,28 @@ private fun InsetDecorationBox(
     } else {
         TextFieldDefaults.textFieldWithoutLabelPadding()
     },
+    focusRequester: FocusRequester? = null,
 ) {
     val layoutDirection = LocalLayoutDirection.current
 
     val startPadding = contentPadding.calculateStartPadding(layoutDirection)
     val endPadding = contentPadding.calculateEndPadding(layoutDirection)
 
+    // Click anywhere on the container to request focus on the text field.
+    // This fixes an issue where clicking on the label text wouldn't focus the field.
+    // We reuse the same interactionSource as BasicTextField so press/focus states are shared.
+    val containerClickModifier = if (enabled && focusRequester != null) {
+        Modifier.clickable(
+            interactionSource = interactionSource,
+            indication = null,
+            onClick = { focusRequester.requestFocus() }
+        )
+    } else {
+        Modifier
+    }
+
     Box(
-        modifier = Modifier.padding(
+        modifier = containerClickModifier.padding(
             start = leadingIcon?.let {
                 (startPadding - HorizontalIconPadding).coerceAtLeast(0.dp)
             } ?: 0.dp,
