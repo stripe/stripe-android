@@ -8,7 +8,6 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -105,7 +104,12 @@ internal class ConfirmPaymentIntentParamsFactory(
             paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
             paymentMethodOptions = optionsParams,
-            mandateData = mandateData(intent, paymentMethodType, optionsParams, intentConfigSetupFutureUsage),
+            mandateData = mandateDataForDeferredIntent(
+                paymentMethodType = paymentMethodType,
+                requiresMandateFromCreateParams = intent.isSetupFutureUsageSet(paymentMethodType.code),
+                optionsParams = optionsParams,
+                intentConfigSetupFutureUsage = intentConfigSetupFutureUsage,
+            ),
             shipping = shipping,
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
             paymentMethodCode = paymentMethodType.code,
@@ -164,7 +168,12 @@ internal class ConfirmSetupIntentParamsFactory(
         return ConfirmSetupIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
-            mandateData = mandateData(intent, paymentMethodType, null, null),
+            mandateData = mandateDataForDeferredIntent(
+                paymentMethodType = paymentMethodType,
+                requiresMandateFromCreateParams = true,
+                optionsParams = null,
+                intentConfigSetupFutureUsage = null,
+            ),
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
             paymentMethodCode = paymentMethodType.code,
             radarOptions = radarOptions,
@@ -202,35 +211,12 @@ internal class ConfirmSetupIntentParamsFactory(
     }
 }
 
-private fun mandateData(
-    intent: StripeIntent,
-    paymentMethodType: PaymentMethod.Type?,
-    optionsParams: PaymentMethodOptionsParams?,
-    intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
-): MandateDataParams? {
-    return paymentMethodType?.let { type ->
-        val supportsAddingMandateData = when (intent) {
-            is PaymentIntent ->
-                intent.canSetupFutureUsage(paymentMethodType.code) ||
-                    type.requiresMandateForPaymentIntent ||
-                    optionsParams?.setupFutureUsage()?.hasIntentToSetup() == true ||
-                    intentConfigSetupFutureUsage?.hasIntentToSetup() == true
-            is SetupIntent -> true
-        }
-
-        return MandateDataParams(MandateDataParams.Type.Online.DEFAULT).takeIf {
-            supportsAddingMandateData && type.requiresMandate
-        }
-    }
-}
-
 /**
- * Determines if mandate data should be included when we don't have a StripeIntent yet.
- * This is used for ConfirmationToken creation in the deferred intent flow.
+ * Determines if mandate data should be included for payment confirmation.
  *
  * @param paymentMethodType The payment method type
- * @param requiresMandateFromCreateParams Whether requiresMandate was set on createParams (computed from
- *     synthetic PaymentIntent from elements/sessions)
+ * @param requiresMandateFromCreateParams Whether the payment method requires a mandate based on intent
+ *     configuration (e.g., SFU set on intent, or always true for SetupIntent)
  * @param optionsParams The payment method options params (for PMO SFU)
  * @param intentConfigSetupFutureUsage The intent configuration level SFU
  */
@@ -242,8 +228,8 @@ fun mandateDataForDeferredIntent(
     intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
 ): MandateDataParams? {
     return paymentMethodType?.let { type ->
-        // For deferred intent, we check:
-        // 1. requiresMandateFromCreateParams - computed from synthetic PaymentIntent's SFU
+        // We check multiple conditions for mandate requirement:
+        // 1. requiresMandateFromCreateParams - SFU set on intent, or true for SetupIntent
         // 2. type.requiresMandateForPaymentIntent - PM types that always need mandate for PaymentIntent
         // 3. optionsParams SFU - PMO setup future usage
         // 4. intentConfigSetupFutureUsage - intent configuration level SFU
@@ -257,10 +243,6 @@ fun mandateDataForDeferredIntent(
             supportsAddingMandateData && type.requiresMandate
         }
     }
-}
-
-private fun PaymentIntent.canSetupFutureUsage(paymentMethodCode: PaymentMethodCode): Boolean {
-    return isSetupFutureUsageSet(paymentMethodCode)
 }
 
 private fun PaymentMethodExtraParams.extractSetAsDefaultPaymentMethodFromExtraParams(): Boolean? {
