@@ -171,6 +171,10 @@ internal class ElementsSessionJsonParser(
                         }
                     }
                 }
+                is ElementsSessionParams.CheckoutSessionType -> {
+                    // CheckoutSession uses CheckoutSessionResponseJsonParser, not this parser
+                    error("CheckoutSessionType should use CheckoutSessionResponseJsonParser")
+                }
             }
         }
     }
