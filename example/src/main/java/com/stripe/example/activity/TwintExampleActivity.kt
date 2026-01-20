@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
@@ -42,7 +43,7 @@ class TwintExampleActivity : StripeIntentActivity() {
         val params = PaymentMethodCreateParams.createTwint()
 
         createAndConfirmPaymentIntent(
-            country = "CH",
+            country = "FR",
             currency = "CHF",
             paymentMethodCreateParams = params,
             supportedPaymentMethods = "twint",
@@ -57,12 +58,16 @@ private fun TwintScreen(
     onButtonPressed: () -> Unit,
 ) {
     MdcTheme {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .safeDrawingPadding()
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Button(
                     onClick = onButtonPressed,
                     enabled = !isProcessing,
-                    modifier = Modifier.padding(16.dp).fillMaxSize(),
+                    modifier = Modifier.padding(16.dp),
                 ) {
                     Text("Pay with Twint")
                 }
