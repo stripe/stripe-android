@@ -7,7 +7,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
@@ -33,12 +33,11 @@ import java.util.UUID
 import kotlin.coroutines.CoroutineContext
 
 internal class CardDetailsController(
-    cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+    cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     initialValues: Map<IdentifierSpec, String?>,
     collectName: Boolean = false,
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     uiContext: CoroutineContext = Dispatchers.Main,
-    workContext: CoroutineContext = Dispatchers.IO,
     cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     cardDetailsTextFieldConfig: CardNumberTextFieldConfig = CardNumberConfig(
@@ -72,9 +71,8 @@ internal class CardDetailsController(
         IdentifierSpec.CardNumber,
         DefaultCardNumberController(
             cardTextFieldConfig = cardDetailsTextFieldConfig,
-            cardAccountRangeRepository = cardAccountRangeRepositoryFactory.create(),
+            cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
             uiContext = uiContext,
-            workContext = workContext,
             initialValue = initialValues[IdentifierSpec.CardNumber],
             cardBrandChoiceConfig = when (cbcEligibility) {
                 is CardBrandChoiceEligibility.Eligible -> CardBrandChoiceConfig.Eligible(

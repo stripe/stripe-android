@@ -20,7 +20,7 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.NullCardAccountRangeServiceFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -110,7 +110,7 @@ internal class FormActivityScreenShotTest {
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             embeddedSelectionHolder = selectionHolder,
-            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
             savedStateHandle = SavedStateHandle(),
             selectedPaymentMethodCode = "",
             tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),

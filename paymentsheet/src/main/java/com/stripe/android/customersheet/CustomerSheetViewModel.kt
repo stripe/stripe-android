@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.cards.DefaultCardAccountRangeServiceFactory
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.Logger
@@ -143,9 +144,11 @@ internal class CustomerSheetViewModel(
         userFacingLogger = userFacingLogger,
     )
 
-    private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
-        context = application,
-        productUsageTokens = productUsage,
+    private val cardAccountRangeServiceFactory = DefaultCardAccountRangeServiceFactory(
+        cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
+            context = application,
+            productUsageTokens = productUsage,
+        ),
     )
 
     private val customerState = MutableStateFlow(
@@ -461,7 +464,7 @@ internal class CustomerSheetViewModel(
                 formElements = paymentMethodMetadata.formElementsForCode(
                     code = paymentMethod.code,
                     uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
-                        cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+                        cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
                         /*
                          * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.
                          */
@@ -807,7 +810,7 @@ internal class CustomerSheetViewModel(
         val formElements = paymentMethodMetadata.formElementsForCode(
             code = selectedPaymentMethod.code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
-                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+                cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
                 /*
                  * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.
                  */

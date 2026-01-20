@@ -102,7 +102,7 @@ import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.InjectableActivityScenario
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.NullCardAccountRangeServiceFactory
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
@@ -1280,7 +1280,7 @@ internal class PaymentSheetActivityTest {
                     linkConfigurationCoordinator = coordinator,
                     cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp()
                 ),
-                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
                 errorReporter = FakeErrorReporter(),
                 cvcRecollectionHandler = cvcRecollectionHandler,
                 cvcRecollectionInteractorFactory = object : CvcRecollectionInteractor.Factory {

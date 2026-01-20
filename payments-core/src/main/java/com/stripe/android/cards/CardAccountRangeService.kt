@@ -56,6 +56,16 @@ interface CardAccountRangeService {
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    interface Factory {
+        fun create(
+            cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+            cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
+            accountRangeResultListener: AccountRangeResultListener? = null,
+            coroutineScope: CoroutineScope? = null
+        ): CardAccountRangeService
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface AccountRangesState {
         val ranges: List<AccountRange>
         val unfilteredRanges: List<AccountRange>

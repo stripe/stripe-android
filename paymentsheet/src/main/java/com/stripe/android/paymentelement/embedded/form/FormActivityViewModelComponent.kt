@@ -6,7 +6,9 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.cards.DefaultCardAccountRangeServiceFactory
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
@@ -91,6 +93,15 @@ internal interface FormActivityViewModelModule {
     fun bindsPrefsRepositoryFactory(factory: DefaultPrefsRepository.Factory): PrefsRepository.Factory
 
     companion object {
+        @Provides
+        fun providesCardAccountRangeServiceFactory(
+            cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
+        ): CardAccountRangeService.Factory {
+            return DefaultCardAccountRangeServiceFactory(
+                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory
+            )
+        }
+
         @Provides
         fun providesContext(application: Application): Context {
             return application

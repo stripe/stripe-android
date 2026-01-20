@@ -38,7 +38,7 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.NullCardAccountRangeServiceFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -706,7 +706,7 @@ internal class FormHelperTest {
     ): FormHelper {
         return DefaultFormHelper(
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
-            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
             paymentMethodMetadata = paymentMethodMetadata,
             newPaymentSelectionProvider = newPaymentSelectionProvider,
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),

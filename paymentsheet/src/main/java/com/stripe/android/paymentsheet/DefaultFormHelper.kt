@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 internal class DefaultFormHelper(
     private val coroutineScope: CoroutineScope,
     private val linkInlineHandler: LinkInlineHandler,
-    private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+    private val cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val newPaymentSelectionProvider: () -> NewPaymentOptionSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
@@ -72,7 +72,7 @@ internal class DefaultFormHelper(
             return DefaultFormHelper(
                 coroutineScope = viewModel.viewModelScope,
                 linkInlineHandler = linkInlineHandler,
-                cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
+                cardAccountRangeServiceFactory = viewModel.cardAccountRangeServiceFactory,
                 paymentMethodMetadata = paymentMethodMetadata,
                 newPaymentSelectionProvider = {
                     viewModel.newPaymentSelection
@@ -105,7 +105,7 @@ internal class DefaultFormHelper(
 
         fun create(
             coroutineScope: CoroutineScope,
-            cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+            cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
             autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
             paymentMethodMetadata: PaymentMethodMetadata,
             eventReporter: EventReporter,
@@ -115,7 +115,7 @@ internal class DefaultFormHelper(
             return DefaultFormHelper(
                 coroutineScope = coroutineScope,
                 linkInlineHandler = LinkInlineHandler.create(),
-                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+                cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
                 paymentMethodMetadata = paymentMethodMetadata,
                 newPaymentSelectionProvider = { null },
                 linkConfigurationCoordinator = null,
@@ -167,7 +167,7 @@ internal class DefaultFormHelper(
         return paymentMethodMetadata.formElementsForCode(
             code = code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
-                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+                cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
                 linkConfigurationCoordinator = linkConfigurationCoordinator,
                 linkInlineHandler = linkInlineHandler,
                 onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,

@@ -22,7 +22,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.NullCardAccountRangeServiceFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
@@ -512,7 +512,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             embeddedSelectionHolder = EmbeddedSelectionHolder(savedStateHandle),
-            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
             savedStateHandle = savedStateHandle,
             selectedPaymentMethodCode = "",
             tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),

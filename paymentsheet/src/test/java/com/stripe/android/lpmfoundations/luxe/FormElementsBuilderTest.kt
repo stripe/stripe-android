@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.cards.DefaultCardAccountRangeServiceFactory
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
@@ -305,7 +306,9 @@ class FormElementsBuilderTest {
             shippingValues = emptyMap(),
             saveForFutureUseInitialValue = false,
             merchantName = "Example Inc.",
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            cardAccountRangeServiceFactory = DefaultCardAccountRangeServiceFactory(
+                cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
+            ),
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             requiresMandate = false,

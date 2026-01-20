@@ -7,7 +7,9 @@ import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.cards.DefaultCardAccountRangeServiceFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -148,6 +150,16 @@ internal interface NativeLinkModule {
 
     @SuppressWarnings("TooManyFunctions")
     companion object {
+        @Provides
+        @NativeLinkScope
+        fun providesCardAccountRangeServiceFactory(
+            cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
+        ): CardAccountRangeService.Factory {
+            return DefaultCardAccountRangeServiceFactory(
+                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory
+            )
+        }
+
         @Provides
         @NativeLinkScope
         fun providesLinkAccountHolder(

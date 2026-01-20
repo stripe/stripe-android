@@ -39,7 +39,7 @@ import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.NullCardAccountRangeServiceFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -254,7 +254,7 @@ internal class DefaultVerticalModeFormInteractorTest {
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             embeddedSelectionHolder = selectionHolder,
-            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
             savedStateHandle = SavedStateHandle(),
             selectedPaymentMethodCode = "",
             tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
@@ -304,7 +304,7 @@ internal class DefaultVerticalModeFormInteractorTest {
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             embeddedSelectionHolder = selectionHolder,
-            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
             savedStateHandle = SavedStateHandle(),
             selectedPaymentMethodCode = selectedPaymentMethodCode,
             tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),

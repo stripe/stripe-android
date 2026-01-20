@@ -106,7 +106,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
         return buildList {
             add(
                 CardDetailsSectionElement(
-                    cardAccountRangeRepositoryFactory = arguments.cardAccountRangeRepositoryFactory,
+                    cardAccountRangeServiceFactory = arguments.cardAccountRangeServiceFactory,
                     initialValues = arguments.initialValues,
                     identifier = IdentifierSpec.Generic("card_details"),
                     collectName = billingDetailsCollectionConfiguration.collectsName,

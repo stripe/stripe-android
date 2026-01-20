@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.cards.DefaultCardAccountRangeServiceFactory
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.testing.CoroutineTestRule
@@ -21,6 +22,7 @@ import com.stripe.android.uicore.elements.TextFieldConfig
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.utils.TestUtils.idleLooper
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -259,7 +261,11 @@ class CardDetailsControllerTest {
     ): CardDetailsController {
         return CardDetailsController(
             cardBrandFilter = cardBrandFilter,
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            cardAccountRangeServiceFactory = DefaultCardAccountRangeServiceFactory(
+                cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+                uiContext = Dispatchers.Main,
+                workContext = Dispatchers.IO
+            ),
             initialValues = initialValues,
             cbcEligibility = cbcEligibility,
             cardDetailsTextFieldConfig = cardDetailsTextFieldConfig,

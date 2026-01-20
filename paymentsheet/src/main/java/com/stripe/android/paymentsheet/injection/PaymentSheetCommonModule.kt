@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.cards.DefaultCardAccountRangeServiceFactory
 import com.stripe.android.common.taptoadd.TapToAddModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -160,6 +162,16 @@ internal abstract class PaymentSheetCommonModule {
 
     @Suppress("TooManyFunctions")
     companion object {
+        @Provides
+        @Singleton
+        fun providesCardAccountRangeServiceFactory(
+            cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
+        ): CardAccountRangeService.Factory {
+            return DefaultCardAccountRangeServiceFactory(
+                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory
+            )
+        }
+
         @Provides
         @Singleton
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {

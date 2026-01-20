@@ -9,7 +9,7 @@ import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.uicore.utils.stateFlowOf
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.NullCardAccountRangeServiceFactory
 import kotlinx.coroutines.flow.StateFlow
 import org.mockito.kotlin.mock
 
@@ -45,7 +45,7 @@ internal class FakeAddPaymentMethodInteractor(
                 metadata = metadata,
             )
             val uiDefinitionArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
-                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
                 linkConfigurationCoordinator = null,
                 onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },
                 autocompleteAddressInteractorFactory = null,

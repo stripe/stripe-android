@@ -4,7 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardDetailsSectionElement(
-    cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+    cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     initialValues: Map<IdentifierSpec, String?>,
     automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
     private val collectName: Boolean = false,
@@ -23,7 +23,7 @@ class CardDetailsSectionElement(
     private val cardFundingFilter: CardFundingFilter,
     override val identifier: IdentifierSpec,
     override val controller: CardDetailsSectionController = CardDetailsSectionController(
-        cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+        cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
         initialValues = initialValues,
         collectName = collectName,
         cbcEligibility = cbcEligibility,

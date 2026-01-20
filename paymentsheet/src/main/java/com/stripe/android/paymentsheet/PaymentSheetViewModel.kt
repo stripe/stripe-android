@@ -12,7 +12,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.analytics.SessionSavedStateHandler
-import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
@@ -85,7 +85,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
-    cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+    cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
@@ -98,7 +98,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     workContext = workContext,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
-    cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+    cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
     isCompleteFlow = true,
     tapToAddCollectionHandler = tapToAddCollectionHandler,
     mode = mode,

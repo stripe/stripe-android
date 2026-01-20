@@ -12,7 +12,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.screenshottesting.PaparazziRule
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.NullCardAccountRangeServiceFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -94,7 +94,7 @@ internal class PaymentMethodScreenScreenshotTest {
     ): PaymentMethodState {
         val metadata = PaymentMethodMetadataFactory.create()
         val uiDefinitionArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
-            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
             linkConfigurationCoordinator = null,
             linkInlineHandler = null,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },

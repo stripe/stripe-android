@@ -5,7 +5,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.uicore.utils.stateFlowOf
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.NullCardAccountRangeServiceFactory
 import kotlinx.coroutines.flow.StateFlow
 import org.mockito.Mockito.mock
 
@@ -35,7 +35,7 @@ internal class FakeVerticalModeFormInteractor private constructor(
                 metadata = metadata,
             )
             val uiDefinitionArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
-                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
                 linkConfigurationCoordinator = null,
                 linkInlineHandler = null,
                 onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },

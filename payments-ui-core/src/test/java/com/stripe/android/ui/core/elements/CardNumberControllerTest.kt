@@ -13,10 +13,13 @@ import androidx.compose.ui.unit.LayoutDirection
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.CardNumber
+import com.stripe.android.cards.DefaultCardAccountRangeServiceFactory
 import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
@@ -37,6 +40,7 @@ import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCardBrandFilter
 import com.stripe.android.utils.TestUtils.idleLooper
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -730,9 +734,8 @@ internal class CardNumberControllerTest {
                 isCardBrandChoiceEligible = false,
                 cardBrandFilter = cardBrandFilter
             ),
-            cardAccountRangeRepository = FakeCardAccountRangeRepository(),
+            cardAccountRangeServiceFactory = FakeCardAccountRangeServiceFactory(),
             uiContext = testDispatcher,
-            workContext = testDispatcher,
             initialValue = initialValue,
             cardBrandChoiceConfig = cardBrandChoiceConfig,
             cardBrandFilter = cardBrandFilter
@@ -759,6 +762,33 @@ internal class CardNumberControllerTest {
         }
 
         override val loading: StateFlow<Boolean> = stateFlowOf(false)
+    }
+
+    private inner class FakeCardAccountRangeServiceFactory : CardAccountRangeService.Factory {
+        override fun create(
+            cardBrandFilter: CardBrandFilter,
+            cardFundingFilter: CardFundingFilter,
+            accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener?,
+            coroutineScope: CoroutineScope?
+        ): CardAccountRangeService {
+            val repositoryFactory = object : CardAccountRangeRepository.Factory {
+                override fun create(): CardAccountRangeRepository = FakeCardAccountRangeRepository()
+                override fun createWithStripeRepository(
+                    stripeRepository: com.stripe.android.networking.StripeRepository,
+                    publishableKey: String
+                ): CardAccountRangeRepository = FakeCardAccountRangeRepository()
+            }
+            return DefaultCardAccountRangeServiceFactory(
+                cardAccountRangeRepositoryFactory = repositoryFactory,
+                uiContext = testDispatcher,
+                workContext = testDispatcher
+            ).create(
+                cardBrandFilter = cardBrandFilter,
+                cardFundingFilter = cardFundingFilter,
+                accountRangeResultListener = accountRangeResultListener,
+                coroutineScope = coroutineScope
+            )
+        }
     }
 
     private companion object {

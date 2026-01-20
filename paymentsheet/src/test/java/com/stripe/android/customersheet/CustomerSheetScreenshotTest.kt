@@ -33,7 +33,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.NullCardAccountRangeServiceFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
@@ -116,7 +116,7 @@ internal class CustomerSheetScreenshotTest {
         ).formElementsForCode(
             code = PaymentMethod.Type.Card.code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
-                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
                 linkConfigurationCoordinator = null,
                 onLinkInlineSignupStateChanged = {},
                 autocompleteAddressInteractorFactory = null,

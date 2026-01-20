@@ -2,7 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
-import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -31,7 +31,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 
 internal sealed interface UiDefinitionFactory {
     class Arguments(
-        val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+        val cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
         val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
         val initialValues: Map<IdentifierSpec, String?>,
         val initialLinkUserInput: UserInput?,
@@ -59,7 +59,7 @@ internal sealed interface UiDefinitionFactory {
             ): Arguments
 
             class Default(
-                private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+                private val cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
                 private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
                 private val linkInlineHandler: LinkInlineHandler?,
                 private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
@@ -81,7 +81,7 @@ internal sealed interface UiDefinitionFactory {
                     requiresMandate: Boolean,
                 ): Arguments {
                     return Arguments(
-                        cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+                        cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
                         linkConfigurationCoordinator = linkConfigurationCoordinator,
                         merchantName = metadata.merchantName,
                         cbcEligibility = metadata.cbcEligibility,

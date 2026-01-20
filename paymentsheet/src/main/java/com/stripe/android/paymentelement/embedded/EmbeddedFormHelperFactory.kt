@@ -1,7 +1,7 @@
 package com.stripe.android.paymentelement.embedded
 
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.strings.ResolvableString
@@ -21,7 +21,7 @@ import javax.inject.Inject
 internal class EmbeddedFormHelperFactory @Inject constructor(
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
-    private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+    private val cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     private val savedStateHandle: SavedStateHandle,
     private val selectedPaymentMethodCode: String,
     private val tapToAddCollectionHandler: TapToAddCollectionHandler,
@@ -62,7 +62,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
         return DefaultFormHelper(
             coroutineScope = coroutineScope,
             linkInlineHandler = LinkInlineHandler.create(),
-            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+            cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
             paymentMethodMetadata = paymentMethodMetadata,
             newPaymentSelectionProvider = {
                 when (val currentSelection = embeddedSelectionHolder.selection.value) {

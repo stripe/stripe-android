@@ -16,13 +16,9 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.CardAccountRangeService.AccountRangesState
 import com.stripe.android.cards.CardNumber
-import com.stripe.android.cards.DefaultCardAccountRangeService
-import com.stripe.android.cards.DefaultStaticCardAccountRanges
-import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
@@ -74,20 +70,14 @@ internal sealed class CardNumberController : TextFieldController {
  */
 internal class DefaultCardNumberController(
     private val cardTextFieldConfig: CardNumberTextFieldConfig,
-    cardAccountRangeRepository: CardAccountRangeRepository,
+    cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     uiContext: CoroutineContext,
-    workContext: CoroutineContext,
-    staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     override val initialValue: String?,
     cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     private val coroutineScope: CoroutineScope = CoroutineScope(uiContext),
-    private val accountRangeService: CardAccountRangeService = DefaultCardAccountRangeService(
-        cardAccountRangeRepository,
-        uiContext,
-        workContext,
-        staticCardAccountRanges,
+    private val accountRangeService: CardAccountRangeService = cardAccountRangeServiceFactory.create(
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
         coroutineScope = coroutineScope

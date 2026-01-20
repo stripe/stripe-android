@@ -121,7 +121,7 @@ import com.stripe.android.utils.BankFormScreenStateFactory
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.NullCardAccountRangeServiceFactory
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
@@ -3491,7 +3491,7 @@ internal class PaymentSheetViewModelTest {
                         awaitResultTurbine.add(null)
                     }
                 },
-                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
                 errorReporter = errorReporter,
                 cvcRecollectionHandler = cvcRecollectionHandler,
                 cvcRecollectionInteractorFactory = object : CvcRecollectionInteractor.Factory {

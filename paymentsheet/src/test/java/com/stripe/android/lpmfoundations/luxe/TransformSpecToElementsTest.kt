@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.cards.DefaultCardAccountRangeServiceFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -443,7 +444,9 @@ private object TransformSpecToElementsFactory {
                 initialLinkUserInput = null,
                 saveForFutureUseInitialValue = true,
                 merchantName = "Merchant, Inc.",
-                cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+                cardAccountRangeServiceFactory = DefaultCardAccountRangeServiceFactory(
+                    cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
+                ),
                 shippingValues = null,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,

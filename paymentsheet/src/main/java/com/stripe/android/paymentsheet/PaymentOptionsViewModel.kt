@@ -10,7 +10,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
-import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.core.injection.IOContext
@@ -66,7 +66,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     @IOContext workContext: CoroutineContext,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
-    cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+    cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     tapToAddCollectionHandler: TapToAddCollectionHandler,
     mode: EventReporter.Mode,
 ) : BaseSheetViewModel(
@@ -76,7 +76,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     workContext = workContext,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
-    cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+    cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
     isCompleteFlow = false,
     tapToAddCollectionHandler = tapToAddCollectionHandler,
     mode = mode,

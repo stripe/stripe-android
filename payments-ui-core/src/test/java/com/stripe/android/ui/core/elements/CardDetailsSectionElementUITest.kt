@@ -18,6 +18,7 @@ import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.cards.DefaultCardAccountRangeServiceFactory
 import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cardscan.FakeCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.FakePaymentCardRecognitionClient
@@ -27,6 +28,7 @@ import com.stripe.android.ui.core.cardscan.ScannedCard
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.IdentifierSpec
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -132,10 +134,14 @@ internal class CardDetailsSectionElementUITest {
         context: Context,
         automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
     ): CardDetailsSectionController {
-        val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
+        val cardAccountRangeServiceFactory = DefaultCardAccountRangeServiceFactory(
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            uiContext = Dispatchers.Main,
+            workContext = Dispatchers.IO
+        )
 
         val output = CardDetailsSectionController(
-            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+            cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
             initialValues = emptyMap(),
             collectName = false,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,

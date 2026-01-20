@@ -3,8 +3,9 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import android.app.Application
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.cards.DefaultCardAccountRangeServiceFactory
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.UserInput
@@ -14,7 +15,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.NullCardAccountRangeServiceFactory
 
 internal object TestUiDefinitionFactoryArgumentsFactory {
     fun create(
@@ -35,7 +36,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
             null
         }
         return UiDefinitionFactory.Arguments.Factory.Default(
-            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory(context),
+            cardAccountRangeServiceFactory = cardAccountRangeServiceFactory(context),
             paymentMethodCreateParams = paymentMethodCreateParams,
             paymentMethodOptionsParams = paymentMethodOptionsParams,
             paymentMethodExtraParams = paymentMethodExtraParams,
@@ -50,11 +51,13 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
         )
     }
 
-    private fun cardAccountRangeRepositoryFactory(context: Context?): CardAccountRangeRepository.Factory {
+    private fun cardAccountRangeServiceFactory(context: Context?): CardAccountRangeService.Factory {
         return if (context == null) {
-            NullCardAccountRangeRepositoryFactory
+            NullCardAccountRangeServiceFactory
         } else {
-            DefaultCardAccountRangeRepositoryFactory(context)
+            DefaultCardAccountRangeServiceFactory(
+                cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
+            )
         }
     }
 }

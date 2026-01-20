@@ -1,7 +1,7 @@
 package com.stripe.android.link
 
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.core.Logger
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountHolder
@@ -24,7 +24,7 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.uicore.navigation.NavigationManager
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.NullCardAccountRangeServiceFactory
 import org.mockito.kotlin.mock
 
 internal class FakeNativeLinkComponent(
@@ -38,8 +38,8 @@ internal class FakeNativeLinkComponent(
         FakeLinkConfirmationHandler()
     },
     override val webLinkActivityContract: WebLinkActivityContract = mock(),
-    override val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory =
-        NullCardAccountRangeRepositoryFactory,
+    override val cardAccountRangeServiceFactory: CardAccountRangeService.Factory =
+        NullCardAccountRangeServiceFactory,
     override val viewModel: LinkActivityViewModel = mock(),
     override val errorReporter: ErrorReporter = FakeErrorReporter(),
     override val savedStateHandle: SavedStateHandle = SavedStateHandle(),

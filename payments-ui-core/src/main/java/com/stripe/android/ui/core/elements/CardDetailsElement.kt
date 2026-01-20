@@ -4,7 +4,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -25,14 +25,14 @@ import kotlinx.coroutines.flow.StateFlow
  */
 internal class CardDetailsElement(
     identifier: IdentifierSpec,
-    cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+    cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     initialValues: Map<IdentifierSpec, String?>,
     collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     val controller: CardDetailsController = CardDetailsController(
-        cardAccountRangeRepositoryFactory,
+        cardAccountRangeServiceFactory,
         initialValues,
         collectName,
         cbcEligibility,
