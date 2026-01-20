@@ -63,7 +63,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         confirmationTokenParser.parse(ConfirmationTokenFixtures.CONFIRMATION_TOKEN_JSON)!!
     }
 
-    internal val defaultIntegrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(
+    internal val defaultIntegrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(
         intentConfiguration = PaymentSheet.IntentConfiguration(
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 1099L,
@@ -832,7 +832,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
         val interceptor = createIntentConfirmationInterceptor(
             ephemeralKeySecret = "ek_test_123",
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
@@ -887,7 +887,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
         val interceptor = createIntentConfirmationInterceptor(
             ephemeralKeySecret = "ek_test_123",
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
@@ -943,7 +943,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val interceptor = createIntentConfirmationInterceptor(
             ephemeralKeySecret = "ek_test_123",
             publishableKeyProvider = { "pk_test_123" },
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
@@ -1231,7 +1231,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         runConfirmationTokenInterceptorScenario(
             observedParams = observedParams,
             isLiveMode = false,
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(mode = paymentMode)
             ),
         ) { interceptor ->
@@ -1301,7 +1301,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
     ) {
         val observedParams = Turbine<ConfirmationTokenParams>()
 
-        val integrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(
+        val integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 1099L,

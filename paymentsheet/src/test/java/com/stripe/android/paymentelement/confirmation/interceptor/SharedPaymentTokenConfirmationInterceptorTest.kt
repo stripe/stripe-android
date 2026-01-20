@@ -218,7 +218,7 @@ class SharedPaymentTokenConfirmationInterceptorTest {
     }
 
     private companion object {
-        val DEFAULT_INTEGRATION_METADATA = IntegrationMetadata.DeferredIntentWithSharedPaymentToken(
+        val DEFAULT_INTEGRATION_METADATA = IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 1099L,

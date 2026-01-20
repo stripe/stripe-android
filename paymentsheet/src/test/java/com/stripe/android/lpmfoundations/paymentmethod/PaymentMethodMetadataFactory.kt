@@ -128,7 +128,7 @@ internal object PaymentMethodMetadataFactory {
         clientSecret?.let { return IntegrationMetadata.IntentFirst(it) }
         return when (this) {
             is PaymentIntent -> {
-                IntegrationMetadata.DeferredIntentWithPaymentMethod(
+                IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = amount ?: 5000,
@@ -138,7 +138,7 @@ internal object PaymentMethodMetadataFactory {
                 )
             }
             is SetupIntent -> {
-                IntegrationMetadata.DeferredIntentWithPaymentMethod(
+                IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         mode = PaymentSheet.IntentConfiguration.Mode.Setup(
                             currency = "usd"
