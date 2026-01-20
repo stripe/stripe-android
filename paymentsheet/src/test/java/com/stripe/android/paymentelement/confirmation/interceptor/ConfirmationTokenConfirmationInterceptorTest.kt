@@ -1264,4 +1264,78 @@ class ConfirmationTokenConfirmationInterceptorTest {
             assertThat(params.clientContext?.setupFutureUsage).isEqualTo(expectedSfu)
         }
     }
+
+    @Test
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    fun `New PM - includes mandate when PMO SFU is set for PM type that requires mandate`() {
+        // Satispay requires mandate when SFU is set
+        runPmoSfuMandateTest(
+            paymentMethodType = PaymentMethod.Type.Satispay,
+            createParams = PaymentMethodCreateParams(
+                code = "satispay",
+                requiresMandate = false, // Form created without SFU knowledge
+            ),
+            expectedMandateIncluded = true,
+        )
+    }
+
+    @Test
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    fun `New PM - excludes mandate when PMO SFU is set for PM type that does not require mandate`() {
+        // Card does not require mandate even with SFU
+        runPmoSfuMandateTest(
+            paymentMethodType = PaymentMethod.Type.Card,
+            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            expectedMandateIncluded = false,
+        )
+    }
+
+    /**
+     * Helper to test PMO SFU mandate behavior for different payment method types.
+     */
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    private fun runPmoSfuMandateTest(
+        paymentMethodType: PaymentMethod.Type,
+        createParams: PaymentMethodCreateParams,
+        expectedMandateIncluded: Boolean,
+    ) {
+        val observedParams = Turbine<ConfirmationTokenParams>()
+
+        val integrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 1099L,
+                    currency = "usd",
+                    paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
+                        mapOf(paymentMethodType to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession)
+                    )
+                ),
+            ),
+        )
+
+        runConfirmationTokenInterceptorScenario(
+            observedParams = observedParams,
+            integrationMetadata = integrationMetadata,
+        ) { interceptor ->
+            val confirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = createParams,
+                optionsParams = null,
+                extraParams = null,
+                shouldSave = false,
+            )
+
+            interceptor.intercept(
+                intent = PaymentIntentFactory.create(),
+                confirmationOption = confirmationOption,
+                shippingValues = null,
+            )
+
+            val params = observedParams.awaitItem()
+            if (expectedMandateIncluded) {
+                assertThat(params.mandateDataParams).isNotNull()
+            } else {
+                assertThat(params.mandateDataParams).isNull()
+            }
+        }
+    }
 }

@@ -6,13 +6,14 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.mandateDataForDeferredIntent
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenClientContextParams
 import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.DeferredIntentParams
-import com.stripe.android.model.MandateDataParams
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.StripeIntent
@@ -219,16 +220,21 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             paymentMethodData = (confirmationOption as? PaymentMethodConfirmationOption.New)?.createParams,
             setUpFutureUsage = resolveSetupFutureUsage(confirmationOption.optionsParams),
             shipping = shippingValues,
-            mandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT).takeIf {
-                when (confirmationOption) {
-                    is PaymentMethodConfirmationOption.New -> {
-                        confirmationOption.createParams.requiresMandate
-                    }
-                    is PaymentMethodConfirmationOption.Saved -> {
-                        confirmationOption.paymentMethod.type?.requiresMandate == true
-                    }
-                }
-            },
+            mandateDataParams = mandateDataForDeferredIntent(
+                paymentMethodType = when (confirmationOption) {
+                    is PaymentMethodConfirmationOption.New ->
+                        PaymentMethod.Type.fromCode(confirmationOption.createParams.typeCode)
+                    is PaymentMethodConfirmationOption.Saved ->
+                        confirmationOption.paymentMethod.type
+                },
+                requiresMandateFromCreateParams = when (confirmationOption) {
+                    is PaymentMethodConfirmationOption.New -> confirmationOption.createParams.requiresMandate
+                    is PaymentMethodConfirmationOption.Saved -> false
+                },
+                optionsParams = confirmationOption.optionsParams,
+                intentConfigSetupFutureUsage = intentConfiguration.mode.setupFutureUse
+                    ?.toConfirmParamsSetupFutureUsage(),
+            ),
             setAsDefaultPaymentMethod = confirmationOption.shouldSaveAsDefault(),
             cvc = if (intentConfiguration.requireCvcRecollection) {
                 (confirmationOption.optionsParams as? PaymentMethodOptionsParams.Card)?.cvc
