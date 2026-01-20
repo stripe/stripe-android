@@ -17,7 +17,6 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.CardAccountRangeService
-import com.stripe.android.cards.CardAccountRangeService.AccountRangesState
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -48,7 +47,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -77,17 +75,13 @@ internal class DefaultCardNumberController(
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     private val coroutineScope: CoroutineScope = CoroutineScope(uiContext),
-    private val accountRangeService: CardAccountRangeService = cardAccountRangeServiceFactory.create(
-        cardBrandFilter = cardBrandFilter,
-        cardFundingFilter = DefaultCardFundingFilter,
-        coroutineScope = coroutineScope
-    ),
-    private val fundingAccountRangeService: CardAccountRangeService = cardAccountRangeServiceFactory.create(
+) : CardNumberController() {
+    private val accountRangeService = ControllerAccountRangeService(
+        cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
-        coroutineScope = coroutineScope
-    ),
-) : CardNumberController() {
+        coroutineScope = coroutineScope,
+    )
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
     override val debugLabel = cardTextFieldConfig.debugLabel
@@ -204,11 +198,11 @@ internal class DefaultCardNumberController(
     private val _fieldState = combine(
         flow = impliedCardBrand,
         flow2 = _fieldValue,
-        flow3 = fundingAccountRangeService.accountRangesStateFlow.filterIsInstance<AccountRangesState.Success>()
+        flow3 = accountRangeService.fundingAccountRanges
     ) { brand, fieldValue, accountRanges ->
         textFieldState(
             brand = brand,
-            accountRanges = accountRanges.ranges,
+            accountRanges = accountRanges,
             number = fieldValue
         )
     }.stateIn(
@@ -268,7 +262,6 @@ internal class DefaultCardNumberController(
         _fieldValue.value = cardTextFieldConfig.filter(displayFormatted)
         val cardNumber = CardNumber.Unvalidated(displayFormatted)
         accountRangeService.onCardNumberChanged(cardNumber, isCbcEligible = isEligibleForCardBrandChoice)
-        fundingAccountRangeService.onCardNumberChanged(cardNumber, isCbcEligible = isEligibleForCardBrandChoice)
         return null
     }
 
@@ -392,7 +385,7 @@ internal class DefaultCardNumberController(
             brand,
             accountRanges,
             number,
-            numberAllowedDigits = fundingAccountRangeService.accountRange?.panLength
+            numberAllowedDigits = accountRangeService.accountRange?.panLength
                 ?: brand.getMaxLengthForCardNumber(number)
         )
     }
