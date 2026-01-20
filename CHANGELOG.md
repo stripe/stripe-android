@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [FIXED][12232](https://github.com/stripe/stripe-android/pull/12232) Fixed an issue where Satispay was missing `mandate_data` when used with `setup_future_usage`.
+
 ## 22.6.0 - 2026-01-12
 
 ### PaymentSheet
