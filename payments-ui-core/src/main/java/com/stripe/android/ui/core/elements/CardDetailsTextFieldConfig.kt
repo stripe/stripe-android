@@ -5,8 +5,8 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.CardFunding
 import com.stripe.android.uicore.elements.TextFieldState
 
 /**
@@ -22,7 +22,7 @@ interface CardDetailsTextFieldConfig {
     fun determineVisualTransformation(number: String, panLength: Int): VisualTransformation
     fun determineState(
         brand: CardBrand,
-        fundingTypes: List<CardFunding>,
+        accountRanges: List<AccountRange>,
         number: String,
         numberAllowedDigits: Int
     ): TextFieldState
