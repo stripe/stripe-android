@@ -79,6 +79,11 @@ internal class DefaultCardNumberController(
     private val coroutineScope: CoroutineScope = CoroutineScope(uiContext),
     private val accountRangeService: CardAccountRangeService = cardAccountRangeServiceFactory.create(
         cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = DefaultCardFundingFilter,
+        coroutineScope = coroutineScope
+    ),
+    private val fundingAccountRangeService: CardAccountRangeService = cardAccountRangeServiceFactory.create(
+        cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
         coroutineScope = coroutineScope
     ),
@@ -199,7 +204,7 @@ internal class DefaultCardNumberController(
     private val _fieldState = combine(
         flow = impliedCardBrand,
         flow2 = _fieldValue,
-        flow3 = accountRangeService.accountRangesStateFlow.filterIsInstance<AccountRangesState.Success>()
+        flow3 = fundingAccountRangeService.accountRangesStateFlow.filterIsInstance<AccountRangesState.Success>()
     ) { brand, fieldValue, accountRanges ->
         textFieldState(
             brand = brand,
@@ -263,7 +268,7 @@ internal class DefaultCardNumberController(
         _fieldValue.value = cardTextFieldConfig.filter(displayFormatted)
         val cardNumber = CardNumber.Unvalidated(displayFormatted)
         accountRangeService.onCardNumberChanged(cardNumber, isCbcEligible = isEligibleForCardBrandChoice)
-
+        fundingAccountRangeService.onCardNumberChanged(cardNumber, isCbcEligible = isEligibleForCardBrandChoice)
         return null
     }
 
@@ -387,7 +392,7 @@ internal class DefaultCardNumberController(
             brand,
             accountRanges,
             number,
-            numberAllowedDigits = accountRangeService.accountRange?.panLength
+            numberAllowedDigits = fundingAccountRangeService.accountRange?.panLength
                 ?: brand.getMaxLengthForCardNumber(number)
         )
     }
