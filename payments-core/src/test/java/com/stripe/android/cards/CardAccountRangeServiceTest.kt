@@ -22,6 +22,7 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeApiRepository
@@ -421,6 +422,10 @@ private class FakeCardBrandFilter(
 ) : CardBrandFilter {
     override fun isAccepted(cardBrand: CardBrand): Boolean {
         return !disallowedBrands.contains(cardBrand)
+    }
+
+    override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+        throw IllegalStateException("Should not be called!")
     }
 }
 

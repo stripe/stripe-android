@@ -6,8 +6,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.CardFunding
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.R as StripeR
@@ -25,7 +25,7 @@ class CvcConfig : CvcTextFieldConfig {
 
     override fun determineState(
         brand: CardBrand,
-        funding: CardFunding?,
+        accountRanges: List<AccountRange>,
         number: String,
         numberAllowedDigits: Int
     ): TextFieldState {

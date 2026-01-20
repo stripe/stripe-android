@@ -21,6 +21,7 @@ internal object CardFundingAcceptanceSettingsDefinition :
             CardFundingAcceptanceType.All.value -> CardFundingAcceptanceType.All
             CardFundingAcceptanceType.CreditOnly.value -> CardFundingAcceptanceType.CreditOnly
             CardFundingAcceptanceType.DebitOnly.value -> CardFundingAcceptanceType.DebitOnly
+            CardFundingAcceptanceType.PrepaidOnly.value -> CardFundingAcceptanceType.PrepaidOnly
             else -> defaultValue
         }
     }
@@ -32,6 +33,7 @@ internal object CardFundingAcceptanceSettingsDefinition :
             option("All", CardFundingAcceptanceType.All),
             option("Credit Only", CardFundingAcceptanceType.CreditOnly),
             option("Debit Only", CardFundingAcceptanceType.DebitOnly),
+            option("Prepaid Only", CardFundingAcceptanceType.PrepaidOnly),
         )
     }
 
@@ -71,5 +73,10 @@ sealed class CardFundingAcceptanceType(
     object DebitOnly : CardFundingAcceptanceType(
         value = "debitOnly",
         cardFundingTypes = listOf(PaymentSheet.CardFundingType.Debit)
+    )
+
+    object PrepaidOnly : CardFundingAcceptanceType(
+        value = "prepaidOnly",
+        cardFundingTypes = listOf(PaymentSheet.CardFundingType.Prepaid)
     )
 }

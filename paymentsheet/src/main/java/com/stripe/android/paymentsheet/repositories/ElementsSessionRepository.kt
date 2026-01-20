@@ -222,6 +222,10 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 link = linkParams,
             )
         }
+
+        is PaymentElementLoader.InitializationMode.CheckoutSession -> {
+            TODO("CheckoutSession elements session not yet supported.")
+        }
     }
 }
 

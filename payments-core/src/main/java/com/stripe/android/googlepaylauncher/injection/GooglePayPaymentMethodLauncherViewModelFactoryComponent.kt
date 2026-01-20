@@ -2,6 +2,7 @@ package com.stripe.android.googlepaylauncher.injection
 
 import android.content.Context
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -57,6 +58,8 @@ internal interface GooglePayPaymentMethodLauncherViewModelFactoryComponent {
             config: GooglePayPaymentMethodLauncher.Config,
             @BindsInstance
             cardBrandFilter: CardBrandFilter,
+            @BindsInstance
+            cardFundingFilter: CardFundingFilter,
         ): GooglePayPaymentMethodLauncherViewModelFactoryComponent
     }
 }

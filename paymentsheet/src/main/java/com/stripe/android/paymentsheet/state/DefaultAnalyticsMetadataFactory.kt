@@ -242,6 +242,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
 private val PaymentElementLoader.InitializationMode.defaultAnalyticsValue: String
     get() = when (this) {
         is PaymentElementLoader.InitializationMode.CryptoOnramp -> "crypto_onramp"
+        is PaymentElementLoader.InitializationMode.CheckoutSession -> "checkout_session"
         is PaymentElementLoader.InitializationMode.DeferredIntent -> {
             when (this.intentConfiguration.mode) {
                 is PaymentSheet.IntentConfiguration.Mode.Payment -> "deferred_payment_intent"
@@ -256,17 +257,18 @@ private fun IntegrationMetadata.isDeferred(): Boolean = when (this) {
     is IntegrationMetadata.IntentFirst -> false
     IntegrationMetadata.CryptoOnramp -> true
     is IntegrationMetadata.CustomerSheet -> true
-    is IntegrationMetadata.DeferredIntentWithConfirmationToken -> true
-    is IntegrationMetadata.DeferredIntentWithPaymentMethod -> true
-    is IntegrationMetadata.DeferredIntentWithSharedPaymentToken -> true
+    is IntegrationMetadata.DeferredIntent.WithConfirmationToken -> true
+    is IntegrationMetadata.DeferredIntent.WithPaymentMethod -> true
+    is IntegrationMetadata.DeferredIntent.WithSharedPaymentToken -> true
+    is IntegrationMetadata.CheckoutSession -> false
 }
 
 private fun IntegrationMetadata.isSpt(): Boolean {
-    return this is IntegrationMetadata.DeferredIntentWithSharedPaymentToken
+    return this is IntegrationMetadata.DeferredIntent.WithSharedPaymentToken
 }
 
 private fun IntegrationMetadata.isConfirmationTokens(): Boolean {
-    return this is IntegrationMetadata.DeferredIntentWithConfirmationToken
+    return this is IntegrationMetadata.DeferredIntent.WithConfirmationToken
 }
 
 private fun StripeIntent.paymentMethodOptionsSetupFutureUsageMap(): Boolean {

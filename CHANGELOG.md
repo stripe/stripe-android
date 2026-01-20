@@ -5,6 +5,11 @@
 ### Connect
 * [Changed] Added `EmbeddedErrorType` enum for type-safe error handling in Connect embedded components, falling back to `api_error` if the error type is `null`.
 
+## 22.6.1 - 2026-01-20
+
+### Payments
+* [FIXED][12232](https://github.com/stripe/stripe-android/pull/12232) Fixed an issue where Satispay was missing `mandate_data` when used with `setup_future_usage`.
+
 ## 22.6.0 - 2026-01-12
 
 ### PaymentSheet

@@ -21,7 +21,7 @@ class CvcConfigTest {
         Truth.assertThat(
             cvcConfig.determineState(
                 brand = CardBrand.Visa,
-                funding = null,
+                accountRanges = emptyList(),
                 number = "",
                 numberAllowedDigits = CardBrand.Visa.maxCvcLength
             )
@@ -33,7 +33,7 @@ class CvcConfigTest {
     fun `card brand is invalid`() {
         val state = cvcConfig.determineState(
             brand = CardBrand.Unknown,
-            funding = null,
+            accountRanges = emptyList(),
             number = "0",
             numberAllowedDigits = CardBrand.Unknown.maxCvcLength
         )
@@ -45,7 +45,7 @@ class CvcConfigTest {
     fun `incomplete number is in incomplete state`() {
         val state = cvcConfig.determineState(
             brand = CardBrand.Visa,
-            funding = null,
+            accountRanges = emptyList(),
             number = "12",
             numberAllowedDigits = CardBrand.Visa.maxCvcLength
         )
@@ -60,7 +60,7 @@ class CvcConfigTest {
     fun `cvc is too long`() {
         val state = cvcConfig.determineState(
             brand = CardBrand.Visa,
-            funding = null,
+            accountRanges = emptyList(),
             number = "1234567890123456789",
             numberAllowedDigits = CardBrand.Visa.maxCvcLength
         )
@@ -75,7 +75,7 @@ class CvcConfigTest {
     fun `cvc is valid`() {
         var state = cvcConfig.determineState(
             brand = CardBrand.Visa,
-            funding = null,
+            accountRanges = emptyList(),
             number = "123",
             numberAllowedDigits = CardBrand.Visa.maxCvcLength
         )
@@ -84,7 +84,7 @@ class CvcConfigTest {
 
         state = cvcConfig.determineState(
             brand = CardBrand.AmericanExpress,
-            funding = null,
+            accountRanges = emptyList(),
             number = "1234",
             numberAllowedDigits = CardBrand.AmericanExpress.maxCvcLength
         )
@@ -96,7 +96,7 @@ class CvcConfigTest {
     fun `cvc is valid for lengths 3 and 4 for amex`() {
         var state = cvcConfig.determineState(
             brand = CardBrand.AmericanExpress,
-            funding = null,
+            accountRanges = emptyList(),
             number = "123",
             numberAllowedDigits = CardBrand.AmericanExpress.maxCvcLength
         )
@@ -105,7 +105,7 @@ class CvcConfigTest {
 
         state = cvcConfig.determineState(
             brand = CardBrand.AmericanExpress,
-            funding = null,
+            accountRanges = emptyList(),
             number = "1234",
             numberAllowedDigits = CardBrand.AmericanExpress.maxCvcLength
         )

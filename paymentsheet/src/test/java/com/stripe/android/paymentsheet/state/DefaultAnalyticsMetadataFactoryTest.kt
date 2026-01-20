@@ -126,7 +126,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         )
         val resultMap = createAnalyticsMetadata(
             initializationMode = InitializationMode.DeferredIntent(intentConfiguration),
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(intentConfiguration),
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(intentConfiguration),
             elementsSession = createElementsSession(stripeIntent = intent)
         )
 
@@ -152,7 +152,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         )
         val resultMap = createAnalyticsMetadata(
             initializationMode = InitializationMode.DeferredIntent(intentConfiguration),
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(intentConfiguration),
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(intentConfiguration),
             elementsSession = createElementsSession(stripeIntent = intent)
         )
 
@@ -187,7 +187,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         )
         val resultMap = createAnalyticsMetadata(
             initializationMode = InitializationMode.DeferredIntent(intentConfiguration),
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithSharedPaymentToken(intentConfiguration),
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(intentConfiguration),
             elementsSession = createElementsSession(stripeIntent = intent)
         )
 

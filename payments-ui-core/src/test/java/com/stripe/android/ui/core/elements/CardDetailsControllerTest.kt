@@ -7,8 +7,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.CardFunding
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cardscan.ScannedCard
@@ -287,7 +287,7 @@ class CardDetailsControllerTest {
     ) : CardNumberTextFieldConfig by defaultCardNumberTextFieldConfig {
         override fun determineState(
             brand: CardBrand,
-            funding: CardFunding?,
+            accountRanges: List<AccountRange>,
             number: String,
             numberAllowedDigits: Int
         ): TextFieldState {
@@ -301,7 +301,7 @@ class CardDetailsControllerTest {
     ) : CvcTextFieldConfig by defaultCvcTextFieldConfig {
         override fun determineState(
             brand: CardBrand,
-            funding: CardFunding?,
+            accountRanges: List<AccountRange>,
             number: String,
             numberAllowedDigits: Int
         ): TextFieldState {

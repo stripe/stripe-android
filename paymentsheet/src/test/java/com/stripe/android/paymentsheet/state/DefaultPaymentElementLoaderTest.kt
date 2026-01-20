@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
@@ -14,7 +16,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.link.LinkConfiguration
@@ -1624,6 +1628,52 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `Returns failure if configuring checkout session with invalid prefix`() = runScenario {
+        assertFailsWith<IllegalArgumentException>(
+            "Must use a checkout session client secret (format: cs_*_secret_*)."
+        ) {
+            PaymentElementLoader.InitializationMode.CheckoutSession(
+                clientSecret = "pi_test_123_secret_abc",
+            ).validate()
+        }
+    }
+
+    @Test
+    fun `Returns failure if configuring checkout session without secret part`() = runScenario {
+        assertFailsWith<IllegalArgumentException>(
+            "Must use a checkout session client secret (format: cs_*_secret_*)."
+        ) {
+            PaymentElementLoader.InitializationMode.CheckoutSession(
+                clientSecret = "cs_test_123",
+            ).validate()
+        }
+    }
+
+    @Test
+    fun `CheckoutSession validate succeeds with valid client secret`() = runScenario {
+        PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = "cs_test_123_secret_abc",
+        ).validate()
+    }
+
+    @Test
+    fun `CheckoutSession id property extracts id from client secret`() = runScenario {
+        val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = "cs_test_123_secret_abc",
+        )
+        assertThat(checkoutSession.id).isEqualTo("cs_test_123")
+    }
+
+    @Test
+    fun `integrationMetadata returns checkout session with extracted id`() = runScenario {
+        val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = "cs_test_123_secret_abc"
+        )
+        assertThat(checkoutSession.integrationMetadata(null))
+            .isEqualTo(IntegrationMetadata.CheckoutSession("cs_test_123"))
+    }
+
+    @Test
     fun `integrationMetadata returns intent first for payment intent`() = runScenario {
         val paymentIntent = PaymentElementLoader.InitializationMode.PaymentIntent("secret")
         assertThat(paymentIntent.integrationMetadata(null))
@@ -1660,7 +1710,7 @@ internal class DefaultPaymentElementLoaderTest {
                         error("Should not be called.")
                     }.build()
             )
-        ).isEqualTo(IntegrationMetadata.DeferredIntentWithSharedPaymentToken(intentConfiguration))
+        ).isEqualTo(IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(intentConfiguration))
     }
 
     @Test
@@ -1681,7 +1731,7 @@ internal class DefaultPaymentElementLoaderTest {
                         error("Should not be called.")
                     }.build()
             )
-        ).isEqualTo(IntegrationMetadata.DeferredIntentWithConfirmationToken(intentConfiguration))
+        ).isEqualTo(IntegrationMetadata.DeferredIntent.WithConfirmationToken(intentConfiguration))
     }
 
     @Test
@@ -1702,7 +1752,7 @@ internal class DefaultPaymentElementLoaderTest {
                         error("Should not be called.")
                     }.build()
             )
-        ).isEqualTo(IntegrationMetadata.DeferredIntentWithPaymentMethod(intentConfiguration))
+        ).isEqualTo(IntegrationMetadata.DeferredIntent.WithPaymentMethod(intentConfiguration))
     }
 
     @Test
@@ -4063,7 +4113,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(createCall.isGooglePaySupported).isFalse()
         assertThat(createCall.customerMetadata).isNull()
         assertThat(createCall.integrationMetadata).isEqualTo(
-            IntegrationMetadata.DeferredIntentWithConfirmationToken(initializationMode.intentConfiguration)
+            IntegrationMetadata.DeferredIntent.WithConfirmationToken(initializationMode.intentConfiguration)
         )
         assertThat(createCall.elementsSession).isNotNull()
         assertThat(createCall.linkStateResult).isNotNull()
@@ -4353,8 +4403,14 @@ internal class DefaultPaymentElementLoaderTest {
 
         return DefaultPaymentElementLoader(
             prefsRepositoryFactory = { prefsRepository },
-            googlePayRepositoryFactory = {
-                GooglePayRepository { flowOf(isGooglePayReady) }
+            googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
+                override fun invoke(
+                    environment: GooglePayEnvironment,
+                    cardFundingFilter: CardFundingFilter,
+                    cardBrandFilter: CardBrandFilter
+                ): GooglePayRepository {
+                    return GooglePayRepository { flowOf(isGooglePayReady) }
+                }
             },
             elementsSessionRepository = elementsSessionRepository,
             customerRepository = customerRepo,
@@ -4373,6 +4429,7 @@ internal class DefaultPaymentElementLoaderTest {
             tapToAddConnectionManager = tapToAddConnectionManager,
             paymentConfiguration = { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") },
             paymentMethodFilter = paymentMethodFilter,
+            cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory(),
         )
     }
 

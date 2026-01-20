@@ -61,6 +61,8 @@ class CheckoutRequest private constructor(
     val customSecretKey: String?,
     @SerialName("custom_publishable_key")
     val customPublishableKey: String?,
+    @SerialName("use_checkout_session")
+    val useCheckoutSession: Boolean?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -103,6 +105,7 @@ class CheckoutRequest private constructor(
         private var customStripeApi: String? = null
         private var customSecretKey: String? = null
         private var customPublishableKey: String? = null
+        private var useCheckoutSession: Boolean? = null
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -212,6 +215,10 @@ class CheckoutRequest private constructor(
             this.customPublishableKey = customPublishableKey
         }
 
+        fun useCheckoutSession(useCheckoutSession: Boolean?) = apply {
+            this.useCheckoutSession = useCheckoutSession
+        }
+
         fun build(): CheckoutRequest {
             return CheckoutRequest(
                 initialization = initialization,
@@ -244,6 +251,7 @@ class CheckoutRequest private constructor(
                 customStripeApi = customStripeApi,
                 customSecretKey = customSecretKey,
                 customPublishableKey = customPublishableKey,
+                useCheckoutSession = useCheckoutSession,
             )
         }
     }
@@ -254,7 +262,9 @@ data class CheckoutResponse(
     @SerialName("publishableKey")
     val publishableKey: String,
     @SerialName("intentClientSecret")
-    val intentClientSecret: String,
+    val intentClientSecret: String? = null,
+    @SerialName("checkoutSessionClientSecret")
+    val checkoutSessionClientSecret: String? = null,
     @SerialName("customerId")
     val customerId: String? = null,
     @SerialName("customerEphemeralKeySecret")
@@ -268,6 +278,10 @@ data class CheckoutResponse(
     @SerialName("paymentMethodTypes")
     val paymentMethodTypes: String? = null,
 ) {
+
+    val clientSecret: String = intentClientSecret ?: checkoutSessionClientSecret
+        ?: error("Either intentClientSecret or checkoutSessionClientSecret must be non-null")
+
     fun makeCustomerConfig(
         customerKeyType: CheckoutRequest.CustomerKeyType?
     ) = customerId?.let { id ->

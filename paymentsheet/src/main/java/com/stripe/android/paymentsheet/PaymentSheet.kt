@@ -33,6 +33,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.AddressAutocompletePreview
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
@@ -467,6 +468,25 @@ class PaymentSheet internal constructor(
     ) {
         paymentSheetLauncher.present(
             mode = InitializationMode.DeferredIntent(intentConfiguration),
+            configuration = configuration,
+        )
+    }
+
+    /**
+     * Present [PaymentSheet] with a Checkout Session.
+     *
+     * @param checkoutSessionClientSecret The client secret of the Checkout Session (format: `cs_*_secret_*`).
+     * @param configuration An optional [PaymentSheet] configuration.
+     */
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @JvmOverloads
+    fun presentWithCheckoutSession(
+        checkoutSessionClientSecret: String,
+        configuration: Configuration? = null,
+    ) {
+        paymentSheetLauncher.present(
+            mode = InitializationMode.CheckoutSession(checkoutSessionClientSecret),
             configuration = configuration,
         )
     }

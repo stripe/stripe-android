@@ -27,7 +27,6 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.CardFunding
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.events.LocalAnalyticsEventReporter
@@ -53,7 +52,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -215,7 +213,7 @@ internal class DefaultCardNumberController(
     ) { brand, fieldValue, accountRanges ->
         textFieldState(
             brand = brand,
-            funding = accountRanges.ranges.firstOrNull()?.funding,
+            accountRanges = accountRanges.ranges,
             number = fieldValue
         )
     }.stateIn(
@@ -392,12 +390,12 @@ internal class DefaultCardNumberController(
 
     private fun textFieldState(
         brand: CardBrand = impliedCardBrand.value,
-        funding: CardFunding? = null,
+        accountRanges: List<AccountRange> = emptyList(),
         number: String = _fieldValue.value
     ): TextFieldState {
         return cardTextFieldConfig.determineState(
             brand,
-            funding,
+            accountRanges,
             number,
             numberAllowedDigits = accountRangeService.accountRange?.panLength
                 ?: brand.getMaxLengthForCardNumber(number)
