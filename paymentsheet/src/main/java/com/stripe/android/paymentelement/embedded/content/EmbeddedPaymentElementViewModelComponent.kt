@@ -5,9 +5,8 @@ import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
-import com.stripe.android.cards.CardAccountRangeService
+import com.stripe.android.cards.CardAccountRangeServiceModule
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.cards.DefaultCardAccountRangeServiceFactory
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.injection.ViewModelScope
@@ -68,6 +67,7 @@ import javax.inject.Singleton
         EmbeddedLinkExtrasModule::class,
         PaymentsIntegrityModule::class,
         LinkHoldbackExposureModule::class,
+        CardAccountRangeServiceModule::class,
     ],
 )
 internal interface EmbeddedPaymentElementViewModelComponent {
@@ -174,15 +174,6 @@ internal interface EmbeddedPaymentElementViewModelModule {
 
     @Suppress("TooManyFunctions")
     companion object {
-        @Provides
-        fun providesCardAccountRangeServiceFactory(
-            cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
-        ): CardAccountRangeService.Factory {
-            return DefaultCardAccountRangeServiceFactory(
-                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory
-            )
-        }
-
         @Provides
         fun providesContext(application: Application): Context {
             return application

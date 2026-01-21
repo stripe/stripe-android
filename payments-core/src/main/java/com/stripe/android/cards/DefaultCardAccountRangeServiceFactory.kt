@@ -15,20 +15,19 @@ import kotlin.coroutines.CoroutineContext
  * different features (like funding filtering) use the service.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class DefaultCardAccountRangeServiceFactory @JvmOverloads constructor(
+class DefaultCardAccountRangeServiceFactory(
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val uiContext: CoroutineContext = Dispatchers.Main,
     private val workContext: CoroutineContext = Dispatchers.IO,
-    private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges()
+    private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
+    private val coroutineScope: CoroutineScope = CoroutineScope(uiContext)
 ) : CardAccountRangeService.Factory {
 
     override fun create(
         cardBrandFilter: CardBrandFilter,
         cardFundingFilter: CardFundingFilter,
         accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener?,
-        coroutineScope: CoroutineScope?
     ): CardAccountRangeService {
-        val scope = coroutineScope ?: CoroutineScope(uiContext)
         return DefaultCardAccountRangeService(
             cardAccountRangeRepository = cardAccountRangeRepositoryFactory.create(),
             uiContext = uiContext,
@@ -37,7 +36,7 @@ class DefaultCardAccountRangeServiceFactory @JvmOverloads constructor(
             cardBrandFilter = cardBrandFilter,
             cardFundingFilter = cardFundingFilter,
             accountRangeResultListener = accountRangeResultListener,
-            coroutineScope = scope
+            coroutineScope = coroutineScope
         )
     }
 }

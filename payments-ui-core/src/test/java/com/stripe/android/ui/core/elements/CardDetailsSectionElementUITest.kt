@@ -28,7 +28,6 @@ import com.stripe.android.ui.core.cardscan.ScannedCard
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.IdentifierSpec
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -135,9 +134,7 @@ internal class CardDetailsSectionElementUITest {
         automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
     ): CardDetailsSectionController {
         val cardAccountRangeServiceFactory = DefaultCardAccountRangeServiceFactory(
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
-            uiContext = Dispatchers.Main,
-            workContext = Dispatchers.IO
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
         )
 
         val output = CardDetailsSectionController(

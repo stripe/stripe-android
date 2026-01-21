@@ -6,7 +6,6 @@ import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.model.AccountRange
 import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -16,7 +15,6 @@ object NullCardAccountRangeServiceFactory : CardAccountRangeService.Factory {
         cardBrandFilter: CardBrandFilter,
         cardFundingFilter: CardFundingFilter,
         accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener?,
-        coroutineScope: CoroutineScope?
     ): CardAccountRangeService {
         return NullCardAccountRangeService
     }
@@ -31,20 +29,12 @@ object NullCardAccountRangeServiceFactory : CardAccountRangeService.Factory {
         override fun onCardNumberChanged(
             cardNumber: CardNumber.Unvalidated,
             isCbcEligible: Boolean
-        ) {
-            // No-op
-        }
+        ) = Unit
 
-        override fun queryAccountRangeRepository(cardNumber: CardNumber.Unvalidated) {
-            // No-op
-        }
+        override fun queryAccountRangeRepository(cardNumber: CardNumber.Unvalidated) = Unit
 
-        override fun cancelAccountRangeRepositoryJob() {
-            // No-op
-        }
+        override fun cancelAccountRangeRepositoryJob() = Unit
 
-        override fun updateAccountRangesResult(accountRanges: List<AccountRange>) {
-            // No-op
-        }
+        override fun updateAccountRangesResult(accountRanges: List<AccountRange>) = Unit
     }
 }

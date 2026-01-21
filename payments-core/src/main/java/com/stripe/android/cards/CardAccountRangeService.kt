@@ -61,7 +61,6 @@ interface CardAccountRangeService {
             cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
             cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
             accountRangeResultListener: AccountRangeResultListener? = null,
-            coroutineScope: CoroutineScope? = null
         ): CardAccountRangeService
     }
 

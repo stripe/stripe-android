@@ -15,7 +15,6 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -245,7 +244,6 @@ internal class ControllerAccountRangeServiceTest {
                 cardBrandFilter: CardBrandFilter,
                 cardFundingFilter: CardFundingFilter,
                 accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener?,
-                coroutineScope: CoroutineScope?
             ): CardAccountRangeService {
                 return if (callCount++ == 0) defaultService else fundingService
             }

@@ -7,12 +7,12 @@ import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.cards.CardAccountRangeRepository
-import com.stripe.android.cards.CardAccountRangeService
+import com.stripe.android.cards.CardAccountRangeServiceModule
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.cards.DefaultCardAccountRangeServiceFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.utils.DefaultDurationProvider
@@ -74,7 +74,8 @@ import kotlin.coroutines.CoroutineContext
 @Module(
     includes = [
         StripeRepositoryModule::class,
-        PaymentsIntegrityModule::class
+        PaymentsIntegrityModule::class,
+        CardAccountRangeServiceModule::class,
     ],
     subcomponents = [
         OAuthConsentViewModelComponent::class,
@@ -152,16 +153,6 @@ internal interface NativeLinkModule {
     companion object {
         @Provides
         @NativeLinkScope
-        fun providesCardAccountRangeServiceFactory(
-            cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
-        ): CardAccountRangeService.Factory {
-            return DefaultCardAccountRangeServiceFactory(
-                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory
-            )
-        }
-
-        @Provides
-        @NativeLinkScope
         fun providesLinkAccountHolder(
             savedStateHandle: SavedStateHandle,
             linkAccountInfo: LinkAccountUpdate.Value,
@@ -204,6 +195,11 @@ internal interface NativeLinkModule {
         @Provides
         @NativeLinkScope
         fun ioContext(): CoroutineContext = Dispatchers.IO
+
+        @UIContext
+        @Provides
+        @NativeLinkScope
+        fun uiContext(): CoroutineContext = Dispatchers.Main
 
         @Provides
         @NativeLinkScope

@@ -25,6 +25,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.events.AnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.CardBrandDisallowedReporter
@@ -40,7 +41,6 @@ import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCardBrandFilter
 import com.stripe.android.utils.TestUtils.idleLooper
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -769,12 +769,11 @@ internal class CardNumberControllerTest {
             cardBrandFilter: CardBrandFilter,
             cardFundingFilter: CardFundingFilter,
             accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener?,
-            coroutineScope: CoroutineScope?
         ): CardAccountRangeService {
             val repositoryFactory = object : CardAccountRangeRepository.Factory {
                 override fun create(): CardAccountRangeRepository = FakeCardAccountRangeRepository()
                 override fun createWithStripeRepository(
-                    stripeRepository: com.stripe.android.networking.StripeRepository,
+                    stripeRepository: StripeRepository,
                     publishableKey: String
                 ): CardAccountRangeRepository = FakeCardAccountRangeRepository()
             }
@@ -786,7 +785,6 @@ internal class CardNumberControllerTest {
                 cardBrandFilter = cardBrandFilter,
                 cardFundingFilter = cardFundingFilter,
                 accountRangeResultListener = accountRangeResultListener,
-                coroutineScope = coroutineScope
             )
         }
     }

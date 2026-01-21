@@ -22,7 +22,6 @@ import com.stripe.android.uicore.elements.TextFieldConfig
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.utils.TestUtils.idleLooper
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -263,8 +262,6 @@ class CardDetailsControllerTest {
             cardBrandFilter = cardBrandFilter,
             cardAccountRangeServiceFactory = DefaultCardAccountRangeServiceFactory(
                 cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
-                uiContext = Dispatchers.Main,
-                workContext = Dispatchers.IO
             ),
             initialValues = initialValues,
             cbcEligibility = cbcEligibility,

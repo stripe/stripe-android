@@ -22,12 +22,10 @@ internal class ControllerAccountRangeService(
     private val defaultCardAccountRangeService: CardAccountRangeService = cardAccountRangeServiceFactory.create(
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = DefaultCardFundingFilter,
-        coroutineScope = coroutineScope
     ),
     private val fundingCardAccountRangeService: CardAccountRangeService = cardAccountRangeServiceFactory.create(
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
-        coroutineScope = coroutineScope
     ),
 ) : CardAccountRangeService by defaultCardAccountRangeService {
 

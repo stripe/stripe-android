@@ -366,7 +366,7 @@ internal class PaymentSheetTest {
     }
 
     @Test
-    fun testCardMetadataQueryExecutedOncePerCardSessionForBin() {
+    fun testCardMetadataQueryExecutedTwicePerCardSessionForBin() {
         repeat(2) {
             runPaymentSheetTest(
                 networkRule = networkRule,
@@ -386,6 +386,13 @@ internal class PaymentSheetTest {
                         paymentIntentClientSecret = "pi_example_secret_example",
                         configuration = defaultConfiguration,
                     )
+                }
+
+                networkRule.enqueue(
+                    method("GET"),
+                    path("edge-internal/card-metadata")
+                ) { response ->
+                    response.testBodyFromFile("card-metadata-get.json")
                 }
 
                 networkRule.enqueue(
