@@ -398,6 +398,15 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
+    fun createPaymentMethod_withTwint_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.TWINT
+        val stripe = Stripe(context, ApiKeyFixtures.TWINT_PUBLISHABLE_KEY)
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Twint)
+    }
+
+    @Test
     fun createPaymentMethod_withAmazonPay_shouldCreateObject() {
         val params = PaymentMethodCreateParamsFixtures.AMAZON_PAY
         val stripe = Stripe(context, ApiKeyFixtures.AMAZON_PAY_PUBLISHABLE_KEY)

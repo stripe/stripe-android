@@ -114,7 +114,7 @@ class DefaultPaymentMethodFilterTest {
             ),
         )
 
-        val expectedElements = listOf(paymentMethodsData.credit, paymentMethodsData.bank)
+        val expectedElements = listOf(paymentMethodsData.credit, paymentMethodsData.noFunding, paymentMethodsData.bank)
         assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
     }
 
@@ -130,7 +130,7 @@ class DefaultPaymentMethodFilterTest {
             ),
         )
 
-        val expectedElements = listOf(paymentMethodsData.debit, paymentMethodsData.bank)
+        val expectedElements = listOf(paymentMethodsData.debit, paymentMethodsData.noFunding, paymentMethodsData.bank)
         assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
     }
 
@@ -146,7 +146,7 @@ class DefaultPaymentMethodFilterTest {
             ),
         )
 
-        val expectedElements = listOf(paymentMethodsData.prepaid, paymentMethodsData.bank)
+        val expectedElements = listOf(paymentMethodsData.prepaid, paymentMethodsData.noFunding, paymentMethodsData.bank)
         assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
     }
 
@@ -165,7 +165,12 @@ class DefaultPaymentMethodFilterTest {
             ),
         )
 
-        val expectedElements = listOf(paymentMethodsData.credit, paymentMethodsData.debit, paymentMethodsData.bank)
+        val expectedElements = listOf(
+            paymentMethodsData.credit,
+            paymentMethodsData.debit,
+            paymentMethodsData.noFunding,
+            paymentMethodsData.bank
+        )
         assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
     }
 
