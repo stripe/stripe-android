@@ -239,15 +239,16 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
         is PaymentElementLoader.InitializationMode.CheckoutSession -> {
             ElementsSessionParams.CheckoutSessionType(
                 clientSecret = clientSecret,
-                customerSessionClientSecret = customerSessionClientSecret,
-                legacyCustomerEphemeralKey = legacyCustomerEphemeralKey,
                 customPaymentMethods = customPaymentMethodIds,
                 externalPaymentMethods = externalPaymentMethods,
+                customerSessionClientSecret = customerSessionClientSecret,
+                legacyCustomerEphemeralKey = legacyCustomerEphemeralKey,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 mobileSessionId = mobileSessionId,
+                sellerDetails = null,
                 appId = appId,
-                link = linkParams,
                 countryOverride = countryOverride,
+                link = linkParams,
             )
         }
     }

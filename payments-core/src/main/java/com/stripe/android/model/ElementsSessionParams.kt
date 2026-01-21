@@ -111,6 +111,7 @@ sealed interface ElementsSessionParams : Parcelable {
     @Parcelize
     data class CheckoutSessionType(
         override val clientSecret: String,
+        var deferredIntentParams: DeferredIntentParams? = null,
         override val locale: String? = Locale.getDefault().toLanguageTag(),
         override val customerSessionClientSecret: String? = null,
         override val legacyCustomerEphemeralKey: String? = null,
@@ -129,7 +130,6 @@ sealed interface ElementsSessionParams : Parcelable {
 
         override val type: String
             get() = "checkout_session"
-
 
         override val expandFields: List<String>
             get() = emptyList()

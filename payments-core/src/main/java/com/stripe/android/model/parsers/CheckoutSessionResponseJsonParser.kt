@@ -15,19 +15,17 @@ import org.json.JSONObject
  * delegates `elements_session` parsing to [ElementsSessionJsonParser].
  */
 internal class CheckoutSessionResponseJsonParser(
+    private val elementsSessionParams: ElementsSessionParams.CheckoutSessionType,
     private val isLiveMode: Boolean,
 ) : ModelJsonParser<CheckoutSessionResponse> {
 
     override fun parse(json: JSONObject): CheckoutSessionResponse? {
-        // 1. Extract checkout session fields
         val id = json.optString(FIELD_ID).takeIf { it.isNotEmpty() } ?: return null
-        val amount = json.optLong(FIELD_AMOUNT, -1).takeIf { it >= 0 } ?: return null
+        val amount = extractAmount(json) ?: return null
         val currency = json.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() } ?: return null
 
-        // 2. Create ElementsSessionParams using extracted amount/currency
-        // Since payment_method_preference.type is "deferred_intent", we use DeferredIntentType
-        val elementsSessionParams = ElementsSessionParams.DeferredIntentType(
-            deferredIntentParams = DeferredIntentParams(
+        elementsSessionParams.deferredIntentParams =
+            DeferredIntentParams(
                 mode = DeferredIntentParams.Mode.Payment(
                     amount = amount,
                     currency = currency,
@@ -38,13 +36,8 @@ internal class CheckoutSessionResponseJsonParser(
                 paymentMethodTypes = emptyList(), // Populated from elements_session
                 paymentMethodConfigurationId = null,
                 onBehalfOf = null,
-            ),
-            customPaymentMethods = emptyList(),
-            externalPaymentMethods = emptyList(),
-            appId = "", // Not needed for parsing, only for API requests
-        )
+            )
 
-        // 3. Parse elements_session with the constructed params
         val elementsSessionJson = json.optJSONObject(FIELD_ELEMENTS_SESSION) ?: return null
         val elementsSession = ElementsSessionJsonParser(
             params = elementsSessionParams,
@@ -59,10 +52,20 @@ internal class CheckoutSessionResponseJsonParser(
         )
     }
 
+    /**
+     * Extracts amount from `line_item_group.total` in the JSON response.
+     */
+    private fun extractAmount(json: JSONObject): Long? {
+        val lineItemGroup = json.optJSONObject(FIELD_LINE_ITEM_GROUP) ?: return null
+        val total = lineItemGroup.optLong(FIELD_TOTAL, -1)
+        return if (total >= 0) total else null
+    }
+
     private companion object {
         private const val FIELD_ID = "id"
-        private const val FIELD_AMOUNT = "amount"
         private const val FIELD_CURRENCY = "currency"
         private const val FIELD_ELEMENTS_SESSION = "elements_session"
+        private const val FIELD_LINE_ITEM_GROUP = "line_item_group"
+        private const val FIELD_TOTAL = "total"
     }
 }

@@ -746,7 +746,6 @@ internal class PaymentSheetPlaygroundActivity :
                 checkoutSessionClientSecret = playgroundState.clientSecret,
                 configuration = playgroundState.paymentSheetConfiguration(viewModel.settings)
             )
-
         } else {
             paymentSheet.presentWithIntentConfiguration(
                 intentConfiguration = playgroundState.intentConfiguration(),

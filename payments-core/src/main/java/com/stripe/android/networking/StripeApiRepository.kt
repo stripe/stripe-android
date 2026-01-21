@@ -1564,6 +1564,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 ),
             ),
             jsonParser = CheckoutSessionResponseJsonParser(
+                elementsSessionParams = params,
                 isLiveMode = options.apiKeyIsLiveMode,
             ),
         )

@@ -1,6 +1,8 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.CheckoutSessionFixtures
+import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
 import org.json.JSONObject
 import org.junit.Test
@@ -8,29 +10,46 @@ import org.junit.Test
 class CheckoutSessionResponseJsonParserTest {
 
     @Test
-    fun `parse returns CheckoutSessionResponse with valid JSON`() {
-        val parser = CheckoutSessionResponseJsonParser(isLiveMode = false)
-        val result = parser.parse(VALID_CHECKOUT_SESSION_RESPONSE_JSON)
+    fun `parse checkout session response`() {
+        val params = ElementsSessionParams.CheckoutSessionType(
+            clientSecret = "cs_test_123_secret_abc",
+        )
+        val result = CheckoutSessionResponseJsonParser(
+            elementsSessionParams = params,
+            isLiveMode = false,
+        ).parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
 
+        // Verify CheckoutSessionResponse fields
         assertThat(result).isNotNull()
-        assertThat(result?.id).isEqualTo("cs_test_123")
-        assertThat(result?.amount).isEqualTo(1000L)
+        assertThat(result?.id).isEqualTo("ppage_1SrjAuLu5o3P18ZpavYVO6Xq")
+        assertThat(result?.amount).isEqualTo(999L)
         assertThat(result?.currency).isEqualTo("usd")
-        assertThat(result?.elementsSession).isNotNull()
-    }
 
-    @Test
-    fun `parse extracts elementsSession correctly`() {
-        val parser = CheckoutSessionResponseJsonParser(isLiveMode = false)
-        val result = parser.parse(VALID_CHECKOUT_SESSION_RESPONSE_JSON)
-
-        assertThat(result).isNotNull()
+        // Verify ElementsSession is parsed correctly
         val elementsSession = result?.elementsSession
-
-        assertThat(elementsSession?.stripeIntent).isNotNull()
-        assertThat(elementsSession?.stripeIntent).isInstanceOf(PaymentIntent::class.java)
+        assertThat(elementsSession).isNotNull()
+        assertThat(elementsSession?.elementsSessionId).isEqualTo("elements_session_1nWWJQ3A6yS")
         assertThat(elementsSession?.merchantCountry).isEqualTo("US")
         assertThat(elementsSession?.isGooglePayEnabled).isTrue()
+
+        // Verify StripeIntent is created correctly
+        val stripeIntent = elementsSession?.stripeIntent
+        assertThat(stripeIntent).isNotNull()
+        assertThat(stripeIntent).isInstanceOf(PaymentIntent::class.java)
+
+        // Verify payment method types from ordered_payment_method_types
+        assertThat(stripeIntent?.paymentMethodTypes).containsExactly(
+            "card",
+            "link",
+            "cashapp",
+            "alipay",
+            "wechat_pay",
+            "us_bank_account",
+            "amazon_pay",
+            "afterpay_clearpay",
+            "klarna",
+            "crypto"
+        ).inOrder()
     }
 
     @Test
@@ -38,31 +57,16 @@ class CheckoutSessionResponseJsonParserTest {
         val json = JSONObject(
             """
             {
-                "amount": 1000,
                 "currency": "usd",
-                "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+                "line_item_group": { "total": 1000 },
+                "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
             }
             """.trimIndent()
         )
-        val parser = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
+        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
 
-        assertThat(parser.parse(json)).isNull()
-    }
-
-    @Test
-    fun `parse returns null when amount is missing`() {
-        val json = JSONObject(
-            """
-            {
-                "id": "cs_test_123",
-                "currency": "usd",
-                "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
-            }
-            """.trimIndent()
-        )
-        val parser = CheckoutSessionResponseJsonParser(isLiveMode = false)
-
-        assertThat(parser.parse(json)).isNull()
+        assertThat(result).isNull()
     }
 
     @Test
@@ -71,14 +75,32 @@ class CheckoutSessionResponseJsonParserTest {
             """
             {
                 "id": "cs_test_123",
-                "amount": 1000,
-                "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+                "line_item_group": { "total": 1000 },
+                "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
             }
             """.trimIndent()
         )
-        val parser = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
+        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
 
-        assertThat(parser.parse(json)).isNull()
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `parse returns null when line_item_group is missing`() {
+        val json = JSONObject(
+            """
+            {
+                "id": "cs_test_123",
+                "currency": "usd",
+                "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
+            }
+            """.trimIndent()
+        )
+        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
+        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
+
+        assertThat(result).isNull()
     }
 
     @Test
@@ -87,14 +109,15 @@ class CheckoutSessionResponseJsonParserTest {
             """
             {
                 "id": "cs_test_123",
-                "amount": 1000,
-                "currency": "usd"
+                "currency": "usd",
+                "line_item_group": { "total": 1000 }
             }
             """.trimIndent()
         )
-        val parser = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
+        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
 
-        assertThat(parser.parse(json)).isNull()
+        assertThat(result).isNull()
     }
 
     @Test
@@ -103,15 +126,16 @@ class CheckoutSessionResponseJsonParserTest {
             """
             {
                 "id": "cs_test_123",
-                "amount": 1000,
                 "currency": "usd",
+                "line_item_group": { "total": 1000 },
                 "elements_session": {}
             }
             """.trimIndent()
         )
-        val parser = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
+        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
 
-        assertThat(parser.parse(json)).isNull()
+        assertThat(result).isNull()
     }
 
     @Test
@@ -120,61 +144,16 @@ class CheckoutSessionResponseJsonParserTest {
             """
             {
                 "id": "cs_test_123",
-                "amount": 0,
                 "currency": "usd",
-                "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+                "line_item_group": { "total": 0 },
+                "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
             }
             """.trimIndent()
         )
-        val parser = CheckoutSessionResponseJsonParser(isLiveMode = false)
-        val result = parser.parse(json)
+        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
+        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
 
         assertThat(result).isNotNull()
         assertThat(result?.amount).isEqualTo(0L)
-    }
-
-    companion object {
-        /**
-         * Minimal elements_session JSON that satisfies ElementsSessionJsonParser.
-         * Uses deferred_intent type which is what checkout sessions return.
-         */
-        private const val MINIMAL_ELEMENTS_SESSION_JSON = """
-            {
-                "session_id": "elements_session_test_123",
-                "merchant_country": "US",
-                "google_pay_preference": "enabled",
-                "payment_method_preference": {
-                    "object": "payment_method_preference",
-                    "country_code": "US",
-                    "ordered_payment_method_types": ["card", "link"],
-                    "type": "deferred_intent"
-                }
-            }
-        """
-
-        private val VALID_CHECKOUT_SESSION_RESPONSE_JSON = JSONObject(
-            """
-            {
-                "id": "cs_test_123",
-                "amount": 1000,
-                "currency": "usd",
-                "elements_session": {
-                    "session_id": "elements_session_test_123",
-                    "merchant_country": "US",
-                    "google_pay_preference": "enabled",
-                    "link_settings": {
-                        "link_bank_enabled": false,
-                        "link_bank_onboarding_enabled": false
-                    },
-                    "payment_method_preference": {
-                        "object": "payment_method_preference",
-                        "country_code": "US",
-                        "ordered_payment_method_types": ["card", "link", "us_bank_account"],
-                        "type": "deferred_intent"
-                    }
-                }
-            }
-            """.trimIndent()
-        )
     }
 }
