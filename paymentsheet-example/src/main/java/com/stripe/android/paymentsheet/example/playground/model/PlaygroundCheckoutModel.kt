@@ -15,6 +15,8 @@ class CheckoutRequest private constructor(
     val customerKeyType: CustomerKeyType?,
     @SerialName("currency")
     val currency: String?,
+    @SerialName("amount")
+    val amount: Long?,
     @SerialName("mode")
     val mode: String?,
     @SerialName("on_behalf_of")
@@ -78,6 +80,7 @@ class CheckoutRequest private constructor(
         private var customer: String? = null
         private var customerKeyType: CustomerKeyType? = null
         private var currency: String? = null
+        private var amount: Long? = null
         private var mode: String? = null
         private var onBehalfOf: String? = null
         private var setShippingAddress: Boolean? = null
@@ -121,6 +124,10 @@ class CheckoutRequest private constructor(
 
         fun currency(currency: String?) = apply {
             this.currency = currency
+        }
+
+        fun amount(amount: Long?) = apply {
+            this.amount = amount
         }
 
         fun mode(mode: String?) = apply {
@@ -225,6 +232,7 @@ class CheckoutRequest private constructor(
                 customer = customer,
                 customerKeyType = customerKeyType,
                 currency = currency,
+                amount = amount,
                 mode = mode,
                 onBehalfOf = onBehalfOf,
                 setShippingAddress = setShippingAddress,
