@@ -11,7 +11,7 @@ import kotlinx.parcelize.Parcelize
  *
  * @property firstName The user’s given name as it appears on official documents.
  * @property lastName The user’s family name as it appears on official documents.
- * @property idNumber The full  identification number.
+ * @property idNumber The full identification number.
  * @property dateOfBirth The user’s date of birth.
  * @property address The user’s billing address.
  */
