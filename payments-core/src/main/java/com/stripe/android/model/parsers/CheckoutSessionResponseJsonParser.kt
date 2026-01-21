@@ -24,23 +24,22 @@ internal class CheckoutSessionResponseJsonParser(
         val amount = extractAmount(json) ?: return null
         val currency = json.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() } ?: return null
 
-        elementsSessionParams.deferredIntentParams =
-            DeferredIntentParams(
-                mode = DeferredIntentParams.Mode.Payment(
-                    amount = amount,
-                    currency = currency,
-                    captureMethod = PaymentIntent.CaptureMethod.Automatic,
-                    setupFutureUsage = null,
-                    paymentMethodOptionsJsonString = null,
-                ),
-                paymentMethodTypes = emptyList(), // Populated from elements_session
-                paymentMethodConfigurationId = null,
-                onBehalfOf = null,
-            )
-
         val elementsSessionJson = json.optJSONObject(FIELD_ELEMENTS_SESSION) ?: return null
         val elementsSession = ElementsSessionJsonParser(
-            params = elementsSessionParams,
+            params = elementsSessionParams.copy(
+                deferredIntentParams = DeferredIntentParams(
+                    mode = DeferredIntentParams.Mode.Payment(
+                        amount = amount,
+                        currency = currency,
+                        captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                        setupFutureUsage = null,
+                        paymentMethodOptionsJsonString = null,
+                    ),
+                    paymentMethodTypes = emptyList(), // Populated from elements_session
+                    paymentMethodConfigurationId = null,
+                    onBehalfOf = null,
+                )
+            ),
             isLiveMode = isLiveMode,
         ).parse(elementsSessionJson) ?: return null
 

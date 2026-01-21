@@ -111,7 +111,7 @@ sealed interface ElementsSessionParams : Parcelable {
     @Parcelize
     data class CheckoutSessionType(
         override val clientSecret: String,
-        var deferredIntentParams: DeferredIntentParams? = null,
+        val deferredIntentParams: DeferredIntentParams? = null,
         override val locale: String? = Locale.getDefault().toLanguageTag(),
         override val customerSessionClientSecret: String? = null,
         override val legacyCustomerEphemeralKey: String? = null,
