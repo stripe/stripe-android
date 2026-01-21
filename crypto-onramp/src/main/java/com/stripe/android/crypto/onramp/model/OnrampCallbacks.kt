@@ -22,7 +22,7 @@ class OnrampCallbacks(
     val authenticateUserCallback: OnrampAuthenticateUserCallback,
 
     /**
-     * Callback invoked when signaling the result of verifiying the user's identity.
+     * Callback invoked when signaling the result of verifying the user's identity.
      */
     val verifyIdentityCallback: OnrampVerifyIdentityCallback,
 
