@@ -3,14 +3,19 @@ package com.stripe.android.paymentsheet.example.playground.settings
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 
 internal object AmountSettingsDefinition :
-    PlaygroundSettingDefinition<Amount>,
-    PlaygroundSettingDefinition.Saveable<Amount> by EnumSaveable(
-        key = "amount",
-        values = Amount.entries.toTypedArray(),
-        defaultValue = Amount.AMOUNT_5099,
-    ),
-    PlaygroundSettingDefinition.Displayable<Amount> {
-    override val displayName: String = "Amount"
+    PlaygroundSettingDefinition<String>,
+    PlaygroundSettingDefinition.Saveable<String>,
+    PlaygroundSettingDefinition.Displayable<String> {
+    override val key: String = "amount"
+    override val displayName: String = "Amount (in cents)"
+    override val defaultValue: String = "5099"
+
+    override fun convertToString(value: String): String = value
+    override fun convertToValue(value: String): String = value
+
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ) = emptyList<PlaygroundSettingDefinition.Displayable.Option<String>>()
 
     override fun applicable(
         configurationData: PlaygroundConfigurationData,
@@ -19,18 +24,10 @@ internal object AmountSettingsDefinition :
         return configurationData.integrationType.isPaymentFlow()
     }
 
-    override fun createOptions(
-        configurationData: PlaygroundConfigurationData
-    ) = Amount.entries.map {
-        option(it.displayName, it)
+    override fun configure(value: String, checkoutRequestBuilder: CheckoutRequest.Builder) {
+        val amount = value.toLongOrNull()
+        if (amount != null && amount > 0) {
+            checkoutRequestBuilder.amount(amount)
+        }
     }
-
-    override fun configure(value: Amount, checkoutRequestBuilder: CheckoutRequest.Builder) {
-        checkoutRequestBuilder.amount(value.longValue)
-    }
-}
-
-enum class Amount(val displayName: String, override val value: String, val longValue: Long) : ValueEnum {
-    AMOUNT_5099("$50.99", "5099", 5099L),
-    AMOUNT_10000("$100.00", "10000", 10000L),
 }
