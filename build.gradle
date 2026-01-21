@@ -128,6 +128,36 @@ apiValidation {
 }
 
 subprojects {
+    // Constrain lifecycle versions to prevent TextInputLayout focus regression in 2.9.3+
+    // See: https://github.com/stripe/stripe-android/issues/11843
+    plugins.withId("com.android.library") {
+        afterEvaluate {
+            dependencies.constraints {
+                def lifecycleMax = versions.androidxLifecycleMax
+                def reason = "2.9.3+ breaks TextInputLayout focus - see issue #11843"
+
+                add("implementation", "androidx.lifecycle:lifecycle-runtime:$lifecycleMax") {
+                    because(reason)
+                }
+                add("implementation", "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleMax") {
+                    because(reason)
+                }
+                add("implementation", "androidx.lifecycle:lifecycle-common:$lifecycleMax") {
+                    because(reason)
+                }
+                add("implementation", "androidx.lifecycle:lifecycle-viewmodel:$lifecycleMax") {
+                    because(reason)
+                }
+                add("implementation", "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleMax") {
+                    because(reason)
+                }
+                add("implementation", "androidx.lifecycle:lifecycle-livedata-core:$lifecycleMax") {
+                    because(reason)
+                }
+            }
+        }
+    }
+
     plugins.withId("app.cash.paparazzi") {
         // Defer until afterEvaluate so that testImplementation is created by Android plugin.
         afterEvaluate {

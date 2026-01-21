@@ -1,0 +1,40 @@
+apply from: configs.androidApplication
+
+dependencies {
+    implementation project(':paymentsheet')
+
+    // Using same versions as StripeDemo
+    implementation "androidx.core:core-ktx:1.17.0"
+    implementation "androidx.appcompat:appcompat:1.7.1"
+    implementation "com.google.android.material:material:1.13.0"
+    implementation "androidx.activity:activity:1.12.2"
+    implementation "androidx.constraintlayout:constraintlayout:2.2.1"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.9.2"
+
+//    debugImplementation libs.leakCanary
+}
+
+android {
+    compileSdk 36
+
+    defaultConfig {
+        vectorDrawables.useSupportLibrary = true
+        targetSdk 36
+        minSdk 26
+    }
+
+    lint {
+        disable 'MissingTranslation'
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            res.srcDirs = ['res']
+        }
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+}
