@@ -25,7 +25,7 @@ internal class PaymentSheetCardFundingFilterTest {
     }
 
     @Test
-    fun `filter with only debit accepted should return true for debit and false for others`() {
+    fun `filter with only debit accepted should return true for debit and unknown`() {
         val filter = PaymentSheetCardFundingFilter(
             listOf(PaymentSheet.CardFundingType.Debit)
         )
@@ -33,11 +33,11 @@ internal class PaymentSheetCardFundingFilterTest {
         assertThat(filter.isAccepted(CardFunding.Debit)).isTrue()
         assertThat(filter.isAccepted(CardFunding.Credit)).isFalse()
         assertThat(filter.isAccepted(CardFunding.Prepaid)).isFalse()
-        assertThat(filter.isAccepted(CardFunding.Unknown)).isFalse()
+        assertThat(filter.isAccepted(CardFunding.Unknown)).isTrue()
     }
 
     @Test
-    fun `filter with only credit accepted should return true for credit and false for others`() {
+    fun `filter with only credit accepted should return true for credit and unknown`() {
         val filter = PaymentSheetCardFundingFilter(
             listOf(PaymentSheet.CardFundingType.Credit)
         )
@@ -45,11 +45,11 @@ internal class PaymentSheetCardFundingFilterTest {
         assertThat(filter.isAccepted(CardFunding.Credit)).isTrue()
         assertThat(filter.isAccepted(CardFunding.Debit)).isFalse()
         assertThat(filter.isAccepted(CardFunding.Prepaid)).isFalse()
-        assertThat(filter.isAccepted(CardFunding.Unknown)).isFalse()
+        assertThat(filter.isAccepted(CardFunding.Unknown)).isTrue()
     }
 
     @Test
-    fun `filter with only prepaid accepted should return true for prepaid and false for others`() {
+    fun `filter with only prepaid accepted should return true for prepaid and unknown`() {
         val filter = PaymentSheetCardFundingFilter(
             listOf(PaymentSheet.CardFundingType.Prepaid)
         )
@@ -57,11 +57,11 @@ internal class PaymentSheetCardFundingFilterTest {
         assertThat(filter.isAccepted(CardFunding.Prepaid)).isTrue()
         assertThat(filter.isAccepted(CardFunding.Debit)).isFalse()
         assertThat(filter.isAccepted(CardFunding.Credit)).isFalse()
-        assertThat(filter.isAccepted(CardFunding.Unknown)).isFalse()
+        assertThat(filter.isAccepted(CardFunding.Unknown)).isTrue()
     }
 
     @Test
-    fun `filter with only unknown accepted should return true for unknown and false for others`() {
+    fun `filter with only unknown in list should return true for unknown and false for others`() {
         val filter = PaymentSheetCardFundingFilter(
             listOf(PaymentSheet.CardFundingType.Unknown)
         )
@@ -73,12 +73,13 @@ internal class PaymentSheetCardFundingFilterTest {
     }
 
     @Test
-    fun `filter with no accepted types should reject all funding types`() {
+    fun `filter with no accepted types should reject all funding types except unknown`() {
         val filter = PaymentSheetCardFundingFilter(emptyList())
 
-        for (funding in CardFunding.entries) {
-            assertThat(filter.isAccepted(funding)).isFalse()
-        }
+        assertThat(filter.isAccepted(CardFunding.Credit)).isFalse()
+        assertThat(filter.isAccepted(CardFunding.Debit)).isFalse()
+        assertThat(filter.isAccepted(CardFunding.Prepaid)).isFalse()
+        assertThat(filter.isAccepted(CardFunding.Unknown)).isTrue()
     }
 
     @Test

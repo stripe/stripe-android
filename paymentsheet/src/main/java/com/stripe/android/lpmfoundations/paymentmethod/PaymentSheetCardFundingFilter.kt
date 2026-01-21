@@ -14,6 +14,7 @@ internal data class PaymentSheetCardFundingFilter(
     private val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>
 ) : CardFundingFilter {
     override fun isAccepted(cardFunding: CardFunding): Boolean {
+        if (cardFunding == CardFunding.Unknown) return true
         return allowedCardFundingTypes.any { it.cardFunding == cardFunding }
     }
 
