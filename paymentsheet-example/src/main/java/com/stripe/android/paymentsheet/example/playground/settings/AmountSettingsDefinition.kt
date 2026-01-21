@@ -7,7 +7,7 @@ internal object AmountSettingsDefinition :
     PlaygroundSettingDefinition.Saveable<String>,
     PlaygroundSettingDefinition.Displayable<String> {
     override val key: String = "amount"
-    override val displayName: String = "Amount (in cents)"
+    override val displayName: String = "Amount"
     override val defaultValue: String = "5099"
 
     override fun convertToString(value: String): String = value
