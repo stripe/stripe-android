@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.stateIn
 
 internal class ControllerAccountRangeService(
     cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     coroutineScope: CoroutineScope,
@@ -23,7 +24,7 @@ internal class ControllerAccountRangeService(
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = DefaultCardFundingFilter,
     ),
-    private val fundingCardAccountRangeService: CardAccountRangeService = cardAccountRangeServiceFactory.create(
+    private val fundingCardAccountRangeService: CardAccountRangeService = fundingCardAccountRangeServiceFactory.create(
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
     ),

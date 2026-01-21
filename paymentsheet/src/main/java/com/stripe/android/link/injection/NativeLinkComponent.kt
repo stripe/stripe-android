@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeService
+import com.stripe.android.cards.DEFAULT_ACCOUNT_RANGE_REPO
+import com.stripe.android.cards.FUNDING_ACCOUNT_RANGE_REPO
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -61,7 +63,12 @@ internal interface NativeLinkComponent {
     val logger: Logger
     val linkConfirmationHandlerFactory: LinkConfirmationHandler.Factory
     val webLinkActivityContract: WebLinkActivityContract
+
+    @get:Named(DEFAULT_ACCOUNT_RANGE_REPO)
     val cardAccountRangeServiceFactory: CardAccountRangeService.Factory
+
+    @get:Named(FUNDING_ACCOUNT_RANGE_REPO)
+    val fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory
     val savedStateHandle: SavedStateHandle
     val viewModel: LinkActivityViewModel
     val eventReporter: EventReporter

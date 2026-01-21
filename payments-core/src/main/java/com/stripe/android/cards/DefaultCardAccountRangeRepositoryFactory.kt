@@ -32,13 +32,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
 ) : CardAccountRangeRepository.Factory {
     private val appContext = context.applicationContext
     private val cardAccountRangeRepository = lazy {
-        val store = InMemoryCardAccountRangeStore()
-        DefaultCardAccountRangeRepository(
-            inMemorySource = InMemoryCardAccountRangeSource(store),
-            remoteSource = createRemoteCardAccountRangeSource(store),
-            staticSource = StaticCardAccountRangeSource(),
-            store = store
-        )
+        createCardAccountRangeRepository()
     }
 
     @JvmOverloads
@@ -53,8 +47,12 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
     )
 
     @Throws(IllegalStateException::class)
-    override fun create(): CardAccountRangeRepository {
-        return cardAccountRangeRepository.value
+    override fun create(useCache: Boolean): CardAccountRangeRepository {
+        return if (useCache) {
+            cardAccountRangeRepository.value
+        } else {
+            createCardAccountRangeRepository()
+        }
     }
 
     override fun createWithStripeRepository(
@@ -73,6 +71,16 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
                 DefaultAnalyticsRequestExecutor(),
                 PaymentAnalyticsRequestFactory(appContext, publishableKey, productUsageTokens)
             ),
+            staticSource = StaticCardAccountRangeSource(),
+            store = store
+        )
+    }
+
+    private fun createCardAccountRangeRepository(): DefaultCardAccountRangeRepository {
+        val store = InMemoryCardAccountRangeStore()
+        return DefaultCardAccountRangeRepository(
+            inMemorySource = InMemoryCardAccountRangeSource(store),
+            remoteSource = createRemoteCardAccountRangeSource(store),
             staticSource = StaticCardAccountRangeSource(),
             store = store
         )

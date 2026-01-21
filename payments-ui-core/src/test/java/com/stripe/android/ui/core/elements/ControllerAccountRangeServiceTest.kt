@@ -237,20 +237,25 @@ internal class ControllerAccountRangeServiceTest {
         defaultService: FakeCardAccountRangeService = FakeCardAccountRangeService(),
         fundingService: FakeCardAccountRangeService = FakeCardAccountRangeService()
     ): ControllerAccountRangeService {
-        val factory = object : CardAccountRangeService.Factory {
-            private var callCount = 0
-
+        val defaultFactory = object : CardAccountRangeService.Factory {
             override fun create(
                 cardBrandFilter: CardBrandFilter,
                 cardFundingFilter: CardFundingFilter,
                 accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener?,
-            ): CardAccountRangeService {
-                return if (callCount++ == 0) defaultService else fundingService
-            }
+            ): CardAccountRangeService = defaultService
+        }
+
+        val fundingFactory = object : CardAccountRangeService.Factory {
+            override fun create(
+                cardBrandFilter: CardBrandFilter,
+                cardFundingFilter: CardFundingFilter,
+                accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener?,
+            ): CardAccountRangeService = fundingService
         }
 
         return ControllerAccountRangeService(
-            cardAccountRangeServiceFactory = factory,
+            cardAccountRangeServiceFactory = defaultFactory,
+            fundingCardAccountRangeServiceFactory = fundingFactory,
             cardBrandFilter = DefaultCardBrandFilter,
             cardFundingFilter = DefaultCardFundingFilter,
             coroutineScope = testScope

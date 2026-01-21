@@ -60,6 +60,7 @@ internal abstract class BaseSheetViewModel(
     val savedStateHandle: SavedStateHandle,
     val linkHandler: LinkHandler,
     val cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    val fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     val isCompleteFlow: Boolean,
     val tapToAddCollectionHandler: TapToAddCollectionHandler,
     val mode: EventReporter.Mode,

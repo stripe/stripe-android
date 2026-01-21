@@ -32,6 +32,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 internal sealed interface UiDefinitionFactory {
     class Arguments(
         val cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+        val fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
         val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
         val initialValues: Map<IdentifierSpec, String?>,
         val initialLinkUserInput: UserInput?,
@@ -60,6 +61,7 @@ internal sealed interface UiDefinitionFactory {
 
             class Default(
                 private val cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+                private val fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
                 private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
                 private val linkInlineHandler: LinkInlineHandler?,
                 private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
@@ -82,6 +84,7 @@ internal sealed interface UiDefinitionFactory {
                 ): Arguments {
                     return Arguments(
                         cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
+                        fundingCardAccountRangeServiceFactory = fundingCardAccountRangeServiceFactory,
                         linkConfigurationCoordinator = linkConfigurationCoordinator,
                         merchantName = metadata.merchantName,
                         cbcEligibility = metadata.cbcEligibility,

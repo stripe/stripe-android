@@ -8,6 +8,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.cards.DefaultCardAccountRangeServiceFactory
+import com.stripe.android.cards.FundingCardAccountRangeServiceFactory
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.testing.CoroutineTestRule
@@ -247,6 +248,8 @@ class CardDetailsControllerTest {
             .isEqualTo("")
     }
 
+    private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
+
     private fun cardDetailsController(
         initialValues: Map<IdentifierSpec, String?> = emptyMap(),
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
@@ -261,7 +264,10 @@ class CardDetailsControllerTest {
         return CardDetailsController(
             cardBrandFilter = cardBrandFilter,
             cardAccountRangeServiceFactory = DefaultCardAccountRangeServiceFactory(
-                cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+            ),
+            fundingCardAccountRangeServiceFactory = FundingCardAccountRangeServiceFactory(
+                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
             ),
             initialValues = initialValues,
             cbcEligibility = cbcEligibility,

@@ -37,6 +37,7 @@ internal class DefaultFormHelper(
     private val coroutineScope: CoroutineScope,
     private val linkInlineHandler: LinkInlineHandler,
     private val cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    private val fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val newPaymentSelectionProvider: () -> NewPaymentOptionSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
@@ -73,6 +74,7 @@ internal class DefaultFormHelper(
                 coroutineScope = viewModel.viewModelScope,
                 linkInlineHandler = linkInlineHandler,
                 cardAccountRangeServiceFactory = viewModel.cardAccountRangeServiceFactory,
+                fundingCardAccountRangeServiceFactory = viewModel.fundingCardAccountRangeServiceFactory,
                 paymentMethodMetadata = paymentMethodMetadata,
                 newPaymentSelectionProvider = {
                     viewModel.newPaymentSelection
@@ -106,6 +108,7 @@ internal class DefaultFormHelper(
         fun create(
             coroutineScope: CoroutineScope,
             cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+            fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
             autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
             paymentMethodMetadata: PaymentMethodMetadata,
             eventReporter: EventReporter,
@@ -116,6 +119,7 @@ internal class DefaultFormHelper(
                 coroutineScope = coroutineScope,
                 linkInlineHandler = LinkInlineHandler.create(),
                 cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
+                fundingCardAccountRangeServiceFactory = fundingCardAccountRangeServiceFactory,
                 paymentMethodMetadata = paymentMethodMetadata,
                 newPaymentSelectionProvider = { null },
                 linkConfigurationCoordinator = null,
@@ -168,6 +172,7 @@ internal class DefaultFormHelper(
             code = code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                 cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
+                fundingCardAccountRangeServiceFactory = fundingCardAccountRangeServiceFactory,
                 linkConfigurationCoordinator = linkConfigurationCoordinator,
                 linkInlineHandler = linkInlineHandler,
                 onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,

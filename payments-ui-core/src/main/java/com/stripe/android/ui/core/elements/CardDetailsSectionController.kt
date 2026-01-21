@@ -14,6 +14,7 @@ import com.stripe.android.uicore.elements.SectionFieldValidationController
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardDetailsSectionController(
     cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     initialValues: Map<IdentifierSpec, String?>,
     collectName: Boolean = false,
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
@@ -25,6 +26,7 @@ class CardDetailsSectionController(
     internal val cardDetailsElement = CardDetailsElement(
         IdentifierSpec.Generic("card_detail"),
         cardAccountRangeServiceFactory,
+        fundingCardAccountRangeServiceFactory,
         initialValues,
         collectName,
         cbcEligibility,

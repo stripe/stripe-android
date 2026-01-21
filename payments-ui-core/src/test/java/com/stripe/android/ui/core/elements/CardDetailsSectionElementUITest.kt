@@ -19,6 +19,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.cards.DefaultCardAccountRangeServiceFactory
+import com.stripe.android.cards.FundingCardAccountRangeServiceFactory
 import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cardscan.FakeCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.FakePaymentCardRecognitionClient
@@ -133,12 +134,17 @@ internal class CardDetailsSectionElementUITest {
         context: Context,
         automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
     ): CardDetailsSectionController {
+        val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
         val cardAccountRangeServiceFactory = DefaultCardAccountRangeServiceFactory(
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
+            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory
+        )
+        val fundingCardAccountRangeServiceFactory = FundingCardAccountRangeServiceFactory(
+            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory
         )
 
         val output = CardDetailsSectionController(
             cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
+            fundingCardAccountRangeServiceFactory = fundingCardAccountRangeServiceFactory,
             initialValues = emptyMap(),
             collectName = false,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,

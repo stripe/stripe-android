@@ -11,6 +11,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeService
+import com.stripe.android.cards.DEFAULT_ACCOUNT_RANGE_REPO
+import com.stripe.android.cards.FUNDING_ACCOUNT_RANGE_REPO
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.core.injection.IOContext
@@ -53,6 +55,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 @JvmSuppressWildcards
@@ -66,7 +69,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     @IOContext workContext: CoroutineContext,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
-    cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    @Named(DEFAULT_ACCOUNT_RANGE_REPO) cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    @Named(FUNDING_ACCOUNT_RANGE_REPO) fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     tapToAddCollectionHandler: TapToAddCollectionHandler,
     mode: EventReporter.Mode,
 ) : BaseSheetViewModel(
@@ -77,6 +81,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
+    fundingCardAccountRangeServiceFactory = fundingCardAccountRangeServiceFactory,
     isCompleteFlow = false,
     tapToAddCollectionHandler = tapToAddCollectionHandler,
     mode = mode,

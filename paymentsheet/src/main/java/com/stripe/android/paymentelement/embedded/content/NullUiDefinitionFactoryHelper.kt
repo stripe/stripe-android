@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.flowOf
 internal object NullUiDefinitionFactoryHelper {
     val nullEmbeddedUiDefinitionFactory = UiDefinitionFactory.Arguments.Factory.Default(
         cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
+        fundingCardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
         linkConfigurationCoordinator = null,
         linkInlineHandler = null,
         autocompleteAddressInteractorFactory = null,

@@ -13,6 +13,8 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeService
+import com.stripe.android.cards.DEFAULT_ACCOUNT_RANGE_REPO
+import com.stripe.android.cards.FUNDING_ACCOUNT_RANGE_REPO
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
@@ -70,6 +72,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -85,7 +88,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
-    cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    @Named(DEFAULT_ACCOUNT_RANGE_REPO) cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    @Named(FUNDING_ACCOUNT_RANGE_REPO) fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
@@ -99,6 +103,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
+    fundingCardAccountRangeServiceFactory = fundingCardAccountRangeServiceFactory,
     isCompleteFlow = true,
     tapToAddCollectionHandler = tapToAddCollectionHandler,
     mode = mode,

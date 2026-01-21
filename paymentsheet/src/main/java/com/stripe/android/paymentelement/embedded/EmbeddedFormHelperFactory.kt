@@ -2,6 +2,8 @@ package com.stripe.android.paymentelement.embedded
 
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeService
+import com.stripe.android.cards.DEFAULT_ACCOUNT_RANGE_REPO
+import com.stripe.android.cards.FUNDING_ACCOUNT_RANGE_REPO
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.strings.ResolvableString
@@ -17,11 +19,15 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
+import javax.inject.Named
 
 internal class EmbeddedFormHelperFactory @Inject constructor(
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
-    private val cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    @Named(DEFAULT_ACCOUNT_RANGE_REPO) private val cardAccountRangeServiceFactory:
+    CardAccountRangeService.Factory,
+    @Named(FUNDING_ACCOUNT_RANGE_REPO) private val fundingCardAccountRangeServiceFactory:
+    CardAccountRangeService.Factory,
     private val savedStateHandle: SavedStateHandle,
     private val selectedPaymentMethodCode: String,
     private val tapToAddCollectionHandler: TapToAddCollectionHandler,
@@ -63,6 +69,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             coroutineScope = coroutineScope,
             linkInlineHandler = LinkInlineHandler.create(),
             cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
+            fundingCardAccountRangeServiceFactory = fundingCardAccountRangeServiceFactory,
             paymentMethodMetadata = paymentMethodMetadata,
             newPaymentSelectionProvider = {
                 when (val currentSelection = embeddedSelectionHolder.selection.value) {

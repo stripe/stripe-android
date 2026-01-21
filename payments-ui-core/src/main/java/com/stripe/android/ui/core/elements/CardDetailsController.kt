@@ -34,6 +34,7 @@ import kotlin.coroutines.CoroutineContext
 
 internal class CardDetailsController(
     cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     initialValues: Map<IdentifierSpec, String?>,
     collectName: Boolean = false,
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
@@ -72,6 +73,7 @@ internal class CardDetailsController(
         DefaultCardNumberController(
             cardTextFieldConfig = cardDetailsTextFieldConfig,
             cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
+            fundingCardAccountRangeServiceFactory = fundingCardAccountRangeServiceFactory,
             uiContext = uiContext,
             initialValue = initialValues[IdentifierSpec.CardNumber],
             cardBrandChoiceConfig = when (cbcEligibility) {

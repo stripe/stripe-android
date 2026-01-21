@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardDetailsSectionElement(
     cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     initialValues: Map<IdentifierSpec, String?>,
     automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
     private val collectName: Boolean = false,
@@ -24,6 +25,7 @@ class CardDetailsSectionElement(
     override val identifier: IdentifierSpec,
     override val controller: CardDetailsSectionController = CardDetailsSectionController(
         cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
+        fundingCardAccountRangeServiceFactory = fundingCardAccountRangeServiceFactory,
         initialValues = initialValues,
         collectName = collectName,
         cbcEligibility = cbcEligibility,

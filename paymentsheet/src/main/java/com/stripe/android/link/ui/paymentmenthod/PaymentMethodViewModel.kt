@@ -197,6 +197,8 @@ internal class PaymentMethodViewModel @Inject constructor(
                         formHelper = DefaultFormHelper.create(
                             coroutineScope = parentComponent.viewModel.viewModelScope,
                             cardAccountRangeServiceFactory = parentComponent.cardAccountRangeServiceFactory,
+                            fundingCardAccountRangeServiceFactory = parentComponent
+                                .fundingCardAccountRangeServiceFactory,
                             paymentMethodMetadata = parentComponent.paymentMethodMetadata,
                             eventReporter = parentComponent.eventReporter,
                             savedStateHandle = parentComponent.viewModel.savedStateHandle,

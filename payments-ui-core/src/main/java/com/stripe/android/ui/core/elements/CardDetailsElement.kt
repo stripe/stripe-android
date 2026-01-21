@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.StateFlow
 internal class CardDetailsElement(
     identifier: IdentifierSpec,
     cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     initialValues: Map<IdentifierSpec, String?>,
     collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
@@ -33,6 +34,7 @@ internal class CardDetailsElement(
     private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     val controller: CardDetailsController = CardDetailsController(
         cardAccountRangeServiceFactory,
+        fundingCardAccountRangeServiceFactory,
         initialValues,
         collectName,
         cbcEligibility,

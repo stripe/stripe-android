@@ -6,6 +6,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.cards.DefaultCardAccountRangeServiceFactory
+import com.stripe.android.cards.FundingCardAccountRangeServiceFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.testing.CoroutineTestRule
@@ -35,8 +36,16 @@ class CardDetailsElementTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
+    private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
+
     private fun createServiceFactory() = DefaultCardAccountRangeServiceFactory(
-        cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+        cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+        uiContext = testDispatcher,
+        workContext = testDispatcher
+    )
+
+    private fun createFundingServiceFactory() = FundingCardAccountRangeServiceFactory(
+        cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
         uiContext = testDispatcher,
         workContext = testDispatcher
     )
@@ -45,11 +54,13 @@ class CardDetailsElementTest {
     fun `test form field values returned and expiration date parsing`() = runTest {
         val cardController = CardDetailsController(
             cardAccountRangeServiceFactory = createServiceFactory(),
+            fundingCardAccountRangeServiceFactory = createFundingServiceFactory(),
             initialValues = emptyMap(),
         )
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeServiceFactory = createServiceFactory(),
+            fundingCardAccountRangeServiceFactory = createFundingServiceFactory(),
             initialValues = emptyMap(),
             controller = cardController
         )
@@ -77,6 +88,7 @@ class CardDetailsElementTest {
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeServiceFactory = createServiceFactory(),
+            fundingCardAccountRangeServiceFactory = createFundingServiceFactory(),
             initialValues = mapOf(
                 IdentifierSpec.CardNumber to "4242424242424242",
                 IdentifierSpec.CardBrand to CardBrand.Visa.code
@@ -104,12 +116,14 @@ class CardDetailsElementTest {
     fun `test form field values returned when collecting name`() = runTest {
         val cardController = CardDetailsController(
             cardAccountRangeServiceFactory = createServiceFactory(),
+            fundingCardAccountRangeServiceFactory = createFundingServiceFactory(),
             initialValues = emptyMap(),
             collectName = true,
         )
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeServiceFactory = createServiceFactory(),
+            fundingCardAccountRangeServiceFactory = createFundingServiceFactory(),
             initialValues = emptyMap(),
             collectName = true,
             controller = cardController,
@@ -140,6 +154,7 @@ class CardDetailsElementTest {
         val cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList())
         val cardController = CardDetailsController(
             cardAccountRangeServiceFactory = createServiceFactory(),
+            fundingCardAccountRangeServiceFactory = createFundingServiceFactory(),
             initialValues = emptyMap(),
             collectName = true,
             cbcEligibility = cbcEligibility,
@@ -148,6 +163,7 @@ class CardDetailsElementTest {
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeServiceFactory = createServiceFactory(),
+            fundingCardAccountRangeServiceFactory = createFundingServiceFactory(),
             initialValues = emptyMap(),
             collectName = true,
             controller = cardController,
@@ -180,6 +196,7 @@ class CardDetailsElementTest {
         val cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf())
         val cardController = CardDetailsController(
             cardAccountRangeServiceFactory = createServiceFactory(),
+            fundingCardAccountRangeServiceFactory = createFundingServiceFactory(),
             initialValues = emptyMap(),
             collectName = true,
             cbcEligibility = cbcEligibility,
@@ -188,6 +205,7 @@ class CardDetailsElementTest {
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeServiceFactory = createServiceFactory(),
+            fundingCardAccountRangeServiceFactory = createFundingServiceFactory(),
             initialValues = emptyMap(),
             collectName = true,
             controller = cardController,
@@ -227,6 +245,7 @@ class CardDetailsElementTest {
         val cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf(CardBrand.CartesBancaires))
         val cardController = CardDetailsController(
             cardAccountRangeServiceFactory = createServiceFactory(),
+            fundingCardAccountRangeServiceFactory = createFundingServiceFactory(),
             initialValues = emptyMap(),
             collectName = true,
             cbcEligibility = cbcEligibility,
@@ -235,6 +254,7 @@ class CardDetailsElementTest {
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeServiceFactory = createServiceFactory(),
+            fundingCardAccountRangeServiceFactory = createFundingServiceFactory(),
             initialValues = emptyMap(),
             collectName = true,
             controller = cardController,
@@ -266,11 +286,13 @@ class CardDetailsElementTest {
     fun `test card scan result should fill in card number and expiration date`() = runTest {
         val cardController = CardDetailsController(
             cardAccountRangeServiceFactory = createServiceFactory(),
+            fundingCardAccountRangeServiceFactory = createFundingServiceFactory(),
             initialValues = emptyMap(),
         )
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeServiceFactory = createServiceFactory(),
+            fundingCardAccountRangeServiceFactory = createFundingServiceFactory(),
             initialValues = emptyMap(),
             controller = cardController
         )
@@ -303,10 +325,12 @@ class CardDetailsElementTest {
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardAccountRangeServiceFactory = createServiceFactory(),
+            fundingCardAccountRangeServiceFactory = createFundingServiceFactory(),
             initialValues = emptyMap(),
             collectName = true,
             controller = CardDetailsController(
                 cardAccountRangeServiceFactory = createServiceFactory(),
+                fundingCardAccountRangeServiceFactory = createFundingServiceFactory(),
                 initialValues = emptyMap(),
                 collectName = true,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,

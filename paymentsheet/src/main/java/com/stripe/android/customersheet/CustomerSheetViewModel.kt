@@ -12,6 +12,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.cards.DefaultCardAccountRangeServiceFactory
+import com.stripe.android.cards.FundingCardAccountRangeServiceFactory
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.Logger
@@ -145,6 +146,13 @@ internal class CustomerSheetViewModel(
     )
 
     private val cardAccountRangeServiceFactory = DefaultCardAccountRangeServiceFactory(
+        cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
+            context = application,
+            productUsageTokens = productUsage,
+        ),
+    )
+
+    private val fundingCardAccountRangeServiceFactory = FundingCardAccountRangeServiceFactory(
         cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
             context = application,
             productUsageTokens = productUsage,
@@ -465,6 +473,7 @@ internal class CustomerSheetViewModel(
                     code = paymentMethod.code,
                     uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                         cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
+                        fundingCardAccountRangeServiceFactory = fundingCardAccountRangeServiceFactory,
                         /*
                          * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.
                          */
@@ -811,6 +820,7 @@ internal class CustomerSheetViewModel(
             code = selectedPaymentMethod.code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                 cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
+                fundingCardAccountRangeServiceFactory = fundingCardAccountRangeServiceFactory,
                 /*
                  * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.
                  */

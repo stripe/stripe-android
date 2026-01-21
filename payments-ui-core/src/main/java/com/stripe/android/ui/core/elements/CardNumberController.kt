@@ -69,6 +69,7 @@ internal sealed class CardNumberController : TextFieldController {
 internal class DefaultCardNumberController(
     private val cardTextFieldConfig: CardNumberTextFieldConfig,
     cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     uiContext: CoroutineContext,
     override val initialValue: String?,
     cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
@@ -78,6 +79,7 @@ internal class DefaultCardNumberController(
 ) : CardNumberController() {
     private val accountRangeService = ControllerAccountRangeService(
         cardAccountRangeServiceFactory = cardAccountRangeServiceFactory,
+        fundingCardAccountRangeServiceFactory = fundingCardAccountRangeServiceFactory,
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
         coroutineScope = coroutineScope,
