@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import android.content.Context
+import android.util.Log
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsEvent
@@ -11,6 +12,7 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -525,11 +527,19 @@ internal class DefaultEventReporter @Inject internal constructor(
     private fun fireV2Event(event: PaymentSheetEvent) {
         CoroutineScope(workContext).launch {
             val paymentMethodMetadata = paymentMethodMetadataProvider.get()
+            val analyticsRequest = analyticsRequestV2Factory.createRequest(
+                eventName = event.eventName,
+                additionalParams = defaultParams(paymentMethodMetadata) + event.params,
+            )
+            if (event is PaymentSheetEvent.ExperimentExposure && event.params["experiment_retrieved"] in listOf(
+                ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE.experimentValue,
+                    ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA.experimentValue,
+                    ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA.experimentValue,
+            )) {
+                Log.d("experiment_exposures", analyticsRequest.toString())
+            }
             analyticsRequestV2Executor.enqueue(
-                analyticsRequestV2Factory.createRequest(
-                    eventName = event.eventName,
-                    additionalParams = defaultParams(paymentMethodMetadata) + event.params,
-                )
+                analyticsRequest
             )
         }
     }
