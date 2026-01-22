@@ -5,6 +5,7 @@ package com.stripe.android.paymentmethodmessaging.element
 import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,6 +72,7 @@ internal sealed class PaymentMethodMessagingContent {
     ) : PaymentMethodMessagingContent() {
         @Composable
         override fun Content(appearance: PaymentMethodMessagingElement.Appearance.State) {
+            println("YEET PMME Content: Publish 3")
             MultiPartner(message, appearance, analyticsOnClick)
         }
     }
@@ -146,6 +149,8 @@ private fun MultiPartner(
     val context = LocalContext.current
     val keyboardController = rememberKeyboardController()
     val scope = rememberCoroutineScope()
+    val images = getImages(message, appearance.theme)
+    val iconHeight = getIconHeight(appearance).dp
 
     Column(
         modifier = Modifier.clickable {
@@ -155,7 +160,11 @@ private fun MultiPartner(
         },
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        Images(getImages(message, appearance.theme), appearance)
+        if (images.isNotEmpty()) {
+            Box(Modifier.height(getIconHeight(appearance).dp)) {
+                Images(images, iconHeight)
+            }
+        }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = message.promotion.buildAnnotatedStringWithInfoIcon(),
@@ -198,29 +207,30 @@ private fun launchLearnMore(
 @Composable
 private fun Images(
     imageList: List<PaymentMethodMessageImage>,
-    appearance: PaymentMethodMessagingElement.Appearance.State
+    iconHeight: Dp
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
         StripeImageLoader(context.applicationContext)
     }
-    val fontSize = appearance.font?.fontSizeSp ?: DEFAULT_TEXT_SIZE
-    val scaleFactor = fontSize / DEFAULT_TEXT_SIZE
-    val iconHeight = DEFAULT_ICON_SIZE * scaleFactor
-    if (imageList.isNotEmpty()) {
-        Row {
-            imageList.forEachIndexed { index, messagingImage ->
-                StripeImage(
-                    url = messagingImage.url,
-                    imageLoader = imageLoader,
-                    contentDescription = messagingImage.text,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.align(Alignment.CenterVertically).height(iconHeight.dp)
-                )
-                if (index != imageList.lastIndex) Spacer(Modifier.width(8.dp))
-            }
+    Row {
+        imageList.forEachIndexed { index, messagingImage ->
+            StripeImage(
+                url = messagingImage.url,
+                imageLoader = imageLoader,
+                contentDescription = messagingImage.text,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.align(Alignment.CenterVertically).height(iconHeight)
+            )
+            if (index != imageList.lastIndex) Spacer(Modifier.width(8.dp))
         }
     }
+}
+
+private fun getIconHeight(appearance: PaymentMethodMessagingElement.Appearance.State): Float {
+    val fontSize = appearance.font?.fontSizeSp ?: DEFAULT_TEXT_SIZE
+    val scaleFactor = fontSize / DEFAULT_TEXT_SIZE
+    return DEFAULT_ICON_SIZE * scaleFactor
 }
 
 private fun getImages(
