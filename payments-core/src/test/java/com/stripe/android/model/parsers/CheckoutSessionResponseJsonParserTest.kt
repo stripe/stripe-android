@@ -181,10 +181,8 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(paymentIntent?.status).isEqualTo(StripeIntent.Status.Succeeded)
         assertThat(paymentIntent?.isConfirmed).isTrue()
 
-        // Verify ElementsSession is created with PaymentIntent as stripeIntent
-        val elementsSession = result?.elementsSession
-        assertThat(elementsSession).isNotNull()
-        assertThat(elementsSession?.stripeIntent).isEqualTo(paymentIntent)
+        // Confirm responses don't include elements_session
+        assertThat(result?.elementsSession).isNull()
     }
 
     @Test

@@ -6,7 +6,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ClientAttributionMetadata
-import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethod
@@ -259,17 +258,17 @@ class CheckoutSessionConfirmationInterceptorTest {
             id = "ppage_test_123",
             amount = 1000L,
             currency = "usd",
-            elementsSession = ElementsSession.createFromFallback(
-                stripeIntent = paymentIntent ?: PaymentIntentFactory.create(),
-                sessionsError = null,
-            ),
+            // Confirm responses don't include elements_session
+            elementsSession = null,
             paymentIntent = paymentIntent,
         )
     }
 
     private class FakeCheckoutSessionStripeRepository(
-        private val createPaymentMethodResult: Result<PaymentMethod> = Result.failure(NotImplementedError()),
-        private val confirmCheckoutSessionResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
+        private val createPaymentMethodResult: Result<PaymentMethod> =
+            Result.failure(NotImplementedError()),
+        private val confirmCheckoutSessionResult: Result<CheckoutSessionResponse> =
+            Result.failure(NotImplementedError()),
     ) : AbsFakeStripeRepository() {
 
         override suspend fun createPaymentMethod(

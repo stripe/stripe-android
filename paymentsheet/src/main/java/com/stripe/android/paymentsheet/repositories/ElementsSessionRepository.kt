@@ -83,7 +83,10 @@ internal class RealElementsSessionRepository @Inject constructor(
                 stripeRepository.initCheckoutSession(
                     params = params,
                     options = requestOptions,
-                ).map { it.elementsSession }
+                ).mapCatching { response ->
+                    response.elementsSession
+                        ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
+                }
             } else {
                 stripeRepository.retrieveElementsSession(
                     params = params,

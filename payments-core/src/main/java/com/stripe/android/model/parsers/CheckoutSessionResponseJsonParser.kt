@@ -45,6 +45,7 @@ internal class CheckoutSessionResponseJsonParser(
 
     /**
      * Parses a confirm response which contains a payment_intent.
+     * Confirm responses don't include elements_session - only the payment_intent.
      */
     private fun parseConfirmResponse(
         json: JSONObject,
@@ -54,19 +55,17 @@ internal class CheckoutSessionResponseJsonParser(
             ?: paymentIntent.id?.substringBefore("_secret_")
             ?: return null
 
-        // For confirm responses, amount/currency come from the payment intent
-        val amount = paymentIntent.amount ?: 0L
-        val currency = paymentIntent.currency ?: ""
+        // For confirm responses, amount/currency come from top-level or payment intent
+        val amount = extractConfirmAmount(json) ?: paymentIntent.amount ?: 0L
+        val currency = json.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() }
+            ?: paymentIntent.currency ?: ""
 
-        // Elements session may or may not be present in confirm response
-        val elementsSession = parseElementsSession(json, amount, currency)
-            ?: createMinimalElementsSession(paymentIntent)
-
+        // Confirm responses don't include elements_session
         return CheckoutSessionResponse(
             id = id,
             amount = amount,
             currency = currency,
-            elementsSession = elementsSession,
+            elementsSession = null,
             paymentIntent = paymentIntent,
         )
     }
@@ -118,23 +117,21 @@ internal class CheckoutSessionResponseJsonParser(
     }
 
     /**
-     * Creates a minimal ElementsSession for confirm responses that don't include elements_session.
-     * Uses the PaymentIntent from the confirm response as the stripeIntent.
-     */
-    private fun createMinimalElementsSession(paymentIntent: PaymentIntent): ElementsSession {
-        return ElementsSession.createFromFallback(
-            stripeIntent = paymentIntent,
-            sessionsError = null,
-        )
-    }
-
-    /**
-     * Extracts amount from `line_item_group.total` in the JSON response.
+     * Extracts amount from `line_item_group.total` in init response JSON.
      */
     private fun extractAmount(json: JSONObject): Long? {
         val lineItemGroup = json.optJSONObject(FIELD_LINE_ITEM_GROUP) ?: return null
         val total = lineItemGroup.optLong(FIELD_TOTAL, -1)
         return if (total >= 0) total else null
+    }
+
+    /**
+     * Extracts amount from `total_summary.due` in confirm response JSON.
+     */
+    private fun extractConfirmAmount(json: JSONObject): Long? {
+        val totalSummary = json.optJSONObject(FIELD_TOTAL_SUMMARY) ?: return null
+        val due = totalSummary.optLong(FIELD_DUE, -1)
+        return if (due >= 0) due else null
     }
 
     private companion object {
@@ -143,6 +140,8 @@ internal class CheckoutSessionResponseJsonParser(
         private const val FIELD_ELEMENTS_SESSION = "elements_session"
         private const val FIELD_LINE_ITEM_GROUP = "line_item_group"
         private const val FIELD_TOTAL = "total"
+        private const val FIELD_TOTAL_SUMMARY = "total_summary"
+        private const val FIELD_DUE = "due"
         private const val FIELD_PAYMENT_INTENT = "payment_intent"
     }
 }

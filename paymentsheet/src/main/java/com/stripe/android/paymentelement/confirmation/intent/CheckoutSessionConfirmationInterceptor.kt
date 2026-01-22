@@ -32,7 +32,9 @@ import dagger.assisted.AssistedInject
  */
 internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val checkoutSessionId: String,
-    @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
+    @Suppress("UnusedPrivateProperty") // Will be used for analytics in follow-up
+    @Assisted
+    private val clientAttributionMetadata: ClientAttributionMetadata,
     private val context: Context,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
@@ -68,7 +70,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
-        // TODO: Implement saved payment method support in follow-up PR
+        // Saved payment method support will be implemented in a follow-up PR
         return ConfirmationDefinition.Action.Fail(
             cause = NotImplementedError("Saved payment methods not yet supported for checkout sessions"),
             message = resolvableString(R.string.stripe_something_went_wrong),
