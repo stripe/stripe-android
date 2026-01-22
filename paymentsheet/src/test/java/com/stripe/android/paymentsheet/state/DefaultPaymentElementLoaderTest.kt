@@ -1670,7 +1670,12 @@ internal class DefaultPaymentElementLoaderTest {
             clientSecret = "cs_test_123_secret_abc"
         )
         assertThat(checkoutSession.integrationMetadata(null))
-            .isEqualTo(IntegrationMetadata.CheckoutSession("cs_test_123"))
+            .isEqualTo(
+                IntegrationMetadata.CheckoutSession(
+                    clientSecret = "cs_test_123_secret_abc",
+                    id = "cs_test_123"
+                )
+            )
     }
 
     @Test

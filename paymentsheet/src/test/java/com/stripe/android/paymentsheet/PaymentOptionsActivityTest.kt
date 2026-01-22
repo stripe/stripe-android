@@ -49,6 +49,7 @@ import com.stripe.android.testing.RetryRule
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePaymentMethodRefresher
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -473,6 +474,7 @@ internal class PaymentOptionsActivityTest {
                 linkPaymentLauncher = mock(),
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
                 mode = EventReporter.Mode.Complete,
+                paymentMethodRefresher = FakePaymentMethodRefresher.noOp(),
             )
         }
 

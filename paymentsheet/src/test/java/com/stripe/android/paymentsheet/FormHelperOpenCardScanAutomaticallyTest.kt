@@ -36,6 +36,7 @@ import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
+import com.stripe.android.utils.FakePaymentMethodRefresher
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -158,6 +159,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
                 mode = EventReporter.Mode.Complete,
+                paymentMethodRefresher = FakePaymentMethodRefresher.noOp(),
             )
         }
     }
@@ -204,7 +206,8 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                     }
                 },
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
-                mode = EventReporter.Mode.Complete
+                mode = EventReporter.Mode.Complete,
+                paymentMethodRefresher = FakePaymentMethodRefresher.noOp(),
             )
         }
     }

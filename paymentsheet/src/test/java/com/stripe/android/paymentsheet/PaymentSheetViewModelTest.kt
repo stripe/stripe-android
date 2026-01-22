@@ -121,6 +121,7 @@ import com.stripe.android.utils.BankFormScreenStateFactory
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
+import com.stripe.android.utils.FakePaymentMethodRefresher
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
@@ -3505,6 +3506,7 @@ internal class PaymentSheetViewModelTest {
                 },
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
                 mode = EventReporter.Mode.Complete,
+                paymentMethodRefresher = FakePaymentMethodRefresher.noOp(),
             )
         }
     }

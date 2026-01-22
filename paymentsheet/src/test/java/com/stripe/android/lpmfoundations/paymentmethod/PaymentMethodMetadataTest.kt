@@ -1225,6 +1225,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
             experimentsData = null,
+            userOverrideCountry = null,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1380,6 +1381,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
             experimentsData = null,
+            userOverrideCountry = null,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }

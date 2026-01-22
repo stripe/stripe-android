@@ -101,6 +101,7 @@ import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
+import com.stripe.android.utils.FakePaymentMethodRefresher
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
@@ -1294,6 +1295,7 @@ internal class PaymentSheetActivityTest {
                 },
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
                 mode = EventReporter.Mode.Complete,
+                paymentMethodRefresher = FakePaymentMethodRefresher.noOp(),
             )
         }
     }

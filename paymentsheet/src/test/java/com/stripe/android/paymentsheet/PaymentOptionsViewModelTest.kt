@@ -62,6 +62,7 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePaymentMethodRefresher
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -1308,6 +1309,7 @@ internal class PaymentOptionsViewModelTest {
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
             mode = EventReporter.Mode.Complete,
+            paymentMethodRefresher = FakePaymentMethodRefresher.noOp(),
         )
     }
 

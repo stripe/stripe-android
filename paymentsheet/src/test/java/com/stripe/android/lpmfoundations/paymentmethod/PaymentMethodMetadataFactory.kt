@@ -67,6 +67,7 @@ internal object PaymentMethodMetadataFactory {
         analyticsMetadata: AnalyticsMetadata = AnalyticsMetadata(emptyMap()),
         isTapToAddSupported: Boolean = false,
         experimentsData: ElementsSession.ExperimentsData? = null,
+        userCountryOverride: String? = null,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -115,6 +116,7 @@ internal object PaymentMethodMetadataFactory {
             analyticsMetadata = analyticsMetadata,
             isTapToAddSupported = isTapToAddSupported,
             experimentsData = experimentsData,
+            userOverrideCountry = userCountryOverride,
         )
     }
 

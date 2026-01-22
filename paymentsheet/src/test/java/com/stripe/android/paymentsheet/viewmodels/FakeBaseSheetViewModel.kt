@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePaymentMethodRefresher
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,6 +49,7 @@ internal class FakeBaseSheetViewModel private constructor(
     isCompleteFlow = true,
     tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
     mode = EventReporter.Mode.Complete,
+    paymentMethodRefresher = FakePaymentMethodRefresher.noOp(),
 ) {
     companion object {
         fun create(
