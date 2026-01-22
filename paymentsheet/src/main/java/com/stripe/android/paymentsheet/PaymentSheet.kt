@@ -2963,24 +2963,30 @@ class PaymentSheet internal constructor(
                 /**
                  * Creates a [Builder] prepopulated with default light mode values.
                  */
-                fun light(): Builder = Builder(
-                    background = null,
-                    onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                    border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
-                    successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                    onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                )
+                fun light(): Builder {
+                    val colors = StripeThemeDefaults.primaryButtonStyle.colorsLight
+                    return Builder(
+                        background = null,
+                        onBackground = colors.onBackground.toArgb(),
+                        border = colors.border.toArgb(),
+                        successBackgroundColor = colors.successBackground.toArgb(),
+                        onSuccessBackgroundColor = colors.onSuccessBackground.toArgb(),
+                    )
+                }
 
                 /**
                  * Creates a [Builder] prepopulated with default dark mode values.
                  */
-                fun dark(): Builder = Builder(
-                    background = null,
-                    onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-                    border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
-                    successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                    onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-                )
+                fun dark(): Builder {
+                    val colors = StripeThemeDefaults.primaryButtonStyle.colorsDark
+                    return Builder(
+                        background = null,
+                        onBackground = colors.onBackground.toArgb(),
+                        border = colors.border.toArgb(),
+                        successBackgroundColor = colors.successBackground.toArgb(),
+                        onSuccessBackgroundColor = colors.onSuccessBackground.toArgb(),
+                    )
+                }
             }
         }
 
