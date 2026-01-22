@@ -13,6 +13,11 @@ internal object CommonElementsDimensions {
         val paymentMethodTypes = paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code }
         val isGooglePayAvailable = paymentMethodMetadata.isGooglePayReady
         val isLinkDisplayed = paymentMethodMetadata.linkState != null
+        val integrationType = when (mode) {
+            EventReporter.Mode.Complete -> "paymentsheet"
+            EventReporter.Mode.Custom -> "flowcontroller"
+            EventReporter.Mode.Embedded -> "embedded"
+        }
 
         return mapOf(
             "displayed_payment_method_types" to paymentMethodTypes.joinToString(","),
@@ -21,7 +26,7 @@ internal object CommonElementsDimensions {
                 isGooglePayAvailable = isGooglePayAvailable,
                 isLinkDisplayed = isLinkDisplayed,
             ).joinToString(","),
-            "in_app_elements_integration_type" to mode.code,
+            "in_app_elements_integration_type" to integrationType,
         )
     }
 
