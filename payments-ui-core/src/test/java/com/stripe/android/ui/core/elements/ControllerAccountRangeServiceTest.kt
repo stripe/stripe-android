@@ -50,6 +50,9 @@ internal class ControllerAccountRangeServiceTest {
         val fundingCall = fundingService.onCardNumberChangedTurbine.awaitItem()
         assertThat(fundingCall.first).isEqualTo(cardNumber)
         assertThat(fundingCall.second).isFalse()
+
+        defaultService.onCardNumberChangedTurbine.ensureAllEventsConsumed()
+        fundingService.onCardNumberChangedTurbine.ensureAllEventsConsumed()
     }
 
     @Test
