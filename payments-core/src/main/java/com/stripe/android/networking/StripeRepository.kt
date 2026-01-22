@@ -420,6 +420,23 @@ interface StripeRepository {
         options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse>
 
+    /**
+     * Confirms a checkout session by calling the `/v1/payment_pages/{checkoutSessionId}/confirm` endpoint.
+     *
+     * @param checkoutSessionId The checkout session ID (e.g., "cs_test_xxx").
+     * @param paymentMethodId The payment method ID to use for confirmation.
+     * @param returnUrl The URL to redirect to after confirmation (required for ui_mode=custom).
+     * @param options API request options including the publishable key.
+     * @return A [CheckoutSessionResponse] containing the confirmed [PaymentIntent].
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun confirmCheckoutSession(
+        checkoutSessionId: String,
+        paymentMethodId: String,
+        returnUrl: String,
+        options: ApiRequest.Options,
+    ): Result<CheckoutSessionResponse>
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun retrieveCardMetadata(
         cardNumber: String,

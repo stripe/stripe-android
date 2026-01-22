@@ -1570,6 +1570,30 @@ class StripeApiRepository @JvmOverloads internal constructor(
         )
     }
 
+    override suspend fun confirmCheckoutSession(
+        checkoutSessionId: String,
+        paymentMethodId: String,
+        returnUrl: String,
+        options: ApiRequest.Options,
+    ): Result<CheckoutSessionResponse> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getApiUrl("payment_pages/$checkoutSessionId/confirm"),
+                options = options,
+                params = mapOf(
+                    "payment_method" to paymentMethodId,
+                    "return_url" to returnUrl,
+                ),
+            ),
+            jsonParser = CheckoutSessionResponseJsonParser(
+                elementsSessionParams = ElementsSessionParams.CheckoutSessionType(
+                    clientSecret = "", // Not needed for confirm parsing
+                ),
+                isLiveMode = options.apiKeyIsLiveMode,
+            ),
+        )
+    }
+
     override suspend fun retrieveCardMetadata(
         cardNumber: String,
         requestOptions: ApiRequest.Options

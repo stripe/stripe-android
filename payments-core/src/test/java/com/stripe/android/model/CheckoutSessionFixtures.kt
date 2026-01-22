@@ -184,4 +184,57 @@ internal object CheckoutSessionFixtures {
             }
         }
     """
+
+    /**
+     * Confirm response with a succeeded PaymentIntent.
+     */
+    val CHECKOUT_SESSION_CONFIRM_SUCCEEDED_JSON = JSONObject(
+        """
+        {
+            "id": "ppage_1SrjAuLu5o3P18ZpavYVO6Xq",
+            "payment_intent": {
+                "id": "pi_3QWK2VIyGgrkZxL71xfPBWG5",
+                "object": "payment_intent",
+                "amount": 999,
+                "currency": "usd",
+                "status": "succeeded",
+                "client_secret": "pi_3QWK2VIyGgrkZxL71xfPBWG5_secret_abc123",
+                "payment_method": "pm_1234",
+                "payment_method_types": ["card"],
+                "livemode": false,
+                "created": 1734000000
+            }
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Confirm response with a PaymentIntent that requires action (3DS).
+     */
+    val CHECKOUT_SESSION_CONFIRM_REQUIRES_ACTION_JSON = JSONObject(
+        """
+        {
+            "id": "ppage_1SrjAuLu5o3P18ZpavYVO6Xq",
+            "payment_intent": {
+                "id": "pi_3QWK2VIyGgrkZxL71xfPBWG5",
+                "object": "payment_intent",
+                "amount": 999,
+                "currency": "usd",
+                "status": "requires_action",
+                "client_secret": "pi_3QWK2VIyGgrkZxL71xfPBWG5_secret_abc123",
+                "payment_method": "pm_1234",
+                "payment_method_types": ["card"],
+                "livemode": false,
+                "created": 1734000000,
+                "next_action": {
+                    "redirect_to_url": {
+                        "return_url": "stripesdk://payment_return_url",
+                        "url": "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_test"
+                    },
+                    "type": "redirect_to_url"
+                }
+            }
+        }
+        """.trimIndent()
+    )
 }

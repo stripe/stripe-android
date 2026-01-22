@@ -48,6 +48,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
     private val deferredIntentConfirmationInterceptorFactory: DeferredIntentConfirmationInterceptor.Factory,
     private val confirmationTokenConfirmationInterceptorFactory: ConfirmationTokenConfirmationInterceptor.Factory,
     private val sharedPaymentTokenConfirmationInterceptorFactory: SharedPaymentTokenConfirmationInterceptor.Factory,
+    private val checkoutSessionConfirmationInterceptorFactory: CheckoutSessionConfirmationInterceptor.Factory,
 ) : IntentConfirmationInterceptor.Factory {
     override suspend fun create(
         integrationMetadata: IntegrationMetadata,
@@ -94,7 +95,10 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                 )
             }
             is IntegrationMetadata.CheckoutSession -> {
-                TODO("CheckoutSession confirmation not yet supported.")
+                checkoutSessionConfirmationInterceptorFactory.create(
+                    checkoutSessionId = integrationMetadata.id,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                )
             }
         }
     }

@@ -5,9 +5,12 @@ import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
 /**
- * Response from the checkout session init API (`/v1/payment_pages/{cs_id}/init`).
+ * Response from checkout session APIs:
+ * - Init API (`/v1/payment_pages/{cs_id}/init`)
+ * - Confirm API (`/v1/payment_pages/{cs_id}/confirm`)
  *
- * Contains both checkout session metadata and an embedded [ElementsSession] for PaymentSheet.
+ * Contains checkout session metadata and an embedded [ElementsSession] for PaymentSheet.
+ * The [paymentIntent] field is only populated in confirm responses.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
@@ -32,4 +35,10 @@ data class CheckoutSessionResponse(
      * customer data, and other configuration needed by PaymentSheet.
      */
     val elementsSession: ElementsSession,
+
+    /**
+     * The PaymentIntent created/confirmed during checkout session confirmation.
+     * Only populated in responses from the confirm API.
+     */
+    val paymentIntent: PaymentIntent? = null,
 ) : StripeModel
