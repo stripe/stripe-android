@@ -197,7 +197,10 @@ internal interface PaymentElementLoader {
             }
 
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
-                return IntegrationMetadata.CheckoutSession(id)
+                return IntegrationMetadata.CheckoutSession(
+                    clientSecret = clientSecret,
+                    id = id
+                )
             }
         }
     }

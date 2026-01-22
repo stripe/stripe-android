@@ -47,6 +47,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.PaymentMethodRefresher
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -90,7 +91,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
     tapToAddCollectionHandler: TapToAddCollectionHandler,
-    mode: EventReporter.Mode
+    mode: EventReporter.Mode,
+    paymentMethodRefresher: PaymentMethodRefresher,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -102,6 +104,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     isCompleteFlow = true,
     tapToAddCollectionHandler = tapToAddCollectionHandler,
     mode = mode,
+    paymentMethodRefresher = paymentMethodRefresher,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(

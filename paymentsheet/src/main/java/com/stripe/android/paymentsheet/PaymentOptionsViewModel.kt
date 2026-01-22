@@ -37,6 +37,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.state.PaymentMethodRefresher
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
@@ -69,6 +70,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     tapToAddCollectionHandler: TapToAddCollectionHandler,
     mode: EventReporter.Mode,
+    paymentMethodRefresher: PaymentMethodRefresher,
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -80,6 +82,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     isCompleteFlow = false,
     tapToAddCollectionHandler = tapToAddCollectionHandler,
     mode = mode,
+    paymentMethodRefresher = paymentMethodRefresher,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(

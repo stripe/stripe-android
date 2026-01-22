@@ -60,6 +60,8 @@ internal class DefaultFormHelper(
             val tapToAddHelper = TapToAddHelper.create(
                 coroutineScope = viewModel.viewModelScope,
                 tapToAddCollectionHandler = viewModel.tapToAddCollectionHandler,
+                customerStateHolder = viewModel.customerStateHolder,
+                paymentMethodRefresher = viewModel.paymentMethodRefresher,
                 paymentMethodMetadata = paymentMethodMetadata,
                 onCollectingUpdated = { collecting ->
                     viewModel.savedStateHandle[SAVE_PROCESSING] = collecting

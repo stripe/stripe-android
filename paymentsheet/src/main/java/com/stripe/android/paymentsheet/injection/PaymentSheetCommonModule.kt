@@ -52,10 +52,12 @@ import com.stripe.android.paymentsheet.state.DefaultCreateLinkState
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
 import com.stripe.android.paymentsheet.state.DefaultPaymentMethodFilter
+import com.stripe.android.paymentsheet.state.DefaultPaymentMethodRefresher
 import com.stripe.android.paymentsheet.state.DefaultRetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentMethodFilter
+import com.stripe.android.paymentsheet.state.PaymentMethodRefresher
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import dagger.Binds
 import dagger.Lazy
@@ -100,6 +102,9 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentElementLoader): PaymentElementLoader
+
+    @Binds
+    abstract fun bindsPaymentMethodRefresher(impl: DefaultPaymentMethodRefresher): PaymentMethodRefresher
 
     @Binds
     abstract fun bindsPaymentMethodFilter(impl: DefaultPaymentMethodFilter): PaymentMethodFilter

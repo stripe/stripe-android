@@ -3,7 +3,9 @@ package com.stripe.android.common.taptoadd
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.state.PaymentMethodRefresher
 import com.stripe.android.paymentsheet.verticalmode.toDisplayableSavedPaymentMethod
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +25,9 @@ internal interface TapToAddHelper {
     companion object {
         fun create(
             coroutineScope: CoroutineScope,
+            customerStateHolder: CustomerStateHolder,
             tapToAddCollectionHandler: TapToAddCollectionHandler,
+            paymentMethodRefresher: PaymentMethodRefresher,
             paymentMethodMetadata: PaymentMethodMetadata,
             onCollectingUpdated: (processing: Boolean) -> Unit,
             onError: (ResolvableString) -> Unit,
@@ -32,7 +36,9 @@ internal interface TapToAddHelper {
                 DefaultTapToAddHelper(
                     coroutineScope = coroutineScope,
                     paymentMethodMetadata = paymentMethodMetadata,
+                    customerStateHolder = customerStateHolder,
                     tapToAddCollectionHandler = tapToAddCollectionHandler,
+                    paymentMethodRefresher = paymentMethodRefresher,
                     onCollectingUpdated = onCollectingUpdated,
                     onError = onError,
                 )
@@ -46,7 +52,9 @@ internal interface TapToAddHelper {
 internal class DefaultTapToAddHelper(
     private val coroutineScope: CoroutineScope,
     private val tapToAddCollectionHandler: TapToAddCollectionHandler,
+    private val customerStateHolder: CustomerStateHolder,
     private val paymentMethodMetadata: PaymentMethodMetadata,
+    private val paymentMethodRefresher: PaymentMethodRefresher,
     private val onCollectingUpdated: (collecting: Boolean) -> Unit,
     private val onError: (ResolvableString) -> Unit,
 ) : TapToAddHelper {
@@ -57,21 +65,35 @@ internal class DefaultTapToAddHelper(
         coroutineScope.launch {
             onCollectingUpdated(true)
 
-            when (val collectionState = tapToAddCollectionHandler.collect(paymentMethodMetadata)) {
+            val success = when (val collectionState = tapToAddCollectionHandler.collect(paymentMethodMetadata)) {
                 is TapToAddCollectionHandler.CollectionState.Collected -> {
                     _collectedPaymentMethod.value = collectionState.paymentMethod.toDisplayableSavedPaymentMethod(
                         paymentMethodMetadata = paymentMethodMetadata,
                         defaultPaymentMethodId = null,
                     )
+
+                    true
                 }
                 is TapToAddCollectionHandler.CollectionState.FailedCollection -> {
                     onError(
                         collectionState.displayMessage ?: collectionState.error.stripeErrorMessage()
                     )
+
+                    false
                 }
             }
 
             onCollectingUpdated(false)
+
+            if (success) {
+                paymentMethodRefresher.refresh(metadata = paymentMethodMetadata).onSuccess { paymentMethods ->
+                    customerStateHolder.setCustomerState(
+                        customerState = customerStateHolder.customer.value?.copy(
+                            paymentMethods = paymentMethods,
+                        )
+                    )
+                }
+            }
         }
     }
 }

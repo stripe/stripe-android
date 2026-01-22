@@ -88,6 +88,7 @@ internal data class PaymentMethodMetadata(
     val analyticsMetadata: AnalyticsMetadata,
     val experimentsData: ElementsSession.ExperimentsData?,
     val isTapToAddSupported: Boolean,
+    val userOverrideCountry: String?,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -398,6 +399,7 @@ internal data class PaymentMethodMetadata(
                 analyticsMetadata = analyticsMetadata,
                 experimentsData = elementsSession.experimentsData,
                 isTapToAddSupported = isTapToAddSupported,
+                userOverrideCountry = configuration.userOverrideCountry,
             )
         }
 
@@ -464,6 +466,7 @@ internal data class PaymentMethodMetadata(
                 analyticsMetadata = AnalyticsMetadata(emptyMap()), // This is unused in customer sheet.
                 isTapToAddSupported = false, // This is unused in customer sheet.
                 experimentsData = elementsSession.experimentsData,
+                userOverrideCountry = null,
             )
         }
     }
