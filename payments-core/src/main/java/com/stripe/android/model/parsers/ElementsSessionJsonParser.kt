@@ -59,10 +59,12 @@ internal class ElementsSessionJsonParser(
         val stripeIntent = parseStripeIntent(
             elementsSessionId = elementsSessionId,
             paymentMethodPreference = paymentMethodPreference,
-            orderedPaymentMethodTypes = orderedPaymentMethodTypes,
-            unactivatedPaymentMethodTypes = unactivatedPaymentMethodTypes,
-            linkFundingSources = linkFundingSources,
-            countryCode = countryCode
+            assistBuilder = StripeIntentAssistBuilder(
+                orderedPaymentMethodTypes = orderedPaymentMethodTypes,
+                unactivatedPaymentMethodTypes = unactivatedPaymentMethodTypes,
+                linkFundingSources = linkFundingSources,
+                countryCode = countryCode
+            ),
         )
 
         val experimentsData: ElementsSession.ExperimentsData? =
@@ -116,15 +118,13 @@ internal class ElementsSessionJsonParser(
         }
     }
 
-    private fun parseStripeIntent(
-        elementsSessionId: String?,
-        paymentMethodPreference: JSONObject?,
-        orderedPaymentMethodTypes: JSONArray?,
-        unactivatedPaymentMethodTypes: JSONArray?,
-        linkFundingSources: JSONArray?,
-        countryCode: String
-    ): StripeIntent? {
-        return (paymentMethodPreference?.optJSONObject(params.type) ?: JSONObject()).let { json ->
+    private class StripeIntentAssistBuilder(
+        private val orderedPaymentMethodTypes: JSONArray?,
+        private val unactivatedPaymentMethodTypes: JSONArray?,
+        private val linkFundingSources: JSONArray?,
+        private val countryCode: String
+    ) {
+        fun build(json: JSONObject): JSONObject {
             orderedPaymentMethodTypes?.let {
                 json.put(
                     FIELD_PAYMENT_METHOD_TYPES,
@@ -144,19 +144,55 @@ internal class ElementsSessionJsonParser(
                 countryCode
             )
 
-            when (params) {
-                is ElementsSessionParams.PaymentIntentType -> {
-                    PaymentIntentJsonParser().parse(json)
+            return json
+        }
+    }
+
+    private fun parseStripeIntent(
+        elementsSessionId: String?,
+        paymentMethodPreference: JSONObject?,
+        assistBuilder: StripeIntentAssistBuilder,
+    ): StripeIntent? {
+        val json = assistBuilder.build(
+            paymentMethodPreference?.optJSONObject(params.type) ?: JSONObject()
+        )
+        return when (params) {
+            is ElementsSessionParams.PaymentIntentType -> {
+                PaymentIntentJsonParser().parse(json)
+            }
+            is ElementsSessionParams.SetupIntentType -> {
+                SetupIntentJsonParser().parse(json)
+            }
+            is ElementsSessionParams.DeferredIntentType -> {
+                when (params.deferredIntentParams.mode) {
+                    is DeferredIntentParams.Mode.Payment -> {
+                        DeferredPaymentIntentJsonParser(
+                            elementsSessionId = elementsSessionId,
+                            paymentMode = params.deferredIntentParams.mode,
+                            isLiveMode = isLiveMode,
+                            timeProvider = timeProvider
+                        ).parse(json)
+                    }
+                    is DeferredIntentParams.Mode.Setup -> {
+                        DeferredSetupIntentJsonParser(
+                            elementsSessionId = elementsSessionId,
+                            setupMode = params.deferredIntentParams.mode,
+                            isLiveMode = isLiveMode,
+                            timeProvider = timeProvider
+                        ).parse(json)
+                    }
                 }
-                is ElementsSessionParams.SetupIntentType -> {
-                    SetupIntentJsonParser().parse(json)
-                }
-                is ElementsSessionParams.DeferredIntentType -> {
-                    when (params.deferredIntentParams.mode) {
+            }
+            is ElementsSessionParams.CheckoutSessionType -> {
+                val deferredIntentParams = params.deferredIntentParams
+                if (deferredIntentParams == null) {
+                    null
+                } else {
+                    when (deferredIntentParams.mode) {
                         is DeferredIntentParams.Mode.Payment -> {
                             DeferredPaymentIntentJsonParser(
                                 elementsSessionId = elementsSessionId,
-                                paymentMode = params.deferredIntentParams.mode,
+                                paymentMode = deferredIntentParams.mode,
                                 isLiveMode = isLiveMode,
                                 timeProvider = timeProvider
                             ).parse(json)
@@ -164,7 +200,7 @@ internal class ElementsSessionJsonParser(
                         is DeferredIntentParams.Mode.Setup -> {
                             DeferredSetupIntentJsonParser(
                                 elementsSessionId = elementsSessionId,
-                                setupMode = params.deferredIntentParams.mode,
+                                setupMode = deferredIntentParams.mode,
                                 isLiveMode = isLiveMode,
                                 timeProvider = timeProvider
                             ).parse(json)

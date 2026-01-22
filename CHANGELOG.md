@@ -5,6 +5,10 @@
 ### EmbeddedPaymentElement
 * [FIXED] Fixed an issue where `successBackground` and `onSuccessBackground` appearance customizations were not applied in EmbeddedPaymentElement.
 
+### Connect
+* [Changed] Added `EmbeddedErrorType` enum for type-safe error handling in Connect embedded components, falling back to `api_error` if the error type is `null`.
+
+
 ## 22.6.1 - 2026-01-20
 
 ### Payments

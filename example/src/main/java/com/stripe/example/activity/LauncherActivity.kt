@@ -162,6 +162,10 @@ class LauncherActivity : AppCompatActivity() {
                 MobilePayExampleActivity::class.java
             ),
             Item(
+                activity.getString(R.string.twint_example),
+                TwintExampleActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.alma_example),
                 AlmaActivity::class.java
             ),
