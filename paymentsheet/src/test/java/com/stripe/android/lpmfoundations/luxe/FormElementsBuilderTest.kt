@@ -309,6 +309,9 @@ class FormElementsBuilderTest {
             cardAccountRangeServiceFactory = DefaultCardAccountRangeServiceFactory(
                 cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
             ),
+            fundingCardAccountRangeServiceFactory = DefaultCardAccountRangeServiceFactory(
+                cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
+            ),
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             requiresMandate = false,

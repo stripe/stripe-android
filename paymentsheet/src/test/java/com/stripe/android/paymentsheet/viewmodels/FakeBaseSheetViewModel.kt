@@ -45,6 +45,7 @@ internal class FakeBaseSheetViewModel private constructor(
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
+    fundingCardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
     isCompleteFlow = true,
     tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
     mode = EventReporter.Mode.Complete,

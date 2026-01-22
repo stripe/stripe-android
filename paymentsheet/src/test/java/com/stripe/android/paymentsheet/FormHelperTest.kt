@@ -707,6 +707,7 @@ internal class FormHelperTest {
         return DefaultFormHelper(
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
             cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
+            fundingCardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
             paymentMethodMetadata = paymentMethodMetadata,
             newPaymentSelectionProvider = newPaymentSelectionProvider,
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),

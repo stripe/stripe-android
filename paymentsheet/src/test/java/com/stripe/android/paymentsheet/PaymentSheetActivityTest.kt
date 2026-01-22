@@ -1281,6 +1281,7 @@ internal class PaymentSheetActivityTest {
                     cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp()
                 ),
                 cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
+                fundingCardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
                 errorReporter = FakeErrorReporter(),
                 cvcRecollectionHandler = cvcRecollectionHandler,
                 cvcRecollectionInteractorFactory = object : CvcRecollectionInteractor.Factory {

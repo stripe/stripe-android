@@ -95,6 +95,7 @@ internal class PaymentMethodScreenScreenshotTest {
         val metadata = PaymentMethodMetadataFactory.create()
         val uiDefinitionArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
             cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
+            fundingCardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
             linkConfigurationCoordinator = null,
             linkInlineHandler = null,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },

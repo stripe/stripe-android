@@ -513,6 +513,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             embeddedSelectionHolder = EmbeddedSelectionHolder(savedStateHandle),
             cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
+            fundingCardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
             savedStateHandle = savedStateHandle,
             selectedPaymentMethodCode = "",
             tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),

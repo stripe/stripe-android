@@ -111,6 +111,7 @@ internal class FormActivityScreenShotTest {
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             embeddedSelectionHolder = selectionHolder,
             cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
+            fundingCardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
             savedStateHandle = SavedStateHandle(),
             selectedPaymentMethodCode = "",
             tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),

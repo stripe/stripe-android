@@ -153,6 +153,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
                 cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
+                fundingCardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
                 linkGateFactory = FakeLinkGate.Factory(),
                 linkPaymentLauncher = mock<LinkPaymentLauncher>(),
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
@@ -192,6 +193,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 linkHandler = linkHandler,
                 confirmationHandlerFactory = { FakeConfirmationHandler() },
                 cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
+                fundingCardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
                 errorReporter = FakeErrorReporter(),
                 cvcRecollectionHandler = FakeCvcRecollectionHandler(),
                 cvcRecollectionInteractorFactory = object : CvcRecollectionInteractor.Factory {

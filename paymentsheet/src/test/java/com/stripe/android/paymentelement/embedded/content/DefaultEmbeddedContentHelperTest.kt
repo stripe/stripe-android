@@ -134,6 +134,19 @@ internal class DefaultEmbeddedContentHelperTest {
         val eventReporter: FakeEventReporter,
     )
 
+    private fun createEmbeddedFormHelperFactory(
+        selectionHolder: EmbeddedSelectionHolder,
+        savedStateHandle: SavedStateHandle,
+    ) = EmbeddedFormHelperFactory(
+        linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+        cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
+        fundingCardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
+        embeddedSelectionHolder = selectionHolder,
+        savedStateHandle = savedStateHandle,
+        selectedPaymentMethodCode = "",
+        tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
+    )
+
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     private fun testScenario(
         setup: SavedStateHandle.() -> Unit = {},
@@ -141,14 +154,7 @@ internal class DefaultEmbeddedContentHelperTest {
     ) = runTest {
         val savedStateHandle = SavedStateHandle().apply { setup() }
         val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
-        val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-            cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
-            embeddedSelectionHolder = selectionHolder,
-            savedStateHandle = savedStateHandle,
-            selectedPaymentMethodCode = "",
-            tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
-        )
+        val embeddedFormHelperFactory = createEmbeddedFormHelperFactory(selectionHolder, savedStateHandle)
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()
         val errorReporter = FakeErrorReporter()

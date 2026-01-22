@@ -46,6 +46,7 @@ internal class FakeAddPaymentMethodInteractor(
             )
             val uiDefinitionArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                 cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
+                fundingCardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
                 linkConfigurationCoordinator = null,
                 onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },
                 autocompleteAddressInteractorFactory = null,

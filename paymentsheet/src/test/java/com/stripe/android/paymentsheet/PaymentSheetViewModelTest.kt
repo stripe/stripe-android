@@ -3492,6 +3492,7 @@ internal class PaymentSheetViewModelTest {
                     }
                 },
                 cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
+                fundingCardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
                 errorReporter = errorReporter,
                 cvcRecollectionHandler = cvcRecollectionHandler,
                 cvcRecollectionInteractorFactory = object : CvcRecollectionInteractor.Factory {

@@ -447,6 +447,9 @@ private object TransformSpecToElementsFactory {
                 cardAccountRangeServiceFactory = DefaultCardAccountRangeServiceFactory(
                     cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
                 ),
+                fundingCardAccountRangeServiceFactory = DefaultCardAccountRangeServiceFactory(
+                    cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
+                ),
                 shippingValues = null,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,

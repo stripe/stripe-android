@@ -117,6 +117,7 @@ internal class CustomerSheetScreenshotTest {
             code = PaymentMethod.Type.Card.code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                 cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
+                fundingCardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
                 linkConfigurationCoordinator = null,
                 onLinkInlineSignupStateChanged = {},
                 autocompleteAddressInteractorFactory = null,

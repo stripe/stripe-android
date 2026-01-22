@@ -138,6 +138,7 @@ internal class EmbeddedContentUiTest {
         val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
+            fundingCardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
             embeddedSelectionHolder = selectionHolder,
             savedStateHandle = savedStateHandle,
             selectedPaymentMethodCode = "",

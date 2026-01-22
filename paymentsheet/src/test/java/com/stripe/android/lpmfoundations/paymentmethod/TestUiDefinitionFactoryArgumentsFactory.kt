@@ -37,6 +37,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
         }
         return UiDefinitionFactory.Arguments.Factory.Default(
             cardAccountRangeServiceFactory = cardAccountRangeServiceFactory(context),
+            fundingCardAccountRangeServiceFactory = cardAccountRangeServiceFactory(context),
             paymentMethodCreateParams = paymentMethodCreateParams,
             paymentMethodOptionsParams = paymentMethodOptionsParams,
             paymentMethodExtraParams = paymentMethodExtraParams,

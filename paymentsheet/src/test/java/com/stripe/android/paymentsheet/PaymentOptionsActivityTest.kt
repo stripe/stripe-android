@@ -469,6 +469,7 @@ internal class PaymentOptionsActivityTest {
                 linkHandler = linkHandler,
                 linkGateFactory = FakeLinkGate.Factory(),
                 cardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
+                fundingCardAccountRangeServiceFactory = NullCardAccountRangeServiceFactory,
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 linkPaymentLauncher = mock(),
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),

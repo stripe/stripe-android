@@ -40,6 +40,8 @@ internal class FakeNativeLinkComponent(
     override val webLinkActivityContract: WebLinkActivityContract = mock(),
     override val cardAccountRangeServiceFactory: CardAccountRangeService.Factory =
         NullCardAccountRangeServiceFactory,
+    override val fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory =
+        NullCardAccountRangeServiceFactory,
     override val viewModel: LinkActivityViewModel = mock(),
     override val errorReporter: ErrorReporter = FakeErrorReporter(),
     override val savedStateHandle: SavedStateHandle = SavedStateHandle(),
