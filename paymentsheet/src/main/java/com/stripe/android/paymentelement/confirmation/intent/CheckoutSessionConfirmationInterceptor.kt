@@ -32,10 +32,8 @@ import dagger.assisted.AssistedInject
  */
 internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val checkoutSessionId: String,
-    @Suppress("UnusedPrivateProperty") // Will be used for analytics in follow-up
-    @Assisted
-    private val clientAttributionMetadata: ClientAttributionMetadata,
-    private val context: Context,
+    @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
+    context: Context,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
@@ -47,7 +45,6 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         confirmationOption: PaymentMethodConfirmationOption.New,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
-        // Step 1: Create the payment method
         return stripeRepository.createPaymentMethod(
             paymentMethodCreateParams = confirmationOption.createParams,
             options = requestOptions,
@@ -87,14 +84,16 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         return stripeRepository.confirmCheckoutSession(
             checkoutSessionId = checkoutSessionId,
             paymentMethodId = paymentMethod.id,
+            clientAttributionMetadata = clientAttributionMetadata,
             returnUrl = returnUrl,
             options = requestOptions,
         ).fold(
             onSuccess = { response ->
+                val exception = IllegalStateException("No PaymentIntent in checkout session confirm response")
                 val paymentIntent = response.paymentIntent
                     ?: return@fold ConfirmationDefinition.Action.Fail(
-                        cause = IllegalStateException("No PaymentIntent in checkout session confirm response"),
-                        message = resolvableString(R.string.stripe_something_went_wrong),
+                        cause = exception,
+                        message = exception.stripeErrorMessage(),
                         errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                     )
 
@@ -114,12 +113,10 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                         )
                     }
                     else -> {
-                        // Unexpected state - payment intent exists but is neither confirmed nor requires action
+                        val exception = IllegalStateException("Intent has not attempted confirm.")
                         ConfirmationDefinition.Action.Fail(
-                            cause = IllegalStateException(
-                                "Unexpected PaymentIntent status: ${paymentIntent.status}"
-                            ),
-                            message = resolvableString(R.string.stripe_something_went_wrong),
+                            cause = exception,
+                            message = exception.stripeErrorMessage(),
                             errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                         )
                     }
