@@ -52,7 +52,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         )
 
         val interceptor = CheckoutSessionConfirmationInterceptor(
-            checkoutSessionId = "ppage_test_123",
+            checkoutSessionId = "cs_test_123",
             clientAttributionMetadata = clientAttributionMetadata,
             context = ApplicationProvider.getApplicationContext(),
             stripeRepository = repository,
@@ -93,7 +93,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         )
 
         val interceptor = CheckoutSessionConfirmationInterceptor(
-            checkoutSessionId = "ppage_test_123",
+            checkoutSessionId = "cs_test_123",
             clientAttributionMetadata = clientAttributionMetadata,
             context = ApplicationProvider.getApplicationContext(),
             stripeRepository = repository,
@@ -127,7 +127,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         )
 
         val interceptor = CheckoutSessionConfirmationInterceptor(
-            checkoutSessionId = "ppage_test_123",
+            checkoutSessionId = "cs_test_123",
             clientAttributionMetadata = clientAttributionMetadata,
             context = ApplicationProvider.getApplicationContext(),
             stripeRepository = repository,
@@ -163,7 +163,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         )
 
         val interceptor = CheckoutSessionConfirmationInterceptor(
-            checkoutSessionId = "ppage_test_123",
+            checkoutSessionId = "cs_test_123",
             clientAttributionMetadata = clientAttributionMetadata,
             context = ApplicationProvider.getApplicationContext(),
             stripeRepository = repository,
@@ -200,7 +200,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         )
 
         val interceptor = CheckoutSessionConfirmationInterceptor(
-            checkoutSessionId = "ppage_test_123",
+            checkoutSessionId = "cs_test_123",
             clientAttributionMetadata = clientAttributionMetadata,
             context = ApplicationProvider.getApplicationContext(),
             stripeRepository = repository,
@@ -230,7 +230,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         val repository = FakeCheckoutSessionStripeRepository()
 
         val interceptor = CheckoutSessionConfirmationInterceptor(
-            checkoutSessionId = "ppage_test_123",
+            checkoutSessionId = "cs_test_123",
             clientAttributionMetadata = clientAttributionMetadata,
             context = ApplicationProvider.getApplicationContext(),
             stripeRepository = repository,
@@ -255,7 +255,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
     private fun createCheckoutSessionResponse(paymentIntent: PaymentIntent?): CheckoutSessionResponse {
         return CheckoutSessionResponse(
-            id = "ppage_test_123",
+            id = "cs_test_123",
             amount = 1000L,
             currency = "usd",
             // Confirm responses don't include elements_session

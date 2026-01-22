@@ -17,7 +17,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class CheckoutSessionResponse(
     /**
-     * The checkout session ID (e.g., "ppage_xxx").
+     * The checkout session ID (e.g., "cs_xxx").
      */
     val id: String,
 

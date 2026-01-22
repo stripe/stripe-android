@@ -10,7 +10,7 @@ internal object CheckoutSessionFixtures {
     val CHECKOUT_SESSION_RESPONSE_JSON = JSONObject(
         """
         {
-          "id": "ppage_1SrjAuLu5o3P18ZpavYVO6Xq",
+          "session_id": "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh",
           "object": "checkout.session",
           "currency": "usd",
           "mode": "payment",
@@ -191,7 +191,11 @@ internal object CheckoutSessionFixtures {
     val CHECKOUT_SESSION_CONFIRM_SUCCEEDED_JSON = JSONObject(
         """
         {
-            "id": "ppage_1SrjAuLu5o3P18ZpavYVO6Xq",
+            "session_id": "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh",
+            "currency": "usd",
+            "total_summary": {
+                "due": 999
+            },
             "payment_intent": {
                 "id": "pi_3QWK2VIyGgrkZxL71xfPBWG5",
                 "object": "payment_intent",
@@ -214,7 +218,11 @@ internal object CheckoutSessionFixtures {
     val CHECKOUT_SESSION_CONFIRM_REQUIRES_ACTION_JSON = JSONObject(
         """
         {
-            "id": "ppage_1SrjAuLu5o3P18ZpavYVO6Xq",
+            "session_id": "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh",
+            "currency": "usd",
+            "total_summary": {
+                "due": 999
+            },
             "payment_intent": {
                 "id": "pi_3QWK2VIyGgrkZxL71xfPBWG5",
                 "object": "payment_intent",
