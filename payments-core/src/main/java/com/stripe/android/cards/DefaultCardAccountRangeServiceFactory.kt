@@ -41,7 +41,11 @@ class DefaultCardAccountRangeServiceFactory internal constructor(
         accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener?,
     ): CardAccountRangeService {
         return DefaultCardAccountRangeService(
-            cardAccountRangeRepository = cardAccountRangeRepositoryFactory.create(useAccountRangeCache),
+            cardAccountRangeRepository = if (useAccountRangeCache) {
+                cardAccountRangeRepositoryFactory.create()
+            } else {
+                cardAccountRangeRepositoryFactory.createWithoutCache()
+            },
             uiContext = uiContext,
             workContext = workContext,
             staticCardAccountRanges = staticCardAccountRanges,

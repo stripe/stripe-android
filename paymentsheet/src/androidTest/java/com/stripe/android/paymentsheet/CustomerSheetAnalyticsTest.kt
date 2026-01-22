@@ -63,6 +63,7 @@ internal class CustomerSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "elements.customer_sheet.payment_methods.load_success")
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "cs_add_payment_method_screen_presented")
 
         context.presentCustomerSheet()

@@ -388,18 +388,13 @@ internal class PaymentSheetTest {
                     )
                 }
 
-                networkRule.enqueue(
-                    method("GET"),
-                    path("edge-internal/card-metadata")
-                ) { response ->
-                    response.testBodyFromFile("card-metadata-get.json")
-                }
-
-                networkRule.enqueue(
-                    method("GET"),
-                    path("edge-internal/card-metadata")
-                ) { response ->
-                    response.testBodyFromFile("card-metadata-get.json")
+                repeat(7) {
+                    networkRule.enqueue(
+                        method("GET"),
+                        path("edge-internal/card-metadata")
+                    ) { response ->
+                        response.testBodyFromFile("card-metadata-get.json")
+                    }
                 }
 
                 page.fillOutCardDetails()

@@ -40,8 +40,8 @@ object CardAccountRangeServiceModule {
     }
 }
 
-@get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val DEFAULT_ACCOUNT_RANGE_REPO = "DEFAULT_ACCOUNT_RANGE_REPO"
 
-@get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val FUNDING_ACCOUNT_RANGE_REPO = "FUNDING_ACCOUNT_RANGE_REPO"

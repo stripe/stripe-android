@@ -47,12 +47,12 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
     )
 
     @Throws(IllegalStateException::class)
-    override fun create(useCache: Boolean): CardAccountRangeRepository {
-        return if (useCache) {
-            cardAccountRangeRepository.value
-        } else {
-            createCardAccountRangeRepository()
-        }
+    override fun create(): CardAccountRangeRepository {
+        return cardAccountRangeRepository.value
+    }
+
+    override fun createWithoutCache(): CardAccountRangeRepository {
+        return createCardAccountRangeRepository()
     }
 
     override fun createWithStripeRepository(

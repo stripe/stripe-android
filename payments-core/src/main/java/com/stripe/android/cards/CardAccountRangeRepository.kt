@@ -21,7 +21,11 @@ interface CardAccountRangeRepository {
     val loading: StateFlow<Boolean>
 
     interface Factory {
-        fun create(useCache: Boolean = true): CardAccountRangeRepository
+        fun create(): CardAccountRangeRepository
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun createWithoutCache(): CardAccountRangeRepository
+
         fun createWithStripeRepository(
             stripeRepository: StripeRepository,
             publishableKey: String
