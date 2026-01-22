@@ -3,16 +3,21 @@ package com.stripe.android.model.parsers
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.DeferredIntentParams
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
 import org.json.JSONObject
 
 /**
- * Parser for the checkout session init API response (`/v1/payment_pages/{cs_id}/init`).
+ * Parser for checkout session API responses:
+ * - Init API (`/v1/payment_pages/{cs_id}/init`) - returns elements_session
+ * - Confirm API (`/v1/payment_pages/{cs_id}/confirm`) - returns payment_intent
  *
- * The response contains both checkout session metadata (`id`, `amount`, `currency`) and an
- * embedded `elements_session` object. This parser extracts the checkout fields first, then
- * delegates `elements_session` parsing to [ElementsSessionJsonParser].
+ * The init response contains checkout session metadata (`id`, `amount`, `currency`) and an
+ * embedded `elements_session` object. The confirm response contains a `payment_intent` object.
+ *
+ * For confirm responses, this parser extracts the `payment_intent` and creates a minimal
+ * response with the payment intent data.
  */
 internal class CheckoutSessionResponseJsonParser(
     private val elementsSessionParams: ElementsSessionParams.CheckoutSessionType,
@@ -20,12 +25,33 @@ internal class CheckoutSessionResponseJsonParser(
 ) : ModelJsonParser<CheckoutSessionResponse> {
 
     override fun parse(json: JSONObject): CheckoutSessionResponse? {
-        val id = json.optString(FIELD_ID).takeIf { it.isNotEmpty() } ?: return null
-        val amount = extractAmount(json) ?: return null
+        val sessionId = json.optString(FIELD_SESSION_ID).takeIf { it.isNotEmpty() } ?: return null
+        val amount = extractDueAmount(json) ?: return null
         val currency = json.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() } ?: return null
+        val paymentIntent = json.optJSONObject(FIELD_PAYMENT_INTENT)?.let {
+            PaymentIntentJsonParser().parse(it)
+        }
+        val elementsSession = parseElementsSession(json, amount, currency)
 
+        return CheckoutSessionResponse(
+            id = sessionId,
+            amount = amount,
+            currency = currency,
+            elementsSession = elementsSession,
+            paymentIntent = paymentIntent,
+        )
+    }
+
+    /**
+     * Parses the elements_session object if present.
+     */
+    private fun parseElementsSession(
+        json: JSONObject,
+        amount: Long,
+        currency: String,
+    ): ElementsSession? {
         val elementsSessionJson = json.optJSONObject(FIELD_ELEMENTS_SESSION) ?: return null
-        val elementsSession = ElementsSessionJsonParser(
+        return ElementsSessionJsonParser(
             params = elementsSessionParams.copy(
                 deferredIntentParams = DeferredIntentParams(
                     mode = DeferredIntentParams.Mode.Payment(
@@ -41,30 +67,24 @@ internal class CheckoutSessionResponseJsonParser(
                 )
             ),
             isLiveMode = isLiveMode,
-        ).parse(elementsSessionJson) ?: return null
-
-        return CheckoutSessionResponse(
-            id = id,
-            amount = amount,
-            currency = currency,
-            elementsSession = elementsSession,
-        )
+        ).parse(elementsSessionJson)
     }
 
     /**
-     * Extracts amount from `line_item_group.total` in the JSON response.
+     * Extracts amount from `total_summary.due` in response JSON.
      */
-    private fun extractAmount(json: JSONObject): Long? {
-        val lineItemGroup = json.optJSONObject(FIELD_LINE_ITEM_GROUP) ?: return null
-        val total = lineItemGroup.optLong(FIELD_TOTAL, -1)
-        return if (total >= 0) total else null
+    private fun extractDueAmount(json: JSONObject): Long? {
+        val totalSummary = json.optJSONObject(FIELD_TOTAL_SUMMARY) ?: return null
+        val due = totalSummary.optLong(FIELD_DUE, -1)
+        return if (due >= 0) due else null
     }
 
     private companion object {
-        private const val FIELD_ID = "id"
+        private const val FIELD_SESSION_ID = "session_id"
         private const val FIELD_CURRENCY = "currency"
         private const val FIELD_ELEMENTS_SESSION = "elements_session"
-        private const val FIELD_LINE_ITEM_GROUP = "line_item_group"
-        private const val FIELD_TOTAL = "total"
+        private const val FIELD_TOTAL_SUMMARY = "total_summary"
+        private const val FIELD_DUE = "due"
+        private const val FIELD_PAYMENT_INTENT = "payment_intent"
     }
 }
