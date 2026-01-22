@@ -99,8 +99,8 @@ internal class HorizontalModeExperimentsTest {
         }
 
         val expectedIntegrationType = when (integrationType) {
-            ProductIntegrationType.FlowController -> "custom"
-            ProductIntegrationType.PaymentSheet -> "complete"
+            ProductIntegrationType.FlowController -> "flowcontroller"
+            ProductIntegrationType.PaymentSheet -> "paymentsheet"
         }
 
         networkRule.enqueue(

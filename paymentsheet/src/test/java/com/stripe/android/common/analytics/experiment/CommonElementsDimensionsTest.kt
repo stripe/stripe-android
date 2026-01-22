@@ -89,6 +89,6 @@ class CommonElementsDimensionsTest {
             EventReporter.Mode.Complete,
         )
 
-        assertThat(dimensions).containsEntry("in_app_elements_integration_type", "complete")
+        assertThat(dimensions).containsEntry("in_app_elements_integration_type", "paymentsheet")
     }
 }
