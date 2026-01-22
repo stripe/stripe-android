@@ -2967,8 +2967,8 @@ class PaymentSheet internal constructor(
                     background = null,
                     onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
                     border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
-                    successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                    onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                    successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.successBackground.toArgb(),
+                    onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onSuccessBackground.toArgb(),
                 )
 
                 /**
@@ -2978,8 +2978,8 @@ class PaymentSheet internal constructor(
                     background = null,
                     onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
                     border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
-                    successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                    onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+                    successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.successBackground.toArgb(),
+                    onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.onSuccessBackground.toArgb(),
                 )
             }
         }
