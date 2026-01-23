@@ -69,8 +69,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
     @IOContext workContext: CoroutineContext,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
-    @Named(DEFAULT_ACCOUNT_RANGE_SERVICE_FACTORY) cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
-    @Named(FUNDING_ACCOUNT_RANGE_SERVICE_FACTORY) fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    @Named(DEFAULT_ACCOUNT_RANGE_SERVICE_FACTORY)
+    cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    @Named(FUNDING_ACCOUNT_RANGE_SERVICE_FACTORY)
+    fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     tapToAddCollectionHandler: TapToAddCollectionHandler,
     mode: EventReporter.Mode,
 ) : BaseSheetViewModel(

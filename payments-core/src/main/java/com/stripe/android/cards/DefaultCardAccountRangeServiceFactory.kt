@@ -1,6 +1,5 @@
 package com.stripe.android.cards
 
-import android.util.Log
 import androidx.annotation.RestrictTo
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
@@ -59,7 +58,6 @@ class FundingCardAccountRangeServiceFactory(
         cardFundingFilter: CardFundingFilter,
         accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener?,
     ): CardAccountRangeService {
-        Log.d("CardAccountRange", "FundingFactory.create() called, factory=$this")
         return DefaultCardAccountRangeService(
             cardAccountRangeRepository = cardAccountRangeRepositoryFactory.create(),
             uiContext = uiContext,

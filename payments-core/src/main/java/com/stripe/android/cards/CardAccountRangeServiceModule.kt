@@ -14,7 +14,8 @@ object CardAccountRangeServiceModule {
     @Named(DEFAULT_ACCOUNT_RANGE_SERVICE_FACTORY)
     @Provides
     fun providesCardAccountRangeServiceFactory(
-        @Named(DEFAULT_ACCOUNT_RANGE_REPO_FACTORY) cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+        @Named(DEFAULT_ACCOUNT_RANGE_REPO_FACTORY)
+        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
         @UIContext uiContext: CoroutineContext,
         @IOContext workContext: CoroutineContext,
     ): CardAccountRangeService.Factory {
@@ -28,7 +29,8 @@ object CardAccountRangeServiceModule {
     @Named(FUNDING_ACCOUNT_RANGE_SERVICE_FACTORY)
     @Provides
     fun providesCardAccountRangeServiceFactoryForFunding(
-        @Named(FUNDING_ACCOUNT_RANGE_REPO_FACTORY) cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+        @Named(FUNDING_ACCOUNT_RANGE_REPO_FACTORY)
+        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
         @UIContext uiContext: CoroutineContext,
         @IOContext workContext: CoroutineContext,
     ): CardAccountRangeService.Factory {

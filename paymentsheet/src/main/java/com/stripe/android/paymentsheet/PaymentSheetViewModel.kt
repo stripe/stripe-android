@@ -89,7 +89,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler: LinkHandler,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     @Named(DEFAULT_ACCOUNT_RANGE_SERVICE_FACTORY) cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
-    @Named(FUNDING_ACCOUNT_RANGE_SERVICE_FACTORY) fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    @Named(FUNDING_ACCOUNT_RANGE_SERVICE_FACTORY) fundingCardAccountRangeServiceFactory:
+    CardAccountRangeService.Factory,
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
