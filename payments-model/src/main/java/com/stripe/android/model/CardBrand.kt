@@ -1,9 +1,11 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import com.stripe.android.cards.CardNumber
 import com.stripe.payments.model.R
+import kotlinx.parcelize.Parcelize
 import java.util.regex.Pattern
 
 /**
@@ -246,6 +248,19 @@ enum class CardBrand(
         return partialPatterns[cardNumber.length] ?: pattern
     }
 
+    fun toBrandCategory(): CardBrandAcceptance.BrandCategory? {
+        return when (this) {
+            Visa -> CardBrandAcceptance.BrandCategory.Visa
+            MasterCard -> CardBrandAcceptance.BrandCategory.Mastercard
+            AmericanExpress -> CardBrandAcceptance.BrandCategory.Amex
+            Discover,
+            DinersClub,
+            JCB,
+            UnionPay -> CardBrandAcceptance.BrandCategory.Discover
+            else -> null
+        }
+    }
+
     companion object {
         /**
          * @param cardNumber a card number
@@ -299,5 +314,73 @@ enum class CardBrand(
             .sortedBy { it.renderingOrder }
 
         private const val CVC_COMMON_LENGTH: Int = 3
+    }
+
+    sealed class CardBrandAcceptance : Parcelable {
+
+        /**
+         * Card brand categories that can be allowed or disallowed
+         */
+        @Parcelize
+        enum class BrandCategory : Parcelable {
+            /**
+             * Visa branded cards
+             */
+            Visa,
+
+            /**
+             * Mastercard branded cards
+             */
+            Mastercard,
+
+            /**
+             * Amex branded cards
+             */
+            Amex,
+
+            /**
+             * Discover branded cards
+             * **Note**: Encompasses all of Discover Global Network (Discover, Diners, JCB, UnionPay, Elo).
+             */
+            Discover
+        }
+
+        companion object {
+            /**
+             * Accept all card brands supported by Stripe
+             */
+            @JvmStatic
+            fun all(): CardBrandAcceptance = All
+
+            /**
+             * Accept only the card brands specified in `brands`.
+             * **Note**: Any card brands that do not map to a `BrandCategory` will be blocked when using an allow list.
+             */
+            @JvmStatic
+            fun allowed(brands: List<BrandCategory>): CardBrandAcceptance =
+                Allowed(brands)
+
+            /**
+             * Accept all card brands supported by Stripe except for those specified in `brands`.
+             * **Note**: Any card brands that do not map to a `BrandCategory` will be accepted
+             * when using a disallow list.
+             */
+            @JvmStatic
+            fun disallowed(brands: List<BrandCategory>): CardBrandAcceptance =
+                Disallowed(brands)
+        }
+
+        @Parcelize
+        data object All : CardBrandAcceptance()
+
+        @Parcelize
+        data class Allowed(
+            val brands: List<BrandCategory>
+        ) : CardBrandAcceptance()
+
+        @Parcelize
+        data class Disallowed(
+            val brands: List<BrandCategory>
+        ) : CardBrandAcceptance()
     }
 }

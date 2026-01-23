@@ -23,3 +23,37 @@ object DefaultCardBrandFilter : CardBrandFilter {
         return true
     }
 }
+
+@Parcelize
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+internal data class AcceptanceCardBrandFilter(
+    private val cardBrandAcceptance: CardBrand.CardBrandAcceptance
+) : CardBrandFilter {
+
+    override fun isAccepted(cardBrand: CardBrand): Boolean {
+        val brandCategory = cardBrand.toBrandCategory()
+
+        return when (cardBrandAcceptance) {
+            is CardBrand.CardBrandAcceptance.All -> true
+
+            is CardBrand.CardBrandAcceptance.Allowed -> {
+                val isAllowed = brandCategory != null && cardBrandAcceptance.brands.contains(brandCategory)
+                isAllowed
+            }
+
+            is CardBrand.CardBrandAcceptance.Disallowed -> {
+                val isDisallowed = brandCategory != null && cardBrandAcceptance.brands.contains(brandCategory)
+                !isDisallowed
+            }
+        }
+    }
+
+    override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+        val brand = paymentMethod.card?.displayBrand?.let { displayBrand ->
+            val cardBrand = CardBrand.fromCode(displayBrand)
+            if (cardBrand == CardBrand.Unknown) null else cardBrand
+        } ?: paymentMethod.card?.brand ?: CardBrand.Unknown
+
+        return paymentMethod.type != PaymentMethod.Type.Card || isAccepted(brand)
+    }
+}
