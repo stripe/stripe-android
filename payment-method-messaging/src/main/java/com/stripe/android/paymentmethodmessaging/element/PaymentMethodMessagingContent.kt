@@ -36,7 +36,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,7 +71,6 @@ internal sealed class PaymentMethodMessagingContent {
     ) : PaymentMethodMessagingContent() {
         @Composable
         override fun Content(appearance: PaymentMethodMessagingElement.Appearance.State) {
-            println("YEET PMME Content: Publish 3")
             MultiPartner(message, appearance, analyticsOnClick)
         }
     }
@@ -150,7 +148,6 @@ private fun MultiPartner(
     val keyboardController = rememberKeyboardController()
     val scope = rememberCoroutineScope()
     val images = getImages(message, appearance.theme)
-    val iconHeight = getIconHeight(appearance).dp
 
     Column(
         modifier = Modifier.clickable {
@@ -162,7 +159,7 @@ private fun MultiPartner(
     ) {
         if (images.isNotEmpty()) {
             Box(Modifier.height(getIconHeight(appearance).dp)) {
-                Images(images, iconHeight)
+                Images(images)
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -207,7 +204,6 @@ private fun launchLearnMore(
 @Composable
 private fun Images(
     imageList: List<PaymentMethodMessageImage>,
-    iconHeight: Dp
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
@@ -220,7 +216,7 @@ private fun Images(
                 imageLoader = imageLoader,
                 contentDescription = messagingImage.text,
                 contentScale = ContentScale.Fit,
-                modifier = Modifier.align(Alignment.CenterVertically).height(iconHeight)
+                modifier = Modifier.align(Alignment.CenterVertically)
             )
             if (index != imageList.lastIndex) Spacer(Modifier.width(8.dp))
         }
