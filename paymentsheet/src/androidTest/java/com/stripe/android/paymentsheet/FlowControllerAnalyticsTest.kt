@@ -103,7 +103,6 @@ internal class FlowControllerAnalyticsTest {
             query("payment_method_layout", "horizontal"),
         )
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
-        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
 
         testContext.configureFlowController {
             configureWithPaymentIntent(
@@ -183,7 +182,6 @@ internal class FlowControllerAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_form_shown")
         // cardscan is not available in test mode
         validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
-        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
@@ -268,12 +266,12 @@ internal class FlowControllerAnalyticsTest {
         ) { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
+
         validateAnalyticsRequest(
             eventName = "mc_load_succeeded",
             query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
             query(Uri.encode("is_decoupled"), "true"),
         )
-        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_custom_paymentoption_newpm_select")
         validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")

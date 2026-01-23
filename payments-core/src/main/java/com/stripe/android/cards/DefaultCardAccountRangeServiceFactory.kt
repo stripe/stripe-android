@@ -71,12 +71,27 @@ class FundingCardAccountRangeServiceFactory(
     private val workContext: CoroutineContext = Dispatchers.IO,
     private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     private val coroutineScope: CoroutineScope = CoroutineScope(uiContext),
-    private val defaultFactory: CardAccountRangeService.Factory = DefaultCardAccountRangeServiceFactory(
-        cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
-        uiContext = uiContext,
-        workContext = workContext,
-        staticCardAccountRanges = staticCardAccountRanges,
-        coroutineScope = coroutineScope,
-        useAccountRangeCache = false
-    )
-) : CardAccountRangeService.Factory by defaultFactory
+) : CardAccountRangeService.Factory {
+
+    // Own lazy-cached repository, separate from the default factory's cache
+    private val fundingCardAccountRangeRepository: CardAccountRangeRepository by lazy {
+        cardAccountRangeRepositoryFactory.createWithoutCache()
+    }
+
+    override fun create(
+        cardBrandFilter: CardBrandFilter,
+        cardFundingFilter: CardFundingFilter,
+        accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener?,
+    ): CardAccountRangeService {
+        return DefaultCardAccountRangeService(
+            cardAccountRangeRepository = fundingCardAccountRangeRepository,
+            uiContext = uiContext,
+            workContext = workContext,
+            staticCardAccountRanges = staticCardAccountRanges,
+            cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = cardFundingFilter,
+            accountRangeResultListener = accountRangeResultListener,
+            coroutineScope = coroutineScope,
+        )
+    }
+}

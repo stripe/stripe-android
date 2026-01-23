@@ -388,7 +388,7 @@ internal class PaymentSheetTest {
                     )
                 }
 
-                repeat(7) {
+                repeat(6) {
                     networkRule.enqueue(
                         method("GET"),
                         path("edge-internal/card-metadata")
