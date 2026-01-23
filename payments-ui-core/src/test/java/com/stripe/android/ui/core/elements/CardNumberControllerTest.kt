@@ -773,7 +773,6 @@ internal class CardNumberControllerTest {
         ): CardAccountRangeService {
             val repositoryFactory = object : CardAccountRangeRepository.Factory {
                 override fun create(): CardAccountRangeRepository = FakeCardAccountRangeRepository()
-                override fun createWithoutCache() = FakeCardAccountRangeRepository()
 
                 override fun createWithStripeRepository(
                     stripeRepository: StripeRepository,

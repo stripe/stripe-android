@@ -11,10 +11,10 @@ import kotlin.coroutines.CoroutineContext
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Module
 object CardAccountRangeServiceModule {
-    @Named(DEFAULT_ACCOUNT_RANGE_REPO)
+    @Named(DEFAULT_ACCOUNT_RANGE_SERVICE_FACTORY)
     @Provides
     fun providesCardAccountRangeServiceFactory(
-        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+        @Named(DEFAULT_ACCOUNT_RANGE_REPO_FACTORY) cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
         @UIContext uiContext: CoroutineContext,
         @IOContext workContext: CoroutineContext,
     ): CardAccountRangeService.Factory {
@@ -25,10 +25,10 @@ object CardAccountRangeServiceModule {
         )
     }
 
-    @Named(FUNDING_ACCOUNT_RANGE_REPO)
+    @Named(FUNDING_ACCOUNT_RANGE_SERVICE_FACTORY)
     @Provides
     fun providesCardAccountRangeServiceFactoryForFunding(
-        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+        @Named(FUNDING_ACCOUNT_RANGE_REPO_FACTORY) cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
         @UIContext uiContext: CoroutineContext,
         @IOContext workContext: CoroutineContext,
     ): CardAccountRangeService.Factory {
@@ -41,7 +41,13 @@ object CardAccountRangeServiceModule {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val DEFAULT_ACCOUNT_RANGE_REPO = "DEFAULT_ACCOUNT_RANGE_REPO"
+const val DEFAULT_ACCOUNT_RANGE_REPO_FACTORY = "DEFAULT_ACCOUNT_RANGE_REPO_FACTORY"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val FUNDING_ACCOUNT_RANGE_REPO = "FUNDING_ACCOUNT_RANGE_REPO"
+const val DEFAULT_ACCOUNT_RANGE_SERVICE_FACTORY = "DEFAULT_ACCOUNT_RANGE_SERVICE_FACTORY"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val FUNDING_ACCOUNT_RANGE_REPO_FACTORY = "FUNDING_ACCOUNT_RANGE_REPO_FACTORY"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val FUNDING_ACCOUNT_RANGE_SERVICE_FACTORY = "FUNDING_ACCOUNT_RANGE_SERVICE_FACTORY"

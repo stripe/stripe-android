@@ -13,8 +13,8 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeService
-import com.stripe.android.cards.DEFAULT_ACCOUNT_RANGE_REPO
-import com.stripe.android.cards.FUNDING_ACCOUNT_RANGE_REPO
+import com.stripe.android.cards.DEFAULT_ACCOUNT_RANGE_SERVICE_FACTORY
+import com.stripe.android.cards.FUNDING_ACCOUNT_RANGE_SERVICE_FACTORY
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
@@ -88,8 +88,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
-    @Named(DEFAULT_ACCOUNT_RANGE_REPO) cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
-    @Named(FUNDING_ACCOUNT_RANGE_REPO) fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    @Named(DEFAULT_ACCOUNT_RANGE_SERVICE_FACTORY) cardAccountRangeServiceFactory: CardAccountRangeService.Factory,
+    @Named(FUNDING_ACCOUNT_RANGE_SERVICE_FACTORY) fundingCardAccountRangeServiceFactory: CardAccountRangeService.Factory,
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,

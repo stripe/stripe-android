@@ -51,10 +51,6 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         return cardAccountRangeRepository.value
     }
 
-    override fun createWithoutCache(): CardAccountRangeRepository {
-        return createCardAccountRangeRepository()
-    }
-
     override fun createWithStripeRepository(
         stripeRepository: StripeRepository,
         publishableKey: String

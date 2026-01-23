@@ -2,8 +2,8 @@ package com.stripe.android.paymentelement.embedded
 
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeService
-import com.stripe.android.cards.DEFAULT_ACCOUNT_RANGE_REPO
-import com.stripe.android.cards.FUNDING_ACCOUNT_RANGE_REPO
+import com.stripe.android.cards.DEFAULT_ACCOUNT_RANGE_SERVICE_FACTORY
+import com.stripe.android.cards.FUNDING_ACCOUNT_RANGE_SERVICE_FACTORY
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.strings.ResolvableString
@@ -24,9 +24,9 @@ import javax.inject.Named
 internal class EmbeddedFormHelperFactory @Inject constructor(
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
-    @Named(DEFAULT_ACCOUNT_RANGE_REPO) private val cardAccountRangeServiceFactory:
+    @Named(DEFAULT_ACCOUNT_RANGE_SERVICE_FACTORY) private val cardAccountRangeServiceFactory:
     CardAccountRangeService.Factory,
-    @Named(FUNDING_ACCOUNT_RANGE_REPO) private val fundingCardAccountRangeServiceFactory:
+    @Named(FUNDING_ACCOUNT_RANGE_SERVICE_FACTORY) private val fundingCardAccountRangeServiceFactory:
     CardAccountRangeService.Factory,
     private val savedStateHandle: SavedStateHandle,
     private val selectedPaymentMethodCode: String,

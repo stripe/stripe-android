@@ -5,7 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardAccountRangeServiceModule
+import com.stripe.android.cards.DEFAULT_ACCOUNT_RANGE_REPO_FACTORY
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.cards.FUNDING_ACCOUNT_RANGE_REPO_FACTORY
 import com.stripe.android.common.taptoadd.TapToAddModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -153,7 +155,14 @@ internal abstract class PaymentSheetCommonModule {
     ): PaymentSheetCardFundingFilterFactory
 
     @Binds
+    @Named(DEFAULT_ACCOUNT_RANGE_REPO_FACTORY)
     abstract fun bindsCardAccountRangeRepositoryFactory(
+        defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
+    ): CardAccountRangeRepository.Factory
+
+    @Binds
+    @Named(FUNDING_ACCOUNT_RANGE_REPO_FACTORY)
+    abstract fun bindsCardAccountRangeRepositoryFactoryForFunding(
         defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
     ): CardAccountRangeRepository.Factory
 

@@ -6,7 +6,9 @@ import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardAccountRangeServiceModule
+import com.stripe.android.cards.DEFAULT_ACCOUNT_RANGE_REPO_FACTORY
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.cards.FUNDING_ACCOUNT_RANGE_REPO_FACTORY
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.injection.ViewModelScope
@@ -109,7 +111,14 @@ internal interface EmbeddedPaymentElementViewModelModule {
     ): EmbeddedConfigurationCoordinator
 
     @Binds
+    @Named(DEFAULT_ACCOUNT_RANGE_REPO_FACTORY)
     fun bindsCardAccountRangeRepositoryFactory(
+        defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
+    ): CardAccountRangeRepository.Factory
+
+    @Binds
+    @Named(FUNDING_ACCOUNT_RANGE_REPO_FACTORY)
+    fun bindsCardAccountRangeRepositoryFactoryForFunding(
         defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
     ): CardAccountRangeRepository.Factory
 

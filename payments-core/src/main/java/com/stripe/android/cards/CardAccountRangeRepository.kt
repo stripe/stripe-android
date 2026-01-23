@@ -23,9 +23,6 @@ interface CardAccountRangeRepository {
     interface Factory {
         fun create(): CardAccountRangeRepository
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun createWithoutCache(): CardAccountRangeRepository
-
         fun createWithStripeRepository(
             stripeRepository: StripeRepository,
             publishableKey: String

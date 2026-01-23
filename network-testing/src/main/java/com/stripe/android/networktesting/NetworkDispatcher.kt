@@ -103,7 +103,7 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
         return extraRequests.joinToString { it.requestUrl.toString() }
     }
 
-    override fun dispatch(request: RecordedRequest): MockResponse {
+    override fun dispatch(request: RecordedRequest): MockResponse = synchronized(this) {
         val testRequest = TestRecordedRequest(request)
         val matchedEntry = enqueuedResponses.firstOrNull { entry ->
             entry.requestMatcher.matches(testRequest)

@@ -8,7 +8,9 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardAccountRangeServiceModule
+import com.stripe.android.cards.DEFAULT_ACCOUNT_RANGE_REPO_FACTORY
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.cards.FUNDING_ACCOUNT_RANGE_REPO_FACTORY
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -106,7 +108,15 @@ internal interface NativeLinkModule {
 
     @Binds
     @NativeLinkScope
+    @Named(DEFAULT_ACCOUNT_RANGE_REPO_FACTORY)
     fun bindsCardAccountRangeRepositoryFactory(
+        defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
+    ): CardAccountRangeRepository.Factory
+
+    @Binds
+    @NativeLinkScope
+    @Named(FUNDING_ACCOUNT_RANGE_REPO_FACTORY)
+    fun bindsCardAccountRangeRepositoryFactoryForFunding(
         defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
     ): CardAccountRangeRepository.Factory
 

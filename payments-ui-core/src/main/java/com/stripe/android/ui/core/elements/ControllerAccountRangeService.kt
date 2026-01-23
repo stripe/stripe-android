@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import android.util.Log
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
@@ -25,7 +26,7 @@ internal class ControllerAccountRangeService(
         cardFundingFilter = DefaultCardFundingFilter,
     ),
     private val fundingCardAccountRangeService: CardAccountRangeService = fundingCardAccountRangeServiceFactory.create(
-        cardBrandFilter = cardBrandFilter,
+        cardBrandFilter = DefaultCardBrandFilter,
         cardFundingFilter = cardFundingFilter,
     ),
 ) : CardAccountRangeService by defaultCardAccountRangeService {
@@ -41,7 +42,8 @@ internal class ControllerAccountRangeService(
         )
 
     override fun onCardNumberChanged(cardNumber: CardNumber.Unvalidated, isCbcEligible: Boolean) {
+        Log.d("CardAccountRange", "ControllerAccountRangeService.onCardNumberChanged: cardNumber=${cardNumber.normalized}, isCbcEligible=$isCbcEligible")
         defaultCardAccountRangeService.onCardNumberChanged(cardNumber, isCbcEligible)
-        fundingCardAccountRangeService.onCardNumberChanged(cardNumber, isCbcEligible)
+        fundingCardAccountRangeService.onCardNumberChanged(cardNumber, isCbcEligible = false)
     }
 }

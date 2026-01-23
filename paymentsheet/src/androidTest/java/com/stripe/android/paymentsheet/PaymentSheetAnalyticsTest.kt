@@ -96,6 +96,8 @@ internal class PaymentSheetAnalyticsTest {
             query("visible_payment_methods", Uri.encode("link,card,afterpay_clearpay,klarna")),
             query("payment_method_layout", "horizontal"),
         )
+        // Two events fire: one for DEFAULT service, one for FUNDING service
+        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
 
         testContext.presentPaymentSheet {
@@ -171,6 +173,8 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_form_shown")
         // cardscan is not available in test mode
         validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
+        // Two events fire: one for DEFAULT service, one for FUNDING service
+        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
@@ -257,6 +261,8 @@ internal class PaymentSheetAnalyticsTest {
             query(Uri.encode("intent_type"), "deferred_payment_intent"),
         )
 
+        // Two events fire: one for DEFAULT service, one for FUNDING service
+        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_form_shown")

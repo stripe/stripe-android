@@ -1,5 +1,6 @@
 package com.stripe.android.cards
 
+import android.util.Log
 import androidx.annotation.RestrictTo
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
@@ -11,29 +12,13 @@ import kotlin.coroutines.CoroutineContext
  * A factory for creating [CardAccountRangeService] instances.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class DefaultCardAccountRangeServiceFactory internal constructor(
+class DefaultCardAccountRangeServiceFactory(
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-    private val uiContext: CoroutineContext,
-    private val workContext: CoroutineContext,
-    private val staticCardAccountRanges: StaticCardAccountRanges,
-    private val coroutineScope: CoroutineScope,
-    private val useAccountRangeCache: Boolean
+    private val uiContext: CoroutineContext = Dispatchers.Main,
+    private val workContext: CoroutineContext = Dispatchers.IO,
+    private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
+    private val coroutineScope: CoroutineScope = CoroutineScope(uiContext),
 ) : CardAccountRangeService.Factory {
-
-    constructor(
-        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-        uiContext: CoroutineContext = Dispatchers.Main,
-        workContext: CoroutineContext = Dispatchers.IO,
-        staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
-        coroutineScope: CoroutineScope = CoroutineScope(uiContext),
-    ) : this(
-        cardAccountRangeRepositoryFactory,
-        uiContext,
-        workContext,
-        staticCardAccountRanges,
-        coroutineScope,
-        useAccountRangeCache = true
-    )
 
     override fun create(
         cardBrandFilter: CardBrandFilter,
@@ -41,11 +26,7 @@ class DefaultCardAccountRangeServiceFactory internal constructor(
         accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener?,
     ): CardAccountRangeService {
         return DefaultCardAccountRangeService(
-            cardAccountRangeRepository = if (useAccountRangeCache) {
-                cardAccountRangeRepositoryFactory.create()
-            } else {
-                cardAccountRangeRepositoryFactory.createWithoutCache()
-            },
+            cardAccountRangeRepository = cardAccountRangeRepositoryFactory.create(),
             uiContext = uiContext,
             workContext = workContext,
             staticCardAccountRanges = staticCardAccountRanges,
@@ -73,18 +54,14 @@ class FundingCardAccountRangeServiceFactory(
     private val coroutineScope: CoroutineScope = CoroutineScope(uiContext),
 ) : CardAccountRangeService.Factory {
 
-    // Own lazy-cached repository, separate from the default factory's cache
-    private val fundingCardAccountRangeRepository: CardAccountRangeRepository by lazy {
-        cardAccountRangeRepositoryFactory.createWithoutCache()
-    }
-
     override fun create(
         cardBrandFilter: CardBrandFilter,
         cardFundingFilter: CardFundingFilter,
         accountRangeResultListener: CardAccountRangeService.AccountRangeResultListener?,
     ): CardAccountRangeService {
+        Log.d("CardAccountRange", "FundingFactory.create() called, factory=$this")
         return DefaultCardAccountRangeService(
-            cardAccountRangeRepository = fundingCardAccountRangeRepository,
+            cardAccountRangeRepository = cardAccountRangeRepositoryFactory.create(),
             uiContext = uiContext,
             workContext = workContext,
             staticCardAccountRanges = staticCardAccountRanges,
