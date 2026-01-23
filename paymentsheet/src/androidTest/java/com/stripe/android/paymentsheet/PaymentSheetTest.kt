@@ -366,7 +366,7 @@ internal class PaymentSheetTest {
     }
 
     @Test
-    fun testCardMetadataQueryExecutedTwicePerCardSessionForBin() {
+    fun testCardMetadataQueryExecutedOncePerCardSessionForBin() {
         repeat(2) {
             runPaymentSheetTest(
                 networkRule = networkRule,
@@ -388,13 +388,11 @@ internal class PaymentSheetTest {
                     )
                 }
 
-                repeat(2) {
-                    networkRule.enqueue(
-                        method("GET"),
-                        path("edge-internal/card-metadata")
-                    ) { response ->
-                        response.testBodyFromFile("card-metadata-get.json")
-                    }
+                networkRule.enqueue(
+                    method("GET"),
+                    path("edge-internal/card-metadata")
+                ) { response ->
+                    response.testBodyFromFile("card-metadata-get.json")
                 }
 
                 page.fillOutCardDetails()

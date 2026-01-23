@@ -72,7 +72,7 @@ internal class ControllerAccountRangeServiceTest {
         assertThat(defaultCall.second).isTrue()
 
         val fundingCall = fundingService.onCardNumberChangedTurbine.awaitItem()
-        assertThat(fundingCall.second).isTrue()
+        assertThat(fundingCall.second).isFalse()
     }
 
     @Test
