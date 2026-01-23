@@ -442,7 +442,7 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     }
 
     override suspend fun initCheckoutSession(
-        params: ElementsSessionParams.CheckoutSessionType,
+        params: ElementsSessionParams.CheckoutSession.Initial,
         options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> {
         TODO("Not yet implemented")
