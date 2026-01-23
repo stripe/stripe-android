@@ -92,7 +92,7 @@ class GooglePayLauncher internal constructor(
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks,
-                cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance)
+                cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance),
                 cardFundingFilter = DefaultCardFundingFilter
             )
         },
@@ -136,7 +136,7 @@ class GooglePayLauncher internal constructor(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
-                cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance)
+                cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance),
                 cardFundingFilter = DefaultCardFundingFilter
             )
         },
@@ -186,7 +186,7 @@ class GooglePayLauncher internal constructor(
                     productUsage = setOf(PRODUCT_USAGE)
                 ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks,
-                cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance)
+                cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance),
                 cardFundingFilter = DefaultCardFundingFilter
             )
         },
@@ -439,7 +439,7 @@ fun rememberGooglePayLauncher(
                         productUsage = setOf(GooglePayLauncher.PRODUCT_USAGE)
                     ),
                     additionalEnabledNetworks = config.additionalEnabledNetworks,
-                    cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance)
+                    cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance),
                     cardFundingFilter = DefaultCardFundingFilter
                 )
             },

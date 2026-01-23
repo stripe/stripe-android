@@ -314,7 +314,7 @@ internal class GooglePayLauncherViewModel(
                 allowCreditCards = args.config.allowCreditCards,
                 errorReporter = errorReporter,
                 logger = logger,
-                cardBrandFilter = AcceptanceCardBrandFilter(args.config.cardBrandAcceptance)
+                cardBrandFilter = AcceptanceCardBrandFilter(args.config.cardBrandAcceptance),
                 cardFundingFilter = DefaultCardFundingFilter,
             )
 

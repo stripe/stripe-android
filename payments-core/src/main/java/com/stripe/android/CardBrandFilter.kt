@@ -48,7 +48,7 @@ internal data class AcceptanceCardBrandFilter(
         }
     }
 
-    fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+    override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
         val brand = paymentMethod.card?.displayBrand?.let { displayBrand ->
             val cardBrand = CardBrand.fromCode(displayBrand)
             if (cardBrand == CardBrand.Unknown) null else cardBrand
